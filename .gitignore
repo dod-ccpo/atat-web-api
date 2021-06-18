@@ -1,0 +1,49 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+
+# Dependency directory
+node_modules
+
+# Optional npm cache directory
+.npm
+
+# Ignore built files
+bin/
+obj/
+wwwroot/
+dist/
+*.js
+*.zip
+*.tar
+*.tar.gz
+publish
+
+# Ignore private files
+*.private.json
+
+# Ignore TS build cache
+.awcache/
+
+# Ignore VS files
+.vs
+
+# Ignore openfaas build and template folders
+build
+template
+
+# Ignore unencrypted env files
+.gitsecret/random_seed
+.gnupg/random_seed
+env.yml
+*/env.yml
+.env
+
+# Temporary files
+*~
