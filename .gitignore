@@ -19,7 +19,6 @@ bin/
 obj/
 wwwroot/
 dist/
-*.js
 *.zip
 *.tar
 *.tar.gz
@@ -31,8 +30,11 @@ publish
 # Ignore TS build cache
 .awcache/
 
-# Ignore VS files
+# VS files
 .vs
+
+# JetBrains
+.idea
 
 # Ignore openfaas build and template folders
 build
@@ -47,3 +49,26 @@ env.yml
 
 # Temporary files
 *~
+
+# terraform
+**/*.tfstate
+**/*.backup
+**/*.tfplan
+**/.terraform
+**/*.plan
+**/*.terraform.tfstate.lock.info
+**/versions.override.tf
+**/.terraform.lock.hcl
+
+# vscode config files
+.vscode/
+
+# jetbrains config files
+.idea/
+
+# mac indexing
+**/*.DS_Store
+
+# sonar files
+.scannerwork
+.sonar
