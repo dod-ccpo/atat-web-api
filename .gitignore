@@ -59,6 +59,7 @@ env.yml
 **/*.terraform.tfstate.lock.info
 **/versions.override.tf
 **/.terraform.lock.hcl
+terraform.tfvars
 
 # vscode config files
 .vscode/
