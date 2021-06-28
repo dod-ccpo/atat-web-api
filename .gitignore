@@ -62,7 +62,6 @@ env.yml
 terraform.tfvars
 
 # vscode config files
-.vscode/
 
 # jetbrains config files
 .idea/
