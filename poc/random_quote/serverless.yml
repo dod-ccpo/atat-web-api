@@ -1,0 +1,38 @@
+service: atat-js-fallback
+
+provider:
+  name: azure
+  region: East US
+  runtime: nodejs12
+  prefix: "atat-sls-poc-js"
+  stage: dev
+  type: consumption
+
+plugins: # look for additional plugins in the community plugins repo: https://github.com/serverless/plugins
+  - serverless-azure-functions
+
+# you can add packaging information here
+package:
+  patterns:
+    - 'host.json'
+    - '!local.settings.json'
+    - '!.vscode/**'
+    - '!**/*.test.js'
+
+functions:
+  get:
+    handler: src/handlers/get.getQuote
+    events:
+      - http: true
+        x-azure-settings:
+          methods:
+            - GET
+          authLevel: anonymous
+  post:
+    handler: src/handlers/post.addQuote
+    events:
+      - http: true
+        x-azure-settings:
+          methods:
+            - POST
+          authLevel: anonymous

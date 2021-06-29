@@ -1,0 +1,17 @@
+{
+  "name": "myho-serverless-demo",
+  "version": "1.0.0",
+  "description": "Azure Functions sample for the Serverless framework",
+  "scripts": {
+    "test": "jest",
+    "start": "func host start"
+  },
+  "keywords": [
+    "azure",
+    "serverless"
+  ],
+  "devDependencies": {
+    "jest": "^27.0.6",
+    "serverless-azure-functions": "^2.1.0"
+  }
+}
