@@ -37,8 +37,8 @@ az account set -s <subscription-id>
 
 #### Create Azure Service Principal and set environment variables
 
-Follow steps at 
-https://www.serverless.com/framework/docs/providers/azure/guide/quick-start#creating-a-service-principal
+Follow steps at [Creating a Service Principal](https://www.serverless.com/framework/docs/providers/azure/guide/quick-start#creating-a-service-principal) at serverless.com
+
 ---
 
 #### Set $STAGE environment var to a unique string
