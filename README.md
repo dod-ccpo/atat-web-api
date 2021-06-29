@@ -51,9 +51,9 @@ Follow steps at [Creating a Service Principal](https://www.serverless.com/framew
 
 ---
 
-#### Set $STAGE environment var to a unique string
+#### Set STAGE environment variable to a unique string
 ```
-export STAGE=myEnv
+export STAGE=<my-environment>
 ```
 
 #### Deploy app (and repeat as needed iteratively)
