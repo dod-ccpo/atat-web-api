@@ -6,17 +6,27 @@ The team is building a temporary proof of concept to demonstrate the breadth of 
 to use when we roll out the first sets of internal APIs. It can be found in `./poc`. 
 
 ### Prerequisites:
-* Node Version Manager (recommended)\
-  Follow instructions at https://github.com/nvm-sh/nvm or:\
-  ```curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash```\
-  Then restart your shell
-* Node.js 12\
-  ```nvm install 12```
-* Serverless Framework\
-  ```npm install -g serverless```
-* Typescript\
-  ```npm install -g typescript```
-* Azure CLI (see https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
+* Node Version Manager
+  ```
+  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
+  ```
+  Then restart your shell.\
+  Details available at [Installing and Updating](https://github.com/nvm-sh/nvm#installing-and-updating) in the nvm README.
+  
+* Node.js 12
+  ```
+  nvm install 12
+  ```
+* Serverless Framework
+  ```
+  npm install -g serverless
+  ```
+* Typescript
+  ```
+  npm install -g typescript
+  ```
+* Azure CLI\
+  Follow steps at [Install the Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) at microsoft.com
 ---
 ### Deploying locally
 #### Install npm dependencies
