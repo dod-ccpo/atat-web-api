@@ -36,9 +36,15 @@ az account set -s <subscription-id>
 ```
 
 #### Create Azure Service Principal and set environment variables
+
 Follow steps at 
 https://www.serverless.com/framework/docs/providers/azure/guide/quick-start#creating-a-service-principal
 ---
+
+#### Set $STAGE environment var to a unique string
+```
+export STAGE=myEnv
+```
 
 #### Deploy app (and repeat as needed iteratively)
 ```
@@ -51,7 +57,17 @@ consists of the following instances:
 * Storage Account
 * App Service Plan
 
-### Troubleshooting
+### Expected Output
 
- App deploy appears to time out 
-If you see
+```
+Serverless: Deployed serverless functions:
+Serverless: -> Function App not ready. Retry 0 of 30...
+Serverless: -> Function App not ready. Retry 1 of 30...
+Serverless: -> Function App not ready. Retry 2 of 30...
+Serverless: -> Function App not ready. Retry 3 of 30...
+Serverless: -> Function App not ready. Retry 4 of 30...
+Serverless: -> Function App not ready. Retry 5 of 30...
+Serverless: -> Function App not ready. Retry 6 of 30...
+Serverless: -> get: [GET] atat-sls-poc-js-eus-dev-atat-js-fallback-jts.azurewebsites.net/api/get
+Serverless: -> post: [POST] atat-sls-poc-js-eus-dev-atat-js-fallback-jts.azurewebsites.net/api/post
+```

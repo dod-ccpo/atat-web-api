@@ -1,11 +1,11 @@
-service: atat-js-fallback
+service: atat-js-fallback-${env:STAGE}
 
 provider:
   name: azure
   region: East US
   runtime: nodejs12
   prefix: "atat-sls-poc-js"
-  stage: dev
+  stage: ${env:STAGE}
   type: consumption
 
 plugins: # look for additional plugins in the community plugins repo: https://github.com/serverless/plugins
