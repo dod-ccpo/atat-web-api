@@ -17,7 +17,7 @@ to use when we roll out the first sets of internal APIs. It can be found in `./p
   ```
   nvm install
   ```
-  Version is specified in file .nvmrc
+  Node.js version is specified in file .nvmrc
 * Serverless Framework
   ```
   npm install -g serverless
