@@ -1,17 +1,16 @@
-service: atat-js-fallback-${env:STAGE}
+service: atat-sls-${env:STAGE}
 
 provider:
   name: azure
-  region: East US
+  region: ${env:REGION}
   runtime: nodejs12
-  prefix: "atat-sls-poc-js"
   stage: ${env:STAGE}
   type: consumption
 
-plugins: # look for additional plugins in the community plugins repo: https://github.com/serverless/plugins
+plugins:
   - serverless-azure-functions
+  - serverless-dotenv-plugin
 
-# you can add packaging information here
 package:
   patterns:
     - 'host.json'
@@ -25,6 +24,7 @@ functions:
     events:
       - http: true
         x-azure-settings:
+          route: quotes
           methods:
             - GET
           authLevel: anonymous
@@ -33,6 +33,7 @@ functions:
     events:
       - http: true
         x-azure-settings:
+          route: quotes
           methods:
             - POST
           authLevel: anonymous

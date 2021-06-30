@@ -51,9 +51,12 @@ Follow steps at [Creating a Service Principal](https://www.serverless.com/framew
 
 ---
 
-#### Set STAGE environment variable to a unique string
+#### Set environment variables in a `.env` file
 ```
-export STAGE=<my-environment>
+cat <<EOT >> .env
+REGION="East US"
+STAGE=your_stage_name
+EOT
 ```
 
 #### Deploy app (and repeat as needed iteratively)
