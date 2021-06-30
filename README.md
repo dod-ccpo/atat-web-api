@@ -13,10 +13,11 @@ to use when we roll out the first sets of internal APIs. It can be found in `./p
   Then restart your shell.\
   Details available at [Installing and Updating](https://github.com/nvm-sh/nvm#installing-and-updating) in the nvm README.
   
-* Node.js 12
+* Node.js
   ```
-  nvm install 12
+  nvm install
   ```
+  Node.js version is specified in file .nvmrc
 * Serverless Framework
   ```
   npm install -g serverless
