@@ -8,7 +8,6 @@ provider:
   type: consumption
   useDotenv: true
 
-
   apim:
     apis:
       - name: quotes-api
