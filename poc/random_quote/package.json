@@ -1,7 +1,7 @@
 {
-  "name": "myho-serverless-demo",
+  "name": "atat-serverless-poc",
   "version": "1.0.0",
-  "description": "Azure Functions sample for the Serverless framework",
+  "description": "ATAT Serverless framework PoC",
   "scripts": {
     "test": "jest",
     "start": "func host start"

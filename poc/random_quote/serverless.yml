@@ -1,11 +1,12 @@
-service: atat-sls-${env:STAGE}
+service: atat-sls-${opt:stage}
 
 provider:
   name: azure
-  region: ${env:REGION}
+  region: ${opt:region, 'East US'}
   runtime: nodejs12
-  stage: ${env:STAGE}
+  stage: ${opt:stage}
   type: consumption
+  useDotenv: true
 
 plugins:
   - serverless-azure-functions

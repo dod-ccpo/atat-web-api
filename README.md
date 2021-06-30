@@ -28,16 +28,14 @@ to use when we roll out the first sets of internal APIs. It can be found in `./p
 * Azure CLI\
   Follow steps at [Install the Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) at microsoft.com
 ---
-### Deploying locally
+### Deploying
 #### Install npm dependencies
 ```
-cd ./poc
-npm install
+cd ./poc/random_quote
+npm ci
 ```
-The functions can be tested 
 
 ---
-### Deploying remotely
 
 #### Login to Azure and set subscription
 ```
@@ -53,18 +51,19 @@ Follow steps at [Creating a Service Principal](https://www.serverless.com/framew
 
 #### Set environment variables in a `.env` file
 ```
+cd ./poc/random_quote
 cat <<EOT >> .env
 REGION="East US"
-STAGE=your_stage_name
 EOT
 ```
 
 #### Deploy app (and repeat as needed iteratively)
 ```
-sls deploy
+sls deploy --stage <your-stage-name>
 ```
-This should create all resources described in `./poc/serverless.yml`. As of this writing (June 26, 2021), this 
-consists of the following instances:
+
+This should create all resources described in `./poc/random_quote/serverless.yml`, which represents a single
+microservice. As of this writing (June 26, 2021), this consists of the following instances:
 * App Insights
 * Function App
 * Storage Account
@@ -83,4 +82,20 @@ Serverless: -> Function App not ready. Retry 5 of 30...
 Serverless: -> Function App not ready. Retry 6 of 30...
 Serverless: -> get: [GET] atat-sls-poc-js-eus-dev-atat-js-fallback-jts.azurewebsites.net/api/get
 Serverless: -> post: [POST] atat-sls-poc-js-eus-dev-atat-js-fallback-jts.azurewebsites.net/api/post
+```
+
+### Troubleshooting
+#### Deploying Hanging
+Note that we have observed that on initial deployments, Azure does not appear to actually create the Functions until
+we navigate to the `Functions` blade within the Function App that was created. This means that the deployment will get 
+stuck and eventually time out after 30 retries. The work-around is just to go into the `Functions` blade once the 
+Function App is available.
+
+### Deploying Locally
+Use the `offline` capability of Serverless Framework. Note that there appears to be a bug that leaves generated
+`function.json` files around at `random_quote/get` and `random_quote/post`, which would otherwise be deleted during the
+package process.
+
+```
+sls offline
 ```
