@@ -49,13 +49,6 @@ Follow steps at [Creating a Service Principal](https://www.serverless.com/framew
 
 ---
 
-#### Set environment variables in a `.env` file
-```
-cd ./poc/random_quote
-cat <<EOT >> .env
-REGION="East US"
-EOT
-```
 
 #### Deploy app (and repeat as needed iteratively)
 ```
