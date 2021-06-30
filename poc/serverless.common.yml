@@ -15,13 +15,6 @@ cors:
   exposeHeaders:
     - '*'
 
-protocols:
-  - https
-
-authorization: none
-
-subscriptionRequired: true
-
 ###########################
 ###########################
 ###########################

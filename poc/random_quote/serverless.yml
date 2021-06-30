@@ -11,7 +11,7 @@ provider:
   apim:
     apis:
       - name: quotes-api
-        subscriptionRequired: ${file(../serverless.common.yml):subscriptionRequired}
+        subscriptionRequired: false
         # Display name
         displayName: Quotes API
         # Description of API
@@ -21,11 +21,11 @@ provider:
           - https
         # Base path of API calls
         path: quotes
-        authorization: ${file(../serverless.common.yml):authorization}
-        backends:
-          - name: quotes-backend
-            url: api/quotes
-        cors: ${file(../serverless.common.yml):cors}
+        authorization: none
+    backends:
+      - name: quotes-backend
+        url: api/quotes
+    cors: ${file(../serverless.common.yml):cors}
 
 plugins: # look for additional plugins in the community plugins repo: https://github.com/serverless/plugins
   - serverless-azure-functions
