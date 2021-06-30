@@ -1,0 +1,40 @@
+service: atat-sls-${opt:stage}
+
+provider:
+  name: azure
+  region: ${opt:region}
+  runtime: nodejs12
+  stage: ${opt:stage}
+  type: consumption
+  useDotenv: true
+
+plugins:
+  - serverless-azure-functions
+  - serverless-dotenv-plugin
+
+package:
+  patterns:
+    - 'host.json'
+    - '!local.settings.json'
+    - '!.vscode/**'
+    - '!**/*.test.js'
+
+functions:
+  get:
+    handler: src/handlers/get.getQuote
+    events:
+      - http: true
+        x-azure-settings:
+          route: quotes
+          methods:
+            - GET
+          authLevel: anonymous
+  post:
+    handler: src/handlers/post.addQuote
+    events:
+      - http: true
+        x-azure-settings:
+          route: quotes
+          methods:
+            - POST
+          authLevel: anonymous

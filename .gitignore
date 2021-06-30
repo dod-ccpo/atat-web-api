@@ -62,7 +62,7 @@ env.yml
 terraform.tfvars
 
 # vscode config files
-.vscode/
+.vscode
 
 # jetbrains config files
 .idea/
@@ -73,3 +73,6 @@ terraform.tfvars
 # sonar files
 .scannerwork
 .sonar
+
+# Azure Functions
+local.settings.json
