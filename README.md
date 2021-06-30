@@ -52,7 +52,7 @@ Follow steps at [Creating a Service Principal](https://www.serverless.com/framew
 
 #### Deploy app (and repeat as needed iteratively)
 ```
-sls deploy --stage <your-stage-name>
+sls deploy --stage <your-stage-name> --region 'East US'
 ```
 
 This should create all resources described in `./poc/random_quote/serverless.yml`, which represents a single

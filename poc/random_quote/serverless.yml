@@ -2,7 +2,7 @@ service: atat-sls-${opt:stage}
 
 provider:
   name: azure
-  region: ${opt:region, 'East US'}
+  region: ${opt:region}
   runtime: nodejs12
   stage: ${opt:stage}
   type: consumption
