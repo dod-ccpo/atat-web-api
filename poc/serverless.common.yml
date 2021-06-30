@@ -18,6 +18,7 @@ cors:
 protocols:
   - https
 
+authorization: none
 
 subscriptionRequired: true
 

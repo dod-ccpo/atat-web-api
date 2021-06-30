@@ -20,7 +20,7 @@ provider:
         protocols:
           - https
         # Base path of API calls
-        path: api/quotes
+        path: quotes
         authorization: ${file(../serverless.common.yml):authorization}
         backends:
           - name: quotes-backend
