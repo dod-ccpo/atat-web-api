@@ -8,7 +8,27 @@ provider:
   type: consumption
   useDotenv: true
 
-plugins:
+
+  apim:
+    apis:
+      - name: quotes-api
+        subscriptionRequired: ${file(../serverless.common.yml):subscriptionRequired}
+        # Display name
+        displayName: Quotes API
+        # Description of API
+        description: The Random Quotes REST API
+        # HTTP protocols allowed
+        protocols:
+          - https
+        # Base path of API calls
+        path: api/quotes
+        authorization: ${file(../serverless.common.yml):authorization}
+        backends:
+          - name: quotes-backend
+            url: api/quotes
+        cors: ${file(../serverless.common.yml):cors}
+
+plugins: # look for additional plugins in the community plugins repo: https://github.com/serverless/plugins
   - serverless-azure-functions
   - serverless-dotenv-plugin
 
@@ -22,6 +42,13 @@ package:
 functions:
   get:
     handler: src/handlers/get.getQuote
+    apim:
+      api: quotes-api
+      backend: quotes-backend
+      operations:
+        - method: get
+          urlTemplate: /
+          displayName: GetQuotes
     events:
       - http: true
         x-azure-settings:
@@ -31,6 +58,13 @@ functions:
           authLevel: anonymous
   post:
     handler: src/handlers/post.addQuote
+    apim:
+      api: quotes-api
+      backend: quotes-backend
+      operations:
+        - method: post
+          urlTemplate: /
+          displayName: PostQuotes
     events:
       - http: true
         x-azure-settings:
