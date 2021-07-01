@@ -1,5 +1,9 @@
 service: atat-sls-${opt:stage}
 
+# Sets the project directory boundary to where we can access other file config settings
+# More information here: https://www.serverless.com/framework/docs/providers/aws/guide/variables#reference-properties-in-other-files
+projectDir: ../
+
 provider:
   name: azure
   region: ${opt:region}
