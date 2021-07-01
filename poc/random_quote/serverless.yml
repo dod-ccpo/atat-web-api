@@ -16,14 +16,10 @@ provider:
     apis:
       - name: quotes-api
         subscriptionRequired: false
-        # Display name
         displayName: Quotes API
-        # Description of API
         description: The Random Quotes REST API
-        # HTTP protocols allowed
         protocols:
           - https
-        # Base path of API calls
         path: quotes
         authorization: none
     backends:
