@@ -57,11 +57,12 @@ sls deploy --stage <your-stage-name> --region 'East US'
 ```
 
 This should create all resources described in `./poc/random_quote/serverless.yml`, which represents a single
-microservice. As of this writing (June 26, 2021), this consists of the following instances:
+microservice. As of this writing (July 1, 2021), this consists of the following instances:
 * App Insights
 * Function App
 * Storage Account
 * App Service Plan
+* API Management Service
 
 ### Expected Output
 
