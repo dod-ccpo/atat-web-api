@@ -78,6 +78,14 @@ Serverless: -> get: [GET] atat-sls-poc-js-eus-dev-atat-js-fallback-jts.azurewebs
 Serverless: -> post: [POST] atat-sls-poc-js-eus-dev-atat-js-fallback-jts.azurewebsites.net/api/post
 ```
 
+#### Destroy app
+```
+sls remove --stage <your-stage-name> --region 'East US'
+```
+
+This should delete and remove all provisioned resources created by the deploy command.
+
+
 ### Troubleshooting
 #### Deploying Hanging
 Note that we have observed that on initial deployments, Azure does not appear to actually create the Functions until
