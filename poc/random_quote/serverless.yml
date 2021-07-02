@@ -1,16 +1,22 @@
 service: atat-sls-${opt:stage}
 
+custom:
+  webpack:
+    webpackConfig: ./webpack.config.js
+    includeModules: true
+
 provider:
   name: azure
-  region: ${opt:region}
+  region: ${opt:region, 'US East'}
   runtime: nodejs12
-  stage: ${opt:stage}
+  stage: ${opt:stage, 'dev'}
   type: consumption
   useDotenv: true
 
 plugins:
   - serverless-azure-functions
   - serverless-dotenv-plugin
+  - serverless-webpack
 
 package:
   patterns:

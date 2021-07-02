@@ -76,3 +76,6 @@ terraform.tfvars
 
 # Azure Functions
 local.settings.json
+
+# webpack items
+**/.webpack
