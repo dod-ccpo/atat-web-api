@@ -20,7 +20,7 @@ provider:
         description: The Random Quotes REST API
         protocols:
           - https
-        path: quotes
+        path: api/quotes
         authorization: none
     backends:
       - name: quotes-backend
