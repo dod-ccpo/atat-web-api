@@ -5,8 +5,9 @@ module.exports = {
   clearMocks: true,
   collectCoverage: true,
   coverageDirectory: "coverage",
-  coveragePathIgnorePatterns: [
-    "/node_modules/"
+  collectCoverageFrom: [
+    "src/**/*.ts",
+    "!<rootDir>/node_modules/"
   ],
   coverageProvider: "v8",
   coverageThreshold: {
