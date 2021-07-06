@@ -1,0 +1,20 @@
+###########################
+###### APIM Settings ######
+###########################
+
+# CORS Settings for APIM
+cors:
+  allowCredentials: false
+  allowedOrigins:
+    - '*'
+  allowedMethods:
+    - GET
+    - POST
+  allowedHeaders:
+    - '*'
+  exposeHeaders:
+    - '*'
+
+###########################
+###########################
+###########################
