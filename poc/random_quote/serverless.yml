@@ -7,7 +7,7 @@ custom:
 
 provider:
   name: azure
-  region: ${opt:region, 'US East'}
+  region: ${opt:region, 'East US'}
   runtime: nodejs12
   stage: ${opt:stage, 'dev'}
   type: consumption
