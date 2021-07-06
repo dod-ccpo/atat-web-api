@@ -74,3 +74,27 @@ resource "azurerm_key_vault_secret" "secret" {
     azurerm_key_vault_access_policy.default_policy,
   ]
 }
+
+
+# Create an Azure Key Vault key
+resource "azurerm_key_vault_key" "test-key" {
+  for_each     = var.customkeys
+  name         = each.key
+  key_vault_id = azurerm_key_vault.key-vault.id
+  key_type     = lookup(each.value, "keytype")
+  key_size     = lookup(each.value, "keysize")
+  key_opts = [
+    "decrypt",
+    "encrypt",
+    "sign",
+    "unwrapKey",
+    "verify",
+    "wrapKey",
+  ] 
+  depends_on = [
+    azurerm_key_vault.key-vault,
+    azurerm_key_vault_access_policy.default_policy,
+  ]
+  
+}
+

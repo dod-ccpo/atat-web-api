@@ -123,3 +123,12 @@ variable "secrets" {
   description = "Define Azure Key Vault secrets"
   default = {}
 }
+
+variable "customkeys" {
+  type = map(object({
+    keytype = string
+    keysize = string
+  }))
+  description = "Define Azure Key Vault custom keys"
+  default     = {}
+}
