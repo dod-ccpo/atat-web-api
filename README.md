@@ -139,3 +139,14 @@ package process.
 ```
 sls offline
 ```
+
+## Shared Infrastructure
+Shared infrastructure for the PoC can be found at `./poc/shared_infrastructure`
+
+### Install dependencies
+For a detailed tutorial, follow the guidance here: [Install Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli?in=terraform/azure-get-started)
+
+### Local set up
+Navigate to the `./poc/shared_infrastructure` directory.
+Run `terraform init` and then `az login`.
+You can now run `terraform apply` to update the infrastructure or `terraform destroy` to destroy it.
