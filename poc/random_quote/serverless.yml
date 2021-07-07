@@ -5,6 +5,10 @@ custom:
     webpackConfig: ./webpack.config.js
     includeModules: true
 
+# Sets the project directory boundary to where we can access other file config settings
+# More information here: https://www.serverless.com/framework/docs/providers/aws/guide/variables#reference-properties-in-other-files
+projectDir: ../
+
 provider:
   name: azure
   region: ${opt:region, 'US East'}
@@ -13,7 +17,22 @@ provider:
   type: consumption
   useDotenv: true
 
-plugins:
+  apim:
+    apis:
+      - name: quotes-api
+        subscriptionRequired: false
+        displayName: Quotes API
+        description: The Random Quotes REST API
+        protocols:
+          - https
+        path: api/quotes
+        authorization: none
+    backends:
+      - name: quotes-backend
+        url: api/quotes
+    cors: ${file(../serverless.common.yml):cors}
+
+plugins: # look for additional plugins in the community plugins repo: https://github.com/serverless/plugins
   - serverless-azure-functions
   - serverless-dotenv-plugin
   - serverless-webpack
@@ -28,6 +47,13 @@ package:
 functions:
   get:
     handler: src/handlers/get.getQuote
+    apim:
+      api: quotes-api
+      backend: quotes-backend
+      operations:
+        - method: get
+          urlTemplate: /
+          displayName: GetQuotes
     events:
       - http: true
         x-azure-settings:
@@ -37,6 +63,13 @@ functions:
           authLevel: anonymous
   post:
     handler: src/handlers/post.addQuote
+    apim:
+      api: quotes-api
+      backend: quotes-backend
+      operations:
+        - method: post
+          urlTemplate: /
+          displayName: PostQuotes
     events:
       - http: true
         x-azure-settings:
