@@ -1,14 +1,19 @@
 service: atat-sls-${opt:stage}
 
+custom:
+  webpack:
+    webpackConfig: ./webpack.config.js
+    includeModules: true
+
 # Sets the project directory boundary to where we can access other file config settings
 # More information here: https://www.serverless.com/framework/docs/providers/aws/guide/variables#reference-properties-in-other-files
 projectDir: ../
 
 provider:
   name: azure
-  region: ${opt:region}
+  region: ${opt:region, 'East US'}
   runtime: nodejs12
-  stage: ${opt:stage}
+  stage: ${opt:stage, 'dev'}
   type: consumption
   useDotenv: true
 
@@ -30,6 +35,7 @@ provider:
 plugins: # look for additional plugins in the community plugins repo: https://github.com/serverless/plugins
   - serverless-azure-functions
   - serverless-dotenv-plugin
+  - serverless-webpack
 
 package:
   patterns:

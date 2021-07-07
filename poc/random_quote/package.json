@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "ATAT Serverless framework PoC",
   "scripts": {
-    "test": "jest",
+    "test": "jest --verbose --no-watchman",
     "start": "func host start"
   },
   "keywords": [
@@ -11,8 +11,19 @@
     "serverless"
   ],
   "devDependencies": {
+    "@azure/functions": "^1.2.3",
+    "@types/jest": "^26.0.23",
+    "@types/node": "^15.12.5",
+    "cache-loader": "^4.1.0",
+    "fork-ts-checker-webpack-plugin": "^6.2.12",
     "jest": "^27.0.6",
     "serverless-azure-functions": "^2.1.0",
-    "serverless-dotenv-plugin": "^3.9.0"
+    "serverless-dotenv-plugin": "^3.9.0",
+    "serverless-webpack": "^5.5.1",
+    "ts-jest": "^27.0.3",
+    "ts-loader": "^9.2.3",
+    "typescript": "^4.3.5",
+    "webpack": "^5.41.1",
+    "webpack-node-externals": "^3.0.0"
   }
 }
