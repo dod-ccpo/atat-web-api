@@ -31,7 +31,6 @@ provider:
       - name: quotes-backend
         url: api/quotes
     cors: ${file(../serverless.common.yml):cors}
-    jwtValidate: ${file(../serverless.common.yml):jwtValidate}
 
 plugins: # look for additional plugins in the community plugins repo: https://github.com/serverless/plugins
   - serverless-azure-functions
