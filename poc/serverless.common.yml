@@ -15,6 +15,16 @@ cors:
   exposeHeaders:
     - '*'
 
+jwtValidate:
+  headerName: authorization
+  scheme: bearer
+  failedStatusCode: 401
+  failedErrorMessage: "Unauthorized. Access token is missing or invalid."
+  openId:
+    metadataUrl: "https://atatb2c.b2clogin.com/atatb2c.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1_atat_mct_sign_in"
+  issuers:
+    - "https://atatb2c.b2clogin.com/49050e1f-32c0-4930-a8bb-65f57947c62e/v2.0/"
+
 ###########################
 ###########################
 ###########################
