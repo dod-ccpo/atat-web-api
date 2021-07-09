@@ -14,7 +14,7 @@ variable "location" {
 
 variable "failover_location" {
   type        = string
-  description = "Define the failover Azure region; Should be geographically seperate from the primary location"
+  description = "Define the failover Azure region; Should be geographically separate from the primary location"
 }
 
 ##################################
