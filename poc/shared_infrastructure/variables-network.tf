@@ -44,3 +44,7 @@ variable "cosmosdb_account_name" {
   description = "Name of the Cosmos DB account"
 }
 
+variable "cosmosdb_database_name" {
+  type        = string
+  description = "Name of the Cosmos DB database"
+}
