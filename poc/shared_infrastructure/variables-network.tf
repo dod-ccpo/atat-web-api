@@ -2,10 +2,19 @@
 # Network variables #
 #####################
 
-# environment
 variable "environment" {
   type        = string
   description = "This variable defines the environment to be built"
+}
+
+variable "location" {
+  type        = string
+  description = "Define the primary Azure region"
+}
+
+variable "failover_location" {
+  type        = string
+  description = "Define the failover Azure region; Should be geographically seperate from the primary location"
 }
 
 ##################################
@@ -17,11 +26,6 @@ variable "resource_group_name" {
   description = "Name of the resource group"
 }
 
-variable "location" {
-  type        = string
-  description = "Define the region the resource group will be created"
-}
-
 ###################################
 # Azure Storage Account variables #
 ###################################
@@ -29,5 +33,14 @@ variable "location" {
 variable "storage_account_name" {
   type        = string
   description = "Name of the storage account"
+}
+
+#####################################
+# Azure Cosmos DB Account variables #
+#####################################
+
+variable "cosmosdb_account_name" {
+  type        = string
+  description = "Name of the Cosmos DB account"
 }
 
