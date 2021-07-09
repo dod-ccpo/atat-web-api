@@ -79,3 +79,6 @@ local.settings.json
 
 # webpack items
 **/.webpack
+
+# jest coverage
+poc/**/coverage
