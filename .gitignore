@@ -80,5 +80,5 @@ local.settings.json
 # webpack items
 **/.webpack
 
-# code coverage
-coverage
+# jest code coverage
+poc/**/coverage
