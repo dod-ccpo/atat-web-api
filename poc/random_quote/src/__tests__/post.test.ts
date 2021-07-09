@@ -23,4 +23,16 @@ describe("POST test for POC", () => {
         await addQuote(context, req);
         expect(context.res.body).toBe("(mock) Added quote: " + JSON.stringify(req.body));
     });
+
+    it("should return no post body", async ()=> {
+       const req = {query: {},
+           method: null,
+           url: '',
+           headers: {},
+           params: {},
+       }
+
+       await addQuote(context, req);
+       expect(context.res.body).toEqual("No POST body")
+    });
 });

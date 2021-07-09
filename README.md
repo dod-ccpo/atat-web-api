@@ -86,6 +86,15 @@ sls remove --stage <your-stage-name> --region 'East US'
 
 This should delete and remove all provisioned resources created by the deploy command.
 
+---
+
+### Running tests
+
+```
+npm test
+```
+
+---
 
 ### Troubleshooting
 #### Deploying Hanging
