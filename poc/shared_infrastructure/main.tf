@@ -7,7 +7,7 @@ terraform {
     }
   }
 
-  required_version = ">= 0.10"
+  required_version = ">= 1.0"
 
   backend "azurerm" {
     container_name = "tf-poc"
