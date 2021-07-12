@@ -30,3 +30,21 @@ variable "storage_account_name" {
   description = "Name of the storage account"
 }
 
+#####################################
+# Azure Cosmos DB Account variables #
+#####################################
+
+variable "cosmosdb_account_name" {
+  type        = string
+  description = "Name of the Cosmos DB account"
+}
+
+variable "cosmosdb_database_name" {
+  type        = string
+  description = "Name of the Cosmos DB database"
+}
+
+variable "failover_location" {
+  type        = string
+  description = "Define the failover Azure region; Should be geographically separate from the primary location"
+}
