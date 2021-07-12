@@ -67,6 +67,14 @@ module "keyvault" {
       certificate_permissions = var.kv-certificate-permissions-read
       storage_permissions     = var.kv-storage-permissions-read
     }
+    atatgroupdeployers = {
+      tenant_id               = var.azure-tenant-id
+      object_id               = var.kv-atat-deployers-object-id
+      key_permissions         = var.kv-key-permissions-full
+      secret_permissions      = var.kv-secret-permissions-full
+      certificate_permissions = var.kv-certificate-permissions-full
+      storage_permissions     = var.kv-storage-permissions-full
+    }
   }
 
   secrets    = var.kv-secrets

@@ -14,6 +14,12 @@ variable "kv-read-object-id" {
   default     = ""
 }
 
+variable "kv-atat-deployers-object-id" {
+  type        = string
+  description = "The object ID of the ATAT Deployers group"
+  default     = ""
+}
+
 variable "kv-vm-deployment" {
   type        = string
   description = "Allow Azure Virtual Machines to retrieve certificates stored as secrets from the Azure Key Vault"
