@@ -2,7 +2,6 @@
 # Network variables #
 #####################
 
-# environment
 variable "environment" {
   type        = string
   description = "This variable defines the environment to be built"
@@ -19,7 +18,7 @@ variable "resource_group_name" {
 
 variable "location" {
   type        = string
-  description = "Define the region the resource group will be created"
+  description = "Define the region the in which resource group will be created"
 }
 
 ###################################

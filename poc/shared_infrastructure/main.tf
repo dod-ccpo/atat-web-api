@@ -69,6 +69,6 @@ module "keyvault" {
     }
   }
 
-  secrets = var.kv-secrets
+  secrets    = var.kv-secrets
   customkeys = var.kv-customkeys
 }
