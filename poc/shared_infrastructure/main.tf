@@ -8,6 +8,11 @@ terraform {
   }
 
   required_version = ">= 0.14.9"
+
+  backend "azurerm" {
+    container_name = "tf-poc"
+    key            = "terraform.tfstate"
+  }
 }
 
 provider "azurerm" {
