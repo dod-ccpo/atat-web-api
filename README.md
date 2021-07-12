@@ -139,3 +139,57 @@ package process.
 ```
 sls offline
 ```
+
+## Shared Infrastructure
+Shared infrastructure for the PoC can be found at `./poc/shared_infrastructure`
+
+### Install dependencies
+For a detailed tutorial, follow the guidance here: [Install Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli?in=terraform/azure-get-started)
+
+### Local Deployment
+
+Navigate to the `./poc/shared_infrastructure` directory.
+
+Ensure you are logged into Azure with `az login`.
+
+#### Terraform Init
+
+You will need the name of the storage account where state will be stored as well as the
+resource group that the storage account is in. Those will be called `$AZURE_STORAGE_ACCOUNT` and
+`$AZURE_STORAGE_RESOURCE_GROUP` respectively in any subsequent steps.
+
+```
+terraform init -backend-config=resource_group_name=$AZURE_STORAGE_RESOURCE_GROUP -backend-config=storage_account_name=$AZURE_STORAGE_ACCOUNT
+```
+
+#### Retrieve .tfstate from Azure
+
+Select the correct workspace inside the container on Azure
+
+```
+terraform workspace select <name of workspace>
+```
+
+You are now connected to the remote .tfstate file on Azure.
+
+#### Plan and Apply
+
+To create an execution plan, run:
+
+```
+terraform plan
+```
+
+If Terraform detects that no changes are needed to resource instances or to root module output values, terraform plan will report that no actions need to be taken.
+
+To apply your changes, run:
+
+```
+terraform apply
+```
+
+To destroy the deployed shared_infrastructure run:
+
+```
+terraform destroy
+```
