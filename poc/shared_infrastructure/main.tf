@@ -103,8 +103,8 @@ resource "azurerm_cosmosdb_account" "da" {
 
 resource "azurerm_cosmosdb_sql_database" "db" {
   name                = var.cosmosdb_database_name
-  resource_group_name = data.azurerm_cosmosdb_account.da.resource_group_name
-  account_name        = data.azurerm_cosmosdb_account.da.name
+  resource_group_name = azurerm_cosmosdb_account.da.resource_group_name
+  account_name        = azurerm_cosmosdb_account.da.name
   throughput          = 400
 }
 
