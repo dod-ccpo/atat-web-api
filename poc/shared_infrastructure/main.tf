@@ -3,11 +3,11 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = ">= 2.26"
+      version = ">= 2.65, <3.0.0"
     }
   }
 
-  required_version = ">= 0.14.9"
+  required_version = ">= 0.10"
 
   backend "azurerm" {
     container_name = "tf-poc"
