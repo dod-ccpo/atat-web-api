@@ -2,7 +2,6 @@
 # Common Variables #
 ####################
 resource_group_name  = ""
-storage_account_name = ""
 location             = "eastus"  # Virginia
 failover_location    = "westcentralus"  # Wyoming
 environment          = ""
@@ -33,9 +32,3 @@ kv-customkeys = {
     keysize = "2048"
   }
 }
-
-############
-# Database #
-############
-cosmosdb_account_name = ""
-cosmosdb_database_name = ""

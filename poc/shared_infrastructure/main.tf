@@ -29,7 +29,7 @@ resource "azurerm_resource_group" "rg" {
 }
 
 resource "azurerm_storage_account" "sa" {
-  name                     = var.storage_account_name
+  name                     = "${var.environment}-storage"
   resource_group_name      = azurerm_resource_group.rg.name
   location                 = azurerm_resource_group.rg.location
   account_tier             = "Standard"
@@ -82,7 +82,7 @@ module "keyvault" {
 }
 
 resource "azurerm_cosmosdb_account" "da" {
-  name                      = var.cosmosdb_account_name
+  name                     = "${var.environment}-database"
   resource_group_name       = azurerm_resource_group.rg.name
   location                  = azurerm_resource_group.rg.location
   offer_type                = "Standard"
@@ -102,7 +102,7 @@ resource "azurerm_cosmosdb_account" "da" {
 }
 
 resource "azurerm_cosmosdb_sql_database" "db" {
-  name                = var.cosmosdb_database_name
+  name                = "atat"
   resource_group_name = azurerm_cosmosdb_account.da.resource_group_name
   account_name        = azurerm_cosmosdb_account.da.name
   throughput          = 400
@@ -141,7 +141,7 @@ resource "azurerm_cosmosdb_sql_container" "portfolios" {
 }
 
 resource "azurerm_servicebus_namespace" "service_bus" {
-  name                = "${var.environment}-service-bus"
+  name                = "${var.environment}-servicebus"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   sku                 = "Standard"
