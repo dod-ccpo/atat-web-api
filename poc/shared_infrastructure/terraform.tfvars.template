@@ -1,0 +1,47 @@
+####################
+# Common Variables #
+####################
+resource_group_name  = ""
+storage_account_name = ""
+location             = "eastus"  # Virginia
+failover_location    = "westcentralus"  # Wyoming
+environment          = ""
+
+##################
+# Authentication #
+##################
+azure-subscription-id = ""
+azure-client-id       = ""
+azure-client-secret   = ""
+azure-tenant-id       = ""
+
+#############
+# Key Vault #
+#############
+kv-full-object-id           = ""
+kv-read-object-id           = ""
+kv-atat-deployers-object-id = ""
+kv-secrets = {
+  sqldb = {
+    value = ""  # set to empty string ("") to auto-generate password
+  }
+  webadmin = {
+    value = ""
+  }
+}
+kv-customkeys = {
+  testkey3 = {
+    keytype = "RSA"
+    keysize = "2048"
+  }
+  testkey4 = {
+    keytype = "RSA"
+    keysize = "2048"
+  }
+}
+
+############
+# Database #
+############
+cosmosdb_account_name = ""
+cosmosdb_database_name = ""
