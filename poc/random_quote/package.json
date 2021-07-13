@@ -5,7 +5,8 @@
   "scripts": {
     "test": "jest --verbose --no-watchman",
     "start": "func host start",
-    "lint": "eslint --fix"
+    "lint": "eslint --ext .js,.ts .",
+    "lint:fix": "eslint --ext .js,.ts --fix ."
   },
   "keywords": [
     "azure",

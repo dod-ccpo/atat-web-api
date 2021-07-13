@@ -95,6 +95,41 @@ npm test
 ```
 
 ---
+### Lint
+
+To run the lint scripts to format and validate the typescript files, use the command:
+```shell
+npm run lint:fix
+```
+Otherwise, use the following to only identify the files that need be fixed:
+```shell
+npm run lint
+```
+
+#### Webstorm / JetBrains IDE
+
+You can go to preferences and search for `eslint`. The settings will be under 
+`Languages and Frameworks > Javascript > Code Quality Tools > ESLint` and you can select 
+`Automatic ESLint Configuration`. 
+
+Clicking on `Run ESLint on save` automatically formats
+the code and so you won't have to before every push.
+
+#### VSCODE
+
+To enable auto lint on save for VSCode, install the extension ESLint, and 
+the following settings should be auto applied. If not, you can create it by adding
+`.vscode/settings.json` and use the following.
+
+```json
+{
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true
+    }
+}
+```
+
+---
 
 ### Troubleshooting
 #### Deploying Hanging

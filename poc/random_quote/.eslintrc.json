@@ -1,10 +1,13 @@
 {
   "env": {
-    "es2021": true,
-    "node": true
+    "node": true,
+    "es6": true,
+    "jest": true,
+    "es2020": true
   },
   "extends": [
-    "eslint:recommended"
+    "standard",
+    "plugin:@typescript-eslint/recommended"
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
@@ -14,7 +17,7 @@
   "plugins": [
     "@typescript-eslint"
   ],
-  "ignorePatterns": ["webpack.config.js"],
+  "ignorePatterns": ["webpack.config.js", "jest.config.js"],
   "rules": {
     "no-console": "warn"
   },

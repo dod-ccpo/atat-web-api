@@ -5,6 +5,6 @@ interface Quote {
     from: string
 }
 
-const quotes: Quote[] = data as Quote[];
+const quotes: Quote[] = data as Quote[]
 
-export default quotes;
+export default quotes
