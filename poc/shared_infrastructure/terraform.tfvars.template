@@ -22,12 +22,6 @@ kv-full-object-id           = ""
 kv-read-object-id           = ""
 kv-atat-deployers-object-id = ""
 kv-secrets = {
-  sqldb = {
-    value = ""  # set to empty string ("") to auto-generate password
-  }
-  webadmin = {
-    value = ""
-  }
 }
 kv-customkeys = {
   testkey3 = {
