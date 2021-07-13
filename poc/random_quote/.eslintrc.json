@@ -17,7 +17,7 @@
   "plugins": [
     "@typescript-eslint"
   ],
-  "ignorePatterns": ["webpack.config.js", "jest.config.js"],
+  "ignorePatterns": ["**/*.js"],
   "rules": {
     "no-console": "warn"
   },
