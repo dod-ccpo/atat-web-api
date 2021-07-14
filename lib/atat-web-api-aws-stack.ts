@@ -11,6 +11,9 @@ export class AtatWebApiAwsStack extends cdk.Stack {
     // Create a shared DynamoDB table that will be used by all the functions in the project.
     const table = new dynamodb.Table(this, "QuotesTable", {
       partitionKey: { name: "id", type: dynamodb.AttributeType.STRING },
+      billingMode: dynamodb.BillingMode.PROVISIONED,
+      readCapacity: 1,
+      writeCapacity: 1,
     });
     const tableOutput = new cdk.CfnOutput(this, "TableName", {
       value: table.tableName,
@@ -32,9 +35,15 @@ export class AtatWebApiAwsStack extends cdk.Stack {
     // construct that handles creating each of the three.
     const getQuoteFn = new lambdaNodejs.NodejsFunction(this, "QuotesGetFunction", {
       entry: "poc/random_quote/handlers/quote.get.ts",
+      environment: {
+        DYNAMODB_TABLE: table.tableName,
+      },
     });
     const postQuoteFn = new lambdaNodejs.NodejsFunction(this, "QuotesPostFunction", {
       entry: "poc/random_quote/handlers/quote.post.ts",
+      environment: {
+        DYNAMODB_TABLE: table.tableName,
+      },
     });
 
     const getQuoteIntegration = new LambdaProxyIntegration({
