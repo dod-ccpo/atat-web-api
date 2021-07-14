@@ -1,15 +1,12 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import {
-    APIGatewayProxyEvent,
-    APIGatewayProxyResult
-} from "aws-lambda";
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-    const client = new DynamoDBClient({});
-    // TODO: Grab a random quote from DynamoDB
-    console.log(event.body);
-    return {
-        statusCode: 200,
-        body: "Hello, World"
-    };
-}
+  const client = new DynamoDBClient({});
+  // TODO: Grab a random quote from DynamoDB
+  console.log(event.body);
+  return {
+    statusCode: 200,
+    body: "Hello, World",
+  };
+};

@@ -1,0 +1,20 @@
+{
+  "name": "atat-serverless-poc",
+  "version": "1.0.0",
+  "description": "ATAT Serverless framework PoC",
+  "scripts": {
+    "test": "jest --verbose --no-watchman",
+    "compile": "tsc"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.78",
+    "@types/jest": "^26.0.23",
+    "@types/node": "^15.12.5",
+    "jest": "^27.0.6",
+    "ts-jest": "^27.0.3",
+    "ts-loader": "^9.2.3",
+    "typescript": "^4.3.5"
+  },
+  "dependencies": {
+  }
+}
