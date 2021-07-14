@@ -4,7 +4,9 @@
   "description": "ATAT Serverless framework PoC",
   "scripts": {
     "test": "jest --verbose --no-watchman",
-    "start": "func host start"
+    "start": "func host start",
+    "lint": "eslint --ext .js,.ts .",
+    "lint:fix": "eslint --ext .js,.ts --fix ."
   },
   "keywords": [
     "azure",
@@ -14,7 +16,14 @@
     "@azure/functions": "^1.2.3",
     "@types/jest": "^26.0.23",
     "@types/node": "^15.12.5",
+    "@typescript-eslint/eslint-plugin": "^4.28.2",
+    "@typescript-eslint/parser": "^4.28.2",
     "cache-loader": "^4.1.0",
+    "eslint": "^7.30.0",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-import": "^2.23.4",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^5.1.0",
     "fork-ts-checker-webpack-plugin": "^6.2.12",
     "jest": "^27.0.6",
     "serverless-azure-functions": "^2.1.0",
