@@ -24,6 +24,13 @@ export class AtatWebApiAwsStack extends cdk.Stack {
     // stage for everything being dev is good enough for a proof of concept
     const restApi = new apigw.HttpApi(this, "QuotesApi", {
       createDefaultStage: true,
+      corsPreflight: {
+        allowCredentials: false,
+        allowOrigins: ["*"],
+        allowMethods: [apigw.CorsHttpMethod.GET, apigw.CorsHttpMethod.POST],
+        allowHeaders: ["*"],
+        exposeHeaders: ["*"],
+      },
     });
     const restUrlOutput = new cdk.CfnOutput(this, "RestUri", {
       value: restApi.url ?? "",
