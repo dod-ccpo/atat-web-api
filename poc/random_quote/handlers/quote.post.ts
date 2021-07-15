@@ -56,7 +56,7 @@ function databaseError(): ErrorResult {
  * @param event - The POST request from API Gateway
  */
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  if (!event.body.trim()) {
+  if (!event.body?.trim()) {
     return new ApiResult(400, missingQuote());
   }
 
