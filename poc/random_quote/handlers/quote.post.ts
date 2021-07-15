@@ -1,12 +1,17 @@
 import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { v4 as uuidv4 } from "uuid";
-import { ErrorResult } from "../../lib/response";
+import { createHash } from "crypto";
+import { ApiResult, ErrorResult } from "../../lib/response";
 import { isQuote, missingQuoteField, Quote } from "../lib/quote";
 
 const TABLE_NAME = process.env.DYNAMODB_TABLE;
 const CLIENT = new DynamoDBClient({});
 
+/**
+ * Creates a result object for when an attribute is missing from the input object.
+ *
+ * @param field - The field that is missing in the request
+ */
 function missingField(field: string): ErrorResult {
   return {
     errorCode: "MissingAttribute",
@@ -14,13 +19,19 @@ function missingField(field: string): ErrorResult {
   };
 }
 
+/**
+ * Creates a result object for when the object is missing from the request
+ */
 function missingQuote(): ErrorResult {
   return {
     errorCode: "MissingItem",
-    errorMessage: "A quote must be provided in the request body",
+    errorMessage: "A valid quote must be provided in the request body",
   };
 }
 
+/**
+ * Creates an error result object for when a quote is already in the database.
+ */
 function alreadyExists(): ErrorResult {
   return {
     errorCode: "AlreadyExists",
@@ -28,6 +39,10 @@ function alreadyExists(): ErrorResult {
   };
 }
 
+/**
+ * Creates an error result object for when there is an error communicating with
+ * the database.
+ */
 function databaseError(): ErrorResult {
   return {
     errorCode: "DatabaseError",
@@ -35,24 +50,32 @@ function databaseError(): ErrorResult {
   };
 }
 
+/**
+ * Handles requests from the API Gateway.
+ *
+ * @param event - The POST request from API Gateway
+ */
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  if (!event.body) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify(missingQuote()),
-    };
+  if (!event.body.trim()) {
+    return new ApiResult(400, missingQuote());
   }
+
+  try {
+    JSON.parse(event.body);
+  } catch (err) {
+    return new ApiResult(400, missingQuote());
+  }
+
   const body = JSON.parse(event.body);
+
   if (!isQuote(body)) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify(missingField(missingQuoteField(body))),
-    };
+    return new ApiResult(400, missingField(missingQuoteField(body)));
   }
   const newQuote: Quote = body as Quote;
-  const quoteId = uuidv4();
+  const quoteId = createHash("sha256")
+    .update(newQuote.text + newQuote.from)
+    .digest("hex");
 
-  // TODO: Check if the quote text already exists
   const putCommand = new PutItemCommand({
     TableName: TABLE_NAME,
     Item: {
@@ -66,14 +89,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     await CLIENT.send(putCommand);
   } catch (err) {
     console.log(err);
-    return {
-      statusCode: 500,
-      body: JSON.stringify(databaseError()),
-    };
+    return new ApiResult(400, databaseError());
   }
-
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ id: quoteId, ...newQuote }),
-  };
+  return new ApiResult(200, { result: { id: quoteId, ...newQuote } });
 };
