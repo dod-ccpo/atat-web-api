@@ -11,13 +11,13 @@
     "cdk": "cdk"
   },
   "devDependencies": {
-    "@aws-cdk/assert": "1.113.0",
+    "@aws-cdk/assert": "1.114.0",
     "@types/aws-lambda": "^8.10.78",
     "@types/jest": "^26.0.10",
     "@types/node": "10.17.27",
     "@typescript-eslint/eslint-plugin": "^4.28.3",
     "@typescript-eslint/parser": "^4.28.3",
-    "aws-cdk": "1.113.0",
+    "aws-cdk": "1.114.0",
     "esbuild": "^0.12.15",
     "eslint": "^7.30.0",
     "eslint-config-prettier": "^8.3.0",
@@ -30,14 +30,16 @@
     "typescript": "~3.9.7"
   },
   "dependencies": {
-    "@aws-cdk/aws-apigatewayv2": "^1.113.0",
-    "@aws-cdk/aws-apigatewayv2-integrations": "^1.113.0",
-    "@aws-cdk/aws-dynamodb": "^1.113.0",
-    "@aws-cdk/aws-iam": "^1.113.0",
-    "@aws-cdk/aws-kms": "^1.113.0",
-    "@aws-cdk/aws-lambda": "^1.113.0",
-    "@aws-cdk/aws-lambda-nodejs": "^1.113.0",
-    "@aws-cdk/core": "1.113.0",
+    "@aws-cdk/aws-apigatewayv2": "^1.114.0",
+    "@aws-cdk/aws-apigatewayv2-authorizers": "^1.114.0",
+    "@aws-cdk/aws-apigatewayv2-integrations": "^1.114.0",
+    "@aws-cdk/aws-cognito": "^1.114.0",
+    "@aws-cdk/aws-dynamodb": "^1.114.0",
+    "@aws-cdk/aws-iam": "^1.114.0",
+    "@aws-cdk/aws-kms": "^1.114.0",
+    "@aws-cdk/aws-lambda": "^1.114.0",
+    "@aws-cdk/aws-lambda-nodejs": "^1.114.0",
+    "@aws-cdk/core": "1.114.0",
     "source-map-support": "^0.5.16",
     "uuid": "^8.3.2"
   }

@@ -1,5 +1,7 @@
 import * as apigw from "@aws-cdk/aws-apigatewayv2";
+import { HttpUserPoolAuthorizer } from "@aws-cdk/aws-apigatewayv2-authorizers";
 import { LambdaProxyIntegration } from "@aws-cdk/aws-apigatewayv2-integrations";
+import { UserPool } from "@aws-cdk/aws-cognito";
 import * as dynamodb from "@aws-cdk/aws-dynamodb";
 import * as lambdaNodejs from "@aws-cdk/aws-lambda-nodejs";
 import * as cdk from "@aws-cdk/core";
@@ -17,6 +19,13 @@ export class AtatWebApiAwsStack extends cdk.Stack {
     });
     const tableOutput = new cdk.CfnOutput(this, "TableName", {
       value: table.tableName,
+    });
+
+    const userPool = new UserPool(this, "PocUserPool");
+    const userPoolClient = userPool.addClient("api-app-client");
+    const userPoolAuthorizer = new HttpUserPoolAuthorizer({
+      userPool,
+      userPoolClient,
     });
 
     // Creates a shared API Gateway that all the functions will be able to add routes to.
@@ -69,6 +78,7 @@ export class AtatWebApiAwsStack extends cdk.Stack {
       path: "/quote",
       methods: [apigw.HttpMethod.POST],
       integration: postQuoteIntegration,
+      authorizer: userPoolAuthorizer,
     });
 
     // Prevent the GET function from being able to write to DynamoDB (it doesn't need to)
