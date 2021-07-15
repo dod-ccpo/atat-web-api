@@ -22,7 +22,19 @@ export class AtatWebApiAwsStack extends cdk.Stack {
     });
 
     const userPool = new UserPool(this, "PocUserPool");
-    const userPoolClient = userPool.addClient("api-app-client");
+    const userPoolClient = userPool.addClient("api-app-client", {
+      authFlows: {
+        userPassword: true,
+      },
+    });
+    const userPoolDomain = userPool.addDomain("api-app-domain", {
+      cognitoDomain: {
+        domainPrefix: "atatapipoc",
+      },
+    });
+    const poolDomainOutput = new cdk.CfnOutput(this, "UserPoolDomain", {
+      value: userPoolDomain.domainName,
+    });
     const userPoolAuthorizer = new HttpUserPoolAuthorizer({
       userPool,
       userPoolClient,
