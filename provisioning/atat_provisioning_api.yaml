@@ -1,0 +1,498 @@
+openapi: 3.0.2
+info:
+  description: >-
+    This is a DRAFT version of the ATAT Portfolio Draft API
+  version: 1.0.0
+  title: ATAT Internal API - Portfolio Drafts
+  contact:
+    email: replaceme@ccpo.mil
+tags:
+  - name: portfolioDraft
+    description: >-
+      Portfolio Drafts represent instances of portfolio provisioning workloads which have not yet been submitted to
+      the CSP
+paths:
+  /portfolioDrafts:
+    get:
+      tags:
+        - portfolioDraft
+      description: Gets all Portfolio Drafts the caller has read access to
+      operationId: getPortfolioDrafts
+      responses:
+        '200':
+          description: Successful operation with empty response body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortfolioDraft'
+        '404':
+          description: Portfolio step not found for this Portfolio Draft or the given Portfolio Draft does not exist
+    post:
+      tags:
+        - portfolioDraft
+      description: Creates a new Portfolio Draft
+      operationId: createPortfolioDraft
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortfolioDraft'
+      requestBody:
+        description: An empty String or JSON body
+        content:
+          application/json:
+            schema:
+              type: string
+              example: '{}'
+          text/plain:
+            schema:
+              type: string
+              example: ''
+  '/portfolioDrafts/{portfolioDraftId}':
+    delete:
+      tags:
+        - portfolioDraft
+      description: Deletes a Portfolio Draft
+      operationId: deletePortfolioDraft
+      parameters:
+        - name: portfolioDraftId
+          in: path
+          description: ID of the Portfolio
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+        '404':
+          description: Portfiolio Draft with the given ID does not exist
+  '/portfolioDrafts/{portfolioDraftId}/portfolio':
+    get:
+      tags:
+        - portfolioDraft
+      description: Gets the Portfolio Step of the Portfolio Draft Wizard
+      operationId: getPortfolioStep
+      parameters:
+        - name: portfolioDraftId
+          in: path
+          description: ID of the Portfolio
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation with empty response body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortfolioStep'
+        '404':
+          description: Portfolio step not found for this Portfolio Draft or the given Portfolio Draft does not exist
+    post:
+      tags:
+        - portfolioDraft
+      description: Submits the Portfolio Step of the Portfolio Draft Wizard
+      operationId: createPortfolioStep
+      parameters:
+        - name: portfolioDraftId
+          in: path
+          description: ID of the Portfolio
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation with empty response body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortfolioStep'
+        '405':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+      requestBody:
+        description: Input data from the Portfolio Step of the Portfolio Draft Wizard
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PortfolioStep'
+  '/portfolioDrafts/{portfolioDraftId}/funding':
+    get:
+      tags:
+        - portfolioDraft
+      description: Gets the Funding Step of the Portfolio Draft Wizard
+      operationId: getFundingStep
+      parameters:
+        - name: portfolioDraftId
+          in: path
+          description: ID of the Portfolio
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FundingStep'
+        '404':
+          description: Funding step not found for this Portfolio Draft or the given Portfolio Draft does not exist
+    post:
+      tags:
+        - portfolioDraft
+      description: Submits the Funding Step of the Portfolio Draft Wizard.
+      operationId: createFundingStep
+      parameters:
+        - name: portfolioDraftId
+          in: path
+          description: ID of the Portfolio
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FundingStep'
+        '404':
+          description: Portfiolio Draft with the given ID does not exist
+        '405':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+      requestBody:
+        description: Input data from the Funding Step of the Portfolio Draft Wizard.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FundingStep'
+  '/portfolioDrafts/{portfolioDraftId}/application':
+    get:
+      tags:
+        - portfolioDraft
+      description: Gets the Application Step of the Portfolio Draft Wizard
+      operationId: getApplicationStep
+      parameters:
+        - name: portfolioDraftId
+          in: path
+          description: ID of the Portfolio
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationStep'
+        '404':
+          description: Application step not found for this Portfolio Draft
+    post:
+      tags:
+        - portfolioDraft
+      description: Submits the Application Step of the Portfolio Draft Wizard
+      operationId: createApplicationStep
+      parameters:
+        - name: portfolioDraftId
+          in: path
+          description: ID of the Portfolio
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationStep'
+        '405':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+      requestBody:
+        description: Input data from the Application Step of the Portfolio Draft Wizard.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationStep'
+    put:
+      tags:
+        - portfolioDraft
+      description: Updates the Application Step of the Portfolio Draft Wizard
+      operationId: updateApplicationStep
+      parameters:
+        - name: portfolioDraftId
+          in: path
+          description: ID of the Portfolio
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation with empty response body
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: ''
+        '405':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+      requestBody:
+        description: Input data from the Application Step of the Portfolio Draft Wizard.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationStep'
+  '/portfolioDrafts/{portfolioDraftId}/submit':
+    post:
+      tags:
+        - portfolioDraft
+      description: Submits the given Portfolio Draft for provisioning with a CSP
+      operationId: submitPortfolioDraft
+      parameters:
+        - name: portfolioDraftId
+          in: path
+          description: ID of the Portfolio
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          # TBD: This will be a meta object containing tracking information about the provisioning process.
+          description: Successful operation.
+        '403':
+          description: User is not authorized to submit this portfolio draft
+        '404':
+          description: Portfiolio Draft with the given ID does not exist
+        '405':
+          description: Validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+      requestBody:
+        description: An empty String or JSON body
+        content:
+          application/json:
+            example: '{}'
+          text/plain:
+            example: ''
+  '/taskOrderFiles/{taskOrderNumber}':
+    post:
+      tags:
+        - taskOrder
+      description: Uploads a Task Order PDF
+      operationId: uploadTaskOrder
+      parameters:
+        - name: taskOrderNumber
+          in: path
+          description: Task Order Number. Must match a task order from Funding Step
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+        '404':
+          description: Task Order with the given number does not exist
+      requestBody:
+        content:
+          application/pdf:
+            schema:
+              type: string
+              format: binary
+    delete:
+      tags:
+        - taskOrder
+      description: Deletes a Task Order PDF
+      operationId: deleteTaskOrder
+      parameters:
+        - name: taskOrderNumber
+          in: path
+          description: Task Order Number. Must match a task order from the Funding Step
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+        '404':
+          description: Task Order with the given number does not exist
+components:
+  schemas:
+    PortfolioDraft:
+      type: object
+      description: Portfolio Draft parent object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        status:
+          type: string
+          description: CSP Provisioning Status
+          enum:
+            - "not_started"
+            - "in_progress"
+            - "complete"
+            - "failed"
+        created_at:
+          type: string
+          format: "date-time"
+        updated_at:
+          type: string
+          format: "date-time"
+    Error:
+      type: object
+      description: Generic error model
+      properties:
+        code:
+          type: string
+          enum: [INVALID_INPUT, OTHER]
+        message:
+          type: string
+      required:
+        - code
+        - message
+    ValidationError:
+      allOf:
+        - $ref: '#/components/schemas/Error'
+        - type: object
+          required:
+            - error_map
+          properties:
+            error_map:
+              type: object
+              description: 'Maps form input IDs to validation error messages so that clients can display in-line errors'
+    PortfolioStep:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        dod_components:
+          type: array
+          xml:
+            name: "dod_component"
+            wrapped: true
+          items:
+            type: string
+            enum:
+              - "air_force"
+              - "army"
+              - "marine_corps"
+              - "navy"
+              - "space_force"
+              - "combatant_command"
+              - "joint_staff"
+              - "dafa"
+              - "osd_psas"
+              - "nsa"
+        portfolio_managers:
+          type: array
+          xml:
+            name: "portfolio_managers"
+            wrapped: true
+          items:
+            type: string
+            format: "email"
+    FundingStep:
+      type: array
+      xml:
+        name: "task_order"
+        wrapped: true
+      items:
+        type: object
+        properties:
+          task_order_number:
+            type: string
+          clin_number:
+            type: string
+          csp:
+            type: string
+            enum:
+              - "aws"
+              - "azure"
+          idiq_clin:
+            type: string
+          total_clin_value:
+            type: "integer"
+          obligated_funds:
+            type: "integer"
+          pop_start_date:
+            type: string
+            format: date
+            example: '2021-07-01'
+          pop_end_date:
+            type: string
+            format: date
+            example: '2022-07-01'
+    ApplicationStep:
+      description: Represents the Application Step of the Portfolio Draft Wizard
+      type: array
+      xml:
+        name: "application"
+        wrapped: true
+      items:
+        type: object
+        properties:
+          name:
+            type: string
+          description:
+            type: string
+          environments:
+            type: array
+            xml:
+              name: "environment"
+              wrapped: true
+            items:
+              type: object
+              properties:
+                name:
+                  type: string
+                operators:
+                  type: array
+                  xml:
+                    name: "operator"
+                    wrapped: true
+                  items:
+                    type: object
+                    properties:
+                      first_name:
+                        type: string
+                      last_name:
+                        type: string
+                      email:
+                        type: string
+                        format: "email"
+                      access:
+                        type: string
+                        description: Operator Access Level to Environment
+                        enum:
+                          - administrator
+                          - read_only
