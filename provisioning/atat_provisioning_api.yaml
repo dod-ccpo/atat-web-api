@@ -18,13 +18,16 @@ paths:
         - portfolioDraft
       description: Gets all Portfolio Drafts the caller has read access to
       operationId: getPortfolioDrafts
+      parameters:
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           description: Successful operation with empty response body
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PortfolioDraft'
+                $ref: '#/components/schemas/PortfolioDraftSummary'
         '404':
           description: Portfolio step not found for this Portfolio Draft or the given Portfolio Draft does not exist
     post:
@@ -38,7 +41,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PortfolioDraft'
+                $ref: '#/components/schemas/PortfolioDraftSummary'
       requestBody:
         description: An empty String or JSON body
         content:
@@ -51,6 +54,27 @@ paths:
               type: string
               example: ''
   '/portfolioDrafts/{portfolioDraftId}':
+    get:
+      tags:
+        - portfolioDraft
+      description: Gets a Portfolio Draft
+      operationId: getPortfolioDraft
+      parameters:
+        - name: portfolioDraftId
+          in: path
+          description: ID of the Portfolio
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortfolioDraft'
+        '404':
+          description: Portfiolio Draft with the given ID does not exist
     delete:
       tags:
         - portfolioDraft
@@ -89,7 +113,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/PortfolioStep'
         '404':
-          description: Portfolio step not found for this Portfolio Draft or the given Portfolio Draft does not exist
+          description: Portfolio step not found for this Portfolio Draft
+        '504':
+          description: The given Portfolio Draft does not exist
     post:
       tags:
         - portfolioDraft
@@ -143,7 +169,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/FundingStep'
         '404':
-          description: Funding step not found for this Portfolio Draft or the given Portfolio Draft does not exist
+          description: Funding step not found for this Portfolio Draft
+        '504':
+          description: The given Portfolio Draft does not exist
     post:
       tags:
         - portfolioDraft
@@ -200,6 +228,8 @@ paths:
                 $ref: '#/components/schemas/ApplicationStep'
         '404':
           description: Application step not found for this Portfolio Draft
+        '504':
+          description: The given Portfolio Draft does not exist
     post:
       tags:
         - portfolioDraft
@@ -232,39 +262,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ApplicationStep'
-    put:
-      tags:
-        - portfolioDraft
-      description: Updates the Application Step of the Portfolio Draft Wizard
-      operationId: updateApplicationStep
-      parameters:
-        - name: portfolioDraftId
-          in: path
-          description: ID of the Portfolio
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Successful operation with empty response body
-          content:
-            text/plain:
-              schema:
-                type: string
-                example: ''
-        '405':
-          description: Invalid input
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationError'
-      requestBody:
-        description: Input data from the Application Step of the Portfolio Draft Wizard.
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ApplicationStep'
   '/portfolioDrafts/{portfolioDraftId}/submit':
     post:
       tags:
@@ -280,8 +277,7 @@ paths:
             type: string
       responses:
         '200':
-          # TBD: This will be a meta object containing tracking information about the provisioning process.
-          description: Successful operation.
+          description: Successful operation
         '403':
           description: User is not authorized to submit this portfolio draft
         '404':
@@ -341,8 +337,27 @@ paths:
         '404':
           description: Task Order with the given number does not exist
 components:
+  parameters:
+    offsetParam:
+      in: query
+      name: offset
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+      description: The number of items to skip before starting to collect the result set.
+    limitParam:
+      in: query
+      name: limit
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 50
+        default: 20
+      description: The numbers of items to return.
   schemas:
-    PortfolioDraft:
+    PortfolioDraftSummary:
       type: object
       description: Portfolio Draft parent object
       properties:
@@ -423,35 +438,35 @@ components:
             format: "email"
     FundingStep:
       type: array
-      xml:
-        name: "task_order"
-        wrapped: true
       items:
         type: object
         properties:
           task_order_number:
-            type: string
-          clin_number:
             type: string
           csp:
             type: string
             enum:
               - "aws"
               - "azure"
-          idiq_clin:
-            type: string
-          total_clin_value:
-            type: "integer"
-          obligated_funds:
-            type: "integer"
-          pop_start_date:
-            type: string
-            format: date
-            example: '2021-07-01'
-          pop_end_date:
-            type: string
-            format: date
-            example: '2022-07-01'
+          clin:
+            type: object
+            properties:
+              clin_number:
+                type: string
+              idiq_clin:
+                type: string
+              total_clin_value:
+                type: "integer"
+              obligated_funds:
+                type: "integer"
+              pop_start_date:
+                type: string
+                format: date
+                example: '2021-07-01'
+              pop_end_date:
+                type: string
+                format: date
+                example: '2022-07-01'
     ApplicationStep:
       description: Represents the Application Step of the Portfolio Draft Wizard
       type: array
@@ -496,3 +511,14 @@ components:
                         enum:
                           - administrator
                           - read_only
+    PortfolioDraft:
+      allOf:
+        - $ref: '#/components/schemas/PortfolioDraftSummary'
+      type: object
+      properties:
+        portfolio:
+          $ref: '#/components/schemas/PortfolioStep'
+        funding:
+          $ref: '#/components/schemas/FundingStep'
+        application:
+          $ref: '#/components/schemas/ApplicationStep'
