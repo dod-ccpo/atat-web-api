@@ -36,7 +36,7 @@ paths:
       description: Creates a new Portfolio Draft
       operationId: createPortfolioDraft
       responses:
-        '200':
+        '201':
           description: Successful operation
           content:
             application/json:
@@ -112,10 +112,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PortfolioStep'
+        '400':
+          description: The given Portfolio Draft does not exist
         '404':
           description: Portfolio Step not found for this Portfolio Draft
-        '504':
-          description: The given Portfolio Draft does not exist
     post:
       tags:
         - portfolioDraft
@@ -129,13 +129,13 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        '201':
           description: Successful operation with empty response body
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PortfolioStep'
-        '405':
+        '400':
           description: Invalid input
           content:
             application/json:
@@ -168,10 +168,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FundingStep'
+        '400':
+          description: The given Portfolio Draft does not exist
         '404':
           description: Funding Step not found for this Portfolio Draft
-        '504':
-          description: The given Portfolio Draft does not exist
     post:
       tags:
         - portfolioDraft
@@ -185,20 +185,20 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        '201':
           description: Successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/FundingStep'
-        '404':
-          description: Portfiolio Draft with the given ID does not exist
-        '405':
+        '400':
           description: Invalid input
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
+        '404':
+          description: Portfiolio Draft with the given ID does not exist
       requestBody:
         description: Input data from the Funding Step of the Portfolio Draft Wizard.
         required: true
@@ -228,7 +228,7 @@ paths:
                 $ref: '#/components/schemas/ApplicationStep'
         '404':
           description: Application Step not found for this Portfolio Draft
-        '504':
+        '400':
           description: The given Portfolio Draft does not exist
     post:
       tags:
@@ -243,13 +243,13 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        '201':
           description: Successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApplicationStep'
-        '405':
+        '400':
           description: Invalid input
           content:
             application/json:
@@ -276,18 +276,18 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        '201':
           description: Successful operation
-        '403':
-          description: User is not authorized to submit this portfolio draft
-        '404':
-          description: Portfiolio Draft with the given ID does not exist
-        '405':
+        '400':
           description: Validation failed
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
+        '403':
+          description: User is not authorized to submit this Portfolio Draft
+        '404':
+          description: Portfiolio Draft with the given ID does not exist
       requestBody:
         description: An empty String or JSON body
         content:
@@ -309,7 +309,7 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        '201':
           description: Successful operation
         '404':
           description: Task Order with the given number does not exist
@@ -362,8 +362,6 @@ components:
       description: Portfolio Draft parent object
       properties:
         id:
-          type: string
-        name:
           type: string
         status:
           type: string
