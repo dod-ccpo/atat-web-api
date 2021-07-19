@@ -41,5 +41,5 @@ jobs:
           VALIDATE_JSON: true
           VALIDATE_TERRAFORM: true
           VALIDATE_YAML: true
-          VALIDATE_ALL_CODEBASE: true
+          VALIDATE_ALL_CODEBASE: false
           SUPPRESS_POSSUM: true
