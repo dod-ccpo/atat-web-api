@@ -30,7 +30,6 @@ jobs:
       - name: Install dependencies
         working-directory: poc/random_quote
         run: npm ci
-      - name: Install dependencies for provisioning
         working-directory: provisioning
         run: npm ci        
       - name: Lint Code Base
