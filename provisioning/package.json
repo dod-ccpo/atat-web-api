@@ -5,8 +5,8 @@
   "scripts": {
     "test": "jest --verbose --no-watchman",
     "start": "func host start",
-    "lint": "eslint --ext .js,.ts .",
-    "lint:fix": "eslint --ext .js,.ts --fix ."
+    "lint": "eslint --ext .js,.ts,.json .",
+    "lint:fix": "eslint --ext .js,.ts,.json --fix ."
   },
   "keywords": [
     "azure",
@@ -21,6 +21,7 @@
     "eslint": "^7.30.0",
     "eslint-config-standard": "^16.0.3",
     "eslint-plugin-import": "^2.23.4",
+    "eslint-plugin-json": "^3.0.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^5.1.0",
     "fork-ts-checker-webpack-plugin": "^6.2.12",
@@ -38,6 +39,6 @@
     "@azure/cosmos": "^3.12.1",
     "@azure/functions": "^1.2.3",
     "dayjs": "^1.10.6",
-    "uuid": "^3.4.0"
+    "uuid": "^8.3.2"
   }
 }
