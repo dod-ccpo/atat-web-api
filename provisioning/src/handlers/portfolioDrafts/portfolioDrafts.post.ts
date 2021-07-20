@@ -1,5 +1,5 @@
 import { Context, HttpRequest } from '@azure/functions'
-const { CosmosClient } = require("@azure/cosmos");
+import { CosmosClient } from '@azure/cosmos'
 import { v4 as uuidv4 } from 'uuid'
 import '../../lib/models/BaseDocument'
 import '../../lib/models/PortfolioSummary'
