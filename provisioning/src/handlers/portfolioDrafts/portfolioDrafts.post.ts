@@ -12,11 +12,11 @@ export async function postPortfolioDrafts (context: Context, req: HttpRequest): 
     const { database } = await client.databases.createIfNotExists({ id: "atat" });
     const { container } = await database.containers.createIfNotExists({ id: "portfolios" });
 
-    // TODO: generate timestamps
+    let now = JSON.stringify(new Date());
     let pf: PortfolioSummary = {
         id: uuidv4(),
-        created_at: "created at time",
-        updated_at: "updated at time",
+        created_at: now,
+        updated_at: now,
         status: ProvisioningStatus.NotStarted
     }
 
