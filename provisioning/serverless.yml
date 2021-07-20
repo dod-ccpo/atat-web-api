@@ -48,7 +48,6 @@ package:
 functions:
   post:
     handler: src/handlers/portfolioDrafts/post.handler
-#    handler: src/handlers/portfolioDrafts/portfolioDrafts.post.handler
     apim:
       api: portfolio-drafts-api
       backend: portfolio-drafts-backend
