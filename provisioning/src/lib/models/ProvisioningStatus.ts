@@ -1,4 +1,4 @@
-const enum ProvisioningStatus {
+export const enum ProvisioningStatus {
     NotStarted = "not_started",
     InProgress = "in_progress",
     Failed = "failed",

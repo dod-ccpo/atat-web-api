@@ -1,0 +1,65 @@
+service: atat-porftolio-draft-api-${opt:stage}
+
+custom:
+  webpack:
+    webpackConfig: ./webpack.config.js
+    includeModules: true
+
+# Sets the project directory boundary to where we can access other file config settings
+# More information here: https://www.serverless.com/framework/docs/providers/aws/guide/variables#reference-properties-in-other-files
+projectDir: ../
+
+provider:
+  name: azure
+  region: ${opt:region, 'East US'}
+  runtime: nodejs12
+  stage: ${opt:stage, 'dev'}
+  type: consumption
+  useDotenv: true
+  environment:
+    COSMOS-CONNECTION-STRING: "@Microsoft.KeyVault(SecretUri=https://${opt:tf_environment}-keyvault.vault.azure.net/secrets/COSMOS-CONNECTION-STRING)"
+
+  apim:
+    apis:
+      - name: portfolio-drafts-api
+        subscriptionRequired: false
+        displayName: Portfolio Drafts API
+        description: Powers the Provisioning Wizard in ATAT Web
+        protocols:
+          - https
+        path: api/portfolioDrafts
+        authorization: none
+    backends:
+      - name: portfolio-drafts-backend
+        url: api/portfolioDrafts
+
+plugins: # look for additional plugins in the community plugins repo: https://github.com/serverless/plugins
+  - serverless-azure-functions
+  - serverless-dotenv-plugin
+  - serverless-webpack
+
+package:
+  patterns:
+    - 'host.json'
+    - '!local.settings.json'
+    - '!.vscode/**'
+    - '!**/*.test.js'
+
+functions:
+  post:
+    handler: src/handlers/portfolioDrafts/post.handler
+#    handler: src/handlers/portfolioDrafts/portfolioDrafts.post.handler
+    apim:
+      api: portfolio-drafts-api
+      backend: portfolio-drafts-backend
+      operations:
+        - method: post
+          urlTemplate: /
+          displayName: AddPortfolioDraft
+    events:
+      - http: true
+        x-azure-settings:
+          route: portfolioDrafts
+          methods:
+            - POST
+          authLevel: anonymous
