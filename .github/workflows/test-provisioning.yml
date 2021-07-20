@@ -1,11 +1,13 @@
 ---
-name: Run Checks
+name: Run Checks on '/provisioning'
 on:
   push:
     branches:
       - main
       - develop
   pull_request:
+    paths:
+      - 'provisioning/**'
 
 jobs:
   lint:
@@ -28,7 +30,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Install dependencies
-        working-directory: poc/random_quote
+        working-directory: provisioning
         run: npm ci
       - name: Lint Code Base
         uses: github/super-linter@v4
@@ -36,7 +38,7 @@ jobs:
           DEFAULT_BRANCH: develop
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           LINTER_RULES_PATH: /
-          JAVASCRIPT_ES_CONFIG_FILE: poc/random_quote/.eslintrc.json
+          JAVASCRIPT_ES_CONFIG_FILE: provisioning/.eslintrc.json
           VALIDATE_JAVASCRIPT_ES: true
           VALIDATE_JSON: true
           VALIDATE_TERRAFORM: true

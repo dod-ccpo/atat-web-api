@@ -1,0 +1,47 @@
+---
+name: Run Checks on '/poc'
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    paths:
+      - 'poc/**'
+
+jobs:
+  lint:
+    name: Lint code base
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Config NodeJS dependency caching
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - name: Setup NodeJS
+        uses: actions/setup-node@v2
+        with:
+          node-version: "12"
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Install dependencies
+        working-directory: poc/random_quote
+        run: npm ci
+      - name: Lint Code Base
+        uses: github/super-linter@v4
+        env:
+          DEFAULT_BRANCH: develop
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LINTER_RULES_PATH: /
+          JAVASCRIPT_ES_CONFIG_FILE: poc/random_quote/.eslintrc.json
+          VALIDATE_JAVASCRIPT_ES: true
+          VALIDATE_JSON: true
+          VALIDATE_TERRAFORM: true
+          VALIDATE_YAML: true
+          VALIDATE_ALL_CODEBASE: false
+          SUPPRESS_POSSUM: true
