@@ -9,12 +9,16 @@ export async function handler (context: Context, req: HttpRequest): Promise<void
   context.log('Connecting to ' + connectionString)
   const client = new CosmosClient(connectionString)
   const id: string = req.params.portfolioDraftId
+  context.log('This is the ID, stupid: ' + id)
 
   // TODO: create these in terraform & fail fast
-  const { database } = await client.databases.createIfNotExists({ id: 'atat' })
-  const { container } = await database.containers.createIfNotExists({ id: 'portfolios' })
+  
+  //const { database } = await client.databases.createIfNotExists({ id: 'atat' })
+  
+  //const { container } = await database.containers.createIfNotExists({ id: 'portfolios' })
 
-  const now: string = dayjs().format('{YYYY} MM-DDTHH:mm:ss SSS [Z] A')
+  
+  //const now: string = dayjs().format('{YYYY} MM-DDTHH:mm:ss SSS [Z] A')
   // TODO: generate UUID for ID, generate timestamps
   /*
   const pf: PortfolioSummary = {
