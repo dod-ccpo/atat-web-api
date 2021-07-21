@@ -27,7 +27,7 @@ The following steps describe the process for installing and deploying the ATAT P
   ```
 * Azure CLI\
   Follow steps at [Install the Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) at microsoft.com
----
+
 ### Deploying
 #### Install npm dependencies
 ```
@@ -35,7 +35,7 @@ cd ./poc/random_quote
 npm ci
 ```
 
----
+
 
 #### Login to Azure and set subscription
 ```
@@ -102,7 +102,7 @@ terraform destroy
 
 Follow steps at [Creating a Service Principal](https://www.serverless.com/framework/docs/providers/azure/guide/quick-start#creating-a-service-principal) at serverless.com
 
----
+
 
 
 #### Deploy app (and repeat as needed iteratively)
@@ -153,7 +153,7 @@ sls remove --stage <your-stage-name> --region 'East US'
 
 This should delete and remove all provisioned resources created by the deploy command.
 
----
+
 
 ### Running tests
 
@@ -161,7 +161,7 @@ This should delete and remove all provisioned resources created by the deploy co
 npm test
 ```
 
----
+
 ### Lint
 
 To run the lint scripts to format and validate the typescript files, use the command:
@@ -196,7 +196,7 @@ the following settings should be auto applied. If not, you can create it by addi
 }
 ```
 
----
+
 
 ### Troubleshooting
 #### Deploying Hanging
