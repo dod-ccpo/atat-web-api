@@ -20,7 +20,8 @@
   ],
   "ignorePatterns": ["**/*.js", "coverage/**"],
   "rules": {
-    "no-console": "warn"
+    "no-console": "warn",
+    "camelcase": "off"
   },
   "overrides": [
     {
