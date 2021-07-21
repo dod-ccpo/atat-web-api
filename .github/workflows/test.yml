@@ -28,7 +28,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Install dependencies
-        run: npm install
+        run: npm ci
       - name: Install packages dependencies
         run: npm run bootstrap
       - name: Lint Code Base
