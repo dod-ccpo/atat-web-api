@@ -28,7 +28,9 @@ jobs:
         with:
           fetch-depth: 0
       - name: Install dependencies
-        run: lerna bootstrap
+        run: npm install
+      - name: Install packages dependencies
+        run: npm run bootstrap
       - name: Lint Code Base
         uses: github/super-linter@v4
         env:
