@@ -53,7 +53,7 @@ For a detailed tutorial, follow the guidance here: [Install Terraform](https://l
 
 ### Local Deployment
 
-Navigate to the `./poc/shared_infrastructure` directory.
+Navigate to the `./provisioning/shared_infrastructure` directory.
 
 Ensure you are logged into Azure with `az login`.
 
@@ -85,7 +85,7 @@ To create an execution plan, run:
 terraform plan
 ```
 
-If Terraform detects that no changes are needed to resource instances or to root module output values, terraform plan will report that no actions need to be taken.
+If Terraform detects that are no changes needed to resource instances or to root module output values, terraform plan will report that no actions need to be taken.
 
 To apply your changes, run:
 
@@ -111,7 +111,7 @@ Follow steps at [Creating a Service Principal](https://www.serverless.com/framew
 sls deploy --stage <your-stage-name> --region 'East US' --tf_environment <your_environment_from_tfvars>
 ```
 
-This should create all resources described in `./poc/random_quote/serverless.yml`, which represents a single
+This should create all resources described in `serverless.yml`, which represents a single
 microservice. As of this writing (July 1, 2021), this consists of the following instances:
 * App Insights
 * Function App
