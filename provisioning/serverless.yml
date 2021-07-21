@@ -62,3 +62,19 @@ functions:
           methods:
             - POST
           authLevel: anonymous
+  portfolioStep:
+    handler: src/handlers/portfolioDrafts/portfolio/post.ts
+    apim:
+      api: portfolio-drafts-api
+      backend: portfolio-drafts-backend
+      operations:
+        - method: post
+          urlTemplate: /{portfolioDraftId}/portfolio
+          displayName: Submits the Portfolio Step of the Portfolio Draft Wizard
+    events:
+      - http: true
+        x-azure-settings:
+          route: portfolioDrafts/{portfolioDraftId:alpha}/portfolio
+          methods:
+            - POST
+          authLevel: anonymous
