@@ -47,9 +47,14 @@ terraform init -backend-config=resource_group_name=$AZURE_STORAGE_RESOURCE_GROUP
 
 ##### Select a workspace
 
-Select the desired workspace.
 Terraform state is stored by default in a file named _terraform.tfstate_.  In this case it is stored remotely inside the storage container on Azure.
 
+Optionally, create a new terraform workspace.
+```
+terraform workspace new <your-workspace-name>
+```
+
+Select the desired workspace.
 ```
 terraform workspace select <your-workspace-name>
 ```
