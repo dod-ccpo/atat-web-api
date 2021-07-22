@@ -157,7 +157,7 @@ sls remove --stage <your-stage-name> --region 'East US'
 
 #### Running unit tests
 
-Execute all [Jest](TODO) tests.
+Execute all [Jest](https://jestjs.io/) tests.
 ```
 npm test
 ```
