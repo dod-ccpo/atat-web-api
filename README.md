@@ -79,7 +79,7 @@ To destroy the deployed shared infrastructure run:
 terraform destroy
 ```
 
-### Deploy Azure Function Apps
+### Deploy ATAT Portolio Drafts API with Serverless Framework
 ---
 [Serverless Framework](https://www.serverless.com/) will be used to deploy Azure Function Apps.
 
