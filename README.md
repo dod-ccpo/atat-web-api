@@ -4,79 +4,59 @@ The ATAT Web API is the internal application programming interface that supports
 ## ATAT Portfolio Drafts API
 The following steps describe the process for installing and deploying the ATAT Portfolio Drafts API.
 
-### Prerequisites:
-* Node Version Manager
-  ```
-  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
-  ```
-  Then restart your shell.\
-  Details available at [Installing and Updating](https://github.com/nvm-sh/nvm#installing-and-updating) in the nvm README.
-  
-* Node.js
-  ```
-  nvm install
-  ```
-  Node.js version is specified in file .nvmrc
-* Serverless Framework
-  ```
-  npm install -g serverless
-  ```
-* Typescript
-  ```
-  npm install -g typescript
-  ```
-* Azure CLI\
-  Follow steps at [Install the Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) at microsoft.com
+### Install Prerequisites
+---
+These software packages are required.
 
-### Deploying
-#### Install npm dependencies
-```
-cd ./poc/random_quote
-npm ci
-```
+| Package | Command | Notes |
+| ----------- | ----------- |----------- |
+| Node Version Manager | `curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash` | Then restart your shell. Details available in the [nvm README](https://github.com/nvm-sh/nvm#installing-and-updating). |
+| Node.js | `nvm install` | Node.js version is specified in file `./.nvmrc` |
+| Serverless Framework | `npm install -g serverless` | n/a |
+| TypeScript | `npm install -g typescript` | n/a |
+| Azure CLI | n/a | Follow steps at [Install the Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) at microsoft.com |
+| Terraform | n/a | Follow steps at [Install Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli?in=terraform/azure-get-started) at hashicorp.com |
 
+### Deploy Shared Infrastructure
+---
+[Terraform](https://www.terraform.io/) will be used to deploy shared infrastructure in Microsoft Azure.
+Examples of such shared resources:
+* Key Vault
+* Storage Account
+* Cosmos DB Account and Database 
+* Enterprise Service Bus
 
+The following is a list of `main.tf` files and their locations which can be used with Terraform to deploy Shared Infrastructure:
+* `./provisioning/shared_infrastructure/main.tf`
+* `./poc/shared_infrastructure/main.tf`
 
-#### Login to Azure and set subscription
-```
-az login
-az account set -s <subscription-id>
-```
+#### Prerequisites
+1. Navigate to a directory containing a `main.tf` file.
+2. Prepare a file `terraform.tfvars` from file `terraform.tfvars.template` in the same directory (if available)
+3. Ensure you are logged in to Azure with `az login`
+4. Set your desired subscription with `az account set -s <subscription-id>`.  You can view the selected subscription with `az account show` 
 
+#### Terraform Steps
 
-## Shared Infrastructure
-Shared infrastructure for the PoC can be found at `./poc/shared_infrastructure`
-
-### Install dependencies
-For a detailed tutorial, follow the guidance here: [Install Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli?in=terraform/azure-get-started)
-
-### Local Deployment
-
-Navigate to the `./poc/shared_infrastructure` directory.
-
-Ensure you are logged into Azure with `az login`.
-
-#### Terraform Init
-
-You will need the name of the storage account where state will be stored as well as the
-resource group that the storage account is in. Those will be called `$AZURE_STORAGE_ACCOUNT` and
-`$AZURE_STORAGE_RESOURCE_GROUP` respectively in any subsequent steps.
+##### Initialization
+You will need the name of a storage account where Terraform [state](https://www.terraform.io/docs/language/state/index.html) will be stored as well as the [resource group](https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/manage-resource-groups-portal#what-is-a-resource-group) that contains it. Those will be called `$AZURE_STORAGE_ACCOUNT` and `$AZURE_STORAGE_RESOURCE_GROUP` respectively in any subsequent steps.
 
 ```
 terraform init -backend-config=resource_group_name=$AZURE_STORAGE_RESOURCE_GROUP -backend-config=storage_account_name=$AZURE_STORAGE_ACCOUNT
 ```
 
-#### Retrieve .tfstate from Azure
+##### Select a workspace
 
-Select the correct workspace inside the container on Azure
+Select the desired workspace.
+Terraform state is stored by default in a file named _terraform.tfstate_.  In this case it is stored remotely inside the storage container on Azure.
 
 ```
-terraform workspace select <name of workspace>
+terraform workspace select <your-workspace-name>
 ```
 
-You are now connected to the remote .tfstate file on Azure.
+You are now connected to the remote .tfstate file.
 
-#### Plan and Apply
+##### Plan and Apply
 
 To create an execution plan, run:
 
@@ -84,7 +64,7 @@ To create an execution plan, run:
 terraform plan
 ```
 
-If Terraform detects that no changes are needed to resource instances or to root module output values, terraform plan will report that no actions need to be taken.
+If Terraform detects that no changes are necessary, `plan` will report that no actions need to be taken.
 
 To apply your changes, run:
 
@@ -92,33 +72,54 @@ To apply your changes, run:
 terraform apply
 ```
 
-To destroy the deployed shared_infrastructure run:
+To destroy the deployed shared infrastructure run:
 
 ```
 terraform destroy
 ```
 
-#### Create Azure Service Principal and set environment variables
+### Deploy Azure Function Apps
+---
+[Serverless Framework](https://www.serverless.com/) will be used to deploy Azure Function Apps.
 
-Follow steps at [Creating a Service Principal](https://www.serverless.com/framework/docs/providers/azure/guide/quick-start#creating-a-service-principal) at serverless.com
+The following is a list of `serverless.yml` files and their locations which can be used with Serverless Framework to deploy Function Apps:
+* `./provisioning/serverless.yml`
+* `./poc/random_quote/serverless.yml`
 
+#### Prerequisites
+1. Navigate to a directory containing a `serverless.yml` file.
+2. This directory also contains a `package.json` file. Install JavaScript dependencies with `npm ci`
+3. Ensure you are logged in to Azure with `az login`
+4. Set your desired subscription with `az account set -s <subscription-id>`.  You can view the selected subscription with `az account show`
 
+#### Create a Service Principal
 
+If you've already installed Azure CLI, logged in to Azure CLI, and set a subscription, you are ready to generate the service principal.
 
-#### Deploy app (and repeat as needed iteratively)
+Generate Service Principal for Azure Subscription
 ```
-sls deploy --stage <your-stage-name> --region 'East US' --tf_environment <your_environment_from_tfvars>
+az ad sp create-for-rbac --name <my-unique-name>
 ```
 
-This should create all resources described in `./poc/random_quote/serverless.yml`, which represents a single
-microservice. As of this writing (July 1, 2021), this consists of the following instances:
-* App Insights
-* Function App
-* Storage Account
-* App Service Plan
-* API Management Service
+Set environment variables with values from above service principal
+```
+export AZURE_SUBSCRIPTION_ID='<subscriptionId>'
+export AZURE_TENANT_ID='<tenantId>'
+export AZURE_CLIENT_ID='<servicePrincipalId>'
+export AZURE_CLIENT_SECRET='<password>'
+```
 
-### Expected Output
+For more details, see [Creating a Service Principal](https://www.serverless.com/framework/docs/providers/azure/guide/quick-start#creating-a-service-principal) at serverless.com
+
+#### Deploy
+
+The `deploy` command should create all resources described in `serverless.yml`
+
+```
+sls deploy --stage <your-stage-name> --region 'East US' --tf_environment <your-environment-from-tfvars>
+```
+
+The expected output should look similar to this:
 
 ```
 Serverless: Deployed serverless functions:
@@ -126,14 +127,11 @@ Serverless: -> Function App not ready. Retry 0 of 30...
 Serverless: -> Function App not ready. Retry 1 of 30...
 Serverless: -> Function App not ready. Retry 2 of 30...
 Serverless: -> Function App not ready. Retry 3 of 30...
-Serverless: -> Function App not ready. Retry 4 of 30...
-Serverless: -> Function App not ready. Retry 5 of 30...
-Serverless: -> Function App not ready. Retry 6 of 30...
 Serverless: -> get: [GET] atat-sls-poc-js-eus-dev-atat-js-fallback-jts.azurewebsites.net/api/get
 Serverless: -> post: [POST] atat-sls-poc-js-eus-dev-atat-js-fallback-jts.azurewebsites.net/api/post
 ```
 
-### Manual Post-deployment Step
+#### Manual Post-deployment Step
 NOTE: The Function App created by Serverless Framework needs access to the Key Vault created by Terraform. 
 Unfortunately this creates the need for a third step in our process. It must be performed manually, but will be 
 automated in the future.
@@ -146,23 +144,26 @@ Key Vault such that it can read secrets
 * Look under Application Settings for COSMOS-CONNECTION-STRING and ensure that the Source column has a green check mark
 before `Key vault Reference`
 
-#### Destroy app
+#### Remove
+
+The `remove` command should remove (destroy) all resources created by the `deploy` command.
+
 ```
 sls remove --stage <your-stage-name> --region 'East US'
 ```
 
-This should delete and remove all provisioned resources created by the deploy command.
+### Support Information
+---
 
+#### Running unit tests
 
-
-### Running tests
-
+Execute all [Jest](TODO) tests.
 ```
 npm test
 ```
 
 
-### Lint
+#### Linting files
 
 To run the lint scripts to format and validate the typescript files, use the command:
 ```shell
@@ -173,7 +174,7 @@ Otherwise, use the following to only identify the files that need be fixed:
 npm run lint
 ```
 
-#### Webstorm / JetBrains IDE
+##### JetBrains WebStorm linting config
 
 You can go to preferences and search for `eslint`. The settings will be under 
 `Languages and Frameworks > Javascript > Code Quality Tools > ESLint` and you can select 
@@ -182,7 +183,7 @@ You can go to preferences and search for `eslint`. The settings will be under
 Clicking on `Run ESLint on save` automatically formats
 the code and so you won't have to before every push.
 
-#### VSCODE
+##### Microsoft VS Code linting config
 
 To enable auto lint on save for VSCode, install the extension ESLint, and 
 the following settings should be auto applied. If not, you can create it by adding
@@ -198,19 +199,19 @@ the following settings should be auto applied. If not, you can create it by addi
 
 
 
-### Troubleshooting
-#### Deploying Hanging
+#### Troubleshooting
+##### Serverless deploy hangs
 Note that we have observed that on initial deployments, Azure does not appear to actually create the Functions until
 we navigate to the `Functions` blade within the Function App that was created. This means that the deployment will get 
 stuck and eventually time out after 30 retries. The work-around is just to go into the `Functions` blade once the 
 Function App is available.
 
-#### Removing deployment and redeploying
+##### Removing deployment and redeploying
 In my deployment testing with the APIM config enabled, after removing the deployment via `sls deploy --stage <stage-name> --region <region>`
 there is an issue redeploying with a soft deleted service of the APIM that was removed. It attempts to redeploy with the same service
 name and needs to be purged. To fix this, there are some steps utilizing some Azure APIs to find the dangling services and to delete them.
 
-EX: 
+Example: 
 ```
  Conflict - {
     "code": "ServiceAlreadyExistsInSoftDeletedState",
@@ -233,7 +234,7 @@ in removing the service.
 You can visit the first step again to make sure it is not there anymore.
 Afterwards, you can attempt to deploy again.
 
-### Deploying Locally
+#### Deploying Locally
 Use the `offline` capability of Serverless Framework. Note that there appears to be a bug that leaves generated
 `function.json` files around at `random_quote/get` and `random_quote/post`, which would otherwise be deleted during the
 package process.
