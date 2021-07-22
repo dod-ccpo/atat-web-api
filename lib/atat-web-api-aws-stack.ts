@@ -57,21 +57,26 @@ export class AtatWebApiAwsStack extends cdk.Stack {
       value: restApi.url ?? "",
     });
 
+    const sharedFunctionProps: lambdaNodejs.NodejsFunctionProps = {
+      environment: {
+        DYNAMODB_TABLE: table.tableName,
+      },
+      bundling: {
+        externalModules: ["aws-sdk"],
+      },
+    };
+
     // These Lambda functions back the API itself. Each function requires the creation of
     // the function resource, the LambdaProxyIntegration, and the addition of a route. This
     // is probably a really good example of something that could be moved to being a custom
     // construct that handles creating each of the three.
     const getQuoteFn = new lambdaNodejs.NodejsFunction(this, "QuotesGetFunction", {
       entry: "poc/random_quote/handlers/quote.get.ts",
-      environment: {
-        DYNAMODB_TABLE: table.tableName,
-      },
+      ...sharedFunctionProps,
     });
     const postQuoteFn = new lambdaNodejs.NodejsFunction(this, "QuotesPostFunction", {
       entry: "poc/random_quote/handlers/quote.post.ts",
-      environment: {
-        DYNAMODB_TABLE: table.tableName,
-      },
+      ...sharedFunctionProps,
     });
 
     const getQuoteIntegration = new LambdaProxyIntegration({
@@ -103,6 +108,7 @@ export class AtatWebApiAwsStack extends cdk.Stack {
     // that might be helpful to have in dedicated construct.
     const getHelloFn = new lambdaNodejs.NodejsFunction(this, "HelloGetFunction", {
       entry: "poc/hello_name/handlers/hello.get.ts",
+      ...sharedFunctionProps,
     });
     const getHelloIntegration = new LambdaProxyIntegration({
       handler: getHelloFn,
