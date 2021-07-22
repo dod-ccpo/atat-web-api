@@ -15,8 +15,8 @@ export interface Quote {
  * @param object - The object to check
  * @returns true if the object has all the attributes of a {@link Quote}
  */
-export function isQuote(object: any): object is Quote {
-  return "text" in object && "from" in object;
+export function isQuote(object: unknown): object is Quote {
+  return object && typeof object === "object" && "text" in object && "from" in object;
 }
 
 /**
@@ -41,9 +41,12 @@ export function isQuote(object: any): object is Quote {
  * missingQUoteField({ }) !== "from";
  * ```
  */
-export function missingQuoteField(object: any): string {
+export function missingQuoteField(object: unknown): string {
   if (isQuote(object)) {
     return undefined;
+  }
+  if (!object || typeof object !== "object") {
+    return "text";
   }
   return ["text", "from"].find((key) => !(key in object));
 }

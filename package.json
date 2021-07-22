@@ -8,7 +8,9 @@
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest",
-    "cdk": "cdk"
+    "cdk": "cdk",
+    "lint": "eslint --ext .js,.ts,.json .",
+    "lint:fix": "npm run lint -- fix"
   },
   "devDependencies": {
     "@aws-cdk/assert": "1.114.0",
@@ -22,6 +24,7 @@
     "eslint": "^7.30.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-json": "^3.0.0",
     "eslint-plugin-prettier": "^3.4.0",
     "jest": "^26.4.2",
     "prettier": "^2.3.2",
@@ -40,6 +43,7 @@
     "@aws-cdk/aws-lambda": "^1.114.0",
     "@aws-cdk/aws-lambda-nodejs": "^1.114.0",
     "@aws-cdk/core": "1.114.0",
+    "@aws-sdk/client-dynamodb": "^3.22.0",
     "source-map-support": "^0.5.16",
     "uuid": "^8.3.2"
   }

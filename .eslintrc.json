@@ -8,6 +8,7 @@
     "extends": [
       "standard",
       "plugin:@typescript-eslint/recommended",
+      "plugin:json/recommended",
       "plugin:prettier/recommended"
     ],
     "parser": "@typescript-eslint/parser",
@@ -19,7 +20,7 @@
       "@typescript-eslint",
       "prettier"
     ],
-    "ignorePatterns": ["**/*.js"],
+    "ignorePatterns": ["**/*.js", "coverage/**"],
     "rules": {
       "no-console": "warn"
     },
