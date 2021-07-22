@@ -17,9 +17,10 @@ These software packages are required.
 | Azure CLI | n/a | Follow steps at [Install the Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) at microsoft.com |
 | Terraform | n/a | Follow steps at [Install Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli?in=terraform/azure-get-started) at hashicorp.com |
 
-### Deploy Shared Infrastructure
+### Deploy Shared Infrastructure with Terraform
 ---
-This monorepo currently contains a single Application (ATAT Portfolio Drafts API), but may eventually contain multiple Applications which all share some common infrastructure pieces. The following instructions describe their deployment:
+This monorepo currently contains a single Application (ATAT Portfolio Drafts API), but may eventually contain multiple Applications which all share some common infrastructure pieces. The following instructions describe their deployment.
+
 [Terraform](https://www.terraform.io/) will be used to deploy shared infrastructure in Microsoft Azure.
 Examples of such shared resources:
 * Key Vault
