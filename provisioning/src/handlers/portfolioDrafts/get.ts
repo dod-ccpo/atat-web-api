@@ -11,7 +11,7 @@ export async function handler (context: Context): Promise<void> {
   const { container } = await database.containers.createIfNotExists({ id: 'portfolios' })
 
   // TODO: add a modicum of error handling
-  const results = await container.items.readAll().fetchAll();
+  const results = await container.items.readAll().fetchAll()
   context.res = {
     body: results
   }
