@@ -10,7 +10,7 @@ These software packages are required.
 
 | Package | Command | Notes |
 | ----------- | ----------- |----------- |
-| Node Version Manager | `curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash` | Then restart your shell. Details available in the [nvm README](https://github.com/nvm-sh/nvm#installing-and-updating). |
+| Node Version Manager | `curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh \| bash` | Then restart your shell. Details available in the [nvm README](https://github.com/nvm-sh/nvm#installing-and-updating). |
 | Node.js | `nvm install` | Node.js version is specified in file `./.nvmrc` |
 | Serverless Framework | `npm install -g serverless` | n/a |
 | TypeScript | `npm install -g typescript` | n/a |
