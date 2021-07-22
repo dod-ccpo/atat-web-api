@@ -46,6 +46,22 @@ package:
     - '!**/*.test.js'
 
 functions:
+  get:
+    handler: src/handlers/portfolioDrafts/get.handler
+    apim:
+      api: portfolio-drafts-api
+      backend: portfolio-drafts-backend
+      operations:
+        - method: get
+          urlTemplate: /
+          displayName: GetPortfolioDrafts
+    events:
+      - http: true
+        x-azure-settings:
+          route: portfolioDrafts
+          methods:
+            - GET
+          authLevel: anonymous
   post:
     handler: src/handlers/portfolioDrafts/post.handler
     apim:
