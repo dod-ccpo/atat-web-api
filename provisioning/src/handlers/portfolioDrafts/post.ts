@@ -22,7 +22,6 @@ export async function handler (context: Context): Promise<void> {
     updated_at: now,
     status: ProvisioningStatus.NotStarted
   }
-
   // TODO: add a modicum of error handling
   await container.items.create(pf)
   context.res = {

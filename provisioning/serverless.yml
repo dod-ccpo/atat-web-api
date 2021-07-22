@@ -62,3 +62,12 @@ functions:
           methods:
             - POST
           authLevel: anonymous
+  portfolioStep:
+    handler: src/handlers/portfolioDrafts/portfolio/post.handler
+    events:
+      - http: true
+        x-azure-settings:
+          route: portfolioDrafts/{portfolioDraftId}/portfolio
+          methods:
+            - POST
+          authLevel: anonymous
