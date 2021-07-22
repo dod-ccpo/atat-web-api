@@ -25,11 +25,10 @@ Examples of such shared resources:
 * Key Vault
 * Storage Account
 * Cosmos DB Account and Database 
-* Enterprise Service Bus
+* Azure Service Bus
 
 The following is a list of `main.tf` files and their locations which can be used with Terraform to deploy Shared Infrastructure:
 * `./provisioning/shared_infrastructure/main.tf`
-* `./poc/shared_infrastructure/main.tf`
 
 #### Prerequisites
 1. Navigate to a directory containing a `main.tf` file.
@@ -85,7 +84,6 @@ terraform destroy
 
 The following is a list of `serverless.yml` files and their locations which can be used with Serverless Framework to deploy Function Apps:
 * `./provisioning/serverless.yml`
-* `./poc/random_quote/serverless.yml`
 
 #### Prerequisites
 1. Navigate to a directory containing a `serverless.yml` file.
