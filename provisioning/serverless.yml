@@ -67,9 +67,7 @@ functions:
     events:
       - http: true
         x-azure-settings:
-          route: portfolioDrafts/{portfolioDraftId}
+          route: portfolioDrafts/{portfolioDraftId}/portfolio
           methods:
             - POST
           authLevel: anonymous
-          
-
