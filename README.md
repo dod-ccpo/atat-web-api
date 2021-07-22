@@ -131,18 +131,24 @@ Serverless: -> get: [GET] atat-sls-poc-js-eus-dev-atat-js-fallback-jts.azurewebs
 Serverless: -> post: [POST] atat-sls-poc-js-eus-dev-atat-js-fallback-jts.azurewebsites.net/api/post
 ```
 
-#### Manual Post-deployment Step
-NOTE: The Function App created by Serverless Framework needs access to the Key Vault created by Terraform. 
-Unfortunately this creates the need for a third step in our process. It must be performed manually, but will be 
-automated in the future.
 
-* Log into the Azure Portal
-* Navigate to the Key Vault created by your Terraform earlier
-* Using the Access Policies screens, provide the Function App created by Serverless Framework with access to the 
-Key Vault such that it can read secrets
-* Navigate to your Function App and select Configuration
-* Look under Application Settings for COSMOS-CONNECTION-STRING and ensure that the Source column has a green check mark
-before `Key vault Reference`
+#### Grant Function App access to read Key Vault secrets
+The newly created Function App needs permission to access the Key Vault in the shared infrastructure such that it can read secrets in that vault. This step must be performed manually, but will be automated in the future.
+1. Log in to Azure Portal
+2. Navigate to the Key Vault in the shared infrastructure
+3. Select _Access policies_ under the _Settings_ heading in the resource menu on the left
+4. Click _Add Access Policy_
+5. On the _Add access policy_ screen, select _Get_ from the _Secret permissions_ drop-down
+6. On the same screen, select a principal by supplying the name of the Function App
+7. Click Add.  This will close the _Add access policy_ screen.
+8. **Click Save**
+
+Now verify that the Function App can access the required secret.
+
+1. Navigate to the newly created Function App
+2. Select _Configuration_ under the _Settings_ heading in the resource menu on the left
+3. Under _Application settings_ look for `COSMOS-CONNECTION-STRING` and **ensure that the _Source_ column contains a green check mark** before _Key vault Reference_
+4. Click on _Refresh_ in the commands bar at the top if necessary
 
 #### Remove
 
