@@ -71,3 +71,19 @@ functions:
           methods:
             - POST
           authLevel: anonymous
+  deletePortfolioDraft:
+    handler: src/handlers/portfolioDrafts/delete.handler
+    apim:
+      api: portfolio-drafts-api
+      backend: portfolio-drafts-backend
+      operations:
+        - method: delete
+          urlTemplate: /
+          displayName: DeletePortfolioDraft
+    events:
+      - http: true
+        x-azure-settings:
+          route: portfolioDrafts
+          methods:
+            - DELETE
+          authLevel: anonymous
