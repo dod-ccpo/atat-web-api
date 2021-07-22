@@ -28,14 +28,11 @@ Examples of such shared resources:
 * Cosmos DB Account and Database 
 * Azure Service Bus
 
-The following is a list of `main.tf` files and their locations which can be used with Terraform to deploy Shared Infrastructure:
-* `./provisioning/shared_infrastructure/main.tf`
-
 #### Prerequisites
-1. Navigate to a directory containing a `main.tf` file.
-2. Prepare a file `terraform.tfvars` from file `terraform.tfvars.template` in the same directory (if available)
-3. Ensure you are logged in to Azure with `az login`
-4. Set your desired subscription with `az account set -s <subscription-id>`.  You can view the selected subscription with `az account show` 
+1. Navigate with `cd ./provisioning/shared_infrastructure`.  This directory contains a `main.tf` file which can be used with Terraform to deploy shared infrastructure.
+3. Prepare a file `terraform.tfvars` from file `terraform.tfvars.template` in the same directory (if available)
+4. Ensure you are logged in to Azure with `az login`
+5. Set your desired subscription with `az account set -s <subscription-id>`.  You can view the selected subscription with `az account show` 
 
 #### Terraform Steps
 
@@ -88,14 +85,11 @@ terraform destroy
 ---
 [Serverless Framework](https://www.serverless.com/) will be used to deploy Azure Function Apps.
 
-The following is a list of `serverless.yml` files and their locations which can be used with Serverless Framework to deploy Function Apps:
-* `./provisioning/serverless.yml`
-
 #### Prerequisites
-1. Navigate to a directory containing a `serverless.yml` file.
-2. This directory also contains a `package.json` file. Install JavaScript dependencies with `npm ci`
-3. Ensure you are logged in to Azure with `az login`
-4. Set your desired subscription with `az account set -s <subscription-id>`.  You can view the selected subscription with `az account show`
+1. Navigate with `cd ./provisioning`.  This directory contains a `serverless.yml` file which can be used with Serverless Framework to deploy Function Apps.
+3. This directory also contains a `package.json` file. Install JavaScript dependencies with `npm ci`
+4. Ensure you are logged in to Azure with `az login`
+5. Set your desired subscription with `az account set -s <subscription-id>`.  You can view the selected subscription with `az account show`
 
 #### Create a Service Principal
 
