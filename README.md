@@ -19,6 +19,7 @@ These software packages are required.
 
 ### Deploy Shared Infrastructure
 ---
+This monorepo currently contains a single Application (ATAT Portfolio Drafts API), but may eventually contain multiple Applications which all share some common infrastructure pieces. The following instructions describe their deployment:
 [Terraform](https://www.terraform.io/) will be used to deploy shared infrastructure in Microsoft Azure.
 Examples of such shared resources:
 * Key Vault
