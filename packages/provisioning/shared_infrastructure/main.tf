@@ -37,7 +37,7 @@ resource "azurerm_storage_account" "sa" {
 }
 
 module "keyvault" {
-  source              = "modules/keyvault"
+  source              = "./modules/keyvault"
   name                = "${var.environment}-keyvault"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
