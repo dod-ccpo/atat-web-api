@@ -46,7 +46,7 @@ package:
     - '!**/*.test.js'
 
 functions:
-  get:
+  getPortfolioDrafts:
     handler: src/handlers/portfolioDrafts/get.handler
     apim:
       api: portfolio-drafts-api
@@ -54,7 +54,7 @@ functions:
       operations:
         - method: get
           urlTemplate: /
-          displayName: GetPortfolioDrafts
+          displayName: getPortfolioDrafts
     events:
       - http: true
         x-azure-settings:
