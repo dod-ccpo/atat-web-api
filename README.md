@@ -16,6 +16,15 @@ These software packages are required.
 | TypeScript | `npm install -g typescript` | n/a |
 | Azure CLI | n/a | Follow steps at [Install the Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) at microsoft.com |
 | Terraform | n/a | Follow steps at [Install Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli?in=terraform/azure-get-started) at hashicorp.com |
+---
+
+### Install dependencies 
+---
+```shell
+npm ci
+
+npm run bootstrap
+```
 
 ### Deploy Shared Infrastructure with Terraform
 ---

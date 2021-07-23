@@ -28,15 +28,16 @@ jobs:
         with:
           fetch-depth: 0
       - name: Install dependencies
-        working-directory: poc/random_quote
         run: npm ci
+      - name: Install packages dependencies
+        run: npm run bootstrap
       - name: Lint Code Base
         uses: github/super-linter@v4
         env:
           DEFAULT_BRANCH: develop
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           LINTER_RULES_PATH: /
-          JAVASCRIPT_ES_CONFIG_FILE: poc/random_quote/.eslintrc.json
+          JAVASCRIPT_ES_CONFIG_FILE: .eslintrc.json
           VALIDATE_JAVASCRIPT_ES: true
           VALIDATE_JSON: true
           VALIDATE_TERRAFORM: true
