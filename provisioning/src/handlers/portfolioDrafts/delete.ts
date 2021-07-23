@@ -11,14 +11,18 @@ export async function handler (context: Context, req: HttpRequest): Promise<void
   const { database } = await client.databases.createIfNotExists({ id: 'atat' })
   const { container } = await database.containers.createIfNotExists({ id: 'portfolios' })
 
-  const { resource } = await container.item(id).delete()
+  const deletedResource = await container.item(id).delete()
 
-  context.res = resource?.id
+  context.res = deletedResource?.item?.id
     ? {
-        body: {}
+        body: {
+          message: `${id} successfully deleted!`
+        }
       }
     : {
-        body: {},
+        body: {
+          message: `${id} cannot be found`
+        },
         status: 404
       }
 }

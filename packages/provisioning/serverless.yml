@@ -76,7 +76,7 @@ functions:
     events:
       - http: true
         x-azure-settings:
-          route: portfolioDrafts/{portfolioDraftId}
+          route: {portfolioDraftId}
           methods:
             - DELETE
           authLevel: anonymous
