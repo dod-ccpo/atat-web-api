@@ -76,10 +76,6 @@ functions:
     apim:
       api: portfolio-drafts-api
       backend: portfolio-drafts-backend
-      operations:
-        - method: delete
-          urlTemplate: /
-          displayName: DeletePortfolioDraft
     events:
       - http: true
         x-azure-settings:
