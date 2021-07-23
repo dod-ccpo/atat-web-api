@@ -1,41 +1,55 @@
 ####################
 # Common Variables #
 ####################
+# Resource Group that will contain all resources
 resource_group_name  = ""
+
+# This could potentially be eliminated. See notes for 'environment'.
+# - '[Storage Account rule] Storage account names must be between 3 and 24 characters in length and may contain numbers and lowercase letters only.'
+# - '[Storage Account rule] Your storage account name must be unique within Azure. No two storage accounts can have the same name.'
 storage_account_name = ""
-location             = "eastus"  # Virginia
-failover_location    = "westcentralus"  # Wyoming
+
+# Primary Azure region
+location             = "eastus"  # Location  = Virginia
+# Secondary Azure region - should be geographically separate from primary above
+failover_location    = "westcentralus"  # Location = Wyoming
+
+# Used as prefix for Key Vault and Service Bus.
+# Could potentially be used for Storage Account and Cosmos DB Account to eliminate those variables, but value must meet their rule restrictions.
+# TODO: Investigate possibility of also using this as prefix for 'storage_account_name' and/or 'cosmosdb_account_name' and eliminating those variables
 environment          = ""
 
 ##################
 # Authentication #
 ##################
+# Azure Subscription ID
 azure-subscription-id = ""
+# Azure Tenant ID that contains the subscription
+azure-tenant-id       = ""
+
+# Unused? Remove?
 azure-client-id       = ""
 azure-client-secret   = ""
-azure-tenant-id       = ""
 
 #############
 # Key Vault #
 #############
+# Azure Object ID of existing user or group to be given full access to the shared key vault to be created
 kv-full-object-id           = ""
+# Azure Object ID of existing user or group to be given read access to the shared key vault to be created
 kv-read-object-id           = ""
+# Azure Object ID of existing privileged 'deployers' group
 kv-atat-deployers-object-id = ""
 kv-secrets = {
 }
 kv-customkeys = {
-  testkey3 = {
-    keytype = "RSA"
-    keysize = "2048"
-  }
-  testkey4 = {
-    keytype = "RSA"
-    keysize = "2048"
-  }
 }
 
 ############
 # Database #
 ############
+# This could potentially be eliminated. See notes for 'environment'.
+# - '[Cosmos DB Account rule] The name can only contain lowercase letters, numbers, and the hyphen (-) character. It must be between 3-44 characters in length.'
 cosmosdb_account_name = ""
+# TODO: Eliminate this and hard code to 'atat'
 cosmosdb_database_name = ""
