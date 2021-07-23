@@ -13,16 +13,8 @@ export async function handler (context: Context, req: HttpRequest): Promise<void
 
   const deletedResource = await container.item(id).delete()
 
-  context.res = deletedResource?.item?.id
-    ? {
-        body: {
-          message: `${id} successfully deleted!`
-        }
-      }
-    : {
-        body: {
-          message: `${id} cannot be found`
-        },
-        status: 404
-      }
+  context.res = {
+    body: deletedResource.item,
+    status: deletedResource?.item?.id ? 202 : 404
+  }
 }
