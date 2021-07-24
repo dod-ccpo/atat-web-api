@@ -46,6 +46,21 @@ package:
     - '!**/*.test.js'
 
 functions:
+# All function names should agree with corresponding 'operationId' from atat_provisioning_wizard_api.yaml
+# TODO:
+#   getPortfolioDrafts:
+#   createPortfolioDraft:
+#   getPortfolioDraft:
+#   deletePortfolioDraft:
+#   getPortfolioStep:
+#   createPortfolioStep:
+#   getFundingStep:
+#   createFundingStep:
+#   getApplicationStep:
+#   createApplicationStep:
+#   submitPortfolioDraft:
+#   uploadTaskOrder:
+#   deleteTaskOrder:
   post:
     handler: src/handlers/portfolioDrafts/post.handler
     apim:
