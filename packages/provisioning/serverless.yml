@@ -49,11 +49,9 @@ functions:
 # All function names should agree with corresponding 'operationId' from atat_provisioning_wizard_api.yaml
 # TODO:
 #   getPortfolioDrafts:
-#   createPortfolioDraft:
 #   getPortfolioDraft:
 #   deletePortfolioDraft:
 #   getPortfolioStep:
-#   createPortfolioStep:
 #   getFundingStep:
 #   createFundingStep:
 #   getApplicationStep:
@@ -61,7 +59,7 @@ functions:
 #   submitPortfolioDraft:
 #   uploadTaskOrder:
 #   deleteTaskOrder:
-  post:
+  createPortfolioDraft:
     handler: src/handlers/portfolioDrafts/post.handler
     apim:
       api: portfolio-drafts-api
@@ -69,7 +67,7 @@ functions:
       operations:
         - method: post
           urlTemplate: /
-          displayName: AddPortfolioDraft
+          displayName: createPortfolioDraft
     events:
       - http: true
         x-azure-settings:
@@ -77,7 +75,7 @@ functions:
           methods:
             - POST
           authLevel: anonymous
-  portfolioStep:
+  createPortfolioStep:
     handler: src/handlers/portfolioDrafts/portfolio/post.handler
     events:
       - http: true
