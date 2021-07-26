@@ -38,7 +38,7 @@ Examples of such shared resources:
 * Azure Service Bus
 
 #### Prerequisites
-1. Navigate with `cd ./provisioning/shared_infrastructure`.  This directory contains a `main.tf` file which can be used with Terraform to deploy shared infrastructure.
+1. Navigate with `cd ./packages/provisioning/shared_infrastructure`.  This directory contains a `main.tf` file which can be used with Terraform to deploy shared infrastructure.
 3. Prepare a file `terraform.tfvars` from file `terraform.tfvars.template` in the same directory (if available)
 4. Ensure you are logged in to Azure with `az login`
 5. Set your desired subscription with `az account set -s <subscription-id>`.  You can view the selected subscription with `az account show` 
@@ -95,7 +95,7 @@ terraform destroy
 [Serverless Framework](https://www.serverless.com/) will be used to deploy Azure Function Apps.
 
 #### Prerequisites
-1. Navigate with `cd ./provisioning`.  This directory contains a `serverless.yml` file which can be used with Serverless Framework to deploy Function Apps.
+1. Navigate with `cd ./packages/provisioning`.  This directory contains a `serverless.yml` file which can be used with Serverless Framework to deploy Function Apps.
 3. This directory also contains a `package.json` file. Install JavaScript dependencies with `npm ci`
 4. Ensure you are logged in to Azure with `az login`
 5. Set your desired subscription with `az account set -s <subscription-id>`.  You can view the selected subscription with `az account show`
