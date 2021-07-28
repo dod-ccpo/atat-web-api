@@ -68,7 +68,7 @@ export class AtatWebApiStack extends cdk.Stack {
       ...sharedFunctionProps,
     });
     const postPortfolioDraftsFn = new lambdaNodejs.NodejsFunction(this, "PortfolioDraftsPostFunction", {
-      entry: "applications/portfolioDrafts/index.ts",
+      entry: "applications/portfolioDrafts/post.ts",
       ...sharedFunctionProps,
     });
 
