@@ -1,84 +1,11 @@
-# Logs
-logs
-*.log
-npm-debug.log*
-
-# Runtime data
-pids
-*.pid
-*.seed
-
-# Dependency directory
+*.js
+!jest.config.js
+*.d.ts
 node_modules
 
-# Optional npm cache directory
-.npm
+# CDK asset staging directory
+.cdk.staging
+cdk.out
 
-# Ignore built files
-bin/
-obj/
-wwwroot/
-dist/
-*.zip
-*.tar
-*.tar.gz
-publish
-
-# Ignore private files
-*.private.json
-
-# Ignore TS build cache
-.awcache/
-
-# VS files
-.vs
-
-# JetBrains
-.idea
-
-# Ignore openfaas build and template folders
-build
-template
-
-# Ignore unencrypted env files
-.gitsecret/random_seed
-.gnupg/random_seed
-env.yml
-*/env.yml
-.env
-
-# Temporary files
-*~
-
-# terraform
-**/*.tfstate
-**/*.backup
-**/*.tfplan
-**/.terraform
-**/*.plan
-**/*.terraform.tfstate.lock.info
-**/versions.override.tf
-**/.terraform.lock.hcl
-terraform.tfvars
-
-# vscode config files
-.vscode
-
-# jetbrains config files
-.idea/
-
-# mac indexing
-**/*.DS_Store
-
-# sonar files
-.scannerwork
-.sonar
-
-# Azure Functions
-local.settings.json
-
-# webpack items
-**/.webpack
-
-# code coverage
-coverage
+# Private tag data
+tags-private.json
