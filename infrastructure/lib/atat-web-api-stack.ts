@@ -84,6 +84,7 @@ export class AtatWebApiStack extends cdk.Stack {
     portfolioDrafts.addMethod("GET", new apigw.LambdaIntegration(getPortfolioDraftsFn));
     // Prevent the GET function from being able to write to DynamoDB (it doesn't need to)
     table.grantReadData(getPortfolioDraftsFn);
+
     const postPortfolioDraftsFn = new lambdaNodejs.NodejsFunction(this, "PortfolioDraftsPostFunction", {
       entry: "applications/portfolioDrafts/post.ts",
       ...sharedFunctionProps,
