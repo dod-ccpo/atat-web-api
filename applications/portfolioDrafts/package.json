@@ -8,10 +8,10 @@
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.23.0",
+    "@aws-sdk/lib-dynamodb": "^3.23.0",
     "@types/aws-lambda": "^8.10.81",
     "eslint": "^7.31.0",
-    "uuid":"^8.3.2"
-
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "eslint": "^7.31.0"
