@@ -2,7 +2,7 @@
 	"name": "root",
 	"private": true,
   "scripts": {
-    "test": "lern run test",
+    "test": "lerna run test",
     "lint": "lerna run lint",
     "lint:fix": "lerna run lint:fix"
   },
