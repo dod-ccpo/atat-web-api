@@ -62,25 +62,33 @@ export class AtatWebApiStack extends cdk.Stack {
       },
     };
 
-    // These Lambda functions back the API itself. Each function requires the creation of
-    // the function resource, the LambdaProxyIntegration, and the addition of a route. This
-    // is probably a really good example of something that could be moved to being a custom
-    // construct that handles creating each of the three.
+    // NEW FUNCTIONS GET DEFINED HERE
+    // Some notes:
+    //   - You can use `applications/portfolioDrafts/index.ts` to get a "Hello world" response when
+    //     initially testing to make sure the infrastructure works
+    //   - Each function gets defined using `lambdaNodejs.NodejsFunction` for now. You can probably
+    //     reuse the `sharedFunctionProps`, especially for the early functions
+    //   - Define new portfolioDrafts routes as `portfolioDrafts.addResource`
+    //   - You can define routes with variables/parameters in the path by using the typical brace notation
+    //     for example {portfolioDraft}
+    //   - Make sure to call `table.grantReadData` or `table.grantReadWriteData` as appropriate (so for GETs
+    //     try to only grant read)
+    // We definitely want to improve the ergonomics of this and doing so is a high priority; however, following
+    // these examples and steps should be a good start to allow progress while that work is happening.
+    const portfolioDrafts = restApi.root.addResource("portfolioDrafts");
+
     const getPortfolioDraftsFn = new lambdaNodejs.NodejsFunction(this, "PortfolioDraftsGetFunction", {
       entry: "applications/portfolioDrafts/index.ts",
       ...sharedFunctionProps,
     });
+    portfolioDrafts.addMethod("GET", new apigw.LambdaIntegration(getPortfolioDraftsFn));
+    // Prevent the GET function from being able to write to DynamoDB (it doesn't need to)
+    table.grantReadData(getPortfolioDraftsFn);
     const postPortfolioDraftsFn = new lambdaNodejs.NodejsFunction(this, "PortfolioDraftsPostFunction", {
       entry: "applications/portfolioDrafts/post.ts",
       ...sharedFunctionProps,
     });
-
-    const portfolioDrafts = restApi.root.addResource("portfolioDrafts");
-    portfolioDrafts.addMethod("GET", new apigw.LambdaIntegration(getPortfolioDraftsFn));
     portfolioDrafts.addMethod("POST", new apigw.LambdaIntegration(postPortfolioDraftsFn));
-
-    // Prevent the GET function from being able to write to DynamoDB (it doesn't need to)
-    table.grantReadData(getPortfolioDraftsFn);
     // Allow the POST function to read and write (since that will be necessary to add the
     // new quotes)
     table.grantReadWriteData(postPortfolioDraftsFn);
