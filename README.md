@@ -18,6 +18,7 @@ These software packages are required.
 ```
 npm ci
 npm run bootstrap
+npm run build
 ```
 
 ### Useful Commands
