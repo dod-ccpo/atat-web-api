@@ -38,6 +38,9 @@ export class AtatWebApiStack extends cdk.Stack {
     // Ideally we'd define different stages for dev, test, and staging. For now, a single
     // stage for everything being dev is good enough for a proof of concept
     const restApi = new apigw.RestApi(this, "AtatWebApi", {
+      endpointConfiguration: {
+        types: [apigw.EndpointType.REGIONAL],
+      },
       defaultCorsPreflightOptions: {
         allowCredentials: false,
         allowOrigins: apigw.Cors.ALL_ORIGINS,
