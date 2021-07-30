@@ -17,21 +17,33 @@ const CLIENT = dynamodbClient;
  * @param event - The POST request from API Gateway
  */
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+  if (!event.body) {
+    return { statusCode: 400, body: "" };
+  }
   /*
     if (event.body && !JSON.parse(event.body)) {
     return { statusCode: 400, body: "Request body must be empty" };
   }
 */
-  const portfolioId = event.pathParameters?.portfolioId;
+  const portfolioId = event.pathParameters?.portfolioDraftId;
+  /*
   if (!portfolioId) {
     return { statusCode: 400, body: "invalid request, you are missing the path parameter id:" };
   }
-  let requestJSON = "";
-  // requestJSON = JSON.parse(event.body);
+  */
+
+  const requestBody = JSON.parse(event.body);
+  const pf: PortfolioStep = {
+    name: requestBody.name,
+    description: requestBody.description,
+    dod_components: requestBody.dod_components,
+    portfolio_managers: requestBody,
+  };
+
   const now = new Date().toISOString();
 
   const pf: PortfolioStep = {
-    name: "bob",
+    name: requestBody.name,
     description: "bob's app",
     dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
     portfolio_managers: ["joe.manager@example.com", "jane.manager@example.com"],
@@ -49,6 +61,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     Key: {
       portfolioId,
     },
+    UpdateExpression: "set portfolioStep = portfolioStep",
     ExpressionAttributeValues: {
       portfolioStep: pf,
     },
