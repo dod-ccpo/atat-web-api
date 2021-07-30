@@ -20,50 +20,35 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   if (!event.body) {
     return { statusCode: 400, body: "" };
   }
-  /*
-    if (event.body && !JSON.parse(event.body)) {
-    return { statusCode: 400, body: "Request body must be empty" };
-  }
-*/
+
   const portfolioId = event.pathParameters?.portfolioDraftId;
-  /*
+
   if (!portfolioId) {
     return { statusCode: 400, body: "invalid request, you are missing the path parameter id:" };
   }
-  */
 
   const requestBody = JSON.parse(event.body);
   const pf: PortfolioStep = {
     name: requestBody.name,
     description: requestBody.description,
     dod_components: requestBody.dod_components,
-    portfolio_managers: requestBody,
+    portfolio_managers: requestBody.portfolio_managers,
   };
 
   const now = new Date().toISOString();
 
-  const pf: PortfolioStep = {
-    name: requestBody.name,
-    description: "bob's app",
-    dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
-    portfolio_managers: ["joe.manager@example.com", "jane.manager@example.com"],
-  };
-
   console.log(pf);
-
-  const putCommand = new PutCommand({
-    TableName: TABLE_NAME,
-    Item: pf,
-  });
-
   const updateCommand = new UpdateCommand({
     TableName: TABLE_NAME,
     Key: {
-      portfolioId,
+      id: portfolioId,
     },
-    UpdateExpression: "set portfolioStep = portfolioStep",
+    UpdateExpression: "set #portfolioVariable = :x",
+    ExpressionAttributeNames: {
+      "#portfolioVariable": "portfolioStep",
+    },
     ExpressionAttributeValues: {
-      portfolioStep: pf,
+      ":x": pf,
     },
   });
 
