@@ -7,7 +7,7 @@
     "watch": "tsc -w",
     "test": "jest",
     "lint": "eslint --ext .js,.ts,.json -c ../../.eslintrc.json .",
-    "lint:fix": "npm run lint -- fix"
+    "lint:fix": "npm run lint -- --fix"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.23.0",
