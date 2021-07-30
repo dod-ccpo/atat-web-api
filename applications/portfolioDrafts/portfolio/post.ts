@@ -1,8 +1,9 @@
-import { PutCommand } from "@aws-sdk/lib-dynamodb";
+import { PutCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { v4 as uuid } from "uuid";
 import { PortfolioSummary } from ".././models/PortfolioSummary";
 import { ProvisioningStatus } from ".././models/ProvisioningStatus";
+import { PortfolioStep } from ".././models/PortfolioStep";
 import { dynamodbClient } from ".././utils/dynamodb";
 
 const TABLE_NAME = process.env.ATAT_TABLE_NAME;
@@ -16,15 +17,24 @@ const CLIENT = dynamodbClient;
  * @param event - The POST request from API Gateway
  */
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  if (event.body && !JSON.parse(event.body)) {
+  /*
+    if (event.body && !JSON.parse(event.body)) {
     return { statusCode: 400, body: "Request body must be empty" };
   }
+*/
+  const portfolioId = event.pathParameters?.portfolioId;
+  if (!portfolioId) {
+    return { statusCode: 400, body: "invalid request, you are missing the path parameter id:" };
+  }
+  let requestJSON = "";
+  // requestJSON = JSON.parse(event.body);
   const now = new Date().toISOString();
-  const pf: PortfolioSummary = {
-    id: uuid(),
-    created_at: now,
-    updated_at: now,
-    status: ProvisioningStatus.NotStarted,
+
+  const pf: PortfolioStep = {
+    name: "bob",
+    description: "bob's app",
+    dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
+    portfolio_managers: ["joe.manager@example.com", "jane.manager@example.com"],
   };
 
   console.log(pf);
@@ -34,8 +44,18 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     Item: pf,
   });
 
+  const updateCommand = new UpdateCommand({
+    TableName: TABLE_NAME,
+    Key: {
+      portfolioId,
+    },
+    ExpressionAttributeValues: {
+      portfolioStep: pf,
+    },
+  });
+
   try {
-    await CLIENT.send(putCommand);
+    await CLIENT.send(updateCommand);
   } catch (err) {
     console.log(err);
     return { statusCode: 500, body: "database error" };
