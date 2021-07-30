@@ -85,13 +85,26 @@ export class AtatWebApiStack extends cdk.Stack {
     // Prevent the GET function from being able to write to DynamoDB (it doesn't need to)
     table.grantReadData(getPortfolioDraftsFn);
 
-    const postPortfolioDraftsFn = new lambdaNodejs.NodejsFunction(this, "PortfolioDraftsPostFunction", {
-      entry: "applications/portfolioDrafts/post.ts",
+    // operationId: createPortfolioDraft
+    const createPortfolioDraftFn = new lambdaNodejs.NodejsFunction(this, "createPortfolioDraft", {
+      entry: "applications/portfolioDrafts/createPortfolioDraft.ts",
       ...sharedFunctionProps,
     });
-    portfolioDrafts.addMethod("POST", new apigw.LambdaIntegration(postPortfolioDraftsFn));
-    // Allow the POST function to read and write (since that will be necessary to add the
-    // new quotes)
-    table.grantReadWriteData(postPortfolioDraftsFn);
+    portfolioDrafts.addMethod("POST", new apigw.LambdaIntegration(createPortfolioDraftFn));
+    table.grantReadWriteData(createPortfolioDraftFn);
+
+    // -- operationIds from API spec ---
+    // operationId: getPortfolioDrafts
+    // operationId: getPortfolioDraft
+    // operationId: deletePortfolioDraft
+    // operationId: getPortfolioStep
+    // operationId: createPortfolioStep
+    // operationId: getFundingStep
+    // operationId: createFundingStep
+    // operationId: getApplicationStep
+    // operationId: createApplicationStep
+    // operationId: submitPortfolioDraft
+    // operationId: uploadTaskOrder
+    // operationId: deleteTaskOrder
   }
 }

@@ -3,15 +3,13 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { v4 as uuid } from "uuid";
 import { PortfolioSummary } from "./models/PortfolioSummary";
 import { ProvisioningStatus } from "./models/ProvisioningStatus";
-import { dynamodbClient } from "./utils/dynamodb";
+import { dynamodbClient as client } from "./utils/dynamodb";
 
 const TABLE_NAME = process.env.ATAT_TABLE_NAME;
 // const PRIMARY_KEY = process.env.PRIMARY_KEY || "";
-// TODO: Just use "dynamoDbClient"
-const CLIENT = dynamodbClient;
 
 /**
- * Handles requests from the API Gateway.
+ * Creates a new Portfolio Draft
  *
  * @param event - The POST request from API Gateway
  */
@@ -19,26 +17,28 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   if (event.body && !JSON.parse(event.body)) {
     return { statusCode: 400, body: "Request body must be empty" };
   }
+
   const now = new Date().toISOString();
-  const pf: PortfolioSummary = {
+  const document: PortfolioSummary = {
     id: uuid(),
     created_at: now,
     updated_at: now,
     status: ProvisioningStatus.NotStarted,
   };
 
-  console.log(pf);
-
-  const putCommand = new PutCommand({
+  const params = {
     TableName: TABLE_NAME,
-    Item: pf,
-  });
+    Item: document,
+  };
+
+  const command = new PutCommand(params);
 
   try {
-    await CLIENT.send(putCommand);
+    const data = await client.send(command);
+    console.log("success. created item: " + JSON.stringify(data));
+    return { statusCode: 201, body: JSON.stringify(data) };
   } catch (err) {
-    console.log(err);
+    console.log("database error: " + err);
     return { statusCode: 500, body: "database error" };
   }
-  return { statusCode: 201, body: JSON.stringify(pf) };
 };
