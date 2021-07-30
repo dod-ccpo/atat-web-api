@@ -76,10 +76,8 @@ export class AtatWebApiStack extends cdk.Stack {
     // We definitely want to improve the ergonomics of this and doing so is a high priority; however, following
     // these examples and steps should be a good start to allow progress while that work is happening.
     const portfolioDrafts = restApi.root.addResource("portfolioDrafts");
-
-    const portfolioId = portfolioDrafts.addResource("{portfolioId}");
-
-    const portfolio = portfolioId.addResource("portfolio");
+    const portfolioDraftId = portfolioDrafts.addResource("{portfolioDraftId}");
+    const portfolio = portfolioDraftId.addResource("portfolio");
 
     const getPortfolioDraftsFn = new lambdaNodejs.NodejsFunction(this, "PortfolioDraftsGetFunction", {
       entry: "applications/portfolioDrafts/index.ts",
