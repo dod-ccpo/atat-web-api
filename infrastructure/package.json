@@ -10,7 +10,7 @@
     "test": "jest",
     "cdk": "cdk",
     "lint": "eslint --ext .js,.ts,.json -c ../.eslintrc.json .",
-    "lint:fix": "npm run lint -- fix"
+    "lint:fix": "npm run lint -- --fix"
   },
   "devDependencies": {
     "@aws-cdk/assert": "1.116.0",
