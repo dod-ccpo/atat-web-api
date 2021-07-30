@@ -13,7 +13,7 @@ These software packages are required.
 | Node.js | `nvm install` | Node.js version is specified in file `./.nvmrc` |
 | TypeScript | `npm install -g typescript` | [Documentation](https://www.typescriptlang.org/docs/) |
 | AWS CDK Toolkit | `npm install -g aws-cdk` | [Developer Guide](https://docs.aws.amazon.com/cdk/latest/guide/cli.html) |
-| AWS CLI | `sudo apt install awscli` | [Documentation](https://aws.amazon.com/cli/) Be sure to configure your AWS CLI/SDK profiles following installation. |
+| AWS CLI | `sudo apt install awscli` | Be sure to configure your AWS CLI/SDK profiles following installation. [Documentation](https://aws.amazon.com/cli/) |
 
 ### Install JavaScript Dependencies 
 ```
