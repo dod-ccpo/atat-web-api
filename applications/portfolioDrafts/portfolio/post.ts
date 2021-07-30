@@ -1,14 +1,9 @@
-import { PutCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
+import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { v4 as uuid } from "uuid";
-import { PortfolioSummary } from ".././models/PortfolioSummary";
-import { ProvisioningStatus } from ".././models/ProvisioningStatus";
 import { PortfolioStep } from ".././models/PortfolioStep";
 import { dynamodbClient } from ".././utils/dynamodb";
 
 const TABLE_NAME = process.env.ATAT_TABLE_NAME;
-// const PRIMARY_KEY = process.env.PRIMARY_KEY || "";
-// TODO: Just use "dynamoDbClient"
 const CLIENT = dynamodbClient;
 
 /**
@@ -34,8 +29,6 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     dod_components: requestBody.dod_components,
     portfolio_managers: requestBody.portfolio_managers,
   };
-
-  const now = new Date().toISOString();
 
   console.log(pf);
   const updateCommand = new UpdateCommand({
