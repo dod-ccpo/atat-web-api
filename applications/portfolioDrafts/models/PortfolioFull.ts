@@ -1,6 +1,6 @@
-import { PortfolioSummary } from './PortfolioSummary'
-import { PortfolioStep } from './PortfolioStep'
+import { PortfolioStep } from "./PortfolioStep";
+import { PortfolioSummary } from "./PortfolioSummary";
 
 export interface PortfolioFull extends PortfolioSummary {
-    portfolio: PortfolioStep
+  portfolio: PortfolioStep;
 }

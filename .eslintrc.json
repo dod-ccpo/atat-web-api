@@ -26,6 +26,10 @@
     },
     "overrides": [
       {
+        "files": ["**/models/**.ts"],
+        "rules": { "camelcase": "off" }
+      },      
+      {
         "files": [
           "**/__tests__/*.{j,t}s?(x)"
         ],
