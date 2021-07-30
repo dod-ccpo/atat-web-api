@@ -1,0 +1,41 @@
+---
+name: Build and Test API
+on:
+  pull_request:
+  push:
+    branches:
+      - develop
+      - main
+
+jobs:
+  build:
+    name: Build and Synthesize
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v2
+      - name: Setup NodeJS
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+          cache: npm
+      - name: Install global dependencies
+        run: |
+          npm install -g aws-cdk
+      - name: Install project dependencies
+        run: |
+          npm ci
+          npm run bootstrap
+      - name: Lint the project
+        run: npm run lint
+      - name: Build the project
+        run: npm run build
+      - name: Synthesize CDK template
+        run: cdk synth
+      - name: Gather artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: cloudformation-assets
+          path: |
+            cdk.out/*.template.json
+            cdk.out/asset.*/index.js
