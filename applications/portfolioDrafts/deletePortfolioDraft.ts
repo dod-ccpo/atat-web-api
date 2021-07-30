@@ -1,8 +1,6 @@
 import { DeleteCommand } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { v4 as uuid } from "uuid";
-// import { PortfolioSummary } from "./models/PortfolioSummary";
-// import { ProvisioningStatus } from "./models/ProvisioningStatus";
+import { parse } from "uuid";
 import { dynamodbClient as client } from "./utils/dynamodb";
 
 const TABLE_NAME = process.env.ATAT_TABLE_NAME;
@@ -14,20 +12,23 @@ const TABLE_NAME = process.env.ATAT_TABLE_NAME;
  * @param event - The DELETE request from API Gateway
  */
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  // TODO: path parameter must contain 'portfolioDraftId', return 400	Bad Request if not present
-  // show properties of the event
-  console.log("event.path: " + JSON.stringify(event.path));
-  console.log("event.pathParameters: " + JSON.stringify(event.pathParameters));
+  const portfolioDraftId = event.pathParameters?.portfolioDraftId;
+  if (portfolioDraftId == null) {
+    return { statusCode: 400, body: "Bad Request. A Portfolio Draft ID must be specified in URL path." };
+  }
+
+  if (!parse(portfolioDraftId)) {
+    return { statusCode: 400, body: "Bad Request. Portfolio Draft ID must be a UUID compliant with RFC 4122." };
+  }
 
   if (event.body && !JSON.parse(event.body)) {
-    console.log("Request body must be empty");
-    return { statusCode: 400, body: "Request body must be empty" };
+    return { statusCode: 400, body: "Bad Request. The Request body must be empty." };
   }
 
   const params = {
     TableName: TABLE_NAME,
     Key: {
-      id: uuid(), // should always yield 404
+      id: portfolioDraftId,
     },
   };
 
