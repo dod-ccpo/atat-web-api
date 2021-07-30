@@ -77,6 +77,10 @@ export class AtatWebApiStack extends cdk.Stack {
     // these examples and steps should be a good start to allow progress while that work is happening.
     const portfolioDrafts = restApi.root.addResource("portfolioDrafts");
 
+    const portfolioId = portfolioDrafts.addResource("{portfolioId}");
+
+    const portfolio = portfolioId.addResource("portfolio");
+
     const getPortfolioDraftsFn = new lambdaNodejs.NodejsFunction(this, "PortfolioDraftsGetFunction", {
       entry: "applications/portfolioDrafts/index.ts",
       ...sharedFunctionProps,
@@ -92,6 +96,18 @@ export class AtatWebApiStack extends cdk.Stack {
     });
     portfolioDrafts.addMethod("POST", new apigw.LambdaIntegration(createPortfolioDraftFn));
     table.grantReadWriteData(createPortfolioDraftFn);
+
+    // createPortfolioStep
+    const createPortfolioStepFn = new lambdaNodejs.NodejsFunction(this, "CreatePortfolioSteptFunction", {
+      entry: "applications/portfolioDrafts/portfolio/post.ts",
+      ...sharedFunctionProps,
+    });
+    portfolio.addMethod("POST", new apigw.LambdaIntegration(createPortfolioStepFn));
+
+    // Allow the POST function to read and write (since that will be necessary to add the
+    // new quotes)
+
+    table.grantReadWriteData(createPortfolioStepFn);
 
     // -- operationIds from API spec ---
     // operationId: getPortfolioDrafts
