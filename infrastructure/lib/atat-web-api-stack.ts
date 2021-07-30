@@ -94,12 +94,13 @@ export class AtatWebApiStack extends cdk.Stack {
     // new quotes)
     table.grantReadWriteData(postPortfolioDraftsFn);
 
+    const portfolioDrafts2 = portfolioDrafts.addResource("{portfolioDraftId}");
     // operationId: deletePortfolioDraft
     const deletePortfolioDraftFn = new lambdaNodejs.NodejsFunction(this, "DeletePortfolioDraftFunction", {
       entry: "applications/portfolioDrafts/deletePortfolioDraft.ts",
       ...sharedFunctionProps,
     });
-    portfolioDrafts.addMethod("DELETE", new apigw.LambdaIntegration(deletePortfolioDraftFn));
+    portfolioDrafts2.addMethod("DELETE", new apigw.LambdaIntegration(deletePortfolioDraftFn));
     table.grantReadWriteData(deletePortfolioDraftFn);
   }
 }
