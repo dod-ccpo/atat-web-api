@@ -93,5 +93,13 @@ export class AtatWebApiStack extends cdk.Stack {
     // Allow the POST function to read and write (since that will be necessary to add the
     // new quotes)
     table.grantReadWriteData(postPortfolioDraftsFn);
+
+    // operationId: deletePortfolioDraft
+    const deletePortfolioDraftFn = new lambdaNodejs.NodejsFunction(this, "DeletePortfolioDraftFunction", {
+      entry: "applications/portfolioDrafts/deletePortfolioDraft.ts",
+      ...sharedFunctionProps,
+    });
+    portfolioDrafts.addMethod("DELETE", new apigw.LambdaIntegration(deletePortfolioDraftFn));
+    table.grantReadWriteData(deletePortfolioDraftFn);
   }
 }
