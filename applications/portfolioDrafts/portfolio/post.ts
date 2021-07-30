@@ -49,7 +49,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     await CLIENT.send(updateCommand);
   } catch (err) {
     console.log(err);
-    return { statusCode: 500, body: "database error" };
+    return { statusCode: 500, body: "Database error" };
   }
   return { statusCode: 201, body: JSON.stringify(pf) };
 };
