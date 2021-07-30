@@ -93,5 +93,20 @@ export class AtatWebApiStack extends cdk.Stack {
     // Allow the POST function to read and write (since that will be necessary to add the
     // new quotes)
     table.grantReadWriteData(postPortfolioDraftsFn);
+
+    // -- operationIds from API spec ---
+    // operationId: getPortfolioDrafts
+    // operationId: createPortfolioDraft
+    // operationId: getPortfolioDraft
+    // operationId: deletePortfolioDraft
+    // operationId: getPortfolioStep
+    // operationId: createPortfolioStep
+    // operationId: getFundingStep
+    // operationId: createFundingStep
+    // operationId: getApplicationStep
+    // operationId: createApplicationStep
+    // operationId: submitPortfolioDraft
+    // operationId: uploadTaskOrder
+    // operationId: deleteTaskOrder
   }
 }
