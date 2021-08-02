@@ -5,7 +5,7 @@ import { ErrorCodes } from "./models/Error";
 import { PortfolioSummary } from "./models/PortfolioSummary";
 import { ProvisioningStatus } from "./models/ProvisioningStatus";
 import { dynamodbClient as client } from "./utils/dynamodb";
-import { ErrorResponse, SuccessResponse } from "./utils/response";
+import { ErrorResponse, ErrorStatusCode, SuccessResponse, SuccessStatusCode } from "./utils/response";
 
 const TABLE_NAME = process.env.ATAT_TABLE_NAME;
 // const PRIMARY_KEY = process.env.PRIMARY_KEY || "";
@@ -17,7 +17,10 @@ const TABLE_NAME = process.env.ATAT_TABLE_NAME;
  */
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   if (event.body && !JSON.parse(event.body)) {
-    return new ErrorResponse({ code: ErrorCodes.INVALID_INPUT, message: "Request body must be empty" }, 400);
+    return new ErrorResponse(
+      { code: ErrorCodes.INVALID_INPUT, message: "Request body must be empty" },
+      ErrorStatusCode.BAD_REQUEST
+    );
   }
 
   const now = new Date().toISOString();
@@ -38,9 +41,12 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   try {
     const data = await client.send(command);
     console.log("success. created item: " + JSON.stringify(data));
-    return new SuccessResponse(document, 201);
+    return new SuccessResponse(document, SuccessStatusCode.CREATED);
   } catch (err) {
     console.log("database error: " + err);
-    return new ErrorResponse({ code: ErrorCodes.OTHER, message: "Database error" }, 500);
+    return new ErrorResponse(
+      { code: ErrorCodes.OTHER, message: "Database error" },
+      ErrorStatusCode.INTERNAL_SERVER_ERROR
+    );
   }
 };

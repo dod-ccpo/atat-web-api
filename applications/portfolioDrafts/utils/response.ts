@@ -5,6 +5,24 @@ import { Error } from "../models/Error";
 type Headers = { [header: string]: string | number | boolean } | undefined;
 type MultiValueHeaders = { [header: string]: (string | number | boolean)[] } | undefined;
 
+export enum SuccessStatusCode {
+  OK = 200,
+  CREATED = 201,
+  ACCEPTED = 202,
+  NO_CONTENT = 204,
+}
+
+export enum ErrorStatusCode {
+  BAD_REQUEST = 400,
+  UNAUTHORIZED = 401,
+  FORBIDDEN = 403,
+  NOT_FOUND = 404,
+  METHOD_NOT_ALLOWED = 405,
+  NOT_ACCEPTABLE = 406,
+  INTERNAL_SERVER_ERROR = 500,
+  NOT_IMPLEMENTED = 501,
+}
+
 abstract class Response implements APIGatewayProxyResult {
   statusCode: number;
   body: string;
@@ -14,7 +32,7 @@ abstract class Response implements APIGatewayProxyResult {
 
   constructor(
     body: string,
-    statusCode: number,
+    statusCode: SuccessStatusCode | ErrorStatusCode,
     headers?: Headers,
     multiValueHeaders?: MultiValueHeaders,
     isBase64Encoded?: boolean
@@ -30,7 +48,7 @@ abstract class Response implements APIGatewayProxyResult {
 export class SuccessResponse extends Response {
   constructor(
     response: BaseDocument,
-    statusCode = 200,
+    statusCode: SuccessStatusCode = SuccessStatusCode.OK,
     headers: Headers = undefined,
     multiValueHeaders: MultiValueHeaders = undefined,
     isBase64Encoded?: boolean
@@ -42,7 +60,7 @@ export class SuccessResponse extends Response {
 export class ErrorResponse extends Response {
   constructor(
     error: Error,
-    statusCode: number,
+    statusCode: ErrorStatusCode,
     headers: Headers = undefined,
     multiValueHeaders: MultiValueHeaders = undefined,
     isBase64Encoded?: boolean
