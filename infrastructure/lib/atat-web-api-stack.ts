@@ -108,7 +108,6 @@ export class AtatWebApiStack extends cdk.Stack {
     // operationId: getPortfolioDraft
     // operationId: deletePortfolioDraft
     // operationId: getPortfolioStep
-    // operationId: createPortfolioStep
     // operationId: getFundingStep
     // operationId: createFundingStep
     // operationId: getApplicationStep
