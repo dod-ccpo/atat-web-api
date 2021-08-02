@@ -295,22 +295,19 @@ paths:
             example: '{}'
           text/plain:
             example: ''
-  '/taskOrderFiles/{taskOrderNumber}':
+  '/taskOrderFiles':
     post:
       tags:
         - taskOrder
       description: Uploads a Task Order PDF
       operationId: uploadTaskOrder
-      parameters:
-        - name: taskOrderNumber
-          in: path
-          description: Task Order Number. Must match a task order from Funding Step
-          required: true
-          schema:
-            type: string
       responses:
         '201':
           description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileMetadata'
         '404':
           description: Task Order with the given number does not exist
       requestBody:
@@ -319,15 +316,38 @@ paths:
             schema:
               type: string
               format: binary
+  '/taskOrderFiles/{taskOrderId}':
+    get:
+      tags:
+        - taskOrder
+      description: Gets a Task Order PDF
+      operationId: getTaskOrder
+      parameters:
+        - name: taskOrderId
+          in: path
+          description: Task Order ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Task Order with the given ID does not exist
     delete:
       tags:
         - taskOrder
       description: Deletes a Task Order PDF
       operationId: deleteTaskOrder
       parameters:
-        - name: taskOrderNumber
+        - name: taskOrderId
           in: path
-          description: Task Order Number. Must match a task order from the Funding Step
+          description: Task Order ID
           required: true
           schema:
             type: string
@@ -357,26 +377,33 @@ components:
         default: 20
       description: The numbers of items to return.
   schemas:
-    PortfolioDraftSummary:
+    BaseObject:
       type: object
-      description: Portfolio Draft parent object
+      description: Base model common to all first-class objects (those with IDs)
       properties:
         id:
           type: string
-        status:
-          type: string
-          description: CSP Provisioning Status
-          enum:
-            - "not_started"
-            - "in_progress"
-            - "complete"
-            - "failed"
         created_at:
           type: string
           format: "date-time"
         updated_at:
           type: string
           format: "date-time"
+    PortfolioDraftSummary:
+      type: object
+      description: Portfolio Draft parent object
+      allOf:
+        - $ref: '#/components/schemas/BaseObject'
+        - type: object
+          properties:
+            status:
+              type: string
+              description: CSP Provisioning Status
+              enum:
+                - "not_started"
+                - "in_progress"
+                - "complete"
+                - "failed"
     Error:
       type: object
       description: Generic error model
@@ -399,6 +426,19 @@ components:
             error_map:
               type: object
               description: 'Maps form input IDs to validation error messages so that clients can display in-line errors'
+    FileMetadata:
+      type: object
+      description: Metadata describing an uploaded file
+      allOf:
+        - $ref: '#/components/schemas/BaseObject'
+        - type: object
+          properties:
+            size:
+              type: number
+              description: file size in bytes
+            name:
+              type: string
+              description: name of file when originally uploaded
     PortfolioStep:
       type: object
       required:
@@ -441,6 +481,9 @@ components:
         properties:
           task_order_number:
             type: string
+          task_order_file_id:
+            type: string
+            description: ID of the file associated with this task order (previously uploaded by POST /taskOrderFiles)
           csp:
             type: string
             enum:
