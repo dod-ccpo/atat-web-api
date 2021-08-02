@@ -8,7 +8,7 @@ import { ApiSuccessResponse, ErrorResponse, ErrorStatusCode, SuccessStatusCode }
 const TABLE_NAME = process.env.ATAT_TABLE_NAME;
 
 /**
- * Handles requests from the API Gateway.
+ * Submits the Portfolio Step of the Portfolio Draft Wizard
  *
  * @param event - The POST request from API Gateway
  */
