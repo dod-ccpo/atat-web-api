@@ -1,10 +1,11 @@
 import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { PortfolioStep } from ".././models/PortfolioStep";
-import { dynamodbClient } from ".././utils/dynamodb";
+import { dynamodbClient as client } from ".././utils/dynamodb";
 
 const TABLE_NAME = process.env.ATAT_TABLE_NAME;
-const CLIENT = dynamodbClient;
+const InvalidBody = { code: "INVALID_INPUT", message: "A valid request body must be specified" };
+const DatabaseError = { code: "OTHER", message: "Internal database error" };
 
 /**
  * Handles requests from the API Gateway.
@@ -13,14 +14,10 @@ const CLIENT = dynamodbClient;
  */
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   if (!event.body) {
-    return { statusCode: 400, body: "" };
+    return { statusCode: 400, body: JSON.stringify(InvalidBody) };
   }
 
   const portfolioId = event.pathParameters?.portfolioDraftId;
-
-  if (!portfolioId) {
-    return { statusCode: 400, body: "invalid request, you are missing the path parameter id:" };
-  }
 
   const requestBody = JSON.parse(event.body);
   const pf: PortfolioStep = {
@@ -46,10 +43,10 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   });
 
   try {
-    await CLIENT.send(updateCommand);
+    await client.send(updateCommand);
   } catch (err) {
     console.log(err);
-    return { statusCode: 500, body: "Database error" };
+    return { statusCode: 500, body: JSON.stringify(DatabaseError) };
   }
   return { statusCode: 201, body: JSON.stringify(pf) };
 };
