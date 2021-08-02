@@ -42,7 +42,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     if (!data.Attributes) {
       return { statusCode: 404, body: JSON.stringify(DoesNotExist) };
     }
-    return { statusCode: 200, body: JSON.stringify(data) };
+    return { statusCode: 200, body: "Successfully deleted portfolioDraft" };
   } catch (err) {
     console.log("Database Error: " + err);
     return { statusCode: 500, body: JSON.stringify(DatabaseError) };
