@@ -1,10 +1,15 @@
-import { DeleteCommand } from "@aws-sdk/lib-dynamodb";
+import { DeleteCommand, DeleteCommandInput } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { parse } from "uuid";
 import { dynamodbClient as client } from "../utils/dynamodb";
 
 const TABLE_NAME = process.env.ATAT_TABLE_NAME;
-// const PRIMARY_KEY = process.env.PRIMARY_KEY || "";
+const InvalidBody = { code: "INVALID_INPUT", message: "HTTP request body must be empty" };
+const MissingPortfolioDraftId = {
+  code: "INVALID_INPUT",
+  message: "PortfolioDraftId must be specified in the URL path",
+};
+const DoesNotExist = { code: "INVALID_INPUT", message: "Portfiolio Draft with the given ID does not exist" };
+const DatabaseError = { code: "OTHER", message: "Internal database error" };
 
 /**
  * Deletes a Portfolio Draft
@@ -13,34 +18,33 @@ const TABLE_NAME = process.env.ATAT_TABLE_NAME;
  */
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   const portfolioDraftId = event.pathParameters?.portfolioDraftId;
-  if (portfolioDraftId == null) {
-    return { statusCode: 400, body: "Bad Request. A Portfolio Draft ID must be specified in URL path." };
+
+  if (!portfolioDraftId) {
+    return { statusCode: 400, body: JSON.stringify(MissingPortfolioDraftId) };
   }
 
-  if (!parse(portfolioDraftId)) {
-    return { statusCode: 400, body: "Bad Request. Portfolio Draft ID must be a UUID compliant with RFC 4122." };
+  if (event.body) {
+    return { statusCode: 400, body: JSON.stringify(InvalidBody) };
   }
 
-  if (event.body && !JSON.parse(event.body)) {
-    return { statusCode: 400, body: "Bad Request. The Request body must be empty." };
-  }
-
-  const params = {
+  const params: DeleteCommandInput = {
     TableName: TABLE_NAME,
     Key: {
       id: portfolioDraftId,
     },
+    ReturnValues: "ALL_OLD",
   };
 
   const command = new DeleteCommand(params);
 
-  // TODO: Implement statusCode 404: Portfiolio Draft with the given ID does not exist
   try {
     const data = await client.send(command);
-    console.log("success. deleted item: " + JSON.stringify(data));
+    if (!data.Attributes) {
+      return { statusCode: 404, body: JSON.stringify(DoesNotExist) };
+    }
     return { statusCode: 200, body: JSON.stringify(data) };
   } catch (err) {
-    console.log("database error: " + err);
-    return { statusCode: 500, body: "database error" };
+    console.log("Database Error: " + err);
+    return { statusCode: 500, body: JSON.stringify(DatabaseError) };
   }
 };
