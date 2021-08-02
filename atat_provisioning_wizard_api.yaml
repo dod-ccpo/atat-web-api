@@ -435,8 +435,10 @@ components:
           properties:
             size:
               type: number
+              description: file size in bytes
             name:
               type: string
+              description: name of file when originally uploaded
     PortfolioStep:
       type: object
       required:
