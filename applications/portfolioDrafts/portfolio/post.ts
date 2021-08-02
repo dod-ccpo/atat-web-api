@@ -27,7 +27,6 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     portfolio_managers: requestBody.portfolio_managers,
   };
 
-  console.log(pf);
   const command = new UpdateCommand({
     TableName: TABLE_NAME,
     Key: {
