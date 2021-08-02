@@ -101,10 +101,6 @@ export class AtatWebApiStack extends cdk.Stack {
       ...sharedFunctionProps,
     });
     portfolio.addMethod("POST", new apigw.LambdaIntegration(createPortfolioStepFn));
-
-    // Allow the POST function to read and write (since that will be necessary to add the
-    // new quotes)
-
     table.grantReadWriteData(createPortfolioStepFn);
 
     // -- operationIds from API spec ---
