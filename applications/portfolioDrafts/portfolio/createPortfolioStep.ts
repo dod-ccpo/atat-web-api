@@ -1,7 +1,9 @@
 import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { PortfolioStep } from ".././models/PortfolioStep";
-import { dynamodbClient as client } from ".././utils/dynamodb";
+import { PortfolioStep } from "../models/PortfolioStep";
+import { dynamodbClient as client } from "../utils/dynamodb";
+import { PortfolioStepResponse, ErrorResponse, ErrorStatusCode, SuccessStatusCode } from "../utils/response";
+import { ErrorCodes } from "../models/Error";
 
 const TABLE_NAME = process.env.ATAT_TABLE_NAME;
 const InvalidBody = { code: "INVALID_INPUT", message: "HTTP request body must not be empty" };
@@ -14,13 +16,16 @@ const DatabaseError = { code: "OTHER", message: "Internal database error" };
  */
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   if (!event.body) {
-    return { statusCode: 400, body: JSON.stringify(InvalidBody) };
+    return new ErrorResponse(
+      { code: ErrorCodes.INVALID_INPUT, message: "Request body must not be empty" },
+      ErrorStatusCode.BAD_REQUEST
+    );
   }
 
   const portfolioId = event.pathParameters?.portfolioDraftId;
 
   const requestBody = JSON.parse(event.body);
-  const pf: PortfolioStep = {
+  const portfolioStep: PortfolioStep = {
     name: requestBody.name,
     description: requestBody.description,
     dod_components: requestBody.dod_components,
@@ -34,18 +39,23 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     },
     UpdateExpression: "set #portfolioVariable = :x",
     ExpressionAttributeNames: {
-      "#portfolioVariable": "portfolioStep",
+      "#portfolioVariable": "portfolio_step",
     },
     ExpressionAttributeValues: {
-      ":x": pf,
+      ":x": portfolioStep,
     },
   });
 
   try {
     await client.send(command);
   } catch (err) {
-    console.log(err);
-    return { statusCode: 500, body: JSON.stringify(DatabaseError) };
+    console.log("Database error: " + err);
+    // return { statusCode: 500, body: JSON.stringify(DatabaseError) };
+    return new ErrorResponse(
+      { code: ErrorCodes.OTHER, message: "Database error" },
+      ErrorStatusCode.INTERNAL_SERVER_ERROR
+    );
   }
-  return { statusCode: 201, body: JSON.stringify(pf) };
+  // return { statusCode: 201, body: JSON.stringify(pf) };
+  return new PortfolioStepResponse(portfolioStep, SuccessStatusCode.CREATED);
 };

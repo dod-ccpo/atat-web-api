@@ -87,16 +87,6 @@ export class AtatWebApiStack extends cdk.Stack {
     // Prevent the GET function from being able to write to DynamoDB (it doesn't need to)
     table.grantReadData(getPortfolioDraftsFn);
 
-<<<<<<< HEAD
-=======
-    // operationId: createPortfolioStep
-    const createPortfolioStepFn = new lambdaNodejs.NodejsFunction(this, "CreatePortfolioSteptFunction", {
-      entry: "applications/portfolioDrafts/portfolio/post.ts",
-      ...sharedFunctionProps,
-    });
-    portfolio.addMethod("POST", new apigw.LambdaIntegration(createPortfolioStepFn));
-    table.grantReadWriteData(createPortfolioStepFn);
->>>>>>> Add comment to match existing format in atat-web-api-stack.ts, response to PR review
     // operationId: createPortfolioDraft
     const createPortfolioDraftFn = new lambdaNodejs.NodejsFunction(this, "createPortfolioDraft", {
       entry: "applications/portfolioDrafts/createPortfolioDraft.ts",
@@ -106,8 +96,8 @@ export class AtatWebApiStack extends cdk.Stack {
     table.grantReadWriteData(createPortfolioDraftFn);
 
     // createPortfolioStep
-    const createPortfolioStepFn = new lambdaNodejs.NodejsFunction(this, "CreatePortfolioSteptFunction", {
-      entry: "applications/portfolioDrafts/portfolio/post.ts",
+    const createPortfolioStepFn = new lambdaNodejs.NodejsFunction(this, "CreatePortfolioStepFunction", {
+      entry: "applications/portfolioDrafts/portfolio/createPortfolioStep.ts",
       ...sharedFunctionProps,
     });
     portfolio.addMethod("POST", new apigw.LambdaIntegration(createPortfolioStepFn));
