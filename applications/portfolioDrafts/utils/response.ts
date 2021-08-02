@@ -87,7 +87,7 @@ abstract class SuccessResponse extends Response {
     headers?: Headers,
     multiValueHeaders?: MultiValueHeaders
   ) {
-    super(JSON.stringify(response), statusCode, headers, multiValueHeaders, false);
+    super(response, statusCode, headers, multiValueHeaders, false);
   }
 }
 
