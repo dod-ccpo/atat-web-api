@@ -28,7 +28,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   };
 
   console.log(pf);
-  const updateCommand = new UpdateCommand({
+  const command = new UpdateCommand({
     TableName: TABLE_NAME,
     Key: {
       id: portfolioId,
@@ -43,7 +43,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   });
 
   try {
-    await client.send(updateCommand);
+    await client.send(command);
   } catch (err) {
     console.log(err);
     return { statusCode: 500, body: JSON.stringify(DatabaseError) };
