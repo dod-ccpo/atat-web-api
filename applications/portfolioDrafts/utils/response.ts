@@ -45,12 +45,30 @@ abstract class Response implements APIGatewayProxyResult {
   }
 }
 
-export class SuccessResponse extends Response {
+abstract class SuccessResponse extends Response {
+  constructor(
+    response: string,
+    statusCode: SuccessStatusCode = SuccessStatusCode.OK,
+    headers?: Headers,
+    multiValueHeaders?: MultiValueHeaders,
+    isBase64Encoded?: boolean
+  ) {
+    super(JSON.stringify(response), statusCode, headers, multiValueHeaders, isBase64Encoded);
+  }
+}
+
+export class NoContentResponse extends SuccessResponse {
+  constructor(headers?: Headers, multiValueHeaders?: MultiValueHeaders, isBase64Encoded?: boolean) {
+    super("", SuccessStatusCode.NO_CONTENT, headers, multiValueHeaders, isBase64Encoded);
+  }
+}
+
+export class DocumentResponse extends SuccessResponse {
   constructor(
     response: BaseDocument,
     statusCode: SuccessStatusCode = SuccessStatusCode.OK,
-    headers: Headers = undefined,
-    multiValueHeaders: MultiValueHeaders = undefined,
+    headers?: Headers,
+    multiValueHeaders?: MultiValueHeaders,
     isBase64Encoded?: boolean
   ) {
     super(JSON.stringify(response), statusCode, headers, multiValueHeaders, isBase64Encoded);
@@ -61,8 +79,8 @@ export class ErrorResponse extends Response {
   constructor(
     error: Error,
     statusCode: ErrorStatusCode,
-    headers: Headers = undefined,
-    multiValueHeaders: MultiValueHeaders = undefined,
+    headers?: Headers,
+    multiValueHeaders?: MultiValueHeaders,
     isBase64Encoded?: boolean
   ) {
     super(JSON.stringify(error), statusCode, headers, multiValueHeaders, isBase64Encoded);

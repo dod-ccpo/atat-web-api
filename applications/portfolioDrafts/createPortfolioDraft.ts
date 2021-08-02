@@ -5,7 +5,7 @@ import { ErrorCodes } from "./models/Error";
 import { PortfolioSummary } from "./models/PortfolioSummary";
 import { ProvisioningStatus } from "./models/ProvisioningStatus";
 import { dynamodbClient as client } from "./utils/dynamodb";
-import { ErrorResponse, ErrorStatusCode, SuccessResponse, SuccessStatusCode } from "./utils/response";
+import { DocumentResponse, ErrorResponse, ErrorStatusCode, SuccessStatusCode } from "./utils/response";
 
 const TABLE_NAME = process.env.ATAT_TABLE_NAME;
 // const PRIMARY_KEY = process.env.PRIMARY_KEY || "";
@@ -41,7 +41,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   try {
     const data = await client.send(command);
     console.log("success. created item: " + JSON.stringify(data));
-    return new SuccessResponse(document, SuccessStatusCode.CREATED);
+    return new DocumentResponse(document, SuccessStatusCode.CREATED);
   } catch (err) {
     console.log("database error: " + err);
     return new ErrorResponse(
