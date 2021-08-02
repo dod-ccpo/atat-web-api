@@ -557,9 +557,9 @@ components:
         - $ref: '#/components/schemas/PortfolioDraftSummary'
       type: object
       properties:
-        portfolio:
+        portfolio_step:
           $ref: '#/components/schemas/PortfolioStep'
-        funding:
+        funding_step:
           $ref: '#/components/schemas/FundingStep'
-        application:
+        application_step:
           $ref: '#/components/schemas/ApplicationStep'
