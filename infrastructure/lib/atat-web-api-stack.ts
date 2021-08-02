@@ -87,7 +87,7 @@ export class AtatWebApiStack extends cdk.Stack {
     // Prevent the GET function from being able to write to DynamoDB (it doesn't need to)
     table.grantReadData(getPortfolioDraftsFn);
 
-    // operationId: createPortfolioDraft
+    // createPortfolioDraft
     const createPortfolioDraftFn = new lambdaNodejs.NodejsFunction(this, "createPortfolioDraft", {
       entry: "applications/portfolioDrafts/createPortfolioDraft.ts",
       ...sharedFunctionProps,
