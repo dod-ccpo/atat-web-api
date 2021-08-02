@@ -5,21 +5,21 @@ import { Error } from "../models/Error";
 type Headers = { [header: string]: string | number | boolean } | undefined;
 type MultiValueHeaders = { [header: string]: (string | number | boolean)[] } | undefined;
 
-export class SuccessResponse implements APIGatewayProxyResult {
+abstract class Response implements APIGatewayProxyResult {
   statusCode: number;
+  body: string;
   headers?: Headers;
   multiValueHeaders?: MultiValueHeaders;
-  body: string;
-  isBase64Encoded: boolean;
+  isBase64Encoded?: boolean | undefined;
 
   constructor(
-    response: BaseDocument,
-    statusCode = 200,
-    headers: Headers = {},
-    multiValueHeaders: MultiValueHeaders = {},
-    isBase64Encoded = false
+    body: string,
+    statusCode: number,
+    headers?: Headers,
+    multiValueHeaders?: MultiValueHeaders,
+    isBase64Encoded?: boolean
   ) {
-    this.body = JSON.stringify(response);
+    this.body = body;
     this.statusCode = statusCode;
     this.headers = headers;
     this.multiValueHeaders = multiValueHeaders;
@@ -27,24 +27,26 @@ export class SuccessResponse implements APIGatewayProxyResult {
   }
 }
 
-export class ErrorResponse implements APIGatewayProxyResult {
-  statusCode: number;
-  headers?: Headers;
-  multiValueHeaders?: MultiValueHeaders;
-  body: string;
-  isBase64Encoded: boolean;
-
+export class SuccessResponse extends Response {
   constructor(
-    response: Error,
-    statusCode: number,
-    headers: Headers = {},
-    multiValueHeaders: MultiValueHeaders = {},
-    isBase64Encoded = false
+    response: BaseDocument,
+    statusCode = 200,
+    headers: Headers = undefined,
+    multiValueHeaders: MultiValueHeaders = undefined,
+    isBase64Encoded?: boolean
   ) {
-    this.body = JSON.stringify(response);
-    this.statusCode = statusCode;
-    this.headers = headers;
-    this.multiValueHeaders = multiValueHeaders;
-    this.isBase64Encoded = isBase64Encoded;
+    super(JSON.stringify(response), statusCode, headers, multiValueHeaders, isBase64Encoded);
+  }
+}
+
+export class ErrorResponse extends Response {
+  constructor(
+    error: Error,
+    statusCode: number,
+    headers: Headers = undefined,
+    multiValueHeaders: MultiValueHeaders = undefined,
+    isBase64Encoded?: boolean
+  ) {
+    super(JSON.stringify(error), statusCode, headers, multiValueHeaders, isBase64Encoded);
   }
 }
