@@ -1,6 +1,4 @@
 import { APIGatewayProxyResult } from "aws-lambda";
-import { BaseDocument } from "../models/BaseDocument";
-import { PortfolioStep } from "../models/PortfolioStep";
 import { Error } from "../models/Error";
 
 type Headers = { [header: string]: string | number | boolean } | undefined;
@@ -104,7 +102,7 @@ export class NoContentResponse extends SuccessResponse {
 /**
  * An API response that includes a model defined in the API specification.
  */
-export class DocumentResponse extends SuccessResponse {
+export class ApiSuccessResponse<T> extends SuccessResponse {
   /**
    * Create a document response for an API request.
    *
@@ -114,26 +112,7 @@ export class DocumentResponse extends SuccessResponse {
    * @param multiValueHeaders - HTTP response headers, allowing multiple values for a header
    */
   constructor(
-    response: BaseDocument,
-    statusCode: SuccessStatusCode = SuccessStatusCode.OK,
-    headers?: Headers,
-    multiValueHeaders?: MultiValueHeaders
-  ) {
-    super(JSON.stringify(response), statusCode, headers, multiValueHeaders);
-  }
-}
-
-export class PortfolioStepResponse extends SuccessResponse {
-  /**
-   * Create a document response for an API request.
-   *
-   * @param response - The instance of the model to include in the response
-   * @param statusCode - The HTTP success status code for the response
-   * @param headers - HTTP response headers
-   * @param multiValueHeaders - HTTP response headers, allowing multiple values for a header
-   */
-  constructor(
-    response: PortfolioStep,
+    response: T,
     statusCode: SuccessStatusCode = SuccessStatusCode.OK,
     headers?: Headers,
     multiValueHeaders?: MultiValueHeaders
