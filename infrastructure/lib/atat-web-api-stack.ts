@@ -76,6 +76,8 @@ export class AtatWebApiStack extends cdk.Stack {
     // We definitely want to improve the ergonomics of this and doing so is a high priority; however, following
     // these examples and steps should be a good start to allow progress while that work is happening.
     const portfolioDrafts = restApi.root.addResource("portfolioDrafts");
+    const portfolioDraftId = portfolioDrafts.addResource("{portfolioDraftId}");
+    const portfolio = portfolioDraftId.addResource("portfolio");
 
     const getPortfolioDraftsFn = new lambdaNodejs.NodejsFunction(this, "PortfolioDraftsGetFunction", {
       entry: "applications/portfolioDrafts/index.ts",
@@ -94,13 +96,12 @@ export class AtatWebApiStack extends cdk.Stack {
     // new quotes)
     table.grantReadWriteData(postPortfolioDraftsFn);
 
-    const portfolioDrafts2 = portfolioDrafts.addResource("{portfolioDraftId}");
     // operationId: deletePortfolioDraft
     const deletePortfolioDraftFn = new lambdaNodejs.NodejsFunction(this, "DeletePortfolioDraftFunction", {
-      entry: "applications/portfolioDrafts/deletePortfolioDraft.ts",
+      entry: "applications/portfolioDrafts/portfolio/delete.ts",
       ...sharedFunctionProps,
     });
-    portfolioDrafts2.addMethod("DELETE", new apigw.LambdaIntegration(deletePortfolioDraftFn));
+    portfolio.addMethod("DELETE", new apigw.LambdaIntegration(deletePortfolioDraftFn));
     table.grantReadWriteData(deletePortfolioDraftFn);
   }
 }

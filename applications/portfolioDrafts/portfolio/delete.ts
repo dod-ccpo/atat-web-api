@@ -1,7 +1,7 @@
 import { DeleteCommand } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { parse } from "uuid";
-import { dynamodbClient as client } from "./utils/dynamodb";
+import { dynamodbClient as client } from "../utils/dynamodb";
 
 const TABLE_NAME = process.env.ATAT_TABLE_NAME;
 // const PRIMARY_KEY = process.env.PRIMARY_KEY || "";
