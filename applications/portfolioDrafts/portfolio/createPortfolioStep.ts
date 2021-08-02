@@ -6,8 +6,6 @@ import { PortfolioStepResponse, ErrorResponse, ErrorStatusCode, SuccessStatusCod
 import { ErrorCodes } from "../models/Error";
 
 const TABLE_NAME = process.env.ATAT_TABLE_NAME;
-const InvalidBody = { code: "INVALID_INPUT", message: "HTTP request body must not be empty" };
-const DatabaseError = { code: "OTHER", message: "Internal database error" };
 
 /**
  * Handles requests from the API Gateway.
@@ -50,12 +48,10 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     await client.send(command);
   } catch (err) {
     console.log("Database error: " + err);
-    // return { statusCode: 500, body: JSON.stringify(DatabaseError) };
     return new ErrorResponse(
       { code: ErrorCodes.OTHER, message: "Database error" },
       ErrorStatusCode.INTERNAL_SERVER_ERROR
     );
   }
-  // return { statusCode: 201, body: JSON.stringify(pf) };
   return new PortfolioStepResponse(portfolioStep, SuccessStatusCode.CREATED);
 };
