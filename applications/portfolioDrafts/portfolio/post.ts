@@ -4,7 +4,7 @@ import { PortfolioStep } from ".././models/PortfolioStep";
 import { dynamodbClient as client } from ".././utils/dynamodb";
 
 const TABLE_NAME = process.env.ATAT_TABLE_NAME;
-const InvalidBody = { code: "INVALID_INPUT", message: "A valid request body must be specified" };
+const InvalidBody = { code: "INVALID_INPUT", message: "HTTP request body must not be empty" };
 const DatabaseError = { code: "OTHER", message: "Internal database error" };
 
 /**
