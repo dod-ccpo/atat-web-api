@@ -8,7 +8,7 @@ const MissingPortfolioDraftId = {
   code: "INVALID_INPUT",
   message: "PortfolioDraftId must be specified in the URL path",
 };
-const DoesNotExist = { code: "INVALID_INPUT", message: "Portfiolio Draft with the given ID does not exist" };
+const DoesNotExist = { code: "INVALID_INPUT", message: "Portfolio Draft with the given ID does not exist" };
 const DatabaseError = { code: "OTHER", message: "Internal database error" };
 
 /**
