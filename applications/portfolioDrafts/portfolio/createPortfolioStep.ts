@@ -1,10 +1,10 @@
 import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { ErrorCodes } from "../models/Error";
-import { PortfolioStep, isPortfolioStep } from "../models/PortfolioStep";
+import { PortfolioStep } from "../models/PortfolioStep";
 import { dynamodbClient as client } from "../utils/dynamodb";
 import { ApiSuccessResponse, ErrorResponse, ErrorStatusCode, SuccessStatusCode } from "../utils/response";
-import { IsValidJson } from "../utils/validation";
+import { isValidJson, isPortfolioStep } from "../utils/validation";
 
 const TABLE_NAME = process.env.ATAT_TABLE_NAME;
 const NO_SUCH_PORTFOLIO = new ErrorResponse(
@@ -31,7 +31,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     return NO_SUCH_PORTFOLIO;
   }
 
-  if (!IsValidJson(event.body)) {
+  if (!isValidJson(event.body)) {
     return new ErrorResponse(
       { code: ErrorCodes.INVALID_INPUT, message: "Invalid request body: Invalid JSON" },
       ErrorStatusCode.BAD_REQUEST
