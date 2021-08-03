@@ -80,7 +80,7 @@ export class AtatWebApiStack extends cdk.Stack {
     const portfolio = portfolioDraftId.addResource("portfolio");
 
     // hello world
-    const getPortfolioDraftsFn = new lambdaNodejs.NodejsFunction(this, "PortfolioDraftsGetFunction", {
+    const getPortfolioDraftsFn = new lambdaNodejs.NodejsFunction(this, "HelloWorldFunction", {
       entry: "applications/portfolioDrafts/index.ts",
       ...sharedFunctionProps,
     });
@@ -90,7 +90,7 @@ export class AtatWebApiStack extends cdk.Stack {
     // OperationIds from API spec are used to identify functions below
 
     // createPortfolioDraft
-    const createPortfolioDraftFn = new lambdaNodejs.NodejsFunction(this, "createPortfolioDraft", {
+    const createPortfolioDraftFn = new lambdaNodejs.NodejsFunction(this, "CreatePortfolioDraftFunction", {
       entry: "applications/portfolioDrafts/createPortfolioDraft.ts",
       ...sharedFunctionProps,
     });
