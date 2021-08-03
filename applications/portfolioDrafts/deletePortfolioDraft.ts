@@ -21,13 +21,6 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     );
   }
 
-  if (event.body) {
-    return new ErrorResponse(
-      { code: ErrorCodes.INVALID_INPUT, message: "HTTP request body must be empty" },
-      ErrorStatusCode.BAD_REQUEST
-    );
-  }
-
   const params: DeleteCommandInput = {
     TableName: TABLE_NAME,
     Key: {
