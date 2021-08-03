@@ -66,10 +66,10 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     await client.send(command);
     return new ApiSuccessResponse<PortfolioStep>(portfolioStep, SuccessStatusCode.CREATED);
   } catch (error) {
-    console.log("Database error: " + error.name);
     if (error.name === "ConditionalCheckFailedException") {
       return NO_SUCH_PORTFOLIO;
     }
+    console.log("Database error: " + error.name);
     return new ErrorResponse(
       { code: ErrorCodes.OTHER, message: "Database error: " + error.name },
       ErrorStatusCode.INTERNAL_SERVER_ERROR
