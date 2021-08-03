@@ -29,10 +29,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   }
 
   const requestBody = JSON.parse(event.body);
-  // TODO - Implement body validation
-  /*
-    if (requestBody does not match PortfolioStep or doesn't parse correctly, throw error:
-  */
+
   if (!isPortfolioStep(requestBody)) {
     return new ErrorResponse(
       { code: ErrorCodes.INVALID_INPUT, message: "Erra erra this is an erra!" },
