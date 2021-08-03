@@ -98,7 +98,7 @@ export class AtatWebApiStack extends cdk.Stack {
       entry: "applications/portfolioDrafts/portfolio/delete.ts",
       ...sharedFunctionProps,
     });
-    portfolio.addMethod("DELETE", new apigw.LambdaIntegration(deletePortfolioDraftFn));
+    portfolioDraftId.addMethod("DELETE", new apigw.LambdaIntegration(deletePortfolioDraftFn));
     table.grantReadWriteData(deletePortfolioDraftFn);
 
     portfolioDrafts.addMethod("POST", new apigw.LambdaIntegration(createPortfolioDraftFn));
