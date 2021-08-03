@@ -105,11 +105,17 @@ export class AtatWebApiStack extends cdk.Stack {
     portfolioDraftId.addMethod("DELETE", new apigw.LambdaIntegration(deletePortfolioDraftFn));
     table.grantReadWriteData(deletePortfolioDraftFn);
 
+    // createPortfolioStep
+    const createPortfolioStepFn = new lambdaNodejs.NodejsFunction(this, "CreatePortfolioStepFunction", {
+      entry: "applications/portfolioDrafts/portfolio/createPortfolioStep.ts",
+      ...sharedFunctionProps,
+    });
+    portfolio.addMethod("POST", new apigw.LambdaIntegration(createPortfolioStepFn));
+    table.grantReadWriteData(createPortfolioStepFn);
 
     // TODO: getPortfolioDrafts
     // TODO: getPortfolioDraft
     // TODO: getPortfolioStep
-    // TODO: createPortfolioStep
     // TODO: getFundingStep
     // TODO: createFundingStep
     // TODO: getApplicationStep
@@ -117,5 +123,6 @@ export class AtatWebApiStack extends cdk.Stack {
     // TODO: submitPortfolioDraft
     // TODO: uploadTaskOrder
     // TODO: deleteTaskOrder
+
   }
 }

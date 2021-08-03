@@ -1,9 +1,11 @@
 import { PutCommand } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { v4 as uuid } from "uuid";
+import { ErrorCodes } from "./models/Error";
 import { PortfolioSummary } from "./models/PortfolioSummary";
 import { ProvisioningStatus } from "./models/ProvisioningStatus";
 import { dynamodbClient as client } from "./utils/dynamodb";
+import { ApiSuccessResponse, ErrorResponse, ErrorStatusCode, SuccessStatusCode } from "./utils/response";
 
 const TABLE_NAME = process.env.ATAT_TABLE_NAME;
 // const PRIMARY_KEY = process.env.PRIMARY_KEY || "";
@@ -15,7 +17,10 @@ const TABLE_NAME = process.env.ATAT_TABLE_NAME;
  */
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   if (event.body && !JSON.parse(event.body)) {
-    return { statusCode: 400, body: "Request body must be empty" };
+    return new ErrorResponse(
+      { code: ErrorCodes.INVALID_INPUT, message: "Request body must be empty" },
+      ErrorStatusCode.BAD_REQUEST
+    );
   }
 
   const now = new Date().toISOString();
@@ -36,9 +41,12 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   try {
     const data = await client.send(command);
     console.log("success. created item: " + JSON.stringify(data));
-    return { statusCode: 201, body: JSON.stringify(data) };
+    return new ApiSuccessResponse<PortfolioSummary>(document, SuccessStatusCode.CREATED);
   } catch (err) {
     console.log("database error: " + err);
-    return { statusCode: 500, body: "database error" };
+    return new ErrorResponse(
+      { code: ErrorCodes.OTHER, message: "Database error" },
+      ErrorStatusCode.INTERNAL_SERVER_ERROR
+    );
   }
 };
