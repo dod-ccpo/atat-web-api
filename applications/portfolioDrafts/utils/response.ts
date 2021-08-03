@@ -29,7 +29,7 @@ export enum ErrorStatusCode {
 }
 
 /**
- * A generic reponse to a request from API Gateway.
+ * A generic response to a request from API Gateway.
  *
  * Allows setting the 5 fields that a REST API Proxy request supports for
  * AWS API Gateway.
@@ -91,7 +91,7 @@ abstract class SuccessResponse extends Response {
 }
 
 /**
- * An API reponse representing a 204 No Content.
+ * An API response representing a 204 No Content.
  */
 export class NoContentResponse extends SuccessResponse {
   constructor(headers?: Headers, multiValueHeaders?: MultiValueHeaders) {
