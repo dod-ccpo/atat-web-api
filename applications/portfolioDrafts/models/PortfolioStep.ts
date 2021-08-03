@@ -12,8 +12,5 @@ export interface PortfolioStep {
  * @returns true if the object has all the attributes of a {@link PortfolioStep}
  */
 export function isPortfolioStep(object: any): object is PortfolioStep {
-  if ("name" in object && "description" in object && "dod_components" in object && "portfolio_managers" in object) {
-    return true;
-  }
-  return false;
+  return "name" in object && "description" in object && "dod_components" in object && "portfolio_managers" in object;
 }
