@@ -75,7 +75,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     if (error.name === "ConditionalCheckFailedException") {
       return new ErrorResponse(
         { code: ErrorCodes.INVALID_INPUT, message: "Portfolio Draft with the given ID does not exist" },
-        ErrorStatusCode.BAD_REQUEST
+        ErrorStatusCode.NOT_FOUND
       );
     }
     return new ErrorResponse(
