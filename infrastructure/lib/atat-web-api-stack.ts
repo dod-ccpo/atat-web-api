@@ -76,6 +76,8 @@ export class AtatWebApiStack extends cdk.Stack {
     // We definitely want to improve the ergonomics of this and doing so is a high priority; however, following
     // these examples and steps should be a good start to allow progress while that work is happening.
     const portfolioDrafts = restApi.root.addResource("portfolioDrafts");
+    const portfolioDraftId = portfolioDrafts.addResource("{portfolioDraftId}");
+    const portfolio = portfolioDraftId.addResource("portfolio");
 
     const getPortfolioDraftsFn = new lambdaNodejs.NodejsFunction(this, "PortfolioDraftsGetFunction", {
       entry: "applications/portfolioDrafts/index.ts",
@@ -85,7 +87,7 @@ export class AtatWebApiStack extends cdk.Stack {
     // Prevent the GET function from being able to write to DynamoDB (it doesn't need to)
     table.grantReadData(getPortfolioDraftsFn);
 
-    // operationId: createPortfolioDraft
+    // createPortfolioDraft
     const createPortfolioDraftFn = new lambdaNodejs.NodejsFunction(this, "createPortfolioDraft", {
       entry: "applications/portfolioDrafts/createPortfolioDraft.ts",
       ...sharedFunctionProps,
@@ -93,12 +95,19 @@ export class AtatWebApiStack extends cdk.Stack {
     portfolioDrafts.addMethod("POST", new apigw.LambdaIntegration(createPortfolioDraftFn));
     table.grantReadWriteData(createPortfolioDraftFn);
 
+    // createPortfolioStep
+    const createPortfolioStepFn = new lambdaNodejs.NodejsFunction(this, "CreatePortfolioStepFunction", {
+      entry: "applications/portfolioDrafts/portfolio/createPortfolioStep.ts",
+      ...sharedFunctionProps,
+    });
+    portfolio.addMethod("POST", new apigw.LambdaIntegration(createPortfolioStepFn));
+    table.grantReadWriteData(createPortfolioStepFn);
+
     // -- operationIds from API spec ---
     // operationId: getPortfolioDrafts
     // operationId: getPortfolioDraft
     // operationId: deletePortfolioDraft
     // operationId: getPortfolioStep
-    // operationId: createPortfolioStep
     // operationId: getFundingStep
     // operationId: createFundingStep
     // operationId: getApplicationStep
