@@ -93,7 +93,7 @@ export class AtatWebApiStack extends cdk.Stack {
       ...sharedFunctionProps,
     });
 
-    // operationId: deletePortfolioDraft
+    // deletePortfolioDraft
     const deletePortfolioDraftFn = new lambdaNodejs.NodejsFunction(this, "DeletePortfolioDraftFunction", {
       entry: "applications/portfolioDrafts/portfolio/delete.ts",
       ...sharedFunctionProps,
@@ -107,7 +107,6 @@ export class AtatWebApiStack extends cdk.Stack {
     // -- operationIds from API spec ---
     // operationId: getPortfolioDrafts
     // operationId: getPortfolioDraft
-    // operationId: deletePortfolioDraft
     // operationId: getPortfolioStep
     // operationId: createPortfolioStep
     // operationId: getFundingStep
