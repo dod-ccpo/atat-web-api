@@ -56,25 +56,22 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       ":y": now,
     },
     ConditionExpression: "attribute_exists(created_at)",
-    ReturnValues: "ALL_OLD",
+    ReturnValues: "ALL_NEW",
   });
 
   try {
-    const data = await client.send(command);
-
-    /*
-    if (!data.Attributes) {
+    await client.send(command);
+    return new ApiSuccessResponse<PortfolioStep>(portfolioStep, SuccessStatusCode.CREATED);
+  } catch (error) {
+    console.log("Database error: " + error.name);
+    if (error.name === "ConditionalCheckFailedException") {
       return new ErrorResponse(
         { code: ErrorCodes.INVALID_INPUT, message: "Portfolio Draft with the given ID does not exist" },
-        ErrorStatusCode.NOT_FOUND
+        ErrorStatusCode.BAD_REQUEST
       );
     }
-    */
-    return new ApiSuccessResponse<PortfolioStep>(portfolioStep, SuccessStatusCode.CREATED);
-  } catch (err) {
-    console.log("Database error: " + err);
     return new ErrorResponse(
-      { code: ErrorCodes.OTHER, message: "Database error" },
+      { code: ErrorCodes.OTHER, message: "Database error" + error.name },
       ErrorStatusCode.INTERNAL_SERVER_ERROR
     );
   }
