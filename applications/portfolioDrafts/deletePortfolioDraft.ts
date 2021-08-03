@@ -1,15 +1,10 @@
 import { DeleteCommand, DeleteCommandInput } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { dynamodbClient as client } from "./utils/dynamodb";
+import { ErrorCodes } from "./models/Error";
+import { ErrorResponse, ErrorStatusCode, NoContentResponse } from "./utils/response";
 
 const TABLE_NAME = process.env.ATAT_TABLE_NAME;
-const InvalidBody = { code: "INVALID_INPUT", message: "HTTP request body must be empty" };
-const MissingPortfolioDraftId = {
-  code: "INVALID_INPUT",
-  message: "PortfolioDraftId must be specified in the URL path",
-};
-const DoesNotExist = { code: "INVALID_INPUT", message: "Portfolio Draft with the given ID does not exist" };
-const DatabaseError = { code: "OTHER", message: "Internal database error" };
 
 /**
  * Deletes a Portfolio Draft
@@ -20,11 +15,17 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   const portfolioDraftId = event.pathParameters?.portfolioDraftId;
 
   if (!portfolioDraftId) {
-    return { statusCode: 400, body: JSON.stringify(MissingPortfolioDraftId) };
+    return new ErrorResponse(
+      { code: ErrorCodes.INVALID_INPUT, message: "PortfolioDraftId must be specified in the URL path" },
+      ErrorStatusCode.BAD_REQUEST
+    );
   }
 
   if (event.body) {
-    return { statusCode: 400, body: JSON.stringify(InvalidBody) };
+    return new ErrorResponse(
+      { code: ErrorCodes.INVALID_INPUT, message: "HTTP request body must be empty" },
+      ErrorStatusCode.BAD_REQUEST
+    );
   }
 
   const params: DeleteCommandInput = {
@@ -40,10 +41,16 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   try {
     const data = await client.send(command);
     if (!data.Attributes) {
-      return { statusCode: 404, body: JSON.stringify(DoesNotExist) };
+      return new ErrorResponse(
+        { code: ErrorCodes.INVALID_INPUT, message: "Portfolio Draft with the given ID does not exist" },
+        ErrorStatusCode.NOT_FOUND
+      );
     }
-    return { statusCode: 200, body: "Successfully deleted portfolioDraft" };
+    return new NoContentResponse({ message: "Successful operation" });
   } catch (err) {
-    return { statusCode: 500, body: JSON.stringify(DatabaseError) };
+    return new ErrorResponse(
+      { code: ErrorCodes.OTHER, message: "Database error" },
+      ErrorStatusCode.INTERNAL_SERVER_ERROR
+    );
   }
 };
