@@ -92,6 +92,8 @@ export class AtatWebApiStack extends cdk.Stack {
       entry: "applications/portfolioDrafts/createPortfolioDraft.ts",
       ...sharedFunctionProps,
     });
+    portfolioDrafts.addMethod("POST", new apigw.LambdaIntegration(createPortfolioDraftFn));
+    table.grantReadWriteData(createPortfolioDraftFn);
 
     // deletePortfolioDraft
     const deletePortfolioDraftFn = new lambdaNodejs.NodejsFunction(this, "DeletePortfolioDraftFunction", {
@@ -101,8 +103,6 @@ export class AtatWebApiStack extends cdk.Stack {
     portfolioDraftId.addMethod("DELETE", new apigw.LambdaIntegration(deletePortfolioDraftFn));
     table.grantReadWriteData(deletePortfolioDraftFn);
 
-    portfolioDrafts.addMethod("POST", new apigw.LambdaIntegration(createPortfolioDraftFn));
-    table.grantReadWriteData(createPortfolioDraftFn);
 
     // -- operationIds from API spec ---
     // operationId: getPortfolioDrafts
