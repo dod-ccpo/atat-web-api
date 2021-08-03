@@ -69,8 +69,8 @@ export class AtatWebApiStack extends cdk.Stack {
     //   - Each function gets defined using `lambdaNodejs.NodejsFunction` for now. You can probably
     //     reuse the `sharedFunctionProps`, especially for the early functions
     //   - Define new portfolioDrafts routes as `portfolioDrafts.addResource`
-    //   - You can define routes with variables/parameters in the path by using the typical brace notation
-    //     for example {portfolioDraft}
+    //   - You can define routes with variables/path parameters by using the typical brace notation
+    //     for example .addResource("{portfolioDraft}")
     //   - Make sure to call `table.grantReadData` or `table.grantReadWriteData` as appropriate (so for GETs
     //     try to only grant read)
     // We definitely want to improve the ergonomics of this and doing so is a high priority; however, following
@@ -79,21 +79,31 @@ export class AtatWebApiStack extends cdk.Stack {
     const portfolioDraftId = portfolioDrafts.addResource("{portfolioDraftId}");
     const portfolio = portfolioDraftId.addResource("portfolio");
 
-    const getPortfolioDraftsFn = new lambdaNodejs.NodejsFunction(this, "PortfolioDraftsGetFunction", {
+    // hello world
+    const helloWorldFn = new lambdaNodejs.NodejsFunction(this, "HelloWorldFunction", {
       entry: "applications/portfolioDrafts/index.ts",
       ...sharedFunctionProps,
     });
-    portfolioDrafts.addMethod("GET", new apigw.LambdaIntegration(getPortfolioDraftsFn));
-    // Prevent the GET function from being able to write to DynamoDB (it doesn't need to)
-    table.grantReadData(getPortfolioDraftsFn);
+    portfolioDrafts.addMethod("GET", new apigw.LambdaIntegration(helloWorldFn));
+    table.grantReadData(helloWorldFn);
+
+    // OperationIds from API spec are used to identify functions below
 
     // createPortfolioDraft
-    const createPortfolioDraftFn = new lambdaNodejs.NodejsFunction(this, "createPortfolioDraft", {
+    const createPortfolioDraftFn = new lambdaNodejs.NodejsFunction(this, "CreatePortfolioDraftFunction", {
       entry: "applications/portfolioDrafts/createPortfolioDraft.ts",
       ...sharedFunctionProps,
     });
     portfolioDrafts.addMethod("POST", new apigw.LambdaIntegration(createPortfolioDraftFn));
     table.grantReadWriteData(createPortfolioDraftFn);
+
+    // deletePortfolioDraft
+    const deletePortfolioDraftFn = new lambdaNodejs.NodejsFunction(this, "DeletePortfolioDraftFunction", {
+      entry: "applications/portfolioDrafts/deletePortfolioDraft.ts",
+      ...sharedFunctionProps,
+    });
+    portfolioDraftId.addMethod("DELETE", new apigw.LambdaIntegration(deletePortfolioDraftFn));
+    table.grantReadWriteData(deletePortfolioDraftFn);
 
     // createPortfolioStep
     const createPortfolioStepFn = new lambdaNodejs.NodejsFunction(this, "CreatePortfolioStepFunction", {
@@ -103,17 +113,15 @@ export class AtatWebApiStack extends cdk.Stack {
     portfolio.addMethod("POST", new apigw.LambdaIntegration(createPortfolioStepFn));
     table.grantReadWriteData(createPortfolioStepFn);
 
-    // -- operationIds from API spec ---
-    // operationId: getPortfolioDrafts
-    // operationId: getPortfolioDraft
-    // operationId: deletePortfolioDraft
-    // operationId: getPortfolioStep
-    // operationId: getFundingStep
-    // operationId: createFundingStep
-    // operationId: getApplicationStep
-    // operationId: createApplicationStep
-    // operationId: submitPortfolioDraft
-    // operationId: uploadTaskOrder
-    // operationId: deleteTaskOrder
+    // TODO: getPortfolioDrafts
+    // TODO: getPortfolioDraft
+    // TODO: getPortfolioStep
+    // TODO: getFundingStep
+    // TODO: createFundingStep
+    // TODO: getApplicationStep
+    // TODO: createApplicationStep
+    // TODO: submitPortfolioDraft
+    // TODO: uploadTaskOrder
+    // TODO: deleteTaskOrder
   }
 }
