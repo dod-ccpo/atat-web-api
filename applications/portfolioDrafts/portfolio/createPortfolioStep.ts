@@ -22,12 +22,14 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   }
 
   const portfolioDraftId = event.pathParameters?.portfolioDraftId;
+
   if (!portfolioDraftId) {
     return new ErrorResponse(
       { code: ErrorCodes.INVALID_INPUT, message: "PortfolioDraftId must be specified in the URL path" },
-      ErrorStatusCode.BAD_REQUEST
+      ErrorStatusCode.NOT_FOUND
     );
   }
+
   if (!IsValidJson(event.body)) {
     return new ErrorResponse(
       { code: ErrorCodes.INVALID_INPUT, message: "Invalid request body: Invalid JSON" },
