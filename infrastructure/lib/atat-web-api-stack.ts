@@ -69,8 +69,8 @@ export class AtatWebApiStack extends cdk.Stack {
     //   - Each function gets defined using `lambdaNodejs.NodejsFunction` for now. You can probably
     //     reuse the `sharedFunctionProps`, especially for the early functions
     //   - Define new portfolioDrafts routes as `portfolioDrafts.addResource`
-    //   - You can define routes with variables/parameters in the path by using the typical brace notation
-    //     for example {portfolioDraft}
+    //   - You can define routes with variables/path parameters by using the typical brace notation
+    //     for example .addResource("{portfolioDraft}")
     //   - Make sure to call `table.grantReadData` or `table.grantReadWriteData` as appropriate (so for GETs
     //     try to only grant read)
     // We definitely want to improve the ergonomics of this and doing so is a high priority; however, following
@@ -79,15 +79,17 @@ export class AtatWebApiStack extends cdk.Stack {
     const portfolioDraftId = portfolioDrafts.addResource("{portfolioDraftId}");
     const portfolio = portfolioDraftId.addResource("portfolio");
 
+    // hello world
     const getPortfolioDraftsFn = new lambdaNodejs.NodejsFunction(this, "PortfolioDraftsGetFunction", {
       entry: "applications/portfolioDrafts/index.ts",
       ...sharedFunctionProps,
     });
     portfolioDrafts.addMethod("GET", new apigw.LambdaIntegration(getPortfolioDraftsFn));
-    // Prevent the GET function from being able to write to DynamoDB (it doesn't need to)
     table.grantReadData(getPortfolioDraftsFn);
 
-    // operationId: createPortfolioDraft
+    // OperationIds from API spec are used to identify functions below
+
+    // createPortfolioDraft
     const createPortfolioDraftFn = new lambdaNodejs.NodejsFunction(this, "createPortfolioDraft", {
       entry: "applications/portfolioDrafts/createPortfolioDraft.ts",
       ...sharedFunctionProps,
@@ -104,17 +106,16 @@ export class AtatWebApiStack extends cdk.Stack {
     table.grantReadWriteData(deletePortfolioDraftFn);
 
 
-    // -- operationIds from API spec ---
-    // operationId: getPortfolioDrafts
-    // operationId: getPortfolioDraft
-    // operationId: getPortfolioStep
-    // operationId: createPortfolioStep
-    // operationId: getFundingStep
-    // operationId: createFundingStep
-    // operationId: getApplicationStep
-    // operationId: createApplicationStep
-    // operationId: submitPortfolioDraft
-    // operationId: uploadTaskOrder
-    // operationId: deleteTaskOrder
+    // TODO: getPortfolioDrafts
+    // TODO: getPortfolioDraft
+    // TODO: getPortfolioStep
+    // TODO: createPortfolioStep
+    // TODO: getFundingStep
+    // TODO: createFundingStep
+    // TODO: getApplicationStep
+    // TODO: createApplicationStep
+    // TODO: submitPortfolioDraft
+    // TODO: uploadTaskOrder
+    // TODO: deleteTaskOrder
   }
 }
