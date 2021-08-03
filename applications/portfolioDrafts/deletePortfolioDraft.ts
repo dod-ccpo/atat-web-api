@@ -46,7 +46,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         ErrorStatusCode.NOT_FOUND
       );
     }
-    return new NoContentResponse({ message: "Successful operation" });
+    return new NoContentResponse();
   } catch (err) {
     return new ErrorResponse(
       { code: ErrorCodes.OTHER, message: "Database error" },
