@@ -7,6 +7,10 @@ import { ApiSuccessResponse, ErrorResponse, ErrorStatusCode, SuccessStatusCode }
 import { IsValidJson } from "../utils/validation";
 
 const TABLE_NAME = process.env.ATAT_TABLE_NAME;
+const NO_SUCH_PORTFOLIO = new ErrorResponse(
+  { code: ErrorCodes.INVALID_INPUT, message: "Portfolio Draft with the given ID does not exist" },
+  ErrorStatusCode.NOT_FOUND
+);
 
 /**
  * Submits the Portfolio Step of the Portfolio Draft Wizard
@@ -24,10 +28,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   const portfolioDraftId = event.pathParameters?.portfolioDraftId;
 
   if (!portfolioDraftId) {
-    return new ErrorResponse(
-      { code: ErrorCodes.INVALID_INPUT, message: "PortfolioDraftId must be specified in the URL path" },
-      ErrorStatusCode.NOT_FOUND
-    );
+    return NO_SUCH_PORTFOLIO;
   }
 
   if (!IsValidJson(event.body)) {
@@ -45,12 +46,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     );
   }
   const now = new Date().toISOString();
-  const portfolioStep: PortfolioStep = {
-    name: requestBody.name,
-    description: requestBody.description,
-    dod_components: requestBody.dod_components,
-    portfolio_managers: requestBody.portfolio_managers,
-  };
+  const portfolioStep: PortfolioStep = requestBody;
 
   const command = new UpdateCommand({
     TableName: TABLE_NAME,
@@ -74,10 +70,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   } catch (error) {
     console.log("Database error: " + error.name);
     if (error.name === "ConditionalCheckFailedException") {
-      return new ErrorResponse(
-        { code: ErrorCodes.INVALID_INPUT, message: "Portfolio Draft with the given ID does not exist" },
-        ErrorStatusCode.NOT_FOUND
-      );
+      return NO_SUCH_PORTFOLIO;
     }
     return new ErrorResponse(
       { code: ErrorCodes.OTHER, message: "Database error: " + error.name },
