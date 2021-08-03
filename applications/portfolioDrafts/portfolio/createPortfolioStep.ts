@@ -64,7 +64,6 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
   try {
     await client.send(command);
-    return new ApiSuccessResponse<PortfolioStep>(portfolioStep, SuccessStatusCode.CREATED);
   } catch (error) {
     if (error.name === "ConditionalCheckFailedException") {
       return NO_SUCH_PORTFOLIO;
@@ -75,4 +74,5 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       ErrorStatusCode.INTERNAL_SERVER_ERROR
     );
   }
+  return new ApiSuccessResponse<PortfolioStep>(portfolioStep, SuccessStatusCode.CREATED);
 };
