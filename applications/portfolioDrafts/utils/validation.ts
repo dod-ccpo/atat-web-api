@@ -1,11 +1,12 @@
 import { PortfolioStep } from "../models/PortfolioStep";
+
 /**
- * Check whether a given string is valid JSON
+ * Check whether a given string is valid JSON.
  *
- * @param str - The String to check
- * @returns true if JSON.parse is successful, otherwise returns false
+ * @param str - The string to check
+ * @returns true if the string is valid JSON and false otherwise
  */
-export function isValidJson(str: string) {
+export function isValidJson(str: string): boolean {
   try {
     JSON.parse(str);
   } catch (e) {
