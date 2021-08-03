@@ -4,8 +4,17 @@ import { ErrorCodes } from "../models/Error";
 import { PortfolioStep } from "../models/PortfolioStep";
 import { dynamodbClient as client } from "../utils/dynamodb";
 import { ApiSuccessResponse, ErrorResponse, ErrorStatusCode, SuccessStatusCode } from "../utils/response";
+import { isPortfolioStep, isValidJson } from "../utils/validation";
 
 const TABLE_NAME = process.env.ATAT_TABLE_NAME;
+const NO_SUCH_PORTFOLIO = new ErrorResponse(
+  { code: ErrorCodes.INVALID_INPUT, message: "Portfolio Draft with the given ID does not exist" },
+  ErrorStatusCode.NOT_FOUND
+);
+const REQUEST_BODY_INVALID = new ErrorResponse(
+  { code: ErrorCodes.INVALID_INPUT, message: "A valid PortfolioStep object must be provided" },
+  ErrorStatusCode.BAD_REQUEST
+);
 
 /**
  * Submits the Portfolio Step of the Portfolio Draft Wizard
@@ -20,36 +29,48 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     );
   }
 
-  const portfolioId = event.pathParameters?.portfolioDraftId;
+  const portfolioDraftId = event.pathParameters?.portfolioDraftId;
 
+  if (!portfolioDraftId) {
+    return NO_SUCH_PORTFOLIO;
+  }
+
+  if (!isValidJson(event.body)) {
+    return REQUEST_BODY_INVALID;
+  }
   const requestBody = JSON.parse(event.body);
-  const portfolioStep: PortfolioStep = {
-    name: requestBody.name,
-    description: requestBody.description,
-    dod_components: requestBody.dod_components,
-    portfolio_managers: requestBody.portfolio_managers,
-  };
+
+  if (!isPortfolioStep(requestBody)) {
+    return REQUEST_BODY_INVALID;
+  }
+  const now = new Date().toISOString();
+  const portfolioStep: PortfolioStep = requestBody;
 
   const command = new UpdateCommand({
     TableName: TABLE_NAME,
     Key: {
-      id: portfolioId,
+      id: portfolioDraftId,
     },
-    UpdateExpression: "set #portfolioVariable = :x",
+    UpdateExpression: "set #portfolioVariable = :portfolio, updated_at = :now",
     ExpressionAttributeNames: {
       "#portfolioVariable": "portfolio_step",
     },
     ExpressionAttributeValues: {
-      ":x": portfolioStep,
+      ":portfolio": portfolioStep,
+      ":now": now,
     },
+    ConditionExpression: "attribute_exists(created_at)",
   });
 
   try {
     await client.send(command);
-  } catch (err) {
-    console.log("Database error: " + err);
+  } catch (error) {
+    if (error.name === "ConditionalCheckFailedException") {
+      return NO_SUCH_PORTFOLIO;
+    }
+    console.log("Database error: " + error.name);
     return new ErrorResponse(
-      { code: ErrorCodes.OTHER, message: "Database error" },
+      { code: ErrorCodes.OTHER, message: "Database error: " + error.name },
       ErrorStatusCode.INTERNAL_SERVER_ERROR
     );
   }
