@@ -4,6 +4,7 @@ import { ErrorCodes } from "../models/Error";
 import { PortfolioStep, isPortfolioStep } from "../models/PortfolioStep";
 import { dynamodbClient as client } from "../utils/dynamodb";
 import { ApiSuccessResponse, ErrorResponse, ErrorStatusCode, SuccessStatusCode } from "../utils/response";
+import { IsValidJson } from "../utils/validation";
 
 const TABLE_NAME = process.env.ATAT_TABLE_NAME;
 
@@ -27,12 +28,17 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       ErrorStatusCode.BAD_REQUEST
     );
   }
-
+  if (!IsValidJson(event.body)) {
+    return new ErrorResponse(
+      { code: ErrorCodes.INVALID_INPUT, message: "Invalid request body: Invalid JSON" },
+      ErrorStatusCode.BAD_REQUEST
+    );
+  }
   const requestBody = JSON.parse(event.body);
 
   if (!isPortfolioStep(requestBody)) {
     return new ErrorResponse(
-      { code: ErrorCodes.INVALID_INPUT, message: "Erra erra this is an erra!" },
+      { code: ErrorCodes.INVALID_INPUT, message: "Invalid request body: Missing request attributes" },
       ErrorStatusCode.BAD_REQUEST
     );
   }
