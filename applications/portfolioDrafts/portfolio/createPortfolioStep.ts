@@ -4,12 +4,16 @@ import { ErrorCodes } from "../models/Error";
 import { PortfolioStep } from "../models/PortfolioStep";
 import { dynamodbClient as client } from "../utils/dynamodb";
 import { ApiSuccessResponse, ErrorResponse, ErrorStatusCode, SuccessStatusCode } from "../utils/response";
-import { isValidJson, isPortfolioStep } from "../utils/validation";
+import { isPortfolioStep, isValidJson } from "../utils/validation";
 
 const TABLE_NAME = process.env.ATAT_TABLE_NAME;
 const NO_SUCH_PORTFOLIO = new ErrorResponse(
   { code: ErrorCodes.INVALID_INPUT, message: "Portfolio Draft with the given ID does not exist" },
   ErrorStatusCode.NOT_FOUND
+);
+const REQUEST_BODY_INVALID = new ErrorResponse(
+  { code: ErrorCodes.INVALID_INPUT, message: "A valid PortfolioStep object must be provided" },
+  ErrorStatusCode.BAD_REQUEST
 );
 
 /**
@@ -32,18 +36,12 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   }
 
   if (!isValidJson(event.body)) {
-    return new ErrorResponse(
-      { code: ErrorCodes.INVALID_INPUT, message: "Invalid request body: Invalid JSON" },
-      ErrorStatusCode.BAD_REQUEST
-    );
+    return REQUEST_BODY_INVALID;
   }
   const requestBody = JSON.parse(event.body);
 
   if (!isPortfolioStep(requestBody)) {
-    return new ErrorResponse(
-      { code: ErrorCodes.INVALID_INPUT, message: "Invalid request body: Missing request attributes" },
-      ErrorStatusCode.BAD_REQUEST
-    );
+    return REQUEST_BODY_INVALID;
   }
   const now = new Date().toISOString();
   const portfolioStep: PortfolioStep = requestBody;
