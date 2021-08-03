@@ -80,12 +80,12 @@ export class AtatWebApiStack extends cdk.Stack {
     const portfolio = portfolioDraftId.addResource("portfolio");
 
     // hello world
-    const getPortfolioDraftsFn = new lambdaNodejs.NodejsFunction(this, "HelloWorldFunction", {
+    const helloWorldFn = new lambdaNodejs.NodejsFunction(this, "HelloWorldFunction", {
       entry: "applications/portfolioDrafts/index.ts",
       ...sharedFunctionProps,
     });
-    portfolioDrafts.addMethod("GET", new apigw.LambdaIntegration(getPortfolioDraftsFn));
-    table.grantReadData(getPortfolioDraftsFn);
+    portfolioDrafts.addMethod("GET", new apigw.LambdaIntegration(helloWorldFn));
+    table.grantReadData(helloWorldFn);
 
     // OperationIds from API spec are used to identify functions below
 
