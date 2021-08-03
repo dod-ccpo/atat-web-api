@@ -64,7 +64,6 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       ":now": now,
     },
     ConditionExpression: "attribute_exists(created_at)",
-    ReturnValues: "ALL_NEW",
   });
 
   try {
