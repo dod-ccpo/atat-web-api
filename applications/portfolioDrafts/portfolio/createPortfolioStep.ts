@@ -1,7 +1,7 @@
 import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { ErrorCodes } from "../models/Error";
-import { PortfolioStep } from "../models/PortfolioStep";
+import { PortfolioStep, isPortfolioStep } from "../models/PortfolioStep";
 import { dynamodbClient as client } from "../utils/dynamodb";
 import { ApiSuccessResponse, ErrorResponse, ErrorStatusCode, SuccessStatusCode } from "../utils/response";
 
@@ -33,7 +33,12 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   /*
     if (requestBody does not match PortfolioStep or doesn't parse correctly, throw error:
   */
-
+  if (!isPortfolioStep(requestBody)) {
+    return new ErrorResponse(
+      { code: ErrorCodes.INVALID_INPUT, message: "Erra erra this is an erra!" },
+      ErrorStatusCode.BAD_REQUEST
+    );
+  }
   const now = new Date().toISOString();
   const portfolioStep: PortfolioStep = {
     name: requestBody.name,
