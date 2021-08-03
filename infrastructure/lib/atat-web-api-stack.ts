@@ -95,7 +95,7 @@ export class AtatWebApiStack extends cdk.Stack {
 
     // deletePortfolioDraft
     const deletePortfolioDraftFn = new lambdaNodejs.NodejsFunction(this, "DeletePortfolioDraftFunction", {
-      entry: "applications/portfolioDrafts/portfolio/delete.ts",
+      entry: "applications/portfolioDrafts/deletePortfolioDraft.ts",
       ...sharedFunctionProps,
     });
     portfolioDraftId.addMethod("DELETE", new apigw.LambdaIntegration(deletePortfolioDraftFn));
