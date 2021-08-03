@@ -123,6 +123,5 @@ export class AtatWebApiStack extends cdk.Stack {
     // TODO: submitPortfolioDraft
     // TODO: uploadTaskOrder
     // TODO: deleteTaskOrder
-
   }
 }
