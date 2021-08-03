@@ -20,9 +20,21 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     );
   }
 
-  const portfolioId = event.pathParameters?.portfolioDraftId;
+  const portfolioDraftId = event.pathParameters?.portfolioDraftId;
+  if (!portfolioDraftId) {
+    return new ErrorResponse(
+      { code: ErrorCodes.INVALID_INPUT, message: "PortfolioDraftId must be specified in the URL path" },
+      ErrorStatusCode.BAD_REQUEST
+    );
+  }
 
   const requestBody = JSON.parse(event.body);
+  // TODO - Implement body validation
+  /*
+    if (requestBody does not match PortfolioStep or doesn't parse correctly, throw error:
+  */
+
+  const now = new Date().toISOString();
   const portfolioStep: PortfolioStep = {
     name: requestBody.name,
     description: requestBody.description,
@@ -33,19 +45,32 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   const command = new UpdateCommand({
     TableName: TABLE_NAME,
     Key: {
-      id: portfolioId,
+      id: portfolioDraftId,
     },
-    UpdateExpression: "set #portfolioVariable = :x",
+    UpdateExpression: "set #portfolioVariable = :x, updated_at = :y",
     ExpressionAttributeNames: {
       "#portfolioVariable": "portfolio_step",
     },
     ExpressionAttributeValues: {
       ":x": portfolioStep,
+      ":y": now,
     },
+    ConditionExpression: "attribute_exists(created_at)",
+    ReturnValues: "ALL_OLD",
   });
 
   try {
-    await client.send(command);
+    const data = await client.send(command);
+
+    /*
+    if (!data.Attributes) {
+      return new ErrorResponse(
+        { code: ErrorCodes.INVALID_INPUT, message: "Portfolio Draft with the given ID does not exist" },
+        ErrorStatusCode.NOT_FOUND
+      );
+    }
+    */
+    return new ApiSuccessResponse<PortfolioStep>(portfolioStep, SuccessStatusCode.CREATED);
   } catch (err) {
     console.log("Database error: " + err);
     return new ErrorResponse(
@@ -53,5 +78,4 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       ErrorStatusCode.INTERNAL_SERVER_ERROR
     );
   }
-  return new ApiSuccessResponse<PortfolioStep>(portfolioStep, SuccessStatusCode.CREATED);
 };
