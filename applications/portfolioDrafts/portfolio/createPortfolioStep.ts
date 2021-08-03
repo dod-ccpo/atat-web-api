@@ -55,13 +55,13 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     Key: {
       id: portfolioDraftId,
     },
-    UpdateExpression: "set #portfolioVariable = :x, updated_at = :y",
+    UpdateExpression: "set #portfolioVariable = :portfolio, updated_at = :now",
     ExpressionAttributeNames: {
       "#portfolioVariable": "portfolio_step",
     },
     ExpressionAttributeValues: {
-      ":x": portfolioStep,
-      ":y": now,
+      ":portfolio": portfolioStep,
+      ":now": now,
     },
     ConditionExpression: "attribute_exists(created_at)",
     ReturnValues: "ALL_NEW",
