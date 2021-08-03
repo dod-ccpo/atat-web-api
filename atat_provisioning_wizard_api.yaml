@@ -88,7 +88,7 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        '204':
           description: Successful operation
         '404':
           description: Portfiolio Draft with the given ID does not exist
@@ -352,7 +352,7 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        '204':
           description: Successful operation
         '404':
           description: Task Order with the given number does not exist
