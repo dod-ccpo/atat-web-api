@@ -122,7 +122,6 @@ export class AtatWebApiStack extends cdk.Stack {
     table.grantReadData(getPortfolioStepFn);
 
     // TODO: getPortfolioDrafts
-    // TODO: getPortfolioStep
     // TODO: getPortfolioDraft
     // TODO: getFundingStep
     // TODO: createFundingStep
