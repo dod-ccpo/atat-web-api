@@ -209,6 +209,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FundingStep'
+              examples:
+                  FundingStepEx:
+                    $ref: '#/components/examples/FundingStepEx'
         '400':
           description: Invalid input
           content:
@@ -636,16 +639,23 @@ components:
     FundingStepEx:
       value:
         - task_order_number: "12345678910"
-          task_order_file_id: "Mock File ID"
+          task_order_file:
+            description: "Mock description"
+            id: "1234"
+            created_at: "2021-08-03T16:21:07.978Z"
+            updated_at: "2021-08-03T16:21:07.978Z"
+            size: 100
+            name: "Mock task order file"
+            status: "pending"
           csp: 
             - "aws"
-          clin: 
-            clin_number:  "0001"
-            idiq_clin:  "1234"
-            total_clin_value:  200000
-            obligated_funds:  10000
-            pop_start_date: "2021-09-01"
-            pop_end_date: "2022-09-01"
+          clins: 
+            - clin_number:  "0001"
+              idiq_clin:  "1234"
+              total_clin_value:  200000
+              obligated_funds:  10000
+              pop_start_date: "2021-09-01"
+              pop_end_date: "2022-09-01"
     ApplicationStepEx:
       value:
         - name: "Mock Application"
