@@ -439,6 +439,13 @@ components:
             name:
               type: string
               description: name of file when originally uploaded
+            status:
+              type: string
+              description: virus scanning status of uploaded file
+              enum:
+                - "pending"
+                - "clean"
+                - "dirty"
     PortfolioStep:
       type: object
       required:
@@ -481,33 +488,36 @@ components:
         properties:
           task_order_number:
             type: string
-          task_order_file_id:
-            type: string
-            description: ID of the file associated with this task order (previously uploaded by POST /taskOrderFiles)
+          task_order_file:
+            allOf:
+              - $ref: '#/components/schemas/FileMetadata'
+            description: Metadata associated with file which was previously uploaded by POST /taskOrderFiles
           csp:
             type: string
             enum:
               - "aws"
               - "azure"
-          clin:
-            type: object
-            properties:
-              clin_number:
-                type: string
-              idiq_clin:
-                type: string
-              total_clin_value:
-                type: "integer"
-              obligated_funds:
-                type: "integer"
-              pop_start_date:
-                type: string
-                format: date
-                example: '2021-07-01'
-              pop_end_date:
-                type: string
-                format: date
-                example: '2022-07-01'
+          clins:
+            type: array
+            items:
+              type: object
+              properties:
+                clin_number:
+                  type: string
+                idiq_clin:
+                  type: string
+                total_clin_value:
+                  type: "integer"
+                obligated_funds:
+                  type: "integer"
+                pop_start_date:
+                  type: string
+                  format: date
+                  example: '2021-07-01'
+                pop_end_date:
+                  type: string
+                  format: date
+                  example: '2022-07-01'
     ApplicationStep:
       description: Represents the Application Step of the Portfolio Draft Wizard
       type: array
