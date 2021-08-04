@@ -74,7 +74,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PortfolioDraft'
         '404':
-          description: Portfiolio Draft with the given ID does not exist
+          description: Portfolio Draft with the given ID does not exist
     delete:
       tags:
         - portfolioDraft
@@ -91,7 +91,7 @@ paths:
         '204':
           description: Successful operation
         '404':
-          description: Portfiolio Draft with the given ID does not exist
+          description: Portfolio Draft with the given ID does not exist
   '/portfolioDrafts/{portfolioDraftId}/portfolio':
     get:
       tags:
@@ -198,7 +198,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ValidationError'
         '404':
-          description: Portfiolio Draft with the given ID does not exist
+          description: Portfolio Draft with the given ID does not exist
       requestBody:
         description: Input data from the Funding Step of the Portfolio Draft Wizard.
         required: true
@@ -287,7 +287,7 @@ paths:
         '403':
           description: User is not authorized to submit this Portfolio Draft
         '404':
-          description: Portfiolio Draft with the given ID does not exist
+          description: Portfolio Draft with the given ID does not exist
       requestBody:
         description: An empty String or JSON body
         content:
