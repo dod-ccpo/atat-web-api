@@ -630,8 +630,8 @@ components:
           csp: 
             - "aws"
           clin: 
-            clin_number:  ""
-            idiq_clin:  "?"
+            clin_number:  "0001"
+            idiq_clin:  "1234"
             total_clin_value:  200000
             obligated_funds:  10000
             pop_start_date: "2021-09-01"
@@ -641,15 +641,19 @@ components:
         - name: "Mock Application"
           description: "The description of the Mock Application"
           environments:
-            - name: "environment 1"
+            - name: "Cloud City"
               operators:
-                - first_name: "John"
-                  last_name: "Smith"
-                  email: "user@example.com"
+                - first_name: "Darth"
+                  last_name: "Vader"
+                  email: "iam@yourfather.com"
                   access: "administrator"
-                - first_name: "Leia"
+                - first_name: "Han"
+                  last_name: "Solo"
+                  email: "frozen@carbonite.com"
+                  access: "read_only"
+                - first_name: "Luke"
                   last_name: "Skywalker"
-                  email: "user@example.com"
+                  email: "lostmy@hand.com"
                   access: "read_only"
                 
             
