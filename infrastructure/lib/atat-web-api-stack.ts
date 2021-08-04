@@ -113,8 +113,15 @@ export class AtatWebApiStack extends cdk.Stack {
     portfolio.addMethod("POST", new apigw.LambdaIntegration(createPortfolioStepFn));
     table.grantReadWriteData(createPortfolioStepFn);
 
+    // getPortfolioDraft
+    const getPortfolioDraftFn = new lambdaNodejs.NodejsFunction(this, "GetPortfolioDraftFunction", {
+      entry: "applications/portfolioDrafts/portfolio/getPortfolioDraft.ts",
+      ...sharedFunctionProps,
+    });
+    portfolio.addMethod("GET", new apigw.LambdaIntegration(getPortfolioDraftFn));
+    table.grantReadData(getPortfolioDraftFn);
+
     // TODO: getPortfolioDrafts
-    // TODO: getPortfolioDraft
     // TODO: getPortfolioStep
     // TODO: getFundingStep
     // TODO: createFundingStep
