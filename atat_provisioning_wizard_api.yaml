@@ -441,11 +441,11 @@ components:
               description: name of file when originally uploaded
             status:
               type: string
-              description: virus scanning status of uploaded file
+              description: status of uploaded file scans and review
               enum:
                 - "pending"
-                - "clean"
-                - "dirty"
+                - "accepted"
+                - "rejected"
     PortfolioStep:
       type: object
       required:
