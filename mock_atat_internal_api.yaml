@@ -244,6 +244,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApplicationStep'
+              examples:
+                  ApplicationStepEx:
+                    $ref: '#/components/examples/ApplicationStepEx'
+              
         '404':
           description: Application Step not found for this Portfolio Draft
         '400':
@@ -267,6 +271,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApplicationStep'
+              examples:
+                  ApplicationStepEx:
+                    $ref: '#/components/examples/ApplicationStepEx'
         '400':
           description: Invalid input
           content:
@@ -629,6 +636,23 @@ components:
             obligated_funds:  10000
             pop_start_date: "2021-09-01"
             pop_end_date: "2022-09-01"
+    ApplicationStepEx:
+      value:
+        - name: "Mock Application"
+          description: "The description of the Mock Application"
+          environments:
+            - name: "environment 1"
+              operators:
+                - first_name: "John"
+                  last_name: "Smith"
+                  email: "user@example.com"
+                  access: "administrator"
+                - first_name: "Leia"
+                  last_name: "Skywalker"
+                  email: "user@example.com"
+                  access: "read_only"
+                
+            
 servers:
   # Added by API Auto Mocking Plugin
   - description: SwaggerHub API Auto Mocking
