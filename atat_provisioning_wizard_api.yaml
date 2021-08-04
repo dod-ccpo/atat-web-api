@@ -655,6 +655,21 @@ components:
                   last_name: "Skywalker"
                   email: "lostmy@hand.com"
                   access: "read_only"
+            - name: "Jabba's Palace"
+              operators:
+                - first_name: "Salacious B."
+                  last_name: "Crumb"
+                  email: "monkey@lizard.com"
+                  access: "administrator"
+                - first_name: "Han"
+                  last_name: "Solo"
+                  email: "frozen@carbonite.com"
+                  access: "read_only"
+                - first_name: "Boba"
+                  last_name: "Fett"
+                  email: "original@mandalorian.com"
+                  access: "read_only"
+        
                 
             
 servers:
