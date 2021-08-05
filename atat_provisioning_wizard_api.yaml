@@ -28,6 +28,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PortfolioDraftSummary'
+              examples:
+                PortfolioDraftSummaryEx:
+                  $ref: '#/components/examples/PortfolioDraftSummaryEx'
         '404':
           description: Portfolio Step not found for this Portfolio Draft or the given Portfolio Draft does not exist
     post:
@@ -42,6 +45,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PortfolioDraftSummary'
+              examples:
+                PortfolioDraftEx:
+                  $ref: '#/components/examples/PortfolioDraftEx'
       requestBody:
         description: An empty String or JSON body
         content:
@@ -73,6 +79,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PortfolioDraft'
+              examples:
+                PortfolioDraftEx:
+                  $ref: '#/components/examples/PortfolioDraftEx'
         '404':
           description: Portfolio Draft with the given ID does not exist
     delete:
@@ -112,6 +121,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PortfolioStep'
+              examples:
+                PortfolioStepEx:
+                  $ref: '#/components/examples/PortfolioStepEx'
         '400':
           description: The given Portfolio Draft does not exist
         '404':
@@ -135,6 +147,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PortfolioStep'
+              examples:
+                PortfolioStepEx:
+                  $ref: '#/components/examples/PortfolioStepEx'
         '400':
           description: Invalid input
           content:
@@ -168,6 +183,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FundingStep'
+              examples:
+                FundingStepEx:
+                  $ref: '#/components/examples/FundingStepEx'
         '400':
           description: The given Portfolio Draft does not exist
         '404':
@@ -191,6 +209,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FundingStep'
+              examples:
+                  FundingStepEx:
+                    $ref: '#/components/examples/FundingStepEx'
         '400':
           description: Invalid input
           content:
@@ -226,6 +247,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApplicationStep'
+              examples:
+                  ApplicationStepEx:
+                    $ref: '#/components/examples/ApplicationStepEx'
+              
         '404':
           description: Application Step not found for this Portfolio Draft
         '400':
@@ -249,6 +274,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApplicationStep'
+              examples:
+                  ApplicationStepEx:
+                    $ref: '#/components/examples/ApplicationStepEx'
         '400':
           description: Invalid input
           content:
@@ -376,6 +404,7 @@ components:
         maximum: 50
         default: 20
       description: The numbers of items to return.
+  
   schemas:
     BaseObject:
       type: object
@@ -573,3 +602,97 @@ components:
           $ref: '#/components/schemas/FundingStep'
         application_step:
           $ref: '#/components/schemas/ApplicationStep'
+  examples:
+    PortfolioDraftSummaryEx:
+      value:
+        - id: "dc2bbee6-8cdb-477e-a363-f9f1593a0a9b"
+          status: "not_started"
+          created_at: "2021-08-03T16:19:51.686Z"
+          updated_at: "2021-08-03T16:19:51.686Z"
+        - id: "c3e8c444-a971-4515-bc43-3cdfef072ccc"
+          status: "in_progress"
+          created_at: "2021-08-03T16:19:24.362Z"
+          updated_at: "2021-08-03T16:19:24.362Z"
+        - id: "3f44ef42-2322-4a42-a381-6770e18eceba"
+          status: "complete"
+          created_at: "2021-08-03T16:21:07.978Z"
+          updated_at: "2021-08-03T16:21:07.978Z"
+    PortfolioDraftEx:
+      value:
+        id: "dc2bbee6-8cdb-477e-a363-f9f1593a0a9b"
+        status: "not_started"
+        created_at: "2021-08-03T16:19:51.686Z"
+        updated_at: "2021-08-03T16:19:51.686Z"
+    PortfolioStepEx:
+      value:
+        name: "Mock Portfolio"
+        description: "Mock portfolio description"
+        dod_components: 
+          - "air_force"
+          - "army"
+          - "marine_corps"
+          - "navy"
+          - "space_force"
+        portfolio_managers:
+          - "joe.manager@example.com"
+          - "jane.manager@example.com"
+    FundingStepEx:
+      value:
+        - task_order_number: "12345678910"
+          task_order_file:
+            description: "Mock description"
+            id: "1234"
+            created_at: "2021-08-03T16:21:07.978Z"
+            updated_at: "2021-08-03T16:21:07.978Z"
+            size: 100
+            name: "Mock task order file"
+            status: "pending"
+          csp: 
+            - "aws"
+          clins: 
+            - clin_number:  "0001"
+              idiq_clin:  "1234"
+              total_clin_value:  200000
+              obligated_funds:  10000
+              pop_start_date: "2021-09-01"
+              pop_end_date: "2022-09-01"
+    ApplicationStepEx:
+      value:
+        - name: "Mock Application"
+          description: "The description of the Mock Application"
+          environments:
+            - name: "Cloud City"
+              operators:
+                - first_name: "Darth"
+                  last_name: "Vader"
+                  email: "iam@yourfather.com"
+                  access: "administrator"
+                - first_name: "Han"
+                  last_name: "Solo"
+                  email: "frozen@carbonite.com"
+                  access: "read_only"
+                - first_name: "Luke"
+                  last_name: "Skywalker"
+                  email: "lostmy@hand.com"
+                  access: "read_only"
+            - name: "Jabba's Palace"
+              operators:
+                - first_name: "Salacious B."
+                  last_name: "Crumb"
+                  email: "monkey@lizard.com"
+                  access: "administrator"
+                - first_name: "Han"
+                  last_name: "Solo"
+                  email: "frozen@carbonite.com"
+                  access: "read_only"
+                - first_name: "Boba"
+                  last_name: "Fett"
+                  email: "original@mandalorian.com"
+                  access: "read_only"
+        
+                
+            
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/CCPO-ATAT/mock-atat-internal-api/1.0.0
