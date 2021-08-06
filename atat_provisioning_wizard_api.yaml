@@ -16,23 +16,26 @@ paths:
     get:
       tags:
         - portfolioDraft
-      description: Gets all Portfolio Drafts the caller has read access to
+      description: Gets all Portfolio Drafts to which the caller has read access
       operationId: getPortfolioDrafts
       parameters:
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
-          description: Successful operation with empty response body
+          description: Should return up to {limitParam} items
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PortfolioDraftSummary'
-              examples:
-                PortfolioDraftSummaryEx:
-                  $ref: '#/components/examples/PortfolioDraftSummaryEx'
-        '404':
-          description: Portfolio Step not found for this Portfolio Draft or the given Portfolio Draft does not exist
+                type: array
+                items:
+                  $ref: '#/components/schemas/PortfolioDraftSummary'
+        '400':
+          description: Invalid request parameter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
     post:
       tags:
         - portfolioDraft
@@ -447,6 +450,8 @@ components:
         - $ref: '#/components/schemas/BaseObject'
         - type: object
           properties:
+            num_portfolio_managers:
+              type: number
             status:
               type: string
               description: CSP Provisioning Status
