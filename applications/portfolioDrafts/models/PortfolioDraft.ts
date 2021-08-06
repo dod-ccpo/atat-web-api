@@ -1,6 +1,6 @@
 import { PortfolioStep } from "./PortfolioStep";
-import { PortfolioSummary } from "./PortfolioSummary";
+import { PortfolioDraftSummary } from "./PortfolioDraftSummary";
 
-export interface PortfolioDraft extends PortfolioSummary {
+export interface PortfolioDraft extends PortfolioDraftSummary {
   portfolio: PortfolioStep;
 }
