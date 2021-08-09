@@ -405,7 +405,7 @@ paths:
                 type: string
                 format: binary
         '404':
-          description: Task Order with the given ID does not exist or has not completed virus scanning
+          description: Task Order with the given ID does not exist or is pending processing
 components:
   parameters:
     offsetParam:
@@ -485,7 +485,7 @@ components:
           type: string
         name:
           type: string
-          description: name of file when originally uploaded
+          description: name of file when uploaded
     FileMetadata:
       type: object
       description: Metadata describing an uploaded file
