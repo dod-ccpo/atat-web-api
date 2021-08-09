@@ -483,6 +483,7 @@ components:
       properties:
         id:
           type: string
+          description: Should be a UUID. Will be the S3 Object Key.
         name:
           type: string
           description: name of file when uploaded
