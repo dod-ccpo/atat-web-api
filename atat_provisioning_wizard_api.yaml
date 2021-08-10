@@ -382,8 +382,8 @@ paths:
         '204':
           description: Successful operation
         '404':
-          description: Task Order with the given number does not exist
-  '/taskOrderFiles/{taskOrderId}/download':
+          description: Task Order with the given ID does not exist
+  '/taskOrderFiles/{taskOrderId}/file':
     get:
       tags:
         - taskOrder
