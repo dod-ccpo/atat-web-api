@@ -1,7 +1,7 @@
 import { ScanCommand, ScanCommandInput } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyResult } from "aws-lambda";
 import { ErrorCodes } from "./models/Error";
-import { PortfolioFull } from "./models/PortfolioFull";
+import { PortfolioDraftSummary } from "./models/PortfolioDraftSummary";
 import { dynamodbDocumentClient as client } from "./utils/dynamodb";
 import { ApiSuccessResponse, ErrorResponse, ErrorStatusCode, SuccessStatusCode } from "./utils/response";
 
@@ -24,7 +24,7 @@ export const handler = async (): Promise<APIGatewayProxyResult> => {
 
   try {
     const data = await client.send(command);
-    return new ApiSuccessResponse<PortfolioFull[]>(data.Items as PortfolioFull[], SuccessStatusCode.OK);
+    return new ApiSuccessResponse<PortfolioDraftSummary[]>(data.Items as PortfolioDraftSummary[], SuccessStatusCode.OK);
   } catch (error) {
     console.log("Database error (" + error.name + "): " + error);
     return new ErrorResponse(
