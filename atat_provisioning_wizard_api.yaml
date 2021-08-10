@@ -348,7 +348,7 @@ paths:
     get:
       tags:
         - taskOrder
-      description: Gets a Task Order PDF
+      description: Gets File Metadata for a Task Order
       operationId: getTaskOrder
       parameters:
         - name: taskOrderId
@@ -361,10 +361,9 @@ paths:
         '200':
           description: Successful operation
           content:
-            application/pdf:
+            application/json:
               schema:
-                type: string
-                format: binary
+                $ref: '#/components/schemas/FileMetadata'
         '404':
           description: Task Order with the given ID does not exist
     delete:
@@ -383,7 +382,30 @@ paths:
         '204':
           description: Successful operation
         '404':
-          description: Task Order with the given number does not exist
+          description: Task Order with the given ID does not exist
+  '/taskOrderFiles/{taskOrderId}/file':
+    get:
+      tags:
+        - taskOrder
+      description: Gets a Task Order PDF
+      operationId: downloadTaskOrder
+      parameters:
+        - name: taskOrderId
+          in: path
+          description: Task Order ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Task Order with the given ID does not exist or is pending processing
 components:
   parameters:
     offsetParam:
@@ -455,19 +477,27 @@ components:
             error_map:
               type: object
               description: 'Maps form input IDs to validation error messages so that clients can display in-line errors'
+    FileMetadataSummary:
+      type: object
+      description: Metadata describing an uploaded file
+      properties:
+        id:
+          type: string
+          description: Should be a UUID. Will be the S3 Object Key.
+        name:
+          type: string
+          description: name of file when uploaded
     FileMetadata:
       type: object
       description: Metadata describing an uploaded file
       allOf:
         - $ref: '#/components/schemas/BaseObject'
+        - $ref: '#/components/schemas/FileMetadataSummary'
         - type: object
           properties:
             size:
               type: number
               description: file size in bytes
-            name:
-              type: string
-              description: name of file when originally uploaded
             status:
               type: string
               description: status of uploaded file scans and review
@@ -519,7 +549,7 @@ components:
             type: string
           task_order_file:
             allOf:
-              - $ref: '#/components/schemas/FileMetadata'
+              - $ref: '#/components/schemas/FileMetadataSummary'
             description: Metadata associated with file which was previously uploaded by POST /taskOrderFiles
           csp:
             type: string
