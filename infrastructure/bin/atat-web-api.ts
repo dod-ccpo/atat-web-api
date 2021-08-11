@@ -7,7 +7,9 @@ import { getTags } from "../lib/load-tags";
 const app = new cdk.App();
 const accountId = app.node.tryGetContext("account");
 const region = app.node.tryGetContext("region");
-const stack = new AtatWebApiStack(app, "AtatWebApiStack", {
+// Ugly hack to quickly isolate deployments for developers.  To be improved/removed later.
+const ticketId = app.node.tryGetContext("TicketId") || "";
+const stack = new AtatWebApiStack(app, ticketId + "AtatWebApiStack", {
   env: { account: accountId, region },
 });
 
