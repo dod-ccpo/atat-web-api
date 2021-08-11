@@ -17,7 +17,7 @@ jobs:
       - name: Check package-lock.json
         run: |
           errors=0
-          for file in package-lock.json infrastructure/package-lock.json applications/**/package-lock.json; do
+          for file in package-lock.json infrastructure/package-lock.json microservices/package-lock.json; do
             if [ "$(cat $file | jq -r .lockfileVersion)" != "1" ]; then
               echo "$file: lockfileVersion is invalid"
               errors=$(( errors + 1 ))
