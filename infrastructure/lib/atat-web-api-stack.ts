@@ -130,12 +130,10 @@ export class AtatWebApiStack extends cdk.Stack {
     // TODO: getApplicationStep
     // TODO: createApplicationStep
     // TODO: submitPortfolioDraft
-    // TODO: uploadTaskOrder
-    // TODO: deleteTaskOrder
 
     const taskOrderFiles = restApi.root.addResource("taskOrderFiles");
-    const taskOrderFileId = taskOrderFiles.addResource("{taskOrderFileId}");
-    const file = taskOrderFileId.addResource("file");
+    const taskOrderId = taskOrderFiles.addResource("{taskOrderId}");
+    const file = taskOrderId.addResource("file");
 
     // hello world two
     const helloWorldTwoFn = new lambdaNodejs.NodejsFunction(this, "HelloWorldTwoFunction", {
@@ -144,5 +142,9 @@ export class AtatWebApiStack extends cdk.Stack {
     });
     taskOrderFiles.addMethod("GET", new apigw.LambdaIntegration(helloWorldTwoFn));
     table.grantReadData(helloWorldTwoFn);
+
+    // TODO: getTaskOrder
+    // TODO: deleteTaskOrder
+    // TODO: downloadTaskOrder
   }
 }
