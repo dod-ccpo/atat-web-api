@@ -26,7 +26,7 @@ export class AtatWebApiStack extends cdk.Stack {
       },
     });
     // Ugly hack to quickly isolate deployments for developers.  To be improved/removed later.
-    const ticketId = this.node.tryGetContext("TicketId").toLowerCase() || "";
+    const ticketId = (this.node.tryGetContext("TicketId") || "").toLowerCase();
     const userPoolDomain = userPool.addDomain("api-app-domain", {
       cognitoDomain: {
         domainPrefix: ticketId + "atatapi",
