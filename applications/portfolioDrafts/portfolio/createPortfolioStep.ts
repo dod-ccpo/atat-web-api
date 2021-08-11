@@ -1,10 +1,11 @@
-import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
+// import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
+import { portfolioStepCommand } from "../utils/commands";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { ErrorCodes } from "../models/Error";
 import { PortfolioStep } from "../models/PortfolioStep";
 import { dynamodbClient as client } from "../utils/dynamodb";
 import { ApiSuccessResponse, ErrorResponse, ErrorStatusCode, SuccessStatusCode } from "../utils/response";
-import { isPortfolioStep, isValidJson } from "../utils/validation";
+import { isPortfolioStep, isValidJson, isBodyEmpty } from "../utils/validation";
 
 const TABLE_NAME = process.env.ATAT_TABLE_NAME;
 const NO_SUCH_PORTFOLIO = new ErrorResponse(
@@ -15,6 +16,10 @@ const REQUEST_BODY_INVALID = new ErrorResponse(
   { code: ErrorCodes.INVALID_INPUT, message: "A valid PortfolioStep object must be provided" },
   ErrorStatusCode.BAD_REQUEST
 );
+const EMPTY_REQUEST_BODY = new ErrorResponse(
+  { code: ErrorCodes.INVALID_INPUT, message: "Request body must not be empty" },
+  ErrorStatusCode.BAD_REQUEST
+);
 
 /**
  * Submits the Portfolio Step of the Portfolio Draft Wizard
@@ -22,11 +27,12 @@ const REQUEST_BODY_INVALID = new ErrorResponse(
  * @param event - The POST request from API Gateway
  */
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+  if (isBodyEmpty(event)) {
+    return EMPTY_REQUEST_BODY;
+  }
+
   if (!event.body) {
-    return new ErrorResponse(
-      { code: ErrorCodes.INVALID_INPUT, message: "Request body must not be empty" },
-      ErrorStatusCode.BAD_REQUEST
-    );
+    return EMPTY_REQUEST_BODY;
   }
 
   const portfolioDraftId = event.pathParameters?.portfolioDraftId;
@@ -43,6 +49,8 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   if (!isPortfolioStep(requestBody)) {
     return REQUEST_BODY_INVALID;
   }
+  const portfolioStep: PortfolioStep = requestBody;
+  /*
   const now = new Date().toISOString();
   const portfolioStep: PortfolioStep = requestBody;
 
@@ -61,6 +69,8 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     },
     ConditionExpression: "attribute_exists(created_at)",
   });
+  */
+  const command = portfolioStepCommand(TABLE_NAME, portfolioDraftId, portfolioStep);
 
   try {
     await client.send(command);
