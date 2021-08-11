@@ -66,7 +66,7 @@ export class AtatWebApiStack extends cdk.Stack {
 
     // NEW FUNCTIONS GET DEFINED HERE
     // Some notes:
-    //   - You can use `applications/portfolioDrafts/index.ts` to get a "Hello world" response when
+    //   - You can use `microservices/api/portfolioDrafts/index.ts` to get a "Hello world" response when
     //     initially testing to make sure the infrastructure works
     //   - Each function gets defined using `lambdaNodejs.NodejsFunction` for now. You can probably
     //     reuse the `sharedFunctionProps`, especially for the early functions
@@ -83,7 +83,7 @@ export class AtatWebApiStack extends cdk.Stack {
 
     // hello world
     const helloWorldFn = new lambdaNodejs.NodejsFunction(this, "HelloWorldFunction", {
-      entry: "applications/portfolioDrafts/index.ts",
+      entry: "microservices/api/portfolioDrafts/index.ts",
       ...sharedFunctionProps,
     });
     portfolioDrafts.addMethod("GET", new apigw.LambdaIntegration(helloWorldFn));
@@ -93,7 +93,7 @@ export class AtatWebApiStack extends cdk.Stack {
 
     // createPortfolioDraft
     const createPortfolioDraftFn = new lambdaNodejs.NodejsFunction(this, "CreatePortfolioDraftFunction", {
-      entry: "applications/portfolioDrafts/createPortfolioDraft.ts",
+      entry: "microservices/api/portfolioDrafts/createPortfolioDraft.ts",
       ...sharedFunctionProps,
     });
     portfolioDrafts.addMethod("POST", new apigw.LambdaIntegration(createPortfolioDraftFn));
@@ -101,7 +101,7 @@ export class AtatWebApiStack extends cdk.Stack {
 
     // deletePortfolioDraft
     const deletePortfolioDraftFn = new lambdaNodejs.NodejsFunction(this, "DeletePortfolioDraftFunction", {
-      entry: "applications/portfolioDrafts/deletePortfolioDraft.ts",
+      entry: "microservices/api/portfolioDrafts/deletePortfolioDraft.ts",
       ...sharedFunctionProps,
     });
     portfolioDraftId.addMethod("DELETE", new apigw.LambdaIntegration(deletePortfolioDraftFn));
@@ -109,7 +109,7 @@ export class AtatWebApiStack extends cdk.Stack {
 
     // createPortfolioStep
     const createPortfolioStepFn = new lambdaNodejs.NodejsFunction(this, "CreatePortfolioStepFunction", {
-      entry: "applications/portfolioDrafts/portfolio/createPortfolioStep.ts",
+      entry: "microservices/api/portfolioDrafts/portfolio/createPortfolioStep.ts",
       ...sharedFunctionProps,
     });
     portfolio.addMethod("POST", new apigw.LambdaIntegration(createPortfolioStepFn));
@@ -117,7 +117,7 @@ export class AtatWebApiStack extends cdk.Stack {
 
     // getPortfolioStep
     const getPortfolioStepFn = new lambdaNodejs.NodejsFunction(this, "GetPortfolioStepFunction", {
-      entry: "applications/portfolioDrafts/portfolio/getPortfolioStep.ts",
+      entry: "microservices/api/portfolioDrafts/portfolio/getPortfolioStep.ts",
       ...sharedFunctionProps,
     });
     portfolio.addMethod("GET", new apigw.LambdaIntegration(getPortfolioStepFn));
