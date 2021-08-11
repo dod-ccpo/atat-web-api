@@ -1,8 +1,8 @@
 import { DeleteCommand, DeleteCommandInput } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { dynamodbClient as client } from "./utils/dynamodb";
-import { ErrorCodes } from "./models/Error";
-import { ErrorResponse, ErrorStatusCode, NoContentResponse } from "./utils/response";
+import { dynamodbClient as client } from "../../utils/dynamodb";
+import { ErrorCodes } from "../../models/Error";
+import { ErrorResponse, ErrorStatusCode, NoContentResponse } from "../../utils/response";
 
 const TABLE_NAME = process.env.ATAT_TABLE_NAME;
 
