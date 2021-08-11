@@ -132,5 +132,17 @@ export class AtatWebApiStack extends cdk.Stack {
     // TODO: submitPortfolioDraft
     // TODO: uploadTaskOrder
     // TODO: deleteTaskOrder
+
+    const taskOrderFiles = restApi.root.addResource("taskOrderFiles");
+    const taskOrderFileId = taskOrderFiles.addResource("{taskOrderFileId}");
+    const file = taskOrderFileId.addResource("file");
+
+    // hello world two
+    const helloWorldTwoFn = new lambdaNodejs.NodejsFunction(this, "HelloWorldTwoFunction", {
+      entry: "applications/taskOrderFiles/index.ts",
+      ...sharedFunctionProps,
+    });
+    taskOrderFiles.addMethod("GET", new apigw.LambdaIntegration(helloWorldTwoFn));
+    table.grantReadData(helloWorldTwoFn);
   }
 }
