@@ -4,7 +4,7 @@
   "description": "ATAT Web API Portfolio Draft support",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint --ext .js,.ts,.json -c ../../.eslintrc.json .",
+    "lint": "eslint --ext .js,.ts,.json -c ../.eslintrc.json .",
     "lint:fix": "npm run lint -- --fix"
   },
   "dependencies": {
