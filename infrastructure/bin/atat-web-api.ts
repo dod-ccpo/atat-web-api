@@ -9,6 +9,11 @@ const accountId = app.node.tryGetContext("account");
 const region = app.node.tryGetContext("region");
 // Ugly hack to quickly isolate deployments for developers.  To be improved/removed later.
 const ticketId = app.node.tryGetContext("TicketId") || "";
+if (ticketId === "") {
+  console.warn("Hello Developer. You must provide a context variable named 'TicketId'.");
+  console.warn("  For example...");
+  console.warn('  $ cdk deploy -c "TicketId=AT1234"');
+}
 const stack = new AtatWebApiStack(app, ticketId + "AtatWebApiStack", {
   env: { account: accountId, region },
 });
