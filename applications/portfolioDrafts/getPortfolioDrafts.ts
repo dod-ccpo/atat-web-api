@@ -6,6 +6,22 @@ import { dynamodbDocumentClient as client } from "./utils/dynamodb";
 import { ApiSuccessResponse, ErrorResponse, ErrorStatusCode, SuccessStatusCode } from "./utils/response";
 
 const TABLE_NAME = process.env.ATAT_TABLE_NAME;
+const QUERY_PARAM_INVALID = new ErrorResponse(
+  { code: ErrorCodes.INVALID_INPUT, message: "Invalid request parameter" },
+  ErrorStatusCode.BAD_REQUEST
+);
+
+/**
+ * Convert string to integer, return defaultInt if undefined or NaN.
+ * @param str - The string value to convert
+ * @param defaultInt - The default integer value to return if str undefined or NaN
+ */
+function getIntegerOrDefault(str: string | undefined, defaultInt: number): number {
+  if (str === undefined) return defaultInt;
+  const int = parseInt(str);
+  if (isNaN(int)) return defaultInt;
+  return int;
+}
 
 /**
  * Gets all Portfolio Drafts, TODO: "...to which the user has read access"
@@ -15,12 +31,17 @@ const TABLE_NAME = process.env.ATAT_TABLE_NAME;
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   // Optional query param 'offset' must be integer with minimum value of 0.
   // Offset is the number of items to skip before starting to collect the result set.
-  const offset = event.queryStringParameters?.offset;
+  const offset: number = getIntegerOrDefault(event.queryStringParameters?.offset, 0);
+  if (offset < 0) {
+    return QUERY_PARAM_INVALID;
+  }
 
   // Optional query param 'limit' must be integer with minimum value of 1 and maximum value of 50. Defaults to 20.
   // Limit is the number of items to return.
-  const limit = event.queryStringParameters?.limit;
-  const defaultLimit = 20;
+  const limit: number = getIntegerOrDefault(event.queryStringParameters?.limit, 20);
+  if (limit < 1 || limit > 50) {
+    return QUERY_PARAM_INVALID;
+  }
 
   const params: ScanCommandInput = {
     TableName: TABLE_NAME,
