@@ -31,7 +31,7 @@ function getIntegerOrDefault(str: string | undefined, defaultInt: number): numbe
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   // Optional query param 'offset' must be integer with minimum value of 0.
   // Offset is the number of items to skip before starting to collect the result set.
-  const offset: number = getIntegerOrDefault(event.queryStringParameters?.offset, 0);
+  const offset = getIntegerOrDefault(event.queryStringParameters?.offset, 0);
   console.log("query param 'offset': " + offset);
   if (offset < 0) {
     console.log("INVALID query param 'offset'");
