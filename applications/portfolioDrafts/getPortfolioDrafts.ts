@@ -12,15 +12,15 @@ const QUERY_PARAM_INVALID = new ErrorResponse(
 );
 
 /**
- * Convert string to integer, return defaultInt if undefined or NaN.
- * @param str - The string value to convert
- * @param defaultInt - The default integer value to return if str undefined or NaN
+ * Evaluate query string parameter which is expected to be an integer.
+ * Return defaultInt if undefined or NaN.
+ * @param qparam - The query string parameter to evaluate
+ * @param defaultInt - The default value
  */
-function getIntegerOrDefault(str: string | undefined, defaultInt: number): number {
-  if (str === undefined) return defaultInt;
-  const int = parseInt(str);
-  if (isNaN(int)) return defaultInt;
-  return int;
+function evaluateQueryParameterInteger(qparam: string | undefined, defaultInt: number): number {
+  // assert numeric
+  if (qparam?.match(/$[0-9]+^/)) return parseInt(qparam);
+  return defaultInt;
 }
 
 /**
@@ -31,7 +31,7 @@ function getIntegerOrDefault(str: string | undefined, defaultInt: number): numbe
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   // Optional query param 'limit' must be integer with minimum value of 1 and maximum value of 50. Defaults to 20.
   // Limit is the number of items to return.
-  const limit = getIntegerOrDefault(event.queryStringParameters?.limit, 20);
+  const limit = evaluateQueryParameterInteger(event.queryStringParameters?.limit, 20);
   if (limit < 1 || limit > 50) {
     return QUERY_PARAM_INVALID;
   }
