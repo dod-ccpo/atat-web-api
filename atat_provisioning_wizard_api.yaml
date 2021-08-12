@@ -30,6 +30,9 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/PortfolioDraftSummary'
+              examples:
+                PortfolioDraftSummaryEx:
+                  $ref: '#/components/examples/PortfolioDraftSummaryEx'
         '400':
           description: Invalid request parameter
           content:
