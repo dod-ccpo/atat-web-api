@@ -40,7 +40,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
   // Optional query param 'limit' must be integer with minimum value of 1 and maximum value of 50. Defaults to 20.
   // Limit is the number of items to return.
-  const limit: number = getIntegerOrDefault(event.queryStringParameters?.limit, 20);
+  const limit = getIntegerOrDefault(event.queryStringParameters?.limit, 20);
   console.log("query param 'limit': " + limit);
   if (limit < 1 || limit > 50) {
     console.log("INVALID query param 'limit'");
