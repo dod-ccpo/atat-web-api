@@ -19,7 +19,7 @@ const QUERY_PARAM_INVALID = new ErrorResponse(
  */
 function evaluateQueryParameterInteger(qparam: string | undefined, defaultInt: number): number {
   // assert numeric
-  if (!qparam?.match(/$[0-9]+^/)) {
+  if (!qparam?.match(/^\+?([0-9]\d*)$/)) {
     return defaultInt;
   }
   return parseInt(qparam);
@@ -34,7 +34,9 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   // Optional query param 'limit' must be integer with minimum value of 1 and maximum value of 50. Defaults to 20.
   // Limit is the number of items to return.
   const limit = evaluateQueryParameterInteger(event.queryStringParameters?.limit, 20);
+  console.log("query param 'limit': ", limit);
   if (limit < 1 || limit > 50) {
+    console.log("INVALID PARAM VALUE.");
     return QUERY_PARAM_INVALID;
   }
 
