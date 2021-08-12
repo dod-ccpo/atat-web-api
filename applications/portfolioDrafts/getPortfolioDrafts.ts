@@ -17,6 +17,11 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   // Offset is the number of items to skip before starting to collect the result set.
   const offset = event.queryStringParameters?.offset;
 
+  // Optional query param 'limit' must be integer with minimum value of 1 and maximum value of 50. Defaults to 20.
+  // Limit is the number of items to return.
+  const limit = event.queryStringParameters?.limit;
+  const defaultLimit = 20;
+
   const params: ScanCommandInput = {
     TableName: TABLE_NAME,
   };
