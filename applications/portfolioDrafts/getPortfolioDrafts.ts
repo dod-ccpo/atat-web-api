@@ -49,6 +49,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
   const params: ScanCommandInput = {
     TableName: TABLE_NAME,
+    Limit: limit,
   };
 
   // This is an expensive command and should be replaced when
