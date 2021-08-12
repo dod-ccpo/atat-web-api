@@ -1,5 +1,5 @@
 import { ScanCommand, ScanCommandInput } from "@aws-sdk/lib-dynamodb";
-import { APIGatewayProxyResult } from "aws-lambda";
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { ErrorCodes } from "./models/Error";
 import { PortfolioDraftSummary } from "./models/PortfolioDraftSummary";
 import { dynamodbDocumentClient as client } from "./utils/dynamodb";
@@ -12,7 +12,7 @@ const TABLE_NAME = process.env.ATAT_TABLE_NAME;
  * Revisit once authentication and authorization are in place.
  * @param event - The GET request from API Gateway
  */
-export const handler = async (): Promise<APIGatewayProxyResult> => {
+export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   const params: ScanCommandInput = {
     TableName: TABLE_NAME,
   };
