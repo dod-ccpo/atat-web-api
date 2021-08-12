@@ -19,8 +19,10 @@ const QUERY_PARAM_INVALID = new ErrorResponse(
  */
 function evaluateQueryParameterInteger(qparam: string | undefined, defaultInt: number): number {
   // assert numeric
-  if (qparam?.match(/$[0-9]+^/)) return parseInt(qparam);
-  return defaultInt;
+  if (!qparam?.match(/$[0-9]+^/)) {
+    return defaultInt;
+  }
+  return parseInt(qparam);
 }
 
 /**
