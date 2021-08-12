@@ -13,6 +13,10 @@ const TABLE_NAME = process.env.ATAT_TABLE_NAME;
  * @param event - The GET request from API Gateway
  */
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+  // Optional query param 'offset' must be integer with minimum value of 0.
+  // Offset is the number of items to skip before starting to collect the result set.
+  const offset = event.queryStringParameters?.offset;
+
   const params: ScanCommandInput = {
     TableName: TABLE_NAME,
   };
