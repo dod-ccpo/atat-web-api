@@ -1,3 +1,4 @@
+import { APIGatewayProxyEvent, APIGatewayProxyEventBase, APIGatewayProxyEventPathParameters } from "aws-lambda";
 import { PortfolioStep } from "../models/PortfolioStep";
 
 /**
@@ -13,6 +14,29 @@ export function isValidJson(str: string): boolean {
     return false;
   }
   return true;
+}
+
+/**
+ * Check whether a given string body is empty
+ *
+ * @param body - The body of the request
+ * @returns true if the string is empty or null
+ */
+export function isBodyPresent(body: string | null): body is string {
+  if (!body || body === "" || body === "{}" || body?.replace(/\s/g, "") === "") {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Check whether the path parameter is present in the request
+ *
+ * @param str - The string to check
+ * @returns true if the string is empty or null
+ */
+export function isPathParameterPresent(pathParam: string | undefined): pathParam is string {
+  return !!pathParam?.trim();
 }
 
 /**
