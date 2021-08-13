@@ -7,7 +7,7 @@ import { dynamodbClient as client } from "../utils/dynamodb";
 import { ApiSuccessResponse, ErrorResponse, ErrorStatusCode, SuccessStatusCode } from "../utils/response";
 import { isPortfolioStep, isValidJson, isBodyPresent, isPathParameterPresent } from "../utils/validation";
 
-const TABLE_NAME = process.env.ATAT_TABLE_NAME;
+const TABLE_NAME = process.env.ATAT_TABLE_NAME ?? "";
 const NO_SUCH_PORTFOLIO = new ErrorResponse(
   { code: ErrorCodes.INVALID_INPUT, message: "Portfolio Draft with the given ID does not exist" },
   ErrorStatusCode.NOT_FOUND

@@ -2,7 +2,7 @@ import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { PortfolioStep } from "../models/PortfolioStep";
 
 export function portfolioStepCommand(
-  table: string | undefined,
+  table: string,
   portfolioDraftId: string,
   portfolioStep: PortfolioStep
 ): UpdateCommand {
