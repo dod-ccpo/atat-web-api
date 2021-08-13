@@ -1,7 +1,7 @@
 {
-  "name": "portfoliodrafts",
+  "name": "atat-web-api",
   "version": "0.1.0",
-  "description": "ATAT Web API Portfolio Draft support",
+  "description": "The ATAT Web API is the internal API that supports the ATAT Web UI.",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint --ext .js,.ts,.json -c ../../.eslintrc.json .",
