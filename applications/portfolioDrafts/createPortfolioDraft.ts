@@ -29,6 +29,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     created_at: now,
     updated_at: now,
     status: ProvisioningStatus.NotStarted,
+    num_portfolio_managers: 0,
   };
 
   const params = {
