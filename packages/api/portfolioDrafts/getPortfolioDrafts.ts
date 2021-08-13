@@ -1,9 +1,9 @@
 import { ScanCommand, ScanCommandInput } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { ErrorCodes } from "./models/Error";
-import { PortfolioDraftSummary } from "./models/PortfolioDraftSummary";
-import { dynamodbDocumentClient as client } from "./utils/dynamodb";
-import { ApiSuccessResponse, ErrorResponse, ErrorStatusCode, SuccessStatusCode } from "./utils/response";
+import { ErrorCodes } from "../models/Error";
+import { PortfolioDraftSummary } from "../models/PortfolioDraftSummary";
+import { dynamodbDocumentClient as client } from "../utils/dynamodb";
+import { ApiSuccessResponse, ErrorResponse, ErrorStatusCode, SuccessStatusCode } from "../utils/response";
 
 const TABLE_NAME = process.env.ATAT_TABLE_NAME;
 const QUERY_PARAM_INVALID = new ErrorResponse(

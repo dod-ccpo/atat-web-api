@@ -1,9 +1,9 @@
 import { GetCommand } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { ErrorCodes } from "../models/Error";
-import { PortfolioStep } from "../models/PortfolioStep";
-import { dynamodbDocumentClient as client } from "../utils/dynamodb";
-import { ApiSuccessResponse, ErrorResponse, ErrorStatusCode, SuccessStatusCode } from "../utils/response";
+import { ErrorCodes } from "../../models/Error";
+import { PortfolioStep } from "../../models/PortfolioStep";
+import { dynamodbDocumentClient as client } from "../../utils/dynamodb";
+import { ApiSuccessResponse, ErrorResponse, ErrorStatusCode, SuccessStatusCode } from "../../utils/response";
 
 const TABLE_NAME = process.env.ATAT_TABLE_NAME;
 const NO_SUCH_PORTFOLIO_STEP = new ErrorResponse(
