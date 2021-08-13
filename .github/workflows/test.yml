@@ -49,7 +49,7 @@ jobs:
       - name: Build the project
         run: npm run build
       - name: Synthesize CDK template
-        run: cdk synth
+        run: cdk synth -c "TicketId=GITHUBWF"
       - name: Gather artifacts
         uses: actions/upload-artifact@v2
         with:
