@@ -25,9 +25,11 @@ export class AtatWebApiStack extends cdk.Stack {
         userPassword: true,
       },
     });
+    // Ugly hack to quickly isolate deployments for developers.  To be improved/removed later.
+    const ticketId = (this.node.tryGetContext("TicketId") || "").toLowerCase();
     const userPoolDomain = userPool.addDomain("api-app-domain", {
       cognitoDomain: {
-        domainPrefix: "atatapi",
+        domainPrefix: ticketId + "atatapi",
       },
     });
     const poolDomainOutput = new cdk.CfnOutput(this, "UserPoolDomain", {
@@ -64,8 +66,6 @@ export class AtatWebApiStack extends cdk.Stack {
 
     // NEW FUNCTIONS GET DEFINED HERE
     // Some notes:
-    //   - You can use `applications/portfolioDrafts/index.ts` to get a "Hello world" response when
-    //     initially testing to make sure the infrastructure works
     //   - Each function gets defined using `lambdaNodejs.NodejsFunction` for now. You can probably
     //     reuse the `sharedFunctionProps`, especially for the early functions
     //   - Define new portfolioDrafts routes as `portfolioDrafts.addResource`
@@ -78,14 +78,6 @@ export class AtatWebApiStack extends cdk.Stack {
     const portfolioDrafts = restApi.root.addResource("portfolioDrafts");
     const portfolioDraftId = portfolioDrafts.addResource("{portfolioDraftId}");
     const portfolio = portfolioDraftId.addResource("portfolio");
-
-    // hello world
-    const helloWorldFn = new lambdaNodejs.NodejsFunction(this, "HelloWorldFunction", {
-      entry: "applications/portfolioDrafts/index.ts",
-      ...sharedFunctionProps,
-    });
-    portfolioDrafts.addMethod("GET", new apigw.LambdaIntegration(helloWorldFn));
-    table.grantReadData(helloWorldFn);
 
     // OperationIds from API spec are used to identify functions below
 
@@ -121,7 +113,14 @@ export class AtatWebApiStack extends cdk.Stack {
     portfolio.addMethod("GET", new apigw.LambdaIntegration(getPortfolioStepFn));
     table.grantReadData(getPortfolioStepFn);
 
-    // TODO: getPortfolioDrafts
+    // getPortfolioDrafts
+    const getPortfolioDraftsFn = new lambdaNodejs.NodejsFunction(this, "GetPortfolioDraftsFunction", {
+      entry: "applications/portfolioDrafts/getPortfolioDrafts.ts",
+      ...sharedFunctionProps,
+    });
+    portfolioDrafts.addMethod("GET", new apigw.LambdaIntegration(getPortfolioDraftsFn));
+    table.grantReadData(getPortfolioDraftsFn);
+
     // TODO: getPortfolioDraft
     // TODO: getFundingStep
     // TODO: createFundingStep

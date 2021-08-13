@@ -7,7 +7,16 @@ import { getTags } from "../lib/load-tags";
 const app = new cdk.App();
 const accountId = app.node.tryGetContext("account");
 const region = app.node.tryGetContext("region");
-const stack = new AtatWebApiStack(app, "AtatWebApiStack", {
+// Ugly hack to quickly isolate deployments for developers.  To be improved/removed later.
+const ticketId = app.node.tryGetContext("TicketId") || "";
+if (!ticketId) {
+  console.warn(
+    "Hello Developer. You must provide a context variable named 'TicketId' to isolate your deployment from others."
+  );
+  console.warn("  For example...");
+  console.warn('  $ cdk deploy -c "TicketId=AT1234"');
+}
+const stack = new AtatWebApiStack(app, ticketId + "AtatWebApiStack", {
   env: { account: accountId, region },
 });
 
