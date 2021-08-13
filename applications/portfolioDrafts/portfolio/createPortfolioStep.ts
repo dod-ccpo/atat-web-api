@@ -49,7 +49,8 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   const portfolioStep: PortfolioStep = requestBody;
 
   try {
-    await createPortfolioStepCommand(client, TABLE_NAME, portfolioDraftId, portfolioStep);
+    const data = await createPortfolioStepCommand(TABLE_NAME, portfolioDraftId, portfolioStep);
+    console.log("Success - item updated", data);
   } catch (error) {
     if (error.name === "ConditionalCheckFailedException") {
       return NO_SUCH_PORTFOLIO;
