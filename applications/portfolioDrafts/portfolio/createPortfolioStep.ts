@@ -1,5 +1,6 @@
 // import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
-import { portfolioStepCommand } from "../utils/commands";
+// import { portfolioStepCommand } from "../utils/commands";
+import { createPortfolioStepCommand } from "../utils/commands/createPortfolioStepCommand";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { ErrorCodes } from "../models/Error";
 import { PortfolioStep } from "../models/PortfolioStep";
@@ -46,30 +47,9 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     return REQUEST_BODY_INVALID;
   }
   const portfolioStep: PortfolioStep = requestBody;
-  /*
-  const now = new Date().toISOString();
-  const portfolioStep: PortfolioStep = requestBody;
-
-  const command = new UpdateCommand({
-    TableName: TABLE_NAME,
-    Key: {
-      id: portfolioDraftId,
-    },
-    UpdateExpression: "set #portfolioVariable = :portfolio, updated_at = :now",
-    ExpressionAttributeNames: {
-      "#portfolioVariable": "portfolio_step",
-    },
-    ExpressionAttributeValues: {
-      ":portfolio": portfolioStep,
-      ":now": now,
-    },
-    ConditionExpression: "attribute_exists(created_at)",
-  });
-  */
-  const command = portfolioStepCommand(TABLE_NAME, portfolioDraftId, portfolioStep);
 
   try {
-    await client.send(command);
+    await createPortfolioStepCommand(client, TABLE_NAME, portfolioDraftId, portfolioStep);
   } catch (error) {
     if (error.name === "ConditionalCheckFailedException") {
       return NO_SUCH_PORTFOLIO;
