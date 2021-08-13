@@ -83,7 +83,7 @@ export class AtatWebApiStack extends cdk.Stack {
 
     // createPortfolioDraft
     const createPortfolioDraftFn = new lambdaNodejs.NodejsFunction(this, "CreatePortfolioDraftFunction", {
-      entry: "applications/portfolioDrafts/createPortfolioDraft.ts",
+      entry: "packages/api/portfolioDrafts/createPortfolioDraft.ts",
       ...sharedFunctionProps,
     });
     portfolioDrafts.addMethod("POST", new apigw.LambdaIntegration(createPortfolioDraftFn));
@@ -91,7 +91,7 @@ export class AtatWebApiStack extends cdk.Stack {
 
     // deletePortfolioDraft
     const deletePortfolioDraftFn = new lambdaNodejs.NodejsFunction(this, "DeletePortfolioDraftFunction", {
-      entry: "applications/portfolioDrafts/deletePortfolioDraft.ts",
+      entry: "packages/api/portfolioDrafts/deletePortfolioDraft.ts",
       ...sharedFunctionProps,
     });
     portfolioDraftId.addMethod("DELETE", new apigw.LambdaIntegration(deletePortfolioDraftFn));
@@ -99,7 +99,7 @@ export class AtatWebApiStack extends cdk.Stack {
 
     // createPortfolioStep
     const createPortfolioStepFn = new lambdaNodejs.NodejsFunction(this, "CreatePortfolioStepFunction", {
-      entry: "applications/portfolioDrafts/portfolio/createPortfolioStep.ts",
+      entry: "packages/api/portfolioDrafts/portfolio/createPortfolioStep.ts",
       ...sharedFunctionProps,
     });
     portfolio.addMethod("POST", new apigw.LambdaIntegration(createPortfolioStepFn));
@@ -107,7 +107,7 @@ export class AtatWebApiStack extends cdk.Stack {
 
     // getPortfolioStep
     const getPortfolioStepFn = new lambdaNodejs.NodejsFunction(this, "GetPortfolioStepFunction", {
-      entry: "applications/portfolioDrafts/portfolio/getPortfolioStep.ts",
+      entry: "packages/api/portfolioDrafts/portfolio/getPortfolioStep.ts",
       ...sharedFunctionProps,
     });
     portfolio.addMethod("GET", new apigw.LambdaIntegration(getPortfolioStepFn));
@@ -115,7 +115,7 @@ export class AtatWebApiStack extends cdk.Stack {
 
     // getPortfolioDrafts
     const getPortfolioDraftsFn = new lambdaNodejs.NodejsFunction(this, "GetPortfolioDraftsFunction", {
-      entry: "applications/portfolioDrafts/getPortfolioDrafts.ts",
+      entry: "packages/api/portfolioDrafts/getPortfolioDrafts.ts",
       ...sharedFunctionProps,
     });
     portfolioDrafts.addMethod("GET", new apigw.LambdaIntegration(getPortfolioDraftsFn));

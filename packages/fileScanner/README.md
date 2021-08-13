@@ -1,0 +1,1 @@
+Placeholder for fileScanner implementation.
