@@ -23,10 +23,11 @@ export function isValidJson(str: string): boolean {
  * @returns true if the string is empty or null
  */
 export function isBodyPresent(body: string | null): body is string {
-  if (!body || body === "" || body === "{}" || body?.replace(/\s/g, "") === "") {
-    return false;
-  }
-  return true;
+  const emptyValues = ["", "{}"];
+  // Treating a null body object as an empty string is legitimate since
+  // an empty string is a forbidden value
+  const trimmedBody = body?.replace(/\s/g, "") ?? "";
+  return !emptyValues.includes(trimmedBody);
 }
 
 /**
