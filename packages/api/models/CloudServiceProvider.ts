@@ -1,4 +1,4 @@
 export const enum CloudServiceProvider {
-  AmazonWebServices = "aws",
-  MicrosoftAzure = "azure",
+  AWS = "aws",
+  AZURE = "azure",
 }
