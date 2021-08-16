@@ -1,6 +1,5 @@
-import { APIGatewayProxyEvent } from "aws-lambda";
 import { isValidJson, isBodyPresent, isPortfolioStep, isPathParameterPresent } from "../utils/validation";
-import { handler, EMPTY_REQUEST_BODY } from "../portfolio/createPortfolioStep";
+
 describe("Testing validation of request body", function () {
   it("should return true because request body is present", async () => {
     const requestBody = {
@@ -69,18 +68,6 @@ describe("Validation tests for createPortfolioStep function", function () {
   it("should fail to map body to portfolioStep object because request body is null", async () => {
     expect(isPortfolioStep(null)).toEqual(false);
   });
-
-  // fix this test with validation PR
-  /*
-  it("should fail to map body to portfolioStep object due to incorrect data type", async () => {
-    const requestBodyMissingDescription = {
-      name: 12345,
-      description: "team america",
-      dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
-      portfolio_managers: "joe.manager@example.com",
-    };
-    expect(isPortfolioStep(requestBodyMissingDescription)).toEqual(false);
-  }); */
 });
 describe("Testing validation of path parameter", function () {
   it("should return false because path parameter is an empty string", async () => {
