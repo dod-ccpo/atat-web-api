@@ -3,6 +3,7 @@
 *.d.ts
 node_modules
 lerna-debug.log
+packages/api/coverage/
 
 # CDK asset staging directory
 .cdk.staging
