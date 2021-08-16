@@ -78,6 +78,7 @@ export class AtatWebApiStack extends cdk.Stack {
     const portfolioDrafts = restApi.root.addResource("portfolioDrafts");
     const portfolioDraftId = portfolioDrafts.addResource("{portfolioDraftId}");
     const portfolio = portfolioDraftId.addResource("portfolio");
+    const funding = portfolioDraftId.addResource("funding");
 
     // OperationIds from API spec are used to identify functions below
 
@@ -121,9 +122,16 @@ export class AtatWebApiStack extends cdk.Stack {
     portfolioDrafts.addMethod("GET", new apigw.LambdaIntegration(getPortfolioDraftsFn));
     table.grantReadData(getPortfolioDraftsFn);
 
+    // createFundingStep
+    const createFundingStepFn = new lambdaNodejs.NodejsFunction(this, "CreateFundingStepFunction", {
+      entry: "packages/api/portfolioDrafts/funding/createFundingStep.ts",
+      ...sharedFunctionProps,
+    });
+    funding.addMethod("POST", new apigw.LambdaIntegration(createFundingStepFn));
+    table.grantReadWriteData(createFundingStepFn);
+
     // TODO: getPortfolioDraft
     // TODO: getFundingStep
-    // TODO: createFundingStep
     // TODO: getApplicationStep
     // TODO: createApplicationStep
     // TODO: submitPortfolioDraft
