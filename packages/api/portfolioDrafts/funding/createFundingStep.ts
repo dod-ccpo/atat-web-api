@@ -70,7 +70,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     }
     console.error("Database error: " + error);
     return new ErrorResponse(
-      { code: ErrorCodes.OTHER, message: "Database error: " + error.name },
+      { code: ErrorCodes.OTHER, message: "Database error" },
       ErrorStatusCode.INTERNAL_SERVER_ERROR
     );
   }
