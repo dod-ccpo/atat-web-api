@@ -1,11 +1,11 @@
-import { GetCommand } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { ErrorCodes } from "../../models/Error";
 import { PortfolioStep } from "../../models/PortfolioStep";
 import { dynamodbDocumentClient as client } from "../../utils/dynamodb";
+import { getPortfolioStepCommand } from "../../utils/commands/getPortfolioStepCommand";
 import { ApiSuccessResponse, ErrorResponse, ErrorStatusCode, SuccessStatusCode } from "../../utils/response";
 
-const TABLE_NAME = process.env.ATAT_TABLE_NAME;
+const TABLE_NAME = process.env.ATAT_TABLE_NAME ?? "";
 const NO_SUCH_PORTFOLIO_STEP = new ErrorResponse(
   { code: ErrorCodes.INVALID_INPUT, message: "Portfolio Step not found for this Portfolio Draft" },
   ErrorStatusCode.NOT_FOUND
@@ -27,16 +27,8 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     return NO_SUCH_PORTFOLIO;
   }
 
-  const command = new GetCommand({
-    TableName: TABLE_NAME,
-    Key: {
-      id: portfolioDraftId,
-    },
-    ProjectionExpression: "portfolio_step",
-  });
-
   try {
-    const data = await client.send(command);
+    const data = await getPortfolioStepCommand(TABLE_NAME, portfolioDraftId);
     if (!data.Item) {
       return NO_SUCH_PORTFOLIO;
     }
