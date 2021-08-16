@@ -3,7 +3,7 @@
 *.d.ts
 node_modules
 lerna-debug.log
-applications/portfolioDrafts/coverage
+applications/portfolioDrafts/coverage/
 
 # CDK asset staging directory
 .cdk.staging
