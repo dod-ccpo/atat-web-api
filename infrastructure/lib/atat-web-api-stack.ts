@@ -4,6 +4,18 @@ import * as dynamodb from "@aws-cdk/aws-dynamodb";
 import * as lambdaNodejs from "@aws-cdk/aws-lambda-nodejs";
 import * as cdk from "@aws-cdk/core";
 
+// This is a suboptimal solution to finding the relative directory to the
+// package root. This is necessary because it is possible for this file to be
+// run with the a cwd of either the infrastructure directory or the root of the
+// git repo.
+function packageRoot(): string {
+  const cwd = process.cwd();
+  if (cwd.endsWith("infrastructure")) {
+    return `${cwd}/../packages`;
+  }
+  return `${cwd}/packages`;
+}
+
 export class AtatWebApiStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
@@ -84,7 +96,7 @@ export class AtatWebApiStack extends cdk.Stack {
 
     // createPortfolioDraft
     const createPortfolioDraftFn = new lambdaNodejs.NodejsFunction(this, "CreatePortfolioDraftFunction", {
-      entry: "packages/api/portfolioDrafts/createPortfolioDraft.ts",
+      entry: packageRoot() + "/api/portfolioDrafts/createPortfolioDraft.ts",
       ...sharedFunctionProps,
     });
     portfolioDrafts.addMethod("POST", new apigw.LambdaIntegration(createPortfolioDraftFn));
@@ -92,7 +104,7 @@ export class AtatWebApiStack extends cdk.Stack {
 
     // deletePortfolioDraft
     const deletePortfolioDraftFn = new lambdaNodejs.NodejsFunction(this, "DeletePortfolioDraftFunction", {
-      entry: "packages/api/portfolioDrafts/deletePortfolioDraft.ts",
+      entry: packageRoot() + "/api/portfolioDrafts/deletePortfolioDraft.ts",
       ...sharedFunctionProps,
     });
     portfolioDraftId.addMethod("DELETE", new apigw.LambdaIntegration(deletePortfolioDraftFn));
@@ -100,7 +112,7 @@ export class AtatWebApiStack extends cdk.Stack {
 
     // createPortfolioStep
     const createPortfolioStepFn = new lambdaNodejs.NodejsFunction(this, "CreatePortfolioStepFunction", {
-      entry: "packages/api/portfolioDrafts/portfolio/createPortfolioStep.ts",
+      entry: packageRoot() + "/api/portfolioDrafts/portfolio/createPortfolioStep.ts",
       ...sharedFunctionProps,
     });
     portfolio.addMethod("POST", new apigw.LambdaIntegration(createPortfolioStepFn));
@@ -108,7 +120,7 @@ export class AtatWebApiStack extends cdk.Stack {
 
     // getPortfolioStep
     const getPortfolioStepFn = new lambdaNodejs.NodejsFunction(this, "GetPortfolioStepFunction", {
-      entry: "packages/api/portfolioDrafts/portfolio/getPortfolioStep.ts",
+      entry: packageRoot() + "/api/portfolioDrafts/portfolio/getPortfolioStep.ts",
       ...sharedFunctionProps,
     });
     portfolio.addMethod("GET", new apigw.LambdaIntegration(getPortfolioStepFn));
@@ -116,7 +128,7 @@ export class AtatWebApiStack extends cdk.Stack {
 
     // getPortfolioDrafts
     const getPortfolioDraftsFn = new lambdaNodejs.NodejsFunction(this, "GetPortfolioDraftsFunction", {
-      entry: "packages/api/portfolioDrafts/getPortfolioDrafts.ts",
+      entry: packageRoot() + "/api/portfolioDrafts/getPortfolioDrafts.ts",
       ...sharedFunctionProps,
     });
     portfolioDrafts.addMethod("GET", new apigw.LambdaIntegration(getPortfolioDraftsFn));
@@ -124,7 +136,7 @@ export class AtatWebApiStack extends cdk.Stack {
 
     // createFundingStep
     const createFundingStepFn = new lambdaNodejs.NodejsFunction(this, "CreateFundingStepFunction", {
-      entry: "packages/api/portfolioDrafts/funding/createFundingStep.ts",
+      entry: packageRoot() + "/api/portfolioDrafts/funding/createFundingStep.ts",
       ...sharedFunctionProps,
     });
     funding.addMethod("POST", new apigw.LambdaIntegration(createFundingStepFn));
