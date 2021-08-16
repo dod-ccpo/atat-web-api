@@ -11,23 +11,3 @@ export const enum FileScanStatus {
     Accepted = "accepted",
     Rejected = "rejected"
 }
-
-export class S3FileMetadata implements FileMetadata {
-
-    id: string;
-    name: string;
-    size: number;
-    status: FileScanStatus;
-    created_at: string;
-    updated_at: string;
-
-    constructor(id: string, name: string, size: number, status: FileScanStatus, created_at: string, updated_at: string) {
-        this.id = id;
-        this.name = name;
-        this.size = size;
-        this.status = status;
-        this.created_at = created_at;
-        this.updated_at = updated_at;
-    }
-
-}
