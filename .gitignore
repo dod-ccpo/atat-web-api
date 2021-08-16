@@ -15,3 +15,7 @@ tags-private.json
 
 # Editor configuration files
 .vscode/
+.idea
+
+# OSX
+.DS_Store

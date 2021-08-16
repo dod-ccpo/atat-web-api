@@ -1,8 +1,11 @@
 import * as apigw from "@aws-cdk/aws-apigateway";
-import { UserPool } from "@aws-cdk/aws-cognito";
+import {ContentHandling} from "@aws-cdk/aws-apigateway";
+import {UserPool} from "@aws-cdk/aws-cognito";
 import * as dynamodb from "@aws-cdk/aws-dynamodb";
+import * as s3 from "@aws-cdk/aws-s3";
 import * as lambdaNodejs from "@aws-cdk/aws-lambda-nodejs";
 import * as cdk from "@aws-cdk/core";
+import {Duration} from "@aws-cdk/core";
 
 // This is a suboptimal solution to finding the relative directory to the
 // package root. This is necessary because it is possible for this file to be
@@ -52,6 +55,12 @@ export class AtatWebApiStack extends cdk.Stack {
     // Ideally we'd define different stages for dev, test, and staging. For now, a single
     // stage for everything being dev is good enough for a proof of concept
     const restApi = new apigw.RestApi(this, "AtatWebApi", {
+      binaryMediaTypes: ["multipart/form-data"],
+      deployOptions: {
+        loggingLevel: apigw.MethodLoggingLevel.INFO,
+        tracingEnabled: true,
+        dataTraceEnabled: true
+      },
       endpointConfiguration: {
         types: [apigw.EndpointType.REGIONAL],
       },
@@ -88,6 +97,7 @@ export class AtatWebApiStack extends cdk.Stack {
     // We definitely want to improve the ergonomics of this and doing so is a high priority; however, following
     // these examples and steps should be a good start to allow progress while that work is happening.
     const portfolioDrafts = restApi.root.addResource("portfolioDrafts");
+    const taskOrderFiles = restApi.root.addResource("taskOrderFiles");
     const portfolioDraftId = portfolioDrafts.addResource("{portfolioDraftId}");
     const portfolio = portfolioDraftId.addResource("portfolio");
     const funding = portfolioDraftId.addResource("funding");
@@ -147,7 +157,28 @@ export class AtatWebApiStack extends cdk.Stack {
     // TODO: getApplicationStep
     // TODO: createApplicationStep
     // TODO: submitPortfolioDraft
-    // TODO: uploadTaskOrder
+    addCreateTaskOrderFiles(this, taskOrderFiles, sharedFunctionProps);
     // TODO: deleteTaskOrder
   }
+}
+
+function addCreateTaskOrderFiles(scope: cdk.Stack,
+                                 resource: apigw.Resource) {
+  const bucket = new s3.Bucket(scope, "PendingBucket", {
+    publicReadAccess: false,
+    removalPolicy: cdk.RemovalPolicy.RETAIN,
+    autoDeleteObjects: false
+  });
+  const fn = new lambdaNodejs.NodejsFunction(scope, "CreateTaskOrderFileFunction", {
+    entry: packageRoot() + "/api/taskOrderFiles/createTaskOrderFile.ts",
+    timeout: Duration.seconds(300),
+    environment: {
+      PENDING_BUCKET: bucket.bucketName
+    },
+    bundling: {
+      externalModules: ["aws-sdk"],
+    },
+  })
+  resource.addMethod("POST", new apigw.LambdaIntegration(fn));
+  bucket.grantPut(fn);
 }
