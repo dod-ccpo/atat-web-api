@@ -1,20 +1,18 @@
 import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { ErrorCodes } from "../../models/Error";
 import { FundingStep } from "../../models/FundingStep";
 import { dynamodbClient as client } from "../../utils/dynamodb";
-import { ApiSuccessResponse, ErrorResponse, ErrorStatusCode, SuccessStatusCode } from "../../utils/response";
+import {
+  ApiSuccessResponse,
+  SuccessStatusCode,
+  DATABASE_ERROR,
+  NO_SUCH_PORTFOLIO_DRAFT,
+  REQUEST_BODY_EMPTY,
+  REQUEST_BODY_INVALID,
+} from "../../utils/response";
 import { isFundingStep, isValidJson } from "../../utils/validation";
 
 const TABLE_NAME = process.env.ATAT_TABLE_NAME;
-const NO_SUCH_PORTFOLIO_DRAFT = new ErrorResponse(
-  { code: ErrorCodes.INVALID_INPUT, message: "Portfolio Draft with the given ID does not exist" },
-  ErrorStatusCode.NOT_FOUND
-);
-const REQUEST_BODY_INVALID = new ErrorResponse(
-  { code: ErrorCodes.INVALID_INPUT, message: "A valid FundingStep object must be provided" },
-  ErrorStatusCode.BAD_REQUEST
-);
 
 /**
  * Submits the Funding Step of the Portfolio Draft Wizard
@@ -23,10 +21,7 @@ const REQUEST_BODY_INVALID = new ErrorResponse(
  */
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   if (!event.body) {
-    return new ErrorResponse(
-      { code: ErrorCodes.INVALID_INPUT, message: "Request body must not be empty" },
-      ErrorStatusCode.BAD_REQUEST
-    );
+    return REQUEST_BODY_EMPTY;
   }
 
   const portfolioDraftId = event.pathParameters?.portfolioDraftId;
@@ -69,10 +64,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       return NO_SUCH_PORTFOLIO_DRAFT;
     }
     console.error("Database error: " + error);
-    return new ErrorResponse(
-      { code: ErrorCodes.OTHER, message: "Database error" },
-      ErrorStatusCode.INTERNAL_SERVER_ERROR
-    );
+    return DATABASE_ERROR;
   }
   return new ApiSuccessResponse<FundingStep>(fundingStep, SuccessStatusCode.CREATED);
 };
