@@ -1,4 +1,4 @@
-import { createPortfolioStepCommand } from "../../utils/commands/createPortfolioStepCommand";
+// import { createPortfolioStepCommand } from "../../utils/commands/createPortfolioStepCommand";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { ErrorCodes } from "../../models/Error";
 import { PortfolioStep } from "../../models/PortfolioStep";
@@ -6,12 +6,15 @@ import { dynamodbClient as client } from "../../utils/dynamodb";
 import { ApiSuccessResponse, ErrorResponse, ErrorStatusCode, SuccessStatusCode } from "../../utils/response";
 import { isPortfolioStep, isValidJson, isBodyPresent, isPathParameterPresent } from "../../utils/validation";
 
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { UpdateCommand, DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
+
 const TABLE_NAME = process.env.ATAT_TABLE_NAME ?? "";
-const NO_SUCH_PORTFOLIO = new ErrorResponse(
+export const NO_SUCH_PORTFOLIO = new ErrorResponse(
   { code: ErrorCodes.INVALID_INPUT, message: "Portfolio Draft with the given ID does not exist" },
   ErrorStatusCode.NOT_FOUND
 );
-const REQUEST_BODY_INVALID = new ErrorResponse(
+export const REQUEST_BODY_INVALID = new ErrorResponse(
   { code: ErrorCodes.INVALID_INPUT, message: "A valid PortfolioStep object must be provided" },
   ErrorStatusCode.BAD_REQUEST
 );
@@ -60,4 +63,33 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     );
   }
   return new ApiSuccessResponse<PortfolioStep>(portfolioStep, SuccessStatusCode.CREATED);
+};
+
+export const createPortfolioStepCommand = async (
+  table: string,
+  portfolioDraftId: string,
+  portfolioStep: PortfolioStep
+) => {
+  const dynamodb = new DynamoDBClient({});
+  const ddb = DynamoDBDocumentClient.from(dynamodb);
+  const now = new Date().toISOString();
+  const result = await ddb.send(
+    new UpdateCommand({
+      TableName: table,
+      Key: {
+        id: portfolioDraftId,
+      },
+      UpdateExpression: "set #portfolioVariable = :portfolio, updated_at = :now",
+      ExpressionAttributeNames: {
+        "#portfolioVariable": "portfolio_step",
+      },
+      ExpressionAttributeValues: {
+        ":portfolio": portfolioStep,
+        ":now": now,
+      },
+      ConditionExpression: "attribute_exists(created_at)",
+      ReturnValues: "ALL_NEW",
+    })
+  );
+  return result;
 };
