@@ -1,11 +1,10 @@
 import * as apigw from "@aws-cdk/aws-apigateway";
-import {ContentHandling} from "@aws-cdk/aws-apigateway";
-import {UserPool} from "@aws-cdk/aws-cognito";
+import { UserPool } from "@aws-cdk/aws-cognito";
 import * as dynamodb from "@aws-cdk/aws-dynamodb";
 import * as s3 from "@aws-cdk/aws-s3";
 import * as lambdaNodejs from "@aws-cdk/aws-lambda-nodejs";
 import * as cdk from "@aws-cdk/core";
-import {Duration} from "@aws-cdk/core";
+import { Duration } from "@aws-cdk/core";
 
 // This is a suboptimal solution to finding the relative directory to the
 // package root. This is necessary because it is possible for this file to be
@@ -56,11 +55,6 @@ export class AtatWebApiStack extends cdk.Stack {
     // stage for everything being dev is good enough for a proof of concept
     const restApi = new apigw.RestApi(this, "AtatWebApi", {
       binaryMediaTypes: ["multipart/form-data"],
-      deployOptions: {
-        loggingLevel: apigw.MethodLoggingLevel.INFO,
-        tracingEnabled: true,
-        dataTraceEnabled: true
-      },
       endpointConfiguration: {
         types: [apigw.EndpointType.REGIONAL],
       },
@@ -157,28 +151,28 @@ export class AtatWebApiStack extends cdk.Stack {
     // TODO: getApplicationStep
     // TODO: createApplicationStep
     // TODO: submitPortfolioDraft
-    addCreateTaskOrderFiles(this, taskOrderFiles, sharedFunctionProps);
+    addCreateTaskOrderFiles(this, taskOrderFiles);
     // TODO: deleteTaskOrder
   }
 }
 
-function addCreateTaskOrderFiles(scope: cdk.Stack,
-                                 resource: apigw.Resource) {
+const addCreateTaskOrderFiles = (scope: cdk.Stack, resource: apigw.Resource) => {
   const bucket = new s3.Bucket(scope, "PendingBucket", {
     publicReadAccess: false,
     removalPolicy: cdk.RemovalPolicy.RETAIN,
-    autoDeleteObjects: false
+    autoDeleteObjects: false,
   });
   const fn = new lambdaNodejs.NodejsFunction(scope, "CreateTaskOrderFileFunction", {
     entry: packageRoot() + "/api/taskOrderFiles/createTaskOrderFile.ts",
     timeout: Duration.seconds(300),
     environment: {
-      PENDING_BUCKET: bucket.bucketName
+      PENDING_BUCKET: bucket.bucketName,
     },
     bundling: {
       externalModules: ["aws-sdk"],
     },
-  })
+    memorySize: 256,
+  });
   resource.addMethod("POST", new apigw.LambdaIntegration(fn));
   bucket.grantPut(fn);
-}
+};
