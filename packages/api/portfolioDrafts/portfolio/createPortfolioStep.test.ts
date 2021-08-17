@@ -14,6 +14,7 @@ const ddbMock = mockClient(DynamoDBDocumentClient);
 beforeEach(() => {
   ddbMock.reset();
 });
+
 describe("Dynamodb mock validation", function () {
   it("should get user names from the DynamoDB", async () => {
     const mockResponse = {
@@ -45,6 +46,7 @@ describe("Dynamodb mock validation", function () {
     expect(data.Attributes).toEqual(mockResponse);
   });
 });
+
 describe("Validation of handler", function () {
   it("should return EMPTY_REQUEST_BODY when body is empty", async () => {
     const request = {
@@ -85,8 +87,8 @@ describe("Validation of handler", function () {
   });
 });
 describe("Handler response with mock dynamodb", function () {
-  it("should return error", async () => {
-    ddbMock.on(UpdateCommand).rejects("ConditionalCheckFailedException");
+  it("should return error when the portfolioDraft doesn't exist", async () => {
+    ddbMock.on(UpdateCommand).rejects({ name: "ConditionalCheckFailedException" });
     // setting up new request
     const requestBody = {
       name: "Test portfolio",
@@ -96,11 +98,30 @@ describe("Handler response with mock dynamodb", function () {
     };
 
     const request: APIGatewayProxyEvent = {
-      body: JSON.stringify(requestBody), // invalid PortfolioStep object
+      body: JSON.stringify(requestBody),
       pathParameters: { portfolioDraftId: "1234" },
     } as any;
 
     const data = await handler(request);
     expect(data).toEqual(NO_SUCH_PORTFOLIO);
+  });
+
+  it("should return database error when unknown internal problem occurs", async () => {
+    ddbMock.on(UpdateCommand).rejects({ name: "InternalServiceError" });
+    // setting up new request
+    const requestBody = {
+      name: "Test portfolio",
+      description: "Team america",
+      dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
+      portfolio_managers: ["joe.manager@example.com", "jane.manager@example.com"],
+    };
+
+    const request: APIGatewayProxyEvent = {
+      body: JSON.stringify(requestBody),
+      pathParameters: { portfolioDraftId: "1234" },
+    } as any;
+
+    const data = await handler(request);
+    expect(data.body).toEqual(`"{\"code\":\"OTHER\",\"message\":\"Database error: InternalServiceError\"}"`);
   });
 });
