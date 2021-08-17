@@ -12,3 +12,6 @@ cdk.out
 
 # Private tag data
 tags-private.json
+
+# Editor configuration files
+.vscode/
