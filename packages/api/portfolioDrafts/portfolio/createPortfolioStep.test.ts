@@ -85,24 +85,8 @@ describe("Validation of handler", function () {
   });
 });
 describe("Handler response with mock dynamodb", function () {
-  it("should ", async () => {
-    const mockResponse = {
-      updated_at: "2021-08-13T20:55:02.595Z",
-      created_at: "2021-08-13T20:51:45.979Z",
-      portfolio_step: {
-        name: "Test portfolio",
-        description: "Test portfolio description",
-        portfolio_managers: [Array],
-        dod_components: [Array],
-      },
-      num_portfolio_managers: 0,
-      status: "not_started",
-      id: "595c31d3-190c-42c3-a9b6-77325fa5ed38",
-    };
-
-    ddbMock.on(UpdateCommand).resolves({
-      Attributes: mockResponse,
-    });
+  it("should return error", async () => {
+    ddbMock.on(UpdateCommand).rejects("ConditionalCheckFailedException");
     // setting up new request
     const requestBody = {
       name: "Test portfolio",
@@ -110,8 +94,13 @@ describe("Handler response with mock dynamodb", function () {
       dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
       portfolio_managers: ["joe.manager@example.com", "jane.manager@example.com"],
     };
-    const portfolioStep: PortfolioStep = requestBody;
-    const data = await createPortfolioStepCommand("mock-table", "595c31d3-190c-42c3-a9b6-77325fa5ed38", portfolioStep);
-    expect(data.Attributes).toEqual(mockResponse);
+
+    const request: APIGatewayProxyEvent = {
+      body: JSON.stringify(requestBody), // invalid PortfolioStep object
+      pathParameters: { portfolioDraftId: "1234" },
+    } as any;
+
+    const data = await handler(request);
+    expect(data).toEqual(NO_SUCH_PORTFOLIO);
   });
 });
