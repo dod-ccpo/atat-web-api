@@ -7,7 +7,7 @@ import {
   EMPTY_REQUEST_BODY,
   handler,
   NO_SUCH_PORTFOLIO,
-  REQUEST_BODY_INVALID
+  REQUEST_BODY_INVALID,
 } from "./createPortfolioStep";
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
