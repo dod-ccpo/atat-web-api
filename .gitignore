@@ -4,6 +4,7 @@
 node_modules
 lerna-debug.log
 coverage/
+build/
 
 # CDK asset staging directory
 .cdk.staging
