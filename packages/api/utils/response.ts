@@ -48,7 +48,7 @@ abstract class Response implements APIGatewayProxyResult {
    * [the API docs]{@link https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-output-format}.
    *
    * @param body - The JSON string response body
-   * @param statuscode - The HTTP status code for the response
+   * @param statusCode - The HTTP status code for the response
    * @param headers - HTTP response headers
    * @param multiValueHeaders - HTTP response headers, allowing multiple values for a header
    * @param isBase64Encoded - Whether the body is base64 encoded
@@ -82,7 +82,7 @@ abstract class SuccessResponse extends Response {
    */
   constructor(
     response: string,
-    statusCode: SuccessStatusCode = SuccessStatusCode.OK,
+    statusCode: SuccessStatusCode,
     headers?: Headers,
     multiValueHeaders?: MultiValueHeaders
   ) {

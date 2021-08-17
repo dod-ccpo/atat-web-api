@@ -1,4 +1,4 @@
-import { isValidJson, isBodyPresent, isPortfolioStep, isPathParameterPresent } from "./validation";
+import { isBodyPresent, isFundingStep, isPathParameterPresent, isPortfolioStep, isValidJson } from "./validation";
 
 describe("Testing validation of request body", function () {
   it("should return true because request body is present", async () => {
@@ -69,6 +69,60 @@ describe("Validation tests for createPortfolioStep function", function () {
     expect(isPortfolioStep(null)).toEqual(false);
   });
 });
+
+describe("Testing validation of fundingStep objects", () => {
+  const fakeClinData = {
+    clin_number: "0100",
+    idiq_clin: "1010",
+    total_clin_value: 100000,
+    obligated_funds: 1,
+    pop_start_date: "2021-08-15",
+    pop_end_date: "2022-08-15",
+  };
+  const toFile = { id: "1234", name: "testto.pdf" };
+  const fundingStepLike = {
+    task_order_number: "1234567890",
+    task_order_file: toFile,
+    csp: "aws",
+    clins: [fakeClinData],
+  };
+  const badFundingSteps = [
+    // Missing CLINs
+    {
+      task_order_number: "12345667890",
+      task_order_file: toFile,
+      csp: "aws",
+    },
+    // Missing TO number
+    {
+      task_order_file: toFile,
+      csp: "aws",
+      clins: [fakeClinData],
+    },
+    // Missing CSP
+    {
+      task_order_number: "1234567890",
+      task_order_file: toFile,
+      clins: [fakeClinData],
+    },
+    // Missing File Data
+    {
+      task_order_number: "12345667890",
+      csp: "aws",
+      clins: [fakeClinData],
+    },
+  ];
+  it.each([true, 1, undefined, null])("should reject non-objects", async (item) => {
+    expect(isFundingStep(item)).toEqual(false);
+  });
+  it("should accept a fundingStep-looking object", async () => {
+    expect(isFundingStep(fundingStepLike)).toEqual(true);
+  });
+  it.each(badFundingSteps)("should reject a FundingStep missing any field", async (badStep) => {
+    expect(isFundingStep(badStep)).toEqual(false);
+  });
+});
+
 describe("Testing validation of path parameter", function () {
   it("should return false because path parameter is an empty string", async () => {
     const pathParam = "";

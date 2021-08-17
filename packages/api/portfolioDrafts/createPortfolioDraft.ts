@@ -4,7 +4,7 @@ import { v4 as uuid } from "uuid";
 import { ErrorCodes } from "../models/Error";
 import { PortfolioDraftSummary } from "../models/PortfolioDraftSummary";
 import { ProvisioningStatus } from "../models/ProvisioningStatus";
-import { dynamodbClient as client } from "../utils/dynamodb";
+import { dynamodbDocumentClient as client } from "../utils/dynamodb";
 import { ApiSuccessResponse, ErrorResponse, ErrorStatusCode, SuccessStatusCode } from "../utils/response";
 
 const TABLE_NAME = process.env.ATAT_TABLE_NAME;

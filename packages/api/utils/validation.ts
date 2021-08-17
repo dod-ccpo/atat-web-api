@@ -19,8 +19,10 @@ export function isValidJson(str: string): boolean {
 /**
  * Check that the given object is in fact a valid object type.
  *
- * This should reject null, undefined
+ * This should reject null, undefined, and non-object types.
  */
+// This is a basic and low-level check that should probably not be exported. Any
+// object type should have a higher-level interface for validation.
 function isValidObject(object: unknown): object is any {
   return object !== undefined && object !== null && typeof object === "object";
 }

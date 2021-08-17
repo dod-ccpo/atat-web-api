@@ -1,13 +1,11 @@
 // import { createPortfolioStepCommand } from "../../utils/commands/createPortfolioStepCommand";
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { DynamoDBDocumentClient, UpdateCommand, UpdateCommandOutput } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { ErrorCodes } from "../../models/Error";
 import { PortfolioStep } from "../../models/PortfolioStep";
-import { dynamodbClient as client } from "../../utils/dynamodb";
 import { ApiSuccessResponse, ErrorResponse, ErrorStatusCode, SuccessStatusCode } from "../../utils/response";
-import { isPortfolioStep, isValidJson, isBodyPresent, isPathParameterPresent } from "../../utils/validation";
-
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { UpdateCommand, DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
+import { isBodyPresent, isPathParameterPresent, isPortfolioStep, isValidJson } from "../../utils/validation";
 
 const TABLE_NAME = process.env.ATAT_TABLE_NAME ?? "";
 export const NO_SUCH_PORTFOLIO = new ErrorResponse(
@@ -28,7 +26,7 @@ export const EMPTY_REQUEST_BODY = new ErrorResponse(
  *
  * @param event - The POST request from API Gateway
  */
-export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   if (!isBodyPresent(event.body)) {
     return EMPTY_REQUEST_BODY;
   }
@@ -50,8 +48,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   const portfolioStep: PortfolioStep = requestBody;
 
   try {
-    const data = await createPortfolioStepCommand(TABLE_NAME, portfolioDraftId, portfolioStep);
-    console.log("Success - item updated", data);
+    await createPortfolioStepCommand(TABLE_NAME, portfolioDraftId, portfolioStep);
   } catch (error) {
     if (error.name === "ConditionalCheckFailedException") {
       return NO_SUCH_PORTFOLIO;
@@ -63,13 +60,13 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     );
   }
   return new ApiSuccessResponse<PortfolioStep>(portfolioStep, SuccessStatusCode.CREATED);
-};
+}
 
-export const createPortfolioStepCommand = async (
+export async function createPortfolioStepCommand(
   table: string,
   portfolioDraftId: string,
   portfolioStep: PortfolioStep
-) => {
+): Promise<UpdateCommandOutput> {
   const dynamodb = new DynamoDBClient({});
   const ddb = DynamoDBDocumentClient.from(dynamodb);
   const now = new Date().toISOString();
@@ -92,4 +89,4 @@ export const createPortfolioStepCommand = async (
     })
   );
   return result;
-};
+}

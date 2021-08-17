@@ -1,14 +1,14 @@
+import { DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb";
+import { APIGatewayProxyEvent } from "aws-lambda";
+import { mockClient } from "aws-sdk-client-mock";
 import { PortfolioStep } from "../../models/PortfolioStep";
 import {
   createPortfolioStepCommand,
-  handler,
   EMPTY_REQUEST_BODY,
+  handler,
   NO_SUCH_PORTFOLIO,
-  REQUEST_BODY_INVALID,
+  REQUEST_BODY_INVALID
 } from "./createPortfolioStep";
-import { UpdateCommand, DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { mockClient } from "aws-sdk-client-mock";
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 beforeEach(() => {
@@ -122,6 +122,6 @@ describe("Handler response with mock dynamodb", function () {
     } as any;
 
     const data = await handler(request);
-    expect(data.body).toEqual(`"{\"code\":\"OTHER\",\"message\":\"Database error: InternalServiceError\"}"`);
+    expect(data.body).toEqual(`{"code":"OTHER","message":"Database error: InternalServiceError"}`);
   });
 });
