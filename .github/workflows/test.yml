@@ -48,10 +48,10 @@ jobs:
         run: npm run lint
       - name: Build the project
         run: npm run build
-      - name: Unit test portfolioDrafts api
-        run: npm test
       - name: Synthesize CDK template
         run: cdk synth -c "TicketId=GITHUBWF"
+      - name: Run test suite
+        run: npm test
       - name: Gather artifacts
         uses: actions/upload-artifact@v2
         with:
