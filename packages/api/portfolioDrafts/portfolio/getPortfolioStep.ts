@@ -1,8 +1,8 @@
+import { GetCommand } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { ErrorCodes } from "../../models/Error";
 import { PortfolioStep } from "../../models/PortfolioStep";
 import { dynamodbDocumentClient as client } from "../../utils/dynamodb";
-import { getPortfolioStepCommand } from "../../utils/commands/getPortfolioStepCommand";
 import { ApiSuccessResponse, ErrorResponse, ErrorStatusCode, SuccessStatusCode } from "../../utils/response";
 
 const TABLE_NAME = process.env.ATAT_TABLE_NAME ?? "";
@@ -14,6 +14,19 @@ const NO_SUCH_PORTFOLIO = new ErrorResponse(
   { code: ErrorCodes.INVALID_INPUT, message: "The given Portfolio Draft does not exist" },
   ErrorStatusCode.NOT_FOUND
 );
+
+const getPortfolioStepCommand = async (table: string, portfolioDraftId: string) => {
+  const result = await client.send(
+    new GetCommand({
+      TableName: table,
+      Key: {
+        id: portfolioDraftId,
+      },
+      ProjectionExpression: "portfolio_step",
+    })
+  );
+  return result;
+};
 
 /**
  * Gets the Portfolio Step of the Portfolio Draft Wizard
