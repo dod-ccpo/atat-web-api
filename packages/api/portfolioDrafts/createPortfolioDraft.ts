@@ -15,7 +15,7 @@ const TABLE_NAME = process.env.ATAT_TABLE_NAME;
  *
  * @param event - The POST request from API Gateway
  */
-export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   if (event.body && !JSON.parse(event.body)) {
     return new ErrorResponse(
       { code: ErrorCodes.INVALID_INPUT, message: "Request body must be empty" },
@@ -50,4 +50,4 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       ErrorStatusCode.INTERNAL_SERVER_ERROR
     );
   }
-};
+}

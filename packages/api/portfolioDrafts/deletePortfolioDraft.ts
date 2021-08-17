@@ -11,7 +11,7 @@ const TABLE_NAME = process.env.ATAT_TABLE_NAME;
  *
  * @param event - The DELETE request from API Gateway
  */
-export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   const portfolioDraftId = event.pathParameters?.portfolioDraftId;
 
   if (!portfolioDraftId) {
@@ -47,4 +47,4 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       ErrorStatusCode.INTERNAL_SERVER_ERROR
     );
   }
-};
+}

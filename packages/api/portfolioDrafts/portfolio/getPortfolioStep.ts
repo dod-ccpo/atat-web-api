@@ -1,4 +1,4 @@
-import { GetCommand } from "@aws-sdk/lib-dynamodb";
+import { GetCommand, GetCommandOutput } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { ErrorCodes } from "../../models/Error";
 import { PortfolioStep } from "../../models/PortfolioStep";
@@ -15,7 +15,7 @@ const NO_SUCH_PORTFOLIO = new ErrorResponse(
   ErrorStatusCode.NOT_FOUND
 );
 
-const getPortfolioStepCommand = async (table: string, portfolioDraftId: string) => {
+async function getPortfolioStepCommand(table: string, portfolioDraftId: string): Promise<GetCommandOutput> {
   const result = await client.send(
     new GetCommand({
       TableName: table,
@@ -26,14 +26,14 @@ const getPortfolioStepCommand = async (table: string, portfolioDraftId: string) 
     })
   );
   return result;
-};
+}
 
 /**
  * Gets the Portfolio Step of the Portfolio Draft Wizard
  *
  * @param event - The GET request from API Gateway
  */
-export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   const portfolioDraftId = event.pathParameters?.portfolioDraftId;
 
   if (!portfolioDraftId) {
@@ -56,4 +56,4 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       ErrorStatusCode.INTERNAL_SERVER_ERROR
     );
   }
-};
+}
