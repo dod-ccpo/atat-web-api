@@ -9,5 +9,5 @@ export interface Error {
 }
 
 export interface ValidationError extends Error {
-  errorMap: Record<string, never>;
+  errorMap: Record<string, unknown>;
 }

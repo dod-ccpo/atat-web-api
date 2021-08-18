@@ -13,35 +13,36 @@ const bucketName = process.env.PENDING_BUCKET;
  *
  * @param event - The POST request from API Gateway
  */
-export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   const result = await parser.parse(event);
+
   if (result.files.length !== 1) {
     return new ErrorResponse(
       { code: ErrorCodes.INVALID_INPUT, message: "Expected exactly one file." },
       ErrorStatusCode.BAD_REQUEST
     );
-  } else {
-    const file = result.files[0];
-    if (file.contentType !== "application/pdf") {
-      return new ErrorResponse(
-        { code: ErrorCodes.INVALID_INPUT, message: "Expected a PDF file" },
-        ErrorStatusCode.BAD_REQUEST
-      );
-    } else {
-      try {
-        return await uploadFile(file);
-      } catch (err) {
-        console.log("Unexpected error: " + err);
-        return new ErrorResponse(
-          { code: ErrorCodes.OTHER, message: "Unexpected error" },
-          ErrorStatusCode.INTERNAL_SERVER_ERROR
-        );
-      }
-    }
   }
-};
 
-const uploadFile = async (file: parser.MultipartFile) => {
+  const file = result.files[0];
+  if (file.contentType !== "application/pdf") {
+    return new ErrorResponse(
+      { code: ErrorCodes.INVALID_INPUT, message: "Expected a PDF file" },
+      ErrorStatusCode.BAD_REQUEST
+    );
+  }
+
+  try {
+    return await uploadFile(file);
+  } catch (err) {
+    console.log("Unexpected error: " + err);
+    return new ErrorResponse(
+      { code: ErrorCodes.OTHER, message: "Unexpected error" },
+      ErrorStatusCode.INTERNAL_SERVER_ERROR
+    );
+  }
+}
+
+async function uploadFile(file: parser.MultipartFile): Promise<APIGatewayProxyResult> {
   const client = new S3Client({});
   const key = uuid();
   const command = new PutObjectCommand({
@@ -61,4 +62,4 @@ const uploadFile = async (file: parser.MultipartFile) => {
     name: file.filename,
   };
   return new ApiSuccessResponse<FileMetadata>(metadata, SuccessStatusCode.CREATED);
-};
+}

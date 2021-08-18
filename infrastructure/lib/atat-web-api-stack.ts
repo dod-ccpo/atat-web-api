@@ -156,7 +156,7 @@ export class AtatWebApiStack extends cdk.Stack {
   }
 }
 
-const addCreateTaskOrderFiles = (scope: cdk.Stack, resource: apigw.Resource) => {
+function addCreateTaskOrderFiles(scope: cdk.Stack, resource: apigw.Resource) {
   const bucket = new s3.Bucket(scope, "PendingBucket", {
     publicReadAccess: false,
     removalPolicy: cdk.RemovalPolicy.RETAIN,
@@ -175,4 +175,4 @@ const addCreateTaskOrderFiles = (scope: cdk.Stack, resource: apigw.Resource) => 
   });
   resource.addMethod("POST", new apigw.LambdaIntegration(fn));
   bucket.grantPut(fn);
-};
+}

@@ -1,6 +1,6 @@
 import { BaseDocument } from "./BaseDocument";
 
-export const enum FileScanStatus {
+export enum FileScanStatus {
   PENDING = "pending",
   ACCEPTED = "accepted",
   REJECTED = "rejected",

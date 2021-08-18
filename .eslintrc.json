@@ -22,7 +22,7 @@
     ],
     "ignorePatterns": ["**/*.js", "coverage/**"],
     "rules": {
-      "no-console": "off"
+      "no-console": "warn"
     },
     "overrides": [
       {
