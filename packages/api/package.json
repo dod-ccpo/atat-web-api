@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "The ATAT Web API is the internal API that supports the ATAT Web UI.",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest --config=jest.config.js",
     "lint": "eslint --ext .js,.ts,.json -c ../../.eslintrc.json .",
     "lint:fix": "npm run lint -- --fix"
   },
@@ -15,7 +15,11 @@
     "uuid": "^8.3.2"
   },
   "devDependencies": {
+    "@types/jest": "^27.0.1",
     "@types/uuid": "^8.3.1",
-    "eslint": "^7.31.0"
+    "aws-sdk-client-mock": "^0.5.3",
+    "eslint": "^7.31.0",
+    "jest": "^27.0.6",
+    "ts-jest": "^27.0.4"
   }
 }

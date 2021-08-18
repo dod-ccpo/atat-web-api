@@ -21,7 +21,7 @@ const REQUEST_BODY_INVALID = new ErrorResponse(
  *
  * @param event - The POST request from API Gateway
  */
-export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   if (!event.body) {
     return new ErrorResponse(
       { code: ErrorCodes.INVALID_INPUT, message: "Request body must not be empty" },
@@ -75,4 +75,4 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     );
   }
   return new ApiSuccessResponse<FundingStep>(fundingStep, SuccessStatusCode.CREATED);
-};
+}

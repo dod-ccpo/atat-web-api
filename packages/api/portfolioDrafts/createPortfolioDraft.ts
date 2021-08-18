@@ -4,7 +4,7 @@ import { v4 as uuid } from "uuid";
 import { ErrorCodes } from "../models/Error";
 import { PortfolioDraftSummary } from "../models/PortfolioDraftSummary";
 import { ProvisioningStatus } from "../models/ProvisioningStatus";
-import { dynamodbClient as client } from "../utils/dynamodb";
+import { dynamodbDocumentClient as client } from "../utils/dynamodb";
 import { ApiSuccessResponse, ErrorResponse, ErrorStatusCode, SuccessStatusCode } from "../utils/response";
 
 const TABLE_NAME = process.env.ATAT_TABLE_NAME;
@@ -15,7 +15,7 @@ const TABLE_NAME = process.env.ATAT_TABLE_NAME;
  *
  * @param event - The POST request from API Gateway
  */
-export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   if (event.body && !JSON.parse(event.body)) {
     return new ErrorResponse(
       { code: ErrorCodes.INVALID_INPUT, message: "Request body must be empty" },
@@ -50,4 +50,4 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       ErrorStatusCode.INTERNAL_SERVER_ERROR
     );
   }
-};
+}

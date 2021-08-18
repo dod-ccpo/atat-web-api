@@ -3,6 +3,8 @@
 *.d.ts
 node_modules
 lerna-debug.log
+coverage/
+build/
 
 # CDK asset staging directory
 .cdk.staging
@@ -10,3 +12,6 @@ cdk.out
 
 # Private tag data
 tags-private.json
+
+# Editor configuration files
+.vscode/

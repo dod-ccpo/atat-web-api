@@ -26,10 +26,12 @@
     "resolveJsonModule": true,
     "typeRoots": [
       "./node_modules/@types"
-    ]
+    ],
+    "outDir": "build"
   },
   "exclude": [
     "node_modules",
-    "cdk.out"
+    "cdk.out",
+    "build"
   ]
 }

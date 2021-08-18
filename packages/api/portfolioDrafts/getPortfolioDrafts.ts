@@ -30,7 +30,7 @@ function evaluateQueryParameterInteger(qparam: string | undefined, defaultInt: n
  * Revisit once authentication and authorization are in place.
  * @param event - The GET request from API Gateway
  */
-export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   // Optional query param 'limit' must be integer with minimum value of 1 and maximum value of 50. Defaults to 20.
   // Limit is the number of items to return.
   const limit = evaluateQueryParameterInteger(event.queryStringParameters?.limit, 20);
@@ -58,4 +58,4 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       ErrorStatusCode.INTERNAL_SERVER_ERROR
     );
   }
-};
+}

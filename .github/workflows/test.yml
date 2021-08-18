@@ -50,6 +50,8 @@ jobs:
         run: npm run build
       - name: Synthesize CDK template
         run: cdk synth -c "TicketId=GITHUBWF"
+      - name: Run test suite
+        run: npm test
       - name: Gather artifacts
         uses: actions/upload-artifact@v2
         with:
