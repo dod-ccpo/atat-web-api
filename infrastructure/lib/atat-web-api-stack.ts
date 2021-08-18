@@ -95,6 +95,7 @@ export class AtatWebApiStack extends cdk.Stack {
     const portfolioDraftId = portfolioDrafts.addResource("{portfolioDraftId}");
     const portfolio = portfolioDraftId.addResource("portfolio");
     const funding = portfolioDraftId.addResource("funding");
+    const taskOrderNumber = taskOrderFiles.addResource("{taskOrderNumber}");
 
     // OperationIds from API spec are used to identify functions below
 
@@ -151,18 +152,18 @@ export class AtatWebApiStack extends cdk.Stack {
     // TODO: getApplicationStep
     // TODO: createApplicationStep
     // TODO: submitPortfolioDraft
-    addCreateTaskOrderFiles(this, taskOrderFiles);
+    addCreateTaskOrderFiles(this, taskOrderFiles, taskOrderNumber);
     // TODO: deleteTaskOrder
   }
 }
 
-function addCreateTaskOrderFiles(scope: cdk.Stack, resource: apigw.Resource) {
+function addCreateTaskOrderFiles(scope: cdk.Stack, resource: apigw.Resource, resourcePath: apigw.Resource) {
   const bucket = new s3.Bucket(scope, "PendingBucket", {
     publicReadAccess: false,
     removalPolicy: cdk.RemovalPolicy.RETAIN,
     autoDeleteObjects: false,
   });
-  const fn = new lambdaNodejs.NodejsFunction(scope, "CreateTaskOrderFileFunction", {
+  const createTaskOrderFileFn = new lambdaNodejs.NodejsFunction(scope, "CreateTaskOrderFileFunction", {
     entry: packageRoot() + "/api/taskOrderFiles/createTaskOrderFile.ts",
     timeout: Duration.seconds(300),
     environment: {
@@ -173,6 +174,20 @@ function addCreateTaskOrderFiles(scope: cdk.Stack, resource: apigw.Resource) {
     },
     memorySize: 256,
   });
-  resource.addMethod("POST", new apigw.LambdaIntegration(fn));
-  bucket.grantPut(fn);
+  resource.addMethod("POST", new apigw.LambdaIntegration(createTaskOrderFileFn));
+  bucket.grantPut(createTaskOrderFileFn);
+
+  const deleteTaskOrderFileFn = new lambdaNodejs.NodejsFunction(scope, "DeleteTaskOrderFileFunction", {
+    entry: packageRoot() + "/api/taskOrderFiles/deleteTaskOrderFile.ts",
+    timeout: Duration.seconds(300),
+    environment: {
+      PENDING_BUCKET: bucket.bucketName,
+    },
+    bundling: {
+      externalModules: ["aws-sdk"],
+    },
+    memorySize: 256,
+  });
+  resourcePath.addMethod("DELETE", new apigw.LambdaIntegration(deleteTaskOrderFileFn));
+  bucket.grantDelete(deleteTaskOrderFileFn);
 }
