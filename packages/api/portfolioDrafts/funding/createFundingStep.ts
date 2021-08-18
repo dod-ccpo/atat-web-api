@@ -2,14 +2,8 @@ import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { FundingStep } from "../../models/FundingStep";
 import { dynamodbClient as client } from "../../utils/dynamodb";
-import {
-  ApiSuccessResponse,
-  SuccessStatusCode,
-  DATABASE_ERROR,
-  NO_SUCH_PORTFOLIO_DRAFT,
-  REQUEST_BODY_EMPTY,
-  REQUEST_BODY_INVALID,
-} from "../../utils/response";
+import { DATABASE_ERROR, NO_SUCH_PORTFOLIO_DRAFT, REQUEST_BODY_EMPTY, REQUEST_BODY_INVALID } from "../../utils/errors";
+import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
 import { isFundingStep, isValidJson } from "../../utils/validation";
 
 const TABLE_NAME = process.env.ATAT_TABLE_NAME;
