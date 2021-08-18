@@ -14,12 +14,11 @@ export const NO_SUCH_TASK_ORDER_FILE = new ErrorResponse(
 );
 
 /**
- * Creates a new Task Order File
+ * Delete a Task Order File
  *
- * @param event - The POST request from API Gateway
+ * @param event - The DELETE request from API Gateway
  */
 export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
-  // const result = await parser.parse(event);
   const taskOrderNumber = event.pathParameters?.taskOrderNumber;
   if (!isPathParameterPresent(taskOrderNumber)) {
     return NO_SUCH_TASK_ORDER_FILE;
