@@ -49,7 +49,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
   //   v. CLIN value and obligated funds must be numbers
   //   vi. CLIN value and obligated funds should be formatted as currency (i.e. “0.00”)
 
-  // 2 b. An error map must be returned, including input validation checks 
+  // 2 b. An error map must be returned, including input validation checks
   //   i. All data should be returned, including a parameter signaling invalid input, so the front-end can highlight the invalid field
 
   const command = new UpdateCommand({
