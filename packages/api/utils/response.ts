@@ -140,10 +140,9 @@ abstract class ErrorResponse extends Response {
  */
 export class ValidationErrorResponse extends ErrorResponse {
   /**
-   * Create an error response.
+   * Create a validation error response.
    *
    * @param validationError - An instance of {@link ValidationError} to include in the response
-   * @param statusCode - Any supported HTTP error status code
    * @param headers - HTTP response headers
    * @param multiValueHeaders - HTTP response headers, allowing multiple values for a header
    */
