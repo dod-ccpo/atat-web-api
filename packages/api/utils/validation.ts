@@ -109,3 +109,19 @@ export function isBodyPresent(body: string | null): body is string {
   const trimmedBody = body?.replace(/\s/g, "") ?? "";
   return !emptyValues.includes(trimmedBody);
 }
+
+/**
+ * Check whether a given string is a valid date.
+ * The expected format is YYYY-MM-DD (ISO 8601).
+ *
+ * @param str - The string to check
+ * @returns true if the string is a valid date; false otherwise
+ */
+export function isValidDate(str: string): boolean {
+  try {
+    const date: Date = new Date(str);
+    return date instanceof Date && !isNaN(date.getTime());
+  } catch (e) {
+    return false;
+  }
+}
