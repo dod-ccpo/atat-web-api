@@ -1,5 +1,5 @@
 import { APIGatewayProxyResult } from "aws-lambda";
-import { Error, ErrorCode, ValidationError } from "../models/Error";
+import { Error, ValidationError } from "../models/Error";
 
 type Headers = { [header: string]: string | number | boolean } | undefined;
 type MultiValueHeaders = { [header: string]: (string | number | boolean)[] } | undefined;
@@ -136,49 +136,23 @@ abstract class ErrorResponse extends Response {
 }
 
 /**
- * An error response to an API request.
- */
-export class OtherErrorResponse extends ErrorResponse {
-  /**
-   * Create an error response.
-   *
-   * @param message - The error message to return to the caller
-   * @param statusCode - The appropriate HTTP error status code
-   * @param headers - HTTP response headers
-   * @param multiValueHeaders - HTTP response headers, allowing multiple values for a header
-   */
-  constructor(message: string, statusCode: ErrorStatusCode, headers?: Headers, multiValueHeaders?: MultiValueHeaders) {
-    const error: Error = {
-      code: ErrorCode.OTHER,
-      message,
-    };
-    super(error, statusCode, headers, multiValueHeaders);
-  }
-}
-
-/**
- * A response for validation errors in an API request.
+ * An error response to an API request with input that fails validation.
  */
 export class ValidationErrorResponse extends ErrorResponse {
   /**
-   * Create a 400 error response for validation errors.
+   * Create an error response.
    *
-   * @param message - The top-level error message to return to the caller
-   * @param errorMap - The Error Map object that specifies the errors for various input elements
+   * @param validationError - An instance of {@link ValidationError} to include in the response
+   * @param statusCode - Any supported HTTP error status code
    * @param headers - HTTP response headers
    * @param multiValueHeaders - HTTP response headers, allowing multiple values for a header
    */
   constructor(
-    message: string,
-    errorMap: Record<string, unknown>,
+    validationError: ValidationError,
+    statusCode: ErrorStatusCode,
     headers?: Headers,
     multiValueHeaders?: MultiValueHeaders
   ) {
-    const error: ValidationError = {
-      code: ErrorCode.INVALID_INPUT,
-      message,
-      errorMap,
-    };
-    super(error, ErrorStatusCode.BAD_REQUEST, headers, multiValueHeaders);
+    super(JSON.stringify(validationError), statusCode, headers, multiValueHeaders, false);
   }
 }
