@@ -4,8 +4,9 @@ import { FundingStep } from "../../models/FundingStep";
 import { FUNDING_STEP } from "../../models/PortfolioDraft";
 import { dynamodbClient as client } from "../../utils/dynamodb";
 import { DATABASE_ERROR, NO_SUCH_PORTFOLIO_DRAFT, REQUEST_BODY_EMPTY, REQUEST_BODY_INVALID } from "../../utils/errors";
-import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
+import { ApiSuccessResponse, SuccessStatusCode, ValidationErrorResponse } from "../../utils/response";
 import { isFundingStep, isValidJson } from "../../utils/validation";
+import { ErrorCodes, ValidationError } from "../../models/Error";
 
 const TABLE_NAME = process.env.ATAT_TABLE_NAME;
 
@@ -51,6 +52,14 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
   // 2 b. An error map must be returned, including input validation checks
   //   i. All data should be returned, including a parameter signaling invalid input, so the front-end can highlight the invalid field
+
+  // BEGIN ValidationErrorResponse example
+  const veresponse = new ValidationErrorResponse({
+    errorMap: { propertyA: "", propertyB: "" },
+    code: ErrorCodes.INVALID_INPUT,
+    message: "Invalid input",
+  });
+  // END
 
   const command = new UpdateCommand({
     TableName: TABLE_NAME,
