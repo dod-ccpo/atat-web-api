@@ -147,12 +147,7 @@ export class ValidationErrorResponse extends ErrorResponse {
    * @param headers - HTTP response headers
    * @param multiValueHeaders - HTTP response headers, allowing multiple values for a header
    */
-  constructor(
-    validationError: ValidationError,
-    statusCode: ErrorStatusCode,
-    headers?: Headers,
-    multiValueHeaders?: MultiValueHeaders
-  ) {
-    super(JSON.stringify(validationError), statusCode, headers, multiValueHeaders, false);
+  constructor(validationError: ValidationError, headers?: Headers, multiValueHeaders?: MultiValueHeaders) {
+    super(validationError, ErrorStatusCode.BAD_REQUEST, headers, multiValueHeaders);
   }
 }
