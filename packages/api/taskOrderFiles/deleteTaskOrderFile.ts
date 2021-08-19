@@ -7,9 +7,9 @@ import * as parser from "lambda-multipart-parser";
 import { ErrorCodes } from "../models/Error";
 import { isPathParameterPresent } from "../utils/validation";
 
-const bucketName = process.env.PENDING_BUCKET;
+const bucketName = process.env.ACCEPTED_BUCKET;
 export const NO_SUCH_TASK_ORDER_FILE = new ErrorResponse(
-  { code: ErrorCodes.INVALID_INPUT, message: "TaskOrderNumber must be specified in the URL path" },
+  { code: ErrorCodes.INVALID_INPUT, message: "TaskOrderId must be specified in the URL path" },
   ErrorStatusCode.BAD_REQUEST
 );
 
@@ -19,13 +19,13 @@ export const NO_SUCH_TASK_ORDER_FILE = new ErrorResponse(
  * @param event - The DELETE request from API Gateway
  */
 export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
-  const taskOrderNumber = event.pathParameters?.taskOrderNumber;
-  if (!isPathParameterPresent(taskOrderNumber)) {
+  const taskOrderId = event.pathParameters?.taskOrderId;
+  if (!isPathParameterPresent(taskOrderId)) {
     return NO_SUCH_TASK_ORDER_FILE;
   }
 
   try {
-    await deleteFile(taskOrderNumber);
+    await deleteFile(taskOrderId);
   } catch (err) {
     console.log("Unexpected error: " + err);
     return new ErrorResponse(
@@ -36,11 +36,11 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
   return new NoContentResponse();
 }
 
-async function deleteFile(taskOrderNumber: string): Promise<DeleteObjectCommandOutput> {
+async function deleteFile(taskOrderId: string): Promise<DeleteObjectCommandOutput> {
   const client = new S3Client({});
   const command = new DeleteObjectCommand({
     Bucket: bucketName,
-    Key: taskOrderNumber,
+    Key: taskOrderId,
   });
   const result = await client.send(command);
   return result;

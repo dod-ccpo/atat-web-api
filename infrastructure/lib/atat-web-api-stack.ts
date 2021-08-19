@@ -91,12 +91,10 @@ export class AtatWebApiStack extends cdk.Stack {
     // We definitely want to improve the ergonomics of this and doing so is a high priority; however, following
     // these examples and steps should be a good start to allow progress while that work is happening.
     const portfolioDrafts = restApi.root.addResource("portfolioDrafts");
-    const taskOrderFiles = restApi.root.addResource("taskOrderFiles");
+
     const portfolioDraftId = portfolioDrafts.addResource("{portfolioDraftId}");
     const portfolio = portfolioDraftId.addResource("portfolio");
     const funding = portfolioDraftId.addResource("funding");
-    const taskOrderNumber = taskOrderFiles.addResource("{taskOrderNumber}");
-
     // OperationIds from API spec are used to identify functions below
 
     // createPortfolioDraft
@@ -152,12 +150,18 @@ export class AtatWebApiStack extends cdk.Stack {
     // TODO: getApplicationStep
     // TODO: createApplicationStep
     // TODO: submitPortfolioDraft
-    addCreateTaskOrderFiles(this, taskOrderFiles, taskOrderNumber);
-    // TODO: deleteTaskOrder
+    addTaskOrderRoutes(this, restApi);
   }
 }
 
-function addCreateTaskOrderFiles(scope: cdk.Stack, resource: apigw.Resource, resourcePath: apigw.Resource) {
+function addTaskOrderRoutes(scope: cdk.Stack, restApi: apigw.RestApi) {
+  const taskOrderFiles = restApi.root.addResource("taskOrderFiles");
+  const taskOrderId = taskOrderFiles.addResource("{taskOrderId}");
+  addCreateTaskOrderFiles(scope, taskOrderFiles);
+  // addGetTaskOrderFiles(scope, taskOrderId);
+  addDeleteTaskOrderFiles(scope, taskOrderId);
+}
+function addCreateTaskOrderFiles(scope: cdk.Stack, resource: apigw.Resource) {
   const bucket = new s3.Bucket(scope, "PendingBucket", {
     publicReadAccess: false,
     removalPolicy: cdk.RemovalPolicy.RETAIN,
@@ -176,18 +180,23 @@ function addCreateTaskOrderFiles(scope: cdk.Stack, resource: apigw.Resource, res
   });
   resource.addMethod("POST", new apigw.LambdaIntegration(createTaskOrderFileFn));
   bucket.grantPut(createTaskOrderFileFn);
+}
 
+function addDeleteTaskOrderFiles(scope: cdk.Stack, resource: apigw.Resource) {
+  const bucket = new s3.Bucket(scope, "AcceptedBucket", {
+    publicReadAccess: false,
+    removalPolicy: cdk.RemovalPolicy.RETAIN,
+    autoDeleteObjects: false,
+  });
   const deleteTaskOrderFileFn = new lambdaNodejs.NodejsFunction(scope, "DeleteTaskOrderFileFunction", {
     entry: packageRoot() + "/api/taskOrderFiles/deleteTaskOrderFile.ts",
-    timeout: Duration.seconds(300),
     environment: {
-      PENDING_BUCKET: bucket.bucketName,
+      ACCEPTED_BUCKET: bucket.bucketName,
     },
     bundling: {
       externalModules: ["aws-sdk"],
     },
-    memorySize: 256,
   });
-  resourcePath.addMethod("DELETE", new apigw.LambdaIntegration(deleteTaskOrderFileFn));
+  resource.addMethod("DELETE", new apigw.LambdaIntegration(deleteTaskOrderFileFn));
   bucket.grantDelete(deleteTaskOrderFileFn);
 }
