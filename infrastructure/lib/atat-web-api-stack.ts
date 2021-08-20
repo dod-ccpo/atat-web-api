@@ -1,10 +1,12 @@
 import * as apigw from "@aws-cdk/aws-apigateway";
 import { UserPool } from "@aws-cdk/aws-cognito";
 import * as dynamodb from "@aws-cdk/aws-dynamodb";
-import * as s3 from "@aws-cdk/aws-s3";
 import * as lambdaNodejs from "@aws-cdk/aws-lambda-nodejs";
+import * as s3 from "@aws-cdk/aws-s3";
 import * as cdk from "@aws-cdk/core";
 import { Duration } from "@aws-cdk/core";
+import { HttpMethod } from "./http";
+import { PortfolioDraftFunction } from "./portfolio-drafts-function";
 
 // This is a suboptimal solution to finding the relative directory to the
 // package root. This is necessary because it is possible for this file to be
@@ -70,88 +72,60 @@ export class AtatWebApiStack extends cdk.Stack {
       value: restApi.url ?? "",
     });
 
-    const sharedFunctionProps: lambdaNodejs.NodejsFunctionProps = {
-      environment: {
-        ATAT_TABLE_NAME: table.tableName,
-      },
-      bundling: {
-        externalModules: ["aws-sdk"],
-      },
-    };
-
-    // NEW FUNCTIONS GET DEFINED HERE
-    // Some notes:
-    //   - Each function gets defined using `lambdaNodejs.NodejsFunction` for now. You can probably
-    //     reuse the `sharedFunctionProps`, especially for the early functions
-    //   - Define new portfolioDrafts routes as `portfolioDrafts.addResource`
-    //   - You can define routes with variables/path parameters by using the typical brace notation
-    //     for example .addResource("{portfolioDraft}")
-    //   - Make sure to call `table.grantReadData` or `table.grantReadWriteData` as appropriate (so for GETs
-    //     try to only grant read)
-    // We definitely want to improve the ergonomics of this and doing so is a high priority; however, following
-    // these examples and steps should be a good start to allow progress while that work is happening.
     const portfolioDrafts = restApi.root.addResource("portfolioDrafts");
-
     const portfolioDraftId = portfolioDrafts.addResource("{portfolioDraftId}");
     const portfolio = portfolioDraftId.addResource("portfolio");
     const funding = portfolioDraftId.addResource("funding");
     // OperationIds from API spec are used to identify functions below
 
-    // createPortfolioDraft
-    const createPortfolioDraftFn = new lambdaNodejs.NodejsFunction(this, "CreatePortfolioDraftFunction", {
-      entry: packageRoot() + "/api/portfolioDrafts/createPortfolioDraft.ts",
-      ...sharedFunctionProps,
+    const createPortfolioDraft = new PortfolioDraftFunction(this, "CreatePortfolioDraft", {
+      resource: portfolioDrafts,
+      table: table,
+      method: HttpMethod.POST,
+      handlerPath: packageRoot() + "/api/portfolioDrafts/createPortfolioDraft.ts",
     });
-    portfolioDrafts.addMethod("POST", new apigw.LambdaIntegration(createPortfolioDraftFn));
-    table.grantReadWriteData(createPortfolioDraftFn);
 
-    // deletePortfolioDraft
-    const deletePortfolioDraftFn = new lambdaNodejs.NodejsFunction(this, "DeletePortfolioDraftFunction", {
-      entry: packageRoot() + "/api/portfolioDrafts/deletePortfolioDraft.ts",
-      ...sharedFunctionProps,
+    const getPortfolioDrafts = new PortfolioDraftFunction(this, "GetPortfolioDrafts", {
+      resource: portfolioDrafts,
+      table: table,
+      method: HttpMethod.GET,
+      handlerPath: packageRoot() + "/api/portfolioDrafts/getPortfolioDrafts.ts",
     });
-    portfolioDraftId.addMethod("DELETE", new apigw.LambdaIntegration(deletePortfolioDraftFn));
-    table.grantReadWriteData(deletePortfolioDraftFn);
 
-    // createPortfolioStep
-    const createPortfolioStepFn = new lambdaNodejs.NodejsFunction(this, "CreatePortfolioStepFunction", {
-      entry: packageRoot() + "/api/portfolioDrafts/portfolio/createPortfolioStep.ts",
-      ...sharedFunctionProps,
+    const deletePortfolioDraft = new PortfolioDraftFunction(this, "DeletePortfolioDraft", {
+      resource: portfolioDraftId,
+      table: table,
+      method: HttpMethod.DELETE,
+      handlerPath: packageRoot() + "/api/portfolioDrafts/deletePortfolioDraft.ts",
     });
-    portfolio.addMethod("POST", new apigw.LambdaIntegration(createPortfolioStepFn));
-    table.grantReadWriteData(createPortfolioStepFn);
 
-    // getPortfolioStep
-    const getPortfolioStepFn = new lambdaNodejs.NodejsFunction(this, "GetPortfolioStepFunction", {
-      entry: packageRoot() + "/api/portfolioDrafts/portfolio/getPortfolioStep.ts",
-      ...sharedFunctionProps,
+    const createPortfolioStep = new PortfolioDraftFunction(this, "CreatePortfolioStep", {
+      resource: portfolio,
+      table: table,
+      method: HttpMethod.POST,
+      handlerPath: packageRoot() + "/api/portfolioDrafts/portfolio/createPortfolioStep.ts",
     });
-    portfolio.addMethod("GET", new apigw.LambdaIntegration(getPortfolioStepFn));
-    table.grantReadData(getPortfolioStepFn);
 
-    // getPortfolioDrafts
-    const getPortfolioDraftsFn = new lambdaNodejs.NodejsFunction(this, "GetPortfolioDraftsFunction", {
-      entry: packageRoot() + "/api/portfolioDrafts/getPortfolioDrafts.ts",
-      ...sharedFunctionProps,
+    const getPortfolioStep = new PortfolioDraftFunction(this, "GetPortfolioStep", {
+      resource: portfolio,
+      table: table,
+      method: HttpMethod.GET,
+      handlerPath: packageRoot() + "/api/portfolioDrafts/portfolio/getPortfolioStep.ts",
     });
-    portfolioDrafts.addMethod("GET", new apigw.LambdaIntegration(getPortfolioDraftsFn));
-    table.grantReadData(getPortfolioDraftsFn);
 
-    // createFundingStep
-    const createFundingStepFn = new lambdaNodejs.NodejsFunction(this, "CreateFundingStepFunction", {
-      entry: packageRoot() + "/api/portfolioDrafts/funding/createFundingStep.ts",
-      ...sharedFunctionProps,
+    const createFundingStep = new PortfolioDraftFunction(this, "CreateFundingStep", {
+      resource: funding,
+      table: table,
+      method: HttpMethod.POST,
+      handlerPath: packageRoot() + "/api/portfolioDrafts/funding/createFundingStep.ts",
     });
-    funding.addMethod("POST", new apigw.LambdaIntegration(createFundingStepFn));
-    table.grantReadWriteData(createFundingStepFn);
 
-    // getFundingStep
-    const getFundingStepFn = new lambdaNodejs.NodejsFunction(this, "GetFundingStepFunction", {
-      entry: packageRoot() + "/api/portfolioDrafts/funding/getFundingStep.ts",
-      ...sharedFunctionProps,
+    const getFundingStep = new PortfolioDraftFunction(this, "GetFundingStep", {
+      resource: funding,
+      table: table,
+      method: HttpMethod.GET,
+      handlerPath: packageRoot() + "/api/portfolioDrafts/funding/getFundingStep.ts",
     });
-    funding.addMethod("GET", new apigw.LambdaIntegration(getFundingStepFn));
-    table.grantReadData(getFundingStepFn);
 
     // TODO: getPortfolioDraft
     // TODO: getApplicationStep
@@ -168,6 +142,7 @@ function addTaskOrderRoutes(scope: cdk.Stack, restApi: apigw.RestApi) {
   // addGetTaskOrderFiles(scope, taskOrderId);
   addDeleteTaskOrderFiles(scope, taskOrderId);
 }
+
 function addCreateTaskOrderFiles(scope: cdk.Stack, resource: apigw.Resource) {
   const bucket = new s3.Bucket(scope, "PendingBucket", {
     publicReadAccess: false,
