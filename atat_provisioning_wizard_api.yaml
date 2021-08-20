@@ -289,6 +289,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
+        '404':
+          description: Portfolio Draft with the given ID does not exist
       requestBody:
         description: Input data from the Application Step of the Portfolio Draft Wizard.
         required: true
