@@ -5,8 +5,8 @@ import { FUNDING_STEP } from "../../models/PortfolioDraft";
 import { dynamodbClient as client } from "../../utils/dynamodb";
 import { DATABASE_ERROR, NO_SUCH_PORTFOLIO_DRAFT, REQUEST_BODY_EMPTY, REQUEST_BODY_INVALID } from "../../utils/errors";
 import { ApiSuccessResponse, SuccessStatusCode, ValidationErrorResponse } from "../../utils/response";
-import { isFundingStep, isValidJson } from "../../utils/validation";
-import { ErrorCodes, ValidationError } from "../../models/Error";
+import { isFundingStep, isValidJson, isValidDate } from "../../utils/validation";
+import { ErrorCodes } from "../../models/Error";
 
 const TABLE_NAME = process.env.ATAT_TABLE_NAME;
 
@@ -43,23 +43,37 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
   // TODO:
   // 1 d. Input validation must take place
-  //   i. Any dates must be ISO 8601 compliant
-  //   ii. PoP start date must occur before the PoP end date, and PoP end date cannot be in the past
   //   iii. Obligated funds must be greater than $0.00, and less than the total CLIN value
   //   iv. Total CLIN value must be greater than $0.00
   //   v. CLIN value and obligated funds must be numbers
   //   vi. CLIN value and obligated funds should be formatted as currency (i.e. “0.00”)
 
-  // 2 b. An error map must be returned, including input validation checks
-  //   i. All data should be returned, including a parameter signaling invalid input, so the front-end can highlight the invalid field
+  // 2 b. An error map must be returned
 
-  // BEGIN ValidationErrorResponse example
-  const veresponse = new ValidationErrorResponse({
-    errorMap: { propertyA: "", propertyB: "" },
-    code: ErrorCodes.INVALID_INPUT,
-    message: "Invalid input",
-  });
-  // END
+  const clins = fundingStep.clins.values();
+  // All validation tests below are logically negating the expected state; i.e. if (!expected) { return validation error }
+  // Assertion messages are positive and describe the expected state.
+  for (const clin of clins) {
+    console.debug("Processing clin_number: " + clin.clin_number + "...");
+    // 1 d. i. Any dates must be ISO 8601 compliant
+    if (!isValidDate(clin.pop_start_date)) {
+      console.warn("clin [" + clin.clin_number + "] - PoP start date must be a valid date");
+      return createValidationErrorResponse({ pop_start_date: clin.pop_start_date });
+    }
+    if (!isValidDate(clin.pop_end_date)) {
+      console.warn("clin [" + clin.clin_number + "] - PoP end date must be a valid date");
+      return createValidationErrorResponse({ pop_end_date: clin.pop_end_date });
+    }
+    // 1 d. ii. PoP start date must occur before the PoP end date, and PoP end date cannot be in the past
+    if (!(new Date(clin.pop_start_date) < new Date(clin.pop_end_date))) {
+      console.warn("clin [" + clin.clin_number + "] - PoP start date must be before PoP end date");
+      return createValidationErrorResponse({ pop_start_date: clin.pop_start_date, pop_end_date: clin.pop_end_date });
+    }
+    if (!(new Date() < new Date(clin.pop_end_date))) {
+      console.warn("clin [" + clin.clin_number + "] - PoP end date must be in the future");
+      return createValidationErrorResponse({ pop_end_date: clin.pop_end_date });
+    }
+  }
 
   const command = new UpdateCommand({
     TableName: TABLE_NAME,
@@ -87,4 +101,17 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
     return DATABASE_ERROR;
   }
   return new ApiSuccessResponse<FundingStep>(fundingStep, SuccessStatusCode.CREATED);
+}
+
+/**
+ * Returns an error map using the given Record
+ * @param properties contains property names and value that have failed validation
+ * @returns ValidationErrorResponse containing an error map property with the given values
+ */
+function createValidationErrorResponse(properties: Record<string, unknown>): ValidationErrorResponse {
+  return new ValidationErrorResponse({
+    errorMap: properties,
+    code: ErrorCodes.INVALID_INPUT,
+    message: "Invalid input",
+  });
 }
