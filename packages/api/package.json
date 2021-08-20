@@ -8,11 +8,11 @@
     "lint:fix": "npm run lint -- --fix"
   },
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.25.0",
-    "@aws-sdk/client-s3": "^3.25.0",
-    "@aws-sdk/lib-dynamodb": "^3.25.0",
-    "@aws-sdk/util-dynamodb": "^3.25.0",
-    "@types/aws-lambda": "^8.10.81",
+    "@aws-sdk/client-dynamodb": "^3.27.0",
+    "@aws-sdk/client-s3": "^3.27.0",
+    "@aws-sdk/lib-dynamodb": "^3.27.0",
+    "@aws-sdk/util-dynamodb": "^3.27.0",
+    "@types/aws-lambda": "^8.10.83",
     "lambda-multipart-parser": "^1.0.1",
     "uuid": "^8.3.2"
   },
