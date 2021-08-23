@@ -1,12 +1,12 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { v4 as uuid } from "uuid";
-import { ApiSuccessResponse, ErrorResponse, ErrorStatusCode, SuccessStatusCode } from "../utils/response";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import { FileMetadata, FileScanStatus } from "../models/FileMetadata";
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import * as parser from "lambda-multipart-parser";
+import { v4 as uuid } from "uuid";
 import { ErrorCodes } from "../models/Error";
+import { FileMetadata, FileScanStatus } from "../models/FileMetadata";
+import { ApiSuccessResponse, ErrorResponse, ErrorStatusCode, SuccessStatusCode } from "../utils/response";
 
-const bucketName = process.env.PENDING_BUCKET;
+const bucketName = process.env.DATA_BUCKET;
 
 /**
  * Creates a new Task Order File

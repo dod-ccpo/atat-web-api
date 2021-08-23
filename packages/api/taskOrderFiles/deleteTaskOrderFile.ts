@@ -1,13 +1,10 @@
+import { DeleteObjectCommand, DeleteObjectCommandOutput, S3Client } from "@aws-sdk/client-s3";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { v4 as uuid } from "uuid";
-import { ApiSuccessResponse, ErrorResponse, ErrorStatusCode, NoContentResponse } from "../utils/response";
-import { S3Client, DeleteObjectCommand, DeleteObjectCommandOutput } from "@aws-sdk/client-s3";
-import { FileMetadata, FileScanStatus } from "../models/FileMetadata";
-import * as parser from "lambda-multipart-parser";
 import { ErrorCodes } from "../models/Error";
+import { ErrorResponse, ErrorStatusCode, NoContentResponse } from "../utils/response";
 import { isPathParameterPresent } from "../utils/validation";
 
-const bucketName = process.env.ACCEPTED_BUCKET;
+const bucketName = process.env.DATA_BUCKET;
 export const NO_SUCH_TASK_ORDER_FILE = new ErrorResponse(
   { code: ErrorCodes.INVALID_INPUT, message: "TaskOrderId must be specified in the URL path" },
   ErrorStatusCode.BAD_REQUEST
