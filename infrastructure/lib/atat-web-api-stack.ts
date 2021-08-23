@@ -1,12 +1,11 @@
 import * as apigw from "@aws-cdk/aws-apigateway";
 import { UserPool } from "@aws-cdk/aws-cognito";
 import * as dynamodb from "@aws-cdk/aws-dynamodb";
-import * as lambdaNodejs from "@aws-cdk/aws-lambda-nodejs";
-import * as s3 from "@aws-cdk/aws-s3";
 import * as cdk from "@aws-cdk/core";
-import { Duration } from "@aws-cdk/core";
+import { ApiDynamoDBFunction } from "./constructs/api-dynamodb-function";
+import { ApiS3Function } from "./constructs/api-s3-function";
+import { TaskOrderLifecycle } from "./constructs/task-order-lifecycle";
 import { HttpMethod } from "./http";
-import { PortfolioDraftFunction } from "./portfolio-drafts-function";
 
 // This is a suboptimal solution to finding the relative directory to the
 // package root. This is necessary because it is possible for this file to be
@@ -78,49 +77,49 @@ export class AtatWebApiStack extends cdk.Stack {
     const funding = portfolioDraftId.addResource("funding");
     // OperationIds from API spec are used to identify functions below
 
-    const createPortfolioDraft = new PortfolioDraftFunction(this, "CreatePortfolioDraft", {
+    const createPortfolioDraft = new ApiDynamoDBFunction(this, "CreatePortfolioDraft", {
       resource: portfolioDrafts,
       table: table,
       method: HttpMethod.POST,
       handlerPath: packageRoot() + "/api/portfolioDrafts/createPortfolioDraft.ts",
     });
 
-    const getPortfolioDrafts = new PortfolioDraftFunction(this, "GetPortfolioDrafts", {
+    const getPortfolioDrafts = new ApiDynamoDBFunction(this, "GetPortfolioDrafts", {
       resource: portfolioDrafts,
       table: table,
       method: HttpMethod.GET,
       handlerPath: packageRoot() + "/api/portfolioDrafts/getPortfolioDrafts.ts",
     });
 
-    const deletePortfolioDraft = new PortfolioDraftFunction(this, "DeletePortfolioDraft", {
+    const deletePortfolioDraft = new ApiDynamoDBFunction(this, "DeletePortfolioDraft", {
       resource: portfolioDraftId,
       table: table,
       method: HttpMethod.DELETE,
       handlerPath: packageRoot() + "/api/portfolioDrafts/deletePortfolioDraft.ts",
     });
 
-    const createPortfolioStep = new PortfolioDraftFunction(this, "CreatePortfolioStep", {
+    const createPortfolioStep = new ApiDynamoDBFunction(this, "CreatePortfolioStep", {
       resource: portfolio,
       table: table,
       method: HttpMethod.POST,
       handlerPath: packageRoot() + "/api/portfolioDrafts/portfolio/createPortfolioStep.ts",
     });
 
-    const getPortfolioStep = new PortfolioDraftFunction(this, "GetPortfolioStep", {
+    const getPortfolioStep = new ApiDynamoDBFunction(this, "GetPortfolioStep", {
       resource: portfolio,
       table: table,
       method: HttpMethod.GET,
       handlerPath: packageRoot() + "/api/portfolioDrafts/portfolio/getPortfolioStep.ts",
     });
 
-    const createFundingStep = new PortfolioDraftFunction(this, "CreateFundingStep", {
+    const createFundingStep = new ApiDynamoDBFunction(this, "CreateFundingStep", {
       resource: funding,
       table: table,
       method: HttpMethod.POST,
       handlerPath: packageRoot() + "/api/portfolioDrafts/funding/createFundingStep.ts",
     });
 
-    const getFundingStep = new PortfolioDraftFunction(this, "GetFundingStep", {
+    const getFundingStep = new ApiDynamoDBFunction(this, "GetFundingStep", {
       resource: funding,
       table: table,
       method: HttpMethod.GET,
@@ -138,47 +137,22 @@ export class AtatWebApiStack extends cdk.Stack {
 function addTaskOrderRoutes(scope: cdk.Stack, restApi: apigw.RestApi) {
   const taskOrderFiles = restApi.root.addResource("taskOrderFiles");
   const taskOrderId = taskOrderFiles.addResource("{taskOrderId}");
-  addCreateTaskOrderFiles(scope, taskOrderFiles);
-  // addGetTaskOrderFiles(scope, taskOrderId);
-  addDeleteTaskOrderFiles(scope, taskOrderId);
-}
+  const taskOrderManagement = new TaskOrderLifecycle(scope, "TaskOrders");
+  const createTaskOrderFile = new ApiS3Function(scope, "CreateTaskOrderFile", {
+    resource: taskOrderFiles,
+    bucket: taskOrderManagement.pendingBucket,
+    method: HttpMethod.POST,
+    handlerPath: packageRoot() + "/api/taskOrderFiles/createTaskOrderFile.ts",
+    functionPropsOverride: {
+      memorySize: 256,
+    },
+  });
+  const deleteTaskOrderFile = new ApiS3Function(scope, "DeleteTaskOrderFile", {
+    resource: taskOrderId,
+    bucket: taskOrderManagement.acceptedBucket,
+    method: HttpMethod.DELETE,
+    handlerPath: packageRoot() + "/api/taskOrderFiles/deleteTaskOrderFile.ts",
+  });
 
-function addCreateTaskOrderFiles(scope: cdk.Stack, resource: apigw.Resource) {
-  const bucket = new s3.Bucket(scope, "PendingBucket", {
-    publicReadAccess: false,
-    removalPolicy: cdk.RemovalPolicy.RETAIN,
-    autoDeleteObjects: false,
-  });
-  const createTaskOrderFileFn = new lambdaNodejs.NodejsFunction(scope, "CreateTaskOrderFileFunction", {
-    entry: packageRoot() + "/api/taskOrderFiles/createTaskOrderFile.ts",
-    timeout: Duration.seconds(300),
-    environment: {
-      PENDING_BUCKET: bucket.bucketName,
-    },
-    bundling: {
-      externalModules: ["aws-sdk"],
-    },
-    memorySize: 256,
-  });
-  resource.addMethod("POST", new apigw.LambdaIntegration(createTaskOrderFileFn));
-  bucket.grantPut(createTaskOrderFileFn);
-}
-
-function addDeleteTaskOrderFiles(scope: cdk.Stack, resource: apigw.Resource) {
-  const bucket = new s3.Bucket(scope, "AcceptedBucket", {
-    publicReadAccess: false,
-    removalPolicy: cdk.RemovalPolicy.RETAIN,
-    autoDeleteObjects: false,
-  });
-  const deleteTaskOrderFileFn = new lambdaNodejs.NodejsFunction(scope, "DeleteTaskOrderFileFunction", {
-    entry: packageRoot() + "/api/taskOrderFiles/deleteTaskOrderFile.ts",
-    environment: {
-      ACCEPTED_BUCKET: bucket.bucketName,
-    },
-    bundling: {
-      externalModules: ["aws-sdk"],
-    },
-  });
-  resource.addMethod("DELETE", new apigw.LambdaIntegration(deleteTaskOrderFileFn));
-  bucket.grantDelete(deleteTaskOrderFileFn);
+  // TODO: getTaskOrderFiles
 }
