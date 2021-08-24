@@ -1,14 +1,13 @@
-import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { DynamoDBDocumentClient, UpdateCommand, UpdateCommandOutput } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { FundingStep } from "../../models/FundingStep";
-import { FUNDING_STEP } from "../../models/PortfolioDraft";
-import { dynamodbClient as client } from "../../utils/dynamodb";
 import { DATABASE_ERROR, NO_SUCH_PORTFOLIO_DRAFT, REQUEST_BODY_EMPTY, REQUEST_BODY_INVALID } from "../../utils/errors";
 import { ApiSuccessResponse, SuccessStatusCode, ValidationErrorResponse } from "../../utils/response";
 import { isFundingStep, isValidJson, isValidDate } from "../../utils/validation";
 import { ErrorCodes } from "../../models/Error";
 
-const TABLE_NAME = process.env.ATAT_TABLE_NAME;
+const TABLE_NAME = process.env.ATAT_TABLE_NAME ?? "";
 
 /**
  * Submits the Funding Step of the Portfolio Draft Wizard
@@ -38,7 +37,6 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
   if (!isFundingStep(requestBody)) {
     return REQUEST_BODY_INVALID;
   }
-  const now = new Date().toISOString();
   const fundingStep: FundingStep = requestBody;
 
   // TODO:
@@ -75,24 +73,8 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
     }
   }
 
-  const command = new UpdateCommand({
-    TableName: TABLE_NAME,
-    Key: {
-      id: portfolioDraftId,
-    },
-    UpdateExpression: "set #portfolioVariable = :portfolio, updated_at = :now",
-    ExpressionAttributeNames: {
-      "#portfolioVariable": FUNDING_STEP,
-    },
-    ExpressionAttributeValues: {
-      ":portfolio": fundingStep,
-      ":now": now,
-    },
-    ConditionExpression: "attribute_exists(created_at)",
-  });
-
   try {
-    await client.send(command);
+    await createFundingStepCommand(TABLE_NAME, portfolioDraftId, fundingStep);
   } catch (error) {
     if (error.name === "ConditionalCheckFailedException") {
       return NO_SUCH_PORTFOLIO_DRAFT;
@@ -108,10 +90,46 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
  * @param properties contains property names and value that have failed validation
  * @returns ValidationErrorResponse containing an error map property with the given values
  */
-function createValidationErrorResponse(properties: Record<string, unknown>): ValidationErrorResponse {
+export function createValidationErrorResponse(properties: Record<string, unknown>): ValidationErrorResponse {
   return new ValidationErrorResponse({
     errorMap: properties,
     code: ErrorCodes.INVALID_INPUT,
     message: "Invalid input",
   });
+}
+
+/**
+ * Creates a DynamoDB Update command object using the given input, executes it, and returns the promised output.
+ * @param table DynamoDB table name
+ * @param portfolioDraftId uuid identifier for a Portfolio Draft
+ * @param fundingStep an object that looks like a Funding Step
+ * @returns output from the Update command
+ */
+export async function createFundingStepCommand(
+  table: string,
+  portfolioDraftId: string,
+  fundingStep: FundingStep
+): Promise<UpdateCommandOutput> {
+  const dynamodb = new DynamoDBClient({});
+  const ddb = DynamoDBDocumentClient.from(dynamodb);
+  const now = new Date().toISOString();
+  const result = await ddb.send(
+    new UpdateCommand({
+      TableName: table,
+      Key: {
+        id: portfolioDraftId,
+      },
+      UpdateExpression: "set #var = :funding, updated_at = :now",
+      ExpressionAttributeNames: {
+        "#var": "funding_step",
+      },
+      ExpressionAttributeValues: {
+        ":funding": fundingStep,
+        ":now": now,
+      },
+      ConditionExpression: "attribute_exists(created_at)",
+      ReturnValues: "ALL_NEW",
+    })
+  );
+  return result;
 }
