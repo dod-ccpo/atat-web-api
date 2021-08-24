@@ -2,7 +2,7 @@ import { DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { mockClient } from "aws-sdk-client-mock";
 import { CloudServiceProvider } from "../../models/CloudServiceProvider";
 import { FundingStep } from "../../models/FundingStep";
-import { createFundingStepCommand } from "./createFundingStep";
+import { createFundingStepCommand, createValidationErrorResponse } from "./createFundingStep";
 import { ProvisioningStatus } from "../../models/ProvisioningStatus";
 import { v4 as uuid } from "uuid";
 
@@ -128,4 +128,15 @@ describe("createFundingStepCommand()", function () {
     const data = await createFundingStepCommand(mockTable, mockPortfolioDraftId, fundingStepTwoClins);
     expect(data.Attributes).toEqual(mockPortfolioDraft);
   });
+});
+
+describe("createValidationErrorResponse()", function () {
+  it("should return http status 400", () => {
+    const properties = { "": "" };
+    const response = createValidationErrorResponse(properties);
+    expect(response.statusCode).toEqual(400);
+  });
+  it.todo("should return message 'Invalid input'");
+  it.todo("should return an error map");
+  it.todo("should return an error map containing the given invalid properties");
 });
