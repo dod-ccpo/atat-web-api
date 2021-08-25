@@ -8,7 +8,7 @@ import { ProvisioningStatus } from "../../models/ProvisioningStatus";
 import { v4 as uuid } from "uuid";
 import { ErrorStatusCode } from "../../utils/response";
 import { ErrorCodes } from "../../models/Error";
-import { REQUEST_BODY_EMPTY, PATH_VARIABLE_REQUIRED_BUT_MISSING } from "../../utils/errors";
+import { REQUEST_BODY_EMPTY, PATH_VARIABLE_REQUIRED_BUT_MISSING, REQUEST_BODY_INVALID } from "../../utils/errors";
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 beforeEach(() => {
@@ -182,6 +182,11 @@ const emptyBodyRequest: APIGatewayProxyEvent = {
   pathParameters: { portfolioDraftId: mockPortfolioDraftId },
 } as any;
 
+const invalidBodyRequest: APIGatewayProxyEvent = {
+  body: JSON.stringify(fundingStepOneClin).slice(10), // slice 10 chars from valid JSON
+  pathParameters: { portfolioDraftId: mockPortfolioDraftId },
+} as any;
+
 describe("when handler() receives empty request body", function () {
   it("should return error response REQUEST_BODY_EMPTY", async () => {
     const response = await handler(emptyBodyRequest);
@@ -217,5 +222,24 @@ describe("when handler() does not receive required parameter 'portfolioDraftId'"
   it("should return a response body containing message 'Required path variable is missing'", async () => {
     const response = await handler(missingPathVariableRequest);
     expect(JSON.parse(response.body).message).toEqual("Required path variable is missing");
+  });
+});
+
+describe("when handler() receives invalid request body", function () {
+  it("should return error response REQUEST_BODY_INVALID", async () => {
+    const response = await handler(invalidBodyRequest);
+    expect(response).toEqual(REQUEST_BODY_INVALID);
+  });
+  it("should return HTTP response status code 400 Bad Request", async () => {
+    const response = await handler(invalidBodyRequest);
+    expect(response.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
+  });
+  it("should return a response body containing code 'INVALID_INPUT'", async () => {
+    const response = await handler(invalidBodyRequest);
+    expect(JSON.parse(response.body).code).toEqual(ErrorCodes.INVALID_INPUT);
+  });
+  it("should return a response body containing message 'A valid request body must be provided'", async () => {
+    const response = await handler(invalidBodyRequest);
+    expect(JSON.parse(response.body).message).toEqual("A valid request body must be provided");
   });
 });
