@@ -6,9 +6,10 @@ import { FundingStep } from "../../models/FundingStep";
 import { updateFundingStepOfPortfolioDraft, createValidationErrorResponse, handler } from "./createFundingStep";
 import { ProvisioningStatus } from "../../models/ProvisioningStatus";
 import { v4 as uuid } from "uuid";
-import { ErrorStatusCode } from "../../utils/response";
+import { ErrorStatusCode, SuccessStatusCode } from "../../utils/response";
 import { ErrorCodes } from "../../models/Error";
 import { REQUEST_BODY_EMPTY, PATH_VARIABLE_REQUIRED_BUT_MISSING, REQUEST_BODY_INVALID } from "../../utils/errors";
+import { isFundingStep } from "../../utils/validation";
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 beforeEach(() => {
@@ -188,12 +189,12 @@ describe("createValidationErrorResponse()", function () {
 });
 
 const normalRequest: APIGatewayProxyEvent = {
-  body: fundingStepOneClin,
+  body: JSON.stringify(fundingStepOneClin),
   pathParameters: { portfolioDraftId: mockPortfolioDraftId },
 } as any;
 
 const missingPathVariableRequest: APIGatewayProxyEvent = {
-  body: fundingStepOneClin,
+  body: JSON.stringify(fundingStepOneClin),
   pathParameters: {}, // missing portfolioDraftId
 } as any;
 
@@ -208,12 +209,12 @@ const invalidBodyRequest: APIGatewayProxyEvent = {
 } as any;
 
 const invalidFundingStepMissingCspRequest: APIGatewayProxyEvent = {
-  body: fundingStepInvalidMissingCsp,
+  body: JSON.stringify(fundingStepInvalidMissingCsp),
   pathParameters: { portfolioDraftId: mockPortfolioDraftId },
 } as any;
 
 const invalidFundingStepMissingTONumberRequest: APIGatewayProxyEvent = {
-  body: fundingStepInvalidMissingTONumber,
+  body: JSON.stringify(fundingStepInvalidMissingTONumber),
   pathParameters: { portfolioDraftId: mockPortfolioDraftId },
 } as any;
 
@@ -309,5 +310,16 @@ describe("when handler() receives invalid FundingStep object (missing TO Number)
   it("should return a response body containing message 'A valid request body must be provided'", async () => {
     const response = await handler(invalidFundingStepMissingTONumberRequest);
     expect(JSON.parse(response.body).message).toEqual("A valid request body must be provided");
+  });
+});
+
+describe("when handler() recieves all required and valid input", function () {
+  it("should return HTTP response status code 201 Created", async () => {
+    const response = await handler(normalRequest);
+    expect(response.statusCode).toEqual(SuccessStatusCode.CREATED);
+  });
+  it("should return a response body that looks like a FundingStep object", async () => {
+    const response = await handler(normalRequest);
+    expect(isFundingStep(JSON.parse(response.body))).toBeTruthy();
   });
 });
