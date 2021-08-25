@@ -167,21 +167,21 @@ describe("createValidationErrorResponse()", function () {
   });
 });
 
-describe("handler()", function () {
+describe("when handler() receives empty request body", function () {
   const emptyRequestBody = { body: "" } as APIGatewayProxyEvent;
-  it("should return error response REQUEST_BODY_EMPTY when request body is empty", async () => {
+  it("should return error response REQUEST_BODY_EMPTY", async () => {
     const response = await handler(emptyRequestBody);
     expect(response).toEqual(REQUEST_BODY_EMPTY);
   });
-  it("should return HTTP response status code 400 Bad Request when request body is empty", async () => {
+  it("should return HTTP response status code 400 Bad Request", async () => {
     const response = await handler(emptyRequestBody);
     expect(response.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
   });
-  it("should return a response body containing code 'INVALID_INPUT' when request body is empty", async () => {
+  it("should return a response body containing code 'INVALID_INPUT'", async () => {
     const response = await handler(emptyRequestBody);
     expect(JSON.parse(response.body).code).toEqual(ErrorCodes.INVALID_INPUT);
   });
-  it("should return a response body containing message 'Request body must not be empty' when request body is empty", async () => {
+  it("should return a response body containing message 'Request body must not be empty'", async () => {
     const response = await handler(emptyRequestBody);
     expect(JSON.parse(response.body).message).toEqual("Request body must not be empty");
   });
