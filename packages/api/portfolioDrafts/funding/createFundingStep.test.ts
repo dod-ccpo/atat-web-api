@@ -8,7 +8,7 @@ import { ProvisioningStatus } from "../../models/ProvisioningStatus";
 import { v4 as uuid } from "uuid";
 import { ErrorStatusCode } from "../../utils/response";
 import { ErrorCodes } from "../../models/Error";
-import { REQUEST_BODY_EMPTY } from "../../utils/errors";
+import { REQUEST_BODY_EMPTY, PATH_VARIABLE_REQUIRED_BUT_MISSING } from "../../utils/errors";
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 beforeEach(() => {
@@ -167,22 +167,55 @@ describe("createValidationErrorResponse()", function () {
   });
 });
 
+const normalRequest: APIGatewayProxyEvent = {
+  body: fundingStepOneClin,
+  pathParameters: { portfolioDraftId: mockPortfolioDraftId },
+} as any;
+
+const missingPathVariableRequest: APIGatewayProxyEvent = {
+  body: fundingStepOneClin,
+  pathParameters: {}, // missing portfolioDraftId
+} as any;
+
+const emptyBodyRequest: APIGatewayProxyEvent = {
+  body: "", // empty
+  pathParameters: { portfolioDraftId: mockPortfolioDraftId },
+} as any;
+
 describe("when handler() receives empty request body", function () {
-  const emptyRequestBody = { body: "" } as APIGatewayProxyEvent;
   it("should return error response REQUEST_BODY_EMPTY", async () => {
-    const response = await handler(emptyRequestBody);
+    const response = await handler(emptyBodyRequest);
     expect(response).toEqual(REQUEST_BODY_EMPTY);
   });
   it("should return HTTP response status code 400 Bad Request", async () => {
-    const response = await handler(emptyRequestBody);
+    const response = await handler(emptyBodyRequest);
     expect(response.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
   });
   it("should return a response body containing code 'INVALID_INPUT'", async () => {
-    const response = await handler(emptyRequestBody);
+    const response = await handler(emptyBodyRequest);
     expect(JSON.parse(response.body).code).toEqual(ErrorCodes.INVALID_INPUT);
   });
   it("should return a response body containing message 'Request body must not be empty'", async () => {
-    const response = await handler(emptyRequestBody);
+    const response = await handler(emptyBodyRequest);
     expect(JSON.parse(response.body).message).toEqual("Request body must not be empty");
+  });
+});
+
+describe("when handler() does not receive required parameter 'portfolioDraftId'", function () {
+  it("should return error response PATH_VARIABLE_REQUIRED_BUT_MISSING", async () => {
+    const response = await handler(missingPathVariableRequest);
+    expect(response).toEqual(PATH_VARIABLE_REQUIRED_BUT_MISSING);
+  });
+  it("should return HTTP response status code 400 Bad Request", async () => {
+    const response = await handler(missingPathVariableRequest);
+    expect(response.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
+  });
+  it("should return a response body containing code 'INVALID_INPUT'", async () => {
+    const response = await handler(missingPathVariableRequest);
+    expect(JSON.parse(response.body).code).toEqual(ErrorCodes.INVALID_INPUT);
+  });
+  it("should return a response body containing message 'Required path variable is missing'", async () => {
+    const response = await handler(missingPathVariableRequest);
+    expect(JSON.parse(response.body).message).toEqual("Required path variable is missing");
   });
 });
