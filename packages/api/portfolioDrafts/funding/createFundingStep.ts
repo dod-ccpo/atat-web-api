@@ -2,9 +2,15 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, UpdateCommand, UpdateCommandOutput } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { FundingStep } from "../../models/FundingStep";
-import { DATABASE_ERROR, NO_SUCH_PORTFOLIO_DRAFT, REQUEST_BODY_EMPTY, REQUEST_BODY_INVALID } from "../../utils/errors";
+import {
+  DATABASE_ERROR,
+  NO_SUCH_PORTFOLIO_DRAFT,
+  REQUEST_BODY_EMPTY,
+  REQUEST_BODY_INVALID,
+  PATH_VARIABLE_REQUIRED_BUT_MISSING,
+} from "../../utils/errors";
 import { ApiSuccessResponse, SuccessStatusCode, ValidationErrorResponse } from "../../utils/response";
-import { isFundingStep, isValidJson, isValidDate } from "../../utils/validation";
+import { isFundingStep, isValidJson, isValidDate, isPathParameterPresent } from "../../utils/validation";
 import { ErrorCodes } from "../../models/Error";
 
 /**
@@ -19,6 +25,9 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
   // 1 b. The route must accept a {portfolioDraftId} that corresponds to a portfolio. This allows data for a specific portfolio draft’s funding to be stored
   const portfolioDraftId = event.pathParameters?.portfolioDraftId;
+  if (!isPathParameterPresent(portfolioDraftId)) {
+    return PATH_VARIABLE_REQUIRED_BUT_MISSING;
+  }
 
   // 3. When an invalid {portfolioDraftId} is provided, a 404 code is provided, along with the message “Portfolio Draft with the given ID does not exist”
   if (!portfolioDraftId) {
