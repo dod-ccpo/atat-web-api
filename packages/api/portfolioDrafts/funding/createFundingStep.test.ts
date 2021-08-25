@@ -1,12 +1,14 @@
 import { DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb";
+import { APIGatewayProxyEvent } from "aws-lambda";
 import { mockClient } from "aws-sdk-client-mock";
 import { CloudServiceProvider } from "../../models/CloudServiceProvider";
 import { FundingStep } from "../../models/FundingStep";
-import { updateFundingStepOfPortfolioDraft, createValidationErrorResponse } from "./createFundingStep";
+import { updateFundingStepOfPortfolioDraft, createValidationErrorResponse, handler } from "./createFundingStep";
 import { ProvisioningStatus } from "../../models/ProvisioningStatus";
 import { v4 as uuid } from "uuid";
 import { ErrorStatusCode } from "../../utils/response";
 import { ErrorCodes } from "../../models/Error";
+import { REQUEST_BODY_EMPTY } from "../../utils/errors";
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 beforeEach(() => {
@@ -162,5 +164,25 @@ describe("createValidationErrorResponse()", function () {
     expect(() => {
       createValidationErrorResponse({ "": "" });
     }).toThrow(Error("Parameter 'invalidProperties' must not have empty string as key"));
+  });
+});
+
+describe("handler()", function () {
+  const emptyRequestBody = { body: "" } as APIGatewayProxyEvent;
+  it("should return error response REQUEST_BODY_EMPTY when request body is empty", async () => {
+    const response = await handler(emptyRequestBody);
+    expect(response).toEqual(REQUEST_BODY_EMPTY);
+  });
+  it("should return HTTP response status code 400 Bad Request when request body is empty", async () => {
+    const response = await handler(emptyRequestBody);
+    expect(response.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
+  });
+  it("should return a response body containing code 'INVALID_INPUT' when request body is empty", async () => {
+    const response = await handler(emptyRequestBody);
+    expect(JSON.parse(response.body).code).toEqual(ErrorCodes.INVALID_INPUT);
+  });
+  it("should return a response body containing message 'Request body must not be empty' when request body is empty", async () => {
+    const response = await handler(emptyRequestBody);
+    expect(JSON.parse(response.body).message).toEqual("Request body must not be empty");
   });
 });
