@@ -7,8 +7,6 @@ import { ApiSuccessResponse, SuccessStatusCode, ValidationErrorResponse } from "
 import { isFundingStep, isValidJson, isValidDate } from "../../utils/validation";
 import { ErrorCodes } from "../../models/Error";
 
-const TABLE_NAME = process.env.ATAT_TABLE_NAME ?? "";
-
 /**
  * Submits the Funding Step of the Portfolio Draft Wizard
  *
@@ -86,7 +84,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
   }
 
   try {
-    await updateFundingStepOfPortfolioDraft(TABLE_NAME, portfolioDraftId, fundingStep);
+    await updateFundingStepOfPortfolioDraft(portfolioDraftId, fundingStep);
   } catch (error) {
     if (error.name === "ConditionalCheckFailedException") {
       return NO_SUCH_PORTFOLIO_DRAFT;
@@ -113,22 +111,21 @@ export function createValidationErrorResponse(properties: Record<string, unknown
 /**
  * Updates the Funding Step of the specified Portfolio Draft.
  * Creates a DynamoDB Update command object using the given input, executes it, and returns the promised output.
- * @param table DynamoDB table name
  * @param portfolioDraftId uuid identifier for a Portfolio Draft
  * @param fundingStep an object that looks like a Funding Step
  * @returns output from the Update command
  */
 export async function updateFundingStepOfPortfolioDraft(
-  table: string,
   portfolioDraftId: string,
   fundingStep: FundingStep
 ): Promise<UpdateCommandOutput> {
+  const TABLE_NAME = process.env.ATAT_TABLE_NAME ?? "";
   const dynamodb = new DynamoDBClient({});
   const ddb = DynamoDBDocumentClient.from(dynamodb);
   const now = new Date().toISOString();
   const result = await ddb.send(
     new UpdateCommand({
-      TableName: table,
+      TableName: TABLE_NAME,
       Key: {
         id: portfolioDraftId,
       },

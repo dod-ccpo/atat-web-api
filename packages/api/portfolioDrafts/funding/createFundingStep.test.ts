@@ -11,7 +11,6 @@ beforeEach(() => {
   ddbMock.reset();
 });
 
-const mockTable = "mock-table";
 const mockPortfolioDraftId = uuid();
 const mockTOfile = {
   id: uuid(),
@@ -110,22 +109,22 @@ const fundingStepTwoClins: FundingStep = {
 describe("createFundingStepCommand()", function () {
   it("should accept object that looks like a Funding Step (minimal)", async () => {
     ddbMock.on(UpdateCommand).resolves({ Attributes: mockPortfolioDraft });
-    const data = await updateFundingStepOfPortfolioDraft(mockTable, mockPortfolioDraftId, fundingStepMinimal);
+    const data = await updateFundingStepOfPortfolioDraft(mockPortfolioDraftId, fundingStepMinimal);
     expect(data.Attributes).toEqual(mockPortfolioDraft);
   });
   it("should accept object that looks like a Funding Step (0 CLINs)", async () => {
     ddbMock.on(UpdateCommand).resolves({ Attributes: mockPortfolioDraft });
-    const data = await updateFundingStepOfPortfolioDraft(mockTable, mockPortfolioDraftId, fundingStepZeroClins);
+    const data = await updateFundingStepOfPortfolioDraft(mockPortfolioDraftId, fundingStepZeroClins);
     expect(data.Attributes).toEqual(mockPortfolioDraft);
   });
   it("should accept object that looks like a Funding Step (1 CLIN)", async () => {
     ddbMock.on(UpdateCommand).resolves({ Attributes: mockPortfolioDraft });
-    const data = await updateFundingStepOfPortfolioDraft(mockTable, mockPortfolioDraftId, fundingStepOneClin);
+    const data = await updateFundingStepOfPortfolioDraft(mockPortfolioDraftId, fundingStepOneClin);
     expect(data.Attributes).toEqual(mockPortfolioDraft);
   });
   it("should accept object that looks like a Funding Step (2 CLINs)", async () => {
     ddbMock.on(UpdateCommand).resolves({ Attributes: mockPortfolioDraft });
-    const data = await updateFundingStepOfPortfolioDraft(mockTable, mockPortfolioDraftId, fundingStepTwoClins);
+    const data = await updateFundingStepOfPortfolioDraft(mockPortfolioDraftId, fundingStepTwoClins);
     expect(data.Attributes).toEqual(mockPortfolioDraft);
   });
 });
