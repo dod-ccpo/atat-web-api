@@ -86,7 +86,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
   }
 
   try {
-    await createFundingStepCommand(TABLE_NAME, portfolioDraftId, fundingStep);
+    await updateFundingStepOfPortfolioDraft(TABLE_NAME, portfolioDraftId, fundingStep);
   } catch (error) {
     if (error.name === "ConditionalCheckFailedException") {
       return NO_SUCH_PORTFOLIO_DRAFT;
@@ -111,13 +111,14 @@ export function createValidationErrorResponse(properties: Record<string, unknown
 }
 
 /**
+ * Updates the Funding Step of the specified Portfolio Draft.
  * Creates a DynamoDB Update command object using the given input, executes it, and returns the promised output.
  * @param table DynamoDB table name
  * @param portfolioDraftId uuid identifier for a Portfolio Draft
  * @param fundingStep an object that looks like a Funding Step
  * @returns output from the Update command
  */
-export async function createFundingStepCommand(
+export async function updateFundingStepOfPortfolioDraft(
   table: string,
   portfolioDraftId: string,
   fundingStep: FundingStep

@@ -2,7 +2,7 @@ import { DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { mockClient } from "aws-sdk-client-mock";
 import { CloudServiceProvider } from "../../models/CloudServiceProvider";
 import { FundingStep } from "../../models/FundingStep";
-import { createFundingStepCommand, createValidationErrorResponse } from "./createFundingStep";
+import { updateFundingStepOfPortfolioDraft, createValidationErrorResponse } from "./createFundingStep";
 import { ProvisioningStatus } from "../../models/ProvisioningStatus";
 import { v4 as uuid } from "uuid";
 
@@ -110,22 +110,22 @@ const fundingStepTwoClins: FundingStep = {
 describe("createFundingStepCommand()", function () {
   it("should accept object that looks like a Funding Step (minimal)", async () => {
     ddbMock.on(UpdateCommand).resolves({ Attributes: mockPortfolioDraft });
-    const data = await createFundingStepCommand(mockTable, mockPortfolioDraftId, fundingStepMinimal);
+    const data = await updateFundingStepOfPortfolioDraft(mockTable, mockPortfolioDraftId, fundingStepMinimal);
     expect(data.Attributes).toEqual(mockPortfolioDraft);
   });
   it("should accept object that looks like a Funding Step (0 CLINs)", async () => {
     ddbMock.on(UpdateCommand).resolves({ Attributes: mockPortfolioDraft });
-    const data = await createFundingStepCommand(mockTable, mockPortfolioDraftId, fundingStepZeroClins);
+    const data = await updateFundingStepOfPortfolioDraft(mockTable, mockPortfolioDraftId, fundingStepZeroClins);
     expect(data.Attributes).toEqual(mockPortfolioDraft);
   });
   it("should accept object that looks like a Funding Step (1 CLIN)", async () => {
     ddbMock.on(UpdateCommand).resolves({ Attributes: mockPortfolioDraft });
-    const data = await createFundingStepCommand(mockTable, mockPortfolioDraftId, fundingStepOneClin);
+    const data = await updateFundingStepOfPortfolioDraft(mockTable, mockPortfolioDraftId, fundingStepOneClin);
     expect(data.Attributes).toEqual(mockPortfolioDraft);
   });
   it("should accept object that looks like a Funding Step (2 CLINs)", async () => {
     ddbMock.on(UpdateCommand).resolves({ Attributes: mockPortfolioDraft });
-    const data = await createFundingStepCommand(mockTable, mockPortfolioDraftId, fundingStepTwoClins);
+    const data = await updateFundingStepOfPortfolioDraft(mockTable, mockPortfolioDraftId, fundingStepTwoClins);
     expect(data.Attributes).toEqual(mockPortfolioDraft);
   });
 });
