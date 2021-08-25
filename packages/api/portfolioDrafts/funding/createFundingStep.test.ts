@@ -330,7 +330,7 @@ describe("when handler() recieves all required and valid input (0 CLINs)", funct
     const response = await handler(normalZeroClinsRequest);
     expect(response.statusCode).toEqual(SuccessStatusCode.CREATED);
   });
-  it("should return a response body that looks like a FundingStep object", async () => {
+  it("should return a response body that looks like a Funding Step", async () => {
     const response = await handler(normalZeroClinsRequest);
     expect(isFundingStep(JSON.parse(response.body))).toBeTruthy();
   });
@@ -341,7 +341,7 @@ describe("when handler() recieves all required and valid input (1 CLIN)", functi
     const response = await handler(normalOneClinRequest);
     expect(response.statusCode).toEqual(SuccessStatusCode.CREATED);
   });
-  it("should return a response body that looks like a FundingStep object", async () => {
+  it("should return a response body that looks like a Funding Step", async () => {
     const response = await handler(normalOneClinRequest);
     expect(isFundingStep(JSON.parse(response.body))).toBeTruthy();
   });
@@ -352,7 +352,7 @@ describe("when handler() recieves all required and valid input (2 CLINs)", funct
     const response = await handler(normalTwoClinsRequest);
     expect(response.statusCode).toEqual(SuccessStatusCode.CREATED);
   });
-  it("should return a response body that looks like a FundingStep object", async () => {
+  it("should return a response body that looks like a Funding Step", async () => {
     const response = await handler(normalTwoClinsRequest);
     expect(isFundingStep(JSON.parse(response.body))).toBeTruthy();
   });
