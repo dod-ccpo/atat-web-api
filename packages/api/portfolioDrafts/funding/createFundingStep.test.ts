@@ -110,6 +110,26 @@ const fundingStepTwoClins: FundingStep = {
   ],
 };
 
+const fundingStepInvalidMissingCsp /*: FundingStep */ = {
+  task_order_number: "",
+  task_order_file: {
+    id: "",
+    name: "",
+  },
+  // csp: CloudServiceProvider.AWS, - Missing CSP
+  clins: [],
+};
+
+const fundingStepInvalidMissingTONumber /*: FundingStep */ = {
+  // task_order_number: "", - Missing TO Number
+  task_order_file: {
+    id: "",
+    name: "",
+  },
+  csp: CloudServiceProvider.AWS,
+  clins: [],
+};
+
 describe("updateFundingStepOfPortfolioDraft()", function () {
   it("should accept object that looks like a Funding Step (minimal)", async () => {
     ddbMock.on(UpdateCommand).resolves({ Attributes: mockPortfolioDraft });
@@ -187,6 +207,16 @@ const invalidBodyRequest: APIGatewayProxyEvent = {
   pathParameters: { portfolioDraftId: mockPortfolioDraftId },
 } as any;
 
+const invalidFundingStepMissingCspRequest: APIGatewayProxyEvent = {
+  body: fundingStepInvalidMissingCsp,
+  pathParameters: { portfolioDraftId: mockPortfolioDraftId },
+} as any;
+
+const invalidFundingStepMissingTONumberRequest: APIGatewayProxyEvent = {
+  body: fundingStepInvalidMissingTONumber,
+  pathParameters: { portfolioDraftId: mockPortfolioDraftId },
+} as any;
+
 describe("when handler() receives empty request body", function () {
   it("should return error response REQUEST_BODY_EMPTY", async () => {
     const response = await handler(emptyBodyRequest);
@@ -240,6 +270,44 @@ describe("when handler() receives invalid request body", function () {
   });
   it("should return a response body containing message 'A valid request body must be provided'", async () => {
     const response = await handler(invalidBodyRequest);
+    expect(JSON.parse(response.body).message).toEqual("A valid request body must be provided");
+  });
+});
+
+describe("when handler() receives invalid FundingStep object (missing CSP) in request body", function () {
+  it("should return error response REQUEST_BODY_INVALID", async () => {
+    const response = await handler(invalidFundingStepMissingCspRequest);
+    expect(response).toEqual(REQUEST_BODY_INVALID);
+  });
+  it("should return HTTP response status code 400 Bad Request", async () => {
+    const response = await handler(invalidFundingStepMissingCspRequest);
+    expect(response.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
+  });
+  it("should return a response body containing code 'INVALID_INPUT'", async () => {
+    const response = await handler(invalidFundingStepMissingCspRequest);
+    expect(JSON.parse(response.body).code).toEqual(ErrorCodes.INVALID_INPUT);
+  });
+  it("should return a response body containing message 'A valid request body must be provided'", async () => {
+    const response = await handler(invalidFundingStepMissingCspRequest);
+    expect(JSON.parse(response.body).message).toEqual("A valid request body must be provided");
+  });
+});
+
+describe("when handler() receives invalid FundingStep object (missing TO Number) in request body", function () {
+  it("should return error response REQUEST_BODY_INVALID", async () => {
+    const response = await handler(invalidFundingStepMissingTONumberRequest);
+    expect(response).toEqual(REQUEST_BODY_INVALID);
+  });
+  it("should return HTTP response status code 400 Bad Request", async () => {
+    const response = await handler(invalidFundingStepMissingTONumberRequest);
+    expect(response.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
+  });
+  it("should return a response body containing code 'INVALID_INPUT'", async () => {
+    const response = await handler(invalidFundingStepMissingTONumberRequest);
+    expect(JSON.parse(response.body).code).toEqual(ErrorCodes.INVALID_INPUT);
+  });
+  it("should return a response body containing message 'A valid request body must be provided'", async () => {
+    const response = await handler(invalidFundingStepMissingTONumberRequest);
     expect(JSON.parse(response.body).message).toEqual("A valid request body must be provided");
   });
 });
