@@ -118,30 +118,31 @@ export function createValidationErrorResponse(invalidProperties: Record<string, 
  * Updates the Funding Step of the specified Portfolio Draft.
  * Creates a DynamoDB Update command object using the given input, executes it, and returns the promised output.
  * @param portfolioDraftId uuid identifier for a Portfolio Draft
- * @param fundingStep an object that looks like a Funding Step
+ * @param step an object that looks like a Funding Step
  * @returns output from the Update command
  */
+// TODO: consider making generic and sharing for update of three Step types
+// Will require: 1) relocate, 2) allow additional Step model types, 3) derive stepKey from type, 4) some renaming
 export async function updateFundingStepOfPortfolioDraft(
   portfolioDraftId: string,
-  fundingStep: FundingStep
+  step: FundingStep
 ): Promise<UpdateCommandOutput> {
-  const TABLE_NAME = process.env.ATAT_TABLE_NAME ?? "";
-  const dynamodb = new DynamoDBClient({});
-  const ddb = DynamoDBDocumentClient.from(dynamodb);
-  const now = new Date().toISOString();
-  const result = await ddb.send(
+  const client = DynamoDBDocumentClient.from(new DynamoDBClient({}));
+  const result = await client.send(
     new UpdateCommand({
-      TableName: TABLE_NAME,
+      TableName: process.env.ATAT_TABLE_NAME ?? "",
       Key: {
         id: portfolioDraftId,
       },
-      UpdateExpression: "set #var = :funding, updated_at = :now",
+      UpdateExpression: "set #stepKey = :stepValue, #updateAtKey = :updateAtValue",
       ExpressionAttributeNames: {
-        "#var": "funding_step",
+        // values are JSON keys
+        "#stepKey": "funding_step",
+        "#updateAtKey": "updated_at",
       },
       ExpressionAttributeValues: {
-        ":funding": fundingStep,
-        ":now": now,
+        ":stepValue": step,
+        ":updateAtValue": new Date().toISOString(),
       },
       ConditionExpression: "attribute_exists(created_at)",
       ReturnValues: "ALL_NEW",
