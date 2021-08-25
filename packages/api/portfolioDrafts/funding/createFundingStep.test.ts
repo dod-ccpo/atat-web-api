@@ -325,6 +325,17 @@ describe("when handler() receives invalid FundingStep object (missing TO Number)
   });
 });
 
+describe("when handler() recieves all required and valid input (minimal)", function () {
+  it("should return HTTP response status code 201 Created", async () => {
+    const response = await handler(normalMinimalRequest);
+    expect(response.statusCode).toEqual(SuccessStatusCode.CREATED);
+  });
+  it("should return a response body that looks like a Funding Step", async () => {
+    const response = await handler(normalMinimalRequest);
+    expect(isFundingStep(JSON.parse(response.body))).toBeTruthy();
+  });
+});
+
 describe("when handler() recieves all required and valid input (0 CLINs)", function () {
   it("should return HTTP response status code 201 Created", async () => {
     const response = await handler(normalZeroClinsRequest);
