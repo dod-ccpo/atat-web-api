@@ -188,8 +188,20 @@ describe("createValidationErrorResponse()", function () {
   });
 });
 
-const normalRequest: APIGatewayProxyEvent = {
+const normalMinimalRequest: APIGatewayProxyEvent = {
+  body: JSON.stringify(fundingStepMinimal),
+  pathParameters: { portfolioDraftId: mockPortfolioDraftId },
+} as any;
+const normalZeroClinsRequest: APIGatewayProxyEvent = {
+  body: JSON.stringify(fundingStepZeroClins),
+  pathParameters: { portfolioDraftId: mockPortfolioDraftId },
+} as any;
+const normalOneClinRequest: APIGatewayProxyEvent = {
   body: JSON.stringify(fundingStepOneClin),
+  pathParameters: { portfolioDraftId: mockPortfolioDraftId },
+} as any;
+const normalTwoClinsRequest: APIGatewayProxyEvent = {
+  body: JSON.stringify(fundingStepTwoClins),
   pathParameters: { portfolioDraftId: mockPortfolioDraftId },
 } as any;
 
@@ -313,13 +325,35 @@ describe("when handler() receives invalid FundingStep object (missing TO Number)
   });
 });
 
-describe("when handler() recieves all required and valid input", function () {
+describe("when handler() recieves all required and valid input (0 CLINs)", function () {
   it("should return HTTP response status code 201 Created", async () => {
-    const response = await handler(normalRequest);
+    const response = await handler(normalZeroClinsRequest);
     expect(response.statusCode).toEqual(SuccessStatusCode.CREATED);
   });
   it("should return a response body that looks like a FundingStep object", async () => {
-    const response = await handler(normalRequest);
+    const response = await handler(normalZeroClinsRequest);
+    expect(isFundingStep(JSON.parse(response.body))).toBeTruthy();
+  });
+});
+
+describe("when handler() recieves all required and valid input (1 CLIN)", function () {
+  it("should return HTTP response status code 201 Created", async () => {
+    const response = await handler(normalOneClinRequest);
+    expect(response.statusCode).toEqual(SuccessStatusCode.CREATED);
+  });
+  it("should return a response body that looks like a FundingStep object", async () => {
+    const response = await handler(normalOneClinRequest);
+    expect(isFundingStep(JSON.parse(response.body))).toBeTruthy();
+  });
+});
+
+describe("when handler() recieves all required and valid input (2 CLINs)", function () {
+  it("should return HTTP response status code 201 Created", async () => {
+    const response = await handler(normalTwoClinsRequest);
+    expect(response.statusCode).toEqual(SuccessStatusCode.CREATED);
+  });
+  it("should return a response body that looks like a FundingStep object", async () => {
+    const response = await handler(normalTwoClinsRequest);
     expect(isFundingStep(JSON.parse(response.body))).toBeTruthy();
   });
 });
