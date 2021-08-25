@@ -106,7 +106,7 @@ const fundingStepTwoClins: FundingStep = {
   ],
 };
 
-describe("createFundingStepCommand()", function () {
+describe("updateFundingStepOfPortfolioDraft()", function () {
   it("should accept object that looks like a Funding Step (minimal)", async () => {
     ddbMock.on(UpdateCommand).resolves({ Attributes: mockPortfolioDraft });
     const data = await updateFundingStepOfPortfolioDraft(mockPortfolioDraftId, fundingStepMinimal);
