@@ -5,6 +5,8 @@ import { FundingStep } from "../../models/FundingStep";
 import { updateFundingStepOfPortfolioDraft, createValidationErrorResponse } from "./createFundingStep";
 import { ProvisioningStatus } from "../../models/ProvisioningStatus";
 import { v4 as uuid } from "uuid";
+import { ErrorStatusCode } from "../../utils/response";
+import { ErrorCodes } from "../../models/Error";
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 beforeEach(() => {
@@ -130,12 +132,35 @@ describe("updateFundingStepOfPortfolioDraft()", function () {
 });
 
 describe("createValidationErrorResponse()", function () {
-  it("should return http status 400", () => {
-    const properties = { "": "" };
-    const response = createValidationErrorResponse(properties);
-    expect(response.statusCode).toEqual(400);
+  const invalidProperties = { invalidPropertyOne: "1", invalidPropertyTwo: "2" };
+  const response = createValidationErrorResponse(invalidProperties);
+  it("should accept an object containing one or more invalid properties", () => {
+    try {
+      createValidationErrorResponse(invalidProperties);
+    } catch (e) {
+      throw Error("Unexpected error");
+    }
   });
-  it.todo("should return message 'Invalid input'");
-  it.todo("should return an error map");
-  it.todo("should return an error map containing the given invalid properties");
+  it("should return HTTP response status code 400 Bad Request", () => {
+    expect(response.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
+  });
+  it("should return a response body containing an error map with invalid properties", () => {
+    expect(JSON.parse(response.body).errorMap).toEqual(invalidProperties);
+  });
+  it("should return a response body containing code 'INVALID_INPUT'", () => {
+    expect(JSON.parse(response.body).code).toEqual(ErrorCodes.INVALID_INPUT);
+  });
+  it("should return a response body containing message 'Invalid input'", () => {
+    expect(JSON.parse(response.body).message).toEqual("Invalid input");
+  });
+  it("should throw error if properties parameter is empty", () => {
+    expect(() => {
+      createValidationErrorResponse({});
+    }).toThrow(Error("Parameter 'invalidProperties' must not be empty"));
+  });
+  it("should throw error if properties parameter contains empty string as key", () => {
+    expect(() => {
+      createValidationErrorResponse({ "": "" });
+    }).toThrow(Error("Parameter 'invalidProperties' must not have empty string as key"));
+  });
 });

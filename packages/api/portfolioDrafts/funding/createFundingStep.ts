@@ -96,13 +96,19 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
 }
 
 /**
- * Returns an error map using the given Record
- * @param properties contains property names and value that have failed validation
- * @returns ValidationErrorResponse containing an error map property with the given values
+ * Returns an error response containing 1) an error map containing the specified invalid properties, 2) an error code, 3) a message
+ * @param invalidProperties object containing property names and their values which failed validation
+ * @returns ValidationErrorResponse containing an error map, error code, and a message
  */
-export function createValidationErrorResponse(properties: Record<string, unknown>): ValidationErrorResponse {
+export function createValidationErrorResponse(invalidProperties: Record<string, unknown>): ValidationErrorResponse {
+  if (Object.keys(invalidProperties).length === 0) {
+    throw Error("Parameter 'invalidProperties' must not be empty");
+  }
+  Object.keys(invalidProperties).forEach((key) => {
+    if (!key) throw Error("Parameter 'invalidProperties' must not have empty string as key");
+  });
   return new ValidationErrorResponse({
-    errorMap: properties,
+    errorMap: invalidProperties,
     code: ErrorCodes.INVALID_INPUT,
     message: "Invalid input",
   });
