@@ -111,7 +111,7 @@ export async function updateFundingStepOfPortfolioDraft(
   portfolioDraftId: string,
   step: FundingStep
 ): Promise<UpdateCommandOutput> {
-  const result = await client.send(
+  return await client.send(
     new UpdateCommand({
       TableName: process.env.ATAT_TABLE_NAME ?? "",
       Key: {
@@ -131,5 +131,4 @@ export async function updateFundingStepOfPortfolioDraft(
       ReturnValues: "ALL_NEW",
     })
   );
-  return result;
 }
