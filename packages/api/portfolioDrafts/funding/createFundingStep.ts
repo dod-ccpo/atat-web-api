@@ -119,14 +119,14 @@ export async function updateFundingStepOfPortfolioDraft(
       Key: {
         id: portfolioDraftId,
       },
-      UpdateExpression: "set #stepKey = :stepValue, #updateAtKey = :now",
+      UpdateExpression: "set #stepKey = :step, #updateAtKey = :now",
       ExpressionAttributeNames: {
         // values are JSON keys
         "#stepKey": "funding_step",
         "#updateAtKey": "updated_at",
       },
       ExpressionAttributeValues: {
-        ":stepValue": step,
+        ":step": step,
         ":now": new Date().toISOString(),
       },
       ConditionExpression: "attribute_exists(created_at)",
