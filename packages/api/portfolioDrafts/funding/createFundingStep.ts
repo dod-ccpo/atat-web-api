@@ -1,5 +1,5 @@
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, UpdateCommand, UpdateCommandOutput } from "@aws-sdk/lib-dynamodb";
+import { dynamodbDocumentClient } from "../../utils/dynamodb";
+import { UpdateCommand, UpdateCommandOutput } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { FundingStep } from "../../models/FundingStep";
 import {
@@ -120,8 +120,7 @@ export async function updateFundingStepOfPortfolioDraft(
   portfolioDraftId: string,
   step: FundingStep
 ): Promise<UpdateCommandOutput> {
-  const client = DynamoDBDocumentClient.from(new DynamoDBClient({}));
-  const result = await client.send(
+  const result = await dynamodbDocumentClient.send(
     new UpdateCommand({
       TableName: process.env.ATAT_TABLE_NAME ?? "",
       Key: {
