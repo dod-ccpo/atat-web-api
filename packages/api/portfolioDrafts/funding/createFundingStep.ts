@@ -1,4 +1,4 @@
-import { dynamodbDocumentClient } from "../../utils/dynamodb";
+import { dynamodbDocumentClient as client } from "../../utils/dynamodb";
 import { UpdateCommand, UpdateCommandOutput } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { FundingStep } from "../../models/FundingStep";
@@ -113,7 +113,7 @@ export async function updateFundingStepOfPortfolioDraft(
   portfolioDraftId: string,
   step: FundingStep
 ): Promise<UpdateCommandOutput> {
-  const result = await dynamodbDocumentClient.send(
+  const result = await client.send(
     new UpdateCommand({
       TableName: process.env.ATAT_TABLE_NAME ?? "",
       Key: {
