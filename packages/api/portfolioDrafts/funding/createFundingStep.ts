@@ -111,7 +111,7 @@ export async function updateFundingStepOfPortfolioDraft(
   portfolioDraftId: string,
   step: FundingStep
 ): Promise<UpdateCommandOutput> {
-  return await client.send(
+  return client.send(
     new UpdateCommand({
       TableName: process.env.ATAT_TABLE_NAME ?? "",
       Key: {
