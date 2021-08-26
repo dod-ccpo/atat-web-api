@@ -1,4 +1,4 @@
-import { isBodyPresent, isFundingStep, isPathParameterPresent, isPortfolioStep, isValidJson } from "./validation";
+import { isBodyPresent, isFundingStep, isPathParameterPresent, isPortfolioStep, isValidJson, isValidDate } from "./validation";
 
 describe("Testing validation of request body", function () {
   it("should return true because request body is present", async () => {
@@ -135,5 +135,17 @@ describe("Testing validation of path parameter", function () {
   it("should return false because path parameter is undefined", async () => {
     const pathParam = undefined;
     expect(isPathParameterPresent(pathParam)).toEqual(false);
+  });
+});
+
+describe("isValidDate()", function () {
+  it("should validate these strings", () => {
+    expect(isValidDate("1970-01-01")).toEqual(true);
+    expect(isValidDate(new Date().toISOString())).toEqual(true);
+  });
+  it("should not validate these strings", () => {
+    expect(isValidDate("")).toEqual(false);
+    expect(isValidDate("not an ISO date")).toEqual(false);
+    expect(isValidDate(NaN.toString())).toEqual(false);
   });
 });

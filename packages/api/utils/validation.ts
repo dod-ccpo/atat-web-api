@@ -117,11 +117,7 @@ export function isBodyPresent(body: string | null): body is string {
  * @param str - The string to check
  * @returns true if the string is a valid date; false otherwise
  */
-export function isValidDate(str: string): boolean {
-  try {
-    const date: Date = new Date(str);
-    return date instanceof Date && !isNaN(date.getTime());
-  } catch (e) {
-    return false;
-  }
+ export function isValidDate(str: string): boolean {
+  const date: Date = new Date(str);
+  return date instanceof Date && !isNaN(date.getTime());
 }
