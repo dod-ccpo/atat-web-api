@@ -47,31 +47,24 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
   // Assertion messages are positive and describe the expected state.
   for (const clin of clins) {
     if (!isValidDate(clin.pop_start_date)) {
-      console.warn("clin [" + clin.clin_number + "] - PoP start date must be a valid date");
       return createValidationErrorResponse({ pop_start_date: clin.pop_start_date });
     }
     if (!isValidDate(clin.pop_end_date)) {
-      console.warn("clin [" + clin.clin_number + "] - PoP end date must be a valid date");
       return createValidationErrorResponse({ pop_end_date: clin.pop_end_date });
     }
     if (!(new Date(clin.pop_start_date) < new Date(clin.pop_end_date))) {
-      console.warn("clin [" + clin.clin_number + "] - PoP start date must be before PoP end date");
       return createValidationErrorResponse({ pop_start_date: clin.pop_start_date, pop_end_date: clin.pop_end_date });
     }
     if (!(new Date() < new Date(clin.pop_end_date))) {
-      console.warn("clin [" + clin.clin_number + "] - PoP end date must be in the future");
       return createValidationErrorResponse({ pop_end_date: clin.pop_end_date });
     }
     if (!(clin.obligated_funds > 0)) {
-      console.warn("clin [" + clin.clin_number + "] - Obligated funds must be greater than $0.00");
       return createValidationErrorResponse({ obligated_funds: clin.obligated_funds });
     }
     if (!(clin.obligated_funds < clin.total_clin_value)) {
-      console.warn("clin [" + clin.clin_number + "] - Obligated funds must be less than the total CLIN value");
       return createValidationErrorResponse({ obligated_funds: clin.obligated_funds });
     }
     if (!(clin.total_clin_value > 0)) {
-      console.warn("clin [" + clin.clin_number + "] - Total CLIN value must be greater than $0.00");
       return createValidationErrorResponse({ total_clin_value: clin.total_clin_value });
     }
   }
