@@ -43,8 +43,6 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
   const fundingStep: FundingStep = requestBody;
 
   const clins = fundingStep.clins.values();
-  // All validation tests below are logically negating the expected state; i.e. if (!expected) { return validation error }
-  // Assertion messages are positive and describe the expected state.
   for (const clin of clins) {
     if (!isValidDate(clin.pop_start_date)) {
       return createValidationErrorResponse({ pop_start_date: clin.pop_start_date });
@@ -52,19 +50,19 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
     if (!isValidDate(clin.pop_end_date)) {
       return createValidationErrorResponse({ pop_end_date: clin.pop_end_date });
     }
-    if (!(new Date(clin.pop_start_date) < new Date(clin.pop_end_date))) {
+    if (new Date(clin.pop_start_date) >= new Date(clin.pop_end_date)) {
       return createValidationErrorResponse({ pop_start_date: clin.pop_start_date, pop_end_date: clin.pop_end_date });
     }
-    if (!(new Date() < new Date(clin.pop_end_date))) {
+    if (new Date() >= new Date(clin.pop_end_date)) {
       return createValidationErrorResponse({ pop_end_date: clin.pop_end_date });
     }
-    if (!(clin.obligated_funds > 0)) {
+    if (clin.obligated_funds <= 0) {
       return createValidationErrorResponse({ obligated_funds: clin.obligated_funds });
     }
-    if (!(clin.obligated_funds < clin.total_clin_value)) {
+    if (clin.obligated_funds >= clin.total_clin_value) {
       return createValidationErrorResponse({ obligated_funds: clin.obligated_funds });
     }
-    if (!(clin.total_clin_value > 0)) {
+    if (clin.total_clin_value <= 0) {
       return createValidationErrorResponse({ total_clin_value: clin.total_clin_value });
     }
   }
