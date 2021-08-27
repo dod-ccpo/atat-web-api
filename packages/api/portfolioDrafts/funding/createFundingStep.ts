@@ -10,7 +10,7 @@ import {
   PATH_VARIABLE_REQUIRED_BUT_MISSING,
 } from "../../utils/errors";
 import { ApiSuccessResponse, SuccessStatusCode, ValidationErrorResponse } from "../../utils/response";
-import { isFundingStep, isValidJson, isValidDate, isPathParameterPresent } from "../../utils/validation";
+import { isFundingStep, isValidJson, isValidDate, isPathParameterPresent, isClin } from "../../utils/validation";
 import { ErrorCodes } from "../../models/Error";
 
 /**
@@ -44,26 +44,9 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
   const clins = fundingStep.clins.values();
   for (const clin of clins) {
-    if (!isValidDate(clin.pop_start_date)) {
-      return createValidationErrorResponse({ pop_start_date: clin.pop_start_date });
-    }
-    if (!isValidDate(clin.pop_end_date)) {
-      return createValidationErrorResponse({ pop_end_date: clin.pop_end_date });
-    }
-    if (new Date(clin.pop_start_date) >= new Date(clin.pop_end_date)) {
-      return createValidationErrorResponse({ pop_start_date: clin.pop_start_date, pop_end_date: clin.pop_end_date });
-    }
-    if (new Date() >= new Date(clin.pop_end_date)) {
-      return createValidationErrorResponse({ pop_end_date: clin.pop_end_date });
-    }
-    if (clin.obligated_funds <= 0) {
-      return createValidationErrorResponse({ obligated_funds: clin.obligated_funds });
-    }
-    if (clin.obligated_funds >= clin.total_clin_value) {
-      return createValidationErrorResponse({ obligated_funds: clin.obligated_funds });
-    }
-    if (clin.total_clin_value <= 0) {
-      return createValidationErrorResponse({ total_clin_value: clin.total_clin_value });
+    if (!validateClin(clin)) {
+      // TODO
+      console.log("This clin failed input validation: " + clin.clin_number);
     }
   }
 
@@ -131,4 +114,44 @@ export async function updateFundingStepOfPortfolioDraft(
       ReturnValues: "ALL_NEW",
     })
   );
+}
+
+/**
+ * Validates the given clin object
+ * @param clin an object that looks like a Clin
+ * @returns an error map containing property names and values that failed input validation
+ */
+export function validateClin(clin: object): boolean {
+  if (!isClin(clin)) {
+    throw Error("Input must be a Clin object");
+  }
+  if (!isValidDate(clin.pop_start_date)) {
+    return false;
+    // createValidationErrorResponse({ pop_start_date: clin.pop_start_date });
+  }
+  if (!isValidDate(clin.pop_end_date)) {
+    return false;
+    // createValidationErrorResponse({ pop_end_date: clin.pop_end_date });
+  }
+  if (new Date(clin.pop_start_date) >= new Date(clin.pop_end_date)) {
+    return false;
+    // createValidationErrorResponse({ pop_start_date: clin.pop_start_date, pop_end_date: clin.pop_end_date });
+  }
+  if (new Date() >= new Date(clin.pop_end_date)) {
+    return false;
+    // createValidationErrorResponse({ pop_end_date: clin.pop_end_date });
+  }
+  if (clin.total_clin_value <= 0) {
+    return false;
+    // createValidationErrorResponse({ total_clin_value: clin.total_clin_value });
+  }
+  if (clin.obligated_funds <= 0) {
+    return false;
+    // createValidationErrorResponse({ obligated_funds: clin.obligated_funds });
+  }
+  if (clin.obligated_funds >= clin.total_clin_value) {
+    return false;
+    // createValidationErrorResponse({ obligated_funds: clin.obligated_funds });
+  }
+  return true;
 }

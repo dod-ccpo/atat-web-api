@@ -3,7 +3,12 @@ import { APIGatewayProxyEvent } from "aws-lambda";
 import { mockClient } from "aws-sdk-client-mock";
 import { CloudServiceProvider } from "../../models/CloudServiceProvider";
 import { FundingStep } from "../../models/FundingStep";
-import { updateFundingStepOfPortfolioDraft, createValidationErrorResponse, handler } from "./createFundingStep";
+import {
+  updateFundingStepOfPortfolioDraft,
+  createValidationErrorResponse,
+  handler,
+  validateClin,
+} from "./createFundingStep";
 import { ProvisioningStatus } from "../../models/ProvisioningStatus";
 import { v4 as uuid } from "uuid";
 import { ErrorStatusCode, SuccessStatusCode } from "../../utils/response";
@@ -366,5 +371,94 @@ describe("when handler() recieves all required and valid input (2 CLINs)", funct
   it("should return a response body that looks like a Funding Step", async () => {
     const response = await handler(normalTwoClinsRequest);
     expect(isFundingStep(JSON.parse(response.body))).toBeTruthy();
+  });
+});
+
+describe("validateClin()", function () {
+  const clinInvalidStartDate = {
+    ...mockClin,
+    ...{ pop_start_date: "invalid" },
+  };
+  const clinInvalidEndDate = {
+    ...mockClin,
+    ...{ pop_end_date: "invalid" },
+  };
+  const clinStartAfterEnd = {
+    ...mockClin,
+    ...{ pop_start_date: "2015-10-21", pop_end_date: "1955-11-05" },
+  };
+  const clinStartEqualsEnd = {
+    ...mockClin,
+    ...{ pop_start_date: "1993-02-02", pop_end_date: "1993-02-02" },
+  };
+  const clinPopExpired = {
+    ...mockClin,
+    ...{ pop_end_date: "2021-08-26" },
+  };
+  const clinTotalLessThanZero = {
+    ...mockClin,
+    ...{ total_clin_value: -1 },
+  };
+  const clinTotalIsZero = {
+    ...mockClin,
+    ...{ total_clin_value: 0 },
+  };
+  const clinObligatedLessThanZero = {
+    ...mockClin,
+    ...{ obligated_funds: -1 },
+  };
+  const clinObligatedIsZero = {
+    ...mockClin,
+    ...{ obligated_funds: 0 },
+  };
+  const clinObligatedGreaterThanTotal = {
+    ...mockClin,
+    ...{ obligated_funds: 2, total_clin_value: 1 },
+  };
+  const clinObligatedEqualToTotal = {
+    ...mockClin,
+    ...{ obligated_funds: 1, total_clin_value: 1 },
+  };
+  it("should throw error if input does not look like a Clin", () => {
+    expect(() => {
+      validateClin({});
+    }).toThrow(Error("Input must be a Clin object"));
+  });
+  it("should return true if given Clin is valid (passes all input validation)", () => {
+    expect(validateClin(mockClin)).toBe(true);
+  });
+  it("should return false if given Clin has invalid pop start date", () => {
+    expect(validateClin(clinInvalidStartDate)).toBe(false);
+  });
+  it("should return false if given Clin has invalid pop end date", () => {
+    expect(validateClin(clinInvalidEndDate)).toBe(false);
+  });
+  it("should return false if given Clin has nonsensical pop dates (start>end)", () => {
+    expect(validateClin(clinStartAfterEnd)).toBe(false);
+  });
+  it("should return false if given Clin has nonsensical pop dates (start=end)", () => {
+    expect(validateClin(clinStartEqualsEnd)).toBe(false);
+  });
+  it("should return false if given Clin has nonsensical pop dates (now>end)", () => {
+    expect(validateClin(clinPopExpired)).toBe(false);
+  });
+  it("should return false if given Clin has nonsensical funding values (total<0)", () => {
+    expect(validateClin(clinTotalLessThanZero)).toBe(false);
+  });
+  it("should return false if given Clin has nonsensical funding values (total=0)", () => {
+    expect(validateClin(clinTotalIsZero)).toBe(false);
+  });
+  it("should return false if given Clin has nonsensical funding values (obligated<0)", () => {
+    expect(validateClin(clinObligatedLessThanZero)).toBe(false);
+  });
+  it("should return false if given Clin has nonsensical funding values (obligated=0)", () => {
+    expect(validateClin(clinObligatedIsZero)).toBe(false);
+  });
+  it("should return false if given Clin has nonsensical funding values (obligated>total)", () => {
+    expect(validateClin(clinObligatedGreaterThanTotal)).toBe(false);
+  });
+  // TODO: Verification of this business rule is pending
+  it("should return false if given Clin has nonsensical funding values (obligated=total)", () => {
+    expect(validateClin(clinObligatedEqualToTotal)).toBe(false);
   });
 });
