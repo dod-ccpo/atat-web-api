@@ -1,0 +1,362 @@
+openapi: 3.0.2
+info:
+  description: >-
+    This is a DRAFT version of the ATAT Portfolio Draft API
+  version: 1.0.0
+  title: ATAT Internal API - Portfolio Drafts
+  contact:
+    email: replaceme@ccpo.mil
+tags:
+  - name: portfolioDraft
+    description: >-
+      Portfolio Drafts represent instances of portfolio provisioning workloads which have not yet been submitted to
+      the CSP
+paths:
+  /:
+    post:
+      summary: List tasks
+      description: Returns a list of tasks
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PortfolioDraftSummary"
+        500:
+          description: "Internal Server Error"
+          content: {}
+      x-amazon-apigateway-integration:
+        uri:
+          arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:{{ createPortolioFunctionName }}/invocations
+        responses:
+          default:
+            statusCode: "200"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws_proxy"
+components:
+  parameters:
+    offsetParam:
+      in: query
+      name: offset
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+      description: The number of items to skip before starting to collect the result set.
+    limitParam:
+      in: query
+      name: limit
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 50
+        default: 20
+      description: The numbers of items to return.
+  
+  schemas:
+    BaseObject:
+      type: object
+      description: Base model common to all first-class objects (those with IDs)
+      properties:
+        id:
+          type: string
+        created_at:
+          type: string
+          format: "date-time"
+        updated_at:
+          type: string
+          format: "date-time"
+    PortfolioDraftSummary:
+      type: object
+      description: Portfolio Draft parent object
+      allOf:
+        - $ref: '#/components/schemas/BaseObject'
+        - type: object
+          properties:
+            num_portfolio_managers:
+              type: number
+            status:
+              type: string
+              description: CSP Provisioning Status
+              enum:
+                - "not_started"
+                - "in_progress"
+                - "complete"
+                - "failed"
+    Error:
+      type: object
+      description: Generic error model
+      properties:
+        code:
+          type: string
+          enum: [INVALID_INPUT, OTHER]
+        message:
+          type: string
+      required:
+        - code
+        - message
+    ValidationError:
+      allOf:
+        - $ref: '#/components/schemas/Error'
+        - type: object
+          required:
+            - error_map
+          properties:
+            error_map:
+              type: object
+              description: 'Maps form input IDs to validation error messages so that clients can display in-line errors'
+    FileMetadataSummary:
+      type: object
+      description: Metadata describing an uploaded file
+      properties:
+        id:
+          type: string
+          description: Should be a UUID. Will be the S3 Object Key.
+        name:
+          type: string
+          description: name of file when uploaded
+    FileMetadata:
+      type: object
+      description: Metadata describing an uploaded file
+      allOf:
+        - $ref: '#/components/schemas/BaseObject'
+        - $ref: '#/components/schemas/FileMetadataSummary'
+        - type: object
+          properties:
+            size:
+              type: number
+              description: file size in bytes
+            status:
+              type: string
+              description: status of uploaded file scans and review
+              enum:
+                - "pending"
+                - "accepted"
+                - "rejected"
+    PortfolioStep:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        dod_components:
+          type: array
+          xml:
+            name: "dod_component"
+            wrapped: true
+          items:
+            type: string
+            enum:
+              - "air_force"
+              - "army"
+              - "marine_corps"
+              - "navy"
+              - "space_force"
+              - "combatant_command"
+              - "joint_staff"
+              - "dafa"
+              - "osd_psas"
+              - "nsa"
+        portfolio_managers:
+          type: array
+          xml:
+            name: "portfolio_managers"
+            wrapped: true
+          items:
+            type: string
+            format: "email"
+    FundingStep:
+      type: array
+      items:
+        type: object
+        properties:
+          task_order_number:
+            type: string
+          task_order_file:
+            allOf:
+              - $ref: '#/components/schemas/FileMetadataSummary'
+            description: Metadata associated with file which was previously uploaded by POST /taskOrderFiles
+          csp:
+            type: string
+            enum:
+              - "aws"
+              - "azure"
+          clins:
+            type: array
+            items:
+              type: object
+              properties:
+                clin_number:
+                  type: string
+                idiq_clin:
+                  type: string
+                total_clin_value:
+                  type: "integer"
+                obligated_funds:
+                  type: "integer"
+                pop_start_date:
+                  type: string
+                  format: date
+                  example: '2021-07-01'
+                pop_end_date:
+                  type: string
+                  format: date
+                  example: '2022-07-01'
+    ApplicationStep:
+      description: Represents the Application Step of the Portfolio Draft Wizard
+      type: array
+      xml:
+        name: "application"
+        wrapped: true
+      items:
+        type: object
+        properties:
+          name:
+            type: string
+          description:
+            type: string
+          environments:
+            type: array
+            xml:
+              name: "environment"
+              wrapped: true
+            items:
+              type: object
+              properties:
+                name:
+                  type: string
+                operators:
+                  type: array
+                  xml:
+                    name: "operator"
+                    wrapped: true
+                  items:
+                    type: object
+                    properties:
+                      first_name:
+                        type: string
+                      last_name:
+                        type: string
+                      email:
+                        type: string
+                        format: "email"
+                      access:
+                        type: string
+                        description: Operator Access Level to Environment
+                        enum:
+                          - administrator
+                          - read_only
+    PortfolioDraft:
+      allOf:
+        - $ref: '#/components/schemas/PortfolioDraftSummary'
+      type: object
+      properties:
+        portfolio_step:
+          $ref: '#/components/schemas/PortfolioStep'
+        funding_step:
+          $ref: '#/components/schemas/FundingStep'
+        application_step:
+          $ref: '#/components/schemas/ApplicationStep'
+  examples:
+    PortfolioDraftSummaryEx:
+      value:
+        - id: "dc2bbee6-8cdb-477e-a363-f9f1593a0a9b"
+          status: "not_started"
+          created_at: "2021-08-03T16:19:51.686Z"
+          updated_at: "2021-08-03T16:19:51.686Z"
+        - id: "c3e8c444-a971-4515-bc43-3cdfef072ccc"
+          status: "in_progress"
+          created_at: "2021-08-03T16:19:24.362Z"
+          updated_at: "2021-08-03T16:19:24.362Z"
+        - id: "3f44ef42-2322-4a42-a381-6770e18eceba"
+          status: "complete"
+          created_at: "2021-08-03T16:21:07.978Z"
+          updated_at: "2021-08-03T16:21:07.978Z"
+    PortfolioDraftEx:
+      value:
+        id: "dc2bbee6-8cdb-477e-a363-f9f1593a0a9b"
+        status: "not_started"
+        created_at: "2021-08-03T16:19:51.686Z"
+        updated_at: "2021-08-03T16:19:51.686Z"
+    PortfolioStepEx:
+      value:
+        name: "Mock Portfolio"
+        description: "Mock portfolio description"
+        dod_components: 
+          - "air_force"
+          - "army"
+          - "marine_corps"
+          - "navy"
+          - "space_force"
+        portfolio_managers:
+          - "joe.manager@example.com"
+          - "jane.manager@example.com"
+    FundingStepEx:
+      value:
+        - task_order_number: "12345678910"
+          task_order_file:
+            description: "Mock description"
+            id: "1234"
+            created_at: "2021-08-03T16:21:07.978Z"
+            updated_at: "2021-08-03T16:21:07.978Z"
+            size: 100
+            name: "Mock task order file"
+            status: "pending"
+          csp: 
+            - "aws"
+          clins: 
+            - clin_number:  "0001"
+              idiq_clin:  "1234"
+              total_clin_value:  200000
+              obligated_funds:  10000
+              pop_start_date: "2021-09-01"
+              pop_end_date: "2022-09-01"
+    ApplicationStepEx:
+      value:
+        - name: "Mock Application"
+          description: "The description of the Mock Application"
+          environments:
+            - name: "Cloud City"
+              operators:
+                - first_name: "Darth"
+                  last_name: "Vader"
+                  email: "iam@yourfather.com"
+                  access: "administrator"
+                - first_name: "Han"
+                  last_name: "Solo"
+                  email: "frozen@carbonite.com"
+                  access: "read_only"
+                - first_name: "Luke"
+                  last_name: "Skywalker"
+                  email: "lostmy@hand.com"
+                  access: "read_only"
+            - name: "Jabba's Palace"
+              operators:
+                - first_name: "Salacious B."
+                  last_name: "Crumb"
+                  email: "monkey@lizard.com"
+                  access: "administrator"
+                - first_name: "Han"
+                  last_name: "Solo"
+                  email: "frozen@carbonite.com"
+                  access: "read_only"
+                - first_name: "Boba"
+                  last_name: "Fett"
+                  email: "original@mandalorian.com"
+                  access: "read_only"
+        
+                
+            
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/CCPO-ATAT/mock-atat-internal-api/1.0.0

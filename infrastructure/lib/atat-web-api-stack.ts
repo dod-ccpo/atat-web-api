@@ -6,6 +6,8 @@ import { ApiDynamoDBFunction } from "./constructs/api-dynamodb-function";
 import { ApiS3Function } from "./constructs/api-s3-function";
 import { TaskOrderLifecycle } from "./constructs/task-order-lifecycle";
 import { HttpMethod } from "./http";
+import * as lambdaNodejs from "@aws-cdk/aws-lambda-nodejs";
+import { JsonSchemaType, Model } from "@aws-cdk/aws-apigateway";
 
 // This is a suboptimal solution to finding the relative directory to the
 // package root. This is necessary because it is possible for this file to be
@@ -54,6 +56,15 @@ export class AtatWebApiStack extends cdk.Stack {
     // Creates a shared API Gateway that all the functions will be able to add routes to.
     // Ideally we'd define different stages for dev, test, and staging. For now, a single
     // stage for everything being dev is good enough for a proof of concept
+
+    const restApi = new apigw.SpecRestApi(this, "AtatSpecTest", {
+      apiDefinition: apigw.ApiDefinition.fromAsset("../atat-web-api/infrastructure/atat_api.yaml"),
+      endpointTypes: [apigw.EndpointType.REGIONAL],
+      parameters: {
+        endpointConfigurationTypes: apigw.EndpointType.REGIONAL,
+      },
+    });
+    /*
     const restApi = new apigw.RestApi(this, "AtatWebApi", {
       binaryMediaTypes: ["multipart/form-data"],
       endpointConfiguration: {
@@ -66,10 +77,107 @@ export class AtatWebApiStack extends cdk.Stack {
         allowHeaders: apigw.Cors.DEFAULT_HEADERS,
       },
     });
+
     restApi.root.addMethod("ANY");
+
     const restUrlOutput = new cdk.CfnOutput(this, "RootApiUri", {
       value: restApi.url ?? "",
     });
+    */
+
+    /**
+     * A Validator
+     */
+
+    const requestValidator = new apigw.RequestValidator(this, "AwesomePayloadValidator", {
+      restApi: restApi,
+      requestValidatorName: `my-payload-validator`,
+      validateRequestBody: true,
+    });
+    const sharedFunctionProps: lambdaNodejs.NodejsFunctionProps = {
+      environment: {
+        ATAT_TABLE_NAME: table.tableName,
+      },
+      bundling: {
+        externalModules: ["aws-sdk"],
+      },
+    };
+    const portfolioDrafts = restApi.root.addResource("portfolioDrafts");
+    const portfolioDraftId = portfolioDrafts.addResource("{portfolioDraftId}");
+    const portfolio = portfolioDraftId.addResource("portfolio");
+    const createPortfolioDraftFn = new lambdaNodejs.NodejsFunction(this, "CreatePortfolioDraftFunction", {
+      entry: packageRoot() + "/api/portfolioDrafts/createPortfolioDraft.ts",
+      ...sharedFunctionProps,
+    });
+
+    portfolioDrafts.addMethod("POST", new apigw.LambdaIntegration(createPortfolioDraftFn));
+    table.grantReadWriteData(createPortfolioDraftFn);
+
+    // createPortfolioStep
+    const createPortfolioStepFn = new lambdaNodejs.NodejsFunction(this, "CreatePortfolioStepFunction", {
+      entry: packageRoot() + "/api/portfolioDrafts/portfolio/createPortfolioStep.ts",
+      ...sharedFunctionProps,
+    });
+    const portfolioStepIntegration = new apigw.LambdaIntegration(createPortfolioStepFn, { proxy: false });
+
+    const model = new apigw.Model(this, "AwesomeValidationModel", {
+      modelName: "myValidationModel", // `myproject-${stage}-validate-payload-model`,
+      restApi: restApi,
+      contentType: "application/json", // this is necessary - even thought they mention it's an optional param
+      description: "Payload used to validate your requests",
+      schema: {
+        type: JsonSchemaType.OBJECT,
+        properties: {
+          name: {
+            type: JsonSchemaType.STRING,
+          },
+          description: {
+            type: JsonSchemaType.STRING,
+          },
+          dod_components: {
+            type: JsonSchemaType.ARRAY,
+            items: {
+              type: JsonSchemaType.STRING,
+              enum: [
+                "air_force",
+                "army",
+                "marine_corps",
+                "navy",
+                "space_force",
+                "combatant_command",
+                "joint_staff",
+                "dafa",
+                "osd_psas",
+                "nsa",
+              ],
+            },
+          },
+          portfolio_managers: { type: JsonSchemaType.ARRAY, items: { type: JsonSchemaType.STRING, format: "email" } },
+        },
+        required: ["name"],
+      },
+    });
+
+    /*
+    portfolio.addMethod("POST", new apigw.LambdaIntegration(createPortfolioStepFn), {
+      requestValidator: myValidator,
+    }); */
+    portfolio.addMethod("POST", portfolioStepIntegration, {
+      requestValidator: requestValidator,
+      requestModels: { "application/json": model },
+      requestParameters: { "method.request.path.portfolioDraftId": true },
+    });
+    table.grantReadWriteData(createPortfolioStepFn);
+
+    /**
+     * Simple Method attaching the validator.
+     
+    const postMethod = restApi.root.addMethod("POST", new apigw.MockIntegration(), {
+      requestValidator: myValidator,
+    }); */
+  }
+}
+/*
 
     const portfolioDrafts = restApi.root.addResource("portfolioDrafts");
     const portfolioDraftId = portfolioDrafts.addResource("{portfolioDraftId}");
@@ -156,3 +264,4 @@ function addTaskOrderRoutes(scope: cdk.Stack, restApi: apigw.RestApi) {
 
   // TODO: getTaskOrderFiles
 }
+*/
