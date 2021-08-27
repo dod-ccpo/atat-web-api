@@ -1,4 +1,12 @@
-import { isBodyPresent, isFundingStep, isPathParameterPresent, isPortfolioStep, isValidJson, isValidDate, isClin } from "./validation";
+import {
+  isBodyPresent,
+  isFundingStep,
+  isPathParameterPresent,
+  isPortfolioStep,
+  isValidJson,
+  isValidDate,
+  isClin,
+} from "./validation";
 
 describe("Testing validation of request body", function () {
   it("should return true because request body is present", async () => {
