@@ -1,6 +1,7 @@
 import { dynamodbDocumentClient as client } from "../../utils/dynamodb";
 import { UpdateCommand, UpdateCommandOutput } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
+import { Clin } from "../../models/Clin";
 import { FundingStep } from "../../models/FundingStep";
 import {
   DATABASE_ERROR,
@@ -122,7 +123,7 @@ export async function updateFundingStepOfPortfolioDraft(
  * @param clin an object that looks like a Clin
  * @returns an error map containing property names and values that failed input validation
  */
-export function validateClin(clin: object): boolean {
+export function validateClin(clin: unknown): clin is Clin {
   if (!isClin(clin)) {
     throw Error("Input must be a Clin object");
   }
