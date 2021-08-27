@@ -123,7 +123,7 @@ export async function updateFundingStepOfPortfolioDraft(
  * @param clin an object that looks like a Clin
  * @returns an error map containing property names and values that failed input validation
  */
-export function validateClin(clin: unknown): clin is Clin {
+export function validateClin(clin: unknown): boolean {
   if (!isClin(clin)) {
     throw Error("Input must be a Clin object");
   }
