@@ -46,7 +46,8 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
   for (const clin of clins) {
     if (!validateClin(clin)) {
       // TODO
-      console.log("This clin failed input validation: " + clin.clin_number);
+      console.warn("This clin failed input validation: " + clin.clin_number);
+      return createValidationErrorResponse({ name: "value" });
     }
   }
 

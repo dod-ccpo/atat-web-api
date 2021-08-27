@@ -2,6 +2,7 @@ import { DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent } from "aws-lambda";
 import { mockClient } from "aws-sdk-client-mock";
 import { CloudServiceProvider } from "../../models/CloudServiceProvider";
+import { Clin } from "../../models/Clin";
 import { FundingStep } from "../../models/FundingStep";
 import {
   updateFundingStepOfPortfolioDraft,
@@ -374,48 +375,73 @@ describe("when handler() recieves all required and valid input (2 CLINs)", funct
   });
 });
 
+describe("when handler() recieves (1 CLIN) with invalid start date", function () {
+  const invalidStartDate = { pop_start_date: "invalid" };
+  const clinInvalidStartDate: Clin = {
+    ...mockClin,
+    ...invalidStartDate,
+  };
+  const fundingStepInvalidStartDate: FundingStep = {
+    task_order_number: "TO987654321",
+    task_order_file: {
+      id: "51312a97-e53a-49b4-bf23-5039759bf843",
+      name: "Task_Order_987654321.pdf",
+    },
+    csp: CloudServiceProvider.AWS,
+    clins: [clinInvalidStartDate],
+  };
+  const requestInvalidStartDate: APIGatewayProxyEvent = {
+    body: JSON.stringify(fundingStepInvalidStartDate),
+    pathParameters: { portfolioDraftId: mockPortfolioDraftId },
+  } as any;
+  it("should return invalid start date in error map", async () => {
+    const response = await handler(requestInvalidStartDate);
+    expect(JSON.parse(response.body).errorMap).toEqual(invalidStartDate);
+  });
+});
+
 describe("validateClin()", function () {
-  const clinInvalidStartDate = {
+  const clinInvalidStartDate: Clin = {
     ...mockClin,
     ...{ pop_start_date: "invalid" },
   };
-  const clinInvalidEndDate = {
+  const clinInvalidEndDate: Clin = {
     ...mockClin,
     ...{ pop_end_date: "invalid" },
   };
-  const clinStartAfterEnd = {
+  const clinStartAfterEnd: Clin = {
     ...mockClin,
     ...{ pop_start_date: "2015-10-21", pop_end_date: "1955-11-05" },
   };
-  const clinStartEqualsEnd = {
+  const clinStartEqualsEnd: Clin = {
     ...mockClin,
     ...{ pop_start_date: "1993-02-02", pop_end_date: "1993-02-02" },
   };
-  const clinPopExpired = {
+  const clinPopExpired: Clin = {
     ...mockClin,
     ...{ pop_end_date: "2021-08-26" },
   };
-  const clinTotalLessThanZero = {
+  const clinTotalLessThanZero: Clin = {
     ...mockClin,
     ...{ total_clin_value: -1 },
   };
-  const clinTotalIsZero = {
+  const clinTotalIsZero: Clin = {
     ...mockClin,
     ...{ total_clin_value: 0 },
   };
-  const clinObligatedLessThanZero = {
+  const clinObligatedLessThanZero: Clin = {
     ...mockClin,
     ...{ obligated_funds: -1 },
   };
-  const clinObligatedIsZero = {
+  const clinObligatedIsZero: Clin = {
     ...mockClin,
     ...{ obligated_funds: 0 },
   };
-  const clinObligatedGreaterThanTotal = {
+  const clinObligatedGreaterThanTotal: Clin = {
     ...mockClin,
     ...{ obligated_funds: 2, total_clin_value: 1 },
   };
-  const clinObligatedEqualToTotal = {
+  const clinObligatedEqualToTotal: Clin = {
     ...mockClin,
     ...{ obligated_funds: 1, total_clin_value: 1 },
   };
