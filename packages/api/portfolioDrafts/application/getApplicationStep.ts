@@ -3,7 +3,12 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { ApplicationStep } from "../../models/ApplicationStep";
 import { dynamodbDocumentClient as client } from "../../utils/dynamodb";
 import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
-import { DATABASE_ERROR, NO_SUCH_PORTFOLIO_DRAFT, NO_SUCH_APPLICATION_STEP } from "../../utils/errors";
+import {
+  DATABASE_ERROR,
+  NO_SUCH_PORTFOLIO_DRAFT,
+  NO_SUCH_APPLICATION_STEP,
+  PATH_VARIABLE_REQUIRED_BUT_MISSING,
+} from "../../utils/errors";
 
 export async function getApplicationStep(portfolioDraftId: string): Promise<GetCommandOutput> {
   return client.send(
@@ -25,7 +30,7 @@ export async function getApplicationStep(portfolioDraftId: string): Promise<GetC
 export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   const portfolioDraftId = event.pathParameters?.portfolioDraftId;
   if (!portfolioDraftId) {
-    return NO_SUCH_PORTFOLIO_DRAFT;
+    return PATH_VARIABLE_REQUIRED_BUT_MISSING;
   }
   try {
     const data = await getApplicationStep(portfolioDraftId);
