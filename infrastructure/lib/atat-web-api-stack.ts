@@ -8,6 +8,7 @@ import { TaskOrderLifecycle } from "./constructs/task-order-lifecycle";
 import { HttpMethod } from "./http";
 import * as lambdaNodejs from "@aws-cdk/aws-lambda-nodejs";
 import { JsonSchemaType, Model } from "@aws-cdk/aws-apigateway";
+import * as lambda from "@aws-cdk/aws-lambda";
 
 // This is a suboptimal solution to finding the relative directory to the
 // package root. This is necessary because it is possible for this file to be
@@ -118,6 +119,11 @@ export class AtatWebApiStack extends cdk.Stack {
       entry: packageRoot() + "/api/portfolioDrafts/portfolio/createPortfolioStep.ts",
       ...sharedFunctionProps,
     });
+    const forceLambdaId = createPortfolioDraftFn.node.defaultChild as lambda.CfnFunction;
+    forceLambdaId.overrideLogicalId("CreatePortfolioStepFunction");
+    const arnYis = forceLambdaId.getAtt("Arn");
+    console.log(arnYis);
+
     const portfolioStepIntegration = new apigw.LambdaIntegration(createPortfolioStepFn, { proxy: true });
 
     const model = new apigw.Model(this, "AwesomeValidationModel", {
