@@ -75,6 +75,7 @@ export class AtatWebApiStack extends cdk.Stack {
     const portfolioDraftId = portfolioDrafts.addResource("{portfolioDraftId}");
     const portfolio = portfolioDraftId.addResource("portfolio");
     const funding = portfolioDraftId.addResource("funding");
+    const application = portfolioDraftId.addResource("application");
     // OperationIds from API spec are used to identify functions below
 
     const createPortfolioDraft = new ApiDynamoDBFunction(this, "CreatePortfolioDraft", {
@@ -126,8 +127,14 @@ export class AtatWebApiStack extends cdk.Stack {
       handlerPath: packageRoot() + "/api/portfolioDrafts/funding/getFundingStep.ts",
     });
 
+    const getApplicationStep = new ApiDynamoDBFunction(this, "GetApplicationStep", {
+      resource: application,
+      table: table,
+      method: HttpMethod.GET,
+      handlerPath: packageRoot() + "/api/portfolioDrafts/application/getApplicationStep.ts",
+    });
+
     // TODO: getPortfolioDraft
-    // TODO: getApplicationStep
     // TODO: createApplicationStep
     // TODO: submitPortfolioDraft
     addTaskOrderRoutes(this, restApi);
