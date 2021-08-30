@@ -12,32 +12,27 @@ tags:
       Portfolio Drafts represent instances of portfolio provisioning workloads which have not yet been submitted to
       the CSP
 paths:
-  /:
+  /portfolioDrafts/{portfolioDraftId}/portfolio:
     post:
-      summary: List tasks
-      description: Returns a list of tasks
-      responses:
-        200:
-          description: "OK"
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/PortfolioDraftSummary"
-        500:
-          description: "Internal Server Error"
-          content: {}
+      parameters:
+      - name: "portfolioDraftId"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PortfolioStep"
+        required: true
+      x-amazon-apigateway-request-validator: "my-payload-validator"
       x-amazon-apigateway-integration:
-        uri:
-          arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:{{ createPortolioFunctionName }}/invocations
-        responses:
-          default:
-            statusCode: "200"
-        passthroughBehavior: "when_no_match"
         httpMethod: "POST"
-        contentHandling: "CONVERT_TO_TEXT"
+        uri: "arn:aws-us-gov:apigateway:us-gov-west-1:lambda:path/2015-03-31/functions/{{createPortfolioStepFnArn}}/invocations"
+        passthroughBehavior: "when_no_match"
         type: "aws_proxy"
+
 components:
   parameters:
     offsetParam:
@@ -353,10 +348,8 @@ components:
                   last_name: "Fett"
                   email: "original@mandalorian.com"
                   access: "read_only"
-        
-                
-            
-servers:
-  # Added by API Auto Mocking Plugin
-  - description: SwaggerHub API Auto Mocking
-    url: https://virtserver.swaggerhub.com/CCPO-ATAT/mock-atat-internal-api/1.0.0
+x-amazon-apigateway-request-validators:
+  my-payload-validator:
+    validateRequestParameters: false
+    validateRequestBody: true      
+    

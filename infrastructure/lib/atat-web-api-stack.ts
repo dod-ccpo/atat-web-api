@@ -23,6 +23,7 @@ function packageRoot(): string {
 }
 
 export class AtatWebApiStack extends cdk.Stack {
+  public readonly createPortfolioStepFn: lambda.IFunction;
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
@@ -58,13 +59,6 @@ export class AtatWebApiStack extends cdk.Stack {
     // Ideally we'd define different stages for dev, test, and staging. For now, a single
     // stage for everything being dev is good enough for a proof of concept
 
-    const restApi = new apigw.SpecRestApi(this, "AtatSpecTest", {
-      apiDefinition: apigw.ApiDefinition.fromAsset("../atat-web-api/infrastructure/atat_api.yaml"),
-      endpointTypes: [apigw.EndpointType.REGIONAL],
-      parameters: {
-        endpointConfigurationTypes: apigw.EndpointType.REGIONAL,
-      },
-    });
     /*
     const restApi = new apigw.RestApi(this, "AtatWebApi", {
       binaryMediaTypes: ["multipart/form-data"],
@@ -90,11 +84,6 @@ export class AtatWebApiStack extends cdk.Stack {
      * A Validator
      */
 
-    const requestValidator = new apigw.RequestValidator(this, "AwesomePayloadValidator", {
-      restApi: restApi,
-      requestValidatorName: `my-payload-validator`,
-      validateRequestBody: true,
-    });
     const sharedFunctionProps: lambdaNodejs.NodejsFunctionProps = {
       environment: {
         ATAT_TABLE_NAME: table.tableName,
@@ -103,77 +92,34 @@ export class AtatWebApiStack extends cdk.Stack {
         externalModules: ["aws-sdk"],
       },
     };
+    /*
     const portfolioDrafts = restApi.root.addResource("portfolioDrafts");
     const portfolioDraftId = portfolioDrafts.addResource("{portfolioDraftId}");
     const portfolio = portfolioDraftId.addResource("portfolio");
+    */
+    /*
     const createPortfolioDraftFn = new lambdaNodejs.NodejsFunction(this, "CreatePortfolioDraftFunction", {
       entry: packageRoot() + "/api/portfolioDrafts/createPortfolioDraft.ts",
       ...sharedFunctionProps,
-    });
-
+    }); */
+    /*
     portfolioDrafts.addMethod("POST", new apigw.LambdaIntegration(createPortfolioDraftFn));
+    */
+    /*
     table.grantReadWriteData(createPortfolioDraftFn);
-
+*/
     // createPortfolioStep
-    const createPortfolioStepFn = new lambdaNodejs.NodejsFunction(this, "CreatePortfolioStepFunction", {
+    this.createPortfolioStepFn = new lambdaNodejs.NodejsFunction(this, "CreatePortfolioStepFunction", {
       entry: packageRoot() + "/api/portfolioDrafts/portfolio/createPortfolioStep.ts",
       ...sharedFunctionProps,
     });
-    const forceLambdaId = createPortfolioDraftFn.node.defaultChild as lambda.CfnFunction;
-    forceLambdaId.overrideLogicalId("CreatePortfolioStepFunction");
-    const arnYis = forceLambdaId.getAtt("Arn");
-    console.log(arnYis);
 
-    const portfolioStepIntegration = new apigw.LambdaIntegration(createPortfolioStepFn, { proxy: true });
-
-    const model = new apigw.Model(this, "AwesomeValidationModel", {
-      modelName: "myValidationModel", // `myproject-${stage}-validate-payload-model`,
-      restApi: restApi,
-      contentType: "application/json", // this is necessary - even thought they mention it's an optional param
-      description: "Payload used to validate your requests",
-      schema: {
-        type: JsonSchemaType.OBJECT,
-        properties: {
-          name: {
-            type: JsonSchemaType.STRING,
-          },
-          description: {
-            type: JsonSchemaType.STRING,
-          },
-          dod_components: {
-            type: JsonSchemaType.ARRAY,
-            items: {
-              type: JsonSchemaType.STRING,
-              enum: [
-                "air_force",
-                "army",
-                "marine_corps",
-                "navy",
-                "space_force",
-                "combatant_command",
-                "joint_staff",
-                "dafa",
-                "osd_psas",
-                "nsa",
-              ],
-            },
-          },
-          portfolio_managers: { type: JsonSchemaType.ARRAY, items: { type: JsonSchemaType.STRING, format: "email" } },
-        },
-        required: ["name"],
-      },
-    });
+    // const portfolioStepIntegration = new apigw.LambdaIntegration(this.createPortfolioStepFn, { proxy: true });
 
     /*
     portfolio.addMethod("POST", new apigw.LambdaIntegration(createPortfolioStepFn), {
       requestValidator: myValidator,
     }); */
-    portfolio.addMethod("POST", portfolioStepIntegration, {
-      requestValidator: requestValidator,
-      requestModels: { "application/json": model },
-      requestParameters: { "method.request.path.portfolioDraftId": true },
-    });
-    table.grantReadWriteData(createPortfolioStepFn);
 
     /**
      * Simple Method attaching the validator.

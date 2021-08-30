@@ -24,8 +24,11 @@ function packageRoot(): string {
   return `${cwd}/packages`;
 }
 
+export interface AtatSpecRestStackProps extends cdk.StackProps {
+  readonly createPortfolioStepFn: lambda.IFunction;
+}
 export class AtatSpecRestStack extends cdk.Stack {
-  constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: cdk.Construct, id: string, props: AtatSpecRestStackProps) {
     super(scope, id, props);
 
     // SpecRestApi example
@@ -33,12 +36,12 @@ export class AtatSpecRestStack extends cdk.Stack {
     const engine = new Liquid();
     engine
       .renderFile("../atat-web-api/infrastructure/atat_api.yaml", {
-        createPortolioFunctionName: createPortfolioDraftFn.functionName,
+        createPortfolioStepFnArn: props.createPortfolioStepFn.functionArn,
         // other function names to fill into api spec
       })
       .then((template) => fs.writeFileSync("template-out.test.yaml", template));
     const restApi = new apigw.SpecRestApi(this, "AtatSpecTest", {
-      apiDefinition: apigw.ApiDefinition.fromAsset("../atat-web-api/infrastructure/atat_api.yaml"),
+      apiDefinition: apigw.ApiDefinition.fromAsset("template-out.test.yaml"),
       endpointTypes: [apigw.EndpointType.REGIONAL],
       parameters: {
         endpointConfigurationTypes: apigw.EndpointType.REGIONAL,
