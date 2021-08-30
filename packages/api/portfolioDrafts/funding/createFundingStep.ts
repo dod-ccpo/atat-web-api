@@ -1,6 +1,7 @@
 import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { FundingStep } from "../../models/FundingStep";
+import { FUNDING_STEP } from "../../models/PortfolioDraft";
 import { dynamodbClient as client } from "../../utils/dynamodb";
 import { DATABASE_ERROR, NO_SUCH_PORTFOLIO_DRAFT, REQUEST_BODY_EMPTY, REQUEST_BODY_INVALID } from "../../utils/errors";
 import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
@@ -42,7 +43,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
     },
     UpdateExpression: "set #portfolioVariable = :portfolio, updated_at = :now",
     ExpressionAttributeNames: {
-      "#portfolioVariable": "funding_step",
+      "#portfolioVariable": FUNDING_STEP,
     },
     ExpressionAttributeValues: {
       ":portfolio": fundingStep,

@@ -9,6 +9,7 @@ import {
   NO_SUCH_APPLICATION_STEP,
   PATH_VARIABLE_REQUIRED_BUT_MISSING,
 } from "../../utils/errors";
+import { APPLICATION_STEP } from "../../models/PortfolioDraft";
 
 export async function getApplicationStep(portfolioDraftId: string): Promise<GetCommandOutput> {
   return client.send(
@@ -17,7 +18,7 @@ export async function getApplicationStep(portfolioDraftId: string): Promise<GetC
       Key: {
         id: portfolioDraftId,
       },
-      ProjectionExpression: "application_step",
+      ProjectionExpression: APPLICATION_STEP,
     })
   );
 }
