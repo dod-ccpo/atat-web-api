@@ -44,7 +44,7 @@
     "@aws-cdk/aws-lambda-nodejs": "1.119.0",
     "@aws-cdk/aws-s3": "1.119.0",
     "@aws-cdk/core": "1.119.0",
-    "cdk-nag": "0.0.56",
+    "cdk-nag": "0.0.60",
     "eslint": "^7.31.0",
     "source-map-support": "^0.5.16",
     "uuid": "^8.3.2"
