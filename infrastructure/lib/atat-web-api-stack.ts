@@ -1,27 +1,17 @@
 import * as apigw from "@aws-cdk/aws-apigateway";
-import { UserPool } from "@aws-cdk/aws-cognito";
 import * as dynamodb from "@aws-cdk/aws-dynamodb";
 import * as cdk from "@aws-cdk/core";
 import { ApiDynamoDBFunction } from "./constructs/api-dynamodb-function";
 import { ApiS3Function } from "./constructs/api-s3-function";
 import { TaskOrderLifecycle } from "./constructs/task-order-lifecycle";
 import { HttpMethod } from "./http";
-
-// This is a suboptimal solution to finding the relative directory to the
-// package root. This is necessary because it is possible for this file to be
-// run with the a cwd of either the infrastructure directory or the root of the
-// git repo.
-function packageRoot(): string {
-  const cwd = process.cwd();
-  if (cwd.endsWith("infrastructure")) {
-    return `${cwd}/../packages`;
-  }
-  return `${cwd}/packages`;
-}
+import { packageRoot } from "./util";
 
 export class AtatWebApiStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
+
+    this.templateOptions.description = "Resources to support the ATAT application API";
 
     // Create a shared DynamoDB table that will be used by all the functions in the project.
     const table = new dynamodb.Table(this, "AtatTable", {
@@ -32,23 +22,6 @@ export class AtatWebApiStack extends cdk.Stack {
     });
     const tableOutput = new cdk.CfnOutput(this, "TableName", {
       value: table.tableName,
-    });
-
-    const userPool = new UserPool(this, "PocUserPool");
-    const userPoolClient = userPool.addClient("api-app-client", {
-      authFlows: {
-        userPassword: true,
-      },
-    });
-    // Ugly hack to quickly isolate deployments for developers.  To be improved/removed later.
-    const ticketId = (this.node.tryGetContext("TicketId") || "").toLowerCase();
-    const userPoolDomain = userPool.addDomain("api-app-domain", {
-      cognitoDomain: {
-        domainPrefix: ticketId + "atatapi",
-      },
-    });
-    const poolDomainOutput = new cdk.CfnOutput(this, "UserPoolDomain", {
-      value: userPoolDomain.domainName,
     });
 
     // Creates a shared API Gateway that all the functions will be able to add routes to.
