@@ -51,6 +51,14 @@ export const PATH_VARIABLE_INVALID = new ErrorResponse(
 );
 
 /**
+ * To be used when a required path variable is not received (not present in path parameters)
+ */
+export const PATH_VARIABLE_REQUIRED_BUT_MISSING = new ErrorResponse(
+  { code: ErrorCodes.INVALID_INPUT, message: "Required path variable is missing" },
+  ErrorStatusCode.BAD_REQUEST
+);
+
+/**
  * To be used when the specified Portfolio Draft is not found
  */
 export const NO_SUCH_PORTFOLIO_DRAFT = new ErrorResponse(
