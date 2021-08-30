@@ -118,7 +118,7 @@ export class AtatWebApiStack extends cdk.Stack {
       entry: packageRoot() + "/api/portfolioDrafts/portfolio/createPortfolioStep.ts",
       ...sharedFunctionProps,
     });
-    const portfolioStepIntegration = new apigw.LambdaIntegration(createPortfolioStepFn, { proxy: false });
+    const portfolioStepIntegration = new apigw.LambdaIntegration(createPortfolioStepFn, { proxy: true });
 
     const model = new apigw.Model(this, "AwesomeValidationModel", {
       modelName: "myValidationModel", // `myproject-${stage}-validate-payload-model`,
