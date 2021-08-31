@@ -1,5 +1,7 @@
+import { ApplicationStep } from "../models/ApplicationStep";
 import { FundingStep } from "../models/FundingStep";
 import { PortfolioStep } from "../models/PortfolioStep";
+import { version as uuidVersion, validate as uuidValidate } from "uuid";
 
 /**
  * Check whether a given string is valid JSON.
@@ -14,6 +16,15 @@ export function isValidJson(str: string): boolean {
     return false;
   }
   return true;
+}
+
+/**
+ * Check whether a given string is a valid v4 UUID.
+ * @param str - The string to check
+ * @returns true if the string is valid v4 UUID and false otherwise
+ */
+export function isValidUuidV4(str: string): boolean {
+  return uuidValidate(str) && uuidVersion(str) === 4;
 }
 
 /**
@@ -58,6 +69,22 @@ export function isFundingStep(object: unknown): object is FundingStep {
     return false;
   }
   return ["task_order_number", "task_order_file", "csp", "clins"].every((item) => item in object);
+}
+
+/**
+ * Check whether a given object is a {@link ApplicationStep}.
+ *
+ * Note that this only asserts that the given object meets the interface. It does not validate
+ * that the object is a valid {@link ApplicationStep}.
+ *
+ * @param object - The object to check
+ * @returns true if the object has all the attributes of a {@link ApplicationStep}
+ */
+export function isApplicationStep(object: unknown): object is ApplicationStep {
+  if (!isValidObject(object)) {
+    return false;
+  }
+  return ["name", "description", "environments"].every((item) => item in object);
 }
 
 /**

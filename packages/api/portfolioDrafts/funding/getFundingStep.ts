@@ -1,6 +1,7 @@
 import { GetCommand, GetCommandOutput } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { FundingStep } from "../../models/FundingStep";
+import { FUNDING_STEP } from "../../models/PortfolioDraft";
 import { dynamodbDocumentClient as client } from "../../utils/dynamodb";
 import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
 import { DATABASE_ERROR, NO_SUCH_PORTFOLIO_DRAFT, NO_SUCH_FUNDING_STEP } from "../../utils/errors";
@@ -14,7 +15,7 @@ async function getFundingStepCommand(table: string, portfolioDraftId: string): P
       Key: {
         id: portfolioDraftId,
       },
-      ProjectionExpression: "funding_step",
+      ProjectionExpression: FUNDING_STEP,
     })
   );
   return result;

@@ -1,6 +1,7 @@
 import { GetCommand, GetCommandOutput } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { ErrorCodes } from "../../models/Error";
+import { PORTFOLIO_STEP } from "../../models/PortfolioDraft";
 import { PortfolioStep } from "../../models/PortfolioStep";
 import { dynamodbDocumentClient as client } from "../../utils/dynamodb";
 import { ApiSuccessResponse, ErrorResponse, ErrorStatusCode, SuccessStatusCode } from "../../utils/response";
@@ -22,7 +23,7 @@ async function getPortfolioStepCommand(table: string, portfolioDraftId: string):
       Key: {
         id: portfolioDraftId,
       },
-      ProjectionExpression: "portfolio_step",
+      ProjectionExpression: PORTFOLIO_STEP,
     })
   );
   return result;
