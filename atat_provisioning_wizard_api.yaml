@@ -356,7 +356,7 @@ paths:
     get:
       tags:
         - taskOrder
-      description: Gets File Metadata for a Task Order PDF
+      description: Gets File Metadata for a Task Order
       operationId: getTaskOrderMetadata
       parameters:
         - name: taskOrderId
