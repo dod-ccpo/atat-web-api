@@ -95,12 +95,19 @@ export class AtatWebApiStack extends cdk.Stack {
     });
     // We need to override the Logical ID so that we have a meaningful way to reference the resource to get
     // it's ARN when we load it in from the API spec.
-    createPortfolioStep.logicalL1.overrideLogicalId("CreatePortfolioStepFunction");
+    // createPortfolioStep.logicalL1.overrideLogicalId("CreatePortfolioStepFunction");
 
     // const createPortfolioStepLogicalL1 = createPortfolioStep.node.defaultChild as lambda.CfnFunction;
     // createPortfolioStepLogicalL1.overrideLogicalId("CreatePortfolioStepFunction");
     // const createPortfolioDraftLogicalL1 = createPortfolioDraftFn.node.defaultChild as lambda.CfnFunction;
     // createPortfolioDraftLogicalL1.overrideLogicalId("CreatePortfolioDraftFunction");
+
+    const createPortfolioDraft = new ApiDynamoDBFunction(this, "CreatePortfolioDraftFunction", {
+      table: table,
+      method: HttpMethod.POST,
+      handlerPath: packageRoot() + "/api/portfolioDrafts/createPortfolioDraft.ts",
+    });
+    // createPortfolioDraft.logicalL1.overrideLogicalId("CreatePortfolioDraftFunction");
 
     // END: Things Done For Every Function
     // Everything after this point is only necessary to do once.
