@@ -4,6 +4,7 @@ import * as lambda from "@aws-cdk/aws-lambda";
 import * as lambdaNodejs from "@aws-cdk/aws-lambda-nodejs";
 import * as s3asset from "@aws-cdk/aws-s3-assets";
 import * as cdk from "@aws-cdk/core";
+import * as iam from "@aws-cdk/aws-iam";
 
 // This is a suboptimal solution to finding the relative directory to the
 // package root. This is necessary because it is possible for this file to be
@@ -120,7 +121,26 @@ export class AtatWebApiStack extends cdk.Stack {
       },
     });
 
-    // const portfolioStepIntegration = new apigw.LambdaIntegration(this.createPortfolioStepFn, { proxy: true });
+    const lambdaRole = new iam.Role(this, "AtatLambdaInvoke", {
+      assumedBy: new iam.ServicePrincipal("apigateway.amazonaws.com"),
+    });
+
+    lambdaRole.addToPolicy(
+      new iam.PolicyStatement({
+        resources: ["*"],
+        actions: ["lambda:InvokeFunction"],
+        effect: iam.Effect.ALLOW,
+      })
+    );
+
+    // also this
+    const resource = new apigw.CfnAccount(this, "app-account-config", {
+      cloudWatchRoleArn: lambdaRole.roleArn,
+    });
+    resource.node.addDependency(restApi);
+
+    // https://github.com/aws/aws-cdk/issues/12102
+    // const portfolioStepIntegration = new apigw.LambdaIntegration(createPortfolioStepFn, { proxy: true });
 
     /*
     portfolio.addMethod("POST", new apigw.LambdaIntegration(createPortfolioStepFn), {
