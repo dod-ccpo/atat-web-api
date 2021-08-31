@@ -527,9 +527,6 @@ components:
           type: string
         dod_components:
           type: array
-          xml:
-            name: "dod_component"
-            wrapped: true
           items:
             type: string
             enum:
@@ -545,9 +542,6 @@ components:
               - "nsa"
         portfolio_managers:
           type: array
-          xml:
-            name: "portfolio_managers"
-            wrapped: true
           items:
             type: string
             format: "email"
@@ -589,9 +583,6 @@ components:
                 example: '2022-07-01'
     ApplicationStep:
       description: Represents step 3 of the Portfolio Draft Wizard
-      xml:
-        name: "application"
-        wrapped: true
       type: object
       properties:
         name:
@@ -600,9 +591,6 @@ components:
           type: string
         environments:
           type: array
-          xml:
-            name: "environment"
-            wrapped: true
           items:
             type: object
             properties:
@@ -610,9 +598,6 @@ components:
                 type: string
               operators:
                 type: array
-                xml:
-                  name: "operator"
-                  wrapped: true
                 items:
                   type: object
                   properties:
