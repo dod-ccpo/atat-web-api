@@ -1,3 +1,4 @@
+import { ApplicationStep } from "../models/ApplicationStep";
 import { FundingStep } from "../models/FundingStep";
 import { PortfolioStep } from "../models/PortfolioStep";
 
@@ -58,6 +59,22 @@ export function isFundingStep(object: unknown): object is FundingStep {
     return false;
   }
   return ["task_order_number", "task_order_file", "csp", "clins"].every((item) => item in object);
+}
+
+/**
+ * Check whether a given object is a {@link ApplicationStep}.
+ *
+ * Note that this only asserts that the given object meets the interface. It does not validate
+ * that the object is a valid {@link ApplicationStep}.
+ *
+ * @param object - The object to check
+ * @returns true if the object has all the attributes of a {@link ApplicationStep}
+ */
+export function isApplicationStep(object: unknown): object is ApplicationStep {
+  if (!isValidObject(object)) {
+    return false;
+  }
+  return ["name", "description", "environments"].every((item) => item in object);
 }
 
 /**
