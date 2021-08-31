@@ -93,21 +93,42 @@ export class AtatWebApiStack extends cdk.Stack {
       method: HttpMethod.POST,
       handlerPath: packageRoot() + "/api/portfolioDrafts/portfolio/createPortfolioStep.ts",
     });
-    // We need to override the Logical ID so that we have a meaningful way to reference the resource to get
-    // it's ARN when we load it in from the API spec.
-    // createPortfolioStep.logicalL1.overrideLogicalId("CreatePortfolioStepFunction");
-
-    // const createPortfolioStepLogicalL1 = createPortfolioStep.node.defaultChild as lambda.CfnFunction;
-    // createPortfolioStepLogicalL1.overrideLogicalId("CreatePortfolioStepFunction");
-    // const createPortfolioDraftLogicalL1 = createPortfolioDraftFn.node.defaultChild as lambda.CfnFunction;
-    // createPortfolioDraftLogicalL1.overrideLogicalId("CreatePortfolioDraftFunction");
 
     const createPortfolioDraft = new ApiDynamoDBFunction(this, "CreatePortfolioDraftFunction", {
       table: table,
       method: HttpMethod.POST,
       handlerPath: packageRoot() + "/api/portfolioDrafts/createPortfolioDraft.ts",
     });
-    // createPortfolioDraft.logicalL1.overrideLogicalId("CreatePortfolioDraftFunction");
+
+    const getPortfolioDrafts = new ApiDynamoDBFunction(this, "GetPortfolioDraftsFunction", {
+      table: table,
+      method: HttpMethod.GET,
+      handlerPath: packageRoot() + "/api/portfolioDrafts/getPortfolioDrafts.ts",
+    });
+
+    const deletePortfolioDraft = new ApiDynamoDBFunction(this, "DeletePortfolioDraftFunction", {
+      table: table,
+      method: HttpMethod.DELETE,
+      handlerPath: packageRoot() + "/api/portfolioDrafts/deletePortfolioDraft.ts",
+    });
+
+    const getPortfolioStep = new ApiDynamoDBFunction(this, "GetPortfolioStepFunction", {
+      table: table,
+      method: HttpMethod.GET,
+      handlerPath: packageRoot() + "/api/portfolioDrafts/portfolio/getPortfolioStep.ts",
+    });
+
+    const createFundingStep = new ApiDynamoDBFunction(this, "CreateFundingStepFunction", {
+      table: table,
+      method: HttpMethod.POST,
+      handlerPath: packageRoot() + "/api/portfolioDrafts/funding/createFundingStep.ts",
+    });
+
+    const getFundingStep = new ApiDynamoDBFunction(this, "GetFundingStepFunction", {
+      table: table,
+      method: HttpMethod.GET,
+      handlerPath: packageRoot() + "/api/portfolioDrafts/funding/getFundingStep.ts",
+    });
 
     // END: Things Done For Every Function
     // Everything after this point is only necessary to do once.
@@ -136,60 +157,6 @@ export class AtatWebApiStack extends cdk.Stack {
 }
 /*
 
-    const portfolioDrafts = restApi.root.addResource("portfolioDrafts");
-    const portfolioDraftId = portfolioDrafts.addResource("{portfolioDraftId}");
-    const portfolio = portfolioDraftId.addResource("portfolio");
-    const funding = portfolioDraftId.addResource("funding");
-    // OperationIds from API spec are used to identify functions below
-
-    const createPortfolioDraft = new ApiDynamoDBFunction(this, "CreatePortfolioDraft", {
-      resource: portfolioDrafts,
-      table: table,
-      method: HttpMethod.POST,
-      handlerPath: packageRoot() + "/api/portfolioDrafts/createPortfolioDraft.ts",
-    });
-
-    const getPortfolioDrafts = new ApiDynamoDBFunction(this, "GetPortfolioDrafts", {
-      resource: portfolioDrafts,
-      table: table,
-      method: HttpMethod.GET,
-      handlerPath: packageRoot() + "/api/portfolioDrafts/getPortfolioDrafts.ts",
-    });
-
-    const deletePortfolioDraft = new ApiDynamoDBFunction(this, "DeletePortfolioDraft", {
-      resource: portfolioDraftId,
-      table: table,
-      method: HttpMethod.DELETE,
-      handlerPath: packageRoot() + "/api/portfolioDrafts/deletePortfolioDraft.ts",
-    });
-
-    const createPortfolioStep = new ApiDynamoDBFunction(this, "CreatePortfolioStep", {
-      resource: portfolio,
-      table: table,
-      method: HttpMethod.POST,
-      handlerPath: packageRoot() + "/api/portfolioDrafts/portfolio/createPortfolioStep.ts",
-    });
-
-    const getPortfolioStep = new ApiDynamoDBFunction(this, "GetPortfolioStep", {
-      resource: portfolio,
-      table: table,
-      method: HttpMethod.GET,
-      handlerPath: packageRoot() + "/api/portfolioDrafts/portfolio/getPortfolioStep.ts",
-    });
-
-    const createFundingStep = new ApiDynamoDBFunction(this, "CreateFundingStep", {
-      resource: funding,
-      table: table,
-      method: HttpMethod.POST,
-      handlerPath: packageRoot() + "/api/portfolioDrafts/funding/createFundingStep.ts",
-    });
-
-    const getFundingStep = new ApiDynamoDBFunction(this, "GetFundingStep", {
-      resource: funding,
-      table: table,
-      method: HttpMethod.GET,
-      handlerPath: packageRoot() + "/api/portfolioDrafts/funding/getFundingStep.ts",
-    });
 
     // TODO: getPortfolioDraft
     // TODO: getApplicationStep

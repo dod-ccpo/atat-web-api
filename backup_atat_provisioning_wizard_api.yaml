@@ -39,12 +39,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-      x-amazon-apigateway-integration:
-        httpMethod: "POST"
-        uri:
-          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetPortfolioDraftsFunction.Arn}/invocations"
-        passthroughBehavior: "when_no_match"
-        type: "aws_proxy"
     post:
       tags:
         - portfolioDraft
@@ -71,13 +65,31 @@ paths:
             schema:
               type: string
               example: ''
-      x-amazon-apigateway-integration:
-        httpMethod: "POST"
-        uri:
-          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CreatePortfolioDraftFunction.Arn}/invocations"
-        passthroughBehavior: "when_no_match"
-        type: "aws_proxy"
-  /portfolioDrafts/{portfolioDraftId}:
+  '/portfolioDrafts/{portfolioDraftId}':
+    get:
+      tags:
+        - portfolioDraft
+      description: Gets a Portfolio Draft
+      operationId: getPortfolioDraft
+      parameters:
+        - name: portfolioDraftId
+          in: path
+          description: ID of the Portfolio Draft
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortfolioDraft'
+              examples:
+                PortfolioDraftEx:
+                  $ref: '#/components/examples/PortfolioDraftEx'
+        '404':
+          description: Portfolio Draft with the given ID does not exist
     delete:
       tags:
         - portfolioDraft
@@ -95,13 +107,7 @@ paths:
           description: Successful operation
         '404':
           description: Portfolio Draft with the given ID does not exist
-      x-amazon-apigateway-integration:
-        httpMethod: "POST"
-        uri:
-          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DeletePortfolioDraftFunction.Arn}/invocations"
-        passthroughBehavior: "when_no_match"
-        type: "aws_proxy"
-  /portfolioDrafts/{portfolioDraftId}/portfolio:
+  '/portfolioDrafts/{portfolioDraftId}/portfolio':
     get:
       tags:
         - portfolioDraft
@@ -128,37 +134,42 @@ paths:
           description: The given Portfolio Draft does not exist
         '404':
           description: Portfolio Step not found for this Portfolio Draft
-      x-amazon-apigateway-integration:
-          httpMethod: "POST"
-          uri:
-            Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetPortfolioStepFunction.Arn}/invocations"
-          passthroughBehavior: "when_no_match"
-          type: "aws_proxy"
     post:
       tags:
         - portfolioDraft
       description: Submits the Portfolio Step of the Portfolio Draft Wizard
       operationId: createPortfolioStep
       parameters:
-      - name: "portfolioDraftId"
-        in: "path"
-        required: true
-        schema:
-          type: "string"
+        - name: portfolioDraftId
+          in: path
+          description: ID of the Portfolio Draft
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Successful operation with empty response body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortfolioStep'
+              examples:
+                PortfolioStepEx:
+                  $ref: '#/components/examples/PortfolioStepEx'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
       requestBody:
+        description: Input data from the Portfolio Step of the Portfolio Draft Wizard
+        required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PortfolioStep"
-        required: true
-      x-amazon-apigateway-request-validator: "my-payload-validator"
-      x-amazon-apigateway-integration:
-        httpMethod: "POST"
-        uri:
-          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CreatePortfolioStepFunction.Arn}/invocations"
-        passthroughBehavior: "when_no_match"
-        type: "aws_proxy"
-  /portfolioDrafts/{portfolioDraftId}/funding:
+              $ref: '#/components/schemas/PortfolioStep'
+  '/portfolioDrafts/{portfolioDraftId}/funding':
     get:
       tags:
         - portfolioDraft
@@ -185,12 +196,6 @@ paths:
           description: The given Portfolio Draft does not exist
         '404':
           description: Funding Step not found for this Portfolio Draft
-      x-amazon-apigateway-integration:
-        httpMethod: "POST"
-        uri:
-          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetFundingStepFunction.Arn}/invocations"
-        passthroughBehavior: "when_no_match"
-        type: "aws_proxy"
     post:
       tags:
         - portfolioDraft
@@ -228,13 +233,187 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/FundingStep'
-      x-amazon-apigateway-integration:
-        httpMethod: "POST"
-        uri:
-          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CreateFundingStepFunction.Arn}/invocations"
-        passthroughBehavior: "when_no_match"
-        type: "aws_proxy"
-
+  '/portfolioDrafts/{portfolioDraftId}/application':
+    get:
+      tags:
+        - portfolioDraft
+      description: Gets the Application Step of the Portfolio Draft Wizard
+      operationId: getApplicationStep
+      parameters:
+        - name: portfolioDraftId
+          in: path
+          description: ID of the Portfolio Draft
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationStep'
+              examples:
+                  ApplicationStepEx:
+                    $ref: '#/components/examples/ApplicationStepEx'
+              
+        '404':
+          description: Application Step not found for this Portfolio Draft
+        '400':
+          description: The given Portfolio Draft does not exist
+    post:
+      tags:
+        - portfolioDraft
+      description: Submits the Application Step of the Portfolio Draft Wizard
+      operationId: createApplicationStep
+      parameters:
+        - name: portfolioDraftId
+          in: path
+          description: ID of the Portfolio Draft
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationStep'
+              examples:
+                  ApplicationStepEx:
+                    $ref: '#/components/examples/ApplicationStepEx'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '404':
+          description: Portfolio Draft with the given ID does not exist
+      requestBody:
+        description: Input data from the Application Step of the Portfolio Draft Wizard.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationStep'
+  '/portfolioDrafts/{portfolioDraftId}/submit':
+    post:
+      tags:
+        - portfolioDraft
+      description: Submits the given Portfolio Draft for provisioning with a CSP
+      operationId: submitPortfolioDraft
+      parameters:
+        - name: portfolioDraftId
+          in: path
+          description: ID of the Portfolio Draft
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Successful operation
+        '400':
+          description: Validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '403':
+          description: User is not authorized to submit this Portfolio Draft
+        '404':
+          description: Portfolio Draft with the given ID does not exist
+      requestBody:
+        description: An empty String or JSON body
+        content:
+          application/json:
+            example: '{}'
+          text/plain:
+            example: ''
+  '/taskOrderFiles':
+    post:
+      tags:
+        - taskOrder
+      description: Uploads a Task Order PDF
+      operationId: uploadTaskOrder
+      responses:
+        '201':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileMetadata'
+        '404':
+          description: Task Order with the given number does not exist
+      requestBody:
+        content:
+          application/pdf:
+            schema:
+              type: string
+              format: binary
+  '/taskOrderFiles/{taskOrderId}':
+    get:
+      tags:
+        - taskOrder
+      description: Gets File Metadata for a Task Order
+      operationId: getTaskOrderMetadata
+      parameters:
+        - name: taskOrderId
+          in: path
+          description: Task Order ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileMetadata'
+        '404':
+          description: Task Order with the given ID does not exist
+    delete:
+      tags:
+        - taskOrder
+      description: Deletes a Task Order PDF
+      operationId: deleteTaskOrder
+      parameters:
+        - name: taskOrderId
+          in: path
+          description: Task Order ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Successful operation
+        '404':
+          description: Task Order with the given ID does not exist
+  '/taskOrderFiles/{taskOrderId}/file':
+    get:
+      tags:
+        - taskOrder
+      description: Downloads a Task Order PDF
+      operationId: downloadTaskOrder
+      parameters:
+        - name: taskOrderId
+          in: path
+          description: Task Order ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Task Order with the given ID does not exist or is pending processing
 components:
   parameters:
     offsetParam:
@@ -501,7 +680,6 @@ components:
       value:
         - task_order_number: "12345678910"
           task_order_file:
-            description: "Mock description"
             id: "1234"
             created_at: "2021-08-03T16:21:07.978Z"
             updated_at: "2021-08-03T16:21:07.978Z"
@@ -511,10 +689,10 @@ components:
           csp: 
             - "aws"
           clins: 
-            - clin_number:  "0001"
-              idiq_clin:  "1234"
-              total_clin_value:  200000
-              obligated_funds:  10000
+            - clin_number: "0001"
+              idiq_clin: "1234"
+              total_clin_value: 200000
+              obligated_funds: 10000
               pop_start_date: "2021-09-01"
               pop_end_date: "2022-09-01"
     ApplicationStepEx:
@@ -550,8 +728,10 @@ components:
                   last_name: "Fett"
                   email: "original@mandalorian.com"
                   access: "read_only"
-x-amazon-apigateway-request-validators:
-  my-payload-validator:
-    validateRequestParameters: false
-    validateRequestBody: true      
-    
+        
+                
+            
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/CCPO-ATAT/mock-atat-internal-api/1.0.0
