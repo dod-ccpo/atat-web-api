@@ -1,11 +1,14 @@
 #!/usr/bin/env node
 import * as cdk from "@aws-cdk/core";
+import { NIST80053Checks } from "cdk-nag";
 import "source-map-support/register";
 import { AtatWebApiStack } from "../lib/atat-web-api-stack";
 import { getTags } from "../lib/load-tags";
 
 const app = new cdk.App();
-// cdk.Aspects.of(app).add(new NIST80053Checks({ verbose: true }));
+if (process.env.CDK_NAG_ENABLED === "1") {
+  cdk.Aspects.of(app).add(new NIST80053Checks({ verbose: true }));
+}
 
 // Ugly hack to quickly isolate deployments for developers.  To be improved/removed later.
 const ticketId = app.node.tryGetContext("TicketId") || "";
