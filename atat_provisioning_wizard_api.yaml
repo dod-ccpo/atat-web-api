@@ -553,86 +553,82 @@ components:
             format: "email"
     FundingStep:
       description: Represents step 2 of the Portfolio Draft Wizard
-      type: array
-      items:
-        type: object
-        properties:
-          task_order_number:
-            type: string
-          task_order_file:
-            allOf:
-              - $ref: '#/components/schemas/FileMetadataSummary'
-            description: Metadata associated with file which was previously uploaded by POST /taskOrderFiles
-          csp:
-            type: string
-            enum:
-              - "aws"
-              - "azure"
-          clins:
-            type: array
-            items:
-              type: object
-              properties:
-                clin_number:
-                  type: string
-                idiq_clin:
-                  type: string
-                total_clin_value:
-                  type: "integer"
-                obligated_funds:
-                  type: "integer"
-                pop_start_date:
-                  type: string
-                  format: date
-                  example: '2021-07-01'
-                pop_end_date:
-                  type: string
-                  format: date
-                  example: '2022-07-01'
+      type: object
+      properties:
+        task_order_number:
+          type: string
+        task_order_file:
+          allOf:
+            - $ref: '#/components/schemas/FileMetadataSummary'
+          description: Metadata associated with file which was previously uploaded by POST /taskOrderFiles
+        csp:
+          type: string
+          enum:
+            - "aws"
+            - "azure"
+        clins:
+          type: array
+          items:
+            type: object
+            properties:
+              clin_number:
+                type: string
+              idiq_clin:
+                type: string
+              total_clin_value:
+                type: "integer"
+              obligated_funds:
+                type: "integer"
+              pop_start_date:
+                type: string
+                format: date
+                example: '2021-07-01'
+              pop_end_date:
+                type: string
+                format: date
+                example: '2022-07-01'
     ApplicationStep:
       description: Represents step 3 of the Portfolio Draft Wizard
-      type: array
       xml:
         name: "application"
         wrapped: true
-      items:
-        type: object
-        properties:
-          name:
-            type: string
-          description:
-            type: string
-          environments:
-            type: array
-            xml:
-              name: "environment"
-              wrapped: true
-            items:
-              type: object
-              properties:
-                name:
-                  type: string
-                operators:
-                  type: array
-                  xml:
-                    name: "operator"
-                    wrapped: true
-                  items:
-                    type: object
-                    properties:
-                      first_name:
-                        type: string
-                      last_name:
-                        type: string
-                      email:
-                        type: string
-                        format: "email"
-                      access:
-                        type: string
-                        description: Operator Access Level to Environment
-                        enum:
-                          - administrator
-                          - read_only
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        environments:
+          type: array
+          xml:
+            name: "environment"
+            wrapped: true
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              operators:
+                type: array
+                xml:
+                  name: "operator"
+                  wrapped: true
+                items:
+                  type: object
+                  properties:
+                    first_name:
+                      type: string
+                    last_name:
+                      type: string
+                    email:
+                      type: string
+                      format: "email"
+                    access:
+                      type: string
+                      description: Operator Access Level to Environment
+                      enum:
+                        - administrator
+                        - read_only
     PortfolioDraft:
       allOf:
         - $ref: '#/components/schemas/PortfolioDraftSummary'
