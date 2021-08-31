@@ -5,6 +5,8 @@ import * as lambdaNodejs from "@aws-cdk/aws-lambda-nodejs";
 import * as s3asset from "@aws-cdk/aws-s3-assets";
 import * as cdk from "@aws-cdk/core";
 import * as iam from "@aws-cdk/aws-iam";
+import { ApiDynamoDBFunction } from "./constructs/api-dynamodb-function";
+import { HttpMethod } from "./http";
 
 // This is a suboptimal solution to finding the relative directory to the
 // package root. This is necessary because it is possible for this file to be
@@ -37,31 +39,10 @@ export class AtatWebApiStack extends cdk.Stack {
     // Ideally we'd define different stages for dev, test, and staging. For now, a single
     // stage for everything being dev is good enough for a proof of concept
 
-    /*
-    const restApi = new apigw.RestApi(this, "AtatWebApi", {
-      binaryMediaTypes: ["multipart/form-data"],
-      endpointConfiguration: {
-        types: [apigw.EndpointType.REGIONAL],
-      },
-      defaultCorsPreflightOptions: {
-        allowCredentials: false,
-        allowOrigins: apigw.Cors.ALL_ORIGINS,
-        allowMethods: apigw.Cors.ALL_METHODS,
-        allowHeaders: apigw.Cors.DEFAULT_HEADERS,
-      },
-    });
-
-    restApi.root.addMethod("ANY");
-
-    const restUrlOutput = new cdk.CfnOutput(this, "RootApiUri", {
-      value: restApi.url ?? "",
-    });
-    */
-
     /**
      * A Validator
      */
-
+    /*
     const sharedFunctionProps: lambdaNodejs.NodejsFunctionProps = {
       environment: {
         ATAT_TABLE_NAME: table.tableName,
@@ -69,8 +50,21 @@ export class AtatWebApiStack extends cdk.Stack {
       bundling: {
         externalModules: ["aws-sdk"],
       },
-    };
-
+    }; */
+    /*
+    createPortfolioDraft = new ApiDynamoDBFunction(this, "CreatePortfolioDraft", {
+      resource: portfolioDrafts,
+      table: table,
+      method: HttpMethod.POST,
+      handlerPath: packageRoot() + "/api/portfolioDrafts/createPortfolioDraft.ts",
+    }); */
+    /*
+    const createPortfolioDraftFn = new ApiDynamoDBFunction(this, "CreatePortfolioDraftFunction", {
+      table: table,
+      method: HttpMethod.POST,
+      handlerPath: packageRoot() + "/api/portfolioDrafts/createPortfolioDraft.ts",
+    });
+*/
     /*
     const createPortfolioDraftFn = new lambdaNodejs.NodejsFunction(this, "CreatePortfolioDraftFunction", {
       entry: packageRoot() + "/api/portfolioDrafts/createPortfolioDraft.ts",
@@ -88,15 +82,26 @@ export class AtatWebApiStack extends cdk.Stack {
     // type of access that should be granted to DynamoDB/S3. Most of the other code there can actually be
     // removed.
     // START: Things Done For Every Function
+    /*
     const createPortfolioStepFn = new lambdaNodejs.NodejsFunction(this, "CreatePortfolioStepFunction", {
       entry: packageRoot() + "/api/portfolioDrafts/portfolio/createPortfolioStep.ts",
       ...sharedFunctionProps,
     });
-    table.grantReadWriteData(createPortfolioStepFn);
+    table.grantReadWriteData(createPortfolioStepFn); */
+    const createPortfolioStep = new ApiDynamoDBFunction(this, "CreatePortfolioStepFunction", {
+      table: table,
+      method: HttpMethod.POST,
+      handlerPath: packageRoot() + "/api/portfolioDrafts/portfolio/createPortfolioStep.ts",
+    });
     // We need to override the Logical ID so that we have a meaningful way to reference the resource to get
     // it's ARN when we load it in from the API spec.
-    const createPortfolioStepLogicalL1 = createPortfolioStepFn.node.defaultChild as lambda.CfnFunction;
-    createPortfolioStepLogicalL1.overrideLogicalId("CreatePortfolioStepFunction");
+    createPortfolioStep.logicalL1.overrideLogicalId("CreatePortfolioStepFunction");
+
+    // const createPortfolioStepLogicalL1 = createPortfolioStep.node.defaultChild as lambda.CfnFunction;
+    // createPortfolioStepLogicalL1.overrideLogicalId("CreatePortfolioStepFunction");
+    // const createPortfolioDraftLogicalL1 = createPortfolioDraftFn.node.defaultChild as lambda.CfnFunction;
+    // createPortfolioDraftLogicalL1.overrideLogicalId("CreatePortfolioDraftFunction");
+
     // END: Things Done For Every Function
     // Everything after this point is only necessary to do once.
 
@@ -120,25 +125,6 @@ export class AtatWebApiStack extends cdk.Stack {
         endpointConfigurationTypes: apigw.EndpointType.REGIONAL,
       },
     });
-
-    createPortfolioStepFn.addPermission("AllowApiGatwewayInvoke", {
-      principal: new iam.ServicePrincipal("apigateway.amazonaws.com"),
-    });
-
-    // https://github.com/aws/aws-cdk/issues/12102
-    // const portfolioStepIntegration = new apigw.LambdaIntegration(createPortfolioStepFn, { proxy: true });
-
-    /*
-    portfolio.addMethod("POST", new apigw.LambdaIntegration(createPortfolioStepFn), {
-      requestValidator: myValidator,
-    }); */
-
-    /**
-     * Simple Method attaching the validator.
-     
-    const postMethod = restApi.root.addMethod("POST", new apigw.MockIntegration(), {
-      requestValidator: myValidator,
-    }); */
   }
 }
 /*

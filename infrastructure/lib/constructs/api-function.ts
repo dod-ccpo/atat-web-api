@@ -3,12 +3,14 @@ import * as lambda from "@aws-cdk/aws-lambda";
 import * as lambdaNodeJs from "@aws-cdk/aws-lambda-nodejs";
 import * as cdk from "@aws-cdk/core";
 import { HttpMethod } from "../http";
+import * as iam from "@aws-cdk/aws-iam";
+import { Fn } from "@aws-cdk/core";
 
 export interface ApiFunctionProps {
   /**
    * The API Gateway resource the route will be added to.
    */
-  readonly resource: apigw.IResource;
+  // readonly resource: apigw.IResource;
 
   /**
    * The HTTP method this route applies to.
@@ -45,13 +47,23 @@ export abstract class ApiFunction extends cdk.Construct {
    */
   public readonly route: apigw.Method;
 
+  /**
+   * The CfnFunction logicalId, used for templating the api yaml.
+   */
+  public readonly logicalL1: lambda.CfnFunction;
+
   protected constructor(scope: cdk.Construct, id: string, props: ApiFunctionProps) {
     super(scope, id);
-    this.method = props.method;
+    this.method = props.method; // method is not needed, defined in api spec
     this.fn = new lambdaNodeJs.NodejsFunction(this, "Function", {
       entry: props.handlerPath,
       ...props.functionPropsOverride,
     });
-    this.route = props.resource.addMethod(props.method, new apigw.LambdaIntegration(this.fn));
+    this.fn.addPermission("AllowApiGatwewayInvoke", {
+      principal: new iam.ServicePrincipal("apigateway.amazonaws.com"),
+    });
+    this.logicalL1 = this.fn.node.defaultChild as lambda.CfnFunction;
+    // this.logicalL1.overrideLogicalId(this.fn.toString());
   }
+  // this.route = props.resource.addMethod(props.method, new apigw.LambdaIntegration(this.fn)); // this is ignored by apispec
 }
