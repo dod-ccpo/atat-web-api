@@ -7,6 +7,8 @@ import * as cdk from "@aws-cdk/core";
 import * as iam from "@aws-cdk/aws-iam";
 import { ApiDynamoDBFunction } from "./constructs/api-dynamodb-function";
 import { HttpMethod } from "./http";
+import { ApiS3Function } from "./constructs/api-s3-function";
+import { TaskOrderLifecycle } from "./constructs/task-order-lifecycle";
 
 // This is a suboptimal solution to finding the relative directory to the
 // package root. This is necessary because it is possible for this file to be
@@ -153,11 +155,37 @@ export class AtatWebApiStack extends cdk.Stack {
         endpointConfigurationTypes: apigw.EndpointType.REGIONAL,
       },
     });
+    // TODO: getPortfolioDraft
+    // TODO: getApplicationStep
+    // TODO: createApplicationStep
+    // TODO: submitPortfolioDraft
+    addTaskOrderRoutes(this);
   }
 }
+function addTaskOrderRoutes(scope: cdk.Stack) {
+  // const taskOrderFiles = restApi.root.addResource("taskOrderFiles");
+  // const taskOrderId = taskOrderFiles.addResource("{taskOrderId}");
+  const taskOrderManagement = new TaskOrderLifecycle(scope, "TaskOrders");
+  // OperationIds from API spec are used to identify functions below
+
+  const uploadTaskOrder = new ApiS3Function(scope, "UploadTaskOrderFunction", {
+    bucket: taskOrderManagement.pendingBucket,
+    method: HttpMethod.POST,
+    handlerPath: packageRoot() + "/api/taskOrderFiles/uploadTaskOrder.ts",
+    functionPropsOverride: {
+      memorySize: 256,
+    },
+  });
+  const deleteTaskOrder = new ApiS3Function(scope, "DeleteTaskOrderFunction", {
+    bucket: taskOrderManagement.acceptedBucket,
+    method: HttpMethod.DELETE,
+    handlerPath: packageRoot() + "/api/taskOrderFiles/deleteTaskOrder.ts",
+  });
+
+  // TODO: getTaskOrder (for metadata)
+  // TODO: downloadTaskOrder
+}
 /*
-
-
     // TODO: getPortfolioDraft
     // TODO: getApplicationStep
     // TODO: createApplicationStep

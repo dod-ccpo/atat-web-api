@@ -234,6 +234,57 @@ paths:
           Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CreateFundingStepFunction.Arn}/invocations"
         passthroughBehavior: "when_no_match"
         type: "aws_proxy"
+  /taskOrderFiles:
+    post:
+      tags:
+        - taskOrder
+      description: Uploads a Task Order PDF
+      operationId: uploadTaskOrder
+      responses:
+        '201':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileMetadata'
+        '404':
+          description: Task Order with the given number does not exist
+      requestBody:
+        content:
+          application/pdf:
+            schema:
+              type: string
+              format: binary
+      x-amazon-apigateway-integration:
+        httpMethod: "POST"
+        uri:
+          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${UploadTaskOrderFunction.Arn}/invocations"
+        passthroughBehavior: "when_no_match"
+        type: "aws_proxy"
+  /taskOrderFiles/{taskOrderId}:
+    delete:
+      tags:
+        - taskOrder
+      description: Deletes a Task Order PDF
+      operationId: deleteTaskOrder
+      parameters:
+        - name: taskOrderId
+          in: path
+          description: Task Order ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Successful operation
+        '404':
+          description: Task Order with the given ID does not exist
+      x-amazon-apigateway-integration:
+        httpMethod: "POST"
+        uri:
+          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DeleteTaskOrderFunction.Arn}/invocations"
+        passthroughBehavior: "when_no_match"
+        type: "aws_proxy"
 
 components:
   parameters:
