@@ -193,6 +193,14 @@ describe("when handler() can not find the Application Step in the given Portfoli
   });
 });
 
+describe("when handler() can not find the given Portfolio Draft", function () {
+  it("should return error response NO_SUCH_PORTFOLIO_DRAFT", async () => {
+    ddbMock.on(GetCommand).resolves({});
+    const response = await handler(normalRequest);
+    expect(response).toEqual(NO_SUCH_PORTFOLIO_DRAFT);
+  });
+});
+
 describe("when handler() fails to service the request", function () {
   it("should return database error when unknown internal problem occurs", async () => {
     ddbMock.on(GetCommand).rejects({ name: "InternalServiceError" });
