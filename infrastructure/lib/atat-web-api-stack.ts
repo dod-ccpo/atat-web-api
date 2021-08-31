@@ -37,59 +37,6 @@ export class AtatWebApiStack extends cdk.Stack {
       value: table.tableName,
     });
 
-    // Creates a shared API Gateway that all the functions will be able to add routes to.
-    // Ideally we'd define different stages for dev, test, and staging. For now, a single
-    // stage for everything being dev is good enough for a proof of concept
-
-    /**
-     * A Validator
-     */
-    /*
-    const sharedFunctionProps: lambdaNodejs.NodejsFunctionProps = {
-      environment: {
-        ATAT_TABLE_NAME: table.tableName,
-      },
-      bundling: {
-        externalModules: ["aws-sdk"],
-      },
-    }; */
-    /*
-    createPortfolioDraft = new ApiDynamoDBFunction(this, "CreatePortfolioDraft", {
-      resource: portfolioDrafts,
-      table: table,
-      method: HttpMethod.POST,
-      handlerPath: packageRoot() + "/api/portfolioDrafts/createPortfolioDraft.ts",
-    }); */
-    /*
-    const createPortfolioDraftFn = new ApiDynamoDBFunction(this, "CreatePortfolioDraftFunction", {
-      table: table,
-      method: HttpMethod.POST,
-      handlerPath: packageRoot() + "/api/portfolioDrafts/createPortfolioDraft.ts",
-    });
-*/
-    /*
-    const createPortfolioDraftFn = new lambdaNodejs.NodejsFunction(this, "CreatePortfolioDraftFunction", {
-      entry: packageRoot() + "/api/portfolioDrafts/createPortfolioDraft.ts",
-      ...sharedFunctionProps,
-    }); */
-    /*
-    portfolioDrafts.addMethod("POST", new apigw.LambdaIntegration(createPortfolioDraftFn));
-    */
-    /*
-    table.grantReadWriteData(createPortfolioDraftFn);
-*/
-    // createPortfolioStep
-    // Create the Function resource with the CDK magic for packaging and bundling a NodeJS package.
-    // TODO: Rework the ApiFunction construct and subclass(es) to take the entry, desired LogicalId, and the
-    // type of access that should be granted to DynamoDB/S3. Most of the other code there can actually be
-    // removed.
-    // START: Things Done For Every Function
-    /*
-    const createPortfolioStepFn = new lambdaNodejs.NodejsFunction(this, "CreatePortfolioStepFunction", {
-      entry: packageRoot() + "/api/portfolioDrafts/portfolio/createPortfolioStep.ts",
-      ...sharedFunctionProps,
-    });
-    table.grantReadWriteData(createPortfolioStepFn); */
     const createPortfolioStep = new ApiDynamoDBFunction(this, "CreatePortfolioStepFunction", {
       table: table,
       method: HttpMethod.POST,
@@ -132,9 +79,6 @@ export class AtatWebApiStack extends cdk.Stack {
       handlerPath: packageRoot() + "/api/portfolioDrafts/funding/getFundingStep.ts",
     });
 
-    // END: Things Done For Every Function
-    // Everything after this point is only necessary to do once.
-
     // The API spec, which just so happens to be a valid CloudFormation snippet (with some actual CloudFormation
     // in it) gets uploaded to S3
     const apiAsset = new s3asset.Asset(this, "ApiSpecAsset", {
@@ -163,11 +107,7 @@ export class AtatWebApiStack extends cdk.Stack {
   }
 }
 function addTaskOrderRoutes(scope: cdk.Stack) {
-  // const taskOrderFiles = restApi.root.addResource("taskOrderFiles");
-  // const taskOrderId = taskOrderFiles.addResource("{taskOrderId}");
   const taskOrderManagement = new TaskOrderLifecycle(scope, "TaskOrders");
-  // OperationIds from API spec are used to identify functions below
-
   const uploadTaskOrder = new ApiS3Function(scope, "UploadTaskOrderFunction", {
     bucket: taskOrderManagement.pendingBucket,
     method: HttpMethod.POST,
@@ -185,35 +125,3 @@ function addTaskOrderRoutes(scope: cdk.Stack) {
   // TODO: getTaskOrder (for metadata)
   // TODO: downloadTaskOrder
 }
-/*
-    // TODO: getPortfolioDraft
-    // TODO: getApplicationStep
-    // TODO: createApplicationStep
-    // TODO: submitPortfolioDraft
-    addTaskOrderRoutes(this, restApi);
-  }
-}
-
-function addTaskOrderRoutes(scope: cdk.Stack, restApi: apigw.RestApi) {
-  const taskOrderFiles = restApi.root.addResource("taskOrderFiles");
-  const taskOrderId = taskOrderFiles.addResource("{taskOrderId}");
-  const taskOrderManagement = new TaskOrderLifecycle(scope, "TaskOrders");
-  const createTaskOrderFile = new ApiS3Function(scope, "CreateTaskOrderFile", {
-    resource: taskOrderFiles,
-    bucket: taskOrderManagement.pendingBucket,
-    method: HttpMethod.POST,
-    handlerPath: packageRoot() + "/api/taskOrderFiles/createTaskOrderFile.ts",
-    functionPropsOverride: {
-      memorySize: 256,
-    },
-  });
-  const deleteTaskOrderFile = new ApiS3Function(scope, "DeleteTaskOrderFile", {
-    resource: taskOrderId,
-    bucket: taskOrderManagement.acceptedBucket,
-    method: HttpMethod.DELETE,
-    handlerPath: packageRoot() + "/api/taskOrderFiles/deleteTaskOrderFile.ts",
-  });
-
-  // TODO: getTaskOrderFiles
-}
-*/

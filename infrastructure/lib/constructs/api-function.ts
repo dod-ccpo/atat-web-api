@@ -8,11 +8,6 @@ import { Fn } from "@aws-cdk/core";
 
 export interface ApiFunctionProps {
   /**
-   * The API Gateway resource the route will be added to.
-   */
-  // readonly resource: apigw.IResource;
-
-  /**
    * The HTTP method this route applies to.
    */
   readonly method: HttpMethod;
@@ -54,7 +49,7 @@ export abstract class ApiFunction extends cdk.Construct {
 
   protected constructor(scope: cdk.Construct, id: string, props: ApiFunctionProps) {
     super(scope, id);
-    this.method = props.method; // method is not needed, defined in api spec
+    this.method = props.method;
     this.fn = new lambdaNodeJs.NodejsFunction(this, "Function", {
       entry: props.handlerPath,
       ...props.functionPropsOverride,
