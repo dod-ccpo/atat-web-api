@@ -1,10 +1,7 @@
 import * as apigw from "@aws-cdk/aws-apigateway";
 import * as dynamodb from "@aws-cdk/aws-dynamodb";
-import * as lambda from "@aws-cdk/aws-lambda";
-import * as lambdaNodejs from "@aws-cdk/aws-lambda-nodejs";
 import * as s3asset from "@aws-cdk/aws-s3-assets";
 import * as cdk from "@aws-cdk/core";
-import * as iam from "@aws-cdk/aws-iam";
 import { ApiDynamoDBFunction } from "./constructs/api-dynamodb-function";
 import { HttpMethod } from "./http";
 import { ApiS3Function } from "./constructs/api-s3-function";

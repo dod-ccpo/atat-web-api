@@ -4,7 +4,6 @@ import * as lambdaNodeJs from "@aws-cdk/aws-lambda-nodejs";
 import * as cdk from "@aws-cdk/core";
 import { HttpMethod } from "../http";
 import * as iam from "@aws-cdk/aws-iam";
-import { Fn } from "@aws-cdk/core";
 
 export interface ApiFunctionProps {
   /**
