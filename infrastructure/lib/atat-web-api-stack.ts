@@ -121,23 +121,9 @@ export class AtatWebApiStack extends cdk.Stack {
       },
     });
 
-    const lambdaRole = new iam.Role(this, "AtatLambdaInvoke", {
-      assumedBy: new iam.ServicePrincipal("apigateway.amazonaws.com"),
+    createPortfolioStepFn.addPermission("AllowApiGatwewayInvoke", {
+      principal: new iam.ServicePrincipal("apigateway.amazonaws.com"),
     });
-
-    lambdaRole.addToPolicy(
-      new iam.PolicyStatement({
-        resources: ["*"],
-        actions: ["lambda:InvokeFunction"],
-        effect: iam.Effect.ALLOW,
-      })
-    );
-
-    // also this
-    const resource = new apigw.CfnAccount(this, "app-account-config", {
-      cloudWatchRoleArn: lambdaRole.roleArn,
-    });
-    resource.node.addDependency(restApi);
 
     // https://github.com/aws/aws-cdk/issues/12102
     // const portfolioStepIntegration = new apigw.LambdaIntegration(createPortfolioStepFn, { proxy: true });
