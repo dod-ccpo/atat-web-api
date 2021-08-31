@@ -138,21 +138,24 @@ function addTaskOrderRoutes(scope: cdk.Stack, restApi: apigw.RestApi) {
   const taskOrderFiles = restApi.root.addResource("taskOrderFiles");
   const taskOrderId = taskOrderFiles.addResource("{taskOrderId}");
   const taskOrderManagement = new TaskOrderLifecycle(scope, "TaskOrders");
-  const createTaskOrderFile = new ApiS3Function(scope, "CreateTaskOrderFile", {
+  // OperationIds from API spec are used to identify functions below
+
+  const uploadTaskOrder = new ApiS3Function(scope, "UploadTaskOrder", {
     resource: taskOrderFiles,
     bucket: taskOrderManagement.pendingBucket,
     method: HttpMethod.POST,
-    handlerPath: packageRoot() + "/api/taskOrderFiles/createTaskOrderFile.ts",
+    handlerPath: packageRoot() + "/api/taskOrderFiles/uploadTaskOrder.ts",
     functionPropsOverride: {
       memorySize: 256,
     },
   });
-  const deleteTaskOrderFile = new ApiS3Function(scope, "DeleteTaskOrderFile", {
+  const deleteTaskOrder = new ApiS3Function(scope, "DeleteTaskOrder", {
     resource: taskOrderId,
     bucket: taskOrderManagement.acceptedBucket,
     method: HttpMethod.DELETE,
-    handlerPath: packageRoot() + "/api/taskOrderFiles/deleteTaskOrderFile.ts",
+    handlerPath: packageRoot() + "/api/taskOrderFiles/deleteTaskOrder.ts",
   });
 
-  // TODO: getTaskOrderFiles
+  // TODO: getTaskOrder (for metadata)
+  // TODO: downloadTaskOrder
 }
