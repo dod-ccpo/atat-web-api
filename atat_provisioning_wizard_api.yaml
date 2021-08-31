@@ -356,8 +356,8 @@ paths:
     get:
       tags:
         - taskOrder
-      description: Gets File Metadata for a Task Order
-      operationId: getTaskOrder
+      description: Gets File Metadata for a Task Order PDF
+      operationId: getTaskOrderMetadata
       parameters:
         - name: taskOrderId
           in: path
@@ -395,7 +395,7 @@ paths:
     get:
       tags:
         - taskOrder
-      description: Gets a Task Order PDF
+      description: Downloads a Task Order PDF
       operationId: downloadTaskOrder
       parameters:
         - name: taskOrderId
