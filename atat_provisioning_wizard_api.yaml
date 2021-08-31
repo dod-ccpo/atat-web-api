@@ -516,6 +516,7 @@ components:
                 - "accepted"
                 - "rejected"
     PortfolioStep:
+      description: Represents step 1 of the Portfolio Draft Wizard
       type: object
       required:
         - name
@@ -551,6 +552,7 @@ components:
             type: string
             format: "email"
     FundingStep:
+      description: Represents step 2 of the Portfolio Draft Wizard
       type: array
       items:
         type: object
@@ -588,7 +590,7 @@ components:
                   format: date
                   example: '2022-07-01'
     ApplicationStep:
-      description: Represents the Application Step of the Portfolio Draft Wizard
+      description: Represents step 3 of the Portfolio Draft Wizard
       type: array
       xml:
         name: "application"
