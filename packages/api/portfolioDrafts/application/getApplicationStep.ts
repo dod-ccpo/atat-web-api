@@ -40,14 +40,14 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
   }
   try {
     const data = await getApplicationStep(portfolioDraftId);
+    if (!data.Item) {
+      return NO_SUCH_PORTFOLIO_DRAFT;
+    }
     if (!data.Item?.application_step) {
       return NO_SUCH_APPLICATION_STEP;
     }
     return new ApiSuccessResponse<ApplicationStep>(data.Item.application_step as ApplicationStep, SuccessStatusCode.OK);
   } catch (error) {
-    if (error.name === "ResourceNotFoundException") {
-      return NO_SUCH_PORTFOLIO_DRAFT;
-    }
     console.error("Database error: " + error);
     return DATABASE_ERROR;
   }

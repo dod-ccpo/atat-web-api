@@ -22,6 +22,7 @@ import {
   PATH_VARIABLE_REQUIRED_BUT_MISSING,
   DATABASE_ERROR,
   PATH_VARIABLE_INVALID,
+  NO_SUCH_APPLICATION_STEP,
 } from "../../utils/errors";
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
@@ -131,7 +132,6 @@ const invalidPathVariableRequest: APIGatewayProxyEvent = {
 
 describe("TODO list", function () {
   it.todo("should return http status 200 on happy path");
-  it.todo("should return http status 404 when Application Step not found the given Portfolio Draft");
   it.todo("should return http status 404 when the given Portfolio Draft does not exist");
 });
 
@@ -178,16 +178,18 @@ describe("getApplicationStep()", function () {
     ddbMock.on(GetCommand).resolves({
       Item: mockApplicationStep,
     });
-    const data = await getApplicationStep(mockPortfolioDraftId);
-    expect(data.Item).toStrictEqual(mockApplicationStep);
+    const response = await getApplicationStep(mockPortfolioDraftId);
+    expect(response.Item).toStrictEqual(mockApplicationStep);
   });
 });
 
-describe("when handler() receives a valid 'portfolioDraftId' but the portfolio draft does not exist", function () {
-  it("should return an error response can not find that portfolio draft", async () => {
-    ddbMock.on(GetCommand).rejects({ name: "ResourceNotFoundException" });
-    const data = await handler(normalRequest);
-    expect(data).toEqual(NO_SUCH_PORTFOLIO_DRAFT);
+describe("when handler() can not find the Application Step in the given Portfolio Draft", function () {
+  it("should return error response NO_SUCH_APPLICATION_STEP", async () => {
+    ddbMock.on(GetCommand).resolves({
+      Item: {},
+    });
+    const response = await handler(normalRequest);
+    expect(response).toEqual(NO_SUCH_APPLICATION_STEP);
   });
 });
 
