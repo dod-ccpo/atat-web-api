@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 import * as cdk from "@aws-cdk/core";
 import "source-map-support/register";
-import { AtatSpecRestStack } from "../lib/atat-spec-rest-stack";
 import { AtatWebApiStack } from "../lib/atat-web-api-stack";
 import { getTags } from "../lib/load-tags";
 
@@ -11,10 +10,7 @@ const app = new cdk.App();
 // Ugly hack to quickly isolate deployments for developers.  To be improved/removed later.
 const ticketId = app.node.tryGetContext("TicketId") || "";
 const stack = new AtatWebApiStack(app, ticketId + "AtatWebApiStack", {});
-const stack2 = new AtatSpecRestStack(app, ticketId + "AtatSpecRestStack", {
-  createPortfolioStepFn: stack.createPortfolioStepFn,
-});
-stack2.addDependency(stack, "Requires functions for template");
+
 if (!ticketId) {
   cdk.Annotations.of(stack).addWarning("A TicketId should be provided to isolate your deployment from others");
 }

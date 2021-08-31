@@ -1,14 +1,9 @@
 import * as apigw from "@aws-cdk/aws-apigateway";
-import { UserPool } from "@aws-cdk/aws-cognito";
 import * as dynamodb from "@aws-cdk/aws-dynamodb";
-import * as cdk from "@aws-cdk/core";
-import { ApiDynamoDBFunction } from "./constructs/api-dynamodb-function";
-import { ApiS3Function } from "./constructs/api-s3-function";
-import { TaskOrderLifecycle } from "./constructs/task-order-lifecycle";
-import { HttpMethod } from "./http";
-import * as lambdaNodejs from "@aws-cdk/aws-lambda-nodejs";
-import { JsonSchemaType, Model } from "@aws-cdk/aws-apigateway";
 import * as lambda from "@aws-cdk/aws-lambda";
+import * as lambdaNodejs from "@aws-cdk/aws-lambda-nodejs";
+import * as s3asset from "@aws-cdk/aws-s3-assets";
+import * as cdk from "@aws-cdk/core";
 
 // This is a suboptimal solution to finding the relative directory to the
 // package root. This is necessary because it is possible for this file to be
@@ -23,7 +18,6 @@ function packageRoot(): string {
 }
 
 export class AtatWebApiStack extends cdk.Stack {
-  public readonly createPortfolioStepFn: lambda.IFunction;
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
@@ -36,23 +30,6 @@ export class AtatWebApiStack extends cdk.Stack {
     });
     const tableOutput = new cdk.CfnOutput(this, "TableName", {
       value: table.tableName,
-    });
-
-    const userPool = new UserPool(this, "PocUserPool");
-    const userPoolClient = userPool.addClient("api-app-client", {
-      authFlows: {
-        userPassword: true,
-      },
-    });
-    // Ugly hack to quickly isolate deployments for developers.  To be improved/removed later.
-    const ticketId = (this.node.tryGetContext("TicketId") || "").toLowerCase();
-    const userPoolDomain = userPool.addDomain("api-app-domain", {
-      cognitoDomain: {
-        domainPrefix: ticketId + "atatapi",
-      },
-    });
-    const poolDomainOutput = new cdk.CfnOutput(this, "UserPoolDomain", {
-      value: userPoolDomain.domainName,
     });
 
     // Creates a shared API Gateway that all the functions will be able to add routes to.
@@ -92,11 +69,7 @@ export class AtatWebApiStack extends cdk.Stack {
         externalModules: ["aws-sdk"],
       },
     };
-    /*
-    const portfolioDrafts = restApi.root.addResource("portfolioDrafts");
-    const portfolioDraftId = portfolioDrafts.addResource("{portfolioDraftId}");
-    const portfolio = portfolioDraftId.addResource("portfolio");
-    */
+
     /*
     const createPortfolioDraftFn = new lambdaNodejs.NodejsFunction(this, "CreatePortfolioDraftFunction", {
       entry: packageRoot() + "/api/portfolioDrafts/createPortfolioDraft.ts",
@@ -109,9 +82,42 @@ export class AtatWebApiStack extends cdk.Stack {
     table.grantReadWriteData(createPortfolioDraftFn);
 */
     // createPortfolioStep
-    this.createPortfolioStepFn = new lambdaNodejs.NodejsFunction(this, "CreatePortfolioStepFunction", {
+    // Create the Function resource with the CDK magic for packaging and bundling a NodeJS package.
+    // TODO: Rework the ApiFunction construct and subclass(es) to take the entry, desired LogicalId, and the
+    // type of access that should be granted to DynamoDB/S3. Most of the other code there can actually be
+    // removed.
+    // START: Things Done For Every Function
+    const createPortfolioStepFn = new lambdaNodejs.NodejsFunction(this, "CreatePortfolioStepFunction", {
       entry: packageRoot() + "/api/portfolioDrafts/portfolio/createPortfolioStep.ts",
       ...sharedFunctionProps,
+    });
+    table.grantReadWriteData(createPortfolioStepFn);
+    // We need to override the Logical ID so that we have a meaningful way to reference the resource to get
+    // it's ARN when we load it in from the API spec.
+    const createPortfolioStepLogicalL1 = createPortfolioStepFn.node.defaultChild as lambda.CfnFunction;
+    createPortfolioStepLogicalL1.overrideLogicalId("CreatePortfolioStepFunction");
+    // END: Things Done For Every Function
+    // Everything after this point is only necessary to do once.
+
+    // The API spec, which just so happens to be a valid CloudFormation snippet (with some actual CloudFormation
+    // in it) gets uploaded to S3
+    const apiAsset = new s3asset.Asset(this, "ApiSpecAsset", {
+      path: "./atat_provisioning_wizard_api.yaml",
+    });
+
+    // And now we include that snippet as an actual part of the template using the AWS::Include Transform. This
+    // is where the two previous pieces come together. Now, all the Fn::Sub and other functions will be resolved
+    // which means that we can reference the ARNs of the various functions.
+    const data = cdk.Fn.transform("AWS::Include", { Location: apiAsset.s3ObjectUrl });
+
+    // And with the data now loaded from the template, we can use ApiDefinition.fromInline to parse it as real
+    // OpenAPI spec (because it was!) and now we've got all our special AWS values and variables interpolated.
+    const restApi = new apigw.SpecRestApi(this, "AtatSpecTest", {
+      apiDefinition: apigw.ApiDefinition.fromInline(data),
+      endpointTypes: [apigw.EndpointType.REGIONAL],
+      parameters: {
+        endpointConfigurationTypes: apigw.EndpointType.REGIONAL,
+      },
     });
 
     // const portfolioStepIntegration = new apigw.LambdaIntegration(this.createPortfolioStepFn, { proxy: true });

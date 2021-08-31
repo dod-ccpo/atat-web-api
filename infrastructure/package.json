@@ -43,6 +43,7 @@
     "@aws-cdk/aws-lambda": "1.119.0",
     "@aws-cdk/aws-lambda-nodejs": "1.119.0",
     "@aws-cdk/aws-s3": "1.119.0",
+    "@aws-cdk/aws-s3-assets": "1.119.0",
     "@aws-cdk/core": "1.119.0",
     "cdk-nag": "0.0.53",
     "eslint": "^7.31.0",
