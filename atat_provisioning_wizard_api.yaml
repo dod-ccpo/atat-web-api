@@ -95,6 +95,7 @@ paths:
           description: Successful operation
         '404':
           description: Portfolio Draft with the given ID does not exist
+      x-amazon-apigateway-request-validator: "request-params-validator"
       x-amazon-apigateway-integration:
         httpMethod: "POST"
         uri:
@@ -128,6 +129,7 @@ paths:
           description: The given Portfolio Draft does not exist
         '404':
           description: Portfolio Step not found for this Portfolio Draft
+      x-amazon-apigateway-request-validator: "request-params-validator"
       x-amazon-apigateway-integration:
           httpMethod: "POST"
           uri:
@@ -151,7 +153,7 @@ paths:
             schema:
               $ref: "#/components/schemas/PortfolioStep"
         required: true
-      x-amazon-apigateway-request-validator: "my-payload-validator"
+      x-amazon-apigateway-request-validator: "full-request-validator"
       x-amazon-apigateway-integration:
         httpMethod: "POST"
         uri:
@@ -185,6 +187,7 @@ paths:
           description: The given Portfolio Draft does not exist
         '404':
           description: Funding Step not found for this Portfolio Draft
+      x-amazon-apigateway-request-validator: "request-param-validator"
       x-amazon-apigateway-integration:
         httpMethod: "POST"
         uri:
@@ -228,6 +231,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/FundingStep'
+      x-amazon-apigateway-request-validator: "full-request-validator"
       x-amazon-apigateway-integration:
         httpMethod: "POST"
         uri:
@@ -349,6 +353,9 @@ components:
       required:
         - code
         - message
+    Empty:
+      type: object
+      description: Empty request body model
     ValidationError:
       allOf:
         - $ref: '#/components/schemas/Error'
@@ -423,42 +430,46 @@ components:
             type: string
             format: "email"
     FundingStep:
-      type: array
-      items:
-        type: object
-        properties:
-          task_order_number:
-            type: string
-          task_order_file:
-            allOf:
-              - $ref: '#/components/schemas/FileMetadataSummary'
-            description: Metadata associated with file which was previously uploaded by POST /taskOrderFiles
-          csp:
-            type: string
-            enum:
-              - "aws"
-              - "azure"
-          clins:
-            type: array
-            items:
-              type: object
-              properties:
-                clin_number:
-                  type: string
-                idiq_clin:
-                  type: string
-                total_clin_value:
-                  type: "integer"
-                obligated_funds:
-                  type: "integer"
-                pop_start_date:
-                  type: string
-                  format: date
-                  example: '2021-07-01'
-                pop_end_date:
-                  type: string
-                  format: date
-                  example: '2022-07-01'
+      description: Represents step 2 of the Portfolio Draft Wizard
+      type: object
+      properties:
+        task_orders:
+          type: array
+          items:
+            type: object
+            properties:
+              task_order_number:
+                type: string
+              task_order_file:
+                allOf:
+                  - $ref: '#/components/schemas/FileMetadataSummary'
+                description: Metadata associated with file which was previously uploaded by POST /taskOrderFiles
+              csp:
+                type: string
+                enum:
+                  - "aws"
+                  - "azure"
+              clins:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    clin_number:
+                      type: string
+                    idiq_clin:
+                      type: string
+                    total_clin_value:
+                      type: "integer"
+                    obligated_funds:
+                      type: "integer"
+                    pop_start_date:
+                      type: string
+                      format: date
+                      example: '2021-07-01'
+                    pop_end_date:
+                      type: string
+                      format: date
+                      example: '2022-07-01'
     ApplicationStep:
       description: Represents the Application Step of the Portfolio Draft Wizard
       type: array
@@ -602,7 +613,13 @@ components:
                   email: "original@mandalorian.com"
                   access: "read_only"
 x-amazon-apigateway-request-validators:
-  my-payload-validator:
+  full-request-validator:
+    validateRequestParameters: true
+    validateRequestBody: true
+  request-body-validator:
     validateRequestParameters: false
-    validateRequestBody: true      
+    validateRequestBody: true
+  request-params-validator:
+    validateRequestParameters: true
+    validateRequestBody: false         
     
