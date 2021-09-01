@@ -44,6 +44,7 @@
     "@aws-cdk/aws-lambda": "1.120.0",
     "@aws-cdk/aws-lambda-nodejs": "1.120.0",
     "@aws-cdk/aws-s3": "1.120.0",
+    "@aws-cdk/aws-s3-assets": "1.120.0",
     "@aws-cdk/aws-secretsmanager": "1.120.0",
     "@aws-cdk/core": "1.120.0",
     "cdk-nag": "0.0.61",

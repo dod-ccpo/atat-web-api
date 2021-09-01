@@ -39,6 +39,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+      x-amazon-apigateway-integration:
+        httpMethod: "POST"
+        uri:
+          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetPortfolioDraftsFunction.Arn}/invocations"
+        passthroughBehavior: "when_no_match"
+        type: "aws_proxy"
     post:
       tags:
         - portfolioDraft
@@ -65,7 +71,13 @@ paths:
             schema:
               type: string
               example: ''
-  '/portfolioDrafts/{portfolioDraftId}':
+      x-amazon-apigateway-integration:
+        httpMethod: "POST"
+        uri:
+          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CreatePortfolioDraftFunction.Arn}/invocations"
+        passthroughBehavior: "when_no_match"
+        type: "aws_proxy"
+  /portfolioDrafts/{portfolioDraftId}:
     get:
       tags:
         - portfolioDraft
@@ -90,6 +102,12 @@ paths:
                   $ref: '#/components/examples/PortfolioDraftEx'
         '404':
           description: Portfolio Draft with the given ID does not exist
+      x-amazon-apigateway-integration:
+        httpMethod: "POST"
+        uri:
+          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetPortfolioDraftFunction.Arn}/invocations"
+        passthroughBehavior: "when_no_match"
+        type: "aws_proxy"
     delete:
       tags:
         - portfolioDraft
@@ -107,7 +125,14 @@ paths:
           description: Successful operation
         '404':
           description: Portfolio Draft with the given ID does not exist
-  '/portfolioDrafts/{portfolioDraftId}/portfolio':
+      x-amazon-apigateway-request-validator: "request-params-validator"
+      x-amazon-apigateway-integration:
+        httpMethod: "POST"
+        uri:
+          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DeletePortfolioDraftFunction.Arn}/invocations"
+        passthroughBehavior: "when_no_match"
+        type: "aws_proxy"
+  /portfolioDrafts/{portfolioDraftId}/portfolio:
     get:
       tags:
         - portfolioDraft
@@ -134,6 +159,13 @@ paths:
           description: The given Portfolio Draft does not exist
         '404':
           description: Portfolio Step not found for this Portfolio Draft
+      x-amazon-apigateway-request-validator: "request-params-validator"
+      x-amazon-apigateway-integration:
+          httpMethod: "POST"
+          uri:
+            Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetPortfolioStepFunction.Arn}/invocations"
+          passthroughBehavior: "when_no_match"
+          type: "aws_proxy"
     post:
       tags:
         - portfolioDraft
@@ -169,7 +201,14 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/PortfolioStep'
-  '/portfolioDrafts/{portfolioDraftId}/funding':
+      x-amazon-apigateway-request-validator: "full-request-validator"
+      x-amazon-apigateway-integration:
+        httpMethod: "POST"
+        uri:
+          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CreatePortfolioStepFunction.Arn}/invocations"
+        passthroughBehavior: "when_no_match"
+        type: "aws_proxy"
+  /portfolioDrafts/{portfolioDraftId}/funding:
     get:
       tags:
         - portfolioDraft
@@ -196,6 +235,13 @@ paths:
           description: The given Portfolio Draft does not exist
         '404':
           description: Funding Step not found for this Portfolio Draft
+      x-amazon-apigateway-request-validator: "request-params-validator"
+      x-amazon-apigateway-integration:
+        httpMethod: "POST"
+        uri:
+          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetFundingStepFunction.Arn}/invocations"
+        passthroughBehavior: "when_no_match"
+        type: "aws_proxy"
     post:
       tags:
         - portfolioDraft
@@ -233,7 +279,14 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/FundingStep'
-  '/portfolioDrafts/{portfolioDraftId}/application':
+      x-amazon-apigateway-request-validator: "full-request-validator"
+      x-amazon-apigateway-integration:
+        httpMethod: "POST"
+        uri:
+          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CreateFundingStepFunction.Arn}/invocations"
+        passthroughBehavior: "when_no_match"
+        type: "aws_proxy"
+  /portfolioDrafts/{portfolioDraftId}/application:
     get:
       tags:
         - portfolioDraft
@@ -261,6 +314,12 @@ paths:
           description: Application Step not found for this Portfolio Draft
         '400':
           description: The given Portfolio Draft does not exist
+      x-amazon-apigateway-integration:
+          httpMethod: "POST"
+          uri:
+            Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetApplicationStepFunction.Arn}/invocations"
+          passthroughBehavior: "when_no_match"
+          type: "aws_proxy"
     post:
       tags:
         - portfolioDraft
@@ -298,7 +357,13 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ApplicationStep'
-  '/portfolioDrafts/{portfolioDraftId}/submit':
+      x-amazon-apigateway-integration:
+          httpMethod: "POST"
+          uri: 
+            Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NotImplementedFunction.Arn}/invocations"
+          passthroughBehavior: "when_no_match"
+          type: "aws_proxy"
+  /portfolioDrafts/{portfolioDraftId}/submit:
     post:
       tags:
         - portfolioDraft
@@ -331,7 +396,13 @@ paths:
             example: '{}'
           text/plain:
             example: ''
-  '/taskOrderFiles':
+      x-amazon-apigateway-integration:
+        httpMethod: "POST"
+        uri: 
+          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NotImplementedFunction.Arn}/invocations"
+        passthroughBehavior: "when_no_match"
+        type: "aws_proxy"
+  /taskOrderFiles:
     post:
       tags:
         - taskOrder
@@ -352,7 +423,13 @@ paths:
             schema:
               type: string
               format: binary
-  '/taskOrderFiles/{taskOrderId}':
+      x-amazon-apigateway-integration:
+        httpMethod: "POST"
+        uri:
+          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${UploadTaskOrderFunction.Arn}/invocations"
+        passthroughBehavior: "when_no_match"
+        type: "aws_proxy"
+  /taskOrderFiles/{taskOrderId}:
     get:
       tags:
         - taskOrder
@@ -374,6 +451,12 @@ paths:
                 $ref: '#/components/schemas/FileMetadata'
         '404':
           description: Task Order with the given ID does not exist
+      x-amazon-apigateway-integration:
+        httpMethod: "POST"
+        uri:
+          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NotImplementedFunction.Arn}/invocations"
+        passthroughBehavior: "when_no_match"
+        type: "aws_proxy"
     delete:
       tags:
         - taskOrder
@@ -391,7 +474,13 @@ paths:
           description: Successful operation
         '404':
           description: Task Order with the given ID does not exist
-  '/taskOrderFiles/{taskOrderId}/file':
+      x-amazon-apigateway-integration:
+        httpMethod: "POST"
+        uri:
+          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DeleteTaskOrderFunction.Arn}/invocations"
+        passthroughBehavior: "when_no_match"
+        type: "aws_proxy"
+  /taskOrderFiles/{taskOrderId}/file:
     get:
       tags:
         - taskOrder
@@ -414,6 +503,12 @@ paths:
                 format: binary
         '404':
           description: Task Order with the given ID does not exist or is pending processing
+      x-amazon-apigateway-integration:
+        httpMethod: "POST"
+        uri: 
+          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NotImplementedFunction.Arn}/invocations"
+        passthroughBehavior: "when_no_match"
+        type: "aws_proxy"
 components:
   parameters:
     offsetParam:
@@ -720,11 +815,14 @@ components:
                 - first_name: "Boba"
                   last_name: "Fett"
                   email: "original@mandalorian.com"
-                  access: "read_only"
-        
-                
-            
-servers:
-  # Added by API Auto Mocking Plugin
-  - description: SwaggerHub API Auto Mocking
-    url: https://virtserver.swaggerhub.com/CCPO-ATAT/mock-atat-internal-api/1.0.0
+                  access: "read_only"       
+x-amazon-apigateway-request-validators:
+  full-request-validator:
+    validateRequestParameters: true
+    validateRequestBody: true
+  request-body-validator:
+    validateRequestParameters: false
+    validateRequestBody: true
+  request-params-validator:
+    validateRequestParameters: true
+    validateRequestBody: false        
