@@ -13,7 +13,7 @@ export const DATABASE_ERROR = new ErrorResponse(
  * To be used when a request body is required but was not provided
  */
 export const REQUEST_BODY_EMPTY = new ErrorResponse(
-  { code: ErrorCodes.INVALID_INPUT, message: "Request body must not be empty" },
+  { code: ErrorCodes.OTHER, message: "Request body must not be empty" },
   ErrorStatusCode.BAD_REQUEST
 );
 
@@ -25,7 +25,7 @@ export const REQUEST_BODY_EMPTY = new ErrorResponse(
  *  - when JSON, is not of the expected type (for example, doesn't look like PortfolioStep/FundingStep/ApplicationStep)
  */
 export const REQUEST_BODY_INVALID = new ErrorResponse(
-  { code: ErrorCodes.INVALID_INPUT, message: "A valid request body must be provided" },
+  { code: ErrorCodes.OTHER, message: "A valid request body must be provided" },
   ErrorStatusCode.BAD_REQUEST
 );
 
@@ -36,7 +36,7 @@ export const REQUEST_BODY_INVALID = new ErrorResponse(
  *  - is out of range (for example, integer not in the accepted range)
  */
 export const QUERY_PARAM_INVALID = new ErrorResponse(
-  { code: ErrorCodes.INVALID_INPUT, message: "Invalid request parameter" },
+  { code: ErrorCodes.OTHER, message: "Invalid request parameter" },
   ErrorStatusCode.BAD_REQUEST
 );
 
@@ -44,7 +44,7 @@ export const QUERY_PARAM_INVALID = new ErrorResponse(
  * To be used when a required path variable is not received (not present in path parameters)
  */
 export const PATH_VARIABLE_REQUIRED_BUT_MISSING = new ErrorResponse(
-  { code: ErrorCodes.INVALID_INPUT, message: "Required path variable is missing" },
+  { code: ErrorCodes.OTHER, message: "Required path variable is missing" },
   ErrorStatusCode.BAD_REQUEST
 );
 
@@ -52,7 +52,7 @@ export const PATH_VARIABLE_REQUIRED_BUT_MISSING = new ErrorResponse(
  * To be used when the specified Portfolio Draft is not found
  */
 export const NO_SUCH_PORTFOLIO_DRAFT = new ErrorResponse(
-  { code: ErrorCodes.INVALID_INPUT, message: "Portfolio Draft with the given ID does not exist" },
+  { code: ErrorCodes.OTHER, message: "Portfolio Draft with the given ID does not exist" },
   ErrorStatusCode.NOT_FOUND
 );
 
@@ -60,7 +60,7 @@ export const NO_SUCH_PORTFOLIO_DRAFT = new ErrorResponse(
  * To be used when a Portfolio Step is not found for a specified Portfolio Draft
  */
 export const NO_SUCH_PORTFOLIO_STEP = new ErrorResponse(
-  { code: ErrorCodes.INVALID_INPUT, message: "Portfolio Step not found for this Portfolio Draft" },
+  { code: ErrorCodes.OTHER, message: "Portfolio Step not found for this Portfolio Draft" },
   ErrorStatusCode.NOT_FOUND
 );
 
@@ -68,7 +68,7 @@ export const NO_SUCH_PORTFOLIO_STEP = new ErrorResponse(
  * To be used when a Funding Step is not found for a specified Portfolio Draft
  */
 export const NO_SUCH_FUNDING_STEP = new ErrorResponse(
-  { code: ErrorCodes.INVALID_INPUT, message: "Funding Step not found for this Portfolio Draft" },
+  { code: ErrorCodes.OTHER, message: "Funding Step not found for this Portfolio Draft" },
   ErrorStatusCode.NOT_FOUND
 );
 
@@ -76,7 +76,7 @@ export const NO_SUCH_FUNDING_STEP = new ErrorResponse(
  * To be used when a Application Step is not found for a specified Portfolio Draft
  */
 export const NO_SUCH_APPLICATION_STEP = new ErrorResponse(
-  { code: ErrorCodes.INVALID_INPUT, message: "Application Step not found for this Portfolio Draft" },
+  { code: ErrorCodes.OTHER, message: "Application Step not found for this Portfolio Draft" },
   ErrorStatusCode.NOT_FOUND
 );
 
