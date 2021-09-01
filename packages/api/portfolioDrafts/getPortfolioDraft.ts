@@ -41,9 +41,8 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
     if (!result.Item) {
       return NO_SUCH_PORTFOLIO;
-    } else {
-      return new ApiSuccessResponse<PortfolioDraft>(result.Item as PortfolioDraft, SuccessStatusCode.OK);
     }
+    return new ApiSuccessResponse<PortfolioDraft>(result.Item as PortfolioDraft, SuccessStatusCode.OK);
   } catch (err) {
     console.log("Database error: " + err);
     return DATABASE_ERROR;
