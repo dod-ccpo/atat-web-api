@@ -14,7 +14,7 @@ const validRequest: APIGatewayProxyEvent = {
   pathParameters: { portfolioDraftId: "1234" },
 } as any;
 
-describe("Validation tests", function () {
+describe("Validation tests", () => {
   it("should require path param", async () => {
     const emptyRequest: APIGatewayProxyEvent = {} as any;
     expect(await handler(emptyRequest)).toEqual(NO_PORTFOLIO_PATH_PARAM);
