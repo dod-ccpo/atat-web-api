@@ -78,6 +78,36 @@ paths:
         passthroughBehavior: "when_no_match"
         type: "aws_proxy"
   /portfolioDrafts/{portfolioDraftId}:
+    get:
+      tags:
+        - portfolioDraft
+      description: Gets a Portfolio Draft
+      operationId: getPortfolioDraft
+      parameters:
+        - name: portfolioDraftId
+          in: path
+          description: ID of the Portfolio Draft
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortfolioDraft'
+              examples:
+                PortfolioDraftEx:
+                  $ref: '#/components/examples/PortfolioDraftEx'
+        '404':
+          description: Portfolio Draft with the given ID does not exist
+      x-amazon-apigateway-integration:
+        httpMethod: "POST"
+        uri:
+          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetPortfolioDraftFunction.Arn}/invocations"
+        passthroughBehavior: "when_no_match"
+        type: "aws_proxy"
     delete:
       tags:
         - portfolioDraft
@@ -142,17 +172,35 @@ paths:
       description: Submits the Portfolio Step of the Portfolio Draft Wizard
       operationId: createPortfolioStep
       parameters:
-      - name: "portfolioDraftId"
-        in: "path"
-        required: true
-        schema:
-          type: "string"
+        - name: portfolioDraftId
+          in: path
+          description: ID of the Portfolio Draft
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Successful operation with empty response body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortfolioStep'
+              examples:
+                PortfolioStepEx:
+                  $ref: '#/components/examples/PortfolioStepEx'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
       requestBody:
+        description: Input data from the Portfolio Step of the Portfolio Draft Wizard
+        required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PortfolioStep"
-        required: true
+              $ref: '#/components/schemas/PortfolioStep'
       x-amazon-apigateway-request-validator: "full-request-validator"
       x-amazon-apigateway-integration:
         httpMethod: "POST"
@@ -238,6 +286,122 @@ paths:
           Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CreateFundingStepFunction.Arn}/invocations"
         passthroughBehavior: "when_no_match"
         type: "aws_proxy"
+  /portfolioDrafts/{portfolioDraftId}/application:
+    get:
+      tags:
+        - portfolioDraft
+      description: Gets the Application Step of the Portfolio Draft Wizard
+      operationId: getApplicationStep
+      parameters:
+        - name: portfolioDraftId
+          in: path
+          description: ID of the Portfolio Draft
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationStep'
+              examples:
+                  ApplicationStepEx:
+                    $ref: '#/components/examples/ApplicationStepEx'
+              
+        '404':
+          description: Application Step not found for this Portfolio Draft
+        '400':
+          description: The given Portfolio Draft does not exist
+      x-amazon-apigateway-integration:
+          httpMethod: "POST"
+          uri:
+            Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetApplicationStepFunction.Arn}/invocations"
+          passthroughBehavior: "when_no_match"
+          type: "aws_proxy"
+    post:
+      tags:
+        - portfolioDraft
+      description: Submits the Application Step of the Portfolio Draft Wizard
+      operationId: createApplicationStep
+      parameters:
+        - name: portfolioDraftId
+          in: path
+          description: ID of the Portfolio Draft
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationStep'
+              examples:
+                  ApplicationStepEx:
+                    $ref: '#/components/examples/ApplicationStepEx'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '404':
+          description: Portfolio Draft with the given ID does not exist
+      requestBody:
+        description: Input data from the Application Step of the Portfolio Draft Wizard.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationStep'
+      x-amazon-apigateway-integration:
+          httpMethod: "POST"
+          uri: 
+            Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetPortfolioDraftsFunction.Arn}/invocations"
+          passthroughBehavior: "when_no_match"
+          type: "aws_proxy"
+  /portfolioDrafts/{portfolioDraftId}/submit:
+    post:
+      tags:
+        - portfolioDraft
+      description: Submits the given Portfolio Draft for provisioning with a CSP
+      operationId: submitPortfolioDraft
+      parameters:
+        - name: portfolioDraftId
+          in: path
+          description: ID of the Portfolio Draft
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Successful operation
+        '400':
+          description: Validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '403':
+          description: User is not authorized to submit this Portfolio Draft
+        '404':
+          description: Portfolio Draft with the given ID does not exist
+      requestBody:
+        description: An empty String or JSON body
+        content:
+          application/json:
+            example: '{}'
+          text/plain:
+            example: ''
+      x-amazon-apigateway-integration:
+        httpMethod: "POST"
+        uri: 
+          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetPortfolioDraftsFunction.Arn}/invocations"
+        passthroughBehavior: "when_no_match"
+        type: "aws_proxy"
   /taskOrderFiles:
     post:
       tags:
@@ -287,6 +451,12 @@ paths:
                 $ref: '#/components/schemas/FileMetadata'
         '404':
           description: Task Order with the given ID does not exist
+      x-amazon-apigateway-integration:
+        httpMethod: "POST"
+        uri:
+          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetPortfolioDraftsFunction.Arn}/invocations"
+        passthroughBehavior: "when_no_match"
+        type: "aws_proxy"
     delete:
       tags:
         - taskOrder
@@ -310,8 +480,7 @@ paths:
           Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DeleteTaskOrderFunction.Arn}/invocations"
         passthroughBehavior: "when_no_match"
         type: "aws_proxy"
-
-  '/taskOrderFiles/{taskOrderId}/file':
+  /taskOrderFiles/{taskOrderId}/file:
     get:
       tags:
         - taskOrder
@@ -334,6 +503,12 @@ paths:
                 format: binary
         '404':
           description: Task Order with the given ID does not exist or is pending processing
+      x-amazon-apigateway-integration:
+        httpMethod: "POST"
+        uri: 
+          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetPortfolioDraftsFunction.Arn}/invocations"
+        passthroughBehavior: "when_no_match"
+        type: "aws_proxy"
 components:
   parameters:
     offsetParam:
@@ -397,9 +572,6 @@ components:
       required:
         - code
         - message
-    Empty:
-      type: object
-      description: Empty request body model
     ValidationError:
       allOf:
         - $ref: '#/components/schemas/Error'
@@ -643,7 +815,7 @@ components:
                 - first_name: "Boba"
                   last_name: "Fett"
                   email: "original@mandalorian.com"
-                  access: "read_only"
+                  access: "read_only"       
 x-amazon-apigateway-request-validators:
   full-request-validator:
     validateRequestParameters: true
@@ -653,5 +825,4 @@ x-amazon-apigateway-request-validators:
     validateRequestBody: true
   request-params-validator:
     validateRequestParameters: true
-    validateRequestBody: false         
-    
+    validateRequestBody: false        
