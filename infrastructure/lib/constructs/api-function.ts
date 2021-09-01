@@ -41,22 +41,16 @@ export abstract class ApiFunction extends cdk.Construct {
    */
   public readonly route: apigw.Method;
 
-  /**
-   * The CfnFunction logicalId, used for templating the api yaml.
-   */
-  public readonly logicalId: lambda.CfnFunction;
-
   protected constructor(scope: cdk.Construct, id: string, props: ApiFunctionProps) {
     super(scope, id);
     this.method = props.method;
-    this.fn = new lambdaNodeJs.NodejsFunction(this, "Function", {
+    this.fn = new lambdaNodeJs.NodejsFunction(this, "PackagedFunction", {
       entry: props.handlerPath,
       ...props.functionPropsOverride,
     });
     this.fn.addPermission("AllowApiGatwewayInvoke", {
       principal: new iam.ServicePrincipal("apigateway.amazonaws.com"),
     });
-    this.logicalId = this.fn.node.defaultChild as lambda.CfnFunction;
-    this.logicalId.overrideLogicalId(id);
+    (this.fn.node.defaultChild as lambda.CfnFunction).overrideLogicalId(id + "Function");
   }
 }

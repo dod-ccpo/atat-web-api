@@ -34,43 +34,43 @@ export class AtatWebApiStack extends cdk.Stack {
       value: table.tableName,
     });
 
-    const createPortfolioStep = new ApiDynamoDBFunction(this, "CreatePortfolioStepFunction", {
+    const createPortfolioStep = new ApiDynamoDBFunction(this, "CreatePortfolioStep", {
       table: table,
       method: HttpMethod.POST,
       handlerPath: packageRoot() + "/api/portfolioDrafts/portfolio/createPortfolioStep.ts",
     });
 
-    const createPortfolioDraft = new ApiDynamoDBFunction(this, "CreatePortfolioDraftFunction", {
+    const createPortfolioDraft = new ApiDynamoDBFunction(this, "CreatePortfolioDraft", {
       table: table,
       method: HttpMethod.POST,
       handlerPath: packageRoot() + "/api/portfolioDrafts/createPortfolioDraft.ts",
     });
 
-    const getPortfolioDrafts = new ApiDynamoDBFunction(this, "GetPortfolioDraftsFunction", {
+    const getPortfolioDrafts = new ApiDynamoDBFunction(this, "GetPortfolioDrafts", {
       table: table,
       method: HttpMethod.GET,
       handlerPath: packageRoot() + "/api/portfolioDrafts/getPortfolioDrafts.ts",
     });
 
-    const deletePortfolioDraft = new ApiDynamoDBFunction(this, "DeletePortfolioDraftFunction", {
+    const deletePortfolioDraft = new ApiDynamoDBFunction(this, "DeletePortfolioDraft", {
       table: table,
       method: HttpMethod.DELETE,
       handlerPath: packageRoot() + "/api/portfolioDrafts/deletePortfolioDraft.ts",
     });
 
-    const getPortfolioStep = new ApiDynamoDBFunction(this, "GetPortfolioStepFunction", {
+    const getPortfolioStep = new ApiDynamoDBFunction(this, "GetPortfolioStep", {
       table: table,
       method: HttpMethod.GET,
       handlerPath: packageRoot() + "/api/portfolioDrafts/portfolio/getPortfolioStep.ts",
     });
 
-    const createFundingStep = new ApiDynamoDBFunction(this, "CreateFundingStepFunction", {
+    const createFundingStep = new ApiDynamoDBFunction(this, "CreateFundingStep", {
       table: table,
       method: HttpMethod.POST,
       handlerPath: packageRoot() + "/api/portfolioDrafts/funding/createFundingStep.ts",
     });
 
-    const getFundingStep = new ApiDynamoDBFunction(this, "GetFundingStepFunction", {
+    const getFundingStep = new ApiDynamoDBFunction(this, "GetFundingStep", {
       table: table,
       method: HttpMethod.GET,
       handlerPath: packageRoot() + "/api/portfolioDrafts/funding/getFundingStep.ts",
@@ -90,7 +90,7 @@ export class AtatWebApiStack extends cdk.Stack {
     // And with the data now loaded from the template, we can use ApiDefinition.fromInline to parse it as real
     // OpenAPI spec (because it was!) and now we've got all our special AWS values and variables interpolated.
     const restApi = new apigw.SpecRestApi(this, "AtatSpecTest", {
-      apiDefinition: apigw.ApiDefinition.fromInline(data),
+      apiDefinition: apigw.ApiDefinition.fromInline(apiSpecAsTemplateInclude),
       endpointTypes: [apigw.EndpointType.REGIONAL],
       parameters: {
         endpointConfigurationTypes: apigw.EndpointType.REGIONAL,
@@ -105,7 +105,7 @@ export class AtatWebApiStack extends cdk.Stack {
 }
 function addTaskOrderRoutes(scope: cdk.Stack) {
   const taskOrderManagement = new TaskOrderLifecycle(scope, "TaskOrders");
-  const uploadTaskOrder = new ApiS3Function(scope, "UploadTaskOrderFunction", {
+  const uploadTaskOrder = new ApiS3Function(scope, "UploadTaskOrder", {
     bucket: taskOrderManagement.pendingBucket,
     method: HttpMethod.POST,
     handlerPath: packageRoot() + "/api/taskOrderFiles/uploadTaskOrder.ts",
@@ -113,7 +113,7 @@ function addTaskOrderRoutes(scope: cdk.Stack) {
       memorySize: 256,
     },
   });
-  const deleteTaskOrder = new ApiS3Function(scope, "DeleteTaskOrderFunction", {
+  const deleteTaskOrder = new ApiS3Function(scope, "DeleteTaskOrder", {
     bucket: taskOrderManagement.acceptedBucket,
     method: HttpMethod.DELETE,
     handlerPath: packageRoot() + "/api/taskOrderFiles/deleteTaskOrder.ts",
