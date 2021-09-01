@@ -100,6 +100,13 @@ export class AtatWebApiStack extends cdk.Stack {
       handlerPath: packageRoot() + "/api/portfolioDrafts/funding/getFundingStep.ts",
     });
 
+    const createApplicationStep = new ApiDynamoDBFunction(this, "CreateApplicationStep", {
+      resource: application,
+      table: table,
+      method: HttpMethod.POST,
+      handlerPath: packageRoot() + "/api/portfolioDrafts/application/createApplicationStep.ts",
+    });
+
     const getApplicationStep = new ApiDynamoDBFunction(this, "GetApplicationStep", {
       resource: application,
       table: table,
@@ -114,7 +121,6 @@ export class AtatWebApiStack extends cdk.Stack {
       handlerPath: packageRoot() + "/api/portfolioDrafts/getPortfolioDraft.ts",
     });
 
-    // TODO: createApplicationStep
     // TODO: submitPortfolioDraft
     addTaskOrderRoutes(this, restApi);
   }
