@@ -82,7 +82,7 @@ export class AtatWebApiStack extends cdk.Stack {
     // The API spec, which just so happens to be a valid CloudFormation snippet (with some actual CloudFormation
     // in it) gets uploaded to S3
     const apiAsset = new s3asset.Asset(this, "ApiSpecAsset", {
-      path: "./atat_provisioning_wizard_api.yaml",
+      path: packageRoot() + "../../atat_provisioning_wizard_api.yaml",
     });
 
     // And now we include that snippet as an actual part of the template using the AWS::Include Transform. This
