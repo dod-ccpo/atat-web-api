@@ -89,3 +89,11 @@ export const NO_SUCH_APPLICATION_STEP = new ErrorResponse(
   { code: ErrorCodes.INVALID_INPUT, message: "Application Step not found for this Portfolio Draft" },
   ErrorStatusCode.NOT_FOUND
 );
+
+/**
+ * To be used when a function has not been implemented
+ */
+export const NOT_IMPLEMENTED = new ErrorResponse(
+  { code: ErrorCodes.INVALID_INPUT, message: "Not implemented" },
+  ErrorStatusCode.NOT_FOUND
+);

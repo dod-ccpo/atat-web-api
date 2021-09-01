@@ -79,6 +79,13 @@ export class AtatWebApiStack extends cdk.Stack {
       handlerPath: packageRoot() + "/api/portfolioDrafts/getPortfolioDraft.ts",
     });
 
+    // All TODO functions will be pointed at this lambda function (in the atat_provisioning_wizard_api.yaml, search NotImplementedFunction)
+    const notImplemented = new ApiDynamoDBFunction(this, "NotImplemented", {
+      table: table,
+      method: HttpMethod.GET,
+      handlerPath: packageRoot() + "/api/portfolioDrafts/notImplemented.ts",
+    });
+
     // The API spec, which just so happens to be a valid CloudFormation snippet (with some actual CloudFormation
     // in it) gets uploaded to S3. The Asset resource reuses the same bucket that the CDK does, so this does not
     // require any additional buckets to be created.
