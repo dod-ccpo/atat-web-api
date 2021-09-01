@@ -266,6 +266,27 @@ paths:
         passthroughBehavior: "when_no_match"
         type: "aws_proxy"
   /taskOrderFiles/{taskOrderId}:
+    get:
+      tags:
+        - taskOrder
+      description: Gets File Metadata for a Task Order
+      operationId: getTaskOrderMetadata
+      parameters:
+        - name: taskOrderId
+          in: path
+          description: Task Order ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileMetadata'
+        '404':
+          description: Task Order with the given ID does not exist
     delete:
       tags:
         - taskOrder
@@ -290,6 +311,29 @@ paths:
         passthroughBehavior: "when_no_match"
         type: "aws_proxy"
 
+  '/taskOrderFiles/{taskOrderId}/file':
+    get:
+      tags:
+        - taskOrder
+      description: Downloads a Task Order PDF
+      operationId: downloadTaskOrder
+      parameters:
+        - name: taskOrderId
+          in: path
+          description: Task Order ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Task Order with the given ID does not exist or is pending processing
 components:
   parameters:
     offsetParam:
@@ -395,6 +439,7 @@ components:
                 - "accepted"
                 - "rejected"
     PortfolioStep:
+      description: Represents step 1 of the Portfolio Draft Wizard
       type: object
       required:
         - name
@@ -405,9 +450,6 @@ components:
           type: string
         dod_components:
           type: array
-          xml:
-            name: "dod_component"
-            wrapped: true
           items:
             type: string
             enum:
@@ -423,9 +465,6 @@ components:
               - "nsa"
         portfolio_managers:
           type: array
-          xml:
-            name: "portfolio_managers"
-            wrapped: true
           items:
             type: string
             format: "email"
@@ -471,49 +510,43 @@ components:
                       format: date
                       example: '2022-07-01'
     ApplicationStep:
-      description: Represents the Application Step of the Portfolio Draft Wizard
-      type: array
-      xml:
-        name: "application"
-        wrapped: true
-      items:
-        type: object
-        properties:
-          name:
-            type: string
-          description:
-            type: string
-          environments:
-            type: array
-            xml:
-              name: "environment"
-              wrapped: true
-            items:
-              type: object
-              properties:
-                name:
-                  type: string
-                operators:
-                  type: array
-                  xml:
-                    name: "operator"
-                    wrapped: true
-                  items:
-                    type: object
-                    properties:
-                      first_name:
-                        type: string
-                      last_name:
-                        type: string
-                      email:
-                        type: string
-                        format: "email"
-                      access:
-                        type: string
-                        description: Operator Access Level to Environment
-                        enum:
-                          - administrator
-                          - read_only
+      description: Represents step 3 of the Portfolio Draft Wizard
+      type: object
+      properties:
+        applications:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+              environments:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    operators:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          first_name:
+                            type: string
+                          last_name:
+                            type: string
+                          email:
+                            type: string
+                            format: "email"
+                          access:
+                            type: string
+                            description: Operator Access Level to Environment
+                            enum:
+                              - administrator
+                              - read_only
     PortfolioDraft:
       allOf:
         - $ref: '#/components/schemas/PortfolioDraftSummary'
@@ -563,7 +596,6 @@ components:
       value:
         - task_order_number: "12345678910"
           task_order_file:
-            description: "Mock description"
             id: "1234"
             created_at: "2021-08-03T16:21:07.978Z"
             updated_at: "2021-08-03T16:21:07.978Z"
@@ -573,10 +605,10 @@ components:
           csp: 
             - "aws"
           clins: 
-            - clin_number:  "0001"
-              idiq_clin:  "1234"
-              total_clin_value:  200000
-              obligated_funds:  10000
+            - clin_number: "0001"
+              idiq_clin: "1234"
+              total_clin_value: 200000
+              obligated_funds: 10000
               pop_start_date: "2021-09-01"
               pop_end_date: "2022-09-01"
     ApplicationStepEx:

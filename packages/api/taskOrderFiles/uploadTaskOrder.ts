@@ -9,7 +9,7 @@ import { ApiSuccessResponse, ErrorResponse, ErrorStatusCode, SuccessStatusCode }
 const bucketName = process.env.DATA_BUCKET;
 
 /**
- * Creates a new Task Order File
+ * Uploads a Task Order PDF
  *
  * @param event - The POST request from API Gateway
  */

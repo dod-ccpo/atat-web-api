@@ -6,22 +6,13 @@ import { ApiDynamoDBFunction } from "./constructs/api-dynamodb-function";
 import { HttpMethod } from "./http";
 import { ApiS3Function } from "./constructs/api-s3-function";
 import { TaskOrderLifecycle } from "./constructs/task-order-lifecycle";
-
-// This is a suboptimal solution to finding the relative directory to the
-// package root. This is necessary because it is possible for this file to be
-// run with the a cwd of either the infrastructure directory or the root of the
-// git repo.
-function packageRoot(): string {
-  const cwd = process.cwd();
-  if (cwd.endsWith("infrastructure")) {
-    return `${cwd}/../packages`;
-  }
-  return `${cwd}/packages`;
-}
+import { packageRoot } from "./util";
 
 export class AtatWebApiStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
+
+    this.templateOptions.description = "Resources to support the ATAT application API";
 
     // Create a shared DynamoDB table that will be used by all the functions in the project.
     const table = new dynamodb.Table(this, "AtatTable", {
@@ -74,6 +65,18 @@ export class AtatWebApiStack extends cdk.Stack {
       table: table,
       method: HttpMethod.GET,
       handlerPath: packageRoot() + "/api/portfolioDrafts/funding/getFundingStep.ts",
+    });
+
+    const getApplicationStep = new ApiDynamoDBFunction(this, "GetApplicationStep", {
+      table: table,
+      method: HttpMethod.GET,
+      handlerPath: packageRoot() + "/api/portfolioDrafts/application/getApplicationStep.ts",
+    });
+
+    const getPortfolioDraft = new ApiDynamoDBFunction(this, "GetPortfolioDraft", {
+      table: table,
+      method: HttpMethod.GET,
+      handlerPath: packageRoot() + "/api/portfolioDrafts/getPortfolioDraft.ts",
     });
 
     // The API spec, which just so happens to be a valid CloudFormation snippet (with some actual CloudFormation

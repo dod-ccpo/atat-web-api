@@ -11,7 +11,7 @@ export const NO_SUCH_TASK_ORDER_FILE = new ErrorResponse(
 );
 
 /**
- * Delete a Task Order File
+ * Deletes a Task Order PDF
  *
  * @param event - The DELETE request from API Gateway
  */

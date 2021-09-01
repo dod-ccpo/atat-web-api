@@ -3,6 +3,7 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, UpdateCommand, UpdateCommandOutput } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { ErrorCodes } from "../../models/Error";
+import { PORTFOLIO_STEP } from "../../models/PortfolioDraft";
 import { PortfolioStep } from "../../models/PortfolioStep";
 import { ApiSuccessResponse, ErrorResponse, ErrorStatusCode, SuccessStatusCode } from "../../utils/response";
 import { isBodyPresent, isPathParameterPresent, isPortfolioStep, isValidJson } from "../../utils/validation";
@@ -78,7 +79,7 @@ export async function createPortfolioStepCommand(
       },
       UpdateExpression: "set #portfolioVariable = :portfolio, updated_at = :now",
       ExpressionAttributeNames: {
-        "#portfolioVariable": "portfolio_step",
+        "#portfolioVariable": PORTFOLIO_STEP,
       },
       ExpressionAttributeValues: {
         ":portfolio": portfolioStep,

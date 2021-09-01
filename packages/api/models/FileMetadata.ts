@@ -1,4 +1,5 @@
 import { BaseDocument } from "./BaseDocument";
+import { FileMetadataSummary } from "./FileMetadataSummary";
 
 export enum FileScanStatus {
   PENDING = "pending",
@@ -6,8 +7,7 @@ export enum FileScanStatus {
   REJECTED = "rejected",
 }
 
-export interface FileMetadata extends BaseDocument {
-  name: string;
+export interface FileMetadata extends BaseDocument, FileMetadataSummary {
   size: number;
   status: FileScanStatus;
 }
