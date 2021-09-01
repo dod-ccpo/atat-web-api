@@ -85,7 +85,7 @@ export class AtatWebApiStack extends cdk.Stack {
     // And now we include that snippet as an actual part of the template using the AWS::Include Transform. This
     // is where the two previous pieces come together. Now, all the Fn::Sub and other functions will be resolved
     // which means that we can reference the ARNs of the various functions.
-    const data = cdk.Fn.transform("AWS::Include", { Location: apiAsset.s3ObjectUrl });
+    const apiSpecAsTemplateInclude = cdk.Fn.transform("AWS::Include", { Location: apiAsset.s3ObjectUrl });
 
     // And with the data now loaded from the template, we can use ApiDefinition.fromInline to parse it as real
     // OpenAPI spec (because it was!) and now we've got all our special AWS values and variables interpolated.
