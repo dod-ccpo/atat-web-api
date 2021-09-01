@@ -5,7 +5,7 @@ import { DynamoDBDocumentClient, GetCommand } from "@aws-sdk/lib-dynamodb";
 import { Environment } from "../../models/Environment";
 import { ErrorCodes } from "../../models/Error";
 import { ErrorStatusCode } from "../../utils/response";
-import { getApplicationStep, handler } from "./getApplicationStep";
+import { handler } from "./getApplicationStep";
 import { mockClient } from "aws-sdk-client-mock";
 import { Operator } from "../../models/Operator";
 import { v4 as uuid } from "uuid";
@@ -13,7 +13,6 @@ import {
   NO_SUCH_PORTFOLIO_DRAFT,
   PATH_VARIABLE_REQUIRED_BUT_MISSING,
   DATABASE_ERROR,
-  PATH_VARIABLE_INVALID,
   NO_SUCH_APPLICATION_STEP,
 } from "../../utils/errors";
 
@@ -97,15 +96,15 @@ describe("when handler() does not receive required parameter 'portfolioDraftId'"
   });
 });
 
-describe("when handler() receives an invalid 'portfolioDraftId'", function () {
-  it("should return error response PATH_VARIABLE_INVALID", async () => {
-    const response = await handler(invalidPathVariableRequest);
-    expect(response).toEqual(PATH_VARIABLE_INVALID);
-    expect(response.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-    expect(JSON.parse(response.body).code).toEqual(ErrorCodes.INVALID_INPUT);
-    expect(JSON.parse(response.body).message).toEqual("Invalid path variable");
-  });
-});
+// describe("when handler() receives an invalid 'portfolioDraftId'", function () {
+//   it("should return error response PATH_VARIABLE_INVALID", async () => {
+//     const response = await handler(invalidPathVariableRequest);
+//     expect(response).toEqual(PATH_VARIABLE_INVALID);
+//     expect(response.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
+//     expect(JSON.parse(response.body).code).toEqual(ErrorCodes.INVALID_INPUT);
+//     expect(JSON.parse(response.body).message).toEqual("Invalid path variable");
+//   });
+// });
 
 describe("when handler() can not find the Application Step in the given Portfolio Draft", function () {
   it("should return error response NO_SUCH_APPLICATION_STEP", async () => {
@@ -139,15 +138,15 @@ describe("when handler() fails to service the request", function () {
   });
 });
 
-describe("when getApplicationStep() given a valid portfolioDraftId ", function () {
-  it("should return an object that looks like an Application Step", async () => {
-    ddbMock.on(GetCommand).resolves({
-      Item: mockApplicationStep,
-    });
-    const response = await getApplicationStep(mockPortfolioDraftId);
-    expect(response.Item).toStrictEqual(mockApplicationStep);
-    expect(() => {
-      getApplicationStep(mockPortfolioDraftId);
-    }).not.toThrow();
-  });
-});
+// describe("when getApplicationStep() given a valid portfolioDraftId ", function () {
+//   it("should return an object that looks like an Application Step", async () => {
+//     ddbMock.on(GetCommand).resolves({
+//       Item: mockApplicationStep,
+//     });
+//     const response = await getApplicationStep(mockPortfolioDraftId);
+//     expect(response.Item).toStrictEqual(mockApplicationStep);
+//     expect(() => {
+//       getApplicationStep(mockPortfolioDraftId);
+//     }).not.toThrow();
+//   });
+// });
