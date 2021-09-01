@@ -41,16 +41,6 @@ export const QUERY_PARAM_INVALID = new ErrorResponse(
 );
 
 /**
- * To be used when an expected path variable exists but is invalid
- * Could be invalid because:
- *  - has the wrong form (for example, uuid expected but won't parse)
- */
-export const PATH_VARIABLE_INVALID = new ErrorResponse(
-  { code: ErrorCodes.INVALID_INPUT, message: "Invalid path variable" },
-  ErrorStatusCode.BAD_REQUEST
-);
-
-/**
  * To be used when a required path variable is not received (not present in path parameters)
  */
 export const PATH_VARIABLE_REQUIRED_BUT_MISSING = new ErrorResponse(
