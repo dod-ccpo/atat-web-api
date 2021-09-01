@@ -43,9 +43,9 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
   }
   const requestBody = JSON.parse(event.body);
 
-  if (!isPortfolioStep(requestBody)) {
-    return REQUEST_BODY_INVALID;
-  }
+  // if (!isPortfolioStep(requestBody)) {
+  //   return REQUEST_BODY_INVALID;
+  // }
   const portfolioStep: PortfolioStep = requestBody;
 
   try {
