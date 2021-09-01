@@ -107,7 +107,13 @@ export class AtatWebApiStack extends cdk.Stack {
       handlerPath: packageRoot() + "/api/portfolioDrafts/application/getApplicationStep.ts",
     });
 
-    // TODO: getPortfolioDraft
+    const getPortfolioDraft = new ApiDynamoDBFunction(this, "GetPortfolioDraft", {
+      resource: portfolioDraftId,
+      table: table,
+      method: HttpMethod.GET,
+      handlerPath: packageRoot() + "/api/portfolioDrafts/getPortfolioDraft.ts",
+    });
+
     // TODO: createApplicationStep
     // TODO: submitPortfolioDraft
     addTaskOrderRoutes(this, restApi);
