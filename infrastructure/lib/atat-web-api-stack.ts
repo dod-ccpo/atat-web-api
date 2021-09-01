@@ -3,9 +3,9 @@ import * as dynamodb from "@aws-cdk/aws-dynamodb";
 import * as s3asset from "@aws-cdk/aws-s3-assets";
 import * as cdk from "@aws-cdk/core";
 import { ApiDynamoDBFunction } from "./constructs/api-dynamodb-function";
-import { HttpMethod } from "./http";
 import { ApiS3Function } from "./constructs/api-s3-function";
 import { TaskOrderLifecycle } from "./constructs/task-order-lifecycle";
+import { HttpMethod } from "./http";
 import { packageRoot } from "./util";
 
 export class AtatWebApiStack extends cdk.Stack {
@@ -80,20 +80,27 @@ export class AtatWebApiStack extends cdk.Stack {
     });
 
     // The API spec, which just so happens to be a valid CloudFormation snippet (with some actual CloudFormation
-    // in it) gets uploaded to S3
+    // in it) gets uploaded to S3. The Asset resource reuses the same bucket that the CDK does, so this does not
+    // require any additional buckets to be created.
     const apiAsset = new s3asset.Asset(this, "ApiSpecAsset", {
       path: packageRoot() + "../../atat_provisioning_wizard_api.yaml",
     });
 
-    // And now we include that snippet as an actual part of the template using the AWS::Include Transform. This
-    // is where the two previous pieces come together. Now, all the Fn::Sub and other functions will be resolved
-    // which means that we can reference the ARNs of the various functions.
+    // And now we include that snippet as an actual part of the template using the AWS::Include Transform. Since
+    // snippet is valid CloudFormation with real Fn::Sub invocations, those will be interpreted. This results in
+    // all of the function ARNs being inserted into the x-aws-apigateway-integration resources when the template
+    // is evaluated.
     const apiSpecAsTemplateInclude = cdk.Fn.transform("AWS::Include", { Location: apiAsset.s3ObjectUrl });
 
     // And with the data now loaded from the template, we can use ApiDefinition.fromInline to parse it as real
     // OpenAPI spec (because it was!) and now we've got all our special AWS values and variables interpolated.
+    // This will get used as the `Body:` parameter in the underlying CloudFormation resource.
     const restApi = new apigw.SpecRestApi(this, "AtatSpecTest", {
       apiDefinition: apigw.ApiDefinition.fromInline(apiSpecAsTemplateInclude),
+      // This is slightly repetitive between endpointTypes and parameters.endpointConfigurationTypes; however, due
+      // to underlying CloudFormation behaviors, endpointTypes is not evaluated entirely correctly when a
+      // parameter specification is given. Specifying both ensures that we truly have a regional endpoint rather than
+      // edge.
       endpointTypes: [apigw.EndpointType.REGIONAL],
       parameters: {
         endpointConfigurationTypes: apigw.EndpointType.REGIONAL,

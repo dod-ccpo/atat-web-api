@@ -1,9 +1,15 @@
 import * as apigw from "@aws-cdk/aws-apigateway";
+import * as iam from "@aws-cdk/aws-iam";
 import * as lambda from "@aws-cdk/aws-lambda";
 import * as lambdaNodeJs from "@aws-cdk/aws-lambda-nodejs";
 import * as cdk from "@aws-cdk/core";
 import { HttpMethod } from "../http";
-import * as iam from "@aws-cdk/aws-iam";
+
+/**
+ * An IAM service principal for the API Gateway service, used to grant Lambda
+ * invocation permissions.
+ */
+const APIGW_SERVICE_PRINCIPAL = new iam.ServicePrincipal("apigateway.amazonaws.com");
 
 export interface ApiFunctionProps {
   /**
@@ -48,9 +54,7 @@ export abstract class ApiFunction extends cdk.Construct {
       entry: props.handlerPath,
       ...props.functionPropsOverride,
     });
-    this.fn.addPermission("AllowApiGatwewayInvoke", {
-      principal: new iam.ServicePrincipal("apigateway.amazonaws.com"),
-    });
+    this.fn.addPermission("AllowApiGatewayInvoke", { principal: APIGW_SERVICE_PRINCIPAL });
     (this.fn.node.defaultChild as lambda.CfnFunction).overrideLogicalId(id + "Function");
   }
 }
