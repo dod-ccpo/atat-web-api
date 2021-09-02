@@ -1,7 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { ApiSuccessResponse, SuccessStatusCode, ValidationErrorResponse } from "../../utils/response";
+import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
 import { dynamodbDocumentClient as client } from "../../utils/dynamodb";
-import { ErrorCodes } from "../../models/Error";
 import { FundingStep } from "../../models/FundingStep";
 import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import {
@@ -9,7 +8,7 @@ import {
   NO_SUCH_PORTFOLIO_DRAFT,
   REQUEST_BODY_EMPTY,
   REQUEST_BODY_INVALID,
-  PATH_VARIABLE_REQUIRED_BUT_MISSING,
+  PATH_PARAMETER_REQUIRED_BUT_MISSING,
 } from "../../utils/errors";
 import {
   isFundingStep,
@@ -28,7 +27,7 @@ import {
 export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   const portfolioDraftId = event.pathParameters?.portfolioDraftId;
   if (!isPathParameterPresent(portfolioDraftId)) {
-    return PATH_VARIABLE_REQUIRED_BUT_MISSING;
+    return PATH_PARAMETER_REQUIRED_BUT_MISSING;
   }
   if (!portfolioDraftId || !isValidUuidV4(portfolioDraftId)) {
     return NO_SUCH_PORTFOLIO_DRAFT;
