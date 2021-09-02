@@ -42,64 +42,67 @@ it("should return generic Error if exception caught", async () => {
   expect(result.statusCode).toEqual(ErrorStatusCode.INTERNAL_SERVER_ERROR);
   expect(JSON.parse(result.body).code).toEqual(ErrorCodes.OTHER);
 });
-it("should require path param", async () => {
-  const emptyRequest: APIGatewayProxyEvent = {} as any;
-  const result = await handler(emptyRequest);
-  expect(result).toBeInstanceOf(ErrorResponse);
-  expect(result).toEqual(PATH_PARAMETER_REQUIRED_BUT_MISSING);
-  expect(result.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-  expect(JSON.parse(result.body).code).toEqual(ErrorCodes.OTHER);
+describe("Path parameter tests", function () {
+  it("should require path param", async () => {
+    const emptyRequest: APIGatewayProxyEvent = {} as any;
+    const result = await handler(emptyRequest);
+    expect(result).toBeInstanceOf(ErrorResponse);
+    expect(result).toEqual(PATH_PARAMETER_REQUIRED_BUT_MISSING);
+    expect(result.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
+    expect(JSON.parse(result.body).code).toEqual(ErrorCodes.OTHER);
+  });
+  it("should return error when path param not UUIDv4 (to avoid attempting update)", async () => {
+    const invalidRequest: APIGatewayProxyEvent = {
+      pathParameters: { portfolioDraftId: "invalid" },
+    } as any;
+    const result = await handler(invalidRequest);
+    expect(result).toBeInstanceOf(ErrorResponse);
+    expect(result).toEqual(NO_SUCH_PORTFOLIO_DRAFT);
+    expect(result.statusCode).toEqual(ErrorStatusCode.NOT_FOUND);
+    expect(JSON.parse(result.body).code).toEqual(ErrorCodes.OTHER);
+    expect(JSON.parse(result.body).message).toMatch(/Portfolio Draft with the given ID does not exist/);
+  });
 });
-it("should return error when path param not UUIDv4 (to avoid attempting update)", async () => {
-  const invalidRequest: APIGatewayProxyEvent = {
-    pathParameters: { portfolioDraftId: "invalid" },
-  } as any;
-  const result = await handler(invalidRequest);
-  expect(result).toBeInstanceOf(ErrorResponse);
-  expect(result).toEqual(NO_SUCH_PORTFOLIO_DRAFT);
-  expect(result.statusCode).toEqual(ErrorStatusCode.NOT_FOUND);
-  expect(JSON.parse(result.body).code).toEqual(ErrorCodes.OTHER);
-  expect(JSON.parse(result.body).message).toMatch(/Portfolio Draft with the given ID does not exist/);
+describe("Request body tests", function () {
+  it("should return error when request body is empty", async () => {
+    const emptyRequest: APIGatewayProxyEvent = {
+      body: "",
+      pathParameters: { portfolioDraftId: uuidv4() },
+    } as any;
+    const result = await handler(emptyRequest);
+    expect(result).toBeInstanceOf(ErrorResponse);
+    expect(result).toEqual(REQUEST_BODY_EMPTY);
+    expect(result.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
+    expect(JSON.parse(result.body).code).toEqual(ErrorCodes.OTHER);
+    expect(JSON.parse(result.body).message).toMatch(/Request body must not be empty/);
+  });
+  it("should return error when request body is invalid json", async () => {
+    const invalidBodyRequest: APIGatewayProxyEvent = {
+      body: JSON.stringify({ foo: "bar" }) + "}", // invalid json
+      pathParameters: { portfolioDraftId: uuidv4() },
+    } as any;
+    const result = await handler(invalidBodyRequest);
+    expect(result).toBeInstanceOf(ErrorResponse);
+    expect(result).toEqual(REQUEST_BODY_INVALID);
+    expect(result.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
+    expect(JSON.parse(result.body).code).toEqual(ErrorCodes.OTHER);
+    expect(JSON.parse(result.body).message).toMatch(/A valid request body must be provided/);
+  });
+  it("should return error when request body is not a funding step", async () => {
+    const notFundingStepRequest: APIGatewayProxyEvent = {
+      body: JSON.stringify({ foo: "bar" }), // valid json
+      pathParameters: { portfolioDraftId: uuidv4() },
+    } as any;
+    expect(isFundingStep(mockFundingStep())).toEqual(true); // control
+    expect(isFundingStep(notFundingStepRequest)).toEqual(false);
+    const result = await handler(notFundingStepRequest);
+    expect(result).toBeInstanceOf(ErrorResponse);
+    expect(result).toEqual(REQUEST_BODY_INVALID);
+    expect(result.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
+    expect(JSON.parse(result.body).code).toEqual(ErrorCodes.OTHER);
+    expect(JSON.parse(result.body).message).toMatch(/A valid request body must be provided/);
+  });
 });
-it("should return error when request body is empty", async () => {
-  const emptyRequest: APIGatewayProxyEvent = {
-    body: "",
-    pathParameters: { portfolioDraftId: uuidv4() },
-  } as any;
-  const result = await handler(emptyRequest);
-  expect(result).toBeInstanceOf(ErrorResponse);
-  expect(result).toEqual(REQUEST_BODY_EMPTY);
-  expect(result.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-  expect(JSON.parse(result.body).code).toEqual(ErrorCodes.OTHER);
-  expect(JSON.parse(result.body).message).toMatch(/Request body must not be empty/);
-});
-it("should return error when request body is invalid json", async () => {
-  const invalidBodyRequest: APIGatewayProxyEvent = {
-    body: JSON.stringify({ foo: "bar" }) + "}", // invalid json
-    pathParameters: { portfolioDraftId: uuidv4() },
-  } as any;
-  const result = await handler(invalidBodyRequest);
-  expect(result).toBeInstanceOf(ErrorResponse);
-  expect(result).toEqual(REQUEST_BODY_INVALID);
-  expect(result.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-  expect(JSON.parse(result.body).code).toEqual(ErrorCodes.OTHER);
-  expect(JSON.parse(result.body).message).toMatch(/A valid request body must be provided/);
-});
-it("should return error when request body is not a funding step", async () => {
-  const notFundingStepRequest: APIGatewayProxyEvent = {
-    body: JSON.stringify({ foo: "bar" }), // valid json
-    pathParameters: { portfolioDraftId: uuidv4() },
-  } as any;
-  expect(isFundingStep(mockFundingStep())).toEqual(true); // control
-  expect(isFundingStep(notFundingStepRequest)).toEqual(false);
-  const result = await handler(notFundingStepRequest);
-  expect(result).toBeInstanceOf(ErrorResponse);
-  expect(result).toEqual(REQUEST_BODY_INVALID);
-  expect(result.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-  expect(JSON.parse(result.body).code).toEqual(ErrorCodes.OTHER);
-  expect(JSON.parse(result.body).message).toMatch(/A valid request body must be provided/);
-});
-
 describe("Successful operation tests", function () {
   it("should return funding step and http status code 201", async () => {
     expect(false).toBe(false);
