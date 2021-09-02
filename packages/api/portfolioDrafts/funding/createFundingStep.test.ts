@@ -11,7 +11,7 @@ import { mockClient } from "aws-sdk-client-mock";
 import { v4 as uuidv4 } from "uuid";
 import {
   REQUEST_BODY_EMPTY,
-  PATH_VARIABLE_REQUIRED_BUT_MISSING,
+  PATH_PARAMETER_REQUIRED_BUT_MISSING,
   REQUEST_BODY_INVALID,
   DATABASE_ERROR,
   NO_SUCH_PORTFOLIO_DRAFT,
@@ -47,7 +47,7 @@ it("should require path param", async () => {
   const emptyRequest: APIGatewayProxyEvent = {} as any;
   const result = await handler(emptyRequest);
   expect(result).toBeInstanceOf(ErrorResponse);
-  expect(result).toEqual(PATH_VARIABLE_REQUIRED_BUT_MISSING);
+  expect(result).toEqual(PATH_PARAMETER_REQUIRED_BUT_MISSING);
   expect(result.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
   // expect(JSON.parse(result.body).code).toEqual(ErrorCodes.OTHER);
 });
