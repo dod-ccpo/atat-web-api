@@ -1,448 +1,173 @@
-import { DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent } from "aws-lambda";
-import { mockClient } from "aws-sdk-client-mock";
-import { CloudServiceProvider } from "../../models/CloudServiceProvider";
+import { ApiSuccessResponse, ErrorResponse, ErrorStatusCode, SuccessStatusCode } from "../../utils/response";
 import { Clin } from "../../models/Clin";
+import { CloudServiceProvider } from "../../models/CloudServiceProvider";
+import { DynamoDBDocumentClient, UpdateCommand, UpdateCommandOutput } from "@aws-sdk/lib-dynamodb";
+import { FileMetadata, FileScanStatus } from "../../models/FileMetadata";
 import { FundingStep } from "../../models/FundingStep";
-import {
-  updateFundingStepOfPortfolioDraft,
-  createValidationErrorResponse,
-  handler,
-  validateClin,
-} from "./createFundingStep";
-import { ProvisioningStatus } from "../../models/ProvisioningStatus";
-import { v4 as uuid } from "uuid";
-import { ErrorStatusCode, SuccessStatusCode } from "../../utils/response";
-import { ErrorCodes } from "../../models/Error";
-import { REQUEST_BODY_EMPTY, PATH_VARIABLE_REQUIRED_BUT_MISSING, REQUEST_BODY_INVALID } from "../../utils/errors";
+import { handler, validateClin } from "./createFundingStep";
 import { isFundingStep } from "../../utils/validation";
+import { mockClient } from "aws-sdk-client-mock";
+import { v4 as uuidv4 } from "uuid";
+import {
+  REQUEST_BODY_EMPTY,
+  PATH_VARIABLE_REQUIRED_BUT_MISSING,
+  REQUEST_BODY_INVALID,
+  DATABASE_ERROR,
+  NO_SUCH_PORTFOLIO_DRAFT,
+} from "../../utils/errors";
+
+// '400':
+//   description: Invalid input
+//       schema:
+//         $ref: '#/components/schemas/ValidationError'
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 beforeEach(() => {
   ddbMock.reset();
 });
 
-const mockPortfolioDraftId = uuid();
-const mockTOfile = {
-  id: uuid(),
-  name: "Task_Order_76543211900.pdf",
-};
-const mockClin = {
-  clin_number: "0001",
-  idiq_clin: "002",
-  total_clin_value: 100000,
-  obligated_funds: 10000,
-  pop_start_date: "2021-07-01",
-  pop_end_date: "2022-07-01",
-};
-const mockFundingStep = {
-  task_order_number: "TO76543211900",
-  task_order_file: mockTOfile,
-  csp: CloudServiceProvider.AWS,
-  clins: [mockClin, mockClin, mockClin],
-};
-const now = new Date();
-const mockPortfolioDraft = {
-  updated_at: now.toISOString,
-  created_at: now.toISOString,
-  funding_step: mockFundingStep,
-  num_portfolio_managers: 1,
-  status: ProvisioningStatus.NOT_STARTED,
-  id: mockPortfolioDraftId,
-};
-
-const fundingStepMinimal: FundingStep = {
-  task_order_number: "",
-  task_order_file: {
-    id: "",
-    name: "",
-  },
-  csp: CloudServiceProvider.AWS,
-  clins: [],
-};
-
-const fundingStepZeroClins: FundingStep = {
-  task_order_number: "TO123456789",
-  task_order_file: {
-    id: "51312a97-e53a-49b4-bf23-5039759bf843",
-    name: "Task_Order_123456789.pdf",
-  },
-  csp: CloudServiceProvider.AZURE,
-  clins: [],
-};
-
-const fundingStepOneClin: FundingStep = {
-  task_order_number: "TO987654321",
-  task_order_file: {
-    id: "51312a97-e53a-49b4-bf23-5039759bf843",
-    name: "Task_Order_987654321.pdf",
-  },
-  csp: CloudServiceProvider.AWS,
-  clins: [
-    {
-      clin_number: "0001",
-      idiq_clin: "002",
-      total_clin_value: 10000,
-      obligated_funds: 1000,
-      pop_start_date: "2020-03-15",
-      pop_end_date: "2022-06-15",
-    },
-  ],
-};
-
-const fundingStepTwoClins: FundingStep = {
-  task_order_number: "TO9876501234",
-  task_order_file: {
-    id: "51312a97-e53a-49b4-bf23-5039759bf843",
-    name: "Task_Order_9876501234.pdf",
-  },
-  csp: CloudServiceProvider.AZURE,
-  clins: [
-    {
-      clin_number: "0001",
-      idiq_clin: "002",
-      total_clin_value: 11000.75,
-      obligated_funds: 5300.25,
-      pop_start_date: "2021-01-01",
-      pop_end_date: "2021-12-31",
-    },
-    {
-      clin_number: "0002",
-      idiq_clin: "004",
-      total_clin_value: 250000.99,
-      obligated_funds: 25000.55,
-      pop_start_date: "2021-04-15",
-      pop_end_date: "2025-04-15",
-    },
-  ],
-};
-
-const fundingStepInvalidMissingCsp /*: FundingStep */ = {
-  task_order_number: "",
-  task_order_file: {
-    id: "",
-    name: "",
-  },
-  // csp: CloudServiceProvider.AWS, - Missing CSP
-  clins: [],
-};
-
-const fundingStepInvalidMissingTONumber /*: FundingStep */ = {
-  // task_order_number: "", - Missing TO Number
-  task_order_file: {
-    id: "",
-    name: "",
-  },
-  csp: CloudServiceProvider.AWS,
-  clins: [],
-};
-
-describe("updateFundingStepOfPortfolioDraft()", function () {
-  it("should accept object that looks like a Funding Step (minimal)", async () => {
-    ddbMock.on(UpdateCommand).resolves({ Attributes: mockPortfolioDraft });
-    const data = await updateFundingStepOfPortfolioDraft(mockPortfolioDraftId, fundingStepMinimal);
-    expect(data.Attributes).toEqual(mockPortfolioDraft);
-  });
-  it("should accept object that looks like a Funding Step (0 CLINs)", async () => {
-    ddbMock.on(UpdateCommand).resolves({ Attributes: mockPortfolioDraft });
-    const data = await updateFundingStepOfPortfolioDraft(mockPortfolioDraftId, fundingStepZeroClins);
-    expect(data.Attributes).toEqual(mockPortfolioDraft);
-  });
-  it("should accept object that looks like a Funding Step (1 CLIN)", async () => {
-    ddbMock.on(UpdateCommand).resolves({ Attributes: mockPortfolioDraft });
-    const data = await updateFundingStepOfPortfolioDraft(mockPortfolioDraftId, fundingStepOneClin);
-    expect(data.Attributes).toEqual(mockPortfolioDraft);
-  });
-  it("should accept object that looks like a Funding Step (2 CLINs)", async () => {
-    ddbMock.on(UpdateCommand).resolves({ Attributes: mockPortfolioDraft });
-    const data = await updateFundingStepOfPortfolioDraft(mockPortfolioDraftId, fundingStepTwoClins);
-    expect(data.Attributes).toEqual(mockPortfolioDraft);
-  });
-});
-
-describe("createValidationErrorResponse()", function () {
-  const invalidProperties = { invalidPropertyOne: "1", invalidPropertyTwo: "2" };
-  const response = createValidationErrorResponse(invalidProperties);
-  it("should accept an object containing one or more invalid properties", () => {
-    try {
-      createValidationErrorResponse(invalidProperties);
-    } catch (e) {
-      throw Error("Unexpected error");
-    }
-  });
-  it("should return HTTP response status code 400 Bad Request", () => {
-    expect(response.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-  });
-  it("should return a response body containing an error map with invalid properties", () => {
-    expect(JSON.parse(response.body).errorMap).toEqual(invalidProperties);
-  });
-  it("should return a response body containing code 'INVALID_INPUT'", () => {
-    expect(JSON.parse(response.body).code).toEqual(ErrorCodes.INVALID_INPUT);
-  });
-  it("should return a response body containing message 'Invalid input'", () => {
-    expect(JSON.parse(response.body).message).toEqual("Invalid input");
-  });
-  it("should throw error if properties parameter is empty", () => {
-    expect(() => {
-      createValidationErrorResponse({});
-    }).toThrow(Error("Parameter 'invalidProperties' must not be empty"));
-  });
-  it("should throw error if properties parameter contains empty string as key", () => {
-    expect(() => {
-      createValidationErrorResponse({ "": "" });
-    }).toThrow(Error("Parameter 'invalidProperties' must not have empty string as key"));
-  });
-});
-
-const normalMinimalRequest: APIGatewayProxyEvent = {
-  body: JSON.stringify(fundingStepMinimal),
-  pathParameters: { portfolioDraftId: mockPortfolioDraftId },
-} as any;
-const normalZeroClinsRequest: APIGatewayProxyEvent = {
-  body: JSON.stringify(fundingStepZeroClins),
-  pathParameters: { portfolioDraftId: mockPortfolioDraftId },
-} as any;
-const normalOneClinRequest: APIGatewayProxyEvent = {
-  body: JSON.stringify(fundingStepOneClin),
-  pathParameters: { portfolioDraftId: mockPortfolioDraftId },
-} as any;
-const normalTwoClinsRequest: APIGatewayProxyEvent = {
-  body: JSON.stringify(fundingStepTwoClins),
-  pathParameters: { portfolioDraftId: mockPortfolioDraftId },
+const validRequest: APIGatewayProxyEvent = {
+  body: JSON.stringify(mockFundingStep()),
+  pathParameters: { portfolioDraftId: uuidv4() },
 } as any;
 
-const missingPathVariableRequest: APIGatewayProxyEvent = {
-  body: JSON.stringify(fundingStepOneClin),
-  pathParameters: {}, // missing portfolioDraftId
-} as any;
+// TODO: Update all commented expects below involving ErrorCodes.OTHER after merge of #154
 
-const emptyBodyRequest: APIGatewayProxyEvent = {
-  body: "", // empty
-  pathParameters: { portfolioDraftId: mockPortfolioDraftId },
-} as any;
-
-const invalidBodyRequest: APIGatewayProxyEvent = {
-  body: JSON.stringify(fundingStepOneClin).slice(10), // slice 10 chars from valid JSON
-  pathParameters: { portfolioDraftId: mockPortfolioDraftId },
-} as any;
-
-const invalidFundingStepMissingCspRequest: APIGatewayProxyEvent = {
-  body: JSON.stringify(fundingStepInvalidMissingCsp),
-  pathParameters: { portfolioDraftId: mockPortfolioDraftId },
-} as any;
-
-const invalidFundingStepMissingTONumberRequest: APIGatewayProxyEvent = {
-  body: JSON.stringify(fundingStepInvalidMissingTONumber),
-  pathParameters: { portfolioDraftId: mockPortfolioDraftId },
-} as any;
-
-describe("when handler() receives empty request body", function () {
-  it("should return error response REQUEST_BODY_EMPTY", async () => {
-    const response = await handler(emptyBodyRequest);
-    expect(response).toEqual(REQUEST_BODY_EMPTY);
-  });
-  it("should return HTTP response status code 400 Bad Request", async () => {
-    const response = await handler(emptyBodyRequest);
-    expect(response.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-  });
-  it("should return a response body containing code 'INVALID_INPUT'", async () => {
-    const response = await handler(emptyBodyRequest);
-    expect(JSON.parse(response.body).code).toEqual(ErrorCodes.INVALID_INPUT);
-  });
-  it("should return a response body containing message 'Request body must not be empty'", async () => {
-    const response = await handler(emptyBodyRequest);
-    expect(JSON.parse(response.body).message).toEqual("Request body must not be empty");
-  });
+it("should return generic Error if exception caught", async () => {
+  jest.spyOn(console, "error").mockImplementation(() => jest.fn()); // suppress output
+  ddbMock.on(UpdateCommand).rejects("Some error occurred");
+  const result = await handler(validRequest);
+  expect(result).toBeInstanceOf(ErrorResponse);
+  expect(result).toEqual(DATABASE_ERROR);
+  expect(result.statusCode).toEqual(ErrorStatusCode.INTERNAL_SERVER_ERROR);
+  // expect(JSON.parse(result.body).code).toEqual(ErrorCodes.OTHER);
 });
-
-describe("when handler() does not receive required parameter 'portfolioDraftId'", function () {
-  it("should return error response PATH_VARIABLE_REQUIRED_BUT_MISSING", async () => {
-    const response = await handler(missingPathVariableRequest);
-    expect(response).toEqual(PATH_VARIABLE_REQUIRED_BUT_MISSING);
-  });
-  it("should return HTTP response status code 400 Bad Request", async () => {
-    const response = await handler(missingPathVariableRequest);
-    expect(response.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-  });
-  it("should return a response body containing code 'INVALID_INPUT'", async () => {
-    const response = await handler(missingPathVariableRequest);
-    expect(JSON.parse(response.body).code).toEqual(ErrorCodes.INVALID_INPUT);
-  });
-  it("should return a response body containing message 'Required path variable is missing'", async () => {
-    const response = await handler(missingPathVariableRequest);
-    expect(JSON.parse(response.body).message).toEqual("Required path variable is missing");
-  });
+it("should require path param", async () => {
+  const emptyRequest: APIGatewayProxyEvent = {} as any;
+  const result = await handler(emptyRequest);
+  expect(result).toBeInstanceOf(ErrorResponse);
+  expect(result).toEqual(PATH_VARIABLE_REQUIRED_BUT_MISSING);
+  expect(result.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
+  // expect(JSON.parse(result.body).code).toEqual(ErrorCodes.OTHER);
 });
-
-describe("when handler() receives invalid request body", function () {
-  it("should return error response REQUEST_BODY_INVALID", async () => {
-    const response = await handler(invalidBodyRequest);
-    expect(response).toEqual(REQUEST_BODY_INVALID);
-  });
-  it("should return HTTP response status code 400 Bad Request", async () => {
-    const response = await handler(invalidBodyRequest);
-    expect(response.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-  });
-  it("should return a response body containing code 'INVALID_INPUT'", async () => {
-    const response = await handler(invalidBodyRequest);
-    expect(JSON.parse(response.body).code).toEqual(ErrorCodes.INVALID_INPUT);
-  });
-  it("should return a response body containing message 'A valid request body must be provided'", async () => {
-    const response = await handler(invalidBodyRequest);
-    expect(JSON.parse(response.body).message).toEqual("A valid request body must be provided");
-  });
-});
-
-describe("when handler() receives invalid FundingStep object (missing CSP) in request body", function () {
-  it("should return error response REQUEST_BODY_INVALID", async () => {
-    const response = await handler(invalidFundingStepMissingCspRequest);
-    expect(response).toEqual(REQUEST_BODY_INVALID);
-  });
-  it("should return HTTP response status code 400 Bad Request", async () => {
-    const response = await handler(invalidFundingStepMissingCspRequest);
-    expect(response.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-  });
-  it("should return a response body containing code 'INVALID_INPUT'", async () => {
-    const response = await handler(invalidFundingStepMissingCspRequest);
-    expect(JSON.parse(response.body).code).toEqual(ErrorCodes.INVALID_INPUT);
-  });
-  it("should return a response body containing message 'A valid request body must be provided'", async () => {
-    const response = await handler(invalidFundingStepMissingCspRequest);
-    expect(JSON.parse(response.body).message).toEqual("A valid request body must be provided");
-  });
-});
-
-describe("when handler() receives invalid FundingStep object (missing TO Number) in request body", function () {
-  it("should return error response REQUEST_BODY_INVALID", async () => {
-    const response = await handler(invalidFundingStepMissingTONumberRequest);
-    expect(response).toEqual(REQUEST_BODY_INVALID);
-  });
-  it("should return HTTP response status code 400 Bad Request", async () => {
-    const response = await handler(invalidFundingStepMissingTONumberRequest);
-    expect(response.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-  });
-  it("should return a response body containing code 'INVALID_INPUT'", async () => {
-    const response = await handler(invalidFundingStepMissingTONumberRequest);
-    expect(JSON.parse(response.body).code).toEqual(ErrorCodes.INVALID_INPUT);
-  });
-  it("should return a response body containing message 'A valid request body must be provided'", async () => {
-    const response = await handler(invalidFundingStepMissingTONumberRequest);
-    expect(JSON.parse(response.body).message).toEqual("A valid request body must be provided");
-  });
-});
-
-describe("when handler() recieves all required and valid input (minimal)", function () {
-  it("should return HTTP response status code 201 Created", async () => {
-    const response = await handler(normalMinimalRequest);
-    expect(response.statusCode).toEqual(SuccessStatusCode.CREATED);
-  });
-  it("should return a response body that looks like a Funding Step", async () => {
-    const response = await handler(normalMinimalRequest);
-    expect(isFundingStep(JSON.parse(response.body))).toBeTruthy();
-  });
-});
-
-describe("when handler() recieves all required and valid input (0 CLINs)", function () {
-  it("should return HTTP response status code 201 Created", async () => {
-    const response = await handler(normalZeroClinsRequest);
-    expect(response.statusCode).toEqual(SuccessStatusCode.CREATED);
-  });
-  it("should return a response body that looks like a Funding Step", async () => {
-    const response = await handler(normalZeroClinsRequest);
-    expect(isFundingStep(JSON.parse(response.body))).toBeTruthy();
-  });
-});
-
-describe("when handler() recieves all required and valid input (1 CLIN)", function () {
-  it("should return HTTP response status code 201 Created", async () => {
-    const response = await handler(normalOneClinRequest);
-    expect(response.statusCode).toEqual(SuccessStatusCode.CREATED);
-  });
-  it("should return a response body that looks like a Funding Step", async () => {
-    const response = await handler(normalOneClinRequest);
-    expect(isFundingStep(JSON.parse(response.body))).toBeTruthy();
-  });
-});
-
-describe("when handler() recieves all required and valid input (2 CLINs)", function () {
-  it("should return HTTP response status code 201 Created", async () => {
-    const response = await handler(normalTwoClinsRequest);
-    expect(response.statusCode).toEqual(SuccessStatusCode.CREATED);
-  });
-  it("should return a response body that looks like a Funding Step", async () => {
-    const response = await handler(normalTwoClinsRequest);
-    expect(isFundingStep(JSON.parse(response.body))).toBeTruthy();
-  });
-});
-
-describe("when handler() recieves (1 CLIN) with invalid start date", function () {
-  const invalidStartDate = { pop_start_date: "invalid" };
-  const clinInvalidStartDate: Clin = {
-    ...mockClin,
-    ...invalidStartDate,
-  };
-  const fundingStepInvalidStartDate: FundingStep = {
-    task_order_number: "TO987654321",
-    task_order_file: {
-      id: "51312a97-e53a-49b4-bf23-5039759bf843",
-      name: "Task_Order_987654321.pdf",
-    },
-    csp: CloudServiceProvider.AWS,
-    clins: [clinInvalidStartDate],
-  };
-  const requestInvalidStartDate: APIGatewayProxyEvent = {
-    body: JSON.stringify(fundingStepInvalidStartDate),
-    pathParameters: { portfolioDraftId: mockPortfolioDraftId },
+it("should return error when path param not UUIDv4 (to avoid attempting update)", async () => {
+  const invalidRequest: APIGatewayProxyEvent = {
+    pathParameters: { portfolioDraftId: "invalid" },
   } as any;
-  it("should return invalid start date in error map", async () => {
-    const response = await handler(requestInvalidStartDate);
-    expect(JSON.parse(response.body).errorMap).toEqual(invalidStartDate);
+  const result = await handler(invalidRequest);
+  expect(result).toBeInstanceOf(ErrorResponse);
+  expect(result).toEqual(NO_SUCH_PORTFOLIO_DRAFT);
+  expect(result.statusCode).toEqual(ErrorStatusCode.NOT_FOUND);
+  // expect(JSON.parse(result.body).code).toEqual(ErrorCodes.OTHER);
+  expect(JSON.parse(result.body).message).toMatch(/Portfolio Draft with the given ID does not exist/);
+});
+it("should return error when request body is empty", async () => {
+  const emptyRequest: APIGatewayProxyEvent = {
+    body: "",
+    pathParameters: { portfolioDraftId: uuidv4() },
+  } as any;
+  const result = await handler(emptyRequest);
+  expect(result).toBeInstanceOf(ErrorResponse);
+  expect(result).toEqual(REQUEST_BODY_EMPTY);
+  expect(result.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
+  // expect(JSON.parse(result.body).code).toEqual(ErrorCodes.OTHER);
+  expect(JSON.parse(result.body).message).toMatch(/Request body must not be empty/);
+});
+it("should return error when request body is invalid json", async () => {
+  const invalidBodyRequest: APIGatewayProxyEvent = {
+    body: JSON.stringify({ foo: "bar" }) + "}", // invalid json
+    pathParameters: { portfolioDraftId: uuidv4() },
+  } as any;
+  const result = await handler(invalidBodyRequest);
+  expect(result).toBeInstanceOf(ErrorResponse);
+  expect(result).toEqual(REQUEST_BODY_INVALID);
+  expect(result.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
+  // expect(JSON.parse(result.body).code).toEqual(ErrorCodes.OTHER);
+  expect(JSON.parse(result.body).message).toMatch(/A valid request body must be provided/);
+});
+it("should return error when request body is not a funding step", async () => {
+  const notFundingStepRequest: APIGatewayProxyEvent = {
+    body: JSON.stringify({ foo: "bar" }), // valid json
+    pathParameters: { portfolioDraftId: uuidv4() },
+  } as any;
+  expect(isFundingStep(mockFundingStep())).toEqual(true); // control
+  expect(isFundingStep(notFundingStepRequest)).toEqual(false);
+  const result = await handler(notFundingStepRequest);
+  expect(result).toBeInstanceOf(ErrorResponse);
+  expect(result).toEqual(REQUEST_BODY_INVALID);
+  expect(result.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
+  // expect(JSON.parse(result.body).code).toEqual(ErrorCodes.OTHER);
+  expect(JSON.parse(result.body).message).toMatch(/A valid request body must be provided/);
+});
+
+describe("Successful operation tests", function () {
+  it("should return funding step and http status code 201", async () => {
+    expect(false).toBe(false);
+    const mockResponse = {
+      updated_at: "2021-08-13T20:55:02.595Z",
+      created_at: "2021-08-13T20:51:45.979Z",
+      portfolio_step: mockFundingStep(),
+      num_portfolio_managers: 0,
+      status: "not_started",
+      id: "595c31d3-190c-42c3-a9b6-77325fa5ed38",
+    };
+    ddbMock.on(UpdateCommand).resolves({
+      Attributes: mockResponse,
+    });
+    const fundingStep: FundingStep = mockFundingStep();
+    const fundingStepOutput: UpdateCommandOutput = { Attributes: { funding_step: JSON.stringify(fundingStep) } } as any;
+    ddbMock.on(UpdateCommand).resolves(fundingStepOutput);
+    const result = await handler(validRequest);
+    expect(result).toBeInstanceOf(ApiSuccessResponse);
+    expect(result.statusCode).toEqual(SuccessStatusCode.CREATED);
+    expect(result.body).toEqual(JSON.stringify(mockFundingStep()));
   });
 });
 
-describe("validateClin()", function () {
+describe("validateClin() tests", function () {
   const clinInvalidStartDate: Clin = {
-    ...mockClin,
+    ...mockClin(),
     ...{ pop_start_date: "invalid" },
   };
   const clinInvalidEndDate: Clin = {
-    ...mockClin,
+    ...mockClin(),
     ...{ pop_end_date: "invalid" },
   };
   const clinStartAfterEnd: Clin = {
-    ...mockClin,
+    ...mockClin(),
     ...{ pop_start_date: "2015-10-21", pop_end_date: "1955-11-05" },
   };
   const clinStartEqualsEnd: Clin = {
-    ...mockClin,
+    ...mockClin(),
     ...{ pop_start_date: "1993-02-02", pop_end_date: "1993-02-02" },
   };
   const clinPopExpired: Clin = {
-    ...mockClin,
+    ...mockClin(),
     ...{ pop_end_date: "2021-08-26" },
   };
   const clinTotalLessThanZero: Clin = {
-    ...mockClin,
+    ...mockClin(),
     ...{ total_clin_value: -1 },
   };
   const clinTotalIsZero: Clin = {
-    ...mockClin,
+    ...mockClin(),
     ...{ total_clin_value: 0 },
   };
   const clinObligatedLessThanZero: Clin = {
-    ...mockClin,
+    ...mockClin(),
     ...{ obligated_funds: -1 },
   };
   const clinObligatedIsZero: Clin = {
-    ...mockClin,
+    ...mockClin(),
     ...{ obligated_funds: 0 },
   };
   const clinObligatedGreaterThanTotal: Clin = {
-    ...mockClin,
+    ...mockClin(),
     ...{ obligated_funds: 2, total_clin_value: 1 },
   };
   const clinObligatedEqualToTotal: Clin = {
-    ...mockClin,
+    ...mockClin(),
     ...{ obligated_funds: 1, total_clin_value: 1 },
   };
   it("should throw error if input does not look like a Clin", () => {
@@ -451,7 +176,7 @@ describe("validateClin()", function () {
     }).toThrow(Error("Input must be a Clin object"));
   });
   it("should return true if given Clin is valid (passes all input validation)", () => {
-    expect(validateClin(mockClin)).toBe(true);
+    expect(validateClin(mockClin())).toBe(true);
   });
   it("should return false if given Clin has invalid pop start date", () => {
     expect(validateClin(clinInvalidStartDate)).toBe(false);
@@ -488,3 +213,39 @@ describe("validateClin()", function () {
     expect(validateClin(clinObligatedEqualToTotal)).toBe(false);
   });
 });
+
+/**
+ * FundingStepEx from API spec
+ * @returns a complete FundingStep
+ */
+function mockFundingStep(): FundingStep {
+  const mockTaskOrderFile: FileMetadata = {
+    created_at: "2021-08-03T16:21:07.978Z",
+    id: "1234",
+    name: "Mock task order file",
+    size: 100,
+    status: FileScanStatus.PENDING,
+    updated_at: "2021-08-03T16:21:07.978Z",
+  };
+  return {
+    task_order_number: "12345678910",
+    task_order_file: mockTaskOrderFile,
+    csp: CloudServiceProvider.AWS,
+    clins: [mockClin()],
+  };
+}
+
+/**
+ * Returns a static clin
+ * @returns a complete Clin
+ */
+function mockClin(): Clin {
+  return {
+    clin_number: "0001",
+    idiq_clin: "1234",
+    obligated_funds: 10000,
+    pop_end_date: "2022-09-01",
+    pop_start_date: "2021-09-01",
+    total_clin_value: 200000,
+  };
+}
