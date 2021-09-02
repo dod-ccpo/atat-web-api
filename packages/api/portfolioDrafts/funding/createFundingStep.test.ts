@@ -125,50 +125,6 @@ describe("Successful operation tests", function () {
 });
 
 describe("Clin validation tests", function () {
-  const clinInvalidStartDate: Clin = {
-    ...mockClin(),
-    ...{ pop_start_date: "invalid" },
-  };
-  const clinInvalidEndDate: Clin = {
-    ...mockClin(),
-    ...{ pop_end_date: "invalid" },
-  };
-  const clinStartAfterEnd: Clin = {
-    ...mockClin(),
-    ...{ pop_start_date: "2015-10-21", pop_end_date: "1955-11-05" },
-  };
-  const clinStartEqualsEnd: Clin = {
-    ...mockClin(),
-    ...{ pop_start_date: "1993-02-02", pop_end_date: "1993-02-02" },
-  };
-  const clinPopExpired: Clin = {
-    ...mockClin(),
-    ...{ pop_end_date: "2021-08-26" },
-  };
-  const clinTotalLessThanZero: Clin = {
-    ...mockClin(),
-    ...{ total_clin_value: -1 },
-  };
-  const clinTotalIsZero: Clin = {
-    ...mockClin(),
-    ...{ total_clin_value: 0 },
-  };
-  const clinObligatedLessThanZero: Clin = {
-    ...mockClin(),
-    ...{ obligated_funds: -1 },
-  };
-  const clinObligatedIsZero: Clin = {
-    ...mockClin(),
-    ...{ obligated_funds: 0 },
-  };
-  const clinObligatedGreaterThanTotal: Clin = {
-    ...mockClin(),
-    ...{ obligated_funds: 2, total_clin_value: 1 },
-  };
-  const clinObligatedEqualToTotal: Clin = {
-    ...mockClin(),
-    ...{ obligated_funds: 1, total_clin_value: 1 },
-  };
   it("should throw error if input does not look like a Clin", () => {
     expect(() => {
       validateClin({});
@@ -178,38 +134,83 @@ describe("Clin validation tests", function () {
     expect(validateClin(mockClin())).toBe(true);
   });
   it("should return false if given Clin has invalid pop start date", () => {
+    const clinInvalidStartDate: Clin = {
+      ...mockClin(),
+      ...{ pop_start_date: "invalid" },
+    };
     expect(validateClin(clinInvalidStartDate)).toBe(false);
   });
   it("should return false if given Clin has invalid pop end date", () => {
+    const clinInvalidEndDate: Clin = {
+      ...mockClin(),
+      ...{ pop_end_date: "invalid" },
+    };
     expect(validateClin(clinInvalidEndDate)).toBe(false);
   });
   it("should return false if given Clin has nonsensical pop dates (start>end)", () => {
+    const clinStartAfterEnd: Clin = {
+      ...mockClin(),
+      ...{ pop_start_date: "2015-10-21", pop_end_date: "1955-11-05" },
+    };
     expect(validateClin(clinStartAfterEnd)).toBe(false);
   });
   it("should return false if given Clin has nonsensical pop dates (start=end)", () => {
+    const clinStartEqualsEnd: Clin = {
+      ...mockClin(),
+      ...{ pop_start_date: "1993-02-02", pop_end_date: "1993-02-02" },
+    };
     expect(validateClin(clinStartEqualsEnd)).toBe(false);
   });
   it("should return false if given Clin has nonsensical pop dates (now>end)", () => {
+    const clinPopExpired: Clin = {
+      ...mockClin(),
+      ...{ pop_end_date: "2021-08-26" },
+    };
     expect(validateClin(clinPopExpired)).toBe(false);
   });
   it("should return false if given Clin has nonsensical funding values (total<0)", () => {
+    const clinTotalLessThanZero: Clin = {
+      ...mockClin(),
+      ...{ total_clin_value: -1 },
+    };
     expect(validateClin(clinTotalLessThanZero)).toBe(false);
   });
   it("should return false if given Clin has nonsensical funding values (total=0)", () => {
+    const clinTotalIsZero: Clin = {
+      ...mockClin(),
+      ...{ total_clin_value: 0 },
+    };
     expect(validateClin(clinTotalIsZero)).toBe(false);
   });
   it("should return false if given Clin has nonsensical funding values (obligated<0)", () => {
+    const clinObligatedLessThanZero: Clin = {
+      ...mockClin(),
+      ...{ obligated_funds: -1 },
+    };
     expect(validateClin(clinObligatedLessThanZero)).toBe(false);
   });
   it("should return false if given Clin has nonsensical funding values (obligated=0)", () => {
+    const clinObligatedIsZero: Clin = {
+      ...mockClin(),
+      ...{ obligated_funds: 0 },
+    };
     expect(validateClin(clinObligatedIsZero)).toBe(false);
   });
   it("should return false if given Clin has nonsensical funding values (obligated>total)", () => {
+    const clinObligatedGreaterThanTotal: Clin = {
+      ...mockClin(),
+      ...{ obligated_funds: 2, total_clin_value: 1 },
+    };
     expect(validateClin(clinObligatedGreaterThanTotal)).toBe(false);
   });
-  // TODO: Verification of this business rule is pending
+  // TODO: Verification of this business rule is pending.
+  // Allowing obligated to equal total for now.
   it("should return false if given Clin has nonsensical funding values (obligated=total)", () => {
-    expect(validateClin(clinObligatedEqualToTotal)).toBe(false);
+    const clinObligatedEqualToTotal: Clin = {
+      ...mockClin(),
+      ...{ obligated_funds: 1, total_clin_value: 1 },
+    };
+    expect(validateClin(clinObligatedEqualToTotal)).toBe(true);
   });
 });
 

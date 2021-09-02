@@ -128,7 +128,7 @@ export function validateClin(clin: unknown): boolean {
   if (clin.obligated_funds <= 0) {
     return false;
   }
-  if (clin.obligated_funds >= clin.total_clin_value) {
+  if (clin.obligated_funds > clin.total_clin_value) {
     return false;
   }
   return true;
