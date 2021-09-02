@@ -41,10 +41,10 @@ export const QUERY_PARAM_INVALID = new ErrorResponse(
 );
 
 /**
- * To be used when a required path variable is not received (not present in path parameters)
+ * To be used when a required path parameter is not received (not present or emtpy)
  */
-export const PATH_VARIABLE_REQUIRED_BUT_MISSING = new ErrorResponse(
-  { code: ErrorCodes.OTHER, message: "Required path variable is missing" },
+export const PATH_PARAMETER_REQUIRED_BUT_MISSING = new ErrorResponse(
+  { code: ErrorCodes.OTHER, message: "Required path parameter is missing" },
   ErrorStatusCode.BAD_REQUEST
 );
 
