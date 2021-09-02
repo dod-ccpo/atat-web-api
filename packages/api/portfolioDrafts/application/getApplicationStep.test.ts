@@ -21,7 +21,7 @@ const validRequest: APIGatewayProxyEvent = {
 } as any;
 
 it("should return generic Error if exception caught", async () => {
-  jest.spyOn(console, "error").mockImplementation(() => {}); // suppress output
+  jest.spyOn(console, "error").mockImplementation(() => jest.fn()); // suppress output
   ddbMock.on(GetCommand).rejects("Some error occurred");
   const result = await handler(validRequest);
   expect(result).toBeInstanceOf(ErrorResponse);
