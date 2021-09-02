@@ -41,7 +41,7 @@ export const QUERY_PARAM_INVALID = new ErrorResponse(
 );
 
 /**
- * To be used when a required path parameter is not received (not present or emtpy)
+ * To be used when a required path parameter is not received (not present or empty)
  */
 export const PATH_PARAMETER_REQUIRED_BUT_MISSING = new ErrorResponse(
   { code: ErrorCodes.OTHER, message: "Required path parameter is missing" },
