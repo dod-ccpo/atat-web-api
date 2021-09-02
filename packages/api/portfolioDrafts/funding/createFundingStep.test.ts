@@ -16,6 +16,7 @@ import {
   DATABASE_ERROR,
   NO_SUCH_PORTFOLIO_DRAFT,
 } from "../../utils/errors";
+import { ErrorCodes } from "../../models/Error";
 
 // '400':
 //   description: Invalid input
@@ -32,8 +33,6 @@ const validRequest: APIGatewayProxyEvent = {
   pathParameters: { portfolioDraftId: uuidv4() },
 } as any;
 
-// TODO: Update all commented expects below involving ErrorCodes.OTHER after merge of #154
-
 it("should return generic Error if exception caught", async () => {
   jest.spyOn(console, "error").mockImplementation(() => jest.fn()); // suppress output
   ddbMock.on(UpdateCommand).rejects("Some error occurred");
@@ -41,7 +40,7 @@ it("should return generic Error if exception caught", async () => {
   expect(result).toBeInstanceOf(ErrorResponse);
   expect(result).toEqual(DATABASE_ERROR);
   expect(result.statusCode).toEqual(ErrorStatusCode.INTERNAL_SERVER_ERROR);
-  // expect(JSON.parse(result.body).code).toEqual(ErrorCodes.OTHER);
+  expect(JSON.parse(result.body).code).toEqual(ErrorCodes.OTHER);
 });
 it("should require path param", async () => {
   const emptyRequest: APIGatewayProxyEvent = {} as any;
@@ -49,7 +48,7 @@ it("should require path param", async () => {
   expect(result).toBeInstanceOf(ErrorResponse);
   expect(result).toEqual(PATH_PARAMETER_REQUIRED_BUT_MISSING);
   expect(result.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-  // expect(JSON.parse(result.body).code).toEqual(ErrorCodes.OTHER);
+  expect(JSON.parse(result.body).code).toEqual(ErrorCodes.OTHER);
 });
 it("should return error when path param not UUIDv4 (to avoid attempting update)", async () => {
   const invalidRequest: APIGatewayProxyEvent = {
@@ -59,7 +58,7 @@ it("should return error when path param not UUIDv4 (to avoid attempting update)"
   expect(result).toBeInstanceOf(ErrorResponse);
   expect(result).toEqual(NO_SUCH_PORTFOLIO_DRAFT);
   expect(result.statusCode).toEqual(ErrorStatusCode.NOT_FOUND);
-  // expect(JSON.parse(result.body).code).toEqual(ErrorCodes.OTHER);
+  expect(JSON.parse(result.body).code).toEqual(ErrorCodes.OTHER);
   expect(JSON.parse(result.body).message).toMatch(/Portfolio Draft with the given ID does not exist/);
 });
 it("should return error when request body is empty", async () => {
@@ -71,7 +70,7 @@ it("should return error when request body is empty", async () => {
   expect(result).toBeInstanceOf(ErrorResponse);
   expect(result).toEqual(REQUEST_BODY_EMPTY);
   expect(result.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-  // expect(JSON.parse(result.body).code).toEqual(ErrorCodes.OTHER);
+  expect(JSON.parse(result.body).code).toEqual(ErrorCodes.OTHER);
   expect(JSON.parse(result.body).message).toMatch(/Request body must not be empty/);
 });
 it("should return error when request body is invalid json", async () => {
@@ -83,7 +82,7 @@ it("should return error when request body is invalid json", async () => {
   expect(result).toBeInstanceOf(ErrorResponse);
   expect(result).toEqual(REQUEST_BODY_INVALID);
   expect(result.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-  // expect(JSON.parse(result.body).code).toEqual(ErrorCodes.OTHER);
+  expect(JSON.parse(result.body).code).toEqual(ErrorCodes.OTHER);
   expect(JSON.parse(result.body).message).toMatch(/A valid request body must be provided/);
 });
 it("should return error when request body is not a funding step", async () => {
@@ -97,7 +96,7 @@ it("should return error when request body is not a funding step", async () => {
   expect(result).toBeInstanceOf(ErrorResponse);
   expect(result).toEqual(REQUEST_BODY_INVALID);
   expect(result.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-  // expect(JSON.parse(result.body).code).toEqual(ErrorCodes.OTHER);
+  expect(JSON.parse(result.body).code).toEqual(ErrorCodes.OTHER);
   expect(JSON.parse(result.body).message).toMatch(/A valid request body must be provided/);
 });
 
@@ -125,7 +124,7 @@ describe("Successful operation tests", function () {
   });
 });
 
-describe("validateClin() tests", function () {
+describe("Clin validation tests", function () {
   const clinInvalidStartDate: Clin = {
     ...mockClin(),
     ...{ pop_start_date: "invalid" },
