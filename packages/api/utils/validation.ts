@@ -1,7 +1,8 @@
+import { ApplicationStep } from "../models/ApplicationStep";
 import { Clin } from "../models/Clin";
 import { FundingStep } from "../models/FundingStep";
 import { PortfolioStep } from "../models/PortfolioStep";
-import { version as uuidVersion, validate as uuidValidate } from "uuid";
+import { validate as uuidValidate, version as uuidVersion } from "uuid";
 
 /**
  * Check whether a given string is valid JSON.
