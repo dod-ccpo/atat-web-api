@@ -1,16 +1,18 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
+import { ApiSuccessResponse, ErrorResponse, ErrorStatusCode, SuccessStatusCode } from "../../utils/response";
 import { APPLICATION_STEP } from "../../models/PortfolioDraft";
 import { ApplicationStep } from "../../models/ApplicationStep";
+import { DATABASE_ERROR, NO_SUCH_APPLICATION_STEP, PATH_PARAMETER_REQUIRED_BUT_MISSING } from "../../utils/errors";
 import { dynamodbDocumentClient as client } from "../../utils/dynamodb";
+import { ErrorCodes } from "../../models/Error";
 import { GetCommand } from "@aws-sdk/lib-dynamodb";
 import { isPathParameterPresent, isValidUuidV4 } from "../../utils/validation";
-import {
-  DATABASE_ERROR,
-  NO_SUCH_PORTFOLIO_DRAFT,
-  NO_SUCH_APPLICATION_STEP,
-  PATH_VARIABLE_REQUIRED_BUT_MISSING,
-} from "../../utils/errors";
+
+// Note that API spec calls for 400 and not 404
+export const NO_SUCH_PORTFOLIO_DRAFT = new ErrorResponse(
+  { code: ErrorCodes.OTHER, message: "The given Portfolio Draft does not exist" },
+  ErrorStatusCode.BAD_REQUEST
+);
 
 /**
  * Gets the Application Step of the specified Portfolio Draft if it exists
@@ -20,7 +22,7 @@ import {
 export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   const portfolioDraftId = event.pathParameters?.portfolioDraftId;
   if (!isPathParameterPresent(portfolioDraftId)) {
-    return PATH_VARIABLE_REQUIRED_BUT_MISSING;
+    return PATH_PARAMETER_REQUIRED_BUT_MISSING;
   }
   if (!isValidUuidV4(portfolioDraftId)) {
     return NO_SUCH_PORTFOLIO_DRAFT;
