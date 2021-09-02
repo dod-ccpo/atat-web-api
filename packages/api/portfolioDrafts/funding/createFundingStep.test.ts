@@ -5,7 +5,7 @@ import { CloudServiceProvider } from "../../models/CloudServiceProvider";
 import { DynamoDBDocumentClient, UpdateCommand, UpdateCommandOutput } from "@aws-sdk/lib-dynamodb";
 import { FileMetadata, FileScanStatus } from "../../models/FileMetadata";
 import { FundingStep } from "../../models/FundingStep";
-import { handler, validateClin } from "./createFundingStep";
+import { validateFundingStepClins, handler, validateClin } from "./createFundingStep";
 import { isFundingStep } from "../../utils/validation";
 import { mockClient } from "aws-sdk-client-mock";
 import { v4 as uuidv4 } from "uuid";
@@ -42,6 +42,7 @@ it("should return generic Error if exception caught", async () => {
   expect(result.statusCode).toEqual(ErrorStatusCode.INTERNAL_SERVER_ERROR);
   expect(JSON.parse(result.body).code).toEqual(ErrorCodes.OTHER);
 });
+
 describe("Path parameter tests", function () {
   it("should require path param", async () => {
     const emptyRequest: APIGatewayProxyEvent = {} as any;
@@ -63,6 +64,7 @@ describe("Path parameter tests", function () {
     expect(JSON.parse(result.body).message).toMatch(/Portfolio Draft with the given ID does not exist/);
   });
 });
+
 describe("Request body tests", function () {
   it("should return error when request body is empty", async () => {
     const emptyRequest: APIGatewayProxyEvent = {
@@ -103,6 +105,7 @@ describe("Request body tests", function () {
     expect(JSON.parse(result.body).message).toMatch(/A valid request body must be provided/);
   });
 });
+
 describe("Successful operation tests", function () {
   it("should return funding step and http status code 201", async () => {
     expect(false).toBe(false);
@@ -215,6 +218,11 @@ describe("Clin validation tests", function () {
     };
     expect(validateClin(clinObligatedEqualToTotal)).toBe(true);
   });
+});
+
+it("should accept a Funding Step and validate all Clins contained therein", () => {
+  // TODO
+  expect(validateFundingStepClins(mockFundingStep())).toBe(true);
 });
 
 /**

@@ -20,6 +20,17 @@ import {
 } from "../../utils/validation";
 
 /**
+ * Accepts a Funding Step and performs input validation
+ * on all Clins contained therein.
+ * Returns a Clin-centric error map of three-element tuples.
+ *   | CLIN_NUMBER |---| PARAM_NAME |---| PARAM_VALUE |
+ * @returns an error map with input that failed validation?
+ */
+export function validateFundingStepClins(fs: FundingStep): boolean {
+  return isFundingStep(fs);
+}
+
+/**
  * Submits the Funding Step of the Portfolio Draft Wizard
  *
  * @param event - The POST request from API Gateway
