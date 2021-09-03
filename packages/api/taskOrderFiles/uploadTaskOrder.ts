@@ -1,7 +1,7 @@
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import * as parser from "lambda-multipart-parser";
-import { v4 as uuid } from "uuid";
+import { v4 as uuidv4 } from "uuid";
 import { ErrorCodes } from "../models/Error";
 import { FileMetadata, FileScanStatus } from "../models/FileMetadata";
 import { ApiSuccessResponse, ErrorResponse, ErrorStatusCode, SuccessStatusCode } from "../utils/response";
@@ -18,23 +18,20 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
   if (result.files.length !== 1) {
     return new ErrorResponse(
-      { code: ErrorCodes.INVALID_INPUT, message: "Expected exactly one file." },
+      { code: ErrorCodes.OTHER, message: "Expected exactly one file." },
       ErrorStatusCode.BAD_REQUEST
     );
   }
 
   const file = result.files[0];
   if (file.contentType !== "application/pdf") {
-    return new ErrorResponse(
-      { code: ErrorCodes.INVALID_INPUT, message: "Expected a PDF file" },
-      ErrorStatusCode.BAD_REQUEST
-    );
+    return new ErrorResponse({ code: ErrorCodes.OTHER, message: "Expected a PDF file" }, ErrorStatusCode.BAD_REQUEST);
   }
 
   try {
     return await uploadFile(file);
-  } catch (err) {
-    console.log("Unexpected error: " + err);
+  } catch (error) {
+    console.error("Unexpected error: " + error);
     return new ErrorResponse(
       { code: ErrorCodes.OTHER, message: "Unexpected error" },
       ErrorStatusCode.INTERNAL_SERVER_ERROR
@@ -44,7 +41,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
 async function uploadFile(file: parser.MultipartFile): Promise<APIGatewayProxyResult> {
   const client = new S3Client({});
-  const key = uuid();
+  const key = uuidv4();
   const command = new PutObjectCommand({
     Bucket: bucketName,
     Key: key,
