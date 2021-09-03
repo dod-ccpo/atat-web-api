@@ -72,6 +72,12 @@ export class AtatWebApiStack extends cdk.Stack {
       handlerPath: packageRoot() + "/api/portfolioDrafts/funding/getFundingStep.ts",
     });
 
+    const createApplicationStep = new ApiDynamoDBFunction(this, "CreateApplicationStep", {
+      table: table,
+      method: HttpMethod.POST,
+      handlerPath: packageRoot() + "/api/portfolioDrafts/application/createApplicationStep.ts",
+    });
+
     const getApplicationStep = new ApiDynamoDBFunction(this, "GetApplicationStep", {
       table: table,
       method: HttpMethod.GET,
@@ -124,9 +130,6 @@ export class AtatWebApiStack extends cdk.Stack {
         endpointConfigurationTypes: apigw.EndpointType.REGIONAL,
       },
     });
-    // TODO: getPortfolioDraft
-    // TODO: getApplicationStep
-    // TODO: createApplicationStep
     // TODO: submitPortfolioDraft
     this.addTaskOrderRoutes(props);
   }
