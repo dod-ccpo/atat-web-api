@@ -803,37 +803,41 @@ components:
                 pop_end_date: "2023-09-01"
     ApplicationStepEx:
       value:
-        - name: "Mock Application"
-          description: "The description of the Mock Application"
-          environments:
-            - name: "Cloud City"
-              operators:
-                - first_name: "Darth"
-                  last_name: "Vader"
-                  email: "iam@yourfather.com"
-                  access: "administrator"
-                - first_name: "Han"
-                  last_name: "Solo"
-                  email: "frozen@carbonite.com"
-                  access: "read_only"
-                - first_name: "Luke"
-                  last_name: "Skywalker"
-                  email: "lostmy@hand.com"
-                  access: "read_only"
-            - name: "Jabba's Palace"
-              operators:
-                - first_name: "Salacious B."
-                  last_name: "Crumb"
-                  email: "monkey@lizard.com"
-                  access: "administrator"
-                - first_name: "Han"
-                  last_name: "Solo"
-                  email: "frozen@carbonite.com"
-                  access: "read_only"
-                - first_name: "Boba"
-                  last_name: "Fett"
-                  email: "original@mandalorian.com"
-                  access: "read_only"       
+        applications:
+          - name: "Cloud City Evac Planner"
+            description: "Application for planning an emergency evacuation"
+            environments:
+              - name: "production"
+                operators:
+                  - first_name: "Darth"
+                    last_name: "Vader"
+                    email: "iam@yourfather.com"
+                    access: "administrator"
+                  - first_name: "Landonis"
+                    last_name: "Calrissian"
+                    email: "thegambler@cloudcity.com"
+                    access: "read_only"
+                  - first_name: "Luke"
+                    last_name: "Skywalker"
+                    email: "lostmy@hand.com"
+                    access: "read_only"
+          - name: "Jabba's Palace Expansion App"
+            description: "Planning application for palace expansion"
+            environments:
+              - name: "development"
+                operators:
+                  - first_name: "Salacious B."
+                    last_name: "Crumb"
+                    email: "monkey@lizard.com"
+                    access: "administrator"
+                  - first_name: "Han"
+                    last_name: "Solo"
+                    email: "frozen@carbonite.com"
+                    access: "read_only"
+                  - first_name: "Boba"
+                    last_name: "Fett"
+                    email: "original@mandalorian.com"
+                    access: "read_only"
 x-amazon-apigateway-request-validators:
   full-request-validator:
     validateRequestParameters: true
