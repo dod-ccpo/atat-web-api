@@ -79,6 +79,12 @@ export class AtatWebApiStack extends cdk.Stack {
       handlerPath: packageRoot() + "/api/portfolioDrafts/getPortfolioDraft.ts",
     });
 
+    const submitPortfolioDraft = new ApiDynamoDBFunction(this, "SubmitPortfolioDraft", {
+      table: table,
+      method: HttpMethod.POST,
+      handlerPath: packageRoot() + "/api/portfolioDrafts/submit/submitPortfolioDraft.ts",
+    });
+
     // All TODO functions will be pointed at this lambda function (in the atat_provisioning_wizard_api.yaml, search NotImplementedFunction)
     const notImplemented = new ApiDynamoDBFunction(this, "NotImplemented", {
       table: table,
@@ -116,7 +122,6 @@ export class AtatWebApiStack extends cdk.Stack {
     // TODO: getPortfolioDraft
     // TODO: getApplicationStep
     // TODO: createApplicationStep
-    // TODO: submitPortfolioDraft
     addTaskOrderRoutes(this);
   }
 }
