@@ -18,6 +18,14 @@ export const REQUEST_BODY_EMPTY = new ErrorResponse(
 );
 
 /**
+ * To be used when a request body is provided but must be empty
+ */
+export const REQUEST_BODY_NOT_EMPTY = new ErrorResponse(
+  { code: ErrorCodes.OTHER, message: "Request body must be empty" },
+  ErrorStatusCode.BAD_REQUEST
+);
+
+/**
  * To be used when a request body exists but is invalid
  * Could be invalid because:
  *  - request body is not of the expected Content-Type (for example, application/json, or application/pdf)
