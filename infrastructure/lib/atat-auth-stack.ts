@@ -10,6 +10,7 @@ export interface AtatAuthStackProps extends cdk.StackProps {
   ticketId?: string;
   adminsGroupName?: string;
   usersGroupName?: string;
+  removalPolicy?: cdk.RemovalPolicy;
 }
 
 export class AtatAuthStack extends cdk.Stack {
@@ -22,6 +23,9 @@ export class AtatAuthStack extends cdk.Stack {
       adminsGroupName: props.adminsGroupName ?? "atat-admins",
       usersGroupName: props.adminsGroupName ?? "atat-users",
       cognitoDomain: "atat-api-" + ticketId.toLowerCase(),
+      userPoolProps: {
+        removalPolicy: props?.removalPolicy,
+      },
       oidcIdps: [
         {
           providerName: props.providerName,

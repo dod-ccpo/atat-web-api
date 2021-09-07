@@ -10,16 +10,24 @@ const app = new cdk.App();
 if (process.env.CDK_NAG_ENABLED === "1") {
   cdk.Aspects.of(app).add(new NIST80053Checks({ verbose: true }));
 }
+// TODO: Dynamically set this based on whether this is a sandbox environment,
+// a dev environment, or something else. For now, destroy everything on delete.
+const removalPolicy = cdk.RemovalPolicy.DESTROY;
 
 // Ugly hack to quickly isolate deployments for developers.  To be improved/removed later.
 const ticketId = app.node.tryGetContext("TicketId") || "";
 const stacks = [];
-stacks.push(new AtatWebApiStack(app, ticketId + "AtatWebApiStack"));
+stacks.push(
+  new AtatWebApiStack(app, ticketId + "AtatWebApiStack", {
+    removalPolicy,
+  })
+);
 stacks.push(
   new AtatAuthStack(app, ticketId + "AtatAuthStack", {
     secretName: "auth/oidc/aad",
     providerName: "ATATDevAAD",
     ticketId,
+    removalPolicy,
   })
 );
 
