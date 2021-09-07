@@ -8,8 +8,12 @@ import { TaskOrderLifecycle } from "./constructs/task-order-lifecycle";
 import { HttpMethod } from "./http";
 import { packageRoot } from "./util";
 
+export interface AtatWebApiStackProps extends cdk.StackProps {
+  removalPolicy?: cdk.RemovalPolicy;
+}
+
 export class AtatWebApiStack extends cdk.Stack {
-  constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: cdk.Construct, id: string, props?: AtatWebApiStackProps) {
     super(scope, id, props);
 
     this.templateOptions.description = "Resources to support the ATAT application API";
@@ -20,6 +24,7 @@ export class AtatWebApiStack extends cdk.Stack {
       billingMode: dynamodb.BillingMode.PROVISIONED,
       readCapacity: 1,
       writeCapacity: 1,
+      removalPolicy: props?.removalPolicy,
     });
     const tableOutput = new cdk.CfnOutput(this, "TableName", {
       value: table.tableName,
@@ -122,25 +127,32 @@ export class AtatWebApiStack extends cdk.Stack {
     // TODO: getPortfolioDraft
     // TODO: getApplicationStep
     // TODO: createApplicationStep
-    addTaskOrderRoutes(this);
+    // TODO: submitPortfolioDraft
+    this.addTaskOrderRoutes(props);
   }
-}
-function addTaskOrderRoutes(scope: cdk.Stack) {
-  const taskOrderManagement = new TaskOrderLifecycle(scope, "TaskOrders");
-  const uploadTaskOrder = new ApiS3Function(scope, "UploadTaskOrder", {
-    bucket: taskOrderManagement.pendingBucket,
-    method: HttpMethod.POST,
-    handlerPath: packageRoot() + "/api/taskOrderFiles/uploadTaskOrder.ts",
-    functionPropsOverride: {
-      memorySize: 256,
-    },
-  });
-  const deleteTaskOrder = new ApiS3Function(scope, "DeleteTaskOrder", {
-    bucket: taskOrderManagement.acceptedBucket,
-    method: HttpMethod.DELETE,
-    handlerPath: packageRoot() + "/api/taskOrderFiles/deleteTaskOrder.ts",
-  });
 
-  // TODO: getTaskOrder (for metadata)
-  // TODO: downloadTaskOrder
+  private addTaskOrderRoutes(props?: AtatWebApiStackProps) {
+    const taskOrderManagement = new TaskOrderLifecycle(this, "TaskOrders", {
+      bucketProps: {
+        removalPolicy: props?.removalPolicy,
+        autoDeleteObjects: props?.removalPolicy === cdk.RemovalPolicy.DESTROY,
+      },
+    });
+    const uploadTaskOrder = new ApiS3Function(this, "UploadTaskOrder", {
+      bucket: taskOrderManagement.pendingBucket,
+      method: HttpMethod.POST,
+      handlerPath: packageRoot() + "/api/taskOrderFiles/uploadTaskOrder.ts",
+      functionPropsOverride: {
+        memorySize: 256,
+      },
+    });
+    const deleteTaskOrder = new ApiS3Function(this, "DeleteTaskOrder", {
+      bucket: taskOrderManagement.acceptedBucket,
+      method: HttpMethod.DELETE,
+      handlerPath: packageRoot() + "/api/taskOrderFiles/deleteTaskOrder.ts",
+    });
+
+    // TODO: getTaskOrder (for metadata)
+    // TODO: downloadTaskOrder
+  }
 }

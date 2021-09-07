@@ -1,33 +1,17 @@
-import { GetCommand, GetCommandOutput } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { ErrorCodes } from "../../models/Error";
+import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
+import { dynamodbDocumentClient as client } from "../../utils/dynamodb";
+import { GetCommand } from "@aws-sdk/lib-dynamodb";
+import { isPathParameterPresent, isValidUuidV4 } from "../../utils/validation";
+import { NO_SUCH_PORTFOLIO } from "./createPortfolioStep";
 import { PORTFOLIO_STEP } from "../../models/PortfolioDraft";
 import { PortfolioStep } from "../../models/PortfolioStep";
-import { dynamodbDocumentClient as client } from "../../utils/dynamodb";
-import { ApiSuccessResponse, ErrorResponse, ErrorStatusCode, SuccessStatusCode } from "../../utils/response";
-
-const TABLE_NAME = process.env.ATAT_TABLE_NAME ?? "";
-const NO_SUCH_PORTFOLIO_STEP = new ErrorResponse(
-  { code: ErrorCodes.INVALID_INPUT, message: "Portfolio Step not found for this Portfolio Draft" },
-  ErrorStatusCode.NOT_FOUND
-);
-const NO_SUCH_PORTFOLIO = new ErrorResponse(
-  { code: ErrorCodes.INVALID_INPUT, message: "The given Portfolio Draft does not exist" },
-  ErrorStatusCode.NOT_FOUND
-);
-
-async function getPortfolioStepCommand(table: string, portfolioDraftId: string): Promise<GetCommandOutput> {
-  const result = await client.send(
-    new GetCommand({
-      TableName: table,
-      Key: {
-        id: portfolioDraftId,
-      },
-      ProjectionExpression: PORTFOLIO_STEP,
-    })
-  );
-  return result;
-}
+import {
+  DATABASE_ERROR,
+  NO_SUCH_PORTFOLIO_DRAFT,
+  NO_SUCH_PORTFOLIO_STEP,
+  PATH_PARAMETER_REQUIRED_BUT_MISSING,
+} from "../../utils/errors";
 
 /**
  * Gets the Portfolio Step of the Portfolio Draft Wizard
@@ -36,25 +20,32 @@ async function getPortfolioStepCommand(table: string, portfolioDraftId: string):
  */
 export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   const portfolioDraftId = event.pathParameters?.portfolioDraftId;
-
-  if (!portfolioDraftId) {
-    return NO_SUCH_PORTFOLIO;
+  if (!isPathParameterPresent(portfolioDraftId)) {
+    return PATH_PARAMETER_REQUIRED_BUT_MISSING;
+  }
+  if (!isValidUuidV4(portfolioDraftId)) {
+    return NO_SUCH_PORTFOLIO_DRAFT;
   }
 
   try {
-    const data = await getPortfolioStepCommand(TABLE_NAME, portfolioDraftId);
-    if (!data.Item) {
+    const result = await client.send(
+      new GetCommand({
+        TableName: process.env.ATAT_TABLE_NAME ?? "",
+        Key: {
+          id: portfolioDraftId,
+        },
+        ProjectionExpression: PORTFOLIO_STEP,
+      })
+    );
+    if (!result.Item) {
       return NO_SUCH_PORTFOLIO;
     }
-    if (!data.Item?.portfolio_step) {
+    if (!result.Item?.portfolio_step) {
       return NO_SUCH_PORTFOLIO_STEP;
     }
-    return new ApiSuccessResponse<PortfolioStep>(data.Item.portfolio_step as PortfolioStep, SuccessStatusCode.OK);
+    return new ApiSuccessResponse<PortfolioStep>(result.Item.portfolio_step as PortfolioStep, SuccessStatusCode.OK);
   } catch (error) {
-    console.log("Database error (" + error.name + "): " + error);
-    return new ErrorResponse(
-      { code: ErrorCodes.OTHER, message: "Database error" },
-      ErrorStatusCode.INTERNAL_SERVER_ERROR
-    );
+    console.error("Database error: " + error);
+    return DATABASE_ERROR;
   }
 }

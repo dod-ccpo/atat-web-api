@@ -99,6 +99,11 @@ export interface CognitoAuthenticationProps {
    * The list of configurations for upstream OIDC IdPs.
    */
   oidcIdps?: OIDCIdentityProviderProps[];
+
+  /**
+   * Props for overriding the User Pool attributes.
+   */
+  userPoolProps?: cognito.UserPoolProps;
 }
 
 function samlAttributeMapping(props: CognitoAuthenticationProps): { [key: string]: string } {
@@ -168,6 +173,7 @@ export class CognitoAuthentication extends cdk.Construct {
     });
 
     this.userPool = new cognito.UserPool(this, "Pool", {
+      ...(props?.userPoolProps ?? {}),
       signInAliases: {},
       lambdaTriggers: { preTokenGeneration: this.preTokenGenerationFunction },
     });
