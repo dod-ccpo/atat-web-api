@@ -33,11 +33,11 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
   if (!isPathParameterPresent(portfolioDraftId)) {
     return NO_SUCH_PORTFOLIO;
   }
-  /*
+
   try {
     const result = await submitPortfolioDraftCommand(TABLE_NAME, portfolioDraftId);
-    const formatResult: PortfolioDraft = result;
-    return new ApiSuccessResponse<PortfolioDraft>(formatResult, SuccessStatusCode.ACCEPTED);
+
+    return new ApiSuccessResponse(result.Attributes as PortfolioDraft, SuccessStatusCode.ACCEPTED);
   } catch (error) {
     if (error.name === "ConditionalCheckFailedException") {
       return NO_SUCH_PORTFOLIO;
@@ -47,15 +47,6 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
       { code: ErrorCodes.OTHER, message: "Database error: " + error.name },
       ErrorStatusCode.INTERNAL_SERVER_ERROR
     );
-  } */
-  // return new ApiSuccessResponse<PortfolioStep>(result, SuccessStatusCode.ACCEPTED);
-  try {
-    const result = await submitPortfolioDraftCommand(TABLE_NAME, portfolioDraftId);
-
-    return new ApiSuccessResponse(result.Attributes as PortfolioDraft, SuccessStatusCode.ACCEPTED);
-  } catch (err) {
-    console.log("Database error: " + err);
-    return DATABASE_ERROR;
   }
 }
 export async function submitPortfolioDraftCommand(
