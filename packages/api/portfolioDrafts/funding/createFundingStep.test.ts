@@ -130,7 +130,7 @@ describe("Successful operation tests", function () {
   });
 });
 
-describe("Clin validation tests", function () {
+describe("Individual Clin validation tests", function () {
   it("should throw error if input does not look like a Clin", () => {
     expect(() => {
       validateClin({});
@@ -220,10 +220,12 @@ describe("Clin validation tests", function () {
   });
 });
 
-it("should accept a Funding Step and validate all Clins contained therein", () => {
-  // TODO
-  // expect(validateFundingStepClins(mockFundingStep())).toBe(true);
-  validateFundingStepClins(mockFundingStep());
+describe("All Clins in a Funding Step validation tests", function () {
+  it("should accept a Funding Step and validate all Clins contained therein", () => {
+    // TODO
+    // expect(validateFundingStepClins(mockFundingStep())).toBe(true);
+    validateFundingStepClins(mockFundingStep());
+  });
 });
 
 /**
@@ -233,10 +235,10 @@ it("should accept a Funding Step and validate all Clins contained therein", () =
 function mockFundingStep(): FundingStep {
   const mockTaskOrderFile: FileMetadata = {
     created_at: "2021-08-03T16:21:07.978Z",
-    id: "1234",
-    name: "Mock task order file",
-    size: 100,
-    status: FileScanStatus.PENDING,
+    id: "b91db32f-40fa-4225-9885-b032f0d229fe",
+    name: "TO_12345678910.pdf",
+    size: 694331,
+    status: FileScanStatus.ACCEPTED,
     updated_at: "2021-08-03T16:21:07.978Z",
   };
   return {
