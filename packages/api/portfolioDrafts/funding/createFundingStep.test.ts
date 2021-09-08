@@ -5,7 +5,7 @@ import { CloudServiceProvider } from "../../models/CloudServiceProvider";
 import { DynamoDBDocumentClient, UpdateCommand, UpdateCommandOutput } from "@aws-sdk/lib-dynamodb";
 import { FileMetadata, FileScanStatus } from "../../models/FileMetadata";
 import { FundingStep } from "../../models/FundingStep";
-import { validateFundingStepClins, handler, validateClin } from "./createFundingStep";
+import { validateFundingStepClins, handler, validateClin, verror } from "./createFundingStep";
 import { isFundingStep } from "../../utils/validation";
 import { mockClient } from "aws-sdk-client-mock";
 import { v4 as uuidv4 } from "uuid";
@@ -131,83 +131,116 @@ describe("Successful operation tests", function () {
 });
 
 describe("Individual Clin validation tests", function () {
+  const errors = Array<typeof verror>();
   it("should throw error if input does not look like a Clin", () => {
     expect(() => {
       validateClin({});
     }).toThrow(Error("Input must be a Clin object"));
   });
   it("should return true if given Clin is valid (passes all input validation)", () => {
-    expect(validateClin(mockClin())).toBe(true);
+    expect(validateClin(mockClin())).toStrictEqual([]);
+    expect(validateClin(mockClin())).toStrictEqual(errors);
   });
   it("should return false if given Clin has invalid pop start date", () => {
     const clinInvalidStartDate: Clin = {
       ...mockClin(),
       ...{ pop_start_date: "invalid" },
     };
-    expect(validateClin(clinInvalidStartDate)).toBe(false);
+    expect(validateClin(clinInvalidStartDate)).toStrictEqual([
+      ["0001", "pop_start_date", "invalid", "start date must be a valid date"],
+    ]);
   });
   it("should return false if given Clin has invalid pop end date", () => {
     const clinInvalidEndDate: Clin = {
       ...mockClin(),
       ...{ pop_end_date: "invalid" },
     };
-    expect(validateClin(clinInvalidEndDate)).toBe(false);
+    expect(validateClin(clinInvalidEndDate)).toStrictEqual([
+      ["0001", "pop_end_date", "invalid", "end date must be a valid date"],
+    ]);
   });
   it("should return false if given Clin has nonsensical pop dates (start>end)", () => {
     const clinStartAfterEnd: Clin = {
       ...mockClin(),
       ...{ pop_start_date: "2015-10-21", pop_end_date: "1955-11-05" },
     };
-    expect(validateClin(clinStartAfterEnd)).toBe(false);
+    expect(validateClin(clinStartAfterEnd)).toStrictEqual([
+      ["0001", "pop_start_date", "2015-10-21", "start date must occur before end date"],
+      ["0001", "pop_end_date", "1955-11-05", "start date must occur before end date"],
+      ["0001", "pop_end_date", "1955-11-05", "end date must be in the future"],
+    ]);
   });
   it("should return false if given Clin has nonsensical pop dates (start=end)", () => {
     const clinStartEqualsEnd: Clin = {
       ...mockClin(),
       ...{ pop_start_date: "1993-02-02", pop_end_date: "1993-02-02" },
     };
-    expect(validateClin(clinStartEqualsEnd)).toBe(false);
+    expect(validateClin(clinStartEqualsEnd)).toStrictEqual([
+      ["0001", "pop_start_date", "1993-02-02", "start date must occur before end date"],
+      ["0001", "pop_end_date", "1993-02-02", "start date must occur before end date"],
+      ["0001", "pop_end_date", "1993-02-02", "end date must be in the future"],
+    ]);
   });
   it("should return false if given Clin has nonsensical pop dates (now>end)", () => {
     const clinPopExpired: Clin = {
       ...mockClin(),
       ...{ pop_end_date: "2021-08-26" },
     };
-    expect(validateClin(clinPopExpired)).toBe(false);
+    expect(validateClin(clinPopExpired)).toStrictEqual([
+      ["0001", "pop_start_date", "2021-09-01", "start date must occur before end date"],
+      ["0001", "pop_end_date", "2021-08-26", "start date must occur before end date"],
+      ["0001", "pop_end_date", "2021-08-26", "end date must be in the future"],
+    ]);
   });
   it("should return false if given Clin has nonsensical funding values (total<0)", () => {
     const clinTotalLessThanZero: Clin = {
       ...mockClin(),
       ...{ total_clin_value: -1 },
     };
-    expect(validateClin(clinTotalLessThanZero)).toBe(false);
+    expect(validateClin(clinTotalLessThanZero)).toStrictEqual([
+      ["0001", "total_clin_value", "-1", "total clin value must be greater than zero"],
+      ["0001", "obligated_funds", "10000", "total clin value must be greater than obligated funds"],
+      ["0001", "total_clin_value", "-1", "total clin value must be greater than obligated funds"],
+    ]);
   });
   it("should return false if given Clin has nonsensical funding values (total=0)", () => {
     const clinTotalIsZero: Clin = {
       ...mockClin(),
       ...{ total_clin_value: 0 },
     };
-    expect(validateClin(clinTotalIsZero)).toBe(false);
+    expect(validateClin(clinTotalIsZero)).toStrictEqual([
+      ["0001", "total_clin_value", "0", "total clin value must be greater than zero"],
+      ["0001", "obligated_funds", "10000", "total clin value must be greater than obligated funds"],
+      ["0001", "total_clin_value", "0", "total clin value must be greater than obligated funds"],
+    ]);
   });
   it("should return false if given Clin has nonsensical funding values (obligated<0)", () => {
     const clinObligatedLessThanZero: Clin = {
       ...mockClin(),
       ...{ obligated_funds: -1 },
     };
-    expect(validateClin(clinObligatedLessThanZero)).toBe(false);
+    expect(validateClin(clinObligatedLessThanZero)).toStrictEqual([
+      ["0001", "obligated_funds", "-1", "obligated funds must be greater than zero"],
+    ]);
   });
   it("should return false if given Clin has nonsensical funding values (obligated=0)", () => {
     const clinObligatedIsZero: Clin = {
       ...mockClin(),
       ...{ obligated_funds: 0 },
     };
-    expect(validateClin(clinObligatedIsZero)).toBe(false);
+    expect(validateClin(clinObligatedIsZero)).toStrictEqual([
+      ["0001", "obligated_funds", "0", "obligated funds must be greater than zero"],
+    ]);
   });
   it("should return false if given Clin has nonsensical funding values (obligated>total)", () => {
     const clinObligatedGreaterThanTotal: Clin = {
       ...mockClin(),
       ...{ obligated_funds: 2, total_clin_value: 1 },
     };
-    expect(validateClin(clinObligatedGreaterThanTotal)).toBe(false);
+    expect(validateClin(clinObligatedGreaterThanTotal)).toStrictEqual([
+      ["0001", "obligated_funds", "2", "total clin value must be greater than obligated funds"],
+      ["0001", "total_clin_value", "1", "total clin value must be greater than obligated funds"],
+    ]);
   });
   // TODO: Verification of this business rule is pending.
   // Allowing obligated to equal total for now.
@@ -216,15 +249,29 @@ describe("Individual Clin validation tests", function () {
       ...mockClin(),
       ...{ obligated_funds: 1, total_clin_value: 1 },
     };
-    expect(validateClin(clinObligatedEqualToTotal)).toBe(true);
+    expect(validateClin(clinObligatedEqualToTotal)).toStrictEqual([]);
+    expect(validateClin(clinObligatedEqualToTotal)).toStrictEqual(errors);
   });
 });
 
 describe("All Clins in a Funding Step validation tests", function () {
   it("should accept a Funding Step and validate all Clins contained therein", () => {
-    // TODO
-    // expect(validateFundingStepClins(mockFundingStep())).toBe(true);
-    validateFundingStepClins(mockFundingStep());
+    const errors = validateFundingStepClins(mockFundingStep());
+    expect(errors.length).toEqual(9);
+    for (const error of errors) {
+      expect(error[0].startsWith("BAD")).toBe(true);
+    }
+    expect(errors).toStrictEqual([
+      ["BAD0006", "obligated_funds", "2", "total clin value must be greater than obligated funds"],
+      ["BAD0006", "total_clin_value", "1", "total clin value must be greater than obligated funds"],
+      ["BAD0005", "total_clin_value", "0", "total clin value must be greater than zero"],
+      ["BAD0005", "obligated_funds", "0", "obligated funds must be greater than zero"],
+      ["BAD0004", "pop_end_date", "2020-09-01", "end date must be in the future"],
+      ["BAD0003", "pop_start_date", "2022-09-01", "start date must occur before end date"],
+      ["BAD0003", "pop_end_date", "2021-09-01", "start date must occur before end date"],
+      ["BAD0003", "pop_end_date", "2021-09-01", "end date must be in the future"],
+      ["BAD0002", "pop_end_date", "2022-13-01", "end date must be a valid date"],
+    ]);
   });
 });
 

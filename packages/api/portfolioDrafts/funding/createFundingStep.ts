@@ -1,6 +1,7 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
 import { dynamodbDocumentClient as client } from "../../utils/dynamodb";
+import { FUNDING_STEP } from "../../models/PortfolioDraft";
 import { FundingStep } from "../../models/FundingStep";
 import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import {
@@ -20,14 +21,26 @@ import {
 } from "../../utils/validation";
 
 /**
+ * Validation error tuple
+ * verror = ["clin_number", "param_name", "param_value", "message"];
+ */
+export let verror: [string, string, string, string];
+
+/**
  * Accepts a Funding Step and performs input validation
  * on all Clins contained therein.
- * Returns a Clin-centric error map of three-element tuples.
- *   | CLIN_NUMBER |---| PARAM_NAME |---| PARAM_VALUE |
- * @returns an error map with input that failed validation?
+ * @returns a collection of four-element tuples containing clin number, property names and values that failed input validation, and a specific message
  */
-export function validateFundingStepClins(fs: FundingStep): boolean {
-  return isFundingStep(fs);
+export function validateFundingStepClins(fs: FundingStep): Array<typeof verror> {
+  const clins = fs.clins.values();
+  let errorAccumulator = Array<typeof verror>();
+  for (const clin of clins) {
+    const errors = validateClin(clin);
+    if (errors.length) {
+      errorAccumulator = [...errors, ...errorAccumulator];
+    }
+  }
+  return errorAccumulator;
 }
 
 /**
@@ -54,14 +67,11 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
     return REQUEST_BODY_INVALID;
   }
   const fundingStep: FundingStep = requestBody;
-  // const clins = fundingStep.clins.values();
-  // for (const clin of clins) {
-  //   if (!validateClin(clin)) {
-  //     // TODO
-  //     console.warn("This clin failed input validation: " + clin.clin_number);
-  //     return createValidationErrorResponse({ name: "value" });
-  //   }
-  // }
+  const errors: Array<typeof verror> = validateFundingStepClins(fundingStep);
+  if (errors.length) {
+    // TODO
+    // createValidationErrorResponse()
+  }
   try {
     await client.send(
       new UpdateCommand({
@@ -72,7 +82,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
         UpdateExpression: "set #stepKey = :step, #updateAtKey = :now",
         ExpressionAttributeNames: {
           // values are JSON keys
-          "#stepKey": "funding_step",
+          "#stepKey": FUNDING_STEP,
           "#updateAtKey": "updated_at",
         },
         ExpressionAttributeValues: {
@@ -114,33 +124,66 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
 /**
  * Validates the given clin object
+ * Returns a Clin-centric array of tuples representing validation errors.
  * @param clin an object that looks like a Clin
- * @returns an error map containing property names and values that failed input validation
+ * @returns a collection of four-element tuples containing clin number, property names and values that failed input validation, and a specific message
  */
-export function validateClin(clin: unknown): boolean {
+export function validateClin(clin: unknown): Array<typeof verror> {
   if (!isClin(clin)) {
     throw Error("Input must be a Clin object");
   }
+  const errors = Array<typeof verror>();
   if (!isValidDate(clin.pop_start_date)) {
-    return false;
+    verror = [clin.clin_number, "pop_start_date", clin.pop_start_date, "start date must be a valid date"];
+    errors.push(verror);
   }
   if (!isValidDate(clin.pop_end_date)) {
-    return false;
+    verror = [clin.clin_number, "pop_end_date", clin.pop_end_date, "end date must be a valid date"];
+    errors.push(verror);
   }
   if (new Date(clin.pop_start_date) >= new Date(clin.pop_end_date)) {
-    return false;
+    verror = [clin.clin_number, "pop_start_date", clin.pop_start_date, "start date must occur before end date"];
+    errors.push(verror);
+    verror = [clin.clin_number, "pop_end_date", clin.pop_end_date, "start date must occur before end date"];
+    errors.push(verror);
   }
   if (new Date() >= new Date(clin.pop_end_date)) {
-    return false;
+    verror = [clin.clin_number, "pop_end_date", clin.pop_end_date, "end date must be in the future"];
+    errors.push(verror);
   }
   if (clin.total_clin_value <= 0) {
-    return false;
+    verror = [
+      clin.clin_number,
+      "total_clin_value",
+      clin.total_clin_value.toString(),
+      "total clin value must be greater than zero",
+    ];
+    errors.push(verror);
   }
   if (clin.obligated_funds <= 0) {
-    return false;
+    verror = [
+      clin.clin_number,
+      "obligated_funds",
+      clin.obligated_funds.toString(),
+      "obligated funds must be greater than zero",
+    ];
+    errors.push(verror);
   }
   if (clin.obligated_funds > clin.total_clin_value) {
-    return false;
+    verror = [
+      clin.clin_number,
+      "obligated_funds",
+      clin.obligated_funds.toString(),
+      "total clin value must be greater than obligated funds",
+    ];
+    errors.push(verror);
+    verror = [
+      clin.clin_number,
+      "total_clin_value",
+      clin.total_clin_value.toString(),
+      "total clin value must be greater than obligated funds",
+    ];
+    errors.push(verror);
   }
-  return true;
+  return errors;
 }
