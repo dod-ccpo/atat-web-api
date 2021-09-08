@@ -14,6 +14,7 @@ import {
   NO_SUCH_PORTFOLIO_DRAFT,
   REQUEST_BODY_NOT_EMPTY,
   PORTFOLIO_ALREADY_SUBMITTED,
+  PATH_PARAMETER_REQUIRED_BUT_MISSING,
 } from "../../utils/errors";
 import { PortfolioDraft } from "../../models/PortfolioDraft";
 import { v4 as uuidv4 } from "uuid";
@@ -33,7 +34,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
   const portfolioDraftId = event.pathParameters?.portfolioDraftId;
 
   if (!isPathParameterPresent(portfolioDraftId)) {
-    return PORTFOLIO_ALREADY_SUBMITTED;
+    return PATH_PARAMETER_REQUIRED_BUT_MISSING;
   }
 
   try {
@@ -61,7 +62,6 @@ export async function submitPortfolioDraftCommand(
   const dynamodb = new DynamoDBClient({});
   const ddb = DynamoDBDocumentClient.from(dynamodb);
   const now = new Date().toISOString();
-  // const submitId = uuidv4();
   const result = await ddb.send(
     new UpdateCommand({
       TableName: table,
