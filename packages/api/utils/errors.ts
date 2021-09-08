@@ -95,3 +95,10 @@ export const NOT_IMPLEMENTED = new ErrorResponse(
   { code: ErrorCodes.INVALID_INPUT, message: "Not implemented" },
   ErrorStatusCode.NOT_FOUND
 );
+/**
+ * To be used when a function has not been implemented
+ */
+export const PORTFOLIO_ALREADY_SUBMITTED = new ErrorResponse(
+  { code: ErrorCodes.OTHER, message: "Portfolio Draft with the given ID has already been submitted" },
+  ErrorStatusCode.BAD_REQUEST
+);
