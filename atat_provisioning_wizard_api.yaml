@@ -557,10 +557,10 @@ components:
               type: string
               description: CSP Provisioning Status
               enum:
-                - "not_started"
-                - "in_progress"
-                - "complete"
-                - "failed"
+                - "NOT_STARTED"
+                - "IN_PROGRESS"
+                - "COMPLETE"
+                - "FAILED"
     Error:
       type: object
       description: Generic error model
@@ -735,15 +735,15 @@ components:
     PortfolioDraftSummaryEx:
       value:
         - id: "dc2bbee6-8cdb-477e-a363-f9f1593a0a9b"
-          status: "not_started"
+          status: "NOT_STARTED"
           created_at: "2021-08-03T16:19:51.686Z"
           updated_at: "2021-08-03T16:19:51.686Z"
         - id: "c3e8c444-a971-4515-bc43-3cdfef072ccc"
-          status: "in_progress"
+          status: "IN_PROGRESS"
           created_at: "2021-08-03T16:19:24.362Z"
           updated_at: "2021-08-03T16:19:24.362Z"
         - id: "3f44ef42-2322-4a42-a381-6770e18eceba"
-          status: "complete"
+          status: "COMPLETED"
           created_at: "2021-08-03T16:21:07.978Z"
           updated_at: "2021-08-03T16:21:07.978Z"
     PortfolioDraftEx:

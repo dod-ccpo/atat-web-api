@@ -27,7 +27,7 @@ describe("Dynamodb mock validation", function () {
         dod_components: [Array],
       },
       num_portfolio_managers: 0,
-      status: "not_started",
+      status: "NOT_STARTED",
       id: "595c31d3-190c-42c3-a9b6-77325fa5ed38",
     };
 
