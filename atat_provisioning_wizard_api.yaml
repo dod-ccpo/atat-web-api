@@ -767,56 +767,78 @@ components:
           - "jane.manager@example.com"
     FundingStepEx:
       value:
-        - task_order_number: "12345678910"
-          task_order_file:
-            id: "1234"
-            created_at: "2021-08-03T16:21:07.978Z"
-            updated_at: "2021-08-03T16:21:07.978Z"
-            size: 100
-            name: "Mock task order file"
-            status: "pending"
-          csp: 
-            - "aws"
-          clins: 
-            - clin_number: "0001"
-              idiq_clin: "1234"
-              total_clin_value: 200000
-              obligated_funds: 10000
-              pop_start_date: "2021-09-01"
-              pop_end_date: "2022-09-01"
+        task_orders:
+          - task_order_number: "12345678910"
+            task_order_file:
+              id: "b91db32f-40fa-4225-9885-b032f0d229fe"
+              created_at: "2021-08-03T16:21:07.978Z"
+              updated_at: "2021-08-03T16:21:07.978Z"
+              size: 694331
+              name: "TO_12345678910.pdf"
+              status: "accepted"
+            csp:
+              - "aws"
+            clins:
+              - clin_number: "0001"
+                idiq_clin: "1234"
+                total_clin_value: 200000
+                obligated_funds: 10000
+                pop_start_date: "2021-09-01"
+                pop_end_date: "2022-09-01"
+          - task_order_number: "98765432101"
+            task_order_file:
+              id: "824f7489-cabe-4c16-b41f-2eb196526995"
+              created_at: "2021-09-07T12:48:11.387Z"
+              updated_at: "2021-09-07T12:48:11.387Z"
+              size: 2945459
+              name: "TaskOrder_98765432101.pdf"
+              status: "pending"
+            csp:
+              - "azure"
+            clins:
+              - clin_number: "0002"
+                idiq_clin: "1234"
+                total_clin_value: 500000
+                obligated_funds: 20000
+                pop_start_date: "2022-09-01"
+                pop_end_date: "2023-09-01"
     ApplicationStepEx:
       value:
-        - name: "Mock Application"
-          description: "The description of the Mock Application"
-          environments:
-            - name: "Cloud City"
-              operators:
-                - first_name: "Darth"
-                  last_name: "Vader"
-                  email: "iam@yourfather.com"
-                  access: "administrator"
-                - first_name: "Han"
-                  last_name: "Solo"
-                  email: "frozen@carbonite.com"
-                  access: "read_only"
-                - first_name: "Luke"
-                  last_name: "Skywalker"
-                  email: "lostmy@hand.com"
-                  access: "read_only"
-            - name: "Jabba's Palace"
-              operators:
-                - first_name: "Salacious B."
-                  last_name: "Crumb"
-                  email: "monkey@lizard.com"
-                  access: "administrator"
-                - first_name: "Han"
-                  last_name: "Solo"
-                  email: "frozen@carbonite.com"
-                  access: "read_only"
-                - first_name: "Boba"
-                  last_name: "Fett"
-                  email: "original@mandalorian.com"
-                  access: "read_only"       
+        applications:
+          - name: "Cloud City Evac Planner"
+            description: "Application for planning an emergency evacuation"
+            environments:
+              - name: "production"
+                operators:
+                  - first_name: "Darth"
+                    last_name: "Vader"
+                    email: "iam@yourfather.com"
+                    access: "administrator"
+                  - first_name: "Landonis"
+                    last_name: "Calrissian"
+                    email: "thegambler@cloudcity.com"
+                    access: "read_only"
+                  - first_name: "Luke"
+                    last_name: "Skywalker"
+                    email: "lostmy@hand.com"
+                    access: "read_only"
+          - name: "Jabba's Palace Expansion App"
+            description: "Planning application for palace expansion"
+            environments:
+              - name: "development"
+                operators:
+                  - first_name: "Salacious B."
+                    last_name: "Crumb"
+                    email: "monkey@lizard.com"
+                    access: "administrator"
+                  - first_name: "Han"
+                    last_name: "Solo"
+                    email: "frozen@carbonite.com"
+                    access: "read_only"
+                  - first_name: "Boba"
+                    last_name: "Fett"
+                    email: "original@mandalorian.com"
+                    access: "read_only"
 x-amazon-apigateway-request-validators:
   full-request-validator:
     validateRequestParameters: true
