@@ -9,6 +9,5 @@ export interface Error {
 }
 
 export interface ValidationError extends Error {
-  code: ErrorCode.INVALID_INPUT;
-  errorMap: Record<string, unknown>;
+  error_map: Record<string, unknown>;
 }
