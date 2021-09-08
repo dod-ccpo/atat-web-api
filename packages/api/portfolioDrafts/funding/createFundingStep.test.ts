@@ -222,7 +222,8 @@ describe("Clin validation tests", function () {
 
 it("should accept a Funding Step and validate all Clins contained therein", () => {
   // TODO
-  expect(validateFundingStepClins(mockFundingStep())).toBe(true);
+  // expect(validateFundingStepClins(mockFundingStep())).toBe(true);
+  validateFundingStepClins(mockFundingStep());
 });
 
 /**
@@ -242,7 +243,14 @@ function mockFundingStep(): FundingStep {
     task_order_number: "12345678910",
     task_order_file: mockTaskOrderFile,
     csp: CloudServiceProvider.AWS,
-    clins: [mockClin()],
+    clins: [
+      mockClin(),
+      mockClinInvalidDates(),
+      mockClinStartAfterEnd(),
+      mockClinAlreadyEnded(),
+      mockClinZeroFunds(),
+      mockClinObligatedGreaterThanTotal(),
+    ],
   };
 }
 
@@ -258,5 +266,81 @@ function mockClin(): Clin {
     pop_end_date: "2022-09-01",
     pop_start_date: "2021-09-01",
     total_clin_value: 200000,
+  };
+}
+/**
+ * Returns a static clin containing bad inputs
+ * - invalid start and end dates
+ * @returns a complete Clin with values that should cause validation errors
+ */
+function mockClinInvalidDates(): Clin {
+  return {
+    clin_number: "BAD0002",
+    idiq_clin: "1234",
+    obligated_funds: 10000,
+    pop_end_date: "2022-13-01",
+    pop_start_date: "2021-02-30",
+    total_clin_value: 200000,
+  };
+}
+/**
+ * Returns a static clin containing bad inputs
+ * - start date is after the end date
+ * @returns a complete Clin with values that should cause validation errors
+ */
+function mockClinStartAfterEnd(): Clin {
+  return {
+    clin_number: "BAD0003",
+    idiq_clin: "1234",
+    obligated_funds: 10000,
+    pop_end_date: "2021-09-01",
+    pop_start_date: "2022-09-01",
+    total_clin_value: 200000,
+  };
+}
+/**
+ * Returns a static clin containing bad inputs
+ * - end date is in the past
+ * @returns a complete Clin with values that should cause validation errors
+ */
+function mockClinAlreadyEnded(): Clin {
+  return {
+    clin_number: "BAD0004",
+    idiq_clin: "1234",
+    obligated_funds: 10000,
+    pop_end_date: "2020-09-01",
+    pop_start_date: "2019-09-01",
+    total_clin_value: 200000,
+  };
+}
+/**
+ * Returns a static clin containing bad inputs
+ * - obligated funds is zero
+ * - total clin value is zero
+ * @returns a complete Clin with values that should cause validation errors
+ */
+function mockClinZeroFunds(): Clin {
+  return {
+    clin_number: "BAD0005",
+    idiq_clin: "1234",
+    obligated_funds: 0,
+    pop_end_date: "2022-09-01",
+    pop_start_date: "2021-09-01",
+    total_clin_value: 0,
+  };
+}
+/**
+ * Returns a static clin containing bad inputs
+ * - obligated funds is greater than the total clin value
+ * @returns a complete Clin with values that should cause validation errors
+ */
+function mockClinObligatedGreaterThanTotal(): Clin {
+  return {
+    clin_number: "BAD0006",
+    idiq_clin: "1234",
+    obligated_funds: 2,
+    pop_end_date: "2022-09-01",
+    pop_start_date: "2021-09-01",
+    total_clin_value: 1,
   };
 }
