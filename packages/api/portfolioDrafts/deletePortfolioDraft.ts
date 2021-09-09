@@ -1,8 +1,7 @@
 import { DeleteCommand, DeleteCommandInput } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { ErrorCodes } from "../models/Error";
 import { dynamodbClient as client } from "../utils/dynamodb";
-import { ErrorResponse, ErrorStatusCode, NoContentResponse } from "../utils/response";
+import { ErrorStatusCode, NoContentResponse, OtherErrorResponse } from "../utils/response";
 
 const TABLE_NAME = process.env.ATAT_TABLE_NAME;
 
@@ -15,10 +14,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
   const portfolioDraftId = event.pathParameters?.portfolioDraftId;
 
   if (!portfolioDraftId) {
-    return new ErrorResponse(
-      { code: ErrorCodes.INVALID_INPUT, message: "PortfolioDraftId must be specified in the URL path" },
-      ErrorStatusCode.BAD_REQUEST
-    );
+    return new OtherErrorResponse("PortfolioDraftId must be specified in the URL path", ErrorStatusCode.BAD_REQUEST);
   }
 
   const params: DeleteCommandInput = {
@@ -34,17 +30,11 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
   try {
     const data = await client.send(command);
     if (!data.Attributes) {
-      return new ErrorResponse(
-        { code: ErrorCodes.INVALID_INPUT, message: "Portfolio Draft with the given ID does not exist" },
-        ErrorStatusCode.NOT_FOUND
-      );
+      return new OtherErrorResponse("Portfolio Draft with the given ID does not exist", ErrorStatusCode.NOT_FOUND);
     }
     return new NoContentResponse();
   } catch (err) {
     console.log("Database error: " + err);
-    return new ErrorResponse(
-      { code: ErrorCodes.OTHER, message: "Database error" },
-      ErrorStatusCode.INTERNAL_SERVER_ERROR
-    );
+    return new OtherErrorResponse("Database error", ErrorStatusCode.INTERNAL_SERVER_ERROR);
   }
 }

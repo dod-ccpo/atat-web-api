@@ -1,15 +1,11 @@
 import { ScanCommand, ScanCommandInput } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { ErrorCodes } from "../models/Error";
 import { PortfolioDraftSummary } from "../models/PortfolioDraftSummary";
 import { dynamodbDocumentClient as client } from "../utils/dynamodb";
-import { ApiSuccessResponse, ErrorResponse, ErrorStatusCode, SuccessStatusCode } from "../utils/response";
+import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusCode } from "../utils/response";
 
 const TABLE_NAME = process.env.ATAT_TABLE_NAME;
-const QUERY_PARAM_INVALID = new ErrorResponse(
-  { code: ErrorCodes.INVALID_INPUT, message: "Invalid request parameter" },
-  ErrorStatusCode.BAD_REQUEST
-);
+const QUERY_PARAM_INVALID = new OtherErrorResponse("Invalid request parameter", ErrorStatusCode.BAD_REQUEST);
 
 /**
  * Evaluate query string parameter which is expected to be an integer.
@@ -53,9 +49,6 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
     return new ApiSuccessResponse<PortfolioDraftSummary[]>(data.Items as PortfolioDraftSummary[], SuccessStatusCode.OK);
   } catch (error) {
     console.log("Database error (" + error.name + "): " + error);
-    return new ErrorResponse(
-      { code: ErrorCodes.OTHER, message: "Database error" },
-      ErrorStatusCode.INTERNAL_SERVER_ERROR
-    );
+    return new OtherErrorResponse("Database error", ErrorStatusCode.INTERNAL_SERVER_ERROR);
   }
 }

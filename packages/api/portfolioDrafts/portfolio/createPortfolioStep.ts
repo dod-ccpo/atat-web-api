@@ -2,25 +2,21 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, UpdateCommand, UpdateCommandOutput } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { ErrorCodes } from "../../models/Error";
 import { PORTFOLIO_STEP } from "../../models/PortfolioDraft";
 import { PortfolioStep } from "../../models/PortfolioStep";
-import { ApiSuccessResponse, ErrorResponse, ErrorStatusCode, SuccessStatusCode } from "../../utils/response";
+import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusCode } from "../../utils/response";
 import { isBodyPresent, isPathParameterPresent, isPortfolioStep, isValidJson } from "../../utils/validation";
 
 const TABLE_NAME = process.env.ATAT_TABLE_NAME ?? "";
-export const NO_SUCH_PORTFOLIO = new ErrorResponse(
-  { code: ErrorCodes.INVALID_INPUT, message: "Portfolio Draft with the given ID does not exist" },
+export const NO_SUCH_PORTFOLIO = new OtherErrorResponse(
+  "Portfolio Draft with the given ID does not exist",
   ErrorStatusCode.NOT_FOUND
 );
-export const REQUEST_BODY_INVALID = new ErrorResponse(
-  { code: ErrorCodes.INVALID_INPUT, message: "A valid PortfolioStep object must be provided" },
+export const REQUEST_BODY_INVALID = new OtherErrorResponse(
+  "A valid PortfolioStep object must be provided",
   ErrorStatusCode.BAD_REQUEST
 );
-export const EMPTY_REQUEST_BODY = new ErrorResponse(
-  { code: ErrorCodes.INVALID_INPUT, message: "Request body must not be empty" },
-  ErrorStatusCode.BAD_REQUEST
-);
+export const EMPTY_REQUEST_BODY = new OtherErrorResponse("Request body must not be empty", ErrorStatusCode.BAD_REQUEST);
 
 /**
  * Submits the Portfolio Step of the Portfolio Draft Wizard
@@ -55,10 +51,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
       return NO_SUCH_PORTFOLIO;
     }
     console.log("Database error: " + error.name);
-    return new ErrorResponse(
-      { code: ErrorCodes.OTHER, message: "Database error: " + error.name },
-      ErrorStatusCode.INTERNAL_SERVER_ERROR
-    );
+    return new OtherErrorResponse("Database error", ErrorStatusCode.INTERNAL_SERVER_ERROR);
   }
   return new ApiSuccessResponse<PortfolioStep>(portfolioStep, SuccessStatusCode.CREATED);
 }

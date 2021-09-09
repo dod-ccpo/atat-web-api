@@ -1,18 +1,17 @@
 import { GetCommand } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { ErrorCodes } from "../models/Error";
-import { ApiSuccessResponse, ErrorResponse, ErrorStatusCode, SuccessStatusCode } from "../utils/response";
 import { PortfolioDraft } from "../models/PortfolioDraft";
-import { isPathParameterPresent } from "../utils/validation";
 import { dynamodbDocumentClient as client } from "../utils/dynamodb";
 import { DATABASE_ERROR } from "../utils/errors";
+import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusCode } from "../utils/response";
+import { isPathParameterPresent } from "../utils/validation";
 
-export const NO_PORTFOLIO_PATH_PARAM = new ErrorResponse(
-  { code: ErrorCodes.INVALID_INPUT, message: "PortfolioDraftId must be specified in the URL path." },
+export const NO_PORTFOLIO_PATH_PARAM = new OtherErrorResponse(
+  "PortfolioDraftId must be specified in the URL path.",
   ErrorStatusCode.BAD_REQUEST
 );
-export const NO_SUCH_PORTFOLIO = new ErrorResponse(
-  { code: ErrorCodes.INVALID_INPUT, message: "Portfolio Draft with the given ID does not exist" },
+export const NO_SUCH_PORTFOLIO = new OtherErrorResponse(
+  "Portfolio Draft with the given ID does not exist",
   ErrorStatusCode.NOT_FOUND
 );
 

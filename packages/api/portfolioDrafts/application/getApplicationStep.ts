@@ -1,16 +1,15 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { ApiSuccessResponse, ErrorResponse, ErrorStatusCode, SuccessStatusCode } from "../../utils/response";
-import { APPLICATION_STEP } from "../../models/PortfolioDraft";
-import { ApplicationStep } from "../../models/ApplicationStep";
-import { DATABASE_ERROR, NO_SUCH_APPLICATION_STEP, PATH_PARAMETER_REQUIRED_BUT_MISSING } from "../../utils/errors";
-import { dynamodbDocumentClient as client } from "../../utils/dynamodb";
-import { ErrorCodes } from "../../models/Error";
 import { GetCommand } from "@aws-sdk/lib-dynamodb";
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
+import { ApplicationStep } from "../../models/ApplicationStep";
+import { APPLICATION_STEP } from "../../models/PortfolioDraft";
+import { dynamodbDocumentClient as client } from "../../utils/dynamodb";
+import { DATABASE_ERROR, NO_SUCH_APPLICATION_STEP, PATH_PARAMETER_REQUIRED_BUT_MISSING } from "../../utils/errors";
+import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusCode } from "../../utils/response";
 import { isPathParameterPresent, isValidUuidV4 } from "../../utils/validation";
 
 // Note that API spec calls for 400 and not 404
-export const NO_SUCH_PORTFOLIO_DRAFT = new ErrorResponse(
-  { code: ErrorCodes.OTHER, message: "The given Portfolio Draft does not exist" },
+export const NO_SUCH_PORTFOLIO_DRAFT = new OtherErrorResponse(
+  "The given Portfolio Draft does not exist",
   ErrorStatusCode.BAD_REQUEST
 );
 
