@@ -27,7 +27,7 @@ import { ProvisioningStatus } from "../../models/ProvisioningStatus";
 
 const millisInDay = 24 * 60 * 60 * 1000;
 const now = Date.now();
-const isoFormatDay = (base, offset) => new Date(base+ offset).toISOString().slice(0, 10);
+const isoFormatDay = (base: number, offset = 0) => new Date(base + offset).toISOString().slice(0, 10);
 const yesterday = isoFormatDay(now, -millisInDay);
 const today = isoFormatDay(now);
 const tomorrow = isoFormatDay(now, millisInDay);
