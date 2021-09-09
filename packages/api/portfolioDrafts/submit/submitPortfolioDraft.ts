@@ -67,10 +67,10 @@ export async function submitPortfolioDraftCommand(
         ":now": now,
         ":submitIdValue": uuidv4(),
         ":statusUpdate": ProvisioningStatus.IN_PROGRESS,
-        ":currentStatus": ProvisioningStatus.NOT_STARTED,
+        ":expectedStatus": ProvisioningStatus.NOT_STARTED,
       },
       ConditionExpression:
-        "attribute_exists(created_at) AND attribute_not_exists(submit_id) AND #status = :currentStatus",
+        "attribute_exists(created_at) AND attribute_not_exists(submit_id) AND #status = :expectedStatus",
       ReturnValues: "ALL_NEW",
     })
   );
