@@ -134,56 +134,47 @@ export function validateClin(clin: unknown): Array<typeof verror> {
   }
   const errors = Array<typeof verror>();
   if (!isValidDate(clin.pop_start_date)) {
-    verror = [clin.clin_number, "pop_start_date", clin.pop_start_date, "start date must be a valid date"];
-    errors.push(verror);
+    errors.push([clin.clin_number, "pop_start_date", clin.pop_start_date, "start date must be a valid date"]);
   }
   if (!isValidDate(clin.pop_end_date)) {
-    verror = [clin.clin_number, "pop_end_date", clin.pop_end_date, "end date must be a valid date"];
-    errors.push(verror);
+    errors.push([clin.clin_number, "pop_end_date", clin.pop_end_date, "end date must be a valid date"]);
   }
   if (new Date(clin.pop_start_date) >= new Date(clin.pop_end_date)) {
-    verror = [clin.clin_number, "pop_start_date", clin.pop_start_date, "start date must occur before end date"];
-    errors.push(verror);
-    verror = [clin.clin_number, "pop_end_date", clin.pop_end_date, "start date must occur before end date"];
-    errors.push(verror);
+    errors.push([clin.clin_number, "pop_start_date", clin.pop_start_date, "start date must occur before end date"]);
+    errors.push([clin.clin_number, "pop_end_date", clin.pop_end_date, "start date must occur before end date"]);
   }
   if (new Date() >= new Date(clin.pop_end_date)) {
-    verror = [clin.clin_number, "pop_end_date", clin.pop_end_date, "end date must be in the future"];
-    errors.push(verror);
+    errors.push([clin.clin_number, "pop_end_date", clin.pop_end_date, "end date must be in the future"]);
   }
   if (clin.total_clin_value <= 0) {
-    verror = [
+    errors.push([
       clin.clin_number,
       "total_clin_value",
       clin.total_clin_value.toString(),
       "total clin value must be greater than zero",
-    ];
-    errors.push(verror);
+    ]);
   }
   if (clin.obligated_funds <= 0) {
-    verror = [
+    errors.push([
       clin.clin_number,
       "obligated_funds",
       clin.obligated_funds.toString(),
       "obligated funds must be greater than zero",
-    ];
-    errors.push(verror);
+    ]);
   }
   if (clin.obligated_funds > clin.total_clin_value) {
-    verror = [
+    errors.push([
       clin.clin_number,
       "obligated_funds",
       clin.obligated_funds.toString(),
       "total clin value must be greater than obligated funds",
-    ];
-    errors.push(verror);
-    verror = [
+    ]);
+    errors.push([
       clin.clin_number,
       "total_clin_value",
       clin.total_clin_value.toString(),
       "total clin value must be greater than obligated funds",
-    ];
-    errors.push(verror);
+    ]);
   }
   return errors;
 }
