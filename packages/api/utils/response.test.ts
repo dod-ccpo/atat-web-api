@@ -17,7 +17,10 @@ describe("Validation for No Content responses", () => {
 describe("Validate parsing results in the same object", () => {
   it("should result in the same error after parsing", async () => {
     const sampleError: Error = { code: ErrorCodes.OTHER, message: "Test Error" };
-    const errorResponse = new response.ErrorResponse(sampleError, response.ErrorStatusCode.INTERNAL_SERVER_ERROR);
+    const errorResponse = new response.ErrorResponse(
+      sampleError.message,
+      response.ErrorStatusCode.INTERNAL_SERVER_ERROR
+    );
     expect(JSON.parse(errorResponse.body)).toEqual(sampleError);
   });
 

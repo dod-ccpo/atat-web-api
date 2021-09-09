@@ -122,6 +122,6 @@ describe("Handler response with mock dynamodb", function () {
     } as any;
 
     const data = await handler(request);
-    expect(data.body).toEqual(`{"code":"OTHER","message":"Database error: InternalServiceError"}`);
+    expect(data.body).toEqual(`{"code":"OTHER","message":"Database error"}`);
   });
 });
