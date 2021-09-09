@@ -377,8 +377,8 @@ paths:
           schema:
             type: string
       responses:
-        '201':
-          description: Successful operation
+        '202':
+          description: Accepted
         '400':
           description: Validation failed
           content:
@@ -396,10 +396,11 @@ paths:
             example: '{}'
           text/plain:
             example: ''
+      x-amazon-apigateway-request-validator: "request-params-validator"
       x-amazon-apigateway-integration:
         httpMethod: "POST"
         uri: 
-          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NotImplementedFunction.Arn}/invocations"
+          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SubmitPortfolioDraftFunction.Arn}/invocations"
         passthroughBehavior: "when_no_match"
         type: "aws_proxy"
   /taskOrderFiles:
