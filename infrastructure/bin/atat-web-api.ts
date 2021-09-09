@@ -15,26 +15,33 @@ if (process.env.CDK_NAG_ENABLED === "1") {
 const removalPolicy = cdk.RemovalPolicy.DESTROY;
 
 // Ugly hack to quickly isolate deployments for developers.  To be improved/removed later.
-const ticketId = app.node.tryGetContext("TicketId") || "";
-const stacks = [];
-stacks.push(
-  new AtatWebApiStack(app, ticketId + "AtatWebApiStack", {
+const environmentId = app.node.tryGetContext("EnvironmentId") ?? app.node.tryGetContext("TicketId");
+
+if (!environmentId) {
+  console.error("An EnvironmentId must be provided");
+  process.exit(1);
+}
+
+if (app.node.tryGetContext("TicketId")) {
+  console.warn("The TicketId context item is deprecated. Migrate to EnvironmentId.");
+}
+
+const stacks = [
+  new AtatWebApiStack(app, environmentId + "AtatWebApiStack", {
     removalPolicy,
-  })
-);
-stacks.push(
-  new AtatAuthStack(app, ticketId + "AtatAuthStack", {
+  }),
+  new AtatAuthStack(app, environmentId + "AtatAuthStack", {
     secretName: "auth/oidc/aad",
     providerName: "ATATDevAAD",
-    ticketId,
+    environmentId,
     removalPolicy,
-  })
-);
+  }),
+];
 
 // Perform operations on all stacks
 for (const stack of stacks) {
-  if (!ticketId) {
-    cdk.Annotations.of(stack).addWarning("A TicketId should be provided to isolate your deployment from others");
+  if (!environmentId) {
+    cdk.Annotations.of(stack).addWarning("An EnvironmentId should be provided to isolate your deployment from others");
   }
 
   // Apply tags from both tag files; warn if unable to load tags from either
