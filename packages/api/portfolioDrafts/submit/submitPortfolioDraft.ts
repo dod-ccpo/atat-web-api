@@ -1,11 +1,4 @@
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import {
-  DynamoDBDocumentClient,
-  UpdateCommand,
-  UpdateCommandOutput,
-  GetCommand,
-  GetCommandOutput,
-} from "@aws-sdk/lib-dynamodb";
+import { UpdateCommand, UpdateCommandOutput, GetCommand, GetCommandOutput } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
 import { isBodyPresent, isPathParameterPresent } from "../../utils/validation";
@@ -19,6 +12,7 @@ import {
 import { PortfolioDraft } from "../../models/PortfolioDraft";
 import { v4 as uuidv4 } from "uuid";
 import { ProvisioningStatus } from "../../models/ProvisioningStatus";
+import { dynamodbDocumentClient as client } from "../../utils/dynamodb";
 const TABLE_NAME = process.env.ATAT_TABLE_NAME ?? "";
 
 /**
@@ -41,11 +35,9 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
     const result = await submitPortfolioDraftCommand(TABLE_NAME, portfolioDraftId);
     return new ApiSuccessResponse(result.Attributes as PortfolioDraft, SuccessStatusCode.ACCEPTED);
   } catch (error) {
-    console.log("Error: " + error);
     // Check if the portfolioDraft exists
     if (error.name === "ConditionalCheckFailedException") {
       const getResult = await doesPortfolioDraftExistCommand(TABLE_NAME, portfolioDraftId);
-      console.log("getResult: " + JSON.stringify(getResult));
       if (!getResult.Item) {
         return NO_SUCH_PORTFOLIO_DRAFT;
       }
@@ -59,10 +51,8 @@ export async function submitPortfolioDraftCommand(
   table: string,
   portfolioDraftId: string
 ): Promise<UpdateCommandOutput> {
-  const dynamodb = new DynamoDBClient({});
-  const ddb = DynamoDBDocumentClient.from(dynamodb);
   const now = new Date().toISOString();
-  const result = await ddb.send(
+  const result = await client.send(
     new UpdateCommand({
       TableName: table,
       Key: {
@@ -77,22 +67,26 @@ export async function submitPortfolioDraftCommand(
         ":now": now,
         ":submitIdValue": uuidv4(),
         ":statusUpdate": ProvisioningStatus.IN_PROGRESS,
+        ":currentStatus": ProvisioningStatus.NOT_STARTED,
       },
-      ConditionExpression: "attribute_exists(created_at) AND attribute_not_exists(submit_id)",
+      ConditionExpression:
+        "attribute_exists(created_at) AND attribute_not_exists(submit_id) AND #status = :currentStatus",
       ReturnValues: "ALL_NEW",
     })
   );
   return result;
 }
-// We cannot use ConditionExpression to differentiate between a 404 and 400 response, so we need
-// to make an additional query to check if the portfolioDraft exists.
+// The `ConditionExpression` that we're using performs two different types of validation. The first is that
+// the PortfolioDraft object actually exists in the database. If this condition fails, we need to return a 404.
+// The second thing is that the portfolio has not been submitted. If this condition fails, we need to return a
+// 400. Unfortunately, the DynamoDB ConditionalCheckFailedException error does not provide sufficient
+// context to understand which of the two conditions failed, and so therefore we need to perform an
+// additional GetItem request on the error path to determine which of these two scenarios has been hit.
 export async function doesPortfolioDraftExistCommand(
   table: string,
   portfolioDraftId: string
 ): Promise<GetCommandOutput> {
-  const dynamodb = new DynamoDBClient({});
-  const ddb = DynamoDBDocumentClient.from(dynamodb);
-  const result = await ddb.send(
+  return client.send(
     new GetCommand({
       TableName: table,
       Key: {
@@ -100,5 +94,4 @@ export async function doesPortfolioDraftExistCommand(
       },
     })
   );
-  return result;
 }
