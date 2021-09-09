@@ -269,7 +269,7 @@ describe("Error response creation tests", function () {
 });
 
 /**
- * Sample Funding Step with valid data, based on FundingStepEx from API spec
+ * Sample Funding Step with valid data
  * @returns a complete FundingStep with good data that should not cause input validation errors
  */
 function mockFundingStepGoodData(): FundingStep {
@@ -337,7 +337,8 @@ function mockClin(): Clin {
 function mockClinInvalidDates(): Clin {
   return {
     ...mockClin(),
-    ...{ pop_start_date: "not an ISO date", pop_end_date: "2021-13-01" },
+    pop_start_date: "not an ISO date",
+    pop_end_date: "2021-13-01",
   };
 }
 /**
@@ -348,7 +349,8 @@ function mockClinInvalidDates(): Clin {
 function mockClinStartAfterEnd(): Clin {
   return {
     ...mockClin(),
-    ...{ pop_start_date: tomorrow, pop_end_date: today },
+    pop_start_date: tomorrow,
+    pop_end_date: today,
   };
 }
 /**
@@ -359,7 +361,8 @@ function mockClinStartAfterEnd(): Clin {
 function mockClinStartEqualsEnd(): Clin {
   return {
     ...mockClin(),
-    ...{ pop_start_date: today, pop_end_date: today },
+    pop_start_date: today,
+    pop_end_date: today,
   };
 }
 /**
@@ -370,7 +373,7 @@ function mockClinStartEqualsEnd(): Clin {
 function mockClinAlreadyEnded(): Clin {
   return {
     ...mockClin(),
-    ...{ pop_end_date: yesterday },
+    pop_end_date: yesterday,
   };
 }
 /**
@@ -382,7 +385,8 @@ function mockClinAlreadyEnded(): Clin {
 function mockClinLessThanZeroFunds(): Clin {
   return {
     ...mockClin(),
-    ...{ obligated_funds: -1, total_clin_value: -1 },
+    obligated_funds: -1,
+    total_clin_value: -1,
   };
 }
 /**
@@ -394,7 +398,8 @@ function mockClinLessThanZeroFunds(): Clin {
 function mockClinZeroFunds(): Clin {
   return {
     ...mockClin(),
-    ...{ obligated_funds: 0, total_clin_value: 0 },
+    obligated_funds: 0,
+    total_clin_value: 0,
   };
 }
 /**
@@ -405,7 +410,8 @@ function mockClinZeroFunds(): Clin {
 function mockClinObligatedGreaterThanTotal(): Clin {
   return {
     ...mockClin(),
-    ...{ obligated_funds: 2, total_clin_value: 1 },
+    obligated_funds: 2,
+    total_clin_value: 1,
   };
 }
 /**
@@ -416,6 +422,7 @@ function mockClinObligatedGreaterThanTotal(): Clin {
 function mockClinObligatedEqualsTotal(): Clin {
   return {
     ...mockClin(),
-    ...{ obligated_funds: 1, total_clin_value: 1 },
+    obligated_funds: 1,
+    total_clin_value: 1,
   };
 }
