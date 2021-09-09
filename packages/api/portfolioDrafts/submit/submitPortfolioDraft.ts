@@ -35,7 +35,12 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
     const result = await submitPortfolioDraftCommand(TABLE_NAME, portfolioDraftId);
     return new ApiSuccessResponse(result.Attributes as PortfolioDraft, SuccessStatusCode.ACCEPTED);
   } catch (error) {
-    // Check if the portfolioDraft exists
+    // The `ConditionExpression` that we're using performs two different types of validation. The first is that
+    // the PortfolioDraft object actually exists in the database. If this condition fails, we need to return a 404.
+    // The second thing is that the portfolio has not been submitted. If this condition fails, we need to return a
+    // 400. Unfortunately, the DynamoDB ConditionalCheckFailedException error does not provide sufficient
+    // context to understand which of the two conditions failed, and so therefore we need to perform an
+    // additional GetItem request on the error path to determine which of these two scenarios has been hit.
     if (error.name === "ConditionalCheckFailedException") {
       const getResult = await doesPortfolioDraftExistCommand(TABLE_NAME, portfolioDraftId);
       if (!getResult.Item) {
@@ -76,12 +81,6 @@ export async function submitPortfolioDraftCommand(
   );
   return result;
 }
-// The `ConditionExpression` that we're using performs two different types of validation. The first is that
-// the PortfolioDraft object actually exists in the database. If this condition fails, we need to return a 404.
-// The second thing is that the portfolio has not been submitted. If this condition fails, we need to return a
-// 400. Unfortunately, the DynamoDB ConditionalCheckFailedException error does not provide sufficient
-// context to understand which of the two conditions failed, and so therefore we need to perform an
-// additional GetItem request on the error path to determine which of these two scenarios has been hit.
 export async function doesPortfolioDraftExistCommand(
   table: string,
   portfolioDraftId: string
