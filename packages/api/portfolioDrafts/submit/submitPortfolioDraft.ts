@@ -56,8 +56,7 @@ export async function submitPortfolioDraftCommand(
   table: string,
   portfolioDraftId: string
 ): Promise<UpdateCommandOutput> {
-  const now = new Date().toISOString();
-  const result = await client.send(
+  return client.send(
     new UpdateCommand({
       TableName: table,
       Key: {
@@ -69,7 +68,7 @@ export async function submitPortfolioDraftCommand(
         "#status": "status",
       },
       ExpressionAttributeValues: {
-        ":now": now,
+        ":now": new Date().toISOString(),
         ":submitIdValue": uuidv4(),
         ":statusUpdate": ProvisioningStatus.IN_PROGRESS,
         ":expectedStatus": ProvisioningStatus.NOT_STARTED,
@@ -79,7 +78,6 @@ export async function submitPortfolioDraftCommand(
       ReturnValues: "ALL_NEW",
     })
   );
-  return result;
 }
 export async function doesPortfolioDraftExistCommand(
   table: string,
