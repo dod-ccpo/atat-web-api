@@ -35,8 +35,8 @@ describe("Validation tests", () => {
       hi: "This should be empty",
     };
     const request: APIGatewayProxyEvent = {
+      ...validRequest,
       body: JSON.stringify(requestBodyShouldBeEmpty),
-      pathParameters: { portfolioDraftId: "1234" },
     } as any;
 
     const response = await handler(request);
