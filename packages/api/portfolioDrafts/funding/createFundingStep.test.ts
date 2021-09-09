@@ -25,9 +25,12 @@ import {
 } from "../../utils/errors";
 import { ProvisioningStatus } from "../../models/ProvisioningStatus";
 
-const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-const today = new Date(Date.now()).toISOString().slice(0, 10);
-const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+const millisInDay = 24 * 60 * 60 * 1000;
+const now = Date.now();
+const isoFormatDay = (base, offset) => new Date(base+ offset).toISOString().slice(0, 10);
+const yesterday = isoFormatDay(now, -millisInDay);
+const today = isoFormatDay(now);
+const tomorrow = isoFormatDay(now, millisInDay);
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 beforeEach(() => {
