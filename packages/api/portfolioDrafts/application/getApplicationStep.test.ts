@@ -1,15 +1,15 @@
-import { AccessLevel } from "../../models/AccessLevel";
-import { APIGatewayProxyEvent } from "aws-lambda";
-import { ApiSuccessResponse, ErrorResponse, ErrorStatusCode, SuccessStatusCode } from "../../utils/response";
-import { ApplicationStep } from "../../models/ApplicationStep";
-import { DATABASE_ERROR, NO_SUCH_APPLICATION_STEP, PATH_PARAMETER_REQUIRED_BUT_MISSING } from "../../utils/errors";
 import { DynamoDBDocumentClient, GetCommand, GetCommandOutput } from "@aws-sdk/lib-dynamodb";
-import { Environment } from "../../models/Environment";
-import { ErrorCodes } from "../../models/Error";
-import { handler, NO_SUCH_PORTFOLIO_DRAFT } from "./getApplicationStep";
+import { APIGatewayProxyEvent } from "aws-lambda";
 import { mockClient } from "aws-sdk-client-mock";
-import { Operator } from "../../models/Operator";
 import { v4 as uuidv4 } from "uuid";
+import { AccessLevel } from "../../models/AccessLevel";
+import { ApplicationStep } from "../../models/ApplicationStep";
+import { Environment } from "../../models/Environment";
+import { ErrorCode } from "../../models/Error";
+import { Operator } from "../../models/Operator";
+import { DATABASE_ERROR, NO_SUCH_APPLICATION_STEP, PATH_PARAMETER_REQUIRED_BUT_MISSING } from "../../utils/errors";
+import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusCode } from "../../utils/response";
+import { handler, NO_SUCH_PORTFOLIO_DRAFT } from "./getApplicationStep";
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 beforeEach(() => {
@@ -24,48 +24,48 @@ it("should return generic Error if exception caught", async () => {
   jest.spyOn(console, "error").mockImplementation(() => jest.fn()); // suppress output
   ddbMock.on(GetCommand).rejects("Some error occurred");
   const result = await handler(validRequest);
-  expect(result).toBeInstanceOf(ErrorResponse);
+  expect(result).toBeInstanceOf(OtherErrorResponse);
   expect(result).toEqual(DATABASE_ERROR);
   expect(result.statusCode).toEqual(ErrorStatusCode.INTERNAL_SERVER_ERROR);
-  expect(JSON.parse(result.body).code).toEqual(ErrorCodes.OTHER);
+  expect(JSON.parse(result.body).code).toEqual(ErrorCode.OTHER);
 });
 it("should require path param", async () => {
   const emptyRequest: APIGatewayProxyEvent = {} as any;
   const result = await handler(emptyRequest);
-  expect(result).toBeInstanceOf(ErrorResponse);
+  expect(result).toBeInstanceOf(OtherErrorResponse);
   expect(result).toEqual(PATH_PARAMETER_REQUIRED_BUT_MISSING);
   expect(result.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-  expect(JSON.parse(result.body).code).toEqual(ErrorCodes.OTHER);
+  expect(JSON.parse(result.body).code).toEqual(ErrorCode.OTHER);
 });
 it("should return error when path param not UUIDv4 (to avoid performing query)", async () => {
   const invalidRequest: APIGatewayProxyEvent = {
     pathParameters: { portfolioDraftId: "invalid" },
   } as any;
   const result = await handler(invalidRequest);
-  expect(result).toBeInstanceOf(ErrorResponse);
+  expect(result).toBeInstanceOf(OtherErrorResponse);
   expect(result).toEqual(NO_SUCH_PORTFOLIO_DRAFT);
   expect(result.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-  expect(JSON.parse(result.body).code).toEqual(ErrorCodes.OTHER);
+  expect(JSON.parse(result.body).code).toEqual(ErrorCode.OTHER);
   expect(JSON.parse(result.body).message).toMatch(/The given Portfolio Draft does not exist/);
 });
 it("should return error if portfolio draft does not exist", async () => {
   const emptyOutput: GetCommandOutput = {} as any;
   ddbMock.on(GetCommand).resolves(emptyOutput);
   const result = await handler(validRequest);
-  expect(result).toBeInstanceOf(ErrorResponse);
+  expect(result).toBeInstanceOf(OtherErrorResponse);
   expect(result).toEqual(NO_SUCH_PORTFOLIO_DRAFT);
   expect(result.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-  expect(JSON.parse(result.body).code).toEqual(ErrorCodes.OTHER);
+  expect(JSON.parse(result.body).code).toEqual(ErrorCode.OTHER);
   expect(JSON.parse(result.body).message).toMatch(/The given Portfolio Draft does not exist/);
 });
 it("should return error if application step does not exist in portfolio draft", async () => {
   const itemOutput: GetCommandOutput = { Item: {} } as any;
   ddbMock.on(GetCommand).resolves(itemOutput);
   const result = await handler(validRequest);
-  expect(result).toBeInstanceOf(ErrorResponse);
+  expect(result).toBeInstanceOf(OtherErrorResponse);
   expect(result).toEqual(NO_SUCH_APPLICATION_STEP);
   expect(result.statusCode).toEqual(ErrorStatusCode.NOT_FOUND);
-  expect(JSON.parse(result.body).code).toEqual(ErrorCodes.OTHER);
+  expect(JSON.parse(result.body).code).toEqual(ErrorCode.OTHER);
   expect(JSON.parse(result.body).message).toMatch(/Application Step not found for this Portfolio Draft/);
 });
 it("should return application step", async () => {

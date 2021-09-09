@@ -1,5 +1,5 @@
 import { APIGatewayProxyResult } from "aws-lambda";
-import { Error, ErrorCodes, ValidationError } from "../models/Error";
+import { Error, ErrorCode, ValidationError } from "../models/Error";
 
 type Headers = { [header: string]: string | number | boolean } | undefined;
 type MultiValueHeaders = { [header: string]: (string | number | boolean)[] } | undefined;
@@ -121,7 +121,7 @@ export class ApiSuccessResponse<T> extends SuccessResponse {
   }
 }
 
-abstract class BaseErrorResponse extends Response {
+abstract class ErrorResponse extends Response {
   /**
    * Create an error response.
    *
@@ -138,7 +138,7 @@ abstract class BaseErrorResponse extends Response {
 /**
  * An error response to an API request.
  */
-export class ErrorResponse extends BaseErrorResponse {
+export class OtherErrorResponse extends ErrorResponse {
   /**
    * Create an error response.
    *
@@ -149,7 +149,7 @@ export class ErrorResponse extends BaseErrorResponse {
    */
   constructor(message: string, statusCode: ErrorStatusCode, headers?: Headers, multiValueHeaders?: MultiValueHeaders) {
     const error: Error = {
-      code: ErrorCodes.OTHER,
+      code: ErrorCode.OTHER,
       message,
     };
     super(error, statusCode, headers, multiValueHeaders);
@@ -159,7 +159,7 @@ export class ErrorResponse extends BaseErrorResponse {
 /**
  * A response for validation errors in an API request.
  */
-export class ValidationErrorResponse extends BaseErrorResponse {
+export class ValidationErrorResponse extends ErrorResponse {
   /**
    * Create a 400 error response for validation errors.
    *
@@ -175,7 +175,7 @@ export class ValidationErrorResponse extends BaseErrorResponse {
     multiValueHeaders?: MultiValueHeaders
   ) {
     const error: ValidationError = {
-      code: ErrorCodes.INVALID_INPUT,
+      code: ErrorCode.INVALID_INPUT,
       message,
       errorMap,
     };

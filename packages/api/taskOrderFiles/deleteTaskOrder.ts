@@ -1,10 +1,10 @@
 import { DeleteObjectCommand, DeleteObjectCommandOutput, S3Client } from "@aws-sdk/client-s3";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { ErrorResponse, ErrorStatusCode, NoContentResponse } from "../utils/response";
+import { ErrorStatusCode, NoContentResponse, OtherErrorResponse } from "../utils/response";
 import { isPathParameterPresent } from "../utils/validation";
 
 const bucketName = process.env.DATA_BUCKET;
-export const NO_SUCH_TASK_ORDER_FILE = new ErrorResponse(
+export const NO_SUCH_TASK_ORDER_FILE = new OtherErrorResponse(
   "TaskOrderId must be specified in the URL path",
   ErrorStatusCode.BAD_REQUEST
 );
@@ -24,7 +24,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
     await deleteFile(taskOrderId);
   } catch (err) {
     console.log("Unexpected error: " + err);
-    return new ErrorResponse("Unexpected error", ErrorStatusCode.INTERNAL_SERVER_ERROR);
+    return new OtherErrorResponse("Unexpected error", ErrorStatusCode.INTERNAL_SERVER_ERROR);
   }
   return new NoContentResponse();
 }

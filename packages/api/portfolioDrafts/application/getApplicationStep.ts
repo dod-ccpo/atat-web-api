@@ -4,11 +4,11 @@ import { ApplicationStep } from "../../models/ApplicationStep";
 import { APPLICATION_STEP } from "../../models/PortfolioDraft";
 import { dynamodbDocumentClient as client } from "../../utils/dynamodb";
 import { DATABASE_ERROR, NO_SUCH_APPLICATION_STEP, PATH_PARAMETER_REQUIRED_BUT_MISSING } from "../../utils/errors";
-import { ApiSuccessResponse, ErrorResponse, ErrorStatusCode, SuccessStatusCode } from "../../utils/response";
+import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusCode } from "../../utils/response";
 import { isPathParameterPresent, isValidUuidV4 } from "../../utils/validation";
 
 // Note that API spec calls for 400 and not 404
-export const NO_SUCH_PORTFOLIO_DRAFT = new ErrorResponse(
+export const NO_SUCH_PORTFOLIO_DRAFT = new OtherErrorResponse(
   "The given Portfolio Draft does not exist",
   ErrorStatusCode.BAD_REQUEST
 );

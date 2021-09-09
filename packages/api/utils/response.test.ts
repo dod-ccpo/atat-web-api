@@ -1,4 +1,4 @@
-import { Error, ErrorCodes } from "../models/Error";
+import { Error, ErrorCode } from "../models/Error";
 import * as response from "./response";
 
 describe("Validation for No Content responses", () => {
@@ -16,8 +16,8 @@ describe("Validation for No Content responses", () => {
 
 describe("Validate parsing results in the same object", () => {
   it("should result in the same error after parsing", async () => {
-    const sampleError: Error = { code: ErrorCodes.OTHER, message: "Test Error" };
-    const errorResponse = new response.ErrorResponse(
+    const sampleError: Error = { code: ErrorCode.OTHER, message: "Test Error" };
+    const errorResponse = new response.OtherErrorResponse(
       sampleError.message,
       response.ErrorStatusCode.INTERNAL_SERVER_ERROR
     );
