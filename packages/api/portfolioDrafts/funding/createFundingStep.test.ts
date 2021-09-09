@@ -1,14 +1,21 @@
 import { APIGatewayProxyEvent } from "aws-lambda";
-import { ApiSuccessResponse, ErrorResponse, ErrorStatusCode, SuccessStatusCode } from "../../utils/response";
 import { Clin } from "../../models/Clin";
 import { CloudServiceProvider } from "../../models/CloudServiceProvider";
+import { createValidationErrorResponse, handler, validateClin, validateFundingStepClins } from "./createFundingStep";
 import { DynamoDBDocumentClient, UpdateCommand, UpdateCommandOutput } from "@aws-sdk/lib-dynamodb";
+import { ErrorCodes } from "../../models/Error";
 import { FileMetadata, FileScanStatus } from "../../models/FileMetadata";
 import { FundingStep } from "../../models/FundingStep";
-import { validateFundingStepClins, handler, validateClin, verror } from "./createFundingStep";
 import { isFundingStep } from "../../utils/validation";
 import { mockClient } from "aws-sdk-client-mock";
 import { v4 as uuidv4 } from "uuid";
+import {
+  ApiSuccessResponse,
+  ErrorResponse,
+  ErrorStatusCode,
+  SuccessStatusCode,
+  ValidationErrorResponse,
+} from "../../utils/response";
 import {
   REQUEST_BODY_EMPTY,
   PATH_PARAMETER_REQUIRED_BUT_MISSING,
@@ -16,12 +23,11 @@ import {
   DATABASE_ERROR,
   NO_SUCH_PORTFOLIO_DRAFT,
 } from "../../utils/errors";
-import { ErrorCodes } from "../../models/Error";
+import { ProvisioningStatus } from "../../models/ProvisioningStatus";
 
-// '400':
-//   description: Invalid input
-//       schema:
-//         $ref: '#/components/schemas/ValidationError'
+const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+const today = new Date(Date.now()).toISOString().slice(0, 10);
+const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 beforeEach(() => {
@@ -29,18 +35,30 @@ beforeEach(() => {
 });
 
 const validRequest: APIGatewayProxyEvent = {
-  body: JSON.stringify(mockFundingStep()),
+  body: JSON.stringify(mockFundingStepGoodData()),
   pathParameters: { portfolioDraftId: uuidv4() },
 } as any;
 
-it("should return generic Error if exception caught", async () => {
-  jest.spyOn(console, "error").mockImplementation(() => jest.fn()); // suppress output
-  ddbMock.on(UpdateCommand).rejects("Some error occurred");
-  const result = await handler(validRequest);
-  expect(result).toBeInstanceOf(ErrorResponse);
-  expect(result).toEqual(DATABASE_ERROR);
-  expect(result.statusCode).toEqual(ErrorStatusCode.INTERNAL_SERVER_ERROR);
-  expect(JSON.parse(result.body).code).toEqual(ErrorCodes.OTHER);
+const validRequestBadData: APIGatewayProxyEvent = {
+  body: JSON.stringify(mockFundingStepBadData()),
+  pathParameters: { portfolioDraftId: uuidv4() },
+} as any;
+
+it("sanity check; relative dates used for tests should make sense", () => {
+  expect(new Date(yesterday) < new Date(today)).toEqual(true);
+  expect(new Date(today) < new Date(tomorrow)).toEqual(true);
+});
+
+describe("Handle service level error", function () {
+  it("should return generic Error if exception caught", async () => {
+    jest.spyOn(console, "error").mockImplementation(() => jest.fn()); // suppress output
+    ddbMock.on(UpdateCommand).rejects("Some error occurred");
+    const result = await handler(validRequest);
+    expect(result).toBeInstanceOf(ErrorResponse);
+    expect(result).toEqual(DATABASE_ERROR);
+    expect(result.statusCode).toEqual(ErrorStatusCode.INTERNAL_SERVER_ERROR);
+    expect(JSON.parse(result.body).code).toEqual(ErrorCodes.OTHER);
+  });
 });
 
 describe("Path parameter tests", function () {
@@ -95,7 +113,7 @@ describe("Request body tests", function () {
       body: JSON.stringify({ foo: "bar" }), // valid json
       pathParameters: { portfolioDraftId: uuidv4() },
     } as any;
-    expect(isFundingStep(mockFundingStep())).toEqual(true); // control
+    expect(isFundingStep(mockFundingStepGoodData())).toEqual(true); // control
     expect(isFundingStep(notFundingStepRequest)).toEqual(false);
     const result = await handler(notFundingStepRequest);
     expect(result).toBeInstanceOf(ErrorResponse);
@@ -109,177 +127,169 @@ describe("Request body tests", function () {
 describe("Successful operation tests", function () {
   it("should return funding step and http status code 201", async () => {
     expect(false).toBe(false);
+    const now = new Date().toISOString();
     const mockResponse = {
-      updated_at: "2021-08-13T20:55:02.595Z",
-      created_at: "2021-08-13T20:51:45.979Z",
-      portfolio_step: mockFundingStep(),
+      updated_at: now,
+      created_at: now,
+      portfolio_step: mockFundingStepGoodData(),
       num_portfolio_managers: 0,
-      status: "not_started",
-      id: "595c31d3-190c-42c3-a9b6-77325fa5ed38",
+      status: ProvisioningStatus.NOT_STARTED,
+      id: uuidv4(),
     };
     ddbMock.on(UpdateCommand).resolves({
       Attributes: mockResponse,
     });
-    const fundingStep: FundingStep = mockFundingStep();
-    const fundingStepOutput: UpdateCommandOutput = { Attributes: { funding_step: JSON.stringify(fundingStep) } } as any;
+    const fundingStepOutput: UpdateCommandOutput = {
+      Attributes: { funding_step: JSON.stringify(mockFundingStepGoodData()) },
+    } as any;
     ddbMock.on(UpdateCommand).resolves(fundingStepOutput);
     const result = await handler(validRequest);
     expect(result).toBeInstanceOf(ApiSuccessResponse);
     expect(result.statusCode).toEqual(SuccessStatusCode.CREATED);
-    expect(result.body).toEqual(JSON.stringify(mockFundingStep()));
+    expect(result.body).toStrictEqual(JSON.stringify(mockFundingStepGoodData()));
   });
 });
 
-describe("Individual Clin validation tests", function () {
-  const errors = Array<typeof verror>();
+describe("Individual Clin input validation tests", function () {
   it("should throw error if input does not look like a Clin", () => {
     expect(() => {
       validateClin({});
     }).toThrow(Error("Input must be a Clin object"));
   });
-  it("should return true if given Clin is valid (passes all input validation)", () => {
+  it("should return no error map entries when given Clin has good data", () => {
     expect(validateClin(mockClin())).toStrictEqual([]);
-    expect(validateClin(mockClin())).toStrictEqual(errors);
   });
-  it("should return false if given Clin has invalid pop start date", () => {
-    const clinInvalidStartDate: Clin = {
-      ...mockClin(),
-      ...{ pop_start_date: "invalid" },
-    };
-    expect(validateClin(clinInvalidStartDate)).toStrictEqual([
-      ["0001", "pop_start_date", "invalid", "start date must be a valid date"],
+  it("should return error map entries when given Clin has invalid start and end dates", () => {
+    const errors = validateClin(mockClinInvalidDates());
+    expect(errors).toContainEqual(["0001", "pop_start_date", "not an ISO date", "start date must be a valid date"]);
+    expect(errors).toContainEqual(["0001", "pop_end_date", "2021-13-01", "end date must be a valid date"]);
+  });
+  it("should return error map entries when given Clin has nonsensical pop dates (start>end)", () => {
+    const errors = validateClin(mockClinStartAfterEnd());
+    expect(errors).toContainEqual(["0001", "pop_start_date", tomorrow, "start date must occur before end date"]);
+    expect(errors).toContainEqual(["0001", "pop_end_date", today, "start date must occur before end date"]);
+  });
+  it("should return error map entries when given Clin has nonsensical pop dates (start=end)", () => {
+    const errors = validateClin(mockClinStartEqualsEnd());
+    expect(errors).toContainEqual(["0001", "pop_start_date", today, "start date must occur before end date"]);
+    expect(errors).toContainEqual(["0001", "pop_end_date", today, "start date must occur before end date"]);
+  });
+  it("should return error map entries when given Clin has nonsensical pop dates (now>end)", () => {
+    const errors = validateClin(mockClinAlreadyEnded());
+    expect(errors).toContainEqual(["0001", "pop_end_date", yesterday, "end date must be in the future"]);
+  });
+  it("should return error map entries when given Clin has nonsensical funding values (total<0, obligated<0)", () => {
+    const errors = validateClin(mockClinLessThanZeroFunds());
+    expect(errors).toContainEqual(["0001", "total_clin_value", "-1", "total clin value must be greater than zero"]);
+    expect(errors).toContainEqual(["0001", "obligated_funds", "-1", "obligated funds must be greater than zero"]);
+  });
+  it("should return error map entries when given Clin has nonsensical funding values (total=0, obligated=0)", () => {
+    const errors = validateClin(mockClinZeroFunds());
+    expect(errors).toContainEqual(["0001", "total_clin_value", "0", "total clin value must be greater than zero"]);
+    expect(errors).toContainEqual(["0001", "obligated_funds", "0", "obligated funds must be greater than zero"]);
+  });
+  it("should return error map entries when given Clin has nonsensical funding values (obligated>total)", () => {
+    const errors = validateClin(mockClinObligatedGreaterThanTotal());
+    expect(errors).toContainEqual([
+      "0001",
+      "obligated_funds",
+      "2",
+      "total clin value must be greater than obligated funds",
+    ]);
+    expect(errors).toContainEqual([
+      "0001",
+      "total_clin_value",
+      "1",
+      "total clin value must be greater than obligated funds",
     ]);
   });
-  it("should return false if given Clin has invalid pop end date", () => {
-    const clinInvalidEndDate: Clin = {
-      ...mockClin(),
-      ...{ pop_end_date: "invalid" },
-    };
-    expect(validateClin(clinInvalidEndDate)).toStrictEqual([
-      ["0001", "pop_end_date", "invalid", "end date must be a valid date"],
-    ]);
-  });
-  it("should return false if given Clin has nonsensical pop dates (start>end)", () => {
-    const clinStartAfterEnd: Clin = {
-      ...mockClin(),
-      ...{ pop_start_date: "2015-10-21", pop_end_date: "1955-11-05" },
-    };
-    expect(validateClin(clinStartAfterEnd)).toStrictEqual([
-      ["0001", "pop_start_date", "2015-10-21", "start date must occur before end date"],
-      ["0001", "pop_end_date", "1955-11-05", "start date must occur before end date"],
-      ["0001", "pop_end_date", "1955-11-05", "end date must be in the future"],
-    ]);
-  });
-  it("should return false if given Clin has nonsensical pop dates (start=end)", () => {
-    const clinStartEqualsEnd: Clin = {
-      ...mockClin(),
-      ...{ pop_start_date: "1993-02-02", pop_end_date: "1993-02-02" },
-    };
-    expect(validateClin(clinStartEqualsEnd)).toStrictEqual([
-      ["0001", "pop_start_date", "1993-02-02", "start date must occur before end date"],
-      ["0001", "pop_end_date", "1993-02-02", "start date must occur before end date"],
-      ["0001", "pop_end_date", "1993-02-02", "end date must be in the future"],
-    ]);
-  });
-  it("should return false if given Clin has nonsensical pop dates (now>end)", () => {
-    const clinPopExpired: Clin = {
-      ...mockClin(),
-      ...{ pop_end_date: "2021-08-26" },
-    };
-    expect(validateClin(clinPopExpired)).toStrictEqual([
-      ["0001", "pop_start_date", "2021-09-01", "start date must occur before end date"],
-      ["0001", "pop_end_date", "2021-08-26", "start date must occur before end date"],
-      ["0001", "pop_end_date", "2021-08-26", "end date must be in the future"],
-    ]);
-  });
-  it("should return false if given Clin has nonsensical funding values (total<0)", () => {
-    const clinTotalLessThanZero: Clin = {
-      ...mockClin(),
-      ...{ total_clin_value: -1 },
-    };
-    expect(validateClin(clinTotalLessThanZero)).toStrictEqual([
-      ["0001", "total_clin_value", "-1", "total clin value must be greater than zero"],
-      ["0001", "obligated_funds", "10000", "total clin value must be greater than obligated funds"],
-      ["0001", "total_clin_value", "-1", "total clin value must be greater than obligated funds"],
-    ]);
-  });
-  it("should return false if given Clin has nonsensical funding values (total=0)", () => {
-    const clinTotalIsZero: Clin = {
-      ...mockClin(),
-      ...{ total_clin_value: 0 },
-    };
-    expect(validateClin(clinTotalIsZero)).toStrictEqual([
-      ["0001", "total_clin_value", "0", "total clin value must be greater than zero"],
-      ["0001", "obligated_funds", "10000", "total clin value must be greater than obligated funds"],
-      ["0001", "total_clin_value", "0", "total clin value must be greater than obligated funds"],
-    ]);
-  });
-  it("should return false if given Clin has nonsensical funding values (obligated<0)", () => {
-    const clinObligatedLessThanZero: Clin = {
-      ...mockClin(),
-      ...{ obligated_funds: -1 },
-    };
-    expect(validateClin(clinObligatedLessThanZero)).toStrictEqual([
-      ["0001", "obligated_funds", "-1", "obligated funds must be greater than zero"],
-    ]);
-  });
-  it("should return false if given Clin has nonsensical funding values (obligated=0)", () => {
-    const clinObligatedIsZero: Clin = {
-      ...mockClin(),
-      ...{ obligated_funds: 0 },
-    };
-    expect(validateClin(clinObligatedIsZero)).toStrictEqual([
-      ["0001", "obligated_funds", "0", "obligated funds must be greater than zero"],
-    ]);
-  });
-  it("should return false if given Clin has nonsensical funding values (obligated>total)", () => {
-    const clinObligatedGreaterThanTotal: Clin = {
-      ...mockClin(),
-      ...{ obligated_funds: 2, total_clin_value: 1 },
-    };
-    expect(validateClin(clinObligatedGreaterThanTotal)).toStrictEqual([
-      ["0001", "obligated_funds", "2", "total clin value must be greater than obligated funds"],
-      ["0001", "total_clin_value", "1", "total clin value must be greater than obligated funds"],
-    ]);
-  });
-  // TODO: Verification of this business rule is pending.
-  // Allowing obligated to equal total for now.
-  it("should return false if given Clin has nonsensical funding values (obligated=total)", () => {
-    const clinObligatedEqualToTotal: Clin = {
-      ...mockClin(),
-      ...{ obligated_funds: 1, total_clin_value: 1 },
-    };
-    expect(validateClin(clinObligatedEqualToTotal)).toStrictEqual([]);
-    expect(validateClin(clinObligatedEqualToTotal)).toStrictEqual(errors);
+  // TODO: Verification of this business rule is pending. Allowing obligated to equal total for now.
+  it("should return no error map entries when given Clin has these funding values (obligated=total)", () => {
+    const errors = validateClin(mockClinObligatedEqualsTotal());
+    expect(errors).toStrictEqual([]);
   });
 });
 
-describe("All Clins in a Funding Step validation tests", function () {
+describe("All Clins in Funding Step input validation tests", function () {
   it("should accept a Funding Step and validate all Clins contained therein", () => {
-    const errors = validateFundingStepClins(mockFundingStep());
-    expect(errors.length).toEqual(9);
-    for (const error of errors) {
-      expect(error[0].startsWith("BAD")).toBe(true);
-    }
+    const errors = validateFundingStepClins(mockFundingStepBadData());
+    expect(errors.length).toEqual(12);
     expect(errors).toStrictEqual([
-      ["BAD0006", "obligated_funds", "2", "total clin value must be greater than obligated funds"],
-      ["BAD0006", "total_clin_value", "1", "total clin value must be greater than obligated funds"],
-      ["BAD0005", "total_clin_value", "0", "total clin value must be greater than zero"],
-      ["BAD0005", "obligated_funds", "0", "obligated funds must be greater than zero"],
-      ["BAD0004", "pop_end_date", "2020-09-01", "end date must be in the future"],
-      ["BAD0003", "pop_start_date", "2022-09-01", "start date must occur before end date"],
-      ["BAD0003", "pop_end_date", "2021-09-01", "start date must occur before end date"],
-      ["BAD0003", "pop_end_date", "2021-09-01", "end date must be in the future"],
-      ["BAD0002", "pop_end_date", "2022-13-01", "end date must be a valid date"],
+      ["0001", "obligated_funds", "2", "total clin value must be greater than obligated funds"],
+      ["0001", "total_clin_value", "1", "total clin value must be greater than obligated funds"],
+      ["0001", "total_clin_value", "0", "total clin value must be greater than zero"],
+      ["0001", "obligated_funds", "0", "obligated funds must be greater than zero"],
+      ["0001", "pop_start_date", yesterday, "start date must occur before end date"],
+      ["0001", "pop_end_date", yesterday, "start date must occur before end date"],
+      ["0001", "pop_end_date", yesterday, "end date must be in the future"],
+      ["0001", "pop_start_date", tomorrow, "start date must occur before end date"],
+      ["0001", "pop_end_date", today, "start date must occur before end date"],
+      ["0001", "pop_end_date", today, "end date must be in the future"],
+      ["0001", "pop_start_date", "not an ISO date", "start date must be a valid date"],
+      ["0001", "pop_end_date", "2021-13-01", "end date must be a valid date"],
     ]);
+  });
+});
+
+describe("Error response creation tests", function () {
+  it("should return error response that includes error_map in response body", () => {
+    const obj = { errors: { propertyA: "property_value", propertyB: "property_value" } };
+    const invalidProperties: Record<string, unknown> = obj;
+    const response = createValidationErrorResponse(invalidProperties);
+    expect(response).toBeInstanceOf(ValidationErrorResponse);
+    expect(response.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
+    expect(JSON.parse(response.body).code).toEqual(ErrorCodes.INVALID_INPUT);
+    expect(JSON.parse(response.body).message).toMatch(/Invalid input/);
+    expect(JSON.parse(response.body).error_map).toEqual(obj);
+  });
+  it("should return error response containing all invalid properties in error_map", async () => {
+    const result = await handler(validRequestBadData);
+    expect(result).toBeInstanceOf(ValidationErrorResponse);
+    expect(result.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
+    expect(JSON.parse(result.body).code).toEqual(ErrorCodes.INVALID_INPUT);
+    expect(JSON.parse(result.body).message).toMatch(/Invalid input/);
+  });
+  it("should throw error if invalid properties input is empty", () => {
+    const emptyInvalidProperties: Record<string, unknown> = {};
+    expect(() => {
+      createValidationErrorResponse(emptyInvalidProperties);
+    }).toThrow(Error("Parameter 'invalidProperties' must not be empty"));
+  });
+  it("should throw error if invalid properties input has empty string as key", () => {
+    const emptyStringKeyInvalidProperties: Record<string, unknown> = {
+      "": { propertyA: "property_value", propertyB: "property_value" },
+    };
+    expect(() => {
+      createValidationErrorResponse(emptyStringKeyInvalidProperties);
+    }).toThrow(Error("Parameter 'invalidProperties' must not have empty string as key"));
   });
 });
 
 /**
- * FundingStepEx from API spec
- * @returns a complete FundingStep
+ * Sample Funding Step with valid data, based on FundingStepEx from API spec
+ * @returns a complete FundingStep with good data that should not cause input validation errors
  */
-function mockFundingStep(): FundingStep {
+function mockFundingStepGoodData(): FundingStep {
+  const mockTaskOrderFile: FileMetadata = {
+    created_at: "2021-08-03T16:21:07.978Z",
+    id: "b91db32f-40fa-4225-9885-b032f0d229fe",
+    name: "TO_12345678910.pdf",
+    size: 694331,
+    status: FileScanStatus.ACCEPTED,
+    updated_at: "2021-08-03T16:21:07.978Z",
+  };
+  return {
+    task_order_number: "12345678910",
+    task_order_file: mockTaskOrderFile,
+    csp: CloudServiceProvider.AWS,
+    clins: [mockClin()],
+  };
+}
+/**
+ * Sample Funding Step with invalid data
+ * @returns a complete FundingStep with bad data that should cause input validation errors
+ */
+function mockFundingStepBadData(): FundingStep {
   const mockTaskOrderFile: FileMetadata = {
     created_at: "2021-08-03T16:21:07.978Z",
     id: "b91db32f-40fa-4225-9885-b032f0d229fe",
@@ -293,7 +303,6 @@ function mockFundingStep(): FundingStep {
     task_order_file: mockTaskOrderFile,
     csp: CloudServiceProvider.AWS,
     clins: [
-      mockClin(),
       mockClinInvalidDates(),
       mockClinStartAfterEnd(),
       mockClinAlreadyEnded(),
@@ -304,16 +313,16 @@ function mockFundingStep(): FundingStep {
 }
 
 /**
- * Returns a static clin
- * @returns a complete Clin
+ * Returns a static clin containing only good inputs
+ * @returns a complete Clin with values that should not cause validation errors
  */
 function mockClin(): Clin {
   return {
     clin_number: "0001",
     idiq_clin: "1234",
     obligated_funds: 10000,
-    pop_end_date: "2022-09-01",
-    pop_start_date: "2021-09-01",
+    pop_start_date: yesterday,
+    pop_end_date: tomorrow,
     total_clin_value: 200000,
   };
 }
@@ -324,12 +333,8 @@ function mockClin(): Clin {
  */
 function mockClinInvalidDates(): Clin {
   return {
-    clin_number: "BAD0002",
-    idiq_clin: "1234",
-    obligated_funds: 10000,
-    pop_end_date: "2022-13-01",
-    pop_start_date: "2021-02-30",
-    total_clin_value: 200000,
+    ...mockClin(),
+    ...{ pop_start_date: "not an ISO date", pop_end_date: "2021-13-01" },
   };
 }
 /**
@@ -339,12 +344,19 @@ function mockClinInvalidDates(): Clin {
  */
 function mockClinStartAfterEnd(): Clin {
   return {
-    clin_number: "BAD0003",
-    idiq_clin: "1234",
-    obligated_funds: 10000,
-    pop_end_date: "2021-09-01",
-    pop_start_date: "2022-09-01",
-    total_clin_value: 200000,
+    ...mockClin(),
+    ...{ pop_start_date: tomorrow, pop_end_date: today },
+  };
+}
+/**
+ * Returns a static clin containing bad inputs
+ * - start date is equal to the end date
+ * @returns a complete Clin with values that should cause validation errors
+ */
+function mockClinStartEqualsEnd(): Clin {
+  return {
+    ...mockClin(),
+    ...{ pop_start_date: today, pop_end_date: today },
   };
 }
 /**
@@ -354,12 +366,20 @@ function mockClinStartAfterEnd(): Clin {
  */
 function mockClinAlreadyEnded(): Clin {
   return {
-    clin_number: "BAD0004",
-    idiq_clin: "1234",
-    obligated_funds: 10000,
-    pop_end_date: "2020-09-01",
-    pop_start_date: "2019-09-01",
-    total_clin_value: 200000,
+    ...mockClin(),
+    ...{ pop_end_date: yesterday },
+  };
+}
+/**
+ * Returns a static clin containing bad inputs
+ * - obligated funds is less than zero
+ * - total clin value is less than zero
+ * @returns a complete Clin with values that should cause validation errors
+ */
+function mockClinLessThanZeroFunds(): Clin {
+  return {
+    ...mockClin(),
+    ...{ obligated_funds: -1, total_clin_value: -1 },
   };
 }
 /**
@@ -370,12 +390,8 @@ function mockClinAlreadyEnded(): Clin {
  */
 function mockClinZeroFunds(): Clin {
   return {
-    clin_number: "BAD0005",
-    idiq_clin: "1234",
-    obligated_funds: 0,
-    pop_end_date: "2022-09-01",
-    pop_start_date: "2021-09-01",
-    total_clin_value: 0,
+    ...mockClin(),
+    ...{ obligated_funds: 0, total_clin_value: 0 },
   };
 }
 /**
@@ -385,11 +401,18 @@ function mockClinZeroFunds(): Clin {
  */
 function mockClinObligatedGreaterThanTotal(): Clin {
   return {
-    clin_number: "BAD0006",
-    idiq_clin: "1234",
-    obligated_funds: 2,
-    pop_end_date: "2022-09-01",
-    pop_start_date: "2021-09-01",
-    total_clin_value: 1,
+    ...mockClin(),
+    ...{ obligated_funds: 2, total_clin_value: 1 },
+  };
+}
+/**
+ * Returns a static clin containing an edge case
+ * - obligated funds equal to the total clin value
+ * @returns a complete Clin with values that should not cause validation errors
+ */
+function mockClinObligatedEqualsTotal(): Clin {
+  return {
+    ...mockClin(),
+    ...{ obligated_funds: 1, total_clin_value: 1 },
   };
 }

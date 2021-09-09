@@ -1,5 +1,5 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
+import { ApiSuccessResponse, SuccessStatusCode, ValidationErrorResponse } from "../../utils/response";
 import { dynamodbDocumentClient as client } from "../../utils/dynamodb";
 import { FUNDING_STEP } from "../../models/PortfolioDraft";
 import { FundingStep } from "../../models/FundingStep";
@@ -19,6 +19,7 @@ import {
   isClin,
   isValidUuidV4,
 } from "../../utils/validation";
+import { ErrorCodes } from "../../models/Error";
 
 /**
  * Validation error tuple
@@ -69,8 +70,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
   const fundingStep: FundingStep = requestBody;
   const errors: Array<typeof verror> = validateFundingStepClins(fundingStep);
   if (errors.length) {
-    // TODO
-    // createValidationErrorResponse()
+    return createValidationErrorResponse({ input_validation_errors: errors });
   }
   try {
     await client.send(
@@ -108,19 +108,19 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
  * @param invalidProperties object containing property names and their values which failed validation
  * @returns ValidationErrorResponse containing an error map, error code, and a message
  */
-// export function createValidationErrorResponse(invalidProperties: Record<string, unknown>): ValidationErrorResponse {
-//   if (Object.keys(invalidProperties).length === 0) {
-//     throw Error("Parameter 'invalidProperties' must not be empty");
-//   }
-//   Object.keys(invalidProperties).forEach((key) => {
-//     if (!key) throw Error("Parameter 'invalidProperties' must not have empty string as key");
-//   });
-//   return new ValidationErrorResponse({
-//     errorMap: invalidProperties,
-//     code: ErrorCodes.INVALID_INPUT,
-//     message: "Invalid input",
-//   });
-// }
+export function createValidationErrorResponse(invalidProperties: Record<string, unknown>): ValidationErrorResponse {
+  if (Object.keys(invalidProperties).length === 0) {
+    throw Error("Parameter 'invalidProperties' must not be empty");
+  }
+  Object.keys(invalidProperties).forEach((key) => {
+    if (!key) throw Error("Parameter 'invalidProperties' must not have empty string as key");
+  });
+  return new ValidationErrorResponse({
+    error_map: invalidProperties,
+    code: ErrorCodes.INVALID_INPUT,
+    message: "Invalid input",
+  });
+}
 
 /**
  * Validates the given clin object
