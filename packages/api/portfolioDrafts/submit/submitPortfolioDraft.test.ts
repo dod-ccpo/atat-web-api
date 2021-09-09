@@ -50,20 +50,11 @@ describe("Handler response with mock dynamodb", function () {
     ddbMock.on(GetCommand).resolves({
       Item: item,
     });
-    // setting up new request
-    const request: APIGatewayProxyEvent = {
-      pathParameters: { portfolioDraftId: "1234" },
-    } as any;
-
-    expect(await handler(request)).toEqual(PORTFOLIO_ALREADY_SUBMITTED);
+    expect(await handler(validRequest)).toEqual(PORTFOLIO_ALREADY_SUBMITTED);
   });
   it("should return error when the submitPortfolioDraftCommand fails, and portfolioDraft doesn't exist", async () => {
     ddbMock.on(UpdateCommand).rejects({ name: "ConditionalCheckFailedException" });
     ddbMock.on(GetCommand).resolves({}); // resolves, but doesn't include an Item (!results.Item)
-    // setting up new request
-    const request: APIGatewayProxyEvent = {
-      pathParameters: { portfolioDraftId: "1234" },
-    } as any;
-    expect(await handler(request)).toEqual(NO_SUCH_PORTFOLIO_DRAFT);
+    expect(await handler(validRequest)).toEqual(NO_SUCH_PORTFOLIO_DRAFT);
   });
 });
