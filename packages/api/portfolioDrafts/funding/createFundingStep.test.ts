@@ -48,8 +48,8 @@ const validRequestBadData: APIGatewayProxyEvent = {
 } as any;
 
 it("sanity check; relative dates used for tests should make sense", () => {
-  expect(new Date(yesterday) < new Date(today)).toEqual(true);
-  expect(new Date(today) < new Date(tomorrow)).toEqual(true);
+  expect(new Date(yesterday).valueOf() + millisInDay).toEqual(new Date(today).valueOf());
+  expect(new Date(today).valueOf() + millisInDay).toEqual(new Date(tomorrow).valueOf());
 });
 
 describe("Handle service level error", function () {
