@@ -5,7 +5,7 @@ import { createValidationErrorResponse, handler, validateClin, validateFundingSt
 import { DynamoDBDocumentClient, UpdateCommand, UpdateCommandOutput } from "@aws-sdk/lib-dynamodb";
 import { ErrorCodes } from "../../models/Error";
 import { FileMetadata, FileScanStatus } from "../../models/FileMetadata";
-import { FundingStep } from "../../models/FundingStep";
+import { FundingStep, ValidationMessages } from "../../models/FundingStep";
 import { isFundingStep } from "../../utils/validation";
 import { mockClient } from "aws-sdk-client-mock";
 import { v4 as uuidv4 } from "uuid";
@@ -129,7 +129,6 @@ describe("Request body tests", function () {
 
 describe("Successful operation tests", function () {
   it("should return funding step and http status code 201", async () => {
-    expect(false).toBe(false);
     const now = new Date().toISOString();
     const mockResponse = {
       updated_at: now,
@@ -164,47 +163,37 @@ describe("Individual Clin input validation tests", function () {
   });
   it("should return error map entries when given Clin has invalid start and end dates", () => {
     const errors = validateClin(mockClinInvalidDates());
-    expect(errors).toContainEqual(["0001", "pop_start_date", "not an ISO date", "start date must be a valid date"]);
-    expect(errors).toContainEqual(["0001", "pop_end_date", "2021-13-01", "end date must be a valid date"]);
+    expect(errors).toContainEqual(["0001", "pop_start_date", "not an ISO date", ValidationMessages.START_VALID]);
+    expect(errors).toContainEqual(["0001", "pop_end_date", "2021-13-01", ValidationMessages.END_VALID]);
   });
   it("should return error map entries when given Clin has nonsensical pop dates (start>end)", () => {
     const errors = validateClin(mockClinStartAfterEnd());
-    expect(errors).toContainEqual(["0001", "pop_start_date", tomorrow, "start date must occur before end date"]);
-    expect(errors).toContainEqual(["0001", "pop_end_date", today, "start date must occur before end date"]);
+    expect(errors).toContainEqual(["0001", "pop_start_date", tomorrow, ValidationMessages.START_BEFORE_END]);
+    expect(errors).toContainEqual(["0001", "pop_end_date", today, ValidationMessages.START_BEFORE_END]);
   });
   it("should return error map entries when given Clin has nonsensical pop dates (start=end)", () => {
     const errors = validateClin(mockClinStartEqualsEnd());
-    expect(errors).toContainEqual(["0001", "pop_start_date", today, "start date must occur before end date"]);
-    expect(errors).toContainEqual(["0001", "pop_end_date", today, "start date must occur before end date"]);
+    expect(errors).toContainEqual(["0001", "pop_start_date", today, ValidationMessages.START_BEFORE_END]);
+    expect(errors).toContainEqual(["0001", "pop_end_date", today, ValidationMessages.START_BEFORE_END]);
   });
   it("should return error map entries when given Clin has nonsensical pop dates (now>end)", () => {
     const errors = validateClin(mockClinAlreadyEnded());
-    expect(errors).toContainEqual(["0001", "pop_end_date", yesterday, "end date must be in the future"]);
+    expect(errors).toContainEqual(["0001", "pop_end_date", yesterday, ValidationMessages.END_FUTURE]);
   });
   it("should return error map entries when given Clin has nonsensical funding values (total<0, obligated<0)", () => {
     const errors = validateClin(mockClinLessThanZeroFunds());
-    expect(errors).toContainEqual(["0001", "total_clin_value", "-1", "total clin value must be greater than zero"]);
-    expect(errors).toContainEqual(["0001", "obligated_funds", "-1", "obligated funds must be greater than zero"]);
+    expect(errors).toContainEqual(["0001", "total_clin_value", "-1", ValidationMessages.TOTAL_GT_ZERO]);
+    expect(errors).toContainEqual(["0001", "obligated_funds", "-1", ValidationMessages.OBLIGATED_GT_ZERO]);
   });
   it("should return error map entries when given Clin has nonsensical funding values (total=0, obligated=0)", () => {
     const errors = validateClin(mockClinZeroFunds());
-    expect(errors).toContainEqual(["0001", "total_clin_value", "0", "total clin value must be greater than zero"]);
-    expect(errors).toContainEqual(["0001", "obligated_funds", "0", "obligated funds must be greater than zero"]);
+    expect(errors).toContainEqual(["0001", "total_clin_value", "0", ValidationMessages.TOTAL_GT_ZERO]);
+    expect(errors).toContainEqual(["0001", "obligated_funds", "0", ValidationMessages.OBLIGATED_GT_ZERO]);
   });
   it("should return error map entries when given Clin has nonsensical funding values (obligated>total)", () => {
     const errors = validateClin(mockClinObligatedGreaterThanTotal());
-    expect(errors).toContainEqual([
-      "0001",
-      "obligated_funds",
-      "2",
-      "total clin value must be greater than obligated funds",
-    ]);
-    expect(errors).toContainEqual([
-      "0001",
-      "total_clin_value",
-      "1",
-      "total clin value must be greater than obligated funds",
-    ]);
+    expect(errors).toContainEqual(["0001", "obligated_funds", "2", ValidationMessages.TOTAL_GT_OBLIGATED]);
+    expect(errors).toContainEqual(["0001", "total_clin_value", "1", ValidationMessages.TOTAL_GT_OBLIGATED]);
   });
   // TODO: Verification of this business rule is pending. Allowing obligated to equal total for now.
   it("should return no error map entries when given Clin has these funding values (obligated=total)", () => {
@@ -218,18 +207,18 @@ describe("All Clins in Funding Step input validation tests", function () {
     const errors = validateFundingStepClins(mockFundingStepBadData());
     expect(errors.length).toEqual(12);
     expect(errors).toStrictEqual([
-      ["0001", "obligated_funds", "2", "total clin value must be greater than obligated funds"],
-      ["0001", "total_clin_value", "1", "total clin value must be greater than obligated funds"],
-      ["0001", "total_clin_value", "0", "total clin value must be greater than zero"],
-      ["0001", "obligated_funds", "0", "obligated funds must be greater than zero"],
-      ["0001", "pop_start_date", yesterday, "start date must occur before end date"],
-      ["0001", "pop_end_date", yesterday, "start date must occur before end date"],
-      ["0001", "pop_end_date", yesterday, "end date must be in the future"],
-      ["0001", "pop_start_date", tomorrow, "start date must occur before end date"],
-      ["0001", "pop_end_date", today, "start date must occur before end date"],
-      ["0001", "pop_end_date", today, "end date must be in the future"],
-      ["0001", "pop_start_date", "not an ISO date", "start date must be a valid date"],
-      ["0001", "pop_end_date", "2021-13-01", "end date must be a valid date"],
+      ["0001", "obligated_funds", "2", ValidationMessages.TOTAL_GT_OBLIGATED],
+      ["0001", "total_clin_value", "1", ValidationMessages.TOTAL_GT_OBLIGATED],
+      ["0001", "total_clin_value", "0", ValidationMessages.TOTAL_GT_ZERO],
+      ["0001", "obligated_funds", "0", ValidationMessages.OBLIGATED_GT_ZERO],
+      ["0001", "pop_start_date", yesterday, ValidationMessages.START_BEFORE_END],
+      ["0001", "pop_end_date", yesterday, ValidationMessages.START_BEFORE_END],
+      ["0001", "pop_end_date", yesterday, ValidationMessages.END_FUTURE],
+      ["0001", "pop_start_date", tomorrow, ValidationMessages.START_BEFORE_END],
+      ["0001", "pop_end_date", today, ValidationMessages.START_BEFORE_END],
+      ["0001", "pop_end_date", today, ValidationMessages.END_FUTURE],
+      ["0001", "pop_start_date", "not an ISO date", ValidationMessages.START_VALID],
+      ["0001", "pop_end_date", "2021-13-01", ValidationMessages.END_VALID],
     ]);
   });
 });

@@ -2,7 +2,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { ApiSuccessResponse, SuccessStatusCode, ValidationErrorResponse } from "../../utils/response";
 import { dynamodbDocumentClient as client } from "../../utils/dynamodb";
 import { FUNDING_STEP } from "../../models/PortfolioDraft";
-import { FundingStep } from "../../models/FundingStep";
+import { FundingStep, ValidationMessages } from "../../models/FundingStep";
 import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import {
   DATABASE_ERROR,
@@ -134,24 +134,24 @@ export function validateClin(clin: unknown): Array<typeof verror> {
   }
   const errors = Array<typeof verror>();
   if (!isValidDate(clin.pop_start_date)) {
-    errors.push([clin.clin_number, "pop_start_date", clin.pop_start_date, "start date must be a valid date"]);
+    errors.push([clin.clin_number, "pop_start_date", clin.pop_start_date, ValidationMessages.START_VALID]);
   }
   if (!isValidDate(clin.pop_end_date)) {
-    errors.push([clin.clin_number, "pop_end_date", clin.pop_end_date, "end date must be a valid date"]);
+    errors.push([clin.clin_number, "pop_end_date", clin.pop_end_date, ValidationMessages.END_VALID]);
   }
   if (new Date(clin.pop_start_date) >= new Date(clin.pop_end_date)) {
-    errors.push([clin.clin_number, "pop_start_date", clin.pop_start_date, "start date must occur before end date"]);
-    errors.push([clin.clin_number, "pop_end_date", clin.pop_end_date, "start date must occur before end date"]);
+    errors.push([clin.clin_number, "pop_start_date", clin.pop_start_date, ValidationMessages.START_BEFORE_END]);
+    errors.push([clin.clin_number, "pop_end_date", clin.pop_end_date, ValidationMessages.START_BEFORE_END]);
   }
   if (new Date() >= new Date(clin.pop_end_date)) {
-    errors.push([clin.clin_number, "pop_end_date", clin.pop_end_date, "end date must be in the future"]);
+    errors.push([clin.clin_number, "pop_end_date", clin.pop_end_date, ValidationMessages.END_FUTURE]);
   }
   if (clin.total_clin_value <= 0) {
     errors.push([
       clin.clin_number,
       "total_clin_value",
       clin.total_clin_value.toString(),
-      "total clin value must be greater than zero",
+      ValidationMessages.TOTAL_GT_ZERO,
     ]);
   }
   if (clin.obligated_funds <= 0) {
@@ -159,7 +159,7 @@ export function validateClin(clin: unknown): Array<typeof verror> {
       clin.clin_number,
       "obligated_funds",
       clin.obligated_funds.toString(),
-      "obligated funds must be greater than zero",
+      ValidationMessages.OBLIGATED_GT_ZERO,
     ]);
   }
   if (clin.obligated_funds > clin.total_clin_value) {
@@ -167,13 +167,13 @@ export function validateClin(clin: unknown): Array<typeof verror> {
       clin.clin_number,
       "obligated_funds",
       clin.obligated_funds.toString(),
-      "total clin value must be greater than obligated funds",
+      ValidationMessages.TOTAL_GT_OBLIGATED,
     ]);
     errors.push([
       clin.clin_number,
       "total_clin_value",
       clin.total_clin_value.toString(),
-      "total clin value must be greater than obligated funds",
+      ValidationMessages.TOTAL_GT_OBLIGATED,
     ]);
   }
   return errors;
