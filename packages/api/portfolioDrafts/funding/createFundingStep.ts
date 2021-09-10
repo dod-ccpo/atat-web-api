@@ -34,15 +34,7 @@ export interface ClinValidationError {
  * @returns a collection of clin validation errors
  */
 export function validateFundingStepClins(fs: FundingStep): Array<ClinValidationError> {
-  const clins = fs.clins.values();
-  let errorAccumulator = Array<ClinValidationError>();
-  for (const clin of clins) {
-    const errors = validateClin(clin);
-    if (errors.length) {
-      errorAccumulator = [...errors, ...errorAccumulator];
-    }
-  }
-  return errorAccumulator;
+  return fs.clins.map(validateClin).reduce((accumulator, validationErrors) => accumulator.concat(validationErrors), []);
 }
 
 /**
