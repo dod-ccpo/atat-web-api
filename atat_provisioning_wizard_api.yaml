@@ -551,7 +551,15 @@ components:
         - $ref: '#/components/schemas/BaseObject'
         - type: object
           properties:
+            name:
+              type: string
             num_portfolio_managers:
+              type: number
+            num_applications:
+              type: number
+            num_environments:
+              type: number
+            num_task_orders:
               type: number
             status:
               type: string
