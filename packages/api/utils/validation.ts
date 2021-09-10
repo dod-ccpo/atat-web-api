@@ -1,7 +1,8 @@
 import { ApplicationStep } from "../models/ApplicationStep";
+import { Clin } from "../models/Clin";
 import { FundingStep } from "../models/FundingStep";
 import { PortfolioStep } from "../models/PortfolioStep";
-import { version as uuidVersion, validate as uuidValidate } from "uuid";
+import { validate as uuidValidate, version as uuidVersion } from "uuid";
 
 /**
  * Check whether a given string is valid JSON.
@@ -108,4 +109,31 @@ export function isBodyPresent(body: string | null): body is string {
   // an empty string is a forbidden value
   const trimmedBody = body?.replace(/\s/g, "") ?? "";
   return !emptyValues.includes(trimmedBody);
+}
+
+/**
+ * Check whether a given string is a valid date.
+ * The expected format is YYYY-MM-DD (ISO 8601).
+ *
+ * @param str - The string to check
+ * @returns true if the string is a valid date; false otherwise
+ */
+export function isValidDate(str: string): boolean {
+  const date: Date = new Date(str);
+  return date instanceof Date && !isNaN(date.getTime());
+}
+
+/**
+ * Check whether a given object is a {@link Clin}.
+ *
+ * @param object - The object to check
+ * @returns true if the object has all the attributes of a {@link Clin}
+ */
+export function isClin(object: unknown): object is Clin {
+  if (!isValidObject(object)) {
+    return false;
+  }
+  return ["clin_number", "idiq_clin", "total_clin_value", "obligated_funds", "pop_start_date", "pop_end_date"].every(
+    (item) => item in object
+  );
 }

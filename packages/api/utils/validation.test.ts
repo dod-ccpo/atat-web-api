@@ -1,4 +1,12 @@
-import { isBodyPresent, isFundingStep, isPathParameterPresent, isPortfolioStep, isValidJson } from "./validation";
+import {
+  isBodyPresent,
+  isFundingStep,
+  isPathParameterPresent,
+  isPortfolioStep,
+  isValidJson,
+  isValidDate,
+  isClin,
+} from "./validation";
 
 describe("Testing validation of request body", function () {
   it("should return true because request body is present", async () => {
@@ -87,29 +95,29 @@ describe("Testing validation of fundingStep objects", () => {
     clins: [fakeClinData],
   };
   const badFundingSteps = [
-    // Missing CLINs
     {
-      task_order_number: "12345667890",
-      task_order_file: toFile,
-      csp: "aws",
-    },
-    // Missing TO number
-    {
+      // task_order_number: "1234567890",
       task_order_file: toFile,
       csp: "aws",
       clins: [fakeClinData],
     },
-    // Missing CSP
+    {
+      task_order_number: "1234567890",
+      // task_order_file: toFile,
+      csp: "aws",
+      clins: [fakeClinData],
+    },
     {
       task_order_number: "1234567890",
       task_order_file: toFile,
+      // csp: "aws",
       clins: [fakeClinData],
     },
-    // Missing File Data
     {
-      task_order_number: "12345667890",
+      task_order_number: "1234567890",
+      task_order_file: toFile,
       csp: "aws",
-      clins: [fakeClinData],
+      // clins: [fakeClinData],
     },
   ];
   it.each([true, 1, undefined, null])("should reject non-objects", async (item) => {
@@ -135,5 +143,93 @@ describe("Testing validation of path parameter", function () {
   it("should return false because path parameter is undefined", async () => {
     const pathParam = undefined;
     expect(isPathParameterPresent(pathParam)).toEqual(false);
+  });
+});
+
+describe("isValidDate()", function () {
+  it("should validate these strings", () => {
+    expect(isValidDate("1970-01-01")).toEqual(true);
+    expect(isValidDate(new Date().toISOString())).toEqual(true);
+  });
+  it("should not validate these strings", () => {
+    expect(isValidDate("")).toEqual(false);
+    expect(isValidDate("not an ISO date")).toEqual(false);
+    expect(isValidDate(NaN.toString())).toEqual(false);
+  });
+});
+
+describe("isClin()", function () {
+  const mockClin = {
+    clin_number: "0001",
+    idiq_clin: "002",
+    total_clin_value: 100000,
+    obligated_funds: 10000,
+    pop_start_date: "2021-07-01",
+    pop_end_date: "2022-07-01",
+  };
+  const badClins = [
+    {
+      // clin_number: "0001",
+      idiq_clin: "002",
+      total_clin_value: 100000,
+      obligated_funds: 10000,
+      pop_start_date: "2021-07-01",
+      pop_end_date: "2022-07-01",
+    },
+    {
+      clin_number: "0001",
+      // idiq_clin: "002",
+      total_clin_value: 100000,
+      obligated_funds: 10000,
+      pop_start_date: "2021-07-01",
+      pop_end_date: "2022-07-01",
+    },
+    {
+      clin_number: "0001",
+      idiq_clin: "002",
+      // total_clin_value: 100000,
+      obligated_funds: 10000,
+      pop_start_date: "2021-07-01",
+      pop_end_date: "2022-07-01",
+    },
+    {
+      clin_number: "0001",
+      idiq_clin: "002",
+      total_clin_value: 100000,
+      // obligated_funds: 10000,
+      pop_start_date: "2021-07-01",
+      pop_end_date: "2022-07-01",
+    },
+    {
+      clin_number: "0001",
+      idiq_clin: "002",
+      total_clin_value: 100000,
+      obligated_funds: 10000,
+      // pop_start_date: "2021-07-01",
+      pop_end_date: "2022-07-01",
+    },
+    {
+      clin_number: "0001",
+      idiq_clin: "002",
+      total_clin_value: 100000,
+      obligated_funds: 10000,
+      pop_start_date: "2021-07-01",
+      // pop_end_date: "2022-07-01",
+    },
+  ];
+  it("should reject a non-object", () => {
+    expect(isClin(undefined)).toEqual(false);
+    expect(isClin(null)).toEqual(false);
+    expect(isClin("")).toEqual(false);
+    expect(isClin(0)).toEqual(false);
+  });
+  it("should reject an empty object", () => {
+    expect(isClin({})).toEqual(false);
+  });
+  it("should accept an object that looks like a Clin", () => {
+    expect(isClin(mockClin)).toEqual(true);
+  });
+  it.each(badClins)("should reject a Clin missing any field", async (badClin) => {
+    expect(isClin(badClin)).toEqual(false);
   });
 });

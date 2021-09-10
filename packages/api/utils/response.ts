@@ -177,7 +177,7 @@ export class ValidationErrorResponse extends ErrorResponse {
     const error: ValidationError = {
       code: ErrorCode.INVALID_INPUT,
       message,
-      errorMap,
+      error_map: errorMap,
     };
     super(error, ErrorStatusCode.BAD_REQUEST, headers, multiValueHeaders);
   }
