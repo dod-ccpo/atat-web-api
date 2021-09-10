@@ -1,21 +1,21 @@
 import { APIGatewayProxyEvent } from "aws-lambda";
+import {
+  ApiSuccessResponse,
+  ErrorStatusCode,
+  OtherErrorResponse,
+  SuccessStatusCode,
+  ValidationErrorResponse,
+} from "../../utils/response";
 import { Clin } from "../../models/Clin";
 import { CloudServiceProvider } from "../../models/CloudServiceProvider";
 import { createValidationErrorResponse, handler, validateClin, validateFundingStepClins } from "./createFundingStep";
 import { DynamoDBDocumentClient, UpdateCommand, UpdateCommandOutput } from "@aws-sdk/lib-dynamodb";
-import { ErrorCodes } from "../../models/Error";
 import { FileMetadata, FileScanStatus } from "../../models/FileMetadata";
 import { FundingStep, ValidationMessages } from "../../models/FundingStep";
 import { isFundingStep } from "../../utils/validation";
 import { mockClient } from "aws-sdk-client-mock";
+import { ProvisioningStatus } from "../../models/ProvisioningStatus";
 import { v4 as uuidv4 } from "uuid";
-import {
-  ApiSuccessResponse,
-  ErrorResponse,
-  ErrorStatusCode,
-  SuccessStatusCode,
-  ValidationErrorResponse,
-} from "../../utils/response";
 import {
   REQUEST_BODY_EMPTY,
   PATH_PARAMETER_REQUIRED_BUT_MISSING,
@@ -23,7 +23,6 @@ import {
   DATABASE_ERROR,
   NO_SUCH_PORTFOLIO_DRAFT,
 } from "../../utils/errors";
-import { ProvisioningStatus } from "../../models/ProvisioningStatus";
 
 const millisInDay = 24 * 60 * 60 * 1000;
 const now = Date.now();
@@ -57,10 +56,9 @@ describe("Handle service level error", function () {
     jest.spyOn(console, "error").mockImplementation(() => jest.fn()); // suppress output
     ddbMock.on(UpdateCommand).rejects("Some error occurred");
     const result = await handler(validRequest);
-    expect(result).toBeInstanceOf(ErrorResponse);
+    expect(result).toBeInstanceOf(OtherErrorResponse);
     expect(result).toEqual(DATABASE_ERROR);
     expect(result.statusCode).toEqual(ErrorStatusCode.INTERNAL_SERVER_ERROR);
-    expect(JSON.parse(result.body).code).toEqual(ErrorCodes.OTHER);
   });
 });
 
@@ -68,20 +66,18 @@ describe("Path parameter tests", function () {
   it("should require path param", async () => {
     const emptyRequest: APIGatewayProxyEvent = {} as any;
     const result = await handler(emptyRequest);
-    expect(result).toBeInstanceOf(ErrorResponse);
+    expect(result).toBeInstanceOf(OtherErrorResponse);
     expect(result).toEqual(PATH_PARAMETER_REQUIRED_BUT_MISSING);
     expect(result.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-    expect(JSON.parse(result.body).code).toEqual(ErrorCodes.OTHER);
   });
   it("should return error when path param not UUIDv4 (to avoid attempting update)", async () => {
     const invalidRequest: APIGatewayProxyEvent = {
       pathParameters: { portfolioDraftId: "invalid" },
     } as any;
     const result = await handler(invalidRequest);
-    expect(result).toBeInstanceOf(ErrorResponse);
+    expect(result).toBeInstanceOf(OtherErrorResponse);
     expect(result).toEqual(NO_SUCH_PORTFOLIO_DRAFT);
     expect(result.statusCode).toEqual(ErrorStatusCode.NOT_FOUND);
-    expect(JSON.parse(result.body).code).toEqual(ErrorCodes.OTHER);
     expect(JSON.parse(result.body).message).toMatch(/Portfolio Draft with the given ID does not exist/);
   });
 });
@@ -93,10 +89,9 @@ describe("Request body tests", function () {
       pathParameters: { portfolioDraftId: uuidv4() },
     } as any;
     const result = await handler(emptyRequest);
-    expect(result).toBeInstanceOf(ErrorResponse);
+    expect(result).toBeInstanceOf(OtherErrorResponse);
     expect(result).toEqual(REQUEST_BODY_EMPTY);
     expect(result.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-    expect(JSON.parse(result.body).code).toEqual(ErrorCodes.OTHER);
     expect(JSON.parse(result.body).message).toMatch(/Request body must not be empty/);
   });
   it("should return error when request body is invalid json", async () => {
@@ -105,10 +100,9 @@ describe("Request body tests", function () {
       pathParameters: { portfolioDraftId: uuidv4() },
     } as any;
     const result = await handler(invalidBodyRequest);
-    expect(result).toBeInstanceOf(ErrorResponse);
+    expect(result).toBeInstanceOf(OtherErrorResponse);
     expect(result).toEqual(REQUEST_BODY_INVALID);
     expect(result.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-    expect(JSON.parse(result.body).code).toEqual(ErrorCodes.OTHER);
     expect(JSON.parse(result.body).message).toMatch(/A valid request body must be provided/);
   });
   it("should return error when request body is not a funding step", async () => {
@@ -119,10 +113,9 @@ describe("Request body tests", function () {
     expect(isFundingStep(mockFundingStepGoodData())).toEqual(true); // control
     expect(isFundingStep(notFundingStepRequest)).toEqual(false);
     const result = await handler(notFundingStepRequest);
-    expect(result).toBeInstanceOf(ErrorResponse);
+    expect(result).toBeInstanceOf(OtherErrorResponse);
     expect(result).toEqual(REQUEST_BODY_INVALID);
     expect(result.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-    expect(JSON.parse(result.body).code).toEqual(ErrorCodes.OTHER);
     expect(JSON.parse(result.body).message).toMatch(/A valid request body must be provided/);
   });
 });
@@ -352,16 +345,12 @@ describe("Error response creation tests", function () {
     const invalidProperties: Record<string, unknown> = obj;
     const response = createValidationErrorResponse(invalidProperties);
     expect(response).toBeInstanceOf(ValidationErrorResponse);
-    expect(response.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-    expect(JSON.parse(response.body).code).toEqual(ErrorCodes.INVALID_INPUT);
     expect(JSON.parse(response.body).message).toMatch(/Invalid input/);
     expect(JSON.parse(response.body).error_map).toEqual(obj);
   });
   it("should return error response containing all invalid properties in error_map", async () => {
     const result = await handler(validRequestBadData);
     expect(result).toBeInstanceOf(ValidationErrorResponse);
-    expect(result.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-    expect(JSON.parse(result.body).code).toEqual(ErrorCodes.INVALID_INPUT);
     expect(JSON.parse(result.body).message).toMatch(/Invalid input/);
   });
   it("should throw error if invalid properties input is empty", () => {

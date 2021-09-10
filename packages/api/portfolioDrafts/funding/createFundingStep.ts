@@ -19,7 +19,7 @@ import {
   isClin,
   isValidUuidV4,
 } from "../../utils/validation";
-import { ErrorCodes } from "../../models/Error";
+import { ErrorCode } from "../../models/Error";
 
 export interface ClinValidationError {
   clinNumber: string;
@@ -108,11 +108,7 @@ export function createValidationErrorResponse(invalidProperties: Record<string, 
   Object.keys(invalidProperties).forEach((key) => {
     if (!key) throw Error("Parameter 'invalidProperties' must not have empty string as key");
   });
-  return new ValidationErrorResponse({
-    error_map: invalidProperties,
-    code: ErrorCodes.INVALID_INPUT,
-    message: "Invalid input",
-  });
+  return new ValidationErrorResponse("Invalid input", invalidProperties);
 }
 
 /**

@@ -1,5 +1,5 @@
 import { APIGatewayProxyResult } from "aws-lambda";
-import { Error, ValidationError } from "../models/Error";
+import { Error, ErrorCode, ValidationError } from "../models/Error";
 
 type Headers = { [header: string]: string | number | boolean } | undefined;
 type MultiValueHeaders = { [header: string]: (string | number | boolean)[] } | undefined;
@@ -146,7 +146,17 @@ export class ValidationErrorResponse extends ErrorResponse {
    * @param headers - HTTP response headers
    * @param multiValueHeaders - HTTP response headers, allowing multiple values for a header
    */
-  constructor(validationError: ValidationError, headers?: Headers, multiValueHeaders?: MultiValueHeaders) {
-    super(validationError, ErrorStatusCode.BAD_REQUEST, headers, multiValueHeaders);
+  constructor(
+    message: string,
+    errorMap: Record<string, unknown>,
+    headers?: Headers,
+    multiValueHeaders?: MultiValueHeaders
+  ) {
+    const error: ValidationError = {
+      code: ErrorCode.INVALID_INPUT,
+      message,
+      error_map: errorMap,
+    };
+    super(error, ErrorStatusCode.BAD_REQUEST, headers, multiValueHeaders);
   }
 }
