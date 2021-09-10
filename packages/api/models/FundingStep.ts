@@ -2,7 +2,7 @@ import { Clin } from "./Clin";
 import { CloudServiceProvider } from "./CloudServiceProvider";
 import { FileMetadataSummary } from "./FileMetadataSummary";
 
-export enum ValidationMessages {
+export enum ValidationMessage {
   START_VALID = "start date must be a valid date",
   END_VALID = "end date must be a valid date",
   START_BEFORE_END = "start date must be before end date",

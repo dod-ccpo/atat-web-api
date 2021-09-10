@@ -2,7 +2,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { ApiSuccessResponse, SuccessStatusCode, ValidationErrorResponse } from "../../utils/response";
 import { dynamodbDocumentClient as client } from "../../utils/dynamodb";
 import { FUNDING_STEP } from "../../models/PortfolioDraft";
-import { FundingStep, ValidationMessages } from "../../models/FundingStep";
+import { FundingStep, ValidationMessage } from "../../models/FundingStep";
 import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import {
   DATABASE_ERROR,
@@ -19,13 +19,12 @@ import {
   isClin,
   isValidUuidV4,
 } from "../../utils/validation";
-import { ErrorCode } from "../../models/Error";
 
 export interface ClinValidationError {
   clinNumber: string;
   invalidParameterName: string;
   invalidParameterValue: string;
-  validationMessage: ValidationMessages;
+  validationMessage: ValidationMessage;
 }
 
 /**
@@ -126,7 +125,7 @@ export function validateClin(clin: unknown): Array<ClinValidationError> {
       clinNumber: clin.clin_number,
       invalidParameterName: "pop_start_date",
       invalidParameterValue: clin.pop_start_date,
-      validationMessage: ValidationMessages.START_VALID,
+      validationMessage: ValidationMessage.START_VALID,
     });
   }
   if (!isValidDate(clin.pop_end_date)) {
@@ -134,13 +133,13 @@ export function validateClin(clin: unknown): Array<ClinValidationError> {
       clinNumber: clin.clin_number,
       invalidParameterName: "pop_end_date",
       invalidParameterValue: clin.pop_end_date,
-      validationMessage: ValidationMessages.END_VALID,
+      validationMessage: ValidationMessage.END_VALID,
     });
   }
   if (new Date(clin.pop_start_date) >= new Date(clin.pop_end_date)) {
     const obj = {
       clinNumber: clin.clin_number,
-      validationMessage: ValidationMessages.START_BEFORE_END,
+      validationMessage: ValidationMessage.START_BEFORE_END,
     };
     errors.push({
       ...obj,
@@ -158,7 +157,7 @@ export function validateClin(clin: unknown): Array<ClinValidationError> {
       clinNumber: clin.clin_number,
       invalidParameterName: "pop_end_date",
       invalidParameterValue: clin.pop_end_date,
-      validationMessage: ValidationMessages.END_FUTURE,
+      validationMessage: ValidationMessage.END_FUTURE,
     });
   }
   if (clin.total_clin_value <= 0) {
@@ -166,7 +165,7 @@ export function validateClin(clin: unknown): Array<ClinValidationError> {
       clinNumber: clin.clin_number,
       invalidParameterName: "total_clin_value",
       invalidParameterValue: clin.total_clin_value.toString(),
-      validationMessage: ValidationMessages.TOTAL_GT_ZERO,
+      validationMessage: ValidationMessage.TOTAL_GT_ZERO,
     });
   }
   if (clin.obligated_funds <= 0) {
@@ -174,13 +173,13 @@ export function validateClin(clin: unknown): Array<ClinValidationError> {
       clinNumber: clin.clin_number,
       invalidParameterName: "obligated_funds",
       invalidParameterValue: clin.obligated_funds.toString(),
-      validationMessage: ValidationMessages.OBLIGATED_GT_ZERO,
+      validationMessage: ValidationMessage.OBLIGATED_GT_ZERO,
     });
   }
   if (clin.obligated_funds > clin.total_clin_value) {
     const obj = {
       clinNumber: clin.clin_number,
-      validationMessage: ValidationMessages.TOTAL_GT_OBLIGATED,
+      validationMessage: ValidationMessage.TOTAL_GT_OBLIGATED,
     };
     errors.push({
       ...obj,

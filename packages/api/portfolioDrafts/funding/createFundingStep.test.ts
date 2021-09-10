@@ -11,7 +11,7 @@ import { CloudServiceProvider } from "../../models/CloudServiceProvider";
 import { createValidationErrorResponse, handler, validateClin, validateFundingStepClins } from "./createFundingStep";
 import { DynamoDBDocumentClient, UpdateCommand, UpdateCommandOutput } from "@aws-sdk/lib-dynamodb";
 import { FileMetadata, FileScanStatus } from "../../models/FileMetadata";
-import { FundingStep, ValidationMessages } from "../../models/FundingStep";
+import { FundingStep, ValidationMessage } from "../../models/FundingStep";
 import { isFundingStep } from "../../utils/validation";
 import { mockClient } from "aws-sdk-client-mock";
 import { ProvisioningStatus } from "../../models/ProvisioningStatus";
@@ -160,13 +160,13 @@ describe("Individual Clin input validation tests", function () {
       clinNumber: "0001",
       invalidParameterName: "pop_start_date",
       invalidParameterValue: "not an ISO date",
-      validationMessage: ValidationMessages.START_VALID,
+      validationMessage: ValidationMessage.START_VALID,
     });
     expect(errors).toContainEqual({
       clinNumber: "0001",
       invalidParameterName: "pop_end_date",
       invalidParameterValue: "2021-13-01",
-      validationMessage: ValidationMessages.END_VALID,
+      validationMessage: ValidationMessage.END_VALID,
     });
   });
   it("should return error map entries when given Clin has nonsensical pop dates (start>end)", () => {
@@ -175,13 +175,13 @@ describe("Individual Clin input validation tests", function () {
       clinNumber: "0001",
       invalidParameterName: "pop_start_date",
       invalidParameterValue: tomorrow,
-      validationMessage: ValidationMessages.START_BEFORE_END,
+      validationMessage: ValidationMessage.START_BEFORE_END,
     });
     expect(errors).toContainEqual({
       clinNumber: "0001",
       invalidParameterName: "pop_end_date",
       invalidParameterValue: today,
-      validationMessage: ValidationMessages.START_BEFORE_END,
+      validationMessage: ValidationMessage.START_BEFORE_END,
     });
   });
   it("should return error map entries when given Clin has nonsensical pop dates (start=end)", () => {
@@ -190,13 +190,13 @@ describe("Individual Clin input validation tests", function () {
       clinNumber: "0001",
       invalidParameterName: "pop_start_date",
       invalidParameterValue: today,
-      validationMessage: ValidationMessages.START_BEFORE_END,
+      validationMessage: ValidationMessage.START_BEFORE_END,
     });
     expect(errors).toContainEqual({
       clinNumber: "0001",
       invalidParameterName: "pop_end_date",
       invalidParameterValue: today,
-      validationMessage: ValidationMessages.START_BEFORE_END,
+      validationMessage: ValidationMessage.START_BEFORE_END,
     });
   });
   it("should return error map entries when given Clin has nonsensical pop dates (now>end)", () => {
@@ -205,7 +205,7 @@ describe("Individual Clin input validation tests", function () {
       clinNumber: "0001",
       invalidParameterName: "pop_end_date",
       invalidParameterValue: yesterday,
-      validationMessage: ValidationMessages.END_FUTURE,
+      validationMessage: ValidationMessage.END_FUTURE,
     });
   });
   it("should return error map entries when given Clin has nonsensical funding values (total<0, obligated<0)", () => {
@@ -214,13 +214,13 @@ describe("Individual Clin input validation tests", function () {
       clinNumber: "0001",
       invalidParameterName: "total_clin_value",
       invalidParameterValue: "-1",
-      validationMessage: ValidationMessages.TOTAL_GT_ZERO,
+      validationMessage: ValidationMessage.TOTAL_GT_ZERO,
     });
     expect(errors).toContainEqual({
       clinNumber: "0001",
       invalidParameterName: "obligated_funds",
       invalidParameterValue: "-1",
-      validationMessage: ValidationMessages.OBLIGATED_GT_ZERO,
+      validationMessage: ValidationMessage.OBLIGATED_GT_ZERO,
     });
   });
   it("should return error map entries when given Clin has nonsensical funding values (total=0, obligated=0)", () => {
@@ -229,13 +229,13 @@ describe("Individual Clin input validation tests", function () {
       clinNumber: "0001",
       invalidParameterName: "total_clin_value",
       invalidParameterValue: "0",
-      validationMessage: ValidationMessages.TOTAL_GT_ZERO,
+      validationMessage: ValidationMessage.TOTAL_GT_ZERO,
     });
     expect(errors).toContainEqual({
       clinNumber: "0001",
       invalidParameterName: "obligated_funds",
       invalidParameterValue: "0",
-      validationMessage: ValidationMessages.OBLIGATED_GT_ZERO,
+      validationMessage: ValidationMessage.OBLIGATED_GT_ZERO,
     });
   });
   it("should return error map entries when given Clin has nonsensical funding values (obligated>total)", () => {
@@ -244,13 +244,13 @@ describe("Individual Clin input validation tests", function () {
       clinNumber: "0001",
       invalidParameterName: "obligated_funds",
       invalidParameterValue: "2",
-      validationMessage: ValidationMessages.TOTAL_GT_OBLIGATED,
+      validationMessage: ValidationMessage.TOTAL_GT_OBLIGATED,
     });
     expect(errors).toContainEqual({
       clinNumber: "0001",
       invalidParameterName: "total_clin_value",
       invalidParameterValue: "1",
-      validationMessage: ValidationMessages.TOTAL_GT_OBLIGATED,
+      validationMessage: ValidationMessage.TOTAL_GT_OBLIGATED,
     });
   });
   // TODO: Verification of this business rule is pending. Allowing obligated to equal total for now.
@@ -268,23 +268,23 @@ describe("All Clins in Funding Step input validation tests", function () {
       clinNumber: "0001",
       invalidParameterName: "pop_start_date",
       invalidParameterValue: "not an ISO date",
-      validationMessage: ValidationMessages.START_VALID,
+      validationMessage: ValidationMessage.START_VALID,
     });
     expect(errors).toContainEqual({
       clinNumber: "0001",
       invalidParameterName: "pop_end_date",
       invalidParameterValue: "2021-13-01",
-      validationMessage: ValidationMessages.END_VALID,
+      validationMessage: ValidationMessage.END_VALID,
     });
     expect(errors).toContainEqual({
       clinNumber: "0001",
-      validationMessage: ValidationMessages.START_BEFORE_END,
+      validationMessage: ValidationMessage.START_BEFORE_END,
       invalidParameterName: "pop_start_date",
       invalidParameterValue: tomorrow,
     });
     expect(errors).toContainEqual({
       clinNumber: "0001",
-      validationMessage: ValidationMessages.START_BEFORE_END,
+      validationMessage: ValidationMessage.START_BEFORE_END,
       invalidParameterName: "pop_end_date",
       invalidParameterValue: today,
     });
@@ -292,17 +292,17 @@ describe("All Clins in Funding Step input validation tests", function () {
       clinNumber: "0001",
       invalidParameterName: "pop_end_date",
       invalidParameterValue: today,
-      validationMessage: ValidationMessages.END_FUTURE,
+      validationMessage: ValidationMessage.END_FUTURE,
     });
     expect(errors).toContainEqual({
       clinNumber: "0001",
-      validationMessage: ValidationMessages.START_BEFORE_END,
+      validationMessage: ValidationMessage.START_BEFORE_END,
       invalidParameterName: "pop_start_date",
       invalidParameterValue: yesterday,
     });
     expect(errors).toContainEqual({
       clinNumber: "0001",
-      validationMessage: ValidationMessages.START_BEFORE_END,
+      validationMessage: ValidationMessage.START_BEFORE_END,
       invalidParameterName: "pop_end_date",
       invalidParameterValue: yesterday,
     });
@@ -310,29 +310,29 @@ describe("All Clins in Funding Step input validation tests", function () {
       clinNumber: "0001",
       invalidParameterName: "pop_end_date",
       invalidParameterValue: yesterday,
-      validationMessage: ValidationMessages.END_FUTURE,
+      validationMessage: ValidationMessage.END_FUTURE,
     });
     expect(errors).toContainEqual({
       clinNumber: "0001",
       invalidParameterName: "total_clin_value",
       invalidParameterValue: "0",
-      validationMessage: ValidationMessages.TOTAL_GT_ZERO,
+      validationMessage: ValidationMessage.TOTAL_GT_ZERO,
     });
     expect(errors).toContainEqual({
       clinNumber: "0001",
       invalidParameterName: "obligated_funds",
       invalidParameterValue: "0",
-      validationMessage: ValidationMessages.OBLIGATED_GT_ZERO,
+      validationMessage: ValidationMessage.OBLIGATED_GT_ZERO,
     });
     expect(errors).toContainEqual({
       clinNumber: "0001",
-      validationMessage: ValidationMessages.TOTAL_GT_OBLIGATED,
+      validationMessage: ValidationMessage.TOTAL_GT_OBLIGATED,
       invalidParameterName: "obligated_funds",
       invalidParameterValue: "2",
     });
     expect(errors).toContainEqual({
       clinNumber: "0001",
-      validationMessage: ValidationMessages.TOTAL_GT_OBLIGATED,
+      validationMessage: ValidationMessage.TOTAL_GT_OBLIGATED,
       invalidParameterName: "total_clin_value",
       invalidParameterValue: "1",
     });
