@@ -21,20 +21,21 @@ import {
 } from "../../utils/validation";
 import { ErrorCodes } from "../../models/Error";
 
-/**
- * Validation error tuple
- * verror = ["clin_number", "param_name", "param_value", "message"];
- */
-export let verror: [string, string, string, string];
+export interface ClinValidationError {
+  clinNumber: string;
+  invalidParameterName: string;
+  invalidParameterValue: string;
+  validationMessage: ValidationMessages;
+}
 
 /**
  * Accepts a Funding Step and performs input validation
  * on all Clins contained therein.
- * @returns a collection of four-element tuples containing clin number, property names and values that failed input validation, and a specific message
+ * @returns a collection of clin validation errors
  */
-export function validateFundingStepClins(fs: FundingStep): Array<typeof verror> {
+export function validateFundingStepClins(fs: FundingStep): Array<ClinValidationError> {
   const clins = fs.clins.values();
-  let errorAccumulator = Array<typeof verror>();
+  let errorAccumulator = Array<ClinValidationError>();
   for (const clin of clins) {
     const errors = validateClin(clin);
     if (errors.length) {
@@ -68,7 +69,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
     return REQUEST_BODY_INVALID;
   }
   const fundingStep: FundingStep = requestBody;
-  const errors: Array<typeof verror> = validateFundingStepClins(fundingStep);
+  const errors: Array<ClinValidationError> = validateFundingStepClins(fundingStep);
   if (errors.length) {
     return createValidationErrorResponse({ input_validation_errors: errors });
   }
@@ -124,57 +125,85 @@ export function createValidationErrorResponse(invalidProperties: Record<string, 
 
 /**
  * Validates the given clin object
- * Returns a Clin-centric array of tuples representing validation errors.
  * @param clin an object that looks like a Clin
- * @returns a collection of four-element tuples containing clin number, property names and values that failed input validation, and a specific message
+ * @returns a collection of clin validation errors
  */
-export function validateClin(clin: unknown): Array<typeof verror> {
+export function validateClin(clin: unknown): Array<ClinValidationError> {
   if (!isClin(clin)) {
     throw Error("Input must be a Clin object");
   }
-  const errors = Array<typeof verror>();
+  const errors = Array<ClinValidationError>();
   if (!isValidDate(clin.pop_start_date)) {
-    errors.push([clin.clin_number, "pop_start_date", clin.pop_start_date, ValidationMessages.START_VALID]);
+    errors.push({
+      clinNumber: clin.clin_number,
+      invalidParameterName: "pop_start_date",
+      invalidParameterValue: clin.pop_start_date,
+      validationMessage: ValidationMessages.START_VALID,
+    });
   }
   if (!isValidDate(clin.pop_end_date)) {
-    errors.push([clin.clin_number, "pop_end_date", clin.pop_end_date, ValidationMessages.END_VALID]);
+    errors.push({
+      clinNumber: clin.clin_number,
+      invalidParameterName: "pop_end_date",
+      invalidParameterValue: clin.pop_end_date,
+      validationMessage: ValidationMessages.END_VALID,
+    });
   }
   if (new Date(clin.pop_start_date) >= new Date(clin.pop_end_date)) {
-    errors.push([clin.clin_number, "pop_start_date", clin.pop_start_date, ValidationMessages.START_BEFORE_END]);
-    errors.push([clin.clin_number, "pop_end_date", clin.pop_end_date, ValidationMessages.START_BEFORE_END]);
+    const obj = {
+      clinNumber: clin.clin_number,
+      validationMessage: ValidationMessages.START_BEFORE_END,
+    };
+    errors.push({
+      ...obj,
+      invalidParameterName: "pop_start_date",
+      invalidParameterValue: clin.pop_start_date,
+    });
+    errors.push({
+      ...obj,
+      invalidParameterName: "pop_end_date",
+      invalidParameterValue: clin.pop_end_date,
+    });
   }
   if (new Date() >= new Date(clin.pop_end_date)) {
-    errors.push([clin.clin_number, "pop_end_date", clin.pop_end_date, ValidationMessages.END_FUTURE]);
+    errors.push({
+      clinNumber: clin.clin_number,
+      invalidParameterName: "pop_end_date",
+      invalidParameterValue: clin.pop_end_date,
+      validationMessage: ValidationMessages.END_FUTURE,
+    });
   }
   if (clin.total_clin_value <= 0) {
-    errors.push([
-      clin.clin_number,
-      "total_clin_value",
-      clin.total_clin_value.toString(),
-      ValidationMessages.TOTAL_GT_ZERO,
-    ]);
+    errors.push({
+      clinNumber: clin.clin_number,
+      invalidParameterName: "total_clin_value",
+      invalidParameterValue: clin.total_clin_value.toString(),
+      validationMessage: ValidationMessages.TOTAL_GT_ZERO,
+    });
   }
   if (clin.obligated_funds <= 0) {
-    errors.push([
-      clin.clin_number,
-      "obligated_funds",
-      clin.obligated_funds.toString(),
-      ValidationMessages.OBLIGATED_GT_ZERO,
-    ]);
+    errors.push({
+      clinNumber: clin.clin_number,
+      invalidParameterName: "obligated_funds",
+      invalidParameterValue: clin.obligated_funds.toString(),
+      validationMessage: ValidationMessages.OBLIGATED_GT_ZERO,
+    });
   }
   if (clin.obligated_funds > clin.total_clin_value) {
-    errors.push([
-      clin.clin_number,
-      "obligated_funds",
-      clin.obligated_funds.toString(),
-      ValidationMessages.TOTAL_GT_OBLIGATED,
-    ]);
-    errors.push([
-      clin.clin_number,
-      "total_clin_value",
-      clin.total_clin_value.toString(),
-      ValidationMessages.TOTAL_GT_OBLIGATED,
-    ]);
+    const obj = {
+      clinNumber: clin.clin_number,
+      validationMessage: ValidationMessages.TOTAL_GT_OBLIGATED,
+    };
+    errors.push({
+      ...obj,
+      invalidParameterName: "obligated_funds",
+      invalidParameterValue: clin.obligated_funds.toString(),
+    });
+    errors.push({
+      ...obj,
+      invalidParameterName: "total_clin_value",
+      invalidParameterValue: clin.total_clin_value.toString(),
+    });
   }
   return errors;
 }
