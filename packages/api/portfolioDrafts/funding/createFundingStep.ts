@@ -19,6 +19,7 @@ import {
   isClin,
   isValidUuidV4,
   isClinNumber,
+  isFundingAmount,
 } from "../../utils/validation";
 
 export interface ClinValidationError {
@@ -170,20 +171,20 @@ export function validateClin(clin: unknown): Array<ClinValidationError> {
       validationMessage: ValidationMessage.END_FUTURE,
     });
   }
-  if (clin.total_clin_value <= 0) {
+  if (!isFundingAmount(clin.total_clin_value.toString())) {
     errors.push({
       clinNumber: clin.clin_number,
       invalidParameterName: "total_clin_value",
       invalidParameterValue: clin.total_clin_value.toString(),
-      validationMessage: ValidationMessage.TOTAL_GT_ZERO,
+      validationMessage: ValidationMessage.INVALID_FUNDING_AMOUNT,
     });
   }
-  if (clin.obligated_funds <= 0) {
+  if (!isFundingAmount(clin.obligated_funds.toString())) {
     errors.push({
       clinNumber: clin.clin_number,
       invalidParameterName: "obligated_funds",
       invalidParameterValue: clin.obligated_funds.toString(),
-      validationMessage: ValidationMessage.OBLIGATED_GT_ZERO,
+      validationMessage: ValidationMessage.INVALID_FUNDING_AMOUNT,
     });
   }
   if (clin.obligated_funds > clin.total_clin_value) {

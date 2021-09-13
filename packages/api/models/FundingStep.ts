@@ -7,8 +7,7 @@ export enum ValidationMessage {
   END_VALID = "end date must be a valid date",
   START_BEFORE_END = "start date must be before end date",
   END_FUTURE = "end date must be in the future",
-  TOTAL_GT_ZERO = "total clin value must be greater than zero",
-  OBLIGATED_GT_ZERO = "obligated funds must be greater than zero",
+  INVALID_FUNDING_AMOUNT = "funding amount must be numbers and amount must be greater than zero",
   TOTAL_GT_OBLIGATED = "total clin value must be greater than obligated funds",
   INVALID_CLIN_NUMBER = "clin number must be four numbers and in range 0001 through 9999",
 }

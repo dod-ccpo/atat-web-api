@@ -208,37 +208,52 @@ describe("Individual Clin input validation tests", function () {
       validationMessage: ValidationMessage.END_FUTURE,
     });
   });
-  it("should return error map entries when given Clin has invalid funding values (total<0, obligated<0)", () => {
+  it("should return error map entries when given Clin has invalid funding amounts (not numbers)", () => {
+    const errors = validateClin(mockClinNotANumberFunds());
+    expect(errors).toContainEqual({
+      clinNumber: "0001",
+      invalidParameterName: "total_clin_value",
+      invalidParameterValue: "not a number",
+      validationMessage: ValidationMessage.INVALID_FUNDING_AMOUNT,
+    });
+    expect(errors).toContainEqual({
+      clinNumber: "0001",
+      invalidParameterName: "obligated_funds",
+      invalidParameterValue: "not a number",
+      validationMessage: ValidationMessage.INVALID_FUNDING_AMOUNT,
+    });
+  });
+  it("should return error map entries when given Clin has invalid funding amounts (total<0, obligated<0)", () => {
     const errors = validateClin(mockClinLessThanZeroFunds());
     expect(errors).toContainEqual({
       clinNumber: "0001",
       invalidParameterName: "total_clin_value",
       invalidParameterValue: "-1",
-      validationMessage: ValidationMessage.TOTAL_GT_ZERO,
+      validationMessage: ValidationMessage.INVALID_FUNDING_AMOUNT,
     });
     expect(errors).toContainEqual({
       clinNumber: "0001",
       invalidParameterName: "obligated_funds",
       invalidParameterValue: "-1",
-      validationMessage: ValidationMessage.OBLIGATED_GT_ZERO,
+      validationMessage: ValidationMessage.INVALID_FUNDING_AMOUNT,
     });
   });
-  it("should return error map entries when given Clin has invalid funding values (total=0, obligated=0)", () => {
+  it("should return error map entries when given Clin has invalid funding amounts (total=0, obligated=0)", () => {
     const errors = validateClin(mockClinZeroFunds());
     expect(errors).toContainEqual({
       clinNumber: "0001",
       invalidParameterName: "total_clin_value",
       invalidParameterValue: "0",
-      validationMessage: ValidationMessage.TOTAL_GT_ZERO,
+      validationMessage: ValidationMessage.INVALID_FUNDING_AMOUNT,
     });
     expect(errors).toContainEqual({
       clinNumber: "0001",
       invalidParameterName: "obligated_funds",
       invalidParameterValue: "0",
-      validationMessage: ValidationMessage.OBLIGATED_GT_ZERO,
+      validationMessage: ValidationMessage.INVALID_FUNDING_AMOUNT,
     });
   });
-  it("should return error map entries when given Clin has invalid funding values (obligated>total)", () => {
+  it("should return error map entries when given Clin has invalid funding amounts (obligated>total)", () => {
     const errors = validateClin(mockClinObligatedGreaterThanTotal());
     expect(errors).toContainEqual({
       clinNumber: "0001",
@@ -361,13 +376,13 @@ describe("All Clins in Funding Step input validation tests", function () {
       clinNumber: "0001",
       invalidParameterName: "total_clin_value",
       invalidParameterValue: "0",
-      validationMessage: ValidationMessage.TOTAL_GT_ZERO,
+      validationMessage: ValidationMessage.INVALID_FUNDING_AMOUNT,
     });
     expect(errors).toContainEqual({
       clinNumber: "0001",
       invalidParameterName: "obligated_funds",
       invalidParameterValue: "0",
-      validationMessage: ValidationMessage.OBLIGATED_GT_ZERO,
+      validationMessage: ValidationMessage.INVALID_FUNDING_AMOUNT,
     });
     expect(errors).toContainEqual({
       clinNumber: "0001",
@@ -460,6 +475,7 @@ function mockFundingStepBadData(): FundingStep {
       mockClinAlreadyEnded(),
       mockClinZeroFunds(),
       mockClinObligatedGreaterThanTotal(),
+      // Note, can't add mockClinNotANumberFunds() here
     ],
   };
 }
@@ -606,5 +622,20 @@ function mockClinObligatedEqualsTotal(): Clin {
     ...mockClin(),
     obligated_funds: 1,
     total_clin_value: 1,
+  };
+}
+/**
+ * Returns a static almost-clin containing bad inputs
+ * - obligated funds is not a number
+ * - total clin value is not a number
+ * @returns an almost-Clin with values that should cause validation errors
+ */
+function mockClinNotANumberFunds() {
+  // return type can't be Clin for this mock because strings
+  // below don't meet the Clin interface
+  return {
+    ...mockClin(),
+    obligated_funds: "not a number",
+    total_clin_value: "not a number",
   };
 }

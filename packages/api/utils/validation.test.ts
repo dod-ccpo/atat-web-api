@@ -260,7 +260,7 @@ describe("isFundingAmount()", function () {
   // Reject?  Accept and round?  Accept and truncate?
   // This formatter rounds the values to nearest cent:
   // Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
-  // So the values below yield ["$1.99", "$1.99", "$2.00", "$2.00"];
+  // The values below yield ["$1.99", "$1.99", "$2.00", "$2.00"];
   const questionableAmounts = ["1.991", "1.994", "1.995", "1.999"];
   it.each(questionableAmounts)("should accept a funding amount that is valid", (num) => {
     expect(isFundingAmount(num)).toEqual(true);
