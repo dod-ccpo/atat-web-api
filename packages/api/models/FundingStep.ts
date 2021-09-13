@@ -11,5 +11,5 @@ export enum ValidationMessage {
 }
 
 export interface FundingStep {
-  task_orders: Array<TaskOrder>
+  task_orders: Array<TaskOrder>;
 }

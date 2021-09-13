@@ -450,7 +450,7 @@ function mockFundingStepGoodData(): FundingStep {
         csp: CloudServiceProvider.AWS,
         clins: [mockClin()],
       },
-    ]
+    ],
   };
 }
 /**
@@ -483,8 +483,8 @@ function mockFundingStepBadData(): FundingStep {
           mockClinObligatedGreaterThanTotal(),
           // Note, can't add mockClinNotANumberFunds() here
         ],
-      }
-    ]
+      },
+    ],
   };
 }
 

@@ -107,8 +107,8 @@ describe("Testing validation of fundingStep objects", () => {
         task_order_file: toFile,
         csp: "aws",
         clins: [fakeClinData],
-      }
-    ]
+      },
+    ],
   };
   const badFundingSteps = [
     {

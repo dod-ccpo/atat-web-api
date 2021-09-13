@@ -36,8 +36,8 @@ export interface ClinValidationError {
  * @returns a collection of clin validation errors
  */
 export function validateFundingStepClins(fs: FundingStep): Array<ClinValidationError> {
-  const clins: Array<Clin> = []
-  fs.task_orders.forEach(task_order => task_order.clins.forEach(clin => clins.push(clin)))
+  const clins: Array<Clin> = [];
+  fs.task_orders.forEach((taskOrder) => taskOrder.clins.forEach((clin) => clins.push(clin)));
   return clins.map(validateClin).reduce((accumulator, validationErrors) => accumulator.concat(validationErrors), []);
 }
 
@@ -85,7 +85,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
         ExpressionAttributeValues: {
           ":step": fundingStep,
           ":now": new Date().toISOString(),
-          ":numOfTaskOrders": fundingStep.task_orders.length
+          ":numOfTaskOrders": fundingStep.task_orders.length,
         },
         ConditionExpression: "attribute_exists(created_at)",
         ReturnValues: "ALL_NEW",
