@@ -75,7 +75,6 @@ export function isFundingStep(object: unknown): object is FundingStep {
   return ["task_orders"].every((item) => item in object);
 }
 
-// TODO: ensure createFundingStep tests account for validating task order objects
 /**
  * Check whether a given object is a {@link TaskOrder}
  *
