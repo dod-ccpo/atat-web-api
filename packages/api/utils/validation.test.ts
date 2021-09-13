@@ -101,10 +101,14 @@ describe("Testing validation of fundingStep objects", () => {
   };
   const toFile = { id: "1234", name: "testto.pdf" };
   const fundingStepLike = {
-    task_order_number: "1234567890",
-    task_order_file: toFile,
-    csp: "aws",
-    clins: [fakeClinData],
+    task_orders: [
+      {
+        task_order_number: "1234567890",
+        task_order_file: toFile,
+        csp: "aws",
+        clins: [fakeClinData],
+      }
+    ]
   };
   const badFundingSteps = [
     {

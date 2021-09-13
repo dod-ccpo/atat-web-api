@@ -2,6 +2,7 @@ import { ApplicationStep } from "../models/ApplicationStep";
 import { Clin } from "../models/Clin";
 import { FundingStep } from "../models/FundingStep";
 import { PortfolioStep } from "../models/PortfolioStep";
+import { TaskOrder } from "../models/TaskOrder";
 import { validate as uuidValidate, version as uuidVersion } from "uuid";
 import { Application } from "../models/Application";
 import { Environment } from "../models/Environment";
@@ -68,6 +69,20 @@ export function isPortfolioStep(object: unknown): object is PortfolioStep {
  * @returns true if the object has all the attributes of a {@link FundingStep}
  */
 export function isFundingStep(object: unknown): object is FundingStep {
+  if (!isValidObject(object)) {
+    return false;
+  }
+  return ["task_orders"].every((item) => item in object);
+}
+
+// TODO: ensure createFundingStep tests account for validating task order objects
+/**
+ * Check whether a given object is a {@link TaskOrder}
+ *
+ * @param object - The object to check
+ * @returns true if object has all attributes of a {@link TaskOrder}
+ */
+export function isTaskOrder(object: unknown): object is TaskOrder {
   if (!isValidObject(object)) {
     return false;
   }

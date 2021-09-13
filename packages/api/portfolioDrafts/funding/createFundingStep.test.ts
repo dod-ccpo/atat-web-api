@@ -443,10 +443,14 @@ function mockFundingStepGoodData(): FundingStep {
     updated_at: "2021-08-03T16:21:07.978Z",
   };
   return {
-    task_order_number: "12345678910",
-    task_order_file: mockTaskOrderFile,
-    csp: CloudServiceProvider.AWS,
-    clins: [mockClin()],
+    task_orders: [
+      {
+        task_order_number: "12345678910",
+        task_order_file: mockTaskOrderFile,
+        csp: CloudServiceProvider.AWS,
+        clins: [mockClin()],
+      },
+    ]
   };
 }
 /**
@@ -463,20 +467,24 @@ function mockFundingStepBadData(): FundingStep {
     updated_at: "2021-08-03T16:21:07.978Z",
   };
   return {
-    task_order_number: "12345678910",
-    task_order_file: mockTaskOrderFile,
-    csp: CloudServiceProvider.AWS,
-    clins: [
-      mockClinInvalidClinNumberTooShort(),
-      mockClinInvalidClinNumberTooLong(),
-      mockClinInvalidClinNumberAllZeros(),
-      mockClinInvalidDates(),
-      mockClinStartAfterEnd(),
-      mockClinAlreadyEnded(),
-      mockClinZeroFunds(),
-      mockClinObligatedGreaterThanTotal(),
-      // Note, can't add mockClinNotANumberFunds() here
-    ],
+    task_orders: [
+      {
+        task_order_number: "12345678910",
+        task_order_file: mockTaskOrderFile,
+        csp: CloudServiceProvider.AWS,
+        clins: [
+          mockClinInvalidClinNumberTooShort(),
+          mockClinInvalidClinNumberTooLong(),
+          mockClinInvalidClinNumberAllZeros(),
+          mockClinInvalidDates(),
+          mockClinStartAfterEnd(),
+          mockClinAlreadyEnded(),
+          mockClinZeroFunds(),
+          mockClinObligatedGreaterThanTotal(),
+          // Note, can't add mockClinNotANumberFunds() here
+        ],
+      }
+    ]
   };
 }
 

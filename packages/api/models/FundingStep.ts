@@ -1,6 +1,4 @@
-import { Clin } from "./Clin";
-import { CloudServiceProvider } from "./CloudServiceProvider";
-import { FileMetadataSummary } from "./FileMetadataSummary";
+import { TaskOrder } from "./TaskOrder";
 
 export enum ValidationMessage {
   START_VALID = "start date must be a valid date",
@@ -13,8 +11,5 @@ export enum ValidationMessage {
 }
 
 export interface FundingStep {
-  task_order_number: string;
-  task_order_file: FileMetadataSummary;
-  csp: CloudServiceProvider;
-  clins: Array<Clin>;
+  task_orders: Array<TaskOrder>
 }
