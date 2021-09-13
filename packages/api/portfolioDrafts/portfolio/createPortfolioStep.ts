@@ -70,13 +70,17 @@ export async function createPortfolioStepCommand(
       Key: {
         id: portfolioDraftId,
       },
-      UpdateExpression: "set #portfolioVariable = :portfolio, updated_at = :now",
+      UpdateExpression: `set #portfolioVariable = :portfolio, updated_at = :now,
+        #portfolioName = :portfolioName, num_portfolio_managers = :numOfManagers`,
       ExpressionAttributeNames: {
         "#portfolioVariable": PORTFOLIO_STEP,
+        "#portfolioName": "name",
       },
       ExpressionAttributeValues: {
         ":portfolio": portfolioStep,
         ":now": now,
+        ":portfolioName": portfolioStep.name,
+        ":numOfManagers": portfolioStep.portfolio_managers.length,
       },
       ConditionExpression: "attribute_exists(created_at)",
       ReturnValues: "ALL_NEW",
