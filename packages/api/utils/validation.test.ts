@@ -6,6 +6,7 @@ import {
   isValidJson,
   isValidDate,
   isClin,
+  isClinNumber,
 } from "./validation";
 
 describe("Testing validation of request body", function () {
@@ -231,5 +232,16 @@ describe("isClin()", function () {
   });
   it.each(badClins)("should reject a Clin missing any field", async (badClin) => {
     expect(isClin(badClin)).toEqual(false);
+  });
+});
+
+describe("isClinNumber()", function () {
+  const goodClinNumbers = ["0001", "0010", "0500", "5000", "9999"];
+  it.each(goodClinNumbers)("should reject a clin number with incorrect length or not in valid range", (num) => {
+    expect(isClinNumber(num)).toEqual(true);
+  });
+  const badClinNumbers = ["", "0", "1", "02", "111", "0000", "10000", "99999"];
+  it.each(badClinNumbers)("should reject a clin number with incorrect length or not in valid range", (num) => {
+    expect(isClinNumber(num)).toEqual(false);
   });
 });
