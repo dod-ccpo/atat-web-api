@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
-    "test": "jest",
+    "test": "jest --config=jest.config.js",
     "cdk": "cdk",
     "lint": "eslint --ext .js,.ts,.json -c ../.eslintrc.json .",
     "lint:fix": "npm run lint -- --fix"

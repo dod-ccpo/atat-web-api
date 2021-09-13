@@ -5,6 +5,7 @@ import "source-map-support/register";
 import { AtatAuthStack } from "../lib/atat-auth-stack";
 import { AtatWebApiStack } from "../lib/atat-web-api-stack";
 import { getTags } from "../lib/load-tags";
+import { isString, lowerCaseEnvironmentId, normalizeEnvironmentName } from "../lib/util";
 
 const app = new cdk.App();
 if (process.env.CDK_NAG_ENABLED === "1") {
@@ -15,22 +16,24 @@ if (process.env.CDK_NAG_ENABLED === "1") {
 const removalPolicy = cdk.RemovalPolicy.DESTROY;
 
 // Ugly hack to quickly isolate deployments for developers.  To be improved/removed later.
-const environmentId = app.node.tryGetContext("EnvironmentId") ?? app.node.tryGetContext("TicketId");
+const environmentParam = app.node.tryGetContext("EnvironmentId") ?? app.node.tryGetContext("TicketId");
 
-if (!environmentId) {
+if (!isString(environmentParam)) {
   console.error("An EnvironmentId must be provided");
   process.exit(1);
 }
-
 if (app.node.tryGetContext("TicketId")) {
   console.warn("The TicketId context item is deprecated. Migrate to EnvironmentId.");
 }
 
+const environmentName = normalizeEnvironmentName(environmentParam);
+const environmentId = lowerCaseEnvironmentId(environmentParam);
+
 const stacks = [
-  new AtatWebApiStack(app, environmentId + "AtatWebApiStack", {
+  new AtatWebApiStack(app, environmentName + "AtatWebApiStack", {
     removalPolicy,
   }),
-  new AtatAuthStack(app, environmentId + "AtatAuthStack", {
+  new AtatAuthStack(app, environmentName + "AtatAuthStack", {
     secretName: "auth/oidc/aad",
     providerName: "ATATDevAAD",
     environmentId,
@@ -40,10 +43,6 @@ const stacks = [
 
 // Perform operations on all stacks
 for (const stack of stacks) {
-  if (!environmentId) {
-    cdk.Annotations.of(stack).addWarning("An EnvironmentId should be provided to isolate your deployment from others");
-  }
-
   // Apply tags from both tag files; warn if unable to load tags from either
   const tagFiles = ["tags.json", "tags-private.json"];
   for (const tagFile of tagFiles) {
