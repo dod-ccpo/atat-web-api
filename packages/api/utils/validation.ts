@@ -137,3 +137,29 @@ export function isClin(object: unknown): object is Clin {
     (item) => item in object
   );
 }
+
+/**
+ * Check whether a given string is a valid CLIN number.
+ * @param str - The string to check
+ * @returns true if the string is a valid CLIN number; false otherwise
+ */
+export function isClinNumber(str: string): boolean {
+  if (str.length !== 4) {
+    return false;
+  }
+  const num: number = parseInt(str);
+  return num >= 1 && num <= 9999;
+}
+
+/**
+ * Check whether a given string is a valid Funding Amount.
+ * @param str - The string to check
+ * @returns true if the string is a valid Funding Amount; false otherwise
+ */
+export function isFundingAmount(str: string): boolean {
+  if (str.length === 0) {
+    return false;
+  }
+  const num: number = parseFloat(str);
+  return num > 0;
+}
