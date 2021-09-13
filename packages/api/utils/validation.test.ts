@@ -7,6 +7,7 @@ import {
   isValidDate,
   isClin,
   isClinNumber,
+  isFundingAmount,
 } from "./validation";
 
 describe("Testing validation of request body", function () {
@@ -243,5 +244,25 @@ describe("isClinNumber()", function () {
   const badClinNumbers = ["", "0", "1", "02", "111", "0000", "10000", "99999"];
   it.each(badClinNumbers)("should reject a clin number with unexpected length or not within accepted range", (num) => {
     expect(isClinNumber(num)).toEqual(false);
+  });
+});
+
+describe("isFundingAmount()", function () {
+  const goodAmounts = ["1", "1.1", "1.50", "1.99", "250000"];
+  it.each(goodAmounts)("should accept a funding amount that is valid", (num) => {
+    expect(isFundingAmount(num)).toEqual(true);
+  });
+  const badAmounts = ["", "0", "-1", "not a number"];
+  it.each(badAmounts)("should reject a funding amount that is invalid", (num) => {
+    expect(isFundingAmount(num)).toEqual(false);
+  });
+  // TODO: What should be done with decimals greater than two digits?
+  // Reject?  Accept and round?  Accept and truncate?
+  // This formatter rounds the values to nearest cent:
+  // Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
+  // So the values below yield ["$1.99", "$1.99", "$2.00", "$2.00"];
+  const questionableAmounts = ["1.991", "1.994", "1.995", "1.999"];
+  it.each(questionableAmounts)("should accept a funding amount that is valid", (num) => {
+    expect(isFundingAmount(num)).toEqual(true);
   });
 });
