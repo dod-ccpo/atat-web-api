@@ -10,6 +10,7 @@ export enum ValidationMessage {
   TOTAL_GT_ZERO = "total clin value must be greater than zero",
   OBLIGATED_GT_ZERO = "obligated funds must be greater than zero",
   TOTAL_GT_OBLIGATED = "total clin value must be greater than obligated funds",
+  INVALID_CLIN_NUMBER = "clin number must be four numbers and in range 0001 through 9999",
 }
 
 export interface FundingStep {

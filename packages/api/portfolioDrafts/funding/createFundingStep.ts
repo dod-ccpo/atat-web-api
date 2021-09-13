@@ -18,6 +18,7 @@ import {
   isPathParameterPresent,
   isClin,
   isValidUuidV4,
+  isClinNumber,
 } from "../../utils/validation";
 
 export interface ClinValidationError {
@@ -120,6 +121,15 @@ export function validateClin(clin: unknown): Array<ClinValidationError> {
     throw Error("Input must be a Clin object");
   }
   const errors = Array<ClinValidationError>();
+
+  if (!isClinNumber(clin.clin_number)) {
+    errors.push({
+      clinNumber: clin.clin_number,
+      invalidParameterName: "clin_number",
+      invalidParameterValue: clin.clin_number,
+      validationMessage: ValidationMessage.INVALID_CLIN_NUMBER,
+    });
+  }
   if (!isValidDate(clin.pop_start_date)) {
     errors.push({
       clinNumber: clin.clin_number,

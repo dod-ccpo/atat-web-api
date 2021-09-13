@@ -169,7 +169,7 @@ describe("Individual Clin input validation tests", function () {
       validationMessage: ValidationMessage.END_VALID,
     });
   });
-  it("should return error map entries when given Clin has nonsensical pop dates (start>end)", () => {
+  it("should return error map entries when given Clin has invalid pop dates (start>end)", () => {
     const errors = validateClin(mockClinStartAfterEnd());
     expect(errors).toContainEqual({
       clinNumber: "0001",
@@ -184,7 +184,7 @@ describe("Individual Clin input validation tests", function () {
       validationMessage: ValidationMessage.START_BEFORE_END,
     });
   });
-  it("should return error map entries when given Clin has nonsensical pop dates (start=end)", () => {
+  it("should return error map entries when given Clin has invalid pop dates (start=end)", () => {
     const errors = validateClin(mockClinStartEqualsEnd());
     expect(errors).toContainEqual({
       clinNumber: "0001",
@@ -199,7 +199,7 @@ describe("Individual Clin input validation tests", function () {
       validationMessage: ValidationMessage.START_BEFORE_END,
     });
   });
-  it("should return error map entries when given Clin has nonsensical pop dates (now>end)", () => {
+  it("should return error map entries when given Clin has invalid pop dates (now>end)", () => {
     const errors = validateClin(mockClinAlreadyEnded());
     expect(errors).toContainEqual({
       clinNumber: "0001",
@@ -208,7 +208,7 @@ describe("Individual Clin input validation tests", function () {
       validationMessage: ValidationMessage.END_FUTURE,
     });
   });
-  it("should return error map entries when given Clin has nonsensical funding values (total<0, obligated<0)", () => {
+  it("should return error map entries when given Clin has invalid funding values (total<0, obligated<0)", () => {
     const errors = validateClin(mockClinLessThanZeroFunds());
     expect(errors).toContainEqual({
       clinNumber: "0001",
@@ -223,7 +223,7 @@ describe("Individual Clin input validation tests", function () {
       validationMessage: ValidationMessage.OBLIGATED_GT_ZERO,
     });
   });
-  it("should return error map entries when given Clin has nonsensical funding values (total=0, obligated=0)", () => {
+  it("should return error map entries when given Clin has invalid funding values (total=0, obligated=0)", () => {
     const errors = validateClin(mockClinZeroFunds());
     expect(errors).toContainEqual({
       clinNumber: "0001",
@@ -238,7 +238,7 @@ describe("Individual Clin input validation tests", function () {
       validationMessage: ValidationMessage.OBLIGATED_GT_ZERO,
     });
   });
-  it("should return error map entries when given Clin has nonsensical funding values (obligated>total)", () => {
+  it("should return error map entries when given Clin has invalid funding values (obligated>total)", () => {
     const errors = validateClin(mockClinObligatedGreaterThanTotal());
     expect(errors).toContainEqual({
       clinNumber: "0001",
@@ -253,6 +253,33 @@ describe("Individual Clin input validation tests", function () {
       validationMessage: ValidationMessage.TOTAL_GT_OBLIGATED,
     });
   });
+  it("should return error map entries when given Clin has invalid clin number (<4char)", () => {
+    const errors = validateClin(mockClinInvalidClinNumberTooShort());
+    expect(errors).toContainEqual({
+      clinNumber: "1",
+      invalidParameterName: "clin_number",
+      invalidParameterValue: "1",
+      validationMessage: ValidationMessage.INVALID_CLIN_NUMBER,
+    });
+  });
+  it("should return error map entries when given Clin has invalid clin number (>4char)", () => {
+    const errors = validateClin(mockClinInvalidClinNumberTooLong());
+    expect(errors).toContainEqual({
+      clinNumber: "00001",
+      invalidParameterName: "clin_number",
+      invalidParameterValue: "00001",
+      validationMessage: ValidationMessage.INVALID_CLIN_NUMBER,
+    });
+  });
+  it("should return error map entries when given Clin has invalid clin number (all 0s)", () => {
+    const errors = validateClin(mockClinInvalidClinNumberAllZeros());
+    expect(errors).toContainEqual({
+      clinNumber: "0000",
+      invalidParameterName: "clin_number",
+      invalidParameterValue: "0000",
+      validationMessage: ValidationMessage.INVALID_CLIN_NUMBER,
+    });
+  });
   // TODO: Verification of this business rule is pending. Allowing obligated to equal total for now.
   it("should return no error map entries when given Clin has these funding values (obligated=total)", () => {
     const errors = validateClin(mockClinObligatedEqualsTotal());
@@ -263,7 +290,25 @@ describe("Individual Clin input validation tests", function () {
 describe("All Clins in Funding Step input validation tests", function () {
   it("should accept a Funding Step and validate all Clins contained therein", () => {
     const errors = validateFundingStepClins(mockFundingStepBadData());
-    expect(errors.length).toEqual(12);
+    expect(errors.length).toEqual(15);
+    expect(errors).toContainEqual({
+      clinNumber: "1",
+      invalidParameterName: "clin_number",
+      invalidParameterValue: "1",
+      validationMessage: ValidationMessage.INVALID_CLIN_NUMBER,
+    });
+    expect(errors).toContainEqual({
+      clinNumber: "0000",
+      invalidParameterName: "clin_number",
+      invalidParameterValue: "0000",
+      validationMessage: ValidationMessage.INVALID_CLIN_NUMBER,
+    });
+    expect(errors).toContainEqual({
+      clinNumber: "00001",
+      invalidParameterName: "clin_number",
+      invalidParameterValue: "00001",
+      validationMessage: ValidationMessage.INVALID_CLIN_NUMBER,
+    });
     expect(errors).toContainEqual({
       clinNumber: "0001",
       invalidParameterName: "pop_start_date",
@@ -407,6 +452,9 @@ function mockFundingStepBadData(): FundingStep {
     task_order_file: mockTaskOrderFile,
     csp: CloudServiceProvider.AWS,
     clins: [
+      mockClinInvalidClinNumberTooShort(),
+      mockClinInvalidClinNumberTooLong(),
+      mockClinInvalidClinNumberAllZeros(),
       mockClinInvalidDates(),
       mockClinStartAfterEnd(),
       mockClinAlreadyEnded(),
@@ -428,6 +476,39 @@ function mockClin(): Clin {
     pop_start_date: yesterday,
     pop_end_date: tomorrow,
     total_clin_value: 200000,
+  };
+}
+/**
+ * Returns a static clin containing bad inputs
+ * - clin number is too short
+ * @returns a complete Clin with values that should cause validation errors
+ */
+function mockClinInvalidClinNumberTooShort(): Clin {
+  return {
+    ...mockClin(),
+    clin_number: "1",
+  };
+}
+/**
+ * Returns a static clin containing bad inputs
+ * - clin number is too long
+ * @returns a complete Clin with values that should cause validation errors
+ */
+function mockClinInvalidClinNumberTooLong(): Clin {
+  return {
+    ...mockClin(),
+    clin_number: "00001",
+  };
+}
+/**
+ * Returns a static clin containing bad inputs
+ * - clin number is all zeros
+ * @returns a complete Clin with values that should cause validation errors
+ */
+function mockClinInvalidClinNumberAllZeros(): Clin {
+  return {
+    ...mockClin(),
+    clin_number: "0000",
   };
 }
 /**
