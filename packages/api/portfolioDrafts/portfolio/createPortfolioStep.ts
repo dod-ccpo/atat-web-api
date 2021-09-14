@@ -71,10 +71,9 @@ export async function createPortfolioStepCommand(
         id: portfolioDraftId,
       },
       UpdateExpression: `set #portfolioVariable = :portfolio, updated_at = :now,
-        #portfolioName = :portfolioName, num_portfolio_managers = :numOfManagers`,
+        portfolio_name = :portfolioName, num_portfolio_managers = :numOfManagers`,
       ExpressionAttributeNames: {
         "#portfolioVariable": PORTFOLIO_STEP,
-        "#portfolioName": "name",
       },
       ExpressionAttributeValues: {
         ":portfolio": portfolioStep,

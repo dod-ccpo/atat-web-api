@@ -23,11 +23,6 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
     created_at: now,
     updated_at: now,
     status: ProvisioningStatus.NOT_STARTED,
-    name: "",
-    num_portfolio_managers: 0,
-    num_applications: 0,
-    num_environments: 0,
-    num_task_orders: 0,
   };
 
   try {
