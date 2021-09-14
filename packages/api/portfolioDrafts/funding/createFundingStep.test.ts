@@ -126,8 +126,8 @@ describe("Successful operation tests", function () {
     const mockResponse = {
       updated_at: now,
       created_at: now,
-      portfolio_step: mockFundingStepGoodData(),
-      num_portfolio_managers: 0,
+      funding_step: mockFundingStepGoodData(),
+      num_task_orders: 1,
       status: ProvisioningStatus.NOT_STARTED,
       id: uuidv4(),
     };
@@ -142,6 +142,8 @@ describe("Successful operation tests", function () {
     expect(result).toBeInstanceOf(ApiSuccessResponse);
     expect(result.statusCode).toEqual(SuccessStatusCode.CREATED);
     expect(result.body).toStrictEqual(JSON.stringify(mockFundingStepGoodData()));
+    const numOfTaskOrders = JSON.parse(result.body);
+    expect(numOfTaskOrders.task_orders.length).toBe(mockResponse.num_task_orders);
   });
 });
 
