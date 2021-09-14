@@ -23,10 +23,10 @@ describe("Dynamodb mock validation", function () {
       portfolio_step: {
         name: "Test portfolio",
         description: "Test portfolio description",
-        portfolio_managers: [Array],
-        dod_components: [Array],
+        portfolio_managers: ["aardvark@example.com", "yardverk@example.com", "hardwork@example.com"],
+        dod_components: ["army", "navy", "space_force"],
       },
-      num_portfolio_managers: 0,
+      num_portfolio_managers: 3,
       status: "not_started",
       id: "595c31d3-190c-42c3-a9b6-77325fa5ed38",
     };
@@ -44,6 +44,7 @@ describe("Dynamodb mock validation", function () {
     const portfolioStep: PortfolioStep = requestBody;
     const data = await createPortfolioStepCommand("mock-table", "595c31d3-190c-42c3-a9b6-77325fa5ed38", portfolioStep);
     expect(data.Attributes).toEqual(mockResponse);
+    expect(data.Attributes?.portfolio_step.portfolio_managers.length).toBe(mockResponse.num_portfolio_managers);
   });
 });
 
