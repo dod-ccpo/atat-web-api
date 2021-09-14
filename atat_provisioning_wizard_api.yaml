@@ -551,7 +551,7 @@ components:
         - $ref: '#/components/schemas/BaseObject'
         - type: object
           properties:
-            name:
+            portfolio_name:
               type: string
             num_portfolio_managers:
               type: number
