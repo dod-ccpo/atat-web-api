@@ -13,7 +13,7 @@ import {
   REQUEST_BODY_INVALID,
 } from "../../utils/errors";
 import { ApiSuccessResponse, SuccessStatusCode, ValidationErrorResponse } from "../../utils/response";
-import { isApplicationStep, isValidJson, isValidUuidV4 } from "../../utils/validation";
+import { isApplicationStep, isBodyPresent, isValidJson, isValidUuidV4 } from "../../utils/validation";
 export interface ApplicationValidationError {
   applicationName: string;
   invalidParameterName: string;
@@ -34,7 +34,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
   if (!isValidUuidV4(portfolioDraftId)) {
     return NO_SUCH_PORTFOLIO_DRAFT;
   }
-  if (!event.body) {
+  if (!isBodyPresent(event.body)) {
     return REQUEST_BODY_EMPTY;
   }
   if (!isValidJson(event.body)) {
