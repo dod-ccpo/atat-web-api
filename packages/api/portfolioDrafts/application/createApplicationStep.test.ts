@@ -14,8 +14,8 @@ import {
 import {
   createValidationErrorResponse,
   handler,
-  validateApplication,
-  validateEnvironment,
+  performDataValidationOnApplication,
+  performDataValidationOnEnvironment,
 } from "./createApplicationStep";
 import {
   DATABASE_ERROR,
@@ -114,7 +114,7 @@ describe("Successful operation tests", function () {
 describe("Individual Application input validation tests", function () {
   it("should return no error map entries when given Application has good data", () => {
     const allerrors = mockApplicationStep.applications
-      .map(validateApplication)
+      .map(performDataValidationOnApplication)
       .reduce((accumulator, validationErrors) => accumulator.concat(validationErrors), []);
     expect(allerrors).toStrictEqual([]);
   });
@@ -122,7 +122,7 @@ describe("Individual Application input validation tests", function () {
   const tooLongName =
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut eleifend lectus ut luctus ultricies nisi.";
   it("should return error map entries when given Application has a name that is too short", () => {
-    const errors = validateApplication(mockApplicationStepsBadData[0].applications[0]);
+    const errors = performDataValidationOnApplication(mockApplicationStepsBadData[0].applications[0]);
     expect(errors.length).toEqual(1);
     expect(errors).toContainEqual({
       applicationName: tooShortName,
@@ -132,7 +132,7 @@ describe("Individual Application input validation tests", function () {
     });
   });
   it("should return error map entries when given Application has a name that is too long", () => {
-    const errors = validateApplication(mockApplicationStepsBadData[1].applications[0]);
+    const errors = performDataValidationOnApplication(mockApplicationStepsBadData[1].applications[0]);
     expect(errors.length).toEqual(1);
     expect(errors).toContainEqual({
       applicationName: tooLongName,
@@ -142,7 +142,7 @@ describe("Individual Application input validation tests", function () {
     });
   });
   it("should return error map entries when given Application has an Environment with a name that is too short", () => {
-    const errors = validateEnvironment(mockApplicationStepsBadData[2].applications[0].environments[0]);
+    const errors = performDataValidationOnEnvironment(mockApplicationStepsBadData[2].applications[0].environments[0]);
     expect(errors.length).toEqual(1);
     expect(errors).toContainEqual({
       applicationName: tooShortName,
@@ -152,7 +152,7 @@ describe("Individual Application input validation tests", function () {
     });
   });
   it("should return error map entries when given Application has an Environment with a name that is too long", () => {
-    const errors = validateEnvironment(mockApplicationStepsBadData[3].applications[0].environments[0]);
+    const errors = performDataValidationOnEnvironment(mockApplicationStepsBadData[3].applications[0].environments[0]);
     expect(errors.length).toEqual(1);
     expect(errors).toContainEqual({
       applicationName: tooLongName,
