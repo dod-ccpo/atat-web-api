@@ -1,4 +1,5 @@
 import * as apigw from "@aws-cdk/aws-apigateway";
+import { ResponseType } from "@aws-cdk/aws-apigateway";
 import * as dynamodb from "@aws-cdk/aws-dynamodb";
 import * as s3asset from "@aws-cdk/aws-s3-assets";
 import * as cdk from "@aws-cdk/core";
@@ -124,6 +125,26 @@ export class AtatWebApiStack extends cdk.Stack {
         endpointConfigurationTypes: apigw.EndpointType.REGIONAL,
       },
     });
+    // AT-6413 API gateway response
+
+    restApi.addGatewayResponse("body-validation-response", {
+      type: ResponseType.BAD_REQUEST_BODY,
+      statusCode: "400",
+      templates: {
+        "application/json":
+          '{ "code": "INVALID_INPUT", "message": $context.error.messageString, "error_map": "$context.error.validationErrorString" }',
+      },
+    });
+
+    restApi.addGatewayResponse("path-params-validation-response", {
+      type: ResponseType.BAD_REQUEST_PARAMETERS,
+      statusCode: "400",
+      templates: {
+        "application/json":
+          '{ "code": "INVALID_INPUT", "message": $context.error.messageString, "error_map": "$context.error.validationErrorString" }',
+      },
+    });
+
     // TODO: getPortfolioDraft
     // TODO: getApplicationStep
     // TODO: createApplicationStep
