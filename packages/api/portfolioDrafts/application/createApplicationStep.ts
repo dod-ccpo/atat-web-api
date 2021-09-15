@@ -45,7 +45,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
     return REQUEST_BODY_INVALID;
   }
   const applicationStep: ApplicationStep = requestBody;
-  const errors: Array<ApplicationValidationError> = validateApplications(applicationStep);
+  const errors: Array<ApplicationValidationError> = validateApplicationStep(applicationStep);
   if (errors.length) {
     return createValidationErrorResponse({ input_validation_errors: errors });
   }
@@ -79,11 +79,12 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
 }
 
 /**
- * Accepts an Application Step and performs input validation
- * on all Applications contained therein.
+ * Validates the given ApplicationStep
+ * Performs input validation on all Applications and Environments contained therein
+ * @param applicationStep the object to validate
  * @returns a collection of application validation errors
  */
-export function validateApplications(applicationStep: ApplicationStep): Array<ApplicationValidationError> {
+export function validateApplicationStep(applicationStep: ApplicationStep): Array<ApplicationValidationError> {
   return applicationStep.applications
     .map(validateApplication)
     .reduce((accumulator, validationErrors) => accumulator.concat(validationErrors), []);
@@ -91,7 +92,7 @@ export function validateApplications(applicationStep: ApplicationStep): Array<Ap
 
 /**
  * Validates the given Application object
- * @param application an object that looks like an Application
+ * @param application the object to validate
  * @returns a collection of application validation errors
  */
 export function validateApplication(application: Application): Array<ApplicationValidationError> {
@@ -111,6 +112,11 @@ export function validateApplication(application: Application): Array<Application
   return errors.concat(environmentErrors);
 }
 
+/**
+ * Validates the given Environment object
+ * @param environment the object to validate
+ * @returns a collection of application validation errors
+ */
 export function validateEnvironment(environment: Environment): Array<ApplicationValidationError> {
   const errors = Array<ApplicationValidationError>();
   if (environment.name.length < 4 || environment.name.length > 100) {

@@ -130,7 +130,6 @@ export class AtatWebApiStack extends cdk.Stack {
         endpointConfigurationTypes: apigw.EndpointType.REGIONAL,
       },
     });
-    // TODO: submitPortfolioDraft
     this.addTaskOrderRoutes(props);
   }
 

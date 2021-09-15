@@ -21,7 +21,6 @@
     "aws-sdk-client-mock": "^0.5.3",
     "eslint": "^7.31.0",
     "jest": "^27.1.1",
-    "lodash.clonedeep": "^4.5.0",
     "ts-jest": "^27.0.4"
   }
 }
