@@ -849,3 +849,13 @@ x-amazon-apigateway-request-validators:
   request-params-validator:
     validateRequestParameters: true
     validateRequestBody: false        
+
+x-amazon-apigateway-gateway-responses:
+  BAD_REQUEST_BODY:
+    statusCode: 400
+    responseTemplates: 
+      application/json: '{ "code": "INVALID_INPUT", "message": $context.error.messageString, "error_map": "$context.error.validationErrorString" }'
+  BAD_REQUEST_PARAMETERS:
+    statusCode: 400
+    responseTemplates: 
+      application/json: '{ "code": "INVALID_INPUT", "message": $context.error.messageString, "error_map": "$context.error.validationErrorString" }'

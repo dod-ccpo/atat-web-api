@@ -125,9 +125,11 @@ export class AtatWebApiStack extends cdk.Stack {
         endpointConfigurationTypes: apigw.EndpointType.REGIONAL,
       },
     });
-    // AT-6413 API gateway response
-
-    restApi.addGatewayResponse("body-validation-response", {
+    // This creates a new API Gateway Error Response to deal with any schema validation errors
+    // It directly uses the API Gateway Console execution logs to indicate the error message and details (such as missing attributes)
+    // to add to the error_map. Although it would be ideal to use the error model directly....
+    /*
+    restApi.addGatewayResponse("body-validation-error-response", {
       type: ResponseType.BAD_REQUEST_BODY,
       statusCode: "400",
       templates: {
@@ -136,7 +138,7 @@ export class AtatWebApiStack extends cdk.Stack {
       },
     });
 
-    restApi.addGatewayResponse("path-params-validation-response", {
+    restApi.addGatewayResponse("path-params-validation-error-response", {
       type: ResponseType.BAD_REQUEST_PARAMETERS,
       statusCode: "400",
       templates: {
@@ -144,7 +146,7 @@ export class AtatWebApiStack extends cdk.Stack {
           '{ "code": "INVALID_INPUT", "message": $context.error.messageString, "error_map": "$context.error.validationErrorString" }',
       },
     });
-
+*/
     // TODO: getPortfolioDraft
     // TODO: getApplicationStep
     // TODO: createApplicationStep
