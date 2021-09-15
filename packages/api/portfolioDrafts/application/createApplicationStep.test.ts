@@ -1,12 +1,22 @@
 import { APIGatewayProxyEvent } from "aws-lambda";
-import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusCode } from "../../utils/response";
-import { DynamoDBDocumentClient, UpdateCommand, UpdateCommandOutput } from "@aws-sdk/lib-dynamodb";
-import { handler, validateApplication, validateEnvironment } from "./createApplicationStep";
-import { isApplicationStep } from "../../utils/validation";
+import { DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { mockApplicationStep, mockApplicationStepsBadData } from "./commonMockData";
 import { mockClient } from "aws-sdk-client-mock";
-import { ProvisioningStatus } from "../../models/ProvisioningStatus";
 import { v4 as uuidv4 } from "uuid";
+import { ValidationMessage } from "../../models/ApplicationStep";
+import {
+  ApiSuccessResponse,
+  ErrorStatusCode,
+  OtherErrorResponse,
+  SuccessStatusCode,
+  ValidationErrorResponse,
+} from "../../utils/response";
+import {
+  createValidationErrorResponse,
+  handler,
+  validateApplication,
+  validateEnvironment,
+} from "./createApplicationStep";
 import {
   DATABASE_ERROR,
   NO_SUCH_PORTFOLIO_DRAFT,
@@ -14,7 +24,6 @@ import {
   REQUEST_BODY_EMPTY,
   REQUEST_BODY_INVALID,
 } from "../../utils/errors";
-import { ValidationMessage } from "../../models/ApplicationStep";
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 beforeEach(() => {
@@ -85,8 +94,6 @@ describe("Request body tests", function () {
       body: JSON.stringify({ foo: "bar" }), // valid json, but not ApplicationStep
       pathParameters: { portfolioDraftId: uuidv4() },
     } as any;
-    expect(isApplicationStep(mockApplicationStep)).toEqual(true); // control
-    expect(isApplicationStep(notApplicationStepRequest)).toEqual(false);
     const result = await handler(notApplicationStepRequest);
     expect(result).toBeInstanceOf(OtherErrorResponse);
     expect(result).toEqual(REQUEST_BODY_INVALID);
@@ -97,22 +104,6 @@ describe("Request body tests", function () {
 
 describe("Successful operation tests", function () {
   it("should return application step and http status code 201", async () => {
-    const now = new Date().toISOString();
-    const mockResponse = {
-      updated_at: now,
-      created_at: now,
-      application_step: mockApplicationStep,
-      num_portfolio_managers: 0,
-      status: ProvisioningStatus.NOT_STARTED,
-      id: uuidv4(),
-    };
-    ddbMock.on(UpdateCommand).resolves({
-      Attributes: mockResponse,
-    });
-    const applicationStepOutput: UpdateCommandOutput = {
-      Attributes: { application_step: JSON.stringify(mockApplicationStep) },
-    } as any;
-    ddbMock.on(UpdateCommand).resolves(applicationStepOutput);
     const result = await handler(validRequest);
     expect(result).toBeInstanceOf(ApiSuccessResponse);
     expect(result.statusCode).toEqual(SuccessStatusCode.CREATED);
@@ -121,21 +112,18 @@ describe("Successful operation tests", function () {
 });
 
 describe("Individual Application input validation tests", function () {
-  it("should throw error if input does not look like an Application", () => {
-    expect(() => {
-      validateApplication({});
-    }).toThrow(Error("Input must be an Application object"));
-  });
   it("should return no error map entries when given Application has good data", () => {
     const allerrors = mockApplicationStep.applications
       .map(validateApplication)
       .reduce((accumulator, validationErrors) => accumulator.concat(validationErrors), []);
     expect(allerrors).toStrictEqual([]);
   });
+  const tooShortName = "abc";
+  const tooLongName =
+    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut eleifend lectus ut luctus ultricies nisi.";
   it("should return error map entries when given Application has a name that is too short", () => {
     const errors = validateApplication(mockApplicationStepsBadData[0].applications[0]);
     expect(errors.length).toEqual(1);
-    const tooShortName = "abc";
     expect(errors).toContainEqual({
       applicationName: tooShortName,
       invalidParameterName: "name",
@@ -146,8 +134,6 @@ describe("Individual Application input validation tests", function () {
   it("should return error map entries when given Application has a name that is too long", () => {
     const errors = validateApplication(mockApplicationStepsBadData[1].applications[0]);
     expect(errors.length).toEqual(1);
-    const tooLongName =
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut eleifend lectus ut luctus ultricies nisi.";
     expect(errors).toContainEqual({
       applicationName: tooLongName,
       invalidParameterName: "name",
@@ -158,7 +144,6 @@ describe("Individual Application input validation tests", function () {
   it("should return error map entries when given Application has an Environment with a name that is too short", () => {
     const errors = validateEnvironment(mockApplicationStepsBadData[2].applications[0].environments[0]);
     expect(errors.length).toEqual(1);
-    const tooShortName = "abc";
     expect(errors).toContainEqual({
       applicationName: tooShortName,
       invalidParameterName: "name",
@@ -169,8 +154,6 @@ describe("Individual Application input validation tests", function () {
   it("should return error map entries when given Application has an Environment with a name that is too long", () => {
     const errors = validateEnvironment(mockApplicationStepsBadData[3].applications[0].environments[0]);
     expect(errors.length).toEqual(1);
-    const tooLongName =
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut eleifend lectus ut luctus ultricies nisi.";
     expect(errors).toContainEqual({
       applicationName: tooLongName,
       invalidParameterName: "name",
@@ -180,34 +163,48 @@ describe("Individual Application input validation tests", function () {
   });
 });
 
-// // NOTE: consider moving this to a shared location so that other tests can use it
-// const emptyEvent: APIGatewayProxyEvent = {
-//   body: "",
-//   headers: {},
-//   httpMethod: "",
-//   isBase64Encoded: false,
-//   path: "",
-//   pathParameters: {},
-//   queryStringParameters: null,
-//   stageVariables: {},
-//   requestContext: {} as never,
-//   resource: "",
-//   multiValueHeaders: {},
-//   multiValueQueryStringParameters: {},
-// };
+describe("Error response creation tests", function () {
+  it("should return error response that includes error_map in response body", () => {
+    const obj = { errors: { propertyA: "property_value", propertyB: "property_value" } };
+    const invalidProperties: Record<string, unknown> = obj;
+    const response = createValidationErrorResponse(invalidProperties);
+    expect(response).toBeInstanceOf(ValidationErrorResponse);
+    expect(JSON.parse(response.body).message).toMatch(/Invalid input/);
+    expect(JSON.parse(response.body).error_map).toEqual(obj);
+  });
+  it.each(mockApplicationStepsBadData)(
+    "should return error response containing all invalid properties in error_map",
+    async (item) => {
+      const validRequestBadData: APIGatewayProxyEvent = {
+        body: JSON.stringify(item),
+        pathParameters: { portfolioDraftId: uuidv4() },
+      } as any;
+      const result = await handler(validRequestBadData);
+      expect(result).toBeInstanceOf(ValidationErrorResponse);
+      expect(JSON.parse(result.body).message).toMatch(/Invalid input/);
+      expect(JSON.parse(result.body).error_map).not.toBeUndefined();
+    }
+  );
+  it("should throw error if invalid properties input is empty", () => {
+    const emptyInvalidProperties: Record<string, unknown> = {};
+    expect(() => {
+      createValidationErrorResponse(emptyInvalidProperties);
+    }).toThrow(Error("Parameter 'invalidProperties' must not be empty"));
+  });
+  it("should throw error if invalid properties input has empty string as key", () => {
+    const emptyStringKeyInvalidProperties: Record<string, unknown> = {
+      "": { propertyA: "property_value", propertyB: "property_value" },
+    };
+    expect(() => {
+      createValidationErrorResponse(emptyStringKeyInvalidProperties);
+    }).toThrow(Error("Parameter 'invalidProperties' must not have empty string as key"));
+  });
+});
 
-// describe("Portfolio Draft DNE tests", () => {
-//   it.todo("should return PATH_PARAMETER_REQUIRED_BUT_MISSING if no path param");
-
-//   it("should return status code 404 & error body with message 'Portfolio Draft with the given ID does not exist'", async () => {
-//     ddbMock.on(UpdateCommand).rejects({
-//       name: "ConditionalCheckFailedException",
-//     });
-//     const request = cloneDeep(emptyEvent);
-//     request.pathParameters = { portfolioDraftId: "invalid" };
-//     request.body = JSON.stringify(applicationStepMinimal);
-
-//     const result = await handler(request);
-//     expect(result).toEqual(NO_SUCH_PORTFOLIO_DRAFT);
-//   });
-// });
+describe("Portfolio Draft DNE tests", () => {
+  it("should return error response when given portfolio draft does not exist", async () => {
+    ddbMock.on(UpdateCommand).rejects({ name: "ConditionalCheckFailedException" });
+    const result = await handler(validRequest);
+    expect(result).toEqual(NO_SUCH_PORTFOLIO_DRAFT);
+  });
+});

@@ -1,6 +1,8 @@
 import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
+import { Application } from "../../models/Application";
 import { ApplicationStep, ValidationMessage } from "../../models/ApplicationStep";
+import { Environment } from "../../models/Environment";
 import { APPLICATION_STEP } from "../../models/PortfolioDraft";
 import { dynamodbDocumentClient as client } from "../../utils/dynamodb";
 import {
@@ -10,8 +12,8 @@ import {
   REQUEST_BODY_EMPTY,
   REQUEST_BODY_INVALID,
 } from "../../utils/errors";
-import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
-import { isApplication, isApplicationStep, isEnvironment, isValidJson, isValidUuidV4 } from "../../utils/validation";
+import { ApiSuccessResponse, SuccessStatusCode, ValidationErrorResponse } from "../../utils/response";
+import { isApplicationStep, isValidJson, isValidUuidV4 } from "../../utils/validation";
 export interface ApplicationValidationError {
   applicationName: string;
   invalidParameterName: string;
@@ -43,17 +45,10 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
     return REQUEST_BODY_INVALID;
   }
   const applicationStep: ApplicationStep = requestBody;
-  // const errors: Array<ApplicationValidationError> = validateApplications(applicationStep);
-  // if (errors.length) {
-  //   return createValidationErrorResponse({ input_validation_errors: errors });
-  // }
-
-  //   // NOTE This is absolutely not want we want to do long term but I am just trying to meet the ACs as simply as possible
-  //   const error = validate(applicationStep);
-  //   if (error) {
-  //     return new ErrorResponse({ code: error.code, message: error.message }, ErrorStatusCode.BAD_REQUEST);
-  //   }
-
+  const errors: Array<ApplicationValidationError> = validateApplications(applicationStep);
+  if (errors.length) {
+    return createValidationErrorResponse({ input_validation_errors: errors });
+  }
   try {
     await client.send(
       new UpdateCommand({
@@ -88,8 +83,8 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
  * on all Applications contained therein.
  * @returns a collection of application validation errors
  */
-export function validateApplicationStepApplications(step: ApplicationStep): Array<ApplicationValidationError> {
-  return step.applications
+export function validateApplications(applicationStep: ApplicationStep): Array<ApplicationValidationError> {
+  return applicationStep.applications
     .map(validateApplication)
     .reduce((accumulator, validationErrors) => accumulator.concat(validationErrors), []);
 }
@@ -99,10 +94,7 @@ export function validateApplicationStepApplications(step: ApplicationStep): Arra
  * @param application an object that looks like an Application
  * @returns a collection of application validation errors
  */
-export function validateApplication(application: unknown): Array<ApplicationValidationError> {
-  if (!isApplication(application)) {
-    throw Error("Input must be an Application object");
-  }
+export function validateApplication(application: Application): Array<ApplicationValidationError> {
   const errors = Array<ApplicationValidationError>();
   if (application.name.length < 4 || application.name.length > 100) {
     errors.push({
@@ -119,10 +111,7 @@ export function validateApplication(application: unknown): Array<ApplicationVali
   return errors.concat(environmentErrors);
 }
 
-export function validateEnvironment(environment: unknown): Array<ApplicationValidationError> {
-  if (!isEnvironment(environment)) {
-    throw Error("Input must be an Environment object");
-  }
+export function validateEnvironment(environment: Environment): Array<ApplicationValidationError> {
   const errors = Array<ApplicationValidationError>();
   if (environment.name.length < 4 || environment.name.length > 100) {
     errors.push({
@@ -133,4 +122,19 @@ export function validateEnvironment(environment: unknown): Array<ApplicationVali
     });
   }
   return errors;
+}
+
+/**
+ * Returns an error response containing 1) an error map containing the specified invalid properties, 2) an error code, 3) a message
+ * @param invalidProperties object containing property names and their values which failed validation
+ * @returns ValidationErrorResponse containing an error map, error code, and a message
+ */
+export function createValidationErrorResponse(invalidProperties: Record<string, unknown>): ValidationErrorResponse {
+  if (Object.keys(invalidProperties).length === 0) {
+    throw Error("Parameter 'invalidProperties' must not be empty");
+  }
+  Object.keys(invalidProperties).forEach((key) => {
+    if (!key) throw Error("Parameter 'invalidProperties' must not have empty string as key");
+  });
+  return new ValidationErrorResponse("Invalid input", invalidProperties);
 }
