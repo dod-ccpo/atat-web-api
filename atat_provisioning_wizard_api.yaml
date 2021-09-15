@@ -360,7 +360,7 @@ paths:
       x-amazon-apigateway-integration:
           httpMethod: "POST"
           uri: 
-            Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NotImplementedFunction.Arn}/invocations"
+            Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CreateApplicationStepFunction.Arn}/invocations"
           passthroughBehavior: "when_no_match"
           type: "aws_proxy"
   /portfolioDrafts/{portfolioDraftId}/submit:

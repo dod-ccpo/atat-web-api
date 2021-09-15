@@ -1,4 +1,11 @@
 import {
+  mockApplicationStep,
+  mockApplicationStepsMissingFields,
+  mockApplicationsMissingFields,
+  mockApplicationCloudCityEvacPlanner,
+  mockEnvironmentsMissingFields,
+} from "../portfolioDrafts/application/commonMockData";
+import {
   isBodyPresent,
   isFundingStep,
   isPathParameterPresent,
@@ -8,6 +15,9 @@ import {
   isClin,
   isClinNumber,
   isFundingAmount,
+  isApplicationStep,
+  isApplication,
+  isEnvironment,
 } from "./validation";
 
 describe("Testing validation of request body", function () {
@@ -130,6 +140,40 @@ describe("Testing validation of fundingStep objects", () => {
   });
   it.each(badFundingSteps)("should reject a FundingStep missing any field", async (badStep) => {
     expect(isFundingStep(badStep)).toEqual(false);
+  });
+});
+
+describe("isApplicationStep()", () => {
+  it.each([true, 1, undefined, null])("should reject non-objects", async (item) => {
+    expect(isApplicationStep(item)).toEqual(false);
+  });
+  it("should accept an ApplicationStep object", async () => {
+    expect(isApplicationStep(mockApplicationStep)).toEqual(true);
+  });
+  it("should reject an ApplicationStep missing any field", async () => {
+    expect(isApplicationStep(mockApplicationStepsMissingFields)).toEqual(false);
+  });
+});
+describe("isApplication()", () => {
+  it.each([true, 1, undefined, null])("should reject non-objects", async (item) => {
+    expect(isApplication(item)).toEqual(false);
+  });
+  it.each(mockApplicationStep.applications)("should accept an Application object", async (item) => {
+    expect(isApplication(item)).toEqual(true);
+  });
+  it("should reject an Application missing any field", async () => {
+    expect(isApplication(mockApplicationsMissingFields)).toEqual(false);
+  });
+});
+describe("isEnvironment()", () => {
+  it.each([true, 1, undefined, null])("should reject non-objects", async (item) => {
+    expect(isEnvironment(item)).toEqual(false);
+  });
+  it.each(mockApplicationCloudCityEvacPlanner.environments)("should accept an Environment object", async (item) => {
+    expect(isEnvironment(item)).toEqual(true);
+  });
+  it("should reject an Environment missing any field", async () => {
+    expect(isEnvironment(mockEnvironmentsMissingFields)).toEqual(false);
   });
 });
 

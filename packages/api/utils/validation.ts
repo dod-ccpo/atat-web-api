@@ -3,6 +3,8 @@ import { Clin } from "../models/Clin";
 import { FundingStep } from "../models/FundingStep";
 import { PortfolioStep } from "../models/PortfolioStep";
 import { validate as uuidValidate, version as uuidVersion } from "uuid";
+import { Application } from "../models/Application";
+import { Environment } from "../models/Environment";
 
 /**
  * Check whether a given string is valid JSON.
@@ -85,7 +87,38 @@ export function isApplicationStep(object: unknown): object is ApplicationStep {
   if (!isValidObject(object)) {
     return false;
   }
+  return ["applications"].every((item) => item in object);
+}
+
+/**
+ * Check whether a given object is a {@link Application}.
+ *
+ * Note that this only asserts that the given object meets the interface. It does not validate
+ * that the object is a valid {@link Application}.
+ *
+ * @param object - The object to check
+ * @returns true if the object has all the attributes of a {@link Application}
+ */
+export function isApplication(object: unknown): object is Application {
+  if (!isValidObject(object)) {
+    return false;
+  }
   return ["name", "description", "environments"].every((item) => item in object);
+}
+/**
+ * Check whether a given object is an {@link Environment}.
+ *
+ * Note that this only asserts that the given object meets the interface. It does not validate
+ * that the object is a valid {@link Environment}.
+ *
+ * @param object - The object to check
+ * @returns true if the object has all the attributes of an {@link Environment}
+ */
+export function isEnvironment(object: unknown): object is Environment {
+  if (!isValidObject(object)) {
+    return false;
+  }
+  return ["name", "operators"].every((item) => item in object);
 }
 
 /**
