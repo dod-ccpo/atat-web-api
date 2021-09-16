@@ -56,13 +56,16 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
         Key: {
           id: portfolioDraftId,
         },
-        UpdateExpression: "set #portfolioVariable = :application, updated_at = :now",
+        UpdateExpression: `set #portfolioVariable = :application, updated_at = :now,
+        num_applications = :numOfApplications, num_environments = :numOfEnvironments`,
         ExpressionAttributeNames: {
           "#portfolioVariable": APPLICATION_STEP,
         },
         ExpressionAttributeValues: {
           ":application": applicationStep,
           ":now": new Date().toISOString(),
+          ":numOfApplications": applicationStep.applications.length,
+          ":numOfEnvironments": applicationStep.applications.flatMap((app) => app.environments).length,
         },
         ConditionExpression: "attribute_exists(created_at)",
         ReturnValues: "ALL_NEW",

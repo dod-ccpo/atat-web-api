@@ -3,6 +3,9 @@ import { Application } from "../../models/Application";
 import { ApplicationStep } from "../../models/ApplicationStep";
 import { Environment } from "../../models/Environment";
 import { Operator } from "../../models/Operator";
+import { ProvisioningStatus } from "../../models/ProvisioningStatus";
+import { v4 as uuidv4 } from "uuid";
+import { PortfolioDraftSummary } from "../../models/PortfolioDraftSummary";
 
 const mockOperatorDarthVader: Operator = {
   first_name: "Darth",
@@ -176,3 +179,43 @@ export const mockApplicationStepsBadData: Array<ApplicationStep> = [
     ],
   },
 ];
+
+/**
+ * A base Portfolio Draft Summary
+ * @returns a base portfolio summary with good data
+ */
+export function mockBasePortfolioSummary(): PortfolioDraftSummary {
+  return {
+    id: uuidv4(),
+    status: ProvisioningStatus.NOT_STARTED,
+    updated_at: new Date().toISOString(),
+    created_at: new Date().toISOString(),
+  };
+}
+
+/**
+ * A good Portfolio Draft Summary item with the application step completed
+ * after a successful DynamoDB update
+ * @returns a Portfolio Draft Summary with good data
+ */
+export function mockPortfolioDraftSummary(): PortfolioDraftSummary {
+  return {
+    ...mockBasePortfolioSummary(),
+    application_step: mockApplicationStep,
+    num_applications: mockApplicationStep.applications.length,
+    num_environments: mockApplicationStep.applications.flatMap((app) => app.environments).length,
+  } as PortfolioDraftSummary;
+}
+
+/**
+ * A bad Portfolio Draft Summary item with the application step completed
+ * @returns a Portfolio Draft Summary with incorrect # of apps and envs
+ */
+export function mockBadPortfolioDraftSummary(): PortfolioDraftSummary {
+  return {
+    ...mockBasePortfolioSummary(),
+    application_step: mockApplicationStep,
+    num_applications: 77,
+    num_environments: 99,
+  } as PortfolioDraftSummary;
+}
