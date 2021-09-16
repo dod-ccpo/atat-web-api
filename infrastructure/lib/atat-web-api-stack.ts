@@ -1,5 +1,4 @@
 import * as apigw from "@aws-cdk/aws-apigateway";
-import { ResponseType } from "@aws-cdk/aws-apigateway";
 import * as dynamodb from "@aws-cdk/aws-dynamodb";
 import * as s3asset from "@aws-cdk/aws-s3-assets";
 import * as cdk from "@aws-cdk/core";
