@@ -86,6 +86,10 @@ abstract class SuccessResponse extends Response {
     headers?: Headers,
     multiValueHeaders?: MultiValueHeaders
   ) {
+    const temporaryIncompleteCorsHeaderWorkaround = {
+      "Access-Control-Allow-Origin": "*",
+    };
+    headers = { ...headers, ...temporaryIncompleteCorsHeaderWorkaround };
     super(response, statusCode, headers, multiValueHeaders, false);
   }
 }
