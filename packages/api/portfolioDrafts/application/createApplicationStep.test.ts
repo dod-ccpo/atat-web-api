@@ -137,11 +137,10 @@ describe("Incorrect number of applications and environments", function () {
     });
     const result = await handler(validRequest);
     const responseBody = JSON.parse(result.body);
-    expect(responseBody.applications.length === mockBadPortfolioSummary.num_applications).toBeFalsy();
-    expect(
-      responseBody.applications.flatMap((app: Application) => app.environments).length ===
-        mockBadPortfolioSummary.num_environments
-    ).toBeFalsy();
+    expect(responseBody.applications.length).not.toBe(mockBadPortfolioSummary.num_applications);
+    expect(responseBody.applications.flatMap((app: Application) => app.environments).length).not.toBe(
+      mockBadPortfolioSummary.num_environments
+    );
   });
 });
 

@@ -12,6 +12,7 @@ import { AccessLevel } from "../models/AccessLevel";
 import { PortfolioStep } from "../models/PortfolioStep";
 import { FundingStep } from "../models/FundingStep";
 import { Application } from "../models/Application";
+import { PortfolioDraft } from "../models/PortfolioDraft";
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 beforeEach(() => {
@@ -46,11 +47,11 @@ describe("Successful operation tests", function () {
       Item: mockPortfolioDraftSummaryGoodData(),
     });
   });
-  const goodMockResponse: PortfolioDraftSummary = mockPortfolioDraftSummaryGoodData();
+  const goodMockResponse: PortfolioDraft = mockPortfolioDraftSummaryGoodData();
   const portfolioSummaryAttributes = [
     "id",
     "status",
-    "portfolio_name",
+    "name",
     "num_portfolio_managers",
     "portfolio_step",
     "funding_step",
@@ -83,17 +84,17 @@ describe("Successful operation tests", function () {
     ).length;
     const numOfTaskOrders: number = responseBody.funding_step.task_orders.length;
 
-    expect(responseBody.portfolio_name === goodMockResponse.portfolio_step?.name).toBeTruthy();
-    expect(numOfPortfolioManagers === goodMockResponse.num_portfolio_managers).toBeTruthy();
-    expect(numOfApplications === goodMockResponse.num_applications).toBeTruthy();
-    expect(numOfEnvironments === goodMockResponse.num_environments).toBeTruthy();
-    expect(numOfTaskOrders === goodMockResponse.num_task_orders).toBeTruthy();
+    expect(responseBody.name).toBe(goodMockResponse.portfolio_step?.name);
+    expect(numOfPortfolioManagers).toBe(goodMockResponse.num_portfolio_managers);
+    expect(numOfApplications).toBe(goodMockResponse.num_applications);
+    expect(numOfEnvironments).toBe(goodMockResponse.num_environments);
+    expect(numOfTaskOrders).toBe(goodMockResponse.num_task_orders);
   });
 });
 
 describe("Incorrect number of attributes for portfolio draft summary", function () {
   it("should return falsy for incorrect attributes ", async () => {
-    const badMockResponse: PortfolioDraftSummary = mockPortfolioDraftSummaryBadData();
+    const badMockResponse: PortfolioDraft = mockPortfolioDraftSummaryBadData();
     ddbMock.on(GetCommand).resolves({
       Item: mockPortfolioDraftSummaryBadData(),
     });
@@ -107,11 +108,11 @@ describe("Incorrect number of attributes for portfolio draft summary", function 
       (app: Application) => app.environments
     ).length;
 
-    expect(responseBody.portfolio_name === badMockResponse.portfolio_step?.name).toBeFalsy();
-    expect(numOfPortfolioManagers === badMockResponse.num_portfolio_managers).toBeFalsy();
-    expect(numOfTaskOrders === badMockResponse.num_task_orders).toBeFalsy();
-    expect(numOfApplications === badMockResponse.num_applications).toBeFalsy();
-    expect(numOfEnvironments === badMockResponse.num_environments).toBeFalsy();
+    expect(responseBody.portfolio_name).not.toBe(badMockResponse.portfolio_step?.name);
+    expect(numOfPortfolioManagers).not.toBe(badMockResponse.num_portfolio_managers);
+    expect(numOfTaskOrders).not.toBe(badMockResponse.num_task_orders);
+    expect(numOfApplications).not.toBe(badMockResponse.num_applications);
+    expect(numOfEnvironments).not.toBe(badMockResponse.num_environments);
   });
 });
 
@@ -119,13 +120,13 @@ describe("Incorrect number of attributes for portfolio draft summary", function 
  * Sample Portfolio Draft Summary with good data
  * @returns a complete Portfolio Draft Summary with good data that should not cause errors
  */
-function mockPortfolioDraftSummaryGoodData(): PortfolioDraftSummary {
+function mockPortfolioDraftSummaryGoodData(): PortfolioDraft {
   return {
     id: "41ec495a-6fec-46f1-a4e5-5be6332f4115",
     updated_at: "2021-09-15T00:15:40.076Z",
     created_at: "2021-09-15T00:10:52.400Z",
     status: ProvisioningStatus.NOT_STARTED,
-    portfolio_name: "Coolest Portfolio",
+    name: "Coolest Portfolio",
     portfolio_step: mockPortfolioStep(),
     num_portfolio_managers: 4,
     application_step: mockApplicationStep(),
@@ -140,13 +141,13 @@ function mockPortfolioDraftSummaryGoodData(): PortfolioDraftSummary {
  * Sample Portfolio Draft Summary with bad data
  * @returns a complete Portfolio Draft Summary with good data that should not cause errors
  */
-function mockPortfolioDraftSummaryBadData(): PortfolioDraftSummary {
+function mockPortfolioDraftSummaryBadData(): PortfolioDraft {
   return {
     id: "41ec495a-6fec-46f1-a4e5-5be6332f4115",
     updated_at: "2021-09-15T00:15:40.076Z",
     created_at: "2021-09-15T00:10:52.400Z",
     status: ProvisioningStatus.NOT_STARTED,
-    portfolio_name: "Crazy Portfolio",
+    name: "Crazy Portfolio",
     portfolio_step: mockPortfolioStep(),
     num_portfolio_managers: 77,
     application_step: mockApplicationStep(),

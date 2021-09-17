@@ -69,10 +69,7 @@ export function isPortfolioStep(object: unknown): object is PortfolioStep {
  * @returns true if the object has all the attributes of a {@link FundingStep}
  */
 export function isFundingStep(object: unknown): object is FundingStep {
-  if (!isValidObject(object)) {
-    return false;
-  }
-  return ["task_orders"].every((item) => item in object);
+  return isValidObject(object) && "task_orders" in object;
 }
 
 /**
