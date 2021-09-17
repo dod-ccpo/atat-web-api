@@ -142,8 +142,27 @@ describe("Successful operation tests", function () {
     expect(result).toBeInstanceOf(ApiSuccessResponse);
     expect(result.statusCode).toEqual(SuccessStatusCode.CREATED);
     expect(result.body).toStrictEqual(JSON.stringify(mockFundingStepGoodData()));
-    const numOfTaskOrders = JSON.parse(result.body);
-    expect(numOfTaskOrders.task_orders.length).toBe(mockResponse.num_task_orders);
+    const numOfTaskOrders = JSON.parse(result.body).task_orders.length;
+    expect(numOfTaskOrders).toBe(mockResponse.num_task_orders);
+  });
+});
+
+describe("Incorrect number of task orders", function () {
+  it("should return falsy due to incorrect number of task orders", async () => {
+    const mockResponse = {
+      updated_at: now,
+      created_at: now,
+      funding_step: mockFundingStepGoodData(),
+      num_task_orders: 3,
+      status: ProvisioningStatus.NOT_STARTED,
+      id: uuidv4(),
+    };
+    ddbMock.on(UpdateCommand).resolves({
+      Attributes: mockResponse,
+    });
+    const result = await handler(validRequest);
+    const responseBody = JSON.parse(result.body);
+    expect(responseBody.task_orders.length === mockResponse.num_task_orders).toBeFalsy();
   });
 });
 
