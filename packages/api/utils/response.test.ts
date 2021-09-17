@@ -44,13 +44,21 @@ describe("Validate parsing results in the same object", () => {
 });
 
 describe("Validate header handling", () => {
-  it("should not modify headers", async () => {
+  it("should not delete headers", async () => {
     const successObject = { test: "object" };
     const headers = {
       "Content-Type": "application/json",
       "X-Test-Header": "testing code",
     };
     const successResponse = new response.ApiSuccessResponse(successObject, response.SuccessStatusCode.OK, headers);
-    expect(successResponse.headers).toEqual(headers);
+    expect(successResponse.headers).not.toEqual(undefined);
+    expect(successResponse.headers).not.toEqual(null);
+    // This assertion is safe because we've already asserted through the previous
+    // tests that the input is not undefined/null (which is an assumption of this
+    // class that should hold). If this turns out to not be valid, then the test
+    // should fail regardless.
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const responseHeaderKeys = Object.keys(successResponse.headers!);
+    Object.keys(headers).forEach((header) => expect(responseHeaderKeys).toContain(header));
   });
 });
