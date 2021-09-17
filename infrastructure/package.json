@@ -19,7 +19,7 @@
     "@types/uuid": "^8.3.1",
     "@typescript-eslint/eslint-plugin": "^4.29.1",
     "@typescript-eslint/parser": "^4.28.3",
-    "aws-cdk": "1.122.0",
+    "aws-cdk": "1.123.0",
     "esbuild": "^0.12.15",
     "eslint": "^7.31.0",
     "eslint-config-prettier": "^8.3.0",
