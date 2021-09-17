@@ -3,6 +3,7 @@ import { ApiSuccessResponse, SuccessStatusCode, ValidationErrorResponse } from "
 import { dynamodbDocumentClient as client } from "../../utils/dynamodb";
 import { FUNDING_STEP } from "../../models/PortfolioDraft";
 import { FundingStep, ValidationMessage } from "../../models/FundingStep";
+import { Clin } from "../../models/Clin";
 import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import {
   DATABASE_ERROR,
@@ -35,7 +36,10 @@ export interface ClinValidationError {
  * @returns a collection of clin validation errors
  */
 export function validateFundingStepClins(fs: FundingStep): Array<ClinValidationError> {
-  return fs.clins.map(validateClin).reduce((accumulator, validationErrors) => accumulator.concat(validationErrors), []);
+  return fs.task_orders
+    .flatMap((taskOrder) => taskOrder.clins)
+    .map(validateClin)
+    .reduce((accumulator, validationErrors) => accumulator.concat(validationErrors), []);
 }
 
 /**
@@ -73,7 +77,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
         Key: {
           id: portfolioDraftId,
         },
-        UpdateExpression: "set #stepKey = :step, #updateAtKey = :now",
+        UpdateExpression: "set #stepKey = :step, #updateAtKey = :now, num_task_orders = :numOfTaskOrders",
         ExpressionAttributeNames: {
           // values are JSON keys
           "#stepKey": FUNDING_STEP,
@@ -82,6 +86,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
         ExpressionAttributeValues: {
           ":step": fundingStep,
           ":now": new Date().toISOString(),
+          ":numOfTaskOrders": fundingStep.task_orders.length,
         },
         ConditionExpression: "attribute_exists(created_at)",
         ReturnValues: "ALL_NEW",

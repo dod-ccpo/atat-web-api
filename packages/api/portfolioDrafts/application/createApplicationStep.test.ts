@@ -1,9 +1,15 @@
 import { APIGatewayProxyEvent } from "aws-lambda";
 import { DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb";
-import { mockApplicationStep, mockApplicationStepsBadData } from "./commonMockData";
+import {
+  mockApplicationStep,
+  mockApplicationStepsBadData,
+  mockPortfolioDraftSummary,
+  mockBadPortfolioDraftSummary,
+} from "./commonMockData";
 import { mockClient } from "aws-sdk-client-mock";
 import { v4 as uuidv4 } from "uuid";
 import { ValidationMessage } from "../../models/ApplicationStep";
+import { Application } from "../../models/Application";
 import {
   ApiSuccessResponse,
   ErrorStatusCode,
@@ -108,6 +114,33 @@ describe("Successful operation tests", function () {
     expect(result).toBeInstanceOf(ApiSuccessResponse);
     expect(result.statusCode).toEqual(SuccessStatusCode.CREATED);
     expect(result.body).toStrictEqual(JSON.stringify(mockApplicationStep));
+  });
+  it("should have correct number of applications and environments", async () => {
+    const mockResponseGoodPortfolioSummary = mockPortfolioDraftSummary();
+    ddbMock.on(UpdateCommand).resolves({
+      Attributes: mockResponseGoodPortfolioSummary,
+    });
+    const result = await handler(validRequest);
+    const responseBody = JSON.parse(result.body);
+    expect(responseBody.applications.length).toBe(mockResponseGoodPortfolioSummary.num_applications);
+    expect(responseBody.applications.flatMap((app: Application) => app.environments).length).toBe(
+      mockResponseGoodPortfolioSummary.num_environments
+    );
+  });
+});
+
+describe("Incorrect number of applications and environments", function () {
+  it("should have incorrect number of applications and environments false", async () => {
+    const mockBadPortfolioSummary = mockBadPortfolioDraftSummary();
+    ddbMock.on(UpdateCommand).resolves({
+      Attributes: mockApplicationStepsBadData,
+    });
+    const result = await handler(validRequest);
+    const responseBody = JSON.parse(result.body);
+    expect(responseBody.applications.length).not.toBe(mockBadPortfolioSummary.num_applications);
+    expect(responseBody.applications.flatMap((app: Application) => app.environments).length).not.toBe(
+      mockBadPortfolioSummary.num_environments
+    );
   });
 });
 

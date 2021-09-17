@@ -126,8 +126,8 @@ describe("Successful operation tests", function () {
     const mockResponse = {
       updated_at: now,
       created_at: now,
-      portfolio_step: mockFundingStepGoodData(),
-      num_portfolio_managers: 0,
+      funding_step: mockFundingStepGoodData(),
+      num_task_orders: 1,
       status: ProvisioningStatus.NOT_STARTED,
       id: uuidv4(),
     };
@@ -142,6 +142,27 @@ describe("Successful operation tests", function () {
     expect(result).toBeInstanceOf(ApiSuccessResponse);
     expect(result.statusCode).toEqual(SuccessStatusCode.CREATED);
     expect(result.body).toStrictEqual(JSON.stringify(mockFundingStepGoodData()));
+    const numOfTaskOrders = JSON.parse(result.body).task_orders.length;
+    expect(numOfTaskOrders).toBe(mockResponse.num_task_orders);
+  });
+});
+
+describe("Incorrect number of task orders", function () {
+  it("should return falsy due to incorrect number of task orders", async () => {
+    const mockResponse = {
+      updated_at: now,
+      created_at: now,
+      funding_step: mockFundingStepGoodData(),
+      num_task_orders: 3,
+      status: ProvisioningStatus.NOT_STARTED,
+      id: uuidv4(),
+    };
+    ddbMock.on(UpdateCommand).resolves({
+      Attributes: mockResponse,
+    });
+    const result = await handler(validRequest);
+    const responseBody = JSON.parse(result.body);
+    expect(responseBody.task_orders.length === mockResponse.num_task_orders).toBeFalsy();
   });
 });
 
@@ -443,10 +464,14 @@ function mockFundingStepGoodData(): FundingStep {
     updated_at: "2021-08-03T16:21:07.978Z",
   };
   return {
-    task_order_number: "12345678910",
-    task_order_file: mockTaskOrderFile,
-    csp: CloudServiceProvider.AWS,
-    clins: [mockClin()],
+    task_orders: [
+      {
+        task_order_number: "12345678910",
+        task_order_file: mockTaskOrderFile,
+        csp: CloudServiceProvider.AWS,
+        clins: [mockClin()],
+      },
+    ],
   };
 }
 /**
@@ -463,19 +488,23 @@ function mockFundingStepBadData(): FundingStep {
     updated_at: "2021-08-03T16:21:07.978Z",
   };
   return {
-    task_order_number: "12345678910",
-    task_order_file: mockTaskOrderFile,
-    csp: CloudServiceProvider.AWS,
-    clins: [
-      mockClinInvalidClinNumberTooShort(),
-      mockClinInvalidClinNumberTooLong(),
-      mockClinInvalidClinNumberAllZeros(),
-      mockClinInvalidDates(),
-      mockClinStartAfterEnd(),
-      mockClinAlreadyEnded(),
-      mockClinZeroFunds(),
-      mockClinObligatedGreaterThanTotal(),
-      // Note, can't add mockClinNotANumberFunds() here
+    task_orders: [
+      {
+        task_order_number: "12345678910",
+        task_order_file: mockTaskOrderFile,
+        csp: CloudServiceProvider.AWS,
+        clins: [
+          mockClinInvalidClinNumberTooShort(),
+          mockClinInvalidClinNumberTooLong(),
+          mockClinInvalidClinNumberAllZeros(),
+          mockClinInvalidDates(),
+          mockClinStartAfterEnd(),
+          mockClinAlreadyEnded(),
+          mockClinZeroFunds(),
+          mockClinObligatedGreaterThanTotal(),
+          // Note, can't add mockClinNotANumberFunds() here
+        ],
+      },
     ],
   };
 }

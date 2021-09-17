@@ -8,6 +8,7 @@ import {
 import {
   isBodyPresent,
   isFundingStep,
+  isTaskOrder,
   isPathParameterPresent,
   isPortfolioStep,
   isValidJson,
@@ -101,12 +102,17 @@ describe("Testing validation of fundingStep objects", () => {
   };
   const toFile = { id: "1234", name: "testto.pdf" };
   const fundingStepLike = {
-    task_order_number: "1234567890",
-    task_order_file: toFile,
-    csp: "aws",
-    clins: [fakeClinData],
+    task_orders: [
+      {
+        task_order_number: "1234567890",
+        task_order_file: toFile,
+        csp: "aws",
+        clins: [fakeClinData],
+      },
+    ],
   };
-  const badFundingSteps = [
+  const badFundingSteps = [{}, { random_orders: "some task orders" }, ""];
+  const badTaskOrders = [
     {
       // task_order_number: "1234567890",
       task_order_file: toFile,
@@ -140,6 +146,9 @@ describe("Testing validation of fundingStep objects", () => {
   });
   it.each(badFundingSteps)("should reject a FundingStep missing any field", async (badStep) => {
     expect(isFundingStep(badStep)).toEqual(false);
+  });
+  it.each(badTaskOrders)("should reject a Task Orders missing any field", async (badTaskOrder) => {
+    expect(isTaskOrder(badTaskOrder)).toEqual(false);
   });
 });
 
