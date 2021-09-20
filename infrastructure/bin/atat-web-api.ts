@@ -3,6 +3,7 @@ import * as cdk from "@aws-cdk/core";
 import { NIST80053Checks } from "cdk-nag";
 import "source-map-support/register";
 import { AtatAuthStack } from "../lib/atat-auth-stack";
+import { AtatIamStack } from "../lib/atat-iam-stack";
 import { AtatWebApiStack } from "../lib/atat-web-api-stack";
 import { getTags } from "../lib/load-tags";
 import { isString, lowerCaseEnvironmentId, normalizeEnvironmentName } from "../lib/util";
@@ -40,6 +41,19 @@ const stacks = [
     removalPolicy,
   }),
 ];
+
+// Only deploy this stack if it has been explicitly enabled. Having duplicate
+// and untested IAM resources in an account could cause issues. This
+// particular stack is likely going to need CAPABILITY_NAMED_IAM for usability
+// so
+if (process.env.ATAT_DEPLOY_IAM === "1") {
+  stacks.push(new AtatIamStack(app, environmentName + "AtatIamStack"));
+  cdk.Annotations.of(stacks[stacks.length - 1]).addWarning(
+    "Deploying multiple IAM stacks in an account may cause issues. " +
+      "Verify there is not already an IAM stack or that the existing stack is " +
+      "being updated."
+  );
+}
 
 // Perform operations on all stacks
 for (const stack of stacks) {
