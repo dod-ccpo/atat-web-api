@@ -52,6 +52,20 @@ export class AtatIamStack extends cdk.Stack {
       ],
     });
 
+    const developerCdkStagingAccess = new iam.ManagedPolicy(this, "DeveloperCdkStagingAccess", {
+      statements: [
+        new iam.PolicyStatement({
+          sid: "AllowModifyingCdkToolBuckets",
+          effect: iam.Effect.ALLOW,
+          actions: ["s3:*"],
+          resources: [
+            `arn:${cdk.Aws.PARTITION}:s3:::cdk-hnb659fds-assets-${cdk.Aws.ACCOUNT_ID}-*`,
+            `arn:${cdk.Aws.PARTITION}:s3:::cdktoolkit-stagingbucket-*`,
+          ],
+        }),
+      ],
+    });
+
     // Eventually, this should be restricted to the specific services in use for the application
     // rather than allowing all IAM actions. This still theoretically will give anyone who can pass
     // the role permission to do almost anything in the account; however, it at least requires that
@@ -106,6 +120,7 @@ export class AtatIamStack extends cdk.Stack {
         generalReadAccess,
         awsManagedLogsReadPolicy,
         awsManagedCfnFullAccessPolicy,
+        developerCdkStagingAccess,
         baseDenies,
       ],
     });
