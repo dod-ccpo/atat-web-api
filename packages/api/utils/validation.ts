@@ -2,7 +2,10 @@ import { ApplicationStep } from "../models/ApplicationStep";
 import { Clin } from "../models/Clin";
 import { FundingStep } from "../models/FundingStep";
 import { PortfolioStep } from "../models/PortfolioStep";
+import { TaskOrder } from "../models/TaskOrder";
 import { validate as uuidValidate, version as uuidVersion } from "uuid";
+import { Application } from "../models/Application";
+import { Environment } from "../models/Environment";
 
 /**
  * Check whether a given string is valid JSON.
@@ -66,6 +69,16 @@ export function isPortfolioStep(object: unknown): object is PortfolioStep {
  * @returns true if the object has all the attributes of a {@link FundingStep}
  */
 export function isFundingStep(object: unknown): object is FundingStep {
+  return isValidObject(object) && "task_orders" in object;
+}
+
+/**
+ * Check whether a given object is a {@link TaskOrder}
+ *
+ * @param object - The object to check
+ * @returns true if object has all attributes of a {@link TaskOrder}
+ */
+export function isTaskOrder(object: unknown): object is TaskOrder {
   if (!isValidObject(object)) {
     return false;
   }
@@ -85,7 +98,38 @@ export function isApplicationStep(object: unknown): object is ApplicationStep {
   if (!isValidObject(object)) {
     return false;
   }
+  return ["applications"].every((item) => item in object);
+}
+
+/**
+ * Check whether a given object is a {@link Application}.
+ *
+ * Note that this only asserts that the given object meets the interface. It does not validate
+ * that the object is a valid {@link Application}.
+ *
+ * @param object - The object to check
+ * @returns true if the object has all the attributes of a {@link Application}
+ */
+export function isApplication(object: unknown): object is Application {
+  if (!isValidObject(object)) {
+    return false;
+  }
   return ["name", "description", "environments"].every((item) => item in object);
+}
+/**
+ * Check whether a given object is an {@link Environment}.
+ *
+ * Note that this only asserts that the given object meets the interface. It does not validate
+ * that the object is a valid {@link Environment}.
+ *
+ * @param object - The object to check
+ * @returns true if the object has all the attributes of an {@link Environment}
+ */
+export function isEnvironment(object: unknown): object is Environment {
+  if (!isValidObject(object)) {
+    return false;
+  }
+  return ["name", "operators"].every((item) => item in object);
 }
 
 /**
@@ -136,4 +180,30 @@ export function isClin(object: unknown): object is Clin {
   return ["clin_number", "idiq_clin", "total_clin_value", "obligated_funds", "pop_start_date", "pop_end_date"].every(
     (item) => item in object
   );
+}
+
+/**
+ * Check whether a given string is a valid CLIN number.
+ * @param str - The string to check
+ * @returns true if the string is a valid CLIN number; false otherwise
+ */
+export function isClinNumber(str: string): boolean {
+  if (str.length !== 4) {
+    return false;
+  }
+  const num: number = parseInt(str);
+  return num >= 1 && num <= 9999;
+}
+
+/**
+ * Check whether a given string is a valid Funding Amount.
+ * @param str - The string to check
+ * @returns true if the string is a valid Funding Amount; false otherwise
+ */
+export function isFundingAmount(str: string): boolean {
+  if (str.length === 0) {
+    return false;
+  }
+  const num: number = parseFloat(str);
+  return num > 0;
 }

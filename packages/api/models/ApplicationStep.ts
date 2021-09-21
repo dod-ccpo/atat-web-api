@@ -1,6 +1,9 @@
-import { Environment } from "./Environment";
+import { Application } from "./Application";
+
+export enum ValidationMessage {
+  INVALID_APPLICATION_NAME = "application name must be between 4 and 100 characters",
+  INVALID_ENVIRONMENT_NAME = "environment name must be between 4 and 100 characters",
+}
 export interface ApplicationStep {
-  name: string;
-  description: string;
-  environments: Array<Environment>;
+  applications: Array<Application>;
 }

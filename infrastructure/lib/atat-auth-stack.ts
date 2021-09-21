@@ -21,7 +21,7 @@ export class AtatAuthStack extends cdk.Stack {
       groupsAttributeName: "groups",
       adminsGroupName: props.adminsGroupName ?? "atat-admins",
       usersGroupName: props.adminsGroupName ?? "atat-users",
-      cognitoDomain: "atat-api-" + props.environmentId.toLowerCase(),
+      cognitoDomain: "atat-api-" + props.environmentId,
       userPoolProps: {
         removalPolicy: props?.removalPolicy,
       },
@@ -35,10 +35,15 @@ export class AtatAuthStack extends cdk.Stack {
         },
       ],
     });
-    const ssmParam = new ssm.StringParameter(this, "UserPoolIdParameter", {
+    const poolIdParam = new ssm.StringParameter(this, "UserPoolIdParameter", {
       description: "Cognito User Pool ID",
       stringValue: cognitoAuthentication.userPool.userPoolId,
       parameterName: `/atat/${props.environmentId}/cognito/userpool/id`,
+    });
+    const idpNamesParam = new ssm.StringListParameter(this, "CognitoIdPNamesParameter", {
+      description: "Names of configured identity providers",
+      parameterName: `/atat/${props.environmentId}/cognito/idps`,
+      stringListValue: cognitoAuthentication.idps.map((idp) => idp.providerName),
     });
   }
 }

@@ -360,7 +360,7 @@ paths:
       x-amazon-apigateway-integration:
           httpMethod: "POST"
           uri: 
-            Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NotImplementedFunction.Arn}/invocations"
+            Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CreateApplicationStepFunction.Arn}/invocations"
           passthroughBehavior: "when_no_match"
           type: "aws_proxy"
   /portfolioDrafts/{portfolioDraftId}/submit:
@@ -551,7 +551,15 @@ components:
         - $ref: '#/components/schemas/BaseObject'
         - type: object
           properties:
+            name:
+              type: string
             num_portfolio_managers:
+              type: number
+            num_applications:
+              type: number
+            num_environments:
+              type: number
+            num_task_orders:
               type: number
             status:
               type: string

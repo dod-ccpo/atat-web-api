@@ -3,6 +3,7 @@ import { ApiSuccessResponse, SuccessStatusCode, ValidationErrorResponse } from "
 import { dynamodbDocumentClient as client } from "../../utils/dynamodb";
 import { FUNDING_STEP } from "../../models/PortfolioDraft";
 import { FundingStep, ValidationMessage } from "../../models/FundingStep";
+import { Clin } from "../../models/Clin";
 import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import {
   DATABASE_ERROR,
@@ -18,6 +19,8 @@ import {
   isPathParameterPresent,
   isClin,
   isValidUuidV4,
+  isClinNumber,
+  isFundingAmount,
 } from "../../utils/validation";
 
 export interface ClinValidationError {
@@ -33,7 +36,10 @@ export interface ClinValidationError {
  * @returns a collection of clin validation errors
  */
 export function validateFundingStepClins(fs: FundingStep): Array<ClinValidationError> {
-  return fs.clins.map(validateClin).reduce((accumulator, validationErrors) => accumulator.concat(validationErrors), []);
+  return fs.task_orders
+    .flatMap((taskOrder) => taskOrder.clins)
+    .map(validateClin)
+    .reduce((accumulator, validationErrors) => accumulator.concat(validationErrors), []);
 }
 
 /**
@@ -71,7 +77,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
         Key: {
           id: portfolioDraftId,
         },
-        UpdateExpression: "set #stepKey = :step, #updateAtKey = :now",
+        UpdateExpression: "set #stepKey = :step, #updateAtKey = :now, num_task_orders = :numOfTaskOrders",
         ExpressionAttributeNames: {
           // values are JSON keys
           "#stepKey": FUNDING_STEP,
@@ -80,6 +86,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
         ExpressionAttributeValues: {
           ":step": fundingStep,
           ":now": new Date().toISOString(),
+          ":numOfTaskOrders": fundingStep.task_orders.length,
         },
         ConditionExpression: "attribute_exists(created_at)",
         ReturnValues: "ALL_NEW",
@@ -120,6 +127,15 @@ export function validateClin(clin: unknown): Array<ClinValidationError> {
     throw Error("Input must be a Clin object");
   }
   const errors = Array<ClinValidationError>();
+
+  if (!isClinNumber(clin.clin_number)) {
+    errors.push({
+      clinNumber: clin.clin_number,
+      invalidParameterName: "clin_number",
+      invalidParameterValue: clin.clin_number,
+      validationMessage: ValidationMessage.INVALID_CLIN_NUMBER,
+    });
+  }
   if (!isValidDate(clin.pop_start_date)) {
     errors.push({
       clinNumber: clin.clin_number,
@@ -160,20 +176,20 @@ export function validateClin(clin: unknown): Array<ClinValidationError> {
       validationMessage: ValidationMessage.END_FUTURE,
     });
   }
-  if (clin.total_clin_value <= 0) {
+  if (!isFundingAmount(clin.total_clin_value.toString())) {
     errors.push({
       clinNumber: clin.clin_number,
       invalidParameterName: "total_clin_value",
       invalidParameterValue: clin.total_clin_value.toString(),
-      validationMessage: ValidationMessage.TOTAL_GT_ZERO,
+      validationMessage: ValidationMessage.INVALID_FUNDING_AMOUNT,
     });
   }
-  if (clin.obligated_funds <= 0) {
+  if (!isFundingAmount(clin.obligated_funds.toString())) {
     errors.push({
       clinNumber: clin.clin_number,
       invalidParameterName: "obligated_funds",
       invalidParameterValue: clin.obligated_funds.toString(),
-      validationMessage: ValidationMessage.OBLIGATED_GT_ZERO,
+      validationMessage: ValidationMessage.INVALID_FUNDING_AMOUNT,
     });
   }
   if (clin.obligated_funds > clin.total_clin_value) {

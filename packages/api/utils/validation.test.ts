@@ -1,11 +1,24 @@
 import {
+  mockApplicationStep,
+  mockApplicationStepsMissingFields,
+  mockApplicationsMissingFields,
+  mockApplicationCloudCityEvacPlanner,
+  mockEnvironmentsMissingFields,
+} from "../portfolioDrafts/application/commonMockData";
+import {
   isBodyPresent,
   isFundingStep,
+  isTaskOrder,
   isPathParameterPresent,
   isPortfolioStep,
   isValidJson,
   isValidDate,
   isClin,
+  isClinNumber,
+  isFundingAmount,
+  isApplicationStep,
+  isApplication,
+  isEnvironment,
 } from "./validation";
 
 describe("Testing validation of request body", function () {
@@ -89,12 +102,17 @@ describe("Testing validation of fundingStep objects", () => {
   };
   const toFile = { id: "1234", name: "testto.pdf" };
   const fundingStepLike = {
-    task_order_number: "1234567890",
-    task_order_file: toFile,
-    csp: "aws",
-    clins: [fakeClinData],
+    task_orders: [
+      {
+        task_order_number: "1234567890",
+        task_order_file: toFile,
+        csp: "aws",
+        clins: [fakeClinData],
+      },
+    ],
   };
-  const badFundingSteps = [
+  const badFundingSteps = [{}, { random_orders: "some task orders" }, ""];
+  const badTaskOrders = [
     {
       // task_order_number: "1234567890",
       task_order_file: toFile,
@@ -128,6 +146,43 @@ describe("Testing validation of fundingStep objects", () => {
   });
   it.each(badFundingSteps)("should reject a FundingStep missing any field", async (badStep) => {
     expect(isFundingStep(badStep)).toEqual(false);
+  });
+  it.each(badTaskOrders)("should reject a Task Orders missing any field", async (badTaskOrder) => {
+    expect(isTaskOrder(badTaskOrder)).toEqual(false);
+  });
+});
+
+describe("isApplicationStep()", () => {
+  it.each([true, 1, undefined, null])("should reject non-objects", async (item) => {
+    expect(isApplicationStep(item)).toEqual(false);
+  });
+  it("should accept an ApplicationStep object", async () => {
+    expect(isApplicationStep(mockApplicationStep)).toEqual(true);
+  });
+  it("should reject an ApplicationStep missing any field", async () => {
+    expect(isApplicationStep(mockApplicationStepsMissingFields)).toEqual(false);
+  });
+});
+describe("isApplication()", () => {
+  it.each([true, 1, undefined, null])("should reject non-objects", async (item) => {
+    expect(isApplication(item)).toEqual(false);
+  });
+  it.each(mockApplicationStep.applications)("should accept an Application object", async (item) => {
+    expect(isApplication(item)).toEqual(true);
+  });
+  it("should reject an Application missing any field", async () => {
+    expect(isApplication(mockApplicationsMissingFields)).toEqual(false);
+  });
+});
+describe("isEnvironment()", () => {
+  it.each([true, 1, undefined, null])("should reject non-objects", async (item) => {
+    expect(isEnvironment(item)).toEqual(false);
+  });
+  it.each(mockApplicationCloudCityEvacPlanner.environments)("should accept an Environment object", async (item) => {
+    expect(isEnvironment(item)).toEqual(true);
+  });
+  it("should reject an Environment missing any field", async () => {
+    expect(isEnvironment(mockEnvironmentsMissingFields)).toEqual(false);
   });
 });
 
@@ -231,5 +286,36 @@ describe("isClin()", function () {
   });
   it.each(badClins)("should reject a Clin missing any field", async (badClin) => {
     expect(isClin(badClin)).toEqual(false);
+  });
+});
+
+describe("isClinNumber()", function () {
+  const goodClinNumbers = ["0001", "0010", "0500", "5000", "9999"];
+  it.each(goodClinNumbers)("should accept a clin number with expected length and within accepted range", (num) => {
+    expect(isClinNumber(num)).toEqual(true);
+  });
+  const badClinNumbers = ["", "0", "1", "02", "111", "0000", "10000", "99999"];
+  it.each(badClinNumbers)("should reject a clin number with unexpected length or not within accepted range", (num) => {
+    expect(isClinNumber(num)).toEqual(false);
+  });
+});
+
+describe("isFundingAmount()", function () {
+  const goodAmounts = ["1", "1.1", "1.50", "1.99", "250000"];
+  it.each(goodAmounts)("should accept a funding amount that is valid", (num) => {
+    expect(isFundingAmount(num)).toEqual(true);
+  });
+  const badAmounts = ["", "0", "-1", "not a number"];
+  it.each(badAmounts)("should reject a funding amount that is invalid", (num) => {
+    expect(isFundingAmount(num)).toEqual(false);
+  });
+  // TODO: What should be done with decimals greater than two digits?
+  // Reject?  Accept and round?  Accept and truncate?
+  // This formatter rounds the values to nearest cent:
+  // Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
+  // The values below yield ["$1.99", "$1.99", "$2.00", "$2.00"];
+  const questionableAmounts = ["1.991", "1.994", "1.995", "1.999"];
+  it.each(questionableAmounts)("should accept a funding amount that is valid", (num) => {
+    expect(isFundingAmount(num)).toEqual(true);
   });
 });
