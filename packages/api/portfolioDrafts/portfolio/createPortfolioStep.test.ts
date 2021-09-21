@@ -41,7 +41,7 @@ describe("Dynamodb mock validation", function () {
     });
     // setting up new request
     const portfolioStep: PortfolioStep = mockResponse.portfolio_step; // request body
-    const data = await createPortfolioStepCommand("mock-table", "595c31d3-190c-42c3-a9b6-77325fa5ed38", portfolioStep);
+    const data = await createPortfolioStepCommand("595c31d3-190c-42c3-a9b6-77325fa5ed38", portfolioStep);
     expect(data.Attributes).toEqual(goodMockResponse);
   });
 });
@@ -80,7 +80,6 @@ describe("Incorrect number of task orders", function () {
       Attributes: badMockResponse,
     });
     const result = await createPortfolioStepCommand(
-      "mock-table",
       "595c31d3-190c-42c3-a9b6-77325fa5ed38",
       badMockResponse.portfolio_step
     );

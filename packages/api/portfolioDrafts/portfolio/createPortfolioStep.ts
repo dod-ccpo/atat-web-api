@@ -1,13 +1,11 @@
-// import { createPortfolioStepCommand } from "../../utils/commands/createPortfolioStepCommand";
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, UpdateCommand, UpdateCommandOutput } from "@aws-sdk/lib-dynamodb";
+import { UpdateCommand, UpdateCommandOutput } from "@aws-sdk/lib-dynamodb";
+import { dynamodbDocumentClient as client } from "../../utils/dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { PORTFOLIO_STEP } from "../../models/PortfolioDraft";
 import { PortfolioStep } from "../../models/PortfolioStep";
 import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusCode } from "../../utils/response";
 import { isBodyPresent, isPathParameterPresent, isPortfolioStep, isValidJson } from "../../utils/validation";
 
-const TABLE_NAME = process.env.ATAT_TABLE_NAME ?? "";
 export const NO_SUCH_PORTFOLIO = new OtherErrorResponse(
   "Portfolio Draft with the given ID does not exist",
   ErrorStatusCode.NOT_FOUND
@@ -45,7 +43,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
   const portfolioStep: PortfolioStep = requestBody;
 
   try {
-    await createPortfolioStepCommand(TABLE_NAME, portfolioDraftId, portfolioStep);
+    await createPortfolioStepCommand(portfolioDraftId, portfolioStep);
   } catch (error) {
     if (error.name === "ConditionalCheckFailedException") {
       return NO_SUCH_PORTFOLIO;
@@ -57,16 +55,13 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
 }
 
 export async function createPortfolioStepCommand(
-  table: string,
   portfolioDraftId: string,
   portfolioStep: PortfolioStep
 ): Promise<UpdateCommandOutput> {
-  const dynamodb = new DynamoDBClient({});
-  const ddb = DynamoDBDocumentClient.from(dynamodb);
   const now = new Date().toISOString();
-  const result = await ddb.send(
+  const result = await client.send(
     new UpdateCommand({
-      TableName: table,
+      TableName: process.env.ATAT_TABLE_NAME ?? "",
       Key: {
         id: portfolioDraftId,
       },
