@@ -3,7 +3,7 @@ import { dynamodbDocumentClient as client } from "../../utils/dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { PORTFOLIO_STEP } from "../../models/PortfolioDraft";
 import { PortfolioStep } from "../../models/PortfolioStep";
-import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusCode } from "../../utils/response";
+import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
 import { isValidJson, isValidUuidV4 } from "../../utils/validation";
 import { NO_SUCH_PORTFOLIO_DRAFT, REQUEST_BODY_INVALID, DATABASE_ERROR } from "../../utils/errors";
 
