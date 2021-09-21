@@ -847,8 +847,8 @@ x-amazon-apigateway-gateway-responses:
   BAD_REQUEST_BODY:
     statusCode: 400
     responseTemplates: 
-      application/json: '{ "code": "INVALID_INPUT", "message": $context.error.messageString, "error_map": "$context.error.validationErrorString" }'
+      application/json: '{ "code": "OTHER", "message": "A valid request body must be provided" }'
   BAD_REQUEST_PARAMETERS:
     statusCode: 400
     responseTemplates: 
-      application/json: '{ "code": "INVALID_INPUT", "message": $context.error.messageString, "error_map": "$context.error.validationErrorString" }'
+      application/json: '{ "code": "OTHER", "message": "Required path parameter is missing" }'
