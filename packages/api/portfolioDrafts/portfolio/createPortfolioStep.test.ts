@@ -84,14 +84,6 @@ describe("Incorrect number of task orders", function () {
 });
 
 describe("Validation of handler", function () {
-  /*
-  it("should return EMPTY_REQUEST_BODY when body is empty", async () => {
-    const request = {
-      body: "",
-    } as APIGatewayProxyEvent;
-    const response = await handler(request);
-    expect(response).toEqual(EMPTY_REQUEST_BODY);
-  }); */
   it("should return NO_SUCH_PORTFOLIO_DRAFT when no portfolioId specified", async () => {
     const request = {
       body: `"{"hi":"123"}"`,

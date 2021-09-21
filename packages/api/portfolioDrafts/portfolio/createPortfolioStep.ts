@@ -7,8 +7,6 @@ import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusC
 import { isValidJson, isValidUuidV4 } from "../../utils/validation";
 import { NO_SUCH_PORTFOLIO_DRAFT, REQUEST_BODY_INVALID } from "../../utils/errors";
 
-export const EMPTY_REQUEST_BODY = new OtherErrorResponse("Request body must not be empty", ErrorStatusCode.BAD_REQUEST);
-
 /**
  * Submits the Portfolio Step of the Portfolio Draft Wizard
  *
