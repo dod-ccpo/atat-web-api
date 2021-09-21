@@ -3,13 +3,8 @@ import { APIGatewayProxyEvent } from "aws-lambda";
 import { mockClient } from "aws-sdk-client-mock";
 import { PortfolioStep } from "../../models/PortfolioStep";
 import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
-import {
-  createPortfolioStepCommand,
-  EMPTY_REQUEST_BODY,
-  handler,
-  NO_SUCH_PORTFOLIO,
-  REQUEST_BODY_INVALID,
-} from "./createPortfolioStep";
+import { createPortfolioStepCommand, handler } from "./createPortfolioStep";
+import { NO_SUCH_PORTFOLIO_DRAFT, REQUEST_BODY_INVALID } from "../../utils/errors";
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 beforeEach(() => {
@@ -89,29 +84,31 @@ describe("Incorrect number of task orders", function () {
 });
 
 describe("Validation of handler", function () {
+  /*
   it("should return EMPTY_REQUEST_BODY when body is empty", async () => {
     const request = {
       body: "",
     } as APIGatewayProxyEvent;
     const response = await handler(request);
     expect(response).toEqual(EMPTY_REQUEST_BODY);
-  });
-  it("should return NO_SUCH_PORTFOLIO when no portfolioId specified", async () => {
+  }); */
+  it("should return NO_SUCH_PORTFOLIO_DRAFT when no portfolioId specified", async () => {
     const request = {
       body: `"{"hi":"123"}"`,
     } as APIGatewayProxyEvent;
     const response = await handler(request);
-    expect(response).toEqual(NO_SUCH_PORTFOLIO);
+    expect(response).toEqual(NO_SUCH_PORTFOLIO_DRAFT);
   });
   it("should return REQUEST_BODY_INVALID when invalid JSON provided", async () => {
     const request: APIGatewayProxyEvent = {
       body: `"{"hi": "123",}"`, // invalid JSON comma at end
-      pathParameters: { portfolioDraftId: "1234" },
+      pathParameters: { portfolioDraftId: "aabcbce6-5a91-4a53-bae1-5cf7cae7edd7" },
     } as any;
 
     const response = await handler(request);
     expect(response).toEqual(REQUEST_BODY_INVALID);
   });
+  /*
   it("should return REQUEST_BODY_INVALID when invalid PortfolioStep object provided", async () => {
     const requestBodyMissingDescription = {
       name: "Zach's portfolio name",
@@ -120,12 +117,12 @@ describe("Validation of handler", function () {
     };
     const request: APIGatewayProxyEvent = {
       body: JSON.stringify(requestBodyMissingDescription), // invalid PortfolioStep object
-      pathParameters: { portfolioDraftId: "1234" },
+      pathParameters: { portfolioDraftId: "aabcbce6-5a91-4a53-bae1-5cf7cae7edd7" },
     } as any;
 
     const response = await handler(request);
     expect(response).toEqual(REQUEST_BODY_INVALID);
-  });
+  }); */
 });
 describe("Handler response with mock dynamodb", function () {
   it("should return error when the portfolioDraft doesn't exist", async () => {
@@ -140,11 +137,11 @@ describe("Handler response with mock dynamodb", function () {
 
     const request: APIGatewayProxyEvent = {
       body: JSON.stringify(requestBody),
-      pathParameters: { portfolioDraftId: "1234" },
+      pathParameters: { portfolioDraftId: "aabcbce6-5a91-4a53-bae1-5cf7cae7edd7" },
     } as any;
 
     const data = await handler(request);
-    expect(data).toEqual(NO_SUCH_PORTFOLIO);
+    expect(data).toEqual(NO_SUCH_PORTFOLIO_DRAFT);
   });
 
   it("should return database error when unknown internal problem occurs", async () => {
@@ -159,7 +156,7 @@ describe("Handler response with mock dynamodb", function () {
 
     const request: APIGatewayProxyEvent = {
       body: JSON.stringify(requestBody),
-      pathParameters: { portfolioDraftId: "1234" },
+      pathParameters: { portfolioDraftId: "aabcbce6-5a91-4a53-bae1-5cf7cae7edd7" },
     } as any;
 
     const data = await handler(request);

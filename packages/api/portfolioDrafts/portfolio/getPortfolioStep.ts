@@ -3,7 +3,6 @@ import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
 import { dynamodbDocumentClient as client } from "../../utils/dynamodb";
 import { GetCommand } from "@aws-sdk/lib-dynamodb";
 import { isPathParameterPresent, isValidUuidV4 } from "../../utils/validation";
-import { NO_SUCH_PORTFOLIO } from "./createPortfolioStep";
 import { PORTFOLIO_STEP } from "../../models/PortfolioDraft";
 import { PortfolioStep } from "../../models/PortfolioStep";
 import {
@@ -38,7 +37,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
       })
     );
     if (!result.Item) {
-      return NO_SUCH_PORTFOLIO;
+      return NO_SUCH_PORTFOLIO_DRAFT;
     }
     if (!result.Item?.portfolio_step) {
       return NO_SUCH_PORTFOLIO_STEP;
