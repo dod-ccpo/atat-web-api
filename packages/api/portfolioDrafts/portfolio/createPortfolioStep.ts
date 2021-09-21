@@ -4,16 +4,9 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { PORTFOLIO_STEP } from "../../models/PortfolioDraft";
 import { PortfolioStep } from "../../models/PortfolioStep";
 import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusCode } from "../../utils/response";
-import { isBodyPresent, isPathParameterPresent, isPortfolioStep, isValidJson } from "../../utils/validation";
+import { isValidJson, isValidUuidV4 } from "../../utils/validation";
+import { NO_SUCH_PORTFOLIO_DRAFT, REQUEST_BODY_INVALID } from "../../utils/errors";
 
-export const NO_SUCH_PORTFOLIO = new OtherErrorResponse(
-  "Portfolio Draft with the given ID does not exist",
-  ErrorStatusCode.NOT_FOUND
-);
-export const REQUEST_BODY_INVALID = new OtherErrorResponse(
-  "A valid PortfolioStep object must be provided",
-  ErrorStatusCode.BAD_REQUEST
-);
 export const EMPTY_REQUEST_BODY = new OtherErrorResponse("Request body must not be empty", ErrorStatusCode.BAD_REQUEST);
 
 /**
@@ -23,18 +16,19 @@ export const EMPTY_REQUEST_BODY = new OtherErrorResponse("Request body must not 
  */
 export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   const portfolioDraftId = event.pathParameters?.portfolioDraftId;
-
+  if (!isValidUuidV4(portfolioDraftId!)) {
+    return NO_SUCH_PORTFOLIO_DRAFT;
+  }
   if (!isValidJson(event.body!)) {
     return REQUEST_BODY_INVALID;
   }
-
   const portfolioStep: PortfolioStep = JSON.parse(event.body!);
 
   try {
     await createPortfolioStepCommand(portfolioDraftId!, portfolioStep);
   } catch (error) {
     if (error.name === "ConditionalCheckFailedException") {
-      return NO_SUCH_PORTFOLIO;
+      return NO_SUCH_PORTFOLIO_DRAFT;
     }
     console.log("Database error: " + error.name);
     return new OtherErrorResponse("Database error", ErrorStatusCode.INTERNAL_SERVER_ERROR);
