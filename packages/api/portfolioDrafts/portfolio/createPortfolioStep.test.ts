@@ -108,21 +108,6 @@ describe("Validation of handler", function () {
     const response = await handler(request);
     expect(response).toEqual(REQUEST_BODY_INVALID);
   });
-  /*
-  it("should return REQUEST_BODY_INVALID when invalid PortfolioStep object provided", async () => {
-    const requestBodyMissingDescription = {
-      name: "Zach's portfolio name",
-      dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
-      portfolio_managers: ["joe.manager@example.com", "jane.manager@example.com"],
-    };
-    const request: APIGatewayProxyEvent = {
-      body: JSON.stringify(requestBodyMissingDescription), // invalid PortfolioStep object
-      pathParameters: { portfolioDraftId: "aabcbce6-5a91-4a53-bae1-5cf7cae7edd7" },
-    } as any;
-
-    const response = await handler(request);
-    expect(response).toEqual(REQUEST_BODY_INVALID);
-  }); */
 });
 describe("Handler response with mock dynamodb", function () {
   it("should return error when the portfolioDraft doesn't exist", async () => {
