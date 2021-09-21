@@ -22,28 +22,16 @@ export const EMPTY_REQUEST_BODY = new OtherErrorResponse("Request body must not 
  * @param event - The POST request from API Gateway
  */
 export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
-  if (!isBodyPresent(event.body)) {
-    return EMPTY_REQUEST_BODY;
-  }
-
   const portfolioDraftId = event.pathParameters?.portfolioDraftId;
 
-  if (!isPathParameterPresent(portfolioDraftId)) {
-    return NO_SUCH_PORTFOLIO;
-  }
-
-  if (!isValidJson(event.body)) {
+  if (!isValidJson(event.body!)) {
     return REQUEST_BODY_INVALID;
   }
-  const requestBody = JSON.parse(event.body);
 
-  if (!isPortfolioStep(requestBody)) {
-    return REQUEST_BODY_INVALID;
-  }
-  const portfolioStep: PortfolioStep = requestBody;
+  const portfolioStep: PortfolioStep = JSON.parse(event.body!);
 
   try {
-    await createPortfolioStepCommand(portfolioDraftId, portfolioStep);
+    await createPortfolioStepCommand(portfolioDraftId!, portfolioStep);
   } catch (error) {
     if (error.name === "ConditionalCheckFailedException") {
       return NO_SUCH_PORTFOLIO;
