@@ -1,14 +1,14 @@
 import * as apigw from "@aws-cdk/aws-apigateway";
 import * as dynamodb from "@aws-cdk/aws-dynamodb";
-import * as s3asset from "@aws-cdk/aws-s3-assets";
 import * as s3 from "@aws-cdk/aws-s3";
+import * as s3asset from "@aws-cdk/aws-s3-assets";
 import * as cdk from "@aws-cdk/core";
 import { ApiDynamoDBFunction } from "./constructs/api-dynamodb-function";
 import { ApiS3Function } from "./constructs/api-s3-function";
+import { SecureBucket } from "./constructs/compliant-resources";
 import { TaskOrderLifecycle } from "./constructs/task-order-lifecycle";
 import { HttpMethod } from "./http";
 import { packageRoot } from "./util";
-import { PrivateBucket } from "./constructs/compliant-resources";
 
 export interface AtatWebApiStackProps extends cdk.StackProps {
   removalPolicy?: cdk.RemovalPolicy;
@@ -139,8 +139,12 @@ export class AtatWebApiStack extends cdk.Stack {
     // Creates a target server access log bucket shared amongst the Task Order Lifecycle buckets
     // assumption that we want to use one target bucket for all 3 taskOrder buckets
     // this target bucket sends and error to cdk-nag since server logs not enabled
-    const taskOrdersAccessLogsBucket = new PrivateBucket(this, "taskOrdersLogBucket", {
-      accessControl: s3.BucketAccessControl.LOG_DELIVERY_WRITE,
+    const taskOrdersAccessLogsBucket = new SecureBucket(this, "taskOrdersLogBucket", {
+      logTargetBucket: "self",
+      logTargetPrefix: "logs/",
+      bucketProps: {
+        accessControl: s3.BucketAccessControl.LOG_DELIVERY_WRITE,
+      },
     });
     const taskOrderManagement = new TaskOrderLifecycle(this, "TaskOrders", {
       bucketProps: {
