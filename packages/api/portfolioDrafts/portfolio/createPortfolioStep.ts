@@ -5,7 +5,7 @@ import { PORTFOLIO_STEP } from "../../models/PortfolioDraft";
 import { PortfolioStep } from "../../models/PortfolioStep";
 import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusCode } from "../../utils/response";
 import { isValidJson, isValidUuidV4 } from "../../utils/validation";
-import { NO_SUCH_PORTFOLIO_DRAFT, REQUEST_BODY_INVALID } from "../../utils/errors";
+import { NO_SUCH_PORTFOLIO_DRAFT, REQUEST_BODY_INVALID, DATABASE_ERROR } from "../../utils/errors";
 
 /**
  * Submits the Portfolio Step of the Portfolio Draft Wizard
@@ -29,7 +29,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
       return NO_SUCH_PORTFOLIO_DRAFT;
     }
     console.log("Database error: " + error.name);
-    return new OtherErrorResponse("Database error", ErrorStatusCode.INTERNAL_SERVER_ERROR);
+    return DATABASE_ERROR;
   }
   return new ApiSuccessResponse<PortfolioStep>(portfolioStep, SuccessStatusCode.CREATED);
 }
