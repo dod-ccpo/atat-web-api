@@ -137,22 +137,32 @@ export class AtatWebApiStack extends cdk.Stack {
 
   private addTaskOrderRoutes(props?: AtatWebApiStackProps) {
     // Creates a target server access log bucket shared amongst the Task Order Lifecycle buckets
-    // assumption that we want to use one target bucket for all 3 taskOrder buckets
-    // this target bucket sends and error to cdk-nag since server logs not enabled
+    // server access logs enabled on target bucket
     const taskOrdersAccessLogsBucket = new SecureBucket(this, "taskOrdersLogBucket", {
       logTargetBucket: "self",
-      logTargetPrefix: "logs/",
+      logTargetPrefix: "logs/logbucket/",
       bucketProps: {
         accessControl: s3.BucketAccessControl.LOG_DELIVERY_WRITE,
       },
     });
+    // Error still shows even though the target bucket server access logs is enabled
+    // this suppresses the related cdk-nag for the target bucket error
+    (taskOrdersAccessLogsBucket.bucket.node.defaultChild as s3.CfnBucket).addMetadata("cdk_nag", {
+      rules_to_suppress: [
+        {
+          id: "NIST.800.53-S3BucketLoggingEnabled",
+          reason:
+            "Task orders server access logs are enabled by using the SecureBucket construct. AWS warns against enabling logs on the log bucket -> https://docs.aws.amazon.com/AmazonS3/latest/userguide/enable-server-access-logging.html",
+        },
+      ],
+    });
     const taskOrderManagement = new TaskOrderLifecycle(this, "TaskOrders", {
+      // enables server access logs for task order buckets (NIST SP 800-53 controls)
+      logTargetBucket: taskOrdersAccessLogsBucket.bucket,
+      logTargetPrefix: "logs/taskorders/",
       bucketProps: {
         removalPolicy: props?.removalPolicy,
         autoDeleteObjects: props?.removalPolicy === cdk.RemovalPolicy.DESTROY,
-        // enables server access logs for task order buckets (NIST SP 800-53 controls)
-        serverAccessLogsBucket: taskOrdersAccessLogsBucket,
-        serverAccessLogsPrefix: "atat/server-access-logs-dev/",
       },
     });
     const uploadTaskOrder = new ApiS3Function(this, "UploadTaskOrder", {

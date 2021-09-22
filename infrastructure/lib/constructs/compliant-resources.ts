@@ -19,9 +19,10 @@ export class SecureBucket extends cdk.Construct {
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       autoDeleteObjects: false,
     });
+    // low level (L1) construct modifications for server access logs
     (bucket.node.defaultChild as s3.CfnBucket).loggingConfiguration = {
       logFilePrefix: props.logTargetPrefix,
-      destinationBucketName: props.logTargetBucket === "self" ? bucket.bucketName : props.logTargetBucket.bucketName,
+      destinationBucketName: props.logTargetBucket === "self" ? undefined : props.logTargetBucket.bucketName,
     };
     this.bucket = bucket;
   }

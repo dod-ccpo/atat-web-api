@@ -1,8 +1,10 @@
 import * as s3 from "@aws-cdk/aws-s3";
 import * as cdk from "@aws-cdk/core";
-import { PrivateBucket } from "./compliant-resources";
+import { SecureBucket } from "./compliant-resources";
 
 export interface TaskOrderLifecycleProps {
+  logTargetBucket: s3.IBucket;
+  logTargetPrefix: string;
   bucketProps?: s3.BucketProps;
 }
 
@@ -13,14 +15,19 @@ export interface TaskOrderLifecycleProps {
  * parts of the architecture.
  */
 export class TaskOrderLifecycle extends cdk.Construct {
-  public readonly pendingBucket: PrivateBucket;
-  public readonly acceptedBucket: PrivateBucket;
-  public readonly rejectedBucket: PrivateBucket;
+  public readonly pendingBucket: SecureBucket;
+  public readonly acceptedBucket: SecureBucket;
+  public readonly rejectedBucket: SecureBucket;
 
-  constructor(scope: cdk.Construct, id: string, props?: TaskOrderLifecycleProps) {
+  constructor(scope: cdk.Construct, id: string, props: TaskOrderLifecycleProps) {
     super(scope, id);
-    this.pendingBucket = new PrivateBucket(this, "PendingBucket", { ...props?.bucketProps });
-    this.acceptedBucket = new PrivateBucket(this, "AcceptedBucket", { ...props?.bucketProps });
-    this.rejectedBucket = new PrivateBucket(this, "RejectedBucket", { ...props?.bucketProps });
+    const taskOrderBucketProps = {
+      logTargetBucket: props.logTargetBucket,
+      logTargetPrefix: props.logTargetPrefix,
+      bucketProps: { ...props?.bucketProps },
+    };
+    this.pendingBucket = new SecureBucket(this, "PendingBucket", { ...taskOrderBucketProps });
+    this.acceptedBucket = new SecureBucket(this, "AcceptedBucket", { ...taskOrderBucketProps });
+    this.rejectedBucket = new SecureBucket(this, "RejectedBucket", { ...taskOrderBucketProps });
   }
 }

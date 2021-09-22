@@ -3,10 +3,10 @@ import * as s3 from "@aws-cdk/aws-s3";
 import * as cdk from "@aws-cdk/core";
 import { HttpMethod } from "../http";
 import { ApiFunction, ApiFunctionProps } from "./api-function";
-import { PrivateBucket } from "./compliant-resources";
+import { SecureBucket } from "./compliant-resources";
 
 export interface ApiS3FunctionProps extends ApiFunctionProps {
-  readonly bucket: PrivateBucket;
+  readonly bucket: SecureBucket;
 }
 
 export class ApiS3Function extends ApiFunction {
@@ -14,7 +14,7 @@ export class ApiS3Function extends ApiFunction {
 
   constructor(scope: cdk.Construct, id: string, props: ApiS3FunctionProps) {
     super(scope, id, props);
-    this.bucket = props.bucket;
+    this.bucket = props.bucket.bucket;
     this.fn.addEnvironment("DATA_BUCKET", this.bucket.bucketName);
     this.grantRequiredBucketPermissions();
   }
