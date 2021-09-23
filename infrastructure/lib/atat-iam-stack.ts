@@ -25,6 +25,7 @@ export class AtatIamStack extends cdk.Stack {
     // will it always? Might we eventually store sensitive data there?
     // Eventually, many of these actions may require access to a KMS Key.
     const generalReadAccess = new iam.ManagedPolicy(this, "GeneralReadAccess", {
+      description: "Grants read access to specific resources not in ViewOnlyAccess",
       statements: [
         new iam.PolicyStatement({
           sid: "DynamoDBItemAccess",
@@ -52,16 +53,32 @@ export class AtatIamStack extends cdk.Stack {
       ],
     });
 
-    const developerCdkStagingAccess = new iam.ManagedPolicy(this, "DeveloperCdkStagingAccess", {
+    const developerRwAccess = new iam.ManagedPolicy(this, "DeveloperReadWriteAccess", {
+      description: "Grants read/write access to developer-specific actions and resources",
       statements: [
+        // During a deployment, outside of CloudFormation (where the role will be used),
+        // the CDK needs to read from and write to the S3 buckets for the CDK.
         new iam.PolicyStatement({
           sid: "AllowModifyingCdkToolBuckets",
           effect: iam.Effect.ALLOW,
           actions: ["s3:*"],
           resources: [
-            `arn:${cdk.Aws.PARTITION}:s3:::cdk-hnb659fds-assets-${cdk.Aws.ACCOUNT_ID}-*`,
+            `arn:${cdk.Aws.PARTITION}:s3:::cdk-*-assets-${cdk.Aws.ACCOUNT_ID}-*`,
             `arn:${cdk.Aws.PARTITION}:s3:::cdktoolkit-stagingbucket-*`,
           ],
+        }),
+        // DevSecOps team members need access to restore tables from PITR
+        // backups and to export to S3.
+        new iam.PolicyStatement({
+          sid: "AllowDynamoDbBackupRestore",
+          effect: iam.Effect.ALLOW,
+          actions: [
+            "dynamodb:RestoreTable*",
+            "dynamodb:ExportTableToPointInTime",
+            "dynamodb:ListBackups",
+            "dynamodb:Describe*Backup*",
+          ],
+          resources: ["*"],
         }),
       ],
     });
@@ -72,6 +89,7 @@ export class AtatIamStack extends cdk.Stack {
     // it happen via CloudFormation.
     const cloudFormationExecutionRole = new iam.Role(this, "CloudFormationExecutionRole", {
       roleName: "AtatCloudFormation",
+      description: "Role for deploying ATAT using CloudFormation",
       assumedBy: new iam.ServicePrincipal("cloudformation.amazonaws.com"),
       managedPolicies: [awsManagedAdminAccessPolicy, baseDenies],
     });
@@ -94,6 +112,7 @@ export class AtatIamStack extends cdk.Stack {
     // APIs that we have considered to be safe.
     const qaAndTestRole = new iam.Role(this, "QaTestingRole", {
       roleName: "AtatQa",
+      description: "ATAT QA Team",
       assumedBy: managementAccountPrincipal,
       managedPolicies: [awsManagedViewOnlyPolicy, generalReadAccess, baseDenies],
     });
@@ -101,6 +120,7 @@ export class AtatIamStack extends cdk.Stack {
     // defined in the AWS-managed SecurityAudit policy.
     const auditorRole = new iam.Role(this, "SecurityAuditorRole", {
       roleName: "AtatSecurityAuditor",
+      description: "ATAT Security Auditors",
       assumedBy: managementAccountPrincipal,
       managedPolicies: [
         awsManagedViewOnlyPolicy,
@@ -114,13 +134,14 @@ export class AtatIamStack extends cdk.Stack {
     // the CloudFormation execution role and read all logs in CloudWatch.
     const developerRole = new iam.Role(this, "DeveloperRole", {
       roleName: "AtatDeveloper",
+      description: "ATAT DevSecOps access",
       assumedBy: managementAccountPrincipal,
       managedPolicies: [
         awsManagedViewOnlyPolicy,
         generalReadAccess,
         awsManagedLogsReadPolicy,
         awsManagedCfnFullAccessPolicy,
-        developerCdkStagingAccess,
+        developerRwAccess,
         baseDenies,
       ],
     });
@@ -138,6 +159,10 @@ export class AtatIamStack extends cdk.Stack {
       new cdk.CfnOutput(this, "AuditorRoleArnOutput", {
         exportName: "AtatAuditorRoleArn",
         value: auditorRole.roleArn,
+      }),
+      new cdk.CfnOutput(this, "CloudFormationRoleArn", {
+        exportName: "AtatCloudFormationExecutionRoleArn",
+        value: cloudFormationExecutionRole.roleArn,
       })
     );
   }
