@@ -139,22 +139,8 @@ export class AtatWebApiStack extends cdk.Stack {
     // Creates a target server access log bucket shared amongst the Task Order Lifecycle buckets
     // server access logs enabled on target bucket
     const taskOrdersAccessLogsBucket = new SecureBucket(this, "taskOrdersLogBucket", {
-      logTargetBucket: "self",
+      logTargetBucket: "self", // access control set to LOG_DELIVERY_WRITE when "self"
       logTargetPrefix: "logs/logbucket/",
-      bucketProps: {
-        accessControl: s3.BucketAccessControl.LOG_DELIVERY_WRITE,
-      },
-    });
-    // Error still shows even though the target bucket server access logs is enabled
-    // this suppresses the related cdk-nag for the target bucket error
-    (taskOrdersAccessLogsBucket.bucket.node.defaultChild as s3.CfnBucket).addMetadata("cdk_nag", {
-      rules_to_suppress: [
-        {
-          id: "NIST.800.53-S3BucketLoggingEnabled",
-          reason:
-            "Task orders server access logs are enabled by using the SecureBucket construct. AWS warns against enabling logs on the log bucket -> https://docs.aws.amazon.com/AmazonS3/latest/userguide/enable-server-access-logging.html",
-        },
-      ],
     });
     const taskOrderManagement = new TaskOrderLifecycle(this, "TaskOrders", {
       // enables server access logs for task order buckets (NIST SP 800-53 controls)
