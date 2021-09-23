@@ -42,12 +42,22 @@ export class AtatIamStack extends cdk.Stack {
       ],
     });
 
-    const baseDenies = new iam.ManagedPolicy(this, "AtatUserDenyPolicy", {
+    const auditorAccess = new iam.ManagedPolicy(this, "AuditorAccessPolicy", {
+      description: "Grants additional security auditor access beyond SecurityAudit",
       statements: [
+        // Artifact access policies generally based on those from the Artifact
+        // User Guide documentation at
+        // https://docs.aws.amazon.com/artifact/latest/ug/security-iam.html#example-iam-policies
         new iam.PolicyStatement({
-          sid: "DenyAllOrganizations",
-          effect: iam.Effect.DENY,
-          actions: ["organizations:*"],
+          sid: "AllowArtifactReportPackageAccess",
+          effect: iam.Effect.ALLOW,
+          actions: ["artifact:Get"],
+          resources: [`arn:${cdk.Aws.PARTITION}:artifact:::report-package/*`],
+        }),
+        new iam.PolicyStatement({
+          sid: "AllowArtifactAgreementDownload",
+          effect: iam.Effect.ALLOW,
+          actions: ["artifact:DownloadAgreement"],
           resources: ["*"],
         }),
       ],
@@ -78,6 +88,17 @@ export class AtatIamStack extends cdk.Stack {
             "dynamodb:ListBackups",
             "dynamodb:Describe*Backup*",
           ],
+          resources: ["*"],
+        }),
+      ],
+    });
+
+    const baseDenies = new iam.ManagedPolicy(this, "AtatUserDenyPolicy", {
+      statements: [
+        new iam.PolicyStatement({
+          sid: "DenyAllOrganizations",
+          effect: iam.Effect.DENY,
+          actions: ["organizations:*"],
           resources: ["*"],
         }),
       ],
@@ -124,9 +145,10 @@ export class AtatIamStack extends cdk.Stack {
       assumedBy: managementAccountPrincipal,
       managedPolicies: [
         awsManagedViewOnlyPolicy,
-        generalReadAccess,
         awsManagedLogsReadPolicy,
         awsManagedAuditorPolicy,
+        generalReadAccess,
+        auditorAccess,
         baseDenies,
       ],
     });
