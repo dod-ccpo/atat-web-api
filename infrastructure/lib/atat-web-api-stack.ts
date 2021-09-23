@@ -136,7 +136,7 @@ export class AtatWebApiStack extends cdk.Stack {
   }
 
   private addTaskOrderRoutes(props?: AtatWebApiStackProps) {
-    // Creates a target server access log bucket shared amongst the Task Order Lifecycle buckets
+    // Creates a server access log target bucket shared amongst the Task Order Lifecycle buckets
     // server access logs enabled on target bucket
     const taskOrdersAccessLogsBucket = new SecureBucket(this, "taskOrdersLogBucket", {
       logTargetBucket: "self", // access control set to LOG_DELIVERY_WRITE when "self"
