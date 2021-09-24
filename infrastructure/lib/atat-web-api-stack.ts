@@ -141,6 +141,10 @@ export class AtatWebApiStack extends cdk.Stack {
     const taskOrdersAccessLogsBucket = new SecureBucket(this, "taskOrdersLogBucket", {
       logTargetBucket: "self", // access control set to LOG_DELIVERY_WRITE when "self"
       logTargetPrefix: "logs/logbucket/",
+      bucketProps: {
+        removalPolicy: props?.removalPolicy,
+        autoDeleteObjects: props?.removalPolicy === cdk.RemovalPolicy.DESTROY,
+      },
     });
     const taskOrderManagement = new TaskOrderLifecycle(this, "TaskOrders", {
       // enables server access logs for task order buckets (NIST SP 800-53 controls)
