@@ -1,4 +1,5 @@
 import * as s3 from "@aws-cdk/aws-s3";
+import * as dynamodb from "@aws-cdk/aws-dynamodb";
 import * as cdk from "@aws-cdk/core";
 
 export interface SecureBucketProps {
@@ -31,5 +32,35 @@ export class SecureBucket extends cdk.Construct {
       serverAccessLogsPrefix: props.logTargetPrefix,
     });
     this.bucket = bucket;
+  }
+}
+
+export interface SecureTableProps {
+  /**
+   * The properties to configure the DynamoDB table
+   */
+  tableProps: dynamodb.TableProps;
+}
+/**
+ * Creates a secure DynamoDB table with properties enabled for compliance
+ *  - point-in-time recover (PITR) enabled by default
+ */
+export class SecureTable extends cdk.Construct {
+  /**
+   * The created DynamoDB table
+   */
+  public readonly table: dynamodb.ITable;
+
+  constructor(scope: cdk.Construct, id: string, props: SecureTableProps) {
+    super(scope, id);
+
+    const table = new dynamodb.Table(this, id, {
+      // passed in table configuration
+      ...props.tableProps,
+      // secure defaults that cannot be overridden
+      pointInTimeRecovery: true,
+    });
+
+    this.table = table;
   }
 }
