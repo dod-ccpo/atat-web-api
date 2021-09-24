@@ -11,11 +11,12 @@
     "@types/aws-lambda": "^8.10.83"
   },
   "devDependencies": {
-    "@types/jest": "^27.0.1",
+    "@types/jest": "^27.0.2",
     "@types/uuid": "^8.3.1",
     "eslint": "^7.31.0",
     "jest": "^27.0.6",
     "ts-jest": "^27.0.4",
+    "typescript": "^4.4.3",
     "uuid": "^8.3.2"
   }
 }

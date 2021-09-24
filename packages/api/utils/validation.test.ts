@@ -150,6 +150,9 @@ describe("Testing validation of fundingStep objects", () => {
   it.each(badTaskOrders)("should reject a Task Orders missing any field", async (badTaskOrder) => {
     expect(isTaskOrder(badTaskOrder)).toEqual(false);
   });
+  it.each([true, 1, undefined, null, "object"])("should reject non-objects", async (item) => {
+    expect(isTaskOrder(item)).toEqual(false);
+  });
 });
 
 describe("isApplicationStep()", () => {

@@ -20,7 +20,7 @@ export class AtatAuthStack extends cdk.Stack {
     const cognitoAuthentication = new CognitoAuthentication(this, "Authentication", {
       groupsAttributeName: "groups",
       adminsGroupName: props.adminsGroupName ?? "atat-admins",
-      usersGroupName: props.adminsGroupName ?? "atat-users",
+      usersGroupName: props.usersGroupName ?? "atat-users",
       cognitoDomain: "atat-api-" + props.environmentId,
       userPoolProps: {
         removalPolicy: props?.removalPolicy,

@@ -1,9 +1,11 @@
 import * as apigw from "@aws-cdk/aws-apigateway";
 import * as dynamodb from "@aws-cdk/aws-dynamodb";
+import * as s3 from "@aws-cdk/aws-s3";
 import * as s3asset from "@aws-cdk/aws-s3-assets";
 import * as cdk from "@aws-cdk/core";
 import { ApiDynamoDBFunction } from "./constructs/api-dynamodb-function";
 import { ApiS3Function } from "./constructs/api-s3-function";
+import { SecureBucket } from "./constructs/compliant-resources";
 import { TaskOrderLifecycle } from "./constructs/task-order-lifecycle";
 import { HttpMethod } from "./http";
 import { packageRoot } from "./util";
@@ -134,7 +136,16 @@ export class AtatWebApiStack extends cdk.Stack {
   }
 
   private addTaskOrderRoutes(props?: AtatWebApiStackProps) {
+    // Creates a server access log target bucket shared amongst the Task Order Lifecycle buckets
+    // server access logs enabled on target bucket
+    const taskOrdersAccessLogsBucket = new SecureBucket(this, "taskOrdersLogBucket", {
+      logTargetBucket: "self", // access control set to LOG_DELIVERY_WRITE when "self"
+      logTargetPrefix: "logs/logbucket/",
+    });
     const taskOrderManagement = new TaskOrderLifecycle(this, "TaskOrders", {
+      // enables server access logs for task order buckets (NIST SP 800-53 controls)
+      logTargetBucket: taskOrdersAccessLogsBucket.bucket,
+      logTargetPrefix: "logs/taskorders/",
       bucketProps: {
         removalPolicy: props?.removalPolicy,
         autoDeleteObjects: props?.removalPolicy === cdk.RemovalPolicy.DESTROY,
