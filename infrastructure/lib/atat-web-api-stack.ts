@@ -4,7 +4,7 @@ import * as s3asset from "@aws-cdk/aws-s3-assets";
 import * as cdk from "@aws-cdk/core";
 import { ApiDynamoDBFunction } from "./constructs/api-dynamodb-function";
 import { ApiS3Function } from "./constructs/api-s3-function";
-import { SecureBucket, PITRTable } from "./constructs/compliant-resources";
+import { SecureBucket, SecureTable } from "./constructs/compliant-resources";
 import { TaskOrderLifecycle } from "./constructs/task-order-lifecycle";
 import { HttpMethod } from "./http";
 import { packageRoot } from "./util";
@@ -20,12 +20,10 @@ export class AtatWebApiStack extends cdk.Stack {
     this.templateOptions.description = "Resources to support the ATAT application API";
 
     // Create a shared DynamoDB table that will be used by all the functions in the project.
-    const { table } = new PITRTable(this, "AtatTable", {
+    const { table } = new SecureTable(this, "AtatTable", {
       tableProps: {
         partitionKey: { name: "id", type: dynamodb.AttributeType.STRING },
-        billingMode: dynamodb.BillingMode.PROVISIONED,
-        readCapacity: 1,
-        writeCapacity: 1,
+        billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
         removalPolicy: props?.removalPolicy,
       },
     });

@@ -33,23 +33,23 @@ export class SecureBucket extends cdk.Construct {
   }
 }
 
-export interface PITRTableProps {
+export interface SecureTableProps {
   /**
    * The properties to configure the DynamoDB table
    */
-  tableProps: dynamodb.TableProps;
+  tableProps?: dynamodb.TableProps;
 }
 /**
- * Creates a DynamoDB table with point-in-time recover (PITR)
- * enabled by default.
+ * Creates a secure DynamoDB table with properties enabled for compliance
+ *  - point-in-time recover (PITR) enabled by default
  */
-export class PITRTable extends cdk.Construct {
+export class SecureTable extends cdk.Construct {
   /**
    * The created DynamoDB table
    */
   public readonly table: dynamodb.ITable;
 
-  constructor(scope: cdk.Construct, id: string, props: PITRTableProps) {
+  constructor(scope: cdk.Construct, id: string, props: SecureTableProps) {
     super(scope, id);
 
     const table = new dynamodb.Table(this, id, {
@@ -57,7 +57,7 @@ export class PITRTable extends cdk.Construct {
       ...props.tableProps,
       // secure defaults that cannot be overridden
       pointInTimeRecovery: true,
-    });
+    } as dynamodb.TableProps);
 
     this.table = table;
   }
