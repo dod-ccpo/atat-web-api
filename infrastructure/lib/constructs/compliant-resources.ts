@@ -24,7 +24,8 @@ export class SecureBucket extends cdk.Construct {
       // secure defaults that cannot be overridden
       publicReadAccess: false,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
-      // NOTE: removed for dev purposes only, once envs are differentiated this will be fixed
+      // TODO: Prevent auto-delete when we properly handle differences between dev and
+      // higher environments
       // autoDeleteObjects: false,
       serverAccessLogsBucket: props.logTargetBucket === "self" ? undefined : props.logTargetBucket,
       serverAccessLogsPrefix: props.logTargetPrefix,
