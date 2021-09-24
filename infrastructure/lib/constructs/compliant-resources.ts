@@ -37,7 +37,7 @@ export interface SecureTableProps {
   /**
    * The properties to configure the DynamoDB table
    */
-  tableProps?: dynamodb.TableProps;
+  tableProps: dynamodb.TableProps;
 }
 /**
  * Creates a secure DynamoDB table with properties enabled for compliance
@@ -57,7 +57,7 @@ export class SecureTable extends cdk.Construct {
       ...props.tableProps,
       // secure defaults that cannot be overridden
       pointInTimeRecovery: true,
-    } as dynamodb.TableProps);
+    });
 
     this.table = table;
   }
