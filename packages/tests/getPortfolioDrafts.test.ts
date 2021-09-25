@@ -1,18 +1,7 @@
 import request from "supertest";
-import { PortfolioDraftSummary } from "../api/models/PortfolioDraftSummary";
 
 const baseUrl = process.env.BASEURL;
 jest.setTimeout(7000);
-
-// had to remove name from the summary attributes
-const portfolioSummaryAttributes: string[] = [
-  "id",
-  "status",
-  "num_portfolio_managers",
-  "portfolio_step",
-  "created_at",
-  "updated_at",
-];
 
 describe("GET /portfolioDrafts", () => {
   it("should return a 200 status code and have portfolio summary attributes: id, status, number of portfolio managers, portfolio step, created at, updated at", async () => {
