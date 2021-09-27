@@ -3,14 +3,9 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from "aws-lambda
 import { PORTFOLIO_STEP } from "../../models/PortfolioDraft";
 import { PortfolioStep } from "../../models/PortfolioStep";
 import { dynamodbDocumentClient as client } from "../../utils/dynamodb";
-import { DATABASE_ERROR, NO_SUCH_PORTFOLIO_DRAFT } from "../../utils/errors";
-import { baseHandler } from "../../utils/handler";
+import { NO_SUCH_PORTFOLIO_DRAFT } from "../../utils/errors";
 import { ApiSuccessResponse, SuccessStatusCode, SetupError, DatabaseError, DatabaseResult } from "../../utils/response";
 import { postRequestPreValidation } from "../../utils/requestValidation";
-
-export async function handler(event: APIGatewayProxyEvent, context?: Context): Promise<APIGatewayProxyResult> {
-  return baseHandler(createPortfolioStep, event, context);
-}
 
 /**
  * Submits the Portfolio Step of the Portfolio Draft Wizard
@@ -18,16 +13,22 @@ export async function handler(event: APIGatewayProxyEvent, context?: Context): P
  * @param event - The POST request from API Gateway
  */
 
-export async function createPortfolioStep(
-  event: APIGatewayProxyEvent,
-  context?: Context
-): Promise<APIGatewayProxyResult> {
+export async function handler(event: APIGatewayProxyEvent, context?: Context): Promise<APIGatewayProxyResult> {
+  // Perform shape validation
   const setupResult = postRequestPreValidation<PortfolioStep>(event);
   if (setupResult instanceof SetupError) {
     return setupResult.errorResponse;
   }
   const portfolioDraftId = setupResult.path.portfolioDraftId;
   const portfolioStep = setupResult.bodyObject;
+  // Perform business validation
+  /*
+  const businessResult = businessValidation<PortfolioStep>(portfolioStep)
+  if (businessResult instanceof SetupError) {
+    return businessResult.errorResponse;
+  }
+  */
+  // Make database call
   const databaseResult = await createPortfolioStepCommand(portfolioDraftId, portfolioStep);
   if (databaseResult instanceof DatabaseError) {
     return databaseResult.errorResponse;
@@ -67,6 +68,7 @@ export async function createPortfolioStepCommand(
     if (error.name === "ConditionalCheckFailedException") {
       return new DatabaseError(NO_SUCH_PORTFOLIO_DRAFT);
     }
-    return new DatabaseError(DATABASE_ERROR);
+    // 500 level error
+    throw error;
   }
 }
