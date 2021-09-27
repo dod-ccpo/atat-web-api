@@ -5,7 +5,7 @@ import { PortfolioStep } from "../../models/PortfolioStep";
 import { dynamodbDocumentClient as client } from "../../utils/dynamodb";
 import { NO_SUCH_PORTFOLIO_DRAFT } from "../../utils/errors";
 import { ApiSuccessResponse, SuccessStatusCode, SetupError, DatabaseError, DatabaseResult } from "../../utils/response";
-import { postRequestPreValidation } from "../../utils/requestValidation";
+import { postRequestShapeValidation } from "../../utils/requestValidation";
 
 /**
  * Submits the Portfolio Step of the Portfolio Draft Wizard
@@ -15,7 +15,7 @@ import { postRequestPreValidation } from "../../utils/requestValidation";
 
 export async function handler(event: APIGatewayProxyEvent, context?: Context): Promise<APIGatewayProxyResult> {
   // Perform shape validation
-  const setupResult = postRequestPreValidation<PortfolioStep>(event);
+  const setupResult = postRequestShapeValidation<PortfolioStep>(event);
   if (setupResult instanceof SetupError) {
     return setupResult.errorResponse;
   }
