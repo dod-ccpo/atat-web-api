@@ -52,15 +52,6 @@ export abstract class ApiFunction extends cdk.Construct {
     this.method = props.method;
     this.fn = new lambdaNodeJs.NodejsFunction(this, "PackagedFunction", {
       entry: props.handlerPath,
-      // This is a workaround for aws/aws-sdk-js-v3#2806, which is a bug in
-      // AWS SDK v3.33.0 surrounding the dependencies for the S3 MRAP feature,
-      // which we are not using. This code path will not be hit and therefore,
-      // excluding this module will be safe.
-      // TODO: Remove when aws/aws-sdk-js-v3#2806 is resolved in a future version
-      // of the AWS SDK for JS v3.
-      bundling: {
-        externalModules: ["@aws-sdk/signature-v4-crt"],
-      },
       ...props.functionPropsOverride,
     });
     this.fn.addPermission("AllowApiGatewayInvoke", { principal: APIGW_SERVICE_PRINCIPAL });
