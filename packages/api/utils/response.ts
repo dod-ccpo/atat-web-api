@@ -125,7 +125,7 @@ export class ApiSuccessResponse<T> extends SuccessResponse {
   }
 }
 
-abstract class ErrorResponse extends Response {
+export abstract class ErrorResponse extends Response {
   /**
    * Create an error response.
    *
