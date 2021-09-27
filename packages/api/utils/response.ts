@@ -1,3 +1,4 @@
+import { DeleteCommandOutput, GetCommandOutput, UpdateCommandOutput } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyResult } from "aws-lambda";
 import { Error, ErrorCode, ValidationError } from "../models/Error";
 
@@ -186,3 +187,27 @@ export class ValidationErrorResponse extends ErrorResponse {
     super(error, ErrorStatusCode.BAD_REQUEST, headers, multiValueHeaders);
   }
 }
+export class DatabaseError {
+  public readonly errorResponse: ErrorResponse;
+  constructor(errorResponse: ErrorResponse) {
+    this.errorResponse = errorResponse;
+  }
+}
+
+export type DatabaseResult = DatabaseError | UpdateCommandOutput | GetCommandOutput | DeleteCommandOutput;
+export class SetupError {
+  public readonly errorResponse: ErrorResponse;
+  constructor(errorResponse: ErrorResponse) {
+    this.errorResponse = errorResponse;
+  }
+}
+export class SetupSuccess<T> {
+  public readonly path: { [key: string]: string };
+  public readonly bodyObject: T;
+  constructor(path: { [key: string]: string }, bodyObject: T) {
+    this.path = path;
+    this.bodyObject = bodyObject;
+  }
+}
+
+export type SetupResult<T> = SetupError | SetupSuccess<T>;
