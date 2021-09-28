@@ -9,7 +9,7 @@ import { isBodyPresent, isValidJson, isValidUuidV4 } from "./validation";
  * @param event - The incoming API Gateway Request proxied to Lambda
  * @returns SetUpSuccess object if event passes validation, otherwise it returns SetUpError
  */
-export function postRequestShapeValidation<T>(event: APIGatewayProxyEvent): SetupResult<T> {
+export function shapeValidationForPostRequest<T>(event: APIGatewayProxyEvent): SetupResult<T> {
   if (!isValidUuidV4(event.pathParameters?.portfolioDraftId)) {
     return new SetupError(NO_SUCH_PORTFOLIO_DRAFT);
   }
