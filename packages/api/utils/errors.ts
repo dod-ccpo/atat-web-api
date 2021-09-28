@@ -6,15 +6,6 @@ import { ErrorStatusCode, OtherErrorResponse } from "./response";
 export const DATABASE_ERROR = new OtherErrorResponse("Database error", ErrorStatusCode.INTERNAL_SERVER_ERROR);
 
 /**
- * A "last-resort" error, to be used when it is unknown what caused a particular
- * error (or to entirely mask error details)
- */
-export const UNKNOWN_ERROR = new OtherErrorResponse(
-  "An unexpected error occurred",
-  ErrorStatusCode.INTERNAL_SERVER_ERROR
-);
-
-/**
  * To be used when a request body is required but was not provided
  */
 export const REQUEST_BODY_EMPTY = new OtherErrorResponse("Request body must not be empty", ErrorStatusCode.BAD_REQUEST);
