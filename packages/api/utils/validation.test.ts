@@ -53,18 +53,21 @@ describe("Testing validation of request body", function () {
 
   it("should return false because request body JSON is invalid", async () => {
     const invalidJsonBody = `{"hi": "123",}`; // comma at end
-    expect(isValidJson(invalidJsonBody)).toEqual(false);
+    expect(isValidJson(invalidJsonBody)).toEqual(undefined);
     const invalidJsonBody2 = `{"hi": "123}`; // missing closing quote
-    expect(isValidJson(invalidJsonBody2)).toEqual(false);
+    expect(isValidJson(invalidJsonBody2)).toEqual(undefined);
     const invalidJsonBody3 = `{hi: 123}`; // need quotes around hi
-    expect(isValidJson(invalidJsonBody3)).toEqual(false);
+    expect(isValidJson(invalidJsonBody3)).toEqual(undefined);
     const invalidJsonBody4 = `{"hi" "123"}`; // missing ':'
-    expect(isValidJson(invalidJsonBody4)).toEqual(false);
+    expect(isValidJson(invalidJsonBody4)).toEqual(undefined);
   });
 
   it("should return true because request body JSON is valid", async () => {
     const validJsonBody = `{"hi": "123"}`; // valid json
-    expect(isValidJson(validJsonBody)).toEqual(true);
+    const mockResponse = {
+      hi: "123",
+    };
+    expect(isValidJson(validJsonBody)).toEqual(mockResponse);
   });
 });
 
