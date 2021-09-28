@@ -192,7 +192,7 @@ export class ValidationErrorResponse extends ErrorResponse {
  *
  * Uses {@link ErrorResponse}
  */
-export class DynamoDBMessage {
+export class DynamoDBException {
   public readonly errorResponse: ErrorResponse;
   constructor(errorResponse: ErrorResponse) {
     this.errorResponse = errorResponse;
@@ -202,9 +202,9 @@ export class DynamoDBMessage {
 /**
  * DatabaseResult is the result of a custom DynamoDB Command (specified in fn file)
  *
- * The type can be a {@link DynamoDBMessage}, or the output CRUD CommandOutput
+ * The type can be a {@link DynamoDBException}, or the output CRUD CommandOutput
  */
-export type DatabaseResult = DynamoDBMessage | UpdateCommandOutput | GetCommandOutput | DeleteCommandOutput;
+export type DatabaseResult = DynamoDBException | UpdateCommandOutput | GetCommandOutput | DeleteCommandOutput;
 
 /**
  * An error object used in requestValidation, used for shape validation
