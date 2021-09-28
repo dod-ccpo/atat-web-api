@@ -21,14 +21,6 @@ export async function handler(event: APIGatewayProxyEvent, context?: Context): P
   }
   const portfolioDraftId = setupResult.path.portfolioDraftId;
   const portfolioStep = setupResult.bodyObject;
-  // TODO: AT-6549 Perform business validation
-  /*
-  Example implementation: 
-  const businessResult = businessValidation<PortfolioStep>(portfolioStep)
-  if (businessResult instanceof SetupError) {
-    return businessResult.errorResponse;
-  }
-  */
   // Perform database call
   const databaseResult = await createPortfolioStepCommand(portfolioDraftId, portfolioStep);
   if (databaseResult instanceof DatabaseError) {
