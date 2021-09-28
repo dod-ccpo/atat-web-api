@@ -11,7 +11,7 @@ import { TaskOrder } from "../models/TaskOrder";
  * Check whether a given string is valid JSON.
  *
  * @param str - The string to check
- * @returns true if the string is valid JSON and false otherwise
+ * @returns the string parsed as the given type, or undefined
  */
 export function isValidJson<T>(str?: string | null): T | undefined {
   if (!str) {

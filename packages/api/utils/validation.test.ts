@@ -51,7 +51,7 @@ describe("Testing validation of request body", function () {
     expect(isBodyPresent(null)).toEqual(false);
   });
 
-  it("should return false because request body JSON is invalid", async () => {
+  it("should return undefined because request body JSON is invalid", async () => {
     const invalidJsonBody = `{"hi": "123",}`; // comma at end
     expect(isValidJson(invalidJsonBody)).toEqual(undefined);
     const invalidJsonBody2 = `{"hi": "123}`; // missing closing quote
