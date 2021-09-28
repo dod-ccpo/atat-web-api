@@ -11,6 +11,21 @@ tags:
     description: >-
       Portfolio Drafts represent instances of portfolio provisioning workloads which have not yet been submitted to
       the CSP
+servers: 
+  - url: http://{baseurl}.execute-api.{region}.amazonaws.com/{stage}
+    variables:
+      baseurl:
+
+        default: 's63gzoj8bh'
+      stage:
+        default: 'prod'
+        enum:
+          - 'prod'
+      region:
+        default: 'us-gov-west-1'
+        enum:
+          - 'us-gov-west-1'
+          - 'us-gov-east-1'
 paths:
   /portfolioDrafts:
     get:
