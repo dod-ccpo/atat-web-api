@@ -124,7 +124,7 @@ describe("Handler response with mock dynamodb", function () {
     expect(data).toEqual(NO_SUCH_PORTFOLIO_DRAFT);
   });
 
-  it("should return database error when unknown internal problem occurs", async () => {
+  it("should throw error when unknown dynamodb internal service error occurs", async () => {
     ddbMock.on(UpdateCommand).rejects({ name: "InternalServiceError" });
     // setting up new request
     const requestBody = {
@@ -139,9 +139,6 @@ describe("Handler response with mock dynamodb", function () {
       pathParameters: { portfolioDraftId: "aabcbce6-5a91-4a53-bae1-5cf7cae7edd7" },
     } as any;
 
-    // const data = await handler(request);
-    // console.log(data);
-    // expect(data.body).toEqual(`{"code":"OTHER","message":"Database error"}`);
-    expect(await handler(request)).toThrow("InternalServiceError");
+    await expect(handler(request)).rejects.toThrowError();
   });
 });
