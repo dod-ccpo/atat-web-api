@@ -1,0 +1,22 @@
+{
+  "name": "atat-web-api-tests",
+  "version": "0.1.0",
+  "description": "Supporting functions for the ATAT API's Testing setup",
+  "scripts": {
+    "test": "jest --config=jest.config.js",
+    "lint": "eslint --ext .js,.ts,.json -c ../../.eslintrc.json .",
+    "lint:fix": "npm run lint -- --fix"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/jest": "^27.0.1",
+    "@types/supertest": "^2.0.11",
+    "dotenv": "^10.0.0",
+    "eslint": "^7.31.0",
+    "jest": "^27.0.6",
+    "jest-html-reporters": "^2.1.6",
+    "jest-openapi": "^0.14.0",
+    "supertest": "^6.1.6",
+    "ts-jest": "^27.0.5"
+  }
+}
