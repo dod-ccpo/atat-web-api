@@ -43,7 +43,7 @@ describe("Dynamodb mock validation", function () {
 });
 
 describe("Successful operations test", function () {
-  it("should return funding step and http status code 201", async () => {
+  it("should return portfolio step and http status code 201", async () => {
     const goodMockResponse = {
       ...mockResponse,
       num_portfolio_managers: 3,
