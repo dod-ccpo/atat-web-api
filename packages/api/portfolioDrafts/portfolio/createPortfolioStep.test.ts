@@ -48,26 +48,6 @@ describe("Successful operations test", function () {
   });
 });
 
-describe("Incorrect number of task orders", function () {
-  const badMockResponse = {
-    ...mockResponse,
-    num_portfolio_managers: 77,
-  };
-  /*
-  it("should return falsy due to incorrect number of applications and environments", async () => {
-    ddbMock.on(UpdateCommand).resolves({
-      Attributes: badMockResponse,
-    });
-    const result = await createPortfolioStepCommand(
-      "595c31d3-190c-42c3-a9b6-77325fa5ed38",
-      badMockResponse.portfolio_step
-    );
-    console.log(result);
-    const numOfPortfolioManagers: number = result?.portfolio_step.portfolio_managers.length;
-    expect(numOfPortfolioManagers === badMockResponse.num_portfolio_managers).toBeFalsy();
-  }); */
-});
-
 describe("Validation of handler", function () {
   it("should return NO_SUCH_PORTFOLIO_DRAFT when no portfolioId specified", async () => {
     const request = {
