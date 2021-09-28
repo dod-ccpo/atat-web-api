@@ -68,7 +68,8 @@ export async function createPortfolioStepCommand(
     if (error.name === "ConditionalCheckFailedException") {
       return new DatabaseError(NO_SUCH_PORTFOLIO_DRAFT);
     }
-    // 500 level error
+    // 5xx error logging
+    console.log(error);
     throw error;
   }
 }
