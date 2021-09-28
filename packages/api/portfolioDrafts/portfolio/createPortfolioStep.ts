@@ -4,7 +4,13 @@ import { PORTFOLIO_STEP } from "../../models/PortfolioDraft";
 import { PortfolioStep } from "../../models/PortfolioStep";
 import { dynamodbDocumentClient as client } from "../../utils/dynamodb";
 import { NO_SUCH_PORTFOLIO_DRAFT } from "../../utils/errors";
-import { ApiSuccessResponse, SuccessStatusCode, SetupError, DatabaseError, DatabaseResult } from "../../utils/response";
+import {
+  ApiSuccessResponse,
+  SuccessStatusCode,
+  SetupError,
+  DynamoDBMessage,
+  DatabaseResult,
+} from "../../utils/response";
 import { shapeValidationForPostRequest } from "../../utils/requestValidation";
 
 /**
@@ -23,7 +29,7 @@ export async function handler(event: APIGatewayProxyEvent, context?: Context): P
   const portfolioStep = setupResult.bodyObject;
   // Perform database call
   const databaseResult = await createPortfolioStepCommand(portfolioDraftId, portfolioStep);
-  if (databaseResult instanceof DatabaseError) {
+  if (databaseResult instanceof DynamoDBMessage) {
     return databaseResult.errorResponse;
   }
   return new ApiSuccessResponse<PortfolioStep>(portfolioStep, SuccessStatusCode.CREATED);
@@ -59,7 +65,7 @@ export async function createPortfolioStepCommand(
     );
   } catch (error) {
     if (error.name === "ConditionalCheckFailedException") {
-      return new DatabaseError(NO_SUCH_PORTFOLIO_DRAFT);
+      return new DynamoDBMessage(NO_SUCH_PORTFOLIO_DRAFT);
     }
     // 5xx error logging
     console.log(error);

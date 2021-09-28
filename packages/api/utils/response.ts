@@ -187,20 +187,43 @@ export class ValidationErrorResponse extends ErrorResponse {
     super(error, ErrorStatusCode.BAD_REQUEST, headers, multiValueHeaders);
   }
 }
-export class DatabaseError {
+/**
+ * A response for translating DynamoDB 4xx error messages, caught in specific dynamodb commands
+ *
+ * Uses {@link ErrorResponse}
+ */
+export class DynamoDBMessage {
   public readonly errorResponse: ErrorResponse;
   constructor(errorResponse: ErrorResponse) {
     this.errorResponse = errorResponse;
   }
 }
 
-export type DatabaseResult = DatabaseError | UpdateCommandOutput | GetCommandOutput | DeleteCommandOutput;
+/**
+ * DatabaseResult is the result of a custom DynamoDB Command (specified in fn file)
+ *
+ * The type can be a {@link DynamoDBMessage}, or the output CRUD CommandOutput
+ */
+export type DatabaseResult = DynamoDBMessage | UpdateCommandOutput | GetCommandOutput | DeleteCommandOutput;
+
+/**
+ * An error object used in requestValidation, used for shape validation
+ *
+ * Uses {@link ErrorResponse}
+ */
 export class SetupError {
   public readonly errorResponse: ErrorResponse;
   constructor(errorResponse: ErrorResponse) {
     this.errorResponse = errorResponse;
   }
 }
+
+/**
+ * The parsed JSON Object that succeded shape validation
+ *
+ * @param path - The path parameter of the validated object (example: portfolioDraftId)
+ * @param bodyObject - The request body, as the provided type T
+ */
 export class SetupSuccess<T> {
   public readonly path: { [key: string]: string };
   public readonly bodyObject: T;
@@ -210,4 +233,7 @@ export class SetupSuccess<T> {
   }
 }
 
+/**
+ * The result of the Setup validation process, either an error or success
+ */
 export type SetupResult<T> = SetupError | SetupSuccess<T>;
