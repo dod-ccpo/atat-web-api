@@ -1,5 +1,6 @@
 import * as s3 from "@aws-cdk/aws-s3";
 import * as dynamodb from "@aws-cdk/aws-dynamodb";
+import * as apigw from "@aws-cdk/aws-apigateway";
 import * as cdk from "@aws-cdk/core";
 
 export interface SecureBucketProps {
@@ -62,5 +63,40 @@ export class SecureTable extends cdk.Construct {
     });
 
     this.table = table;
+  }
+}
+
+export interface SecureAPIGatewayProps {
+  /**
+   * The properties to configure the API Gateway
+   */
+  apiGatewayProps: apigw.SpecRestApiProps;
+}
+
+/**
+ * Creates a secure API Gateway with properties enabled for compliance
+ *  - cache enabled and encrypted by default
+ *  - execution logs enabled by default
+ */
+export class SecureAPIGateway extends cdk.Construct {
+  readonly apiGateway: apigw.SpecRestApi;
+  constructor(scope: cdk.Construct, id: string, props: SecureAPIGatewayProps) {
+    super(scope, id);
+
+    const apiGateway = new apigw.SpecRestApi(this, id, {
+      ...props.apiGatewayProps,
+      deployOptions: {
+        // sensible defaults allowed to be overridden
+        cacheTtl: cdk.Duration.minutes(60), // ! override for dev purposes?
+        // passed in API Gateway configurations
+        ...props.apiGatewayProps?.deployOptions,
+        // secure defaults that cannot be overridden
+        cachingEnabled: true,
+        cacheDataEncrypted: true,
+        loggingLevel: apigw.MethodLoggingLevel.INFO, // execution logging
+      },
+    });
+
+    this.apiGateway = apiGateway;
   }
 }
