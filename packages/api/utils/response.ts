@@ -194,7 +194,7 @@ export class DatabaseError {
   }
 }
 
-export type DatabaseResult = DatabaseError | UpdateCommandOutput | GetCommandOutput | DeleteCommandOutput;
+export type DatabaseResult = DatabaseError | UpdateCommandOutput; // | GetCommandOutput | DeleteCommandOutput;
 export class SetupError {
   public readonly errorResponse: ErrorResponse;
   constructor(errorResponse: ErrorResponse) {
