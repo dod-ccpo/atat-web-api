@@ -1,3 +1,4 @@
+import { DeleteCommandOutput, GetCommandOutput, UpdateCommandOutput } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyResult } from "aws-lambda";
 import { Error, ErrorCode, ValidationError } from "../models/Error";
 
@@ -125,7 +126,7 @@ export class ApiSuccessResponse<T> extends SuccessResponse {
   }
 }
 
-abstract class ErrorResponse extends Response {
+export abstract class ErrorResponse extends Response {
   /**
    * Create an error response.
    *
@@ -186,3 +187,53 @@ export class ValidationErrorResponse extends ErrorResponse {
     super(error, ErrorStatusCode.BAD_REQUEST, headers, multiValueHeaders);
   }
 }
+/**
+ * A response for translating DynamoDB 4xx error messages, caught in specific dynamodb commands
+ *
+ * Uses {@link ErrorResponse}
+ */
+export class DynamoDBException {
+  public readonly errorResponse: ErrorResponse;
+  constructor(errorResponse: ErrorResponse) {
+    this.errorResponse = errorResponse;
+  }
+}
+
+/**
+ * DatabaseResult is the result of a custom DynamoDB Command (specified in fn file)
+ *
+ * The type can be a {@link DynamoDBException}, or the output CRUD CommandOutput
+ */
+export type DatabaseResult = DynamoDBException | UpdateCommandOutput | GetCommandOutput | DeleteCommandOutput;
+
+/**
+ * An error object used in requestValidation, used for shape validation
+ *
+ * Uses {@link ErrorResponse}
+ */
+export class SetupError {
+  public readonly errorResponse: ErrorResponse;
+  constructor(errorResponse: ErrorResponse) {
+    this.errorResponse = errorResponse;
+  }
+}
+
+/**
+ * The parsed JSON Object that succeded shape validation
+ *
+ * @param path - The path parameter of the validated object (example: portfolioDraftId)
+ * @param bodyObject - The request body, as the provided type T
+ */
+export class SetupSuccess<T> {
+  public readonly path: { [key: string]: string };
+  public readonly bodyObject: T;
+  constructor(path: { [key: string]: string }, bodyObject: T) {
+    this.path = path;
+    this.bodyObject = bodyObject;
+  }
+}
+
+/**
+ * The result of the Setup validation process, either an error or success
+ */
+export type SetupResult<T> = SetupError | SetupSuccess<T>;

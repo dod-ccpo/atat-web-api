@@ -1,90 +1,74 @@
-// import { createPortfolioStepCommand } from "../../utils/commands/createPortfolioStepCommand";
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, UpdateCommand, UpdateCommandOutput } from "@aws-sdk/lib-dynamodb";
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
+import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
+import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from "aws-lambda";
 import { PORTFOLIO_STEP } from "../../models/PortfolioDraft";
 import { PortfolioStep } from "../../models/PortfolioStep";
-import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusCode } from "../../utils/response";
-import { isBodyPresent, isPathParameterPresent, isPortfolioStep, isValidJson } from "../../utils/validation";
-
-const TABLE_NAME = process.env.ATAT_TABLE_NAME ?? "";
-export const NO_SUCH_PORTFOLIO = new OtherErrorResponse(
-  "Portfolio Draft with the given ID does not exist",
-  ErrorStatusCode.NOT_FOUND
-);
-export const REQUEST_BODY_INVALID = new OtherErrorResponse(
-  "A valid PortfolioStep object must be provided",
-  ErrorStatusCode.BAD_REQUEST
-);
-export const EMPTY_REQUEST_BODY = new OtherErrorResponse("Request body must not be empty", ErrorStatusCode.BAD_REQUEST);
+import { dynamodbDocumentClient as client } from "../../utils/dynamodb";
+import { NO_SUCH_PORTFOLIO_DRAFT } from "../../utils/errors";
+import {
+  ApiSuccessResponse,
+  SuccessStatusCode,
+  SetupError,
+  DynamoDBException,
+  DatabaseResult,
+} from "../../utils/response";
+import { shapeValidationForPostRequest } from "../../utils/requestValidation";
 
 /**
  * Submits the Portfolio Step of the Portfolio Draft Wizard
  *
  * @param event - The POST request from API Gateway
  */
-export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
-  if (!isBodyPresent(event.body)) {
-    return EMPTY_REQUEST_BODY;
+
+export async function handler(event: APIGatewayProxyEvent, context?: Context): Promise<APIGatewayProxyResult> {
+  // Perform shape validation
+  const setupResult = shapeValidationForPostRequest<PortfolioStep>(event);
+  if (setupResult instanceof SetupError) {
+    return setupResult.errorResponse;
   }
-
-  const portfolioDraftId = event.pathParameters?.portfolioDraftId;
-
-  if (!isPathParameterPresent(portfolioDraftId)) {
-    return NO_SUCH_PORTFOLIO;
-  }
-
-  if (!isValidJson(event.body)) {
-    return REQUEST_BODY_INVALID;
-  }
-  const requestBody = JSON.parse(event.body);
-
-  if (!isPortfolioStep(requestBody)) {
-    return REQUEST_BODY_INVALID;
-  }
-  const portfolioStep: PortfolioStep = requestBody;
-
-  try {
-    await createPortfolioStepCommand(TABLE_NAME, portfolioDraftId, portfolioStep);
-  } catch (error) {
-    if (error.name === "ConditionalCheckFailedException") {
-      return NO_SUCH_PORTFOLIO;
-    }
-    console.log("Database error: " + error.name);
-    return new OtherErrorResponse("Database error", ErrorStatusCode.INTERNAL_SERVER_ERROR);
+  const portfolioDraftId = setupResult.path.portfolioDraftId;
+  const portfolioStep = setupResult.bodyObject;
+  // Perform database call
+  const databaseResult = await createPortfolioStepCommand(portfolioDraftId, portfolioStep);
+  if (databaseResult instanceof DynamoDBException) {
+    return databaseResult.errorResponse;
   }
   return new ApiSuccessResponse<PortfolioStep>(portfolioStep, SuccessStatusCode.CREATED);
 }
 
 export async function createPortfolioStepCommand(
-  table: string,
   portfolioDraftId: string,
   portfolioStep: PortfolioStep
-): Promise<UpdateCommandOutput> {
-  const dynamodb = new DynamoDBClient({});
-  const ddb = DynamoDBDocumentClient.from(dynamodb);
+): Promise<DatabaseResult> {
   const now = new Date().toISOString();
-  const result = await ddb.send(
-    new UpdateCommand({
-      TableName: table,
-      Key: {
-        id: portfolioDraftId,
-      },
-      UpdateExpression: `set #portfolioVariable = :portfolio, updated_at = :now,
+  try {
+    return await client.send(
+      new UpdateCommand({
+        TableName: process.env.ATAT_TABLE_NAME ?? "",
+        Key: {
+          id: portfolioDraftId,
+        },
+        UpdateExpression: `set #portfolioVariable = :portfolio, updated_at = :now,
         #portfolioName = :portfolioName, num_portfolio_managers = :numOfManagers`,
-      ExpressionAttributeNames: {
-        "#portfolioVariable": PORTFOLIO_STEP,
-        "#portfolioName": "name",
-      },
-      ExpressionAttributeValues: {
-        ":portfolio": portfolioStep,
-        ":now": now,
-        ":portfolioName": portfolioStep.name,
-        ":numOfManagers": portfolioStep.portfolio_managers.length,
-      },
-      ConditionExpression: "attribute_exists(created_at)",
-      ReturnValues: "ALL_NEW",
-    })
-  );
-  return result;
+        ExpressionAttributeNames: {
+          "#portfolioVariable": PORTFOLIO_STEP,
+          "#portfolioName": "name",
+        },
+        ExpressionAttributeValues: {
+          ":portfolio": portfolioStep,
+          ":now": now,
+          ":portfolioName": portfolioStep.name,
+          ":numOfManagers": portfolioStep.portfolio_managers.length,
+        },
+        ConditionExpression: "attribute_exists(created_at)",
+        ReturnValues: "ALL_NEW",
+      })
+    );
+  } catch (error) {
+    if (error.name === "ConditionalCheckFailedException") {
+      return new DynamoDBException(NO_SUCH_PORTFOLIO_DRAFT);
+    }
+    // 5xx error logging
+    console.log(error);
+    throw error;
+  }
 }

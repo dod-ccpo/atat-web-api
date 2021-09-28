@@ -1,25 +1,27 @@
+import { validate as uuidValidate, version as uuidVersion } from "uuid";
+import { Application } from "../models/Application";
 import { ApplicationStep } from "../models/ApplicationStep";
 import { Clin } from "../models/Clin";
+import { Environment } from "../models/Environment";
 import { FundingStep } from "../models/FundingStep";
 import { PortfolioStep } from "../models/PortfolioStep";
 import { TaskOrder } from "../models/TaskOrder";
-import { validate as uuidValidate, version as uuidVersion } from "uuid";
-import { Application } from "../models/Application";
-import { Environment } from "../models/Environment";
 
 /**
  * Check whether a given string is valid JSON.
  *
  * @param str - The string to check
- * @returns true if the string is valid JSON and false otherwise
+ * @returns the string parsed as the given type, or undefined
  */
-export function isValidJson(str: string): boolean {
-  try {
-    JSON.parse(str);
-  } catch (e) {
-    return false;
+export function isValidJson<T>(str?: string | null): T | undefined {
+  if (!str) {
+    return undefined;
   }
-  return true;
+  try {
+    return JSON.parse(str) as T;
+  } catch (e) {
+    return undefined;
+  }
 }
 
 /**
@@ -27,8 +29,8 @@ export function isValidJson(str: string): boolean {
  * @param str - The string to check
  * @returns true if the string is valid v4 UUID and false otherwise
  */
-export function isValidUuidV4(str: string): boolean {
-  return uuidValidate(str) && uuidVersion(str) === 4;
+export function isValidUuidV4(str?: string): boolean {
+  return !!str && uuidValidate(str) && uuidVersion(str) === 4;
 }
 
 /**
