@@ -24,24 +24,6 @@ const mockResponse = {
   id: "595c31d3-190c-42c3-a9b6-77325fa5ed38",
 };
 
-describe("Dynamodb mock validation", function () {
-  /*
-  it("should get user names from the DynamoDB", async () => {
-    const goodMockResponse = {
-      ...mockResponse,
-      num_portfolio_managers: 3,
-    };
-
-    ddbMock.on(UpdateCommand).resolves({
-      Attributes: goodMockResponse,
-    });
-    // setting up new request
-    const portfolioStep: PortfolioStep = mockResponse.portfolio_step; // request body
-    const data = await createPortfolioStepCommand("595c31d3-190c-42c3-a9b6-77325fa5ed38", portfolioStep);
-    expect(data).toEqual(goodMockResponse);
-  }); */
-});
-
 describe("Successful operations test", function () {
   it("should return portfolio step and http status code 201", async () => {
     const goodMockResponse = {
