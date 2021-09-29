@@ -45,7 +45,11 @@ paths:
           Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetPortfolioDraftsFunction.Arn}/invocations"
         type: "aws_proxy"
       security:
-        - cognitoAuthorizer: []
+        Fn::If:
+          - IsAuthorizationRequired
+          - 
+            - cognitoAuthorizer: []
+          - Ref: AWS::NoValue
     post:
       tags:
         - portfolioDraft
@@ -78,7 +82,11 @@ paths:
           Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CreatePortfolioDraftFunction.Arn}/invocations"
         type: "aws_proxy"
       security:
-        - cognitoAuthorizer: []
+        Fn::If:
+          - IsAuthorizationRequired
+          - 
+            - cognitoAuthorizer: []
+          - Ref: AWS::NoValue
   /portfolioDrafts/{portfolioDraftId}:
     get:
       tags:
@@ -110,7 +118,11 @@ paths:
           Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetPortfolioDraftFunction.Arn}/invocations"
         type: "aws_proxy"
       security:
-        - cognitoAuthorizer: []
+        Fn::If:
+          - IsAuthorizationRequired
+          - 
+            - cognitoAuthorizer: []
+          - Ref: AWS::NoValue
     delete:
       tags:
         - portfolioDraft
@@ -135,7 +147,11 @@ paths:
           Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DeletePortfolioDraftFunction.Arn}/invocations"
         type: "aws_proxy"
       security:
-        - cognitoAuthorizer: []
+        Fn::If:
+          - IsAuthorizationRequired
+          - 
+            - cognitoAuthorizer: []
+          - Ref: AWS::NoValue
   /portfolioDrafts/{portfolioDraftId}/portfolio:
     get:
       tags:
@@ -170,7 +186,11 @@ paths:
           Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetPortfolioStepFunction.Arn}/invocations"
         type: "aws_proxy"
       security:
-        - cognitoAuthorizer: []
+        Fn::If:
+          - IsAuthorizationRequired
+          - 
+            - cognitoAuthorizer: []
+          - Ref: AWS::NoValue
     post:
       tags:
         - portfolioDraft
@@ -213,7 +233,11 @@ paths:
           Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CreatePortfolioStepFunction.Arn}/invocations"
         type: "aws_proxy"
       security:
-        - cognitoAuthorizer: []
+        Fn::If:
+          - IsAuthorizationRequired
+          - 
+            - cognitoAuthorizer: []
+          - Ref: AWS::NoValue
   /portfolioDrafts/{portfolioDraftId}/funding:
     get:
       tags:
@@ -248,7 +272,11 @@ paths:
           Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetFundingStepFunction.Arn}/invocations"
         type: "aws_proxy"
       security:
-        - cognitoAuthorizer: []
+        Fn::If:
+          - IsAuthorizationRequired
+          - 
+            - cognitoAuthorizer: []
+          - Ref: AWS::NoValue
     post:
       tags:
         - portfolioDraft
@@ -293,7 +321,11 @@ paths:
           Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CreateFundingStepFunction.Arn}/invocations"
         type: "aws_proxy"
       security:
-        - cognitoAuthorizer: []
+        Fn::If:
+          - IsAuthorizationRequired
+          - 
+            - cognitoAuthorizer: []
+          - Ref: AWS::NoValue
   /portfolioDrafts/{portfolioDraftId}/application:
     get:
       tags:
@@ -328,7 +360,11 @@ paths:
           Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetApplicationStepFunction.Arn}/invocations"
         type: "aws_proxy"
       security:
-        - cognitoAuthorizer: []
+        Fn::If:
+          - IsAuthorizationRequired
+          - 
+            - cognitoAuthorizer: []
+          - Ref: AWS::NoValue
     post:
       tags:
         - portfolioDraft
@@ -372,7 +408,11 @@ paths:
           Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CreateApplicationStepFunction.Arn}/invocations"
         type: "aws_proxy"
       security:
-        - cognitoAuthorizer: []
+        Fn::If:
+          - IsAuthorizationRequired
+          - 
+            - cognitoAuthorizer: []
+          - Ref: AWS::NoValue
   /portfolioDrafts/{portfolioDraftId}/submit:
     post:
       tags:
@@ -413,7 +453,11 @@ paths:
           Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SubmitPortfolioDraftFunction.Arn}/invocations"
         type: "aws_proxy"
       security:
-        - cognitoAuthorizer: []
+        Fn::If:
+          - IsAuthorizationRequired
+          - 
+            - cognitoAuthorizer: []
+          - Ref: AWS::NoValue
   /taskOrderFiles:
     post:
       tags:
@@ -441,7 +485,11 @@ paths:
           Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${UploadTaskOrderFunction.Arn}/invocations"
         type: "aws_proxy"
       security:
-        - cognitoAuthorizer: []
+        Fn::If:
+          - IsAuthorizationRequired
+          - 
+            - cognitoAuthorizer: []
+          - Ref: AWS::NoValue
   /taskOrderFiles/{taskOrderId}:
     get:
       tags:
@@ -470,7 +518,11 @@ paths:
           Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NotImplementedFunction.Arn}/invocations"
         type: "aws_proxy"
       security:
-        - cognitoAuthorizer: []
+        Fn::If:
+          - IsAuthorizationRequired
+          - 
+            - cognitoAuthorizer: []
+          - Ref: AWS::NoValue
     delete:
       tags:
         - taskOrder
@@ -494,7 +546,11 @@ paths:
           Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DeleteTaskOrderFunction.Arn}/invocations"
         type: "aws_proxy"
       security:
-        - cognitoAuthorizer: []
+        Fn::If:
+          - IsAuthorizationRequired
+          - 
+            - cognitoAuthorizer: []
+          - Ref: AWS::NoValue
   /taskOrderFiles/{taskOrderId}/file:
     get:
       tags:
@@ -524,7 +580,11 @@ paths:
           Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NotImplementedFunction.Arn}/invocations"
         type: "aws_proxy"
       security:
-        - cognitoAuthorizer: []
+        Fn::If:
+          - IsAuthorizationRequired
+          - 
+            - cognitoAuthorizer: []
+          - Ref: AWS::NoValue
 components:
   parameters:
     offsetParam:
