@@ -176,6 +176,26 @@ export class CognitoAuthentication extends cdk.Construct {
       ...(props?.userPoolProps ?? {}),
       signInAliases: {},
       lambdaTriggers: { preTokenGeneration: this.preTokenGenerationFunction },
+      // To be clear, users cannot register for our pool. But just in case one
+      // were to be created by an administrator, this enforces that the password
+      // policy and MFA for the pool is as secure as possible.
+      mfa: cognito.Mfa.REQUIRED,
+      mfaSecondFactor: {
+        sms: false,
+        otp: true,
+      },
+      accountRecovery: cognito.AccountRecovery.NONE,
+      passwordPolicy: {
+        // This is the highest possible value
+        minLength: 98,
+        // This is the lowest possible value
+        tempPasswordValidity: cdk.Duration.days(1),
+        // These require all possible types of characters.
+        requireDigits: true,
+        requireLowercase: true,
+        requireSymbols: true,
+        requireUppercase: true,
+      },
     });
     const cfnPool = this.userPool.node.defaultChild as CfnUserPool;
     cfnPool.schema = [
