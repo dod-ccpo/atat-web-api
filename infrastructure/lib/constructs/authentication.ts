@@ -178,6 +178,7 @@ export class CognitoAuthentication extends cdk.Construct {
       lambdaTriggers: { preTokenGeneration: this.preTokenGenerationFunction },
     });
     const cfnPool = this.userPool.node.defaultChild as CfnUserPool;
+    cfnPool.overrideLogicalId("AtatUserPool");
     cfnPool.schema = [
       {
         name: props.groupsAttributeName ?? "groups",

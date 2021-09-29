@@ -875,7 +875,7 @@ components:
       x-amazon-apigateway-authorizer:
         type: cognito_user_pools
         providerARNs:
-          - Fn::GetAtt: ApplicationsApiUserPool.Arn
+          - Fn::GetAtt: AtatUserPool.Arn
 x-amazon-apigateway-request-validators:
   full-request-validator:
     validateRequestParameters: true
