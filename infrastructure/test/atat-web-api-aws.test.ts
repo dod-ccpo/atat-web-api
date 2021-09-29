@@ -5,7 +5,13 @@ import * as AtatWebApi from "../lib/atat-web-api-stack";
 test("DynamoDB Resource is present, and Partition Key is set.", () => {
   const app = new cdk.App();
   // WHEN
-  const stack = new AtatWebApi.AtatWebApiStack(app, "MyTestStack");
+  const stack = new AtatWebApi.AtatWebApiStack(app, "MyTestStack", {
+    environmentId: "testrunner",
+    idpProps: {
+      secretName: "/test/secret",
+      providerName: "TestIdp",
+    },
+  });
   // THEN
   expectCDK(stack).to(
     haveResource("AWS::DynamoDB::Table", {

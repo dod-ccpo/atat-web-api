@@ -1,23 +1,39 @@
 import * as apigw from "@aws-cdk/aws-apigateway";
 import * as dynamodb from "@aws-cdk/aws-dynamodb";
 import * as s3asset from "@aws-cdk/aws-s3-assets";
+import * as secretsmanager from "@aws-cdk/aws-secretsmanager";
+import * as ssm from "@aws-cdk/aws-ssm";
 import * as cdk from "@aws-cdk/core";
 import { ApiDynamoDBFunction } from "./constructs/api-dynamodb-function";
 import { ApiS3Function } from "./constructs/api-s3-function";
+import { CognitoAuthentication } from "./constructs/authentication";
 import { SecureBucket, SecureTable } from "./constructs/compliant-resources";
 import { TaskOrderLifecycle } from "./constructs/task-order-lifecycle";
 import { HttpMethod } from "./http";
 import { packageRoot } from "./util";
 
+interface AtatIdpProps {
+  secretName: string;
+  providerName: string;
+  adminsGroupName?: string;
+  usersGroupName?: string;
+}
+
 export interface AtatWebApiStackProps extends cdk.StackProps {
+  environmentId: string;
+  idpProps: AtatIdpProps;
   removalPolicy?: cdk.RemovalPolicy;
 }
 
 export class AtatWebApiStack extends cdk.Stack {
-  constructor(scope: cdk.Construct, id: string, props?: AtatWebApiStackProps) {
+  private readonly environmentId: string;
+  constructor(scope: cdk.Construct, id: string, props: AtatWebApiStackProps) {
     super(scope, id, props);
 
     this.templateOptions.description = "Resources to support the ATAT application API";
+
+    this.environmentId = props.environmentId;
+    this.setupCognito(props.idpProps, props.removalPolicy);
 
     // Create a shared DynamoDB table that will be used by all the functions in the project.
     const { table } = new SecureTable(this, "AtatTable", {
@@ -170,5 +186,37 @@ export class AtatWebApiStack extends cdk.Stack {
 
     // TODO: getTaskOrder (for metadata)
     // TODO: downloadTaskOrder
+  }
+
+  private setupCognito(props: AtatIdpProps, removalPolicy?: cdk.RemovalPolicy) {
+    const secret = secretsmanager.Secret.fromSecretNameV2(this, "OidcSecret", props.secretName);
+    const cognitoAuthentication = new CognitoAuthentication(this, "Authentication", {
+      groupsAttributeName: "groups",
+      adminsGroupName: props.adminsGroupName ?? "atat-admins",
+      usersGroupName: props.usersGroupName ?? "atat-users",
+      cognitoDomain: "atat-api-" + this.environmentId,
+      userPoolProps: {
+        removalPolicy: removalPolicy,
+      },
+      oidcIdps: [
+        {
+          providerName: props.providerName,
+          clientId: secret.secretValueFromJson("clientId"),
+          clientSecret: secret.secretValueFromJson("clientSecret"),
+          oidcIssuerUrl: secret.secretValueFromJson("oidcIssuerUrl"),
+          attributesRequestMethod: HttpMethod.GET,
+        },
+      ],
+    });
+    const poolIdParam = new ssm.StringParameter(this, "UserPoolIdParameter", {
+      description: "Cognito User Pool ID",
+      stringValue: cognitoAuthentication.userPool.userPoolId,
+      parameterName: `/atat/${this.environmentId}/cognito/userpool/id`,
+    });
+    const idpNamesParam = new ssm.StringListParameter(this, "CognitoIdPNamesParameter", {
+      description: "Names of configured identity providers",
+      parameterName: `/atat/${this.environmentId}/cognito/idps`,
+      stringListValue: cognitoAuthentication.idps.map((idp) => idp.providerName),
+    });
   }
 }
