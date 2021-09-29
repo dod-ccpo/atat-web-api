@@ -2,7 +2,6 @@
 import * as cdk from "@aws-cdk/core";
 import { NIST80053Checks } from "cdk-nag";
 import "source-map-support/register";
-import { AtatAuthStack } from "../lib/atat-auth-stack";
 import { AtatIamStack } from "../lib/atat-iam-stack";
 import { AtatWebApiStack } from "../lib/atat-web-api-stack";
 import { getTags } from "../lib/load-tags";
@@ -30,15 +29,14 @@ if (app.node.tryGetContext("TicketId")) {
 const environmentName = normalizeEnvironmentName(environmentParam);
 const environmentId = lowerCaseEnvironmentId(environmentParam);
 
-const stacks = [
+const stacks: cdk.Stack[] = [
   new AtatWebApiStack(app, environmentName + "AtatWebApiStack", {
     removalPolicy,
-  }),
-  new AtatAuthStack(app, environmentName + "AtatAuthStack", {
-    secretName: "auth/oidc/aad",
-    providerName: "ATATDevAAD",
     environmentId,
-    removalPolicy,
+    idpProps: {
+      secretName: "auth/oidc/aad",
+      providerName: "ATATDevAAD",
+    },
   }),
 ];
 
