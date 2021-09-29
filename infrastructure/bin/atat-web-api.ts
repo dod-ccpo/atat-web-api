@@ -37,6 +37,7 @@ const stacks: cdk.Stack[] = [
       secretName: "auth/oidc/aad",
       providerName: "ATATDevAAD",
     },
+    requireAuthorization: process.env.ATAT_REQUIRE_AUTH !== "false",
   }),
 ];
 

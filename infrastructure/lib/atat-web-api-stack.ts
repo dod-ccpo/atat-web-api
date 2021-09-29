@@ -23,6 +23,7 @@ export interface AtatWebApiStackProps extends cdk.StackProps {
   environmentId: string;
   idpProps: AtatIdpProps;
   removalPolicy?: cdk.RemovalPolicy;
+  requireAuthorization?: boolean;
 }
 
 export class AtatWebApiStack extends cdk.Stack {
@@ -46,6 +47,11 @@ export class AtatWebApiStack extends cdk.Stack {
     const tableOutput = new cdk.CfnOutput(this, "TableName", {
       value: table.tableName,
     });
+
+    const forceAuth = new cdk.CfnCondition(this, "ForceAuthorization", {
+      expression: cdk.Fn.conditionEquals(props?.requireAuthorization ?? true, true),
+    });
+    forceAuth.overrideLogicalId("IsAuthorizationRequired");
 
     const createPortfolioStep = new ApiDynamoDBFunction(this, "CreatePortfolioStep", {
       table: table,
