@@ -122,6 +122,9 @@ function oidcAttributeMapping(props: CognitoAuthenticationProps): { [key: string
   return {
     username: "sub",
     [`custom:${props.groupsAttributeName}`]: "groups",
+    family_name: "family_name",
+    given_name: "given_name",
+    email: "email",
   };
 }
 
