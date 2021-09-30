@@ -35,7 +35,7 @@ export class AtatWebApiStack extends cdk.Stack {
     });
 
     const submitQueue = new sqs.Queue(this, "SubmitQueue", {
-      queueName: "SubmitQueue",
+      queueName: "SubmitQueue.fifo",
       fifo: true,
     });
 
@@ -109,19 +109,15 @@ export class AtatWebApiStack extends cdk.Stack {
     const submitPortfolioDraft = new ApiSQSFunction(this, "SubmitPortfolioDraft", {
       queue: submitQueue,
       method: HttpMethod.POST,
-      handlerPath: packageRoot() + "/api/portfolioDrafts/submit/submitPortfolioDraft.ts",
+      handlerPath: packageRoot() + "/api/portfolioDrafts/submit/publish.ts",
     });
     // subscribe to queue, add item to DB
     const subscribePortfolioDraftRequest = new ApiSQSDynamoDBFunction(this, "subscribePortfolioDraftRequest", {
       table: table,
       queue: submitQueue,
       method: HttpMethod.POST, // this doesn't actually need this variable, since it will never get hit by the API, todo fix this
-      handlerPath: packageRoot() + "/api/portfolioDrafts/submit/submitPortfolioDraft.ts",
+      handlerPath: packageRoot() + "/api/portfolioDrafts/submit/subscribe.ts",
     });
-
-    const eventSource = subscribePortfolioDraftRequest.addEventSource(
-      new SqsEventSource(subscribePortfolioDraftRequest.queue)
-    );
 
     // All TODO functions will be pointed at this lambda function (in the atat_provisioning_wizard_api.yaml, search NotImplementedFunction)
     const notImplemented = new ApiDynamoDBFunction(this, "NotImplemented", {

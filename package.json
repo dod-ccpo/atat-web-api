@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "@aws-cdk/aws-lambda-event-sources": "^1.124.0",
+    "@aws-sdk/client-sqs": "^3.34.0",
     "esbuild": "^0.13.2"
   }
 }
