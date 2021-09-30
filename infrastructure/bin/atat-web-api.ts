@@ -1,8 +1,10 @@
 #!/usr/bin/env node
+import * as ec2 from "@aws-cdk/aws-ec2";
 import * as cdk from "@aws-cdk/core";
 import { NIST80053Checks } from "cdk-nag";
 import "source-map-support/register";
 import { AtatIamStack } from "../lib/atat-iam-stack";
+import { AtatNetStack } from "../lib/atat-net-stack";
 import { AtatWebApiStack } from "../lib/atat-web-api-stack";
 import { getTags } from "../lib/load-tags";
 import { isString, lowerCaseEnvironmentId, normalizeEnvironmentName } from "../lib/util";
@@ -38,6 +40,9 @@ const stacks: cdk.Stack[] = [
       providerName: "ATATDevAAD",
     },
     requireAuthorization: process.env.ATAT_REQUIRE_AUTH !== "false",
+  }),
+  new AtatNetStack(app, environmentName + "AtatNetStack", {
+    vpcCidr: ec2.Vpc.DEFAULT_CIDR_RANGE,
   }),
 ];
 
