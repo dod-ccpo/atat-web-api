@@ -66,11 +66,11 @@ export class SecureTable extends cdk.Construct {
   }
 }
 
-export interface SecureAPIGatewayProps {
+export interface SecureRestApiProps extends apigw.RestApiBaseProps {
   /**
    * The properties to configure the API Gateway
    */
-  apiGatewayProps: apigw.SpecRestApiProps;
+  apiDefinition?: apigw.ApiDefinition;
 }
 
 /**
@@ -78,25 +78,41 @@ export interface SecureAPIGatewayProps {
  *  - cache enabled and encrypted by default
  *  - execution logs enabled by default
  */
-export class SecureAPIGateway extends cdk.Construct {
-  readonly apiGateway: apigw.SpecRestApi;
-  constructor(scope: cdk.Construct, id: string, props: SecureAPIGatewayProps) {
-    super(scope, id);
+export class SecureRestApi extends cdk.Construct {
+  readonly restApi: apigw.SpecRestApi;
 
-    const apiGateway = new apigw.SpecRestApi(this, id, {
-      ...props.apiGatewayProps,
+  constructor(scope: cdk.Construct, id: string, props: SecureRestApiProps) {
+    super(scope, id);
+    const baseProps = {
+      // This is slightly repetitive between endpointTypes and parameters.endpointConfigurationTypes; however, due
+      // to underlying CloudFormation behaviors, endpointTypes is not evaluated entirely correctly when a
+      // parameter specification is given. Specifying both ensures that we truly have a regional endpoint rather than
+      // edge.
+      endpointTypes: [apigw.EndpointType.REGIONAL],
+      parameters: {
+        endpointConfigurationTypes: apigw.EndpointType.REGIONAL,
+      },
       deployOptions: {
         // sensible defaults allowed to be overridden
-        cacheTtl: cdk.Duration.minutes(60), // ! override for dev purposes?
+        cacheTtl: cdk.Duration.minutes(15),
         // passed in API Gateway configurations
-        ...props.apiGatewayProps?.deployOptions,
+        ...props?.deployOptions,
         // secure defaults that cannot be overridden
         cachingEnabled: true,
         cacheDataEncrypted: true,
         loggingLevel: apigw.MethodLoggingLevel.INFO, // execution logging
       },
-    });
+    };
 
-    this.apiGateway = apiGateway;
+    // TODO: refactor to use a function (e.g. determineApiClass) that returns constructor
+    // reference allowing for further prop validation (and mutual exclusion of props)
+    let restApi: apigw.RestApiBase;
+    if (props.apiDefinition) {
+      restApi = new apigw.SpecRestApi(this, id, { apiDefinition: props.apiDefinition, ...baseProps });
+    } else {
+      restApi = new apigw.RestApi(this, id, baseProps);
+    }
+
+    this.restApi = restApi;
   }
 }
