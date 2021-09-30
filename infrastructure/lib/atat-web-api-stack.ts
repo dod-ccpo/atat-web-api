@@ -144,9 +144,6 @@ export class AtatWebApiStack extends cdk.Stack {
     // This will get used as the `Body:` parameter in the underlying CloudFormation resource.
     const restApi = new SecureRestApi(this, "AtatSpecTest", {
       apiDefinition: apigw.ApiDefinition.fromInline(apiSpecAsTemplateInclude),
-      deployOptions: {
-        cacheTtl: cdk.Duration.minutes(2),
-      },
     });
     this.addTaskOrderRoutes(props);
   }

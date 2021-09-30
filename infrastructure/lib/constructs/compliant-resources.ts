@@ -93,13 +93,12 @@ export class SecureRestApi extends cdk.Construct {
         endpointConfigurationTypes: apigw.EndpointType.REGIONAL,
       },
       deployOptions: {
-        // sensible defaults allowed to be overridden
-        cacheTtl: cdk.Duration.minutes(15),
         // passed in API Gateway configurations
         ...props?.deployOptions,
         // secure defaults that cannot be overridden
         cachingEnabled: true,
         cacheDataEncrypted: true,
+        cacheTtl: cdk.Duration.minutes(0),
         loggingLevel: apigw.MethodLoggingLevel.INFO, // execution logging
       },
     };
