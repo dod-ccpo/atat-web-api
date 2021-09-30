@@ -119,7 +119,9 @@ export class AtatWebApiStack extends cdk.Stack {
       handlerPath: packageRoot() + "/api/portfolioDrafts/submit/submitPortfolioDraft.ts",
     });
 
-    const eventSource = subscribePortfolioDraftRequest.addEventSource(new SqsEventSource(submitQueue));
+    const eventSource = subscribePortfolioDraftRequest.addEventSource(
+      new SqsEventSource(subscribePortfolioDraftRequest.queue)
+    );
 
     // All TODO functions will be pointed at this lambda function (in the atat_provisioning_wizard_api.yaml, search NotImplementedFunction)
     const notImplemented = new ApiDynamoDBFunction(this, "NotImplemented", {
