@@ -79,7 +79,7 @@ export interface SecureRestApiProps extends apigw.RestApiBaseProps {
  *  - execution logs enabled by default
  */
 export class SecureRestApi extends cdk.Construct {
-  readonly restApi: apigw.SpecRestApi;
+  readonly restApi: apigw.RestApiBase;
 
   constructor(scope: cdk.Construct, id: string, props: SecureRestApiProps) {
     super(scope, id);
