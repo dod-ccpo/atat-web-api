@@ -7,7 +7,7 @@ import * as cdk from "@aws-cdk/core";
 import { ApiDynamoDBFunction } from "./constructs/api-dynamodb-function";
 import { ApiS3Function } from "./constructs/api-s3-function";
 import { CognitoAuthentication } from "./constructs/authentication";
-import { SecureBucket, SecureTable } from "./constructs/compliant-resources";
+import { SecureBucket, SecureTable, SecureRestApi } from "./constructs/compliant-resources";
 import { TaskOrderLifecycle } from "./constructs/task-order-lifecycle";
 import { HttpMethod } from "./http";
 import { packageRoot } from "./util";
@@ -142,16 +142,8 @@ export class AtatWebApiStack extends cdk.Stack {
     // And with the data now loaded from the template, we can use ApiDefinition.fromInline to parse it as real
     // OpenAPI spec (because it was!) and now we've got all our special AWS values and variables interpolated.
     // This will get used as the `Body:` parameter in the underlying CloudFormation resource.
-    const restApi = new apigw.SpecRestApi(this, "AtatSpecTest", {
+    const restApi = new SecureRestApi(this, "AtatSpecTest", {
       apiDefinition: apigw.ApiDefinition.fromInline(apiSpecAsTemplateInclude),
-      // This is slightly repetitive between endpointTypes and parameters.endpointConfigurationTypes; however, due
-      // to underlying CloudFormation behaviors, endpointTypes is not evaluated entirely correctly when a
-      // parameter specification is given. Specifying both ensures that we truly have a regional endpoint rather than
-      // edge.
-      endpointTypes: [apigw.EndpointType.REGIONAL],
-      parameters: {
-        endpointConfigurationTypes: apigw.EndpointType.REGIONAL,
-      },
     });
     this.addTaskOrderRoutes(props);
   }
