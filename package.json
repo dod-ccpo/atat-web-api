@@ -29,6 +29,7 @@
     "typescript": "~4.4.2"
   },
   "dependencies": {
+    "@aws-cdk/aws-lambda-event-sources": "^1.125.0",
     "esbuild": "^0.13.2"
   }
 }

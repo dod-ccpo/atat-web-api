@@ -3,11 +3,14 @@ import * as dynamodb from "@aws-cdk/aws-dynamodb";
 import * as s3asset from "@aws-cdk/aws-s3-assets";
 import * as cdk from "@aws-cdk/core";
 import { ApiDynamoDBFunction } from "./constructs/api-dynamodb-function";
+import { ApiSQSDynamoDBFunction, ApiSQSFunction } from "./constructs/api-sqs-function";
 import { ApiS3Function } from "./constructs/api-s3-function";
 import { SecureBucket, SecureTable } from "./constructs/compliant-resources";
 import { TaskOrderLifecycle } from "./constructs/task-order-lifecycle";
 import { HttpMethod } from "./http";
 import { packageRoot } from "./util";
+import * as sqs from "@aws-cdk/aws-sqs";
+import { SqsEventSource } from "@aws-cdk/aws-lambda-event-sources";
 
 export interface AtatWebApiStackProps extends cdk.StackProps {
   removalPolicy?: cdk.RemovalPolicy;
@@ -29,6 +32,11 @@ export class AtatWebApiStack extends cdk.Stack {
     });
     const tableOutput = new cdk.CfnOutput(this, "TableName", {
       value: table.tableName,
+    });
+
+    const submitQueue = new sqs.Queue(this, "SubmitQueue", {
+      queueName: "SubmitQueue",
+      fifo: true,
     });
 
     const createPortfolioStep = new ApiDynamoDBFunction(this, "CreatePortfolioStep", {
@@ -90,12 +98,28 @@ export class AtatWebApiStack extends cdk.Stack {
       method: HttpMethod.GET,
       handlerPath: packageRoot() + "/api/portfolioDrafts/getPortfolioDraft.ts",
     });
-
+    /*
     const submitPortfolioDraft = new ApiDynamoDBFunction(this, "SubmitPortfolioDraft", {
       table: table,
       method: HttpMethod.POST,
       handlerPath: packageRoot() + "/api/portfolioDrafts/submit/submitPortfolioDraft.ts",
     });
+*/
+    // publish to queue
+    const submitPortfolioDraft = new ApiSQSFunction(this, "SubmitPortfolioDraft", {
+      queue: submitQueue,
+      method: HttpMethod.POST,
+      handlerPath: packageRoot() + "/api/portfolioDrafts/submit/submitPortfolioDraft.ts",
+    });
+    // subscribe to queue, add item to DB
+    const subscribePortfolioDraftRequest = new ApiSQSDynamoDBFunction(this, "subscribePortfolioDraftRequest", {
+      table: table,
+      queue: submitQueue,
+      method: HttpMethod.POST, // this doesn't actually need this variable, since it will never get hit by the API, todo fix this
+      handlerPath: packageRoot() + "/api/portfolioDrafts/submit/submitPortfolioDraft.ts",
+    });
+
+    const eventSource = subscribePortfolioDraftRequest.addEventSource(new SqsEventSource(submitQueue));
 
     // All TODO functions will be pointed at this lambda function (in the atat_provisioning_wizard_api.yaml, search NotImplementedFunction)
     const notImplemented = new ApiDynamoDBFunction(this, "NotImplemented", {
