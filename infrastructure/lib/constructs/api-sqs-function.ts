@@ -84,6 +84,7 @@ export class ApiSQSDynamoDBFunction extends ApiFunction {
     this.fn.addEnvironment("ATAT_TABLE_NAME", props.table.tableName);
     this.grantRequiredQueuePermissions();
     this.grantRequiredTablePermissions();
+    this.fn.addEventSource(new SqsEventSource(this.queue));
   }
 
   private grantRequiredQueuePermissions(): iam.Grant | undefined {
