@@ -704,6 +704,11 @@ components:
       properties:
         name:
           type: string
+        csp:
+          type: string
+          enum:
+            - "aws"
+            - "azure"
         description:
           type: string
         dod_components:
@@ -741,11 +746,6 @@ components:
                 allOf:
                   - $ref: '#/components/schemas/FileMetadataSummary'
                 description: Metadata associated with file which was previously uploaded by POST /taskOrderFiles
-              csp:
-                type: string
-                enum:
-                  - "aws"
-                  - "azure"
               clins:
                 type: array
                 items:
@@ -840,6 +840,8 @@ components:
     PortfolioStepEx:
       value:
         name: "Mock Portfolio"
+        csp:
+          - "aws"
         description: "Mock portfolio description"
         dod_components: 
           - "air_force"
@@ -861,8 +863,6 @@ components:
               size: 694331
               name: "TO_12345678910.pdf"
               status: "accepted"
-            csp:
-              - "aws"
             clins:
               - clin_number: "0001"
                 idiq_clin: "1234"
