@@ -1,7 +1,8 @@
+import { CloudServiceProvider } from "./CloudServiceProvider";
+import { exhaustivePick } from "./TypeFields";
 import { PortfolioDraft } from "./PortfolioDraft";
 import { portfolioDraftFields } from "./PortfolioDraftSummary";
 import { ProvisioningStatus } from "./ProvisioningStatus";
-import { exhaustivePick } from "./TypeFields";
 
 describe("Test object trimming", () => {
   const portfolioDraft: PortfolioDraft = {
@@ -22,6 +23,7 @@ describe("Test object trimming", () => {
     },
     portfolio_step: {
       name: "test",
+      csp: CloudServiceProvider.AWS,
       description: "test",
       dod_components: [],
       portfolio_managers: [],
