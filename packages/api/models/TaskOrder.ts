@@ -1,6 +1,7 @@
 import { Clin } from "./Clin";
 import { CloudServiceProvider } from "./CloudServiceProvider";
 import { FileMetadataSummary } from "./FileMetadataSummary";
+import { ExhaustiveAttributeMap } from "./TypeFields";
 
 export interface TaskOrder {
   task_order_number: string;
@@ -8,3 +9,10 @@ export interface TaskOrder {
   csp: CloudServiceProvider;
   clins: Array<Clin>;
 }
+
+export const taskOrderFields: ExhaustiveAttributeMap<TaskOrder> = {
+  task_order_number: null,
+  task_order_file: null,
+  csp: null,
+  clins: null,
+};

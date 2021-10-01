@@ -5,7 +5,8 @@ import { Clin } from "../models/Clin";
 import { Environment } from "../models/Environment";
 import { FundingStep } from "../models/FundingStep";
 import { PortfolioStep } from "../models/PortfolioStep";
-import { TaskOrder } from "../models/TaskOrder";
+import { TaskOrder, taskOrderFields } from "../models/TaskOrder";
+import { containsExactlyFields } from "../models/TypeFields";
 
 /**
  * Check whether a given string is valid JSON.
@@ -81,10 +82,7 @@ export function isFundingStep(object: unknown): object is FundingStep {
  * @returns true if object has all attributes of a {@link TaskOrder}
  */
 export function isTaskOrder(object: unknown): object is TaskOrder {
-  if (!isValidObject(object)) {
-    return false;
-  }
-  return ["task_order_number", "task_order_file", "csp", "clins"].every((item) => item in object);
+  return containsExactlyFields(object, taskOrderFields);
 }
 
 /**
