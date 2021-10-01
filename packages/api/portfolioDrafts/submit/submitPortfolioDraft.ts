@@ -40,8 +40,6 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
       new SendMessageCommand({
         QueueUrl: QUEUE_URL,
         MessageBody: JSON.stringify(result.Attributes as PortfolioDraft),
-        MessageGroupId: "submitPortfolioDraft",
-        MessageDeduplicationId: result?.Attributes?.submit_id,
       })
     );
     return new ApiSuccessResponse(result.Attributes as PortfolioDraft, SuccessStatusCode.ACCEPTED);

@@ -51,9 +51,9 @@ export class AtatWebApiStack extends cdk.Stack {
     });
 
     const submitQueue = new sqs.Queue(this, "SubmitQueue", {
-      queueName: "SubmitQueue.fifo",
-      fifo: true,
+      queueName: "SubmitQueue",
     });
+
     const forceAuth = new cdk.CfnCondition(this, "ForceAuthorization", {
       expression: cdk.Fn.conditionEquals(props?.requireAuthorization ?? true, true),
     });
