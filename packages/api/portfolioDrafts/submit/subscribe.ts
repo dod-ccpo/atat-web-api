@@ -15,7 +15,6 @@ import { ProvisioningStatus } from "../../models/ProvisioningStatus";
 import { dynamodbDocumentClient as client } from "../../utils/dynamodb";
 import { SendMessageCommand } from "@aws-sdk/client-sqs";
 import { sqsClient } from "../../utils/sqs";
-import { SqsEventSource } from "@aws-cdk/aws-lambda-event-sources";
 const TABLE_NAME = process.env.ATAT_TABLE_NAME ?? "";
 const QUEUE_URL = process.env.ATAT_QUEUE_URL ?? "";
 
