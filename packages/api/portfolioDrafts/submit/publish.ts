@@ -26,7 +26,6 @@ const QUEUE_URL = process.env.ATAT_QUEUE_URL ?? "";
 export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   // Set the parameters
   const params = {
-    DelaySeconds: 10,
     MessageBody: "Hello World",
     MessageDeduplicationId: "TheWhistler", // Required for FIFO queues
     MessageGroupId: "Group1", // Required for FIFO queues

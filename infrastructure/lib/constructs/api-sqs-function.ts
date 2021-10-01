@@ -8,11 +8,12 @@ import { LambdaInsightsVersion } from "@aws-cdk/aws-lambda";
 import { SqsEventSource } from "@aws-cdk/aws-lambda-event-sources";
 import * as lambda from "@aws-cdk/aws-lambda";
 
-export interface ApiSQSFunctionProps extends ApiFunctionProps {
+export interface ApiSQSPublishFunctionProps extends ApiFunctionProps {
   /**
    * The DynamoDB table where data is stored.
    */
   readonly queue: sqs.IQueue;
+  readonly table: dynamodb.ITable;
 }
 
 /**
@@ -22,16 +23,20 @@ export interface ApiSQSFunctionProps extends ApiFunctionProps {
  * created. Additionally, the necessary permissions are granted on the DynamoDB table
  * corresponding to the HTTP method specified in the props.
  */
-export class ApiSQSFunction extends ApiFunction {
+export class ApiSQSPublishFunction extends ApiFunction {
   /**
    * The sqs queue
    */
   public readonly queue: sqs.IQueue;
+  public readonly table: dynamodb.ITable;
 
-  constructor(scope: cdk.Construct, id: string, props: ApiSQSFunctionProps) {
+  constructor(scope: cdk.Construct, id: string, props: ApiSQSPublishFunctionProps) {
     super(scope, id, props);
     this.queue = props.queue;
+    this.table = props.table;
     this.fn.addEnvironment("ATAT_QUEUE_URL", props.queue.queueUrl);
+    this.fn.addEnvironment("ATAT_TABLE_NAME", props.table.tableName);
+    this.grantRequiredTablePermissions();
     this.grantRequiredQueuePermissions();
   }
 
@@ -53,9 +58,28 @@ export class ApiSQSFunction extends ApiFunction {
         return undefined;
     }
   }
+
+  private grantRequiredTablePermissions(): iam.Grant | undefined {
+    switch (this.method) {
+      // Read-Only operations
+      case HttpMethod.GET:
+      case HttpMethod.HEAD:
+        return this.table.grantReadData(this.fn);
+      // Read-Write operations
+      case HttpMethod.POST:
+      case HttpMethod.PUT:
+      case HttpMethod.DELETE:
+        return this.table.grantReadWriteData(this.fn);
+      default:
+        // This will allow Synthesis to continue; however, the error will stop the
+        // CDK from moving forward with a diff or deploy action.
+        cdk.Annotations.of(this).addError("Unknown HTTP method " + this.method);
+        return undefined;
+    }
+  }
 }
 
-export interface ApiSQSDynamoDBFunctionProps extends ApiFunctionProps {
+export interface ApiSQSSubscribeFunctionProps extends ApiFunctionProps {
   /**
    * The DynamoDB table where data is stored.
    */
@@ -66,7 +90,7 @@ export interface ApiSQSDynamoDBFunctionProps extends ApiFunctionProps {
   readonly table: dynamodb.ITable;
 }
 
-export class ApiSQSDynamoDBFunction extends ApiFunction {
+export class ApiSQSSubscribeFunction extends ApiFunction {
   /**
    * The SQS queue
    */
@@ -76,7 +100,7 @@ export class ApiSQSDynamoDBFunction extends ApiFunction {
    */
   public readonly table: dynamodb.ITable;
 
-  constructor(scope: cdk.Construct, id: string, props: ApiSQSDynamoDBFunctionProps) {
+  constructor(scope: cdk.Construct, id: string, props: ApiSQSSubscribeFunctionProps) {
     super(scope, id, props);
     this.queue = props.queue;
     this.fn.addEnvironment("ATAT_QUEUE_URL", props.queue.queueUrl);

@@ -13,7 +13,10 @@ import { PortfolioDraft } from "../../models/PortfolioDraft";
 import { v4 as uuidv4 } from "uuid";
 import { ProvisioningStatus } from "../../models/ProvisioningStatus";
 import { dynamodbDocumentClient as client } from "../../utils/dynamodb";
+import { SendMessageCommand } from "@aws-sdk/client-sqs";
+import { sqsClient } from "../../utils/sqs";
 const TABLE_NAME = process.env.ATAT_TABLE_NAME ?? "";
+const QUEUE_URL = process.env.ATAT_QUEUE_URL ?? "";
 
 /**
  * Submits all progress from the Portfolio Provisioning Wizard
@@ -33,6 +36,15 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
   try {
     const result = await submitPortfolioDraftCommand(TABLE_NAME, portfolioDraftId);
+    // return new ApiSuccessResponse(result.Attributes as PortfolioDraft, SuccessStatusCode.ACCEPTED);
+    const data = await sqsClient.send(
+      new SendMessageCommand({
+        QueueUrl: QUEUE_URL,
+        MessageBody: JSON.stringify(result.Attributes as PortfolioDraft),
+        MessageGroupId: "submitPortfolioDraft",
+        MessageDeduplicationId: portfolioDraftId, // change to submit ID
+      })
+    );
     return new ApiSuccessResponse(result.Attributes as PortfolioDraft, SuccessStatusCode.ACCEPTED);
   } catch (error) {
     // The `ConditionExpression` that we're using performs two different types of validation. The first is that
