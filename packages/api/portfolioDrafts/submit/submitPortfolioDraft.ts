@@ -36,13 +36,12 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
   try {
     const result = await submitPortfolioDraftCommand(TABLE_NAME, portfolioDraftId);
-    // return new ApiSuccessResponse(result.Attributes as PortfolioDraft, SuccessStatusCode.ACCEPTED);
     const data = await sqsClient.send(
       new SendMessageCommand({
         QueueUrl: QUEUE_URL,
         MessageBody: JSON.stringify(result.Attributes as PortfolioDraft),
         MessageGroupId: "submitPortfolioDraft",
-        MessageDeduplicationId: portfolioDraftId, // change to submit ID
+        MessageDeduplicationId: result?.Attributes?.submit_id,
       })
     );
     return new ApiSuccessResponse(result.Attributes as PortfolioDraft, SuccessStatusCode.ACCEPTED);
