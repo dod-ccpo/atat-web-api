@@ -1,6 +1,7 @@
 import { ScanCommand, ScanCommandInput } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { PortfolioDraftSummary } from "../models/PortfolioDraftSummary";
+import { portfolioDraftFields, PortfolioDraftSummary } from "../models/PortfolioDraftSummary";
+import { exhaustivePick } from "../models/TypeFields";
 import { dynamodbDocumentClient as client } from "../utils/dynamodb";
 import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusCode } from "../utils/response";
 
@@ -37,6 +38,14 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
   const params: ScanCommandInput = {
     TableName: TABLE_NAME,
     Limit: limit,
+    ProjectionExpression: Object.keys(portfolioDraftFields)
+      .join(", ")
+      .replace("name", "#name")
+      .replace("status", "#status"),
+    ExpressionAttributeNames: {
+      "#name": "name",
+      "#status": "status",
+    },
   };
 
   // This is an expensive command and should be replaced when
@@ -46,7 +55,9 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
   try {
     const data = await client.send(command);
-    return new ApiSuccessResponse<PortfolioDraftSummary[]>(data.Items as PortfolioDraftSummary[], SuccessStatusCode.OK);
+    const items = (data.Items ?? []) as PortfolioDraftSummary[];
+    const summaries = items.map((draft) => exhaustivePick(draft, portfolioDraftFields));
+    return new ApiSuccessResponse<PortfolioDraftSummary[]>(summaries, SuccessStatusCode.OK);
   } catch (error) {
     console.log("Database error (" + error.name + "): " + error);
     return new OtherErrorResponse("Database error", ErrorStatusCode.INTERNAL_SERVER_ERROR);
