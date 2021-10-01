@@ -6,7 +6,13 @@ import * as sqs from "@aws-cdk/aws-sqs";
 import { SqsEventSource } from "@aws-cdk/aws-lambda-event-sources";
 
 export interface ApiSQSFunctionProps extends ApiDynamoDBFunctionProps {
+  /**
+   * The SQS queue where data is sent
+   */
   readonly queue: sqs.IQueue;
+  /**
+   * Optional param to create an SQS event source to recieve queue data
+   */
   readonly createEventSource?: any;
 }
 
@@ -19,10 +25,12 @@ export interface ApiSQSFunctionProps extends ApiDynamoDBFunctionProps {
  */
 export class ApiSQSFunction extends ApiDynamoDBFunction {
   /**
-   * The DynamoDB table.
+   * The SQS queue where data is sent
    */
-  // public readonly table: dynamodb.ITable;
   public readonly queue: sqs.IQueue;
+  /**
+   * Optional param to create an SQS event source to recieve queue data
+   */
   public readonly createEventSource?: boolean;
 
   constructor(scope: cdk.Construct, id: string, props: ApiSQSFunctionProps) {
@@ -30,6 +38,7 @@ export class ApiSQSFunction extends ApiDynamoDBFunction {
     this.queue = props.queue;
     this.fn.addEnvironment("ATAT_QUEUE_URL", props.queue.queueUrl);
     this.grantRequiredQueuePermissions();
+    // creating an EventSource allows the fn to subscribe to the queue
     if (props.createEventSource) {
       this.fn.addEventSource(new SqsEventSource(this.queue));
     }
