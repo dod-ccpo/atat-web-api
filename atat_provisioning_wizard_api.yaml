@@ -878,8 +878,6 @@ components:
               size: 2945459
               name: "TaskOrder_98765432101.pdf"
               status: "pending"
-            csp:
-              - "azure"
             clins:
               - clin_number: "0002"
                 idiq_clin: "1234"
