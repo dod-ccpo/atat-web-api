@@ -13,7 +13,6 @@ import { TaskOrderLifecycle } from "./constructs/task-order-lifecycle";
 import { HttpMethod } from "./http";
 import { packageRoot } from "./util";
 import * as sqs from "@aws-cdk/aws-sqs";
-import { SqsEventSource } from "@aws-cdk/aws-lambda-event-sources";
 
 interface AtatIdpProps {
   secretName: string;
@@ -119,20 +118,7 @@ export class AtatWebApiStack extends cdk.Stack {
       method: HttpMethod.GET,
       handlerPath: packageRoot() + "/api/portfolioDrafts/getPortfolioDraft.ts",
     });
-    /*
-    const submitPortfolioDraft = new ApiDynamoDBFunction(this, "SubmitPortfolioDraft", {
-      table: table,
-      method: HttpMethod.POST,
-      handlerPath: packageRoot() + "/api/portfolioDrafts/submit/submitPortfolioDraft.ts",
-    });
-*/
-    // publish to queue
-    /*
-    const submitPortfolioDraft = new ApiSQSFunction(this, "SubmitPortfolioDraft", {
-      queue: submitQueue,
-      method: HttpMethod.POST,
-      handlerPath: packageRoot() + "/api/portfolioDrafts/submit/publish.ts",
-    }); */
+
     const submitPortfolioDraft = new ApiSQSFunction(this, "SubmitPortfolioDraft", {
       queue: submitQueue,
       table: table,
@@ -140,11 +126,10 @@ export class AtatWebApiStack extends cdk.Stack {
       handlerPath: packageRoot() + "/api/portfolioDrafts/submit/submitPortfolioDraft.ts",
     });
 
-    // subscribe to queue, add item to DB
     const subscribePortfolioDraftRequest = new ApiSQSFunction(this, "subscribePortfolioDraftRequest", {
       table: table,
       queue: submitQueue,
-      method: HttpMethod.POST, // this doesn't actually need this variable, since it will never get hit by the API, todo fix this
+      method: HttpMethod.POST,
       handlerPath: packageRoot() + "/api/portfolioDrafts/submit/subscribe.ts",
       createEventSource: true,
     });
