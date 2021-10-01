@@ -61,6 +61,13 @@ abstract class Response implements APIGatewayProxyResult {
     multiValueHeaders?: MultiValueHeaders,
     isBase64Encoded?: boolean
   ) {
+    const temporaryIncompleteCorsHeaderWorkaround = {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "*",
+      "Access-Control-Allow-Headers": "*",
+    };
+    headers = { ...headers, ...temporaryIncompleteCorsHeaderWorkaround };
+
     this.body = body;
     this.statusCode = statusCode;
     this.headers = headers;
@@ -87,10 +94,6 @@ abstract class SuccessResponse extends Response {
     headers?: Headers,
     multiValueHeaders?: MultiValueHeaders
   ) {
-    const temporaryIncompleteCorsHeaderWorkaround = {
-      "Access-Control-Allow-Origin": "*",
-    };
-    headers = { ...headers, ...temporaryIncompleteCorsHeaderWorkaround };
     super(response, statusCode, headers, multiValueHeaders, false);
   }
 }

@@ -87,6 +87,29 @@ paths:
           - 
             - cognitoAuthorizer: []
           - Ref: AWS::NoValue
+    options:
+      tags:
+        - cors
+      description: CORS headers
+      responses:
+        '200':
+          $ref: '#/components/responses/CorsHeaders'
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode" : 200
+            }
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''*'''
+              method.response.header.Access-Control-Allow-Methods: '''*'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            responseTemplates:
+              application/json: "{}"
   /portfolioDrafts/{portfolioDraftId}:
     get:
       tags:
@@ -152,6 +175,29 @@ paths:
           - 
             - cognitoAuthorizer: []
           - Ref: AWS::NoValue
+    options:
+      tags:
+        - cors
+      description: CORS headers
+      responses:
+        '200':
+          $ref: '#/components/responses/CorsHeaders'
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode" : 200
+            }
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''*'''
+              method.response.header.Access-Control-Allow-Methods: '''*'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            responseTemplates:
+              application/json: "{}"
   /portfolioDrafts/{portfolioDraftId}/portfolio:
     get:
       tags:
@@ -238,6 +284,29 @@ paths:
           - 
             - cognitoAuthorizer: []
           - Ref: AWS::NoValue
+    options:
+      tags:
+        - cors
+      description: CORS support
+      responses:
+        '200':
+          $ref: '#/components/responses/CorsHeaders'
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode" : 200
+            }
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''*'''
+              method.response.header.Access-Control-Allow-Methods: '''*'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            responseTemplates:
+              application/json: "{}"
   /portfolioDrafts/{portfolioDraftId}/funding:
     get:
       tags:
@@ -326,6 +395,29 @@ paths:
           - 
             - cognitoAuthorizer: []
           - Ref: AWS::NoValue
+    options:
+      tags:
+        - cors
+      description: CORS headers
+      responses:
+        '200':
+          $ref: '#/components/responses/CorsHeaders'
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode" : 200
+            }
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''*'''
+              method.response.header.Access-Control-Allow-Methods: '''*'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            responseTemplates:
+              application/json: "{}"
   /portfolioDrafts/{portfolioDraftId}/application:
     get:
       tags:
@@ -413,6 +505,29 @@ paths:
           - 
             - cognitoAuthorizer: []
           - Ref: AWS::NoValue
+    options:
+      tags:
+        - cors
+      description: CORS headers
+      responses:
+        '200':
+          $ref: '#/components/responses/CorsHeaders'
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode" : 200
+            }
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''*'''
+              method.response.header.Access-Control-Allow-Methods: '''*'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            responseTemplates:
+              application/json: "{}"
   /portfolioDrafts/{portfolioDraftId}/submit:
     post:
       tags:
@@ -458,6 +573,29 @@ paths:
           - 
             - cognitoAuthorizer: []
           - Ref: AWS::NoValue
+    options:
+      tags:
+        - cors
+      description: CORS headers
+      responses:
+        '200':
+          $ref: '#/components/responses/CorsHeaders'
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode" : 200
+            }
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''*'''
+              method.response.header.Access-Control-Allow-Methods: '''*'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            responseTemplates:
+              application/json: "{}"
   /taskOrderFiles:
     post:
       tags:
@@ -490,6 +628,29 @@ paths:
           - 
             - cognitoAuthorizer: []
           - Ref: AWS::NoValue
+    options:
+      tags:
+        - cors
+      description: CORS headers
+      responses:
+        '200':
+          $ref: '#/components/responses/CorsHeaders'
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode" : 200
+            }
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''*'''
+              method.response.header.Access-Control-Allow-Methods: '''*'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            responseTemplates:
+              application/json: "{}"
   /taskOrderFiles/{taskOrderId}:
     get:
       tags:
@@ -551,6 +712,29 @@ paths:
           - 
             - cognitoAuthorizer: []
           - Ref: AWS::NoValue
+    options:
+      tags:
+        - cors
+      description: CORS headers
+      responses:
+        '200':
+          $ref: '#/components/responses/CorsHeaders'
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode" : 200
+            }
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''*'''
+              method.response.header.Access-Control-Allow-Methods: '''*'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            responseTemplates:
+              application/json: "{}"
   /taskOrderFiles/{taskOrderId}/file:
     get:
       tags:
@@ -585,6 +769,30 @@ paths:
           - 
             - cognitoAuthorizer: []
           - Ref: AWS::NoValue
+    options:
+      tags:
+        - cors
+      description: CORS headers
+      responses:
+        '200':
+          $ref: '#/components/responses/CorsHeaders'
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode" : 200
+            }
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''*'''
+              method.response.header.Access-Control-Allow-Methods: '''*'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            responseTemplates:
+              application/json: "{}"
+
 components:
   parameters:
     offsetParam:
@@ -605,7 +813,20 @@ components:
         maximum: 50
         default: 20
       description: The numbers of items to return.
-  
+  responses:
+    CorsHeaders:
+      description: Default response for CORS method
+      headers:
+        Access-Control-Allow-Origin:
+          schema:
+            type: string
+        Access-Control-Allow-Methods:
+          schema:
+            type: string
+        Access-Control-Allow-Headers:
+          schema:
+            type: string
+      content: {}
   schemas:
     BaseObject:
       type: object
