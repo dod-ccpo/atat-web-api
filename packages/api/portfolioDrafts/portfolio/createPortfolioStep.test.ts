@@ -1,54 +1,62 @@
-import { DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent } from "aws-lambda";
-import { mockClient } from "aws-sdk-client-mock";
-import { PortfolioStep } from "../../models/PortfolioStep";
 import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
-import { createPortfolioStepCommand, handler } from "./createPortfolioStep";
+import { CloudServiceProvider } from "../../models/CloudServiceProvider";
+import { DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb";
+import { handler } from "./createPortfolioStep";
+import { mockClient } from "aws-sdk-client-mock";
 import { NO_SUCH_PORTFOLIO_DRAFT, REQUEST_BODY_INVALID } from "../../utils/errors";
+import { PortfolioStep } from "../../models/PortfolioStep";
+import { ProvisioningStatus } from "../../models/ProvisioningStatus";
+import { v4 as uuidv4 } from "uuid";
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 beforeEach(() => {
   ddbMock.reset();
 });
 
-const mockResponse = {
-  updated_at: "2021-08-13T20:55:02.595Z",
-  created_at: "2021-08-13T20:51:45.979Z",
-  portfolio_step: {
-    name: "Test portfolio",
-    description: "Team america",
-    portfolio_managers: ["joe.manager@example.com", "jane.manager@example.com", "hardwork@example.com"],
-    dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
-  },
-  status: "not_started",
-  id: "595c31d3-190c-42c3-a9b6-77325fa5ed38",
+/**
+ * PortfolioStepEx from API spec
+ * @returns a complete PortfolioStep with good data
+ */
+const mockPortfolioStep: PortfolioStep = {
+  name: "Mock Portfolio",
+  csp: CloudServiceProvider.AWS,
+  description: "Mock portfolio description",
+  dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
+  portfolio_managers: ["joe.manager@example.com", "jane.manager@example.com"],
 };
 
-describe("Successful operations test", function () {
+const now = new Date().toISOString();
+
+describe("Successful operations test", () => {
+  const mockResponse = {
+    updated_at: now,
+    created_at: now,
+    portfolio_step: mockPortfolioStep,
+    status: ProvisioningStatus.NOT_STARTED,
+    id: uuidv4(),
+    num_portfolio_managers: mockPortfolioStep.portfolio_managers.length,
+  };
   it("should return portfolio step and http status code 201", async () => {
-    const goodMockResponse = {
-      ...mockResponse,
-      num_portfolio_managers: 3,
-    };
     ddbMock.on(UpdateCommand).resolves({
-      Attributes: goodMockResponse,
+      Attributes: mockResponse,
     });
 
     const validRequest: APIGatewayProxyEvent = {
-      body: JSON.stringify(goodMockResponse.portfolio_step),
-      pathParameters: { portfolioDraftId: goodMockResponse.id },
+      body: JSON.stringify(mockResponse.portfolio_step),
+      pathParameters: { portfolioDraftId: mockResponse.id },
     } as any;
     const response = await handler(validRequest);
     const numOfPortfolioManagers: number = JSON.parse(response.body).portfolio_managers.length;
 
     expect(response).toBeInstanceOf(ApiSuccessResponse);
     expect(response.statusCode).toEqual(SuccessStatusCode.CREATED);
-    expect(response.body).toStrictEqual(JSON.stringify(goodMockResponse.portfolio_step));
-    expect(numOfPortfolioManagers).toBe(goodMockResponse.num_portfolio_managers);
+    expect(response.body).toStrictEqual(JSON.stringify(mockResponse.portfolio_step));
+    expect(numOfPortfolioManagers).toBe(mockResponse.num_portfolio_managers);
   });
 });
 
-describe("Validation of handler", function () {
+describe("Validation of handler", () => {
   it("should return NO_SUCH_PORTFOLIO_DRAFT when no portfolioId specified", async () => {
     const request = {
       body: `"{"hi":"123"}"`,
@@ -59,48 +67,26 @@ describe("Validation of handler", function () {
   it("should return REQUEST_BODY_INVALID when invalid JSON provided", async () => {
     const request: APIGatewayProxyEvent = {
       body: `"{"hi": "123",}"`, // invalid JSON comma at end
-      pathParameters: { portfolioDraftId: "aabcbce6-5a91-4a53-bae1-5cf7cae7edd7" },
+      pathParameters: { portfolioDraftId: uuidv4() },
     } as any;
 
     const response = await handler(request);
     expect(response).toEqual(REQUEST_BODY_INVALID);
   });
 });
-describe("Handler response with mock dynamodb", function () {
+describe("Handler response with mock dynamodb", () => {
+  const request: APIGatewayProxyEvent = {
+    body: JSON.stringify(mockPortfolioStep),
+    pathParameters: { portfolioDraftId: uuidv4() },
+  } as any;
   it("should return error when the portfolioDraft doesn't exist", async () => {
     ddbMock.on(UpdateCommand).rejects({ name: "ConditionalCheckFailedException" });
-    // setting up new request
-    const requestBody = {
-      name: "Test portfolio",
-      description: "Team america",
-      dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
-      portfolio_managers: ["joe.manager@example.com", "jane.manager@example.com"],
-    };
-
-    const request: APIGatewayProxyEvent = {
-      body: JSON.stringify(requestBody),
-      pathParameters: { portfolioDraftId: "aabcbce6-5a91-4a53-bae1-5cf7cae7edd7" },
-    } as any;
-
     const data = await handler(request);
     expect(data).toEqual(NO_SUCH_PORTFOLIO_DRAFT);
   });
 
   it("should throw error when unknown dynamodb internal service error occurs", async () => {
     ddbMock.on(UpdateCommand).rejects({ name: "InternalServiceError" });
-    // setting up new request
-    const requestBody = {
-      name: "Test portfolio",
-      description: "Team america",
-      dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
-      portfolio_managers: ["joe.manager@example.com", "jane.manager@example.com"],
-    };
-
-    const request: APIGatewayProxyEvent = {
-      body: JSON.stringify(requestBody),
-      pathParameters: { portfolioDraftId: "aabcbce6-5a91-4a53-bae1-5cf7cae7edd7" },
-    } as any;
-
     await expect(handler(request)).rejects.toThrowError();
   });
 });
