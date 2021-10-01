@@ -49,7 +49,7 @@
     "@aws-cdk/aws-ssm": "1.125.0",
     "@aws-cdk/core": "1.125.0",
     "@aws-cdk/custom-resources": "1.125.0",
-    "cdk-nag": "0.0.114",
+    "cdk-nag": "0.0.115",
     "eslint": "^7.31.0",
     "source-map-support": "^0.5.16",
     "uuid": "^8.3.2"
