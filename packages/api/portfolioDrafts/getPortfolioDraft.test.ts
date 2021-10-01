@@ -4,7 +4,6 @@ import { mockClient } from "aws-sdk-client-mock";
 import { handler, NO_PORTFOLIO_PATH_PARAM, NO_SUCH_PORTFOLIO } from "./getPortfolioDraft";
 import { DATABASE_ERROR } from "../utils/errors";
 import { SuccessStatusCode } from "../utils/response";
-import { PortfolioDraftSummary } from "../models/PortfolioDraftSummary";
 import { ProvisioningStatus } from "../models/ProvisioningStatus";
 import { CloudServiceProvider } from "../models/CloudServiceProvider";
 import { ApplicationStep } from "../models/ApplicationStep";
@@ -165,6 +164,7 @@ function mockPortfolioDraftSummaryBadData(): PortfolioDraft {
 function mockPortfolioStep(): PortfolioStep {
   return {
     name: "Coolest Portfolio",
+    csp: CloudServiceProvider.AWS,
     description: "Description of something cool",
     portfolio_managers: ["coolIdea@example.com", "coolPerson@example.com", "support@example.com", "admin@example.com"],
     dod_components: ["space_force"],
@@ -273,7 +273,6 @@ function mockFundingStep(): FundingStep {
             obligated_funds: 1,
           },
         ],
-        csp: CloudServiceProvider.AWS,
         task_order_number: "1234567890",
       },
       {
@@ -291,7 +290,6 @@ function mockFundingStep(): FundingStep {
             obligated_funds: 100,
           },
         ],
-        csp: CloudServiceProvider.AZURE,
         task_order_number: "0987654321",
       },
     ],

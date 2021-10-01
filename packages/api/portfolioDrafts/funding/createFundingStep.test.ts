@@ -7,7 +7,6 @@ import {
   ValidationErrorResponse,
 } from "../../utils/response";
 import { Clin } from "../../models/Clin";
-import { CloudServiceProvider } from "../../models/CloudServiceProvider";
 import { createValidationErrorResponse, handler, validateClin, validateFundingStepClins } from "./createFundingStep";
 import { DynamoDBDocumentClient, UpdateCommand, UpdateCommandOutput } from "@aws-sdk/lib-dynamodb";
 import { FileMetadata, FileScanStatus } from "../../models/FileMetadata";
@@ -468,7 +467,6 @@ function mockFundingStepGoodData(): FundingStep {
       {
         task_order_number: "12345678910",
         task_order_file: mockTaskOrderFile,
-        csp: CloudServiceProvider.AWS,
         clins: [mockClin()],
       },
     ],
@@ -492,7 +490,6 @@ function mockFundingStepBadData(): FundingStep {
       {
         task_order_number: "12345678910",
         task_order_file: mockTaskOrderFile,
-        csp: CloudServiceProvider.AWS,
         clins: [
           mockClinInvalidClinNumberTooShort(),
           mockClinInvalidClinNumberTooLong(),

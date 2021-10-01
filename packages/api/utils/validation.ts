@@ -1,12 +1,12 @@
-import { validate as uuidValidate, version as uuidVersion } from "uuid";
 import { Application } from "../models/Application";
 import { ApplicationStep } from "../models/ApplicationStep";
 import { Clin } from "../models/Clin";
+import { containsExactlyFields } from "../models/TypeFields";
 import { Environment } from "../models/Environment";
 import { FundingStep } from "../models/FundingStep";
 import { PortfolioStep } from "../models/PortfolioStep";
 import { TaskOrder, taskOrderFields } from "../models/TaskOrder";
-import { containsExactlyFields } from "../models/TypeFields";
+import { validate as uuidValidate, version as uuidVersion } from "uuid";
 
 /**
  * Check whether a given string is valid JSON.
@@ -59,7 +59,7 @@ export function isPortfolioStep(object: unknown): object is PortfolioStep {
   if (!isValidObject(object)) {
     return false;
   }
-  return ["name", "description", "dod_components", "portfolio_managers"].every((item) => item in object);
+  return ["name", "csp", "description", "dod_components", "portfolio_managers"].every((item) => item in object);
 }
 
 /**
