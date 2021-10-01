@@ -8,7 +8,7 @@ import { ApiDynamoDBFunction } from "./constructs/api-dynamodb-function";
 import { ApiSQSFunction } from "./constructs/api-sqs-function";
 import { ApiS3Function } from "./constructs/api-s3-function";
 import { CognitoAuthentication } from "./constructs/authentication";
-import { SecureBucket, SecureTable, SecureRestApi } from "./constructs/compliant-resources";
+import { SecureBucket, SecureTable, SecureRestApi, SecureQueue } from "./constructs/compliant-resources";
 import { TaskOrderLifecycle } from "./constructs/task-order-lifecycle";
 import { HttpMethod } from "./http";
 import { packageRoot } from "./util";
@@ -50,9 +50,7 @@ export class AtatWebApiStack extends cdk.Stack {
       value: table.tableName,
     });
 
-    const submitQueue = new sqs.Queue(this, "SubmitQueue", {
-      queueName: "SubmitQueue",
-    });
+    const { queue } = new SecureQueue(this, "SubmitQueue", { queueProps: { queueName: "SubmitQueue" } });
 
     const forceAuth = new cdk.CfnCondition(this, "ForceAuthorization", {
       expression: cdk.Fn.conditionEquals(props?.requireAuthorization ?? true, true),
@@ -120,7 +118,7 @@ export class AtatWebApiStack extends cdk.Stack {
     });
 
     const submitPortfolioDraft = new ApiSQSFunction(this, "SubmitPortfolioDraft", {
-      queue: submitQueue,
+      queue: queue,
       table: table,
       method: HttpMethod.POST,
       handlerPath: packageRoot() + "/api/portfolioDrafts/submit/submitPortfolioDraft.ts",
@@ -128,7 +126,7 @@ export class AtatWebApiStack extends cdk.Stack {
 
     const subscribePortfolioDraftRequest = new ApiSQSFunction(this, "subscribePortfolioDraftRequest", {
       table: table,
-      queue: submitQueue,
+      queue: queue,
       method: HttpMethod.POST,
       handlerPath: packageRoot() + "/api/portfolioDrafts/submit/subscribe.ts",
       createEventSource: true,

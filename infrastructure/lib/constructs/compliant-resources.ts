@@ -2,6 +2,7 @@ import * as s3 from "@aws-cdk/aws-s3";
 import * as dynamodb from "@aws-cdk/aws-dynamodb";
 import * as apigw from "@aws-cdk/aws-apigateway";
 import * as cdk from "@aws-cdk/core";
+import * as sqs from "@aws-cdk/aws-sqs";
 
 export interface SecureBucketProps {
   logTargetBucket: s3.IBucket | "self";
@@ -113,5 +114,31 @@ export class SecureRestApi extends cdk.Construct {
     }
 
     this.restApi = restApi;
+  }
+}
+export interface SecureQueueProps {
+  /**
+   * The properties to configure the Queue
+   */
+  queueProps: sqs.QueueProps;
+}
+/**
+ * Creates a secure(?) SQS Queue with properties enabled for compliance
+ *  - TODO
+ */
+export class SecureQueue extends cdk.Construct {
+  /**
+   * The created SQS Queue
+   */
+  public readonly queue: sqs.IQueue;
+
+  constructor(scope: cdk.Construct, id: string, props: SecureQueueProps) {
+    super(scope, id);
+
+    const queue = new sqs.Queue(this, id, {
+      ...props.queueProps,
+    });
+
+    this.queue = queue;
   }
 }
