@@ -11,6 +11,5 @@ export interface TaskOrder {
 export const taskOrderFields: ExhaustiveAttributeMap<TaskOrder> = {
   task_order_number: null,
   task_order_file: null,
-  csp: null,
   clins: null,
 };
