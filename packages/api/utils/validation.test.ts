@@ -1,3 +1,4 @@
+import { CloudServiceProvider } from "../models/CloudServiceProvider";
 import {
   mockApplicationStep,
   mockApplicationStepsMissingFields,
@@ -75,6 +76,7 @@ describe("Validation tests for createPortfolioStep function", function () {
   it("should map body to portfolioStep object", async () => {
     const requestBody = {
       name: "Zach's portfolio name",
+      csp: CloudServiceProvider.AWS,
       description: "team america",
       dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
       portfolio_managers: ["joe.manager@example.com", "jane.manager@example.com"],
@@ -84,6 +86,8 @@ describe("Validation tests for createPortfolioStep function", function () {
   it("should fail to map body to portfolioStep object due to missing attribute", async () => {
     const requestBodyMissingDescription = {
       name: "Zach's portfolio name",
+      csp: CloudServiceProvider.AWS,
+      // description: "team america",
       dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
       portfolio_managers: ["joe.manager@example.com", "jane.manager@example.com"],
     };
@@ -119,25 +123,16 @@ describe("Testing validation of fundingStep objects", () => {
     {
       // task_order_number: "1234567890",
       task_order_file: toFile,
-      csp: "aws",
       clins: [fakeClinData],
     },
     {
       task_order_number: "1234567890",
       // task_order_file: toFile,
-      csp: "aws",
       clins: [fakeClinData],
     },
     {
       task_order_number: "1234567890",
       task_order_file: toFile,
-      // csp: "aws",
-      clins: [fakeClinData],
-    },
-    {
-      task_order_number: "1234567890",
-      task_order_file: toFile,
-      csp: "aws",
       // clins: [fakeClinData],
     },
   ];

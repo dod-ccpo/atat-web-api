@@ -44,6 +44,12 @@ paths:
         uri:
           Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetPortfolioDraftsFunction.Arn}/invocations"
         type: "aws_proxy"
+      security:
+        Fn::If:
+          - IsAuthorizationRequired
+          - 
+            - cognitoAuthorizer: []
+          - Ref: AWS::NoValue
     post:
       tags:
         - portfolioDraft
@@ -75,6 +81,12 @@ paths:
         uri:
           Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CreatePortfolioDraftFunction.Arn}/invocations"
         type: "aws_proxy"
+      security:
+        Fn::If:
+          - IsAuthorizationRequired
+          - 
+            - cognitoAuthorizer: []
+          - Ref: AWS::NoValue
   /portfolioDrafts/{portfolioDraftId}:
     get:
       tags:
@@ -105,6 +117,12 @@ paths:
         uri:
           Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetPortfolioDraftFunction.Arn}/invocations"
         type: "aws_proxy"
+      security:
+        Fn::If:
+          - IsAuthorizationRequired
+          - 
+            - cognitoAuthorizer: []
+          - Ref: AWS::NoValue
     delete:
       tags:
         - portfolioDraft
@@ -128,6 +146,12 @@ paths:
         uri:
           Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DeletePortfolioDraftFunction.Arn}/invocations"
         type: "aws_proxy"
+      security:
+        Fn::If:
+          - IsAuthorizationRequired
+          - 
+            - cognitoAuthorizer: []
+          - Ref: AWS::NoValue
   /portfolioDrafts/{portfolioDraftId}/portfolio:
     get:
       tags:
@@ -157,10 +181,16 @@ paths:
           description: Portfolio Step not found for this Portfolio Draft
       x-amazon-apigateway-request-validator: "request-params-validator"
       x-amazon-apigateway-integration:
-          httpMethod: "POST"
-          uri:
-            Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetPortfolioStepFunction.Arn}/invocations"
-          type: "aws_proxy"
+        httpMethod: "POST"
+        uri:
+          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetPortfolioStepFunction.Arn}/invocations"
+        type: "aws_proxy"
+      security:
+        Fn::If:
+          - IsAuthorizationRequired
+          - 
+            - cognitoAuthorizer: []
+          - Ref: AWS::NoValue
     post:
       tags:
         - portfolioDraft
@@ -202,6 +232,12 @@ paths:
         uri:
           Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CreatePortfolioStepFunction.Arn}/invocations"
         type: "aws_proxy"
+      security:
+        Fn::If:
+          - IsAuthorizationRequired
+          - 
+            - cognitoAuthorizer: []
+          - Ref: AWS::NoValue
   /portfolioDrafts/{portfolioDraftId}/funding:
     get:
       tags:
@@ -235,6 +271,12 @@ paths:
         uri:
           Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetFundingStepFunction.Arn}/invocations"
         type: "aws_proxy"
+      security:
+        Fn::If:
+          - IsAuthorizationRequired
+          - 
+            - cognitoAuthorizer: []
+          - Ref: AWS::NoValue
     post:
       tags:
         - portfolioDraft
@@ -278,6 +320,12 @@ paths:
         uri:
           Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CreateFundingStepFunction.Arn}/invocations"
         type: "aws_proxy"
+      security:
+        Fn::If:
+          - IsAuthorizationRequired
+          - 
+            - cognitoAuthorizer: []
+          - Ref: AWS::NoValue
   /portfolioDrafts/{portfolioDraftId}/application:
     get:
       tags:
@@ -307,10 +355,16 @@ paths:
         '400':
           description: The given Portfolio Draft does not exist
       x-amazon-apigateway-integration:
-          httpMethod: "POST"
-          uri:
-            Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetApplicationStepFunction.Arn}/invocations"
-          type: "aws_proxy"
+        httpMethod: "POST"
+        uri:
+          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetApplicationStepFunction.Arn}/invocations"
+        type: "aws_proxy"
+      security:
+        Fn::If:
+          - IsAuthorizationRequired
+          - 
+            - cognitoAuthorizer: []
+          - Ref: AWS::NoValue
     post:
       tags:
         - portfolioDraft
@@ -349,10 +403,16 @@ paths:
             schema:
               $ref: '#/components/schemas/ApplicationStep'
       x-amazon-apigateway-integration:
-          httpMethod: "POST"
-          uri: 
-            Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CreateApplicationStepFunction.Arn}/invocations"
-          type: "aws_proxy"
+        httpMethod: "POST"
+        uri: 
+          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CreateApplicationStepFunction.Arn}/invocations"
+        type: "aws_proxy"
+      security:
+        Fn::If:
+          - IsAuthorizationRequired
+          - 
+            - cognitoAuthorizer: []
+          - Ref: AWS::NoValue
   /portfolioDrafts/{portfolioDraftId}/submit:
     post:
       tags:
@@ -392,6 +452,12 @@ paths:
         uri: 
           Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SubmitPortfolioDraftFunction.Arn}/invocations"
         type: "aws_proxy"
+      security:
+        Fn::If:
+          - IsAuthorizationRequired
+          - 
+            - cognitoAuthorizer: []
+          - Ref: AWS::NoValue
   /taskOrderFiles:
     post:
       tags:
@@ -418,6 +484,12 @@ paths:
         uri:
           Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${UploadTaskOrderFunction.Arn}/invocations"
         type: "aws_proxy"
+      security:
+        Fn::If:
+          - IsAuthorizationRequired
+          - 
+            - cognitoAuthorizer: []
+          - Ref: AWS::NoValue
   /taskOrderFiles/{taskOrderId}:
     get:
       tags:
@@ -445,6 +517,12 @@ paths:
         uri:
           Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NotImplementedFunction.Arn}/invocations"
         type: "aws_proxy"
+      security:
+        Fn::If:
+          - IsAuthorizationRequired
+          - 
+            - cognitoAuthorizer: []
+          - Ref: AWS::NoValue
     delete:
       tags:
         - taskOrder
@@ -467,6 +545,12 @@ paths:
         uri:
           Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DeleteTaskOrderFunction.Arn}/invocations"
         type: "aws_proxy"
+      security:
+        Fn::If:
+          - IsAuthorizationRequired
+          - 
+            - cognitoAuthorizer: []
+          - Ref: AWS::NoValue
   /taskOrderFiles/{taskOrderId}/file:
     get:
       tags:
@@ -495,6 +579,12 @@ paths:
         uri: 
           Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NotImplementedFunction.Arn}/invocations"
         type: "aws_proxy"
+      security:
+        Fn::If:
+          - IsAuthorizationRequired
+          - 
+            - cognitoAuthorizer: []
+          - Ref: AWS::NoValue
 components:
   parameters:
     offsetParam:
@@ -614,6 +704,11 @@ components:
       properties:
         name:
           type: string
+        csp:
+          type: string
+          enum:
+            - "aws"
+            - "azure"
         description:
           type: string
         dod_components:
@@ -651,11 +746,6 @@ components:
                 allOf:
                   - $ref: '#/components/schemas/FileMetadataSummary'
                 description: Metadata associated with file which was previously uploaded by POST /taskOrderFiles
-              csp:
-                type: string
-                enum:
-                  - "aws"
-                  - "azure"
               clins:
                 type: array
                 items:
@@ -750,6 +840,8 @@ components:
     PortfolioStepEx:
       value:
         name: "Mock Portfolio"
+        csp:
+          - "aws"
         description: "Mock portfolio description"
         dod_components: 
           - "air_force"
@@ -771,8 +863,6 @@ components:
               size: 694331
               name: "TO_12345678910.pdf"
               status: "accepted"
-            csp:
-              - "aws"
             clins:
               - clin_number: "0001"
                 idiq_clin: "1234"
@@ -788,8 +878,6 @@ components:
               size: 2945459
               name: "TaskOrder_98765432101.pdf"
               status: "pending"
-            csp:
-              - "azure"
             clins:
               - clin_number: "0002"
                 idiq_clin: "1234"
@@ -834,6 +922,22 @@ components:
                     last_name: "Fett"
                     email: "original@mandalorian.com"
                     access: "read_only"
+  securitySchemes:
+    Fn::If:
+      - IsAuthorizationRequired
+      - cognitoAuthorizer:
+          description: >-
+            Authorizes API access by token. Token obtained from custom IdP and provided in subsequent API requests.
+          type: apiKey
+          name: Authorization
+          in: header
+          x-amazon-apigateway-authtype: cognito_user_pools
+          x-amazon-apigateway-authorizer:
+            type: cognito_user_pools
+            providerARNs:
+              - Fn::GetAtt: AtatUserPool.Arn
+      - Ref: AWS::NoValue
+
 x-amazon-apigateway-request-validators:
   full-request-validator:
     validateRequestParameters: true

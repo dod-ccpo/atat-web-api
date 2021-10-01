@@ -1,8 +1,6 @@
-import { ApplicationStep } from "./ApplicationStep";
 import { BaseDocument } from "./BaseDocument";
-import { FundingStep } from "./FundingStep";
-import { PortfolioStep } from "./PortfolioStep";
 import { ProvisioningStatus } from "./ProvisioningStatus";
+import { ExhaustiveAttributeMap } from "./TypeFields";
 
 export interface PortfolioDraftSummary extends BaseDocument {
   status: ProvisioningStatus;
@@ -12,3 +10,15 @@ export interface PortfolioDraftSummary extends BaseDocument {
   num_applications: number;
   num_environments: number;
 }
+
+export const portfolioDraftFields: ExhaustiveAttributeMap<PortfolioDraftSummary> = {
+  id: null,
+  created_at: null,
+  updated_at: null,
+  status: null,
+  name: null,
+  num_portfolio_managers: null,
+  num_task_orders: null,
+  num_applications: null,
+  num_environments: null,
+};

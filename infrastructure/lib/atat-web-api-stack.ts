@@ -1,26 +1,43 @@
 import * as apigw from "@aws-cdk/aws-apigateway";
 import * as dynamodb from "@aws-cdk/aws-dynamodb";
 import * as s3asset from "@aws-cdk/aws-s3-assets";
+import * as secretsmanager from "@aws-cdk/aws-secretsmanager";
+import * as ssm from "@aws-cdk/aws-ssm";
 import * as cdk from "@aws-cdk/core";
 import { ApiDynamoDBFunction } from "./constructs/api-dynamodb-function";
 import { ApiSQSFunction } from "./constructs/api-sqs-function";
 import { ApiS3Function } from "./constructs/api-s3-function";
-import { SecureBucket, SecureTable } from "./constructs/compliant-resources";
+import { CognitoAuthentication } from "./constructs/authentication";
+import { SecureBucket, SecureTable, SecureRestApi } from "./constructs/compliant-resources";
 import { TaskOrderLifecycle } from "./constructs/task-order-lifecycle";
 import { HttpMethod } from "./http";
 import { packageRoot } from "./util";
 import * as sqs from "@aws-cdk/aws-sqs";
 import { SqsEventSource } from "@aws-cdk/aws-lambda-event-sources";
 
+interface AtatIdpProps {
+  secretName: string;
+  providerName: string;
+  adminsGroupName?: string;
+  usersGroupName?: string;
+}
+
 export interface AtatWebApiStackProps extends cdk.StackProps {
+  environmentId: string;
+  idpProps: AtatIdpProps;
   removalPolicy?: cdk.RemovalPolicy;
+  requireAuthorization?: boolean;
 }
 
 export class AtatWebApiStack extends cdk.Stack {
-  constructor(scope: cdk.Construct, id: string, props?: AtatWebApiStackProps) {
+  private readonly environmentId: string;
+  constructor(scope: cdk.Construct, id: string, props: AtatWebApiStackProps) {
     super(scope, id, props);
 
     this.templateOptions.description = "Resources to support the ATAT application API";
+
+    this.environmentId = props.environmentId;
+    this.setupCognito(props.idpProps, props.removalPolicy);
 
     // Create a shared DynamoDB table that will be used by all the functions in the project.
     const { table } = new SecureTable(this, "AtatTable", {
@@ -38,6 +55,10 @@ export class AtatWebApiStack extends cdk.Stack {
       queueName: "SubmitQueue.fifo",
       fifo: true,
     });
+    const forceAuth = new cdk.CfnCondition(this, "ForceAuthorization", {
+      expression: cdk.Fn.conditionEquals(props?.requireAuthorization ?? true, true),
+    });
+    forceAuth.overrideLogicalId("IsAuthorizationRequired");
 
     const createPortfolioStep = new ApiDynamoDBFunction(this, "CreatePortfolioStep", {
       table: table,
@@ -151,16 +172,8 @@ export class AtatWebApiStack extends cdk.Stack {
     // And with the data now loaded from the template, we can use ApiDefinition.fromInline to parse it as real
     // OpenAPI spec (because it was!) and now we've got all our special AWS values and variables interpolated.
     // This will get used as the `Body:` parameter in the underlying CloudFormation resource.
-    const restApi = new apigw.SpecRestApi(this, "AtatSpecTest", {
+    const restApi = new SecureRestApi(this, "AtatSpecTest", {
       apiDefinition: apigw.ApiDefinition.fromInline(apiSpecAsTemplateInclude),
-      // This is slightly repetitive between endpointTypes and parameters.endpointConfigurationTypes; however, due
-      // to underlying CloudFormation behaviors, endpointTypes is not evaluated entirely correctly when a
-      // parameter specification is given. Specifying both ensures that we truly have a regional endpoint rather than
-      // edge.
-      endpointTypes: [apigw.EndpointType.REGIONAL],
-      parameters: {
-        endpointConfigurationTypes: apigw.EndpointType.REGIONAL,
-      },
     });
     this.addTaskOrderRoutes(props);
   }
@@ -199,7 +212,39 @@ export class AtatWebApiStack extends cdk.Stack {
       handlerPath: packageRoot() + "/api/taskOrderFiles/deleteTaskOrder.ts",
     });
 
-    // TODO: getTaskOrder (for metadata)
+    // TODO: getTaskOrderMetadata
     // TODO: downloadTaskOrder
+  }
+
+  private setupCognito(props: AtatIdpProps, removalPolicy?: cdk.RemovalPolicy) {
+    const secret = secretsmanager.Secret.fromSecretNameV2(this, "OidcSecret", props.secretName);
+    const cognitoAuthentication = new CognitoAuthentication(this, "Authentication", {
+      groupsAttributeName: "groups",
+      adminsGroupName: props.adminsGroupName ?? "atat-admins",
+      usersGroupName: props.usersGroupName ?? "atat-users",
+      cognitoDomain: "atat-api-" + this.environmentId,
+      userPoolProps: {
+        removalPolicy: removalPolicy,
+      },
+      oidcIdps: [
+        {
+          providerName: props.providerName,
+          clientId: secret.secretValueFromJson("clientId"),
+          clientSecret: secret.secretValueFromJson("clientSecret"),
+          oidcIssuerUrl: secret.secretValueFromJson("oidcIssuerUrl"),
+          attributesRequestMethod: HttpMethod.GET,
+        },
+      ],
+    });
+    const poolIdParam = new ssm.StringParameter(this, "UserPoolIdParameter", {
+      description: "Cognito User Pool ID",
+      stringValue: cognitoAuthentication.userPool.userPoolId,
+      parameterName: `/atat/${this.environmentId}/cognito/userpool/id`,
+    });
+    const idpNamesParam = new ssm.StringListParameter(this, "CognitoIdPNamesParameter", {
+      description: "Names of configured identity providers",
+      parameterName: `/atat/${this.environmentId}/cognito/idps`,
+      stringListValue: cognitoAuthentication.idps.map((idp) => idp.providerName),
+    });
   }
 }

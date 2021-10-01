@@ -1,5 +1,6 @@
 import * as s3 from "@aws-cdk/aws-s3";
 import * as dynamodb from "@aws-cdk/aws-dynamodb";
+import * as apigw from "@aws-cdk/aws-apigateway";
 import * as cdk from "@aws-cdk/core";
 
 export interface SecureBucketProps {
@@ -62,5 +63,55 @@ export class SecureTable extends cdk.Construct {
     });
 
     this.table = table;
+  }
+}
+
+export interface SecureRestApiProps extends apigw.RestApiBaseProps {
+  /**
+   * The properties to configure the API Gateway
+   */
+  apiDefinition?: apigw.ApiDefinition;
+}
+
+/**
+ * Creates a secure API Gateway with properties enabled for compliance
+ *  - cache enabled and encrypted by default
+ *  - execution logs enabled by default
+ */
+export class SecureRestApi extends cdk.Construct {
+  readonly restApi: apigw.RestApiBase;
+
+  constructor(scope: cdk.Construct, id: string, props: SecureRestApiProps) {
+    super(scope, id);
+    const baseProps = {
+      // This is slightly repetitive between endpointTypes and parameters.endpointConfigurationTypes; however, due
+      // to underlying CloudFormation behaviors, endpointTypes is not evaluated entirely correctly when a
+      // parameter specification is given. Specifying both ensures that we truly have a regional endpoint rather than
+      // edge.
+      endpointTypes: [apigw.EndpointType.REGIONAL],
+      parameters: {
+        endpointConfigurationTypes: apigw.EndpointType.REGIONAL,
+      },
+      deployOptions: {
+        // passed in API Gateway configurations
+        ...props?.deployOptions,
+        // secure defaults that cannot be overridden
+        cachingEnabled: true,
+        cacheDataEncrypted: true,
+        cacheTtl: cdk.Duration.minutes(0),
+        loggingLevel: apigw.MethodLoggingLevel.INFO, // execution logging
+      },
+    };
+
+    // TODO: refactor to use a function (e.g. determineApiClass) that returns constructor
+    // reference allowing for further prop validation (and mutual exclusion of props)
+    let restApi: apigw.RestApiBase;
+    if (props.apiDefinition) {
+      restApi = new apigw.SpecRestApi(this, id, { apiDefinition: props.apiDefinition, ...baseProps });
+    } else {
+      restApi = new apigw.RestApi(this, id, baseProps);
+    }
+
+    this.restApi = restApi;
   }
 }

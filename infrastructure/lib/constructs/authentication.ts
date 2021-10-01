@@ -122,6 +122,9 @@ function oidcAttributeMapping(props: CognitoAuthenticationProps): { [key: string
   return {
     username: "sub",
     [`custom:${props.groupsAttributeName}`]: "groups",
+    family_name: "family_name",
+    given_name: "given_name",
+    email: "email",
   };
 }
 
@@ -178,6 +181,7 @@ export class CognitoAuthentication extends cdk.Construct {
       lambdaTriggers: { preTokenGeneration: this.preTokenGenerationFunction },
     });
     const cfnPool = this.userPool.node.defaultChild as CfnUserPool;
+    cfnPool.overrideLogicalId("AtatUserPool");
     cfnPool.schema = [
       {
         name: props.groupsAttributeName ?? "groups",

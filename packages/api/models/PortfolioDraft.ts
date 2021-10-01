@@ -1,7 +1,7 @@
+import { ApplicationStep } from "./ApplicationStep";
+import { FundingStep } from "./FundingStep";
 import { PortfolioDraftSummary } from "./PortfolioDraftSummary";
 import { PortfolioStep } from "./PortfolioStep";
-import { FundingStep } from "./FundingStep";
-import { ApplicationStep } from "./ApplicationStep";
 
 export const PORTFOLIO_STEP = "portfolio_step";
 export const FUNDING_STEP = "funding_step";
