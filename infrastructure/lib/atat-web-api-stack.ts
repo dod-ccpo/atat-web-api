@@ -182,7 +182,7 @@ export class AtatWebApiStack extends cdk.Stack {
       handlerPath: packageRoot() + "/api/taskOrderFiles/deleteTaskOrder.ts",
     });
 
-    // TODO: getTaskOrder (for metadata)
+    // TODO: getTaskOrderMetadata
     // TODO: downloadTaskOrder
   }
 
