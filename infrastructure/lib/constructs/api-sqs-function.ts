@@ -28,10 +28,6 @@ export class ApiSQSFunction extends ApiDynamoDBFunction {
    * The SQS queue where data is sent
    */
   public readonly queue: sqs.IQueue;
-  /**
-   * Optional param to create an SQS event source to recieve queue data
-   */
-  public readonly createEventSource?: boolean;
 
   constructor(scope: cdk.Construct, id: string, props: ApiSQSFunctionProps) {
     super(scope, id, props);
