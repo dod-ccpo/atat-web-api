@@ -13,7 +13,7 @@ export interface ApiSQSFunctionProps extends ApiDynamoDBFunctionProps {
   /**
    * Optional param to create an SQS event source to recieve queue data
    */
-  readonly createEventSource?: any;
+  readonly createEventSource?: boolean;
 }
 
 /**
