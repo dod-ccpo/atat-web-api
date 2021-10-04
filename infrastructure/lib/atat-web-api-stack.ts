@@ -5,9 +5,10 @@ import * as secretsmanager from "@aws-cdk/aws-secretsmanager";
 import * as ssm from "@aws-cdk/aws-ssm";
 import * as cdk from "@aws-cdk/core";
 import { ApiDynamoDBFunction } from "./constructs/api-dynamodb-function";
+import { ApiSQSFunction } from "./constructs/api-sqs-function";
 import { ApiS3Function } from "./constructs/api-s3-function";
 import { CognitoAuthentication } from "./constructs/authentication";
-import { SecureBucket, SecureTable, SecureRestApi } from "./constructs/compliant-resources";
+import { SecureBucket, SecureTable, SecureRestApi, SecureQueue } from "./constructs/compliant-resources";
 import { TaskOrderLifecycle } from "./constructs/task-order-lifecycle";
 import { HttpMethod } from "./http";
 import { packageRoot } from "./util";
@@ -46,6 +47,12 @@ export class AtatWebApiStack extends cdk.Stack {
     });
     const tableOutput = new cdk.CfnOutput(this, "TableName", {
       value: table.tableName,
+    });
+
+    // Create a queue for PortfolioDraft submission
+    const { queue } = new SecureQueue(this, "SubmitQueue", { queueProps: { queueName: "SubmitQueue" } });
+    const queueOutput = new cdk.CfnOutput(this, "QueueName", {
+      value: queue.queueName,
     });
 
     const forceAuth = new cdk.CfnCondition(this, "ForceAuthorization", {
@@ -113,10 +120,19 @@ export class AtatWebApiStack extends cdk.Stack {
       handlerPath: packageRoot() + "/api/portfolioDrafts/getPortfolioDraft.ts",
     });
 
-    const submitPortfolioDraft = new ApiDynamoDBFunction(this, "SubmitPortfolioDraft", {
+    const submitPortfolioDraft = new ApiSQSFunction(this, "SubmitPortfolioDraft", {
+      queue: queue,
       table: table,
       method: HttpMethod.POST,
       handlerPath: packageRoot() + "/api/portfolioDrafts/submit/submitPortfolioDraft.ts",
+    });
+
+    const subscribePortfolioDraftRequest = new ApiSQSFunction(this, "subscribePortfolioDraftRequest", {
+      table: table,
+      queue: queue,
+      method: HttpMethod.POST,
+      handlerPath: packageRoot() + "/api/portfolioDrafts/submit/subscribe.ts",
+      createEventSource: true,
     });
 
     // All TODO functions will be pointed at this lambda function (in the atat_provisioning_wizard_api.yaml, search NotImplementedFunction)
