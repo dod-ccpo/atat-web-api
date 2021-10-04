@@ -28,6 +28,12 @@
     "typeRoots": [
       "./node_modules/@types"
     ],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "src/*"
+      ]
+    },
     "outDir": "build"
   },
   "exclude": [
