@@ -24,6 +24,8 @@ export class AtatNetStack extends cdk.Stack {
         },
       ],
     });
+    // Default is capturing all logs and pushing to CloudWatchLogs
+    vpc.addFlowLog("AllFlowLogs");
     this.vpc = vpc;
     const vpcOutput = new cdk.CfnOutput(this, "VpcId", {
       value: this.vpc.vpcId,
