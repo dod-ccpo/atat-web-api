@@ -5,6 +5,7 @@ import { ExhaustiveAttributeMap } from "./TypeFields";
 export interface PortfolioDraftSummary extends BaseDocument {
   status: ProvisioningStatus;
   name: string;
+  description: string;
   num_portfolio_managers: number;
   num_task_orders: number;
   num_applications: number;
@@ -17,6 +18,7 @@ export const portfolioDraftFields: ExhaustiveAttributeMap<PortfolioDraftSummary>
   updated_at: null,
   status: null,
   name: null,
+  description: null,
   num_portfolio_managers: null,
   num_task_orders: null,
   num_applications: null,

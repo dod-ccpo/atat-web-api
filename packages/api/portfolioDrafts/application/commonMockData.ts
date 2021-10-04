@@ -193,6 +193,7 @@ export function mockBasePortfolioSummary(): PortfolioDraftSummary {
     updated_at: now,
     created_at: now,
     name: "",
+    description: "",
     num_portfolio_managers: 0,
     num_task_orders: 0,
     num_applications: 0,
