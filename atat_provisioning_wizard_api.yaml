@@ -1042,16 +1042,16 @@ components:
   examples:
     PortfolioDraftSummaryEx:
       value:
-        id: "dc2bbee6-8cdb-477e-a363-f9f1593a0a9b"
-        created_at: "2021-08-03T16:19:51.686Z"
-        updated_at: "2021-08-03T16:19:51.686Z"
-        status: "not_started"
-        name: "Mock Portfolio"
-        description: "Mock portfolio description"
-        num_portfolio_managers: 2
-        num_task_orders: 2
-        num_applications: 2
-        num_environments: 2
+        - id: "dc2bbee6-8cdb-477e-a363-f9f1593a0a9b"
+          created_at: "2021-08-03T16:19:51.686Z"
+          updated_at: "2021-08-03T16:19:51.686Z"
+          status: "not_started"
+          name: "Mock Portfolio"
+          description: "Mock portfolio description"
+          num_portfolio_managers: 2
+          num_task_orders: 2
+          num_applications: 2
+          num_environments: 2
     PortfolioDraftEx:
       value:
         id: "dc2bbee6-8cdb-477e-a363-f9f1593a0a9b"
