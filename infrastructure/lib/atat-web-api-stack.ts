@@ -5,10 +5,10 @@ import * as secretsmanager from "@aws-cdk/aws-secretsmanager";
 import * as ssm from "@aws-cdk/aws-ssm";
 import * as cdk from "@aws-cdk/core";
 import { ApiDynamoDBFunction } from "./constructs/api-dynamodb-function";
-import { ApiSQSFunction } from "./constructs/api-sqs-function";
 import { ApiS3Function } from "./constructs/api-s3-function";
+import { ApiSQSFunction } from "./constructs/api-sqs-function";
 import { CognitoAuthentication } from "./constructs/authentication";
-import { SecureBucket, SecureTable, SecureRestApi, SecureQueue } from "./constructs/compliant-resources";
+import { SecureBucket, SecureQueue, SecureRestApi, SecureTable } from "./constructs/compliant-resources";
 import { TaskOrderLifecycle } from "./constructs/task-order-lifecycle";
 import { HttpMethod } from "./http";
 import { packageRoot } from "./util";
@@ -50,7 +50,7 @@ export class AtatWebApiStack extends cdk.Stack {
     });
 
     // Create a queue for PortfolioDraft submission
-    const { queue } = new SecureQueue(this, "SubmitQueue", { queueProps: { queueName: "SubmitQueue" } });
+    const { queue } = new SecureQueue(this, "SubmitQueue", { queueProps: {} });
     const queueOutput = new cdk.CfnOutput(this, "QueueName", {
       value: queue.queueName,
     });
