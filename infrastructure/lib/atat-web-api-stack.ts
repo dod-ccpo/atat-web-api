@@ -49,7 +49,11 @@ export class AtatWebApiStack extends cdk.Stack {
       value: table.tableName,
     });
 
+    // Create a queue for PortfolioDraft submission
     const { queue } = new SecureQueue(this, "SubmitQueue", { queueProps: { queueName: "SubmitQueue" } });
+    const queueOutput = new cdk.CfnOutput(this, "QueueName", {
+      value: queue.queueName,
+    });
 
     const forceAuth = new cdk.CfnCondition(this, "ForceAuthorization", {
       expression: cdk.Fn.conditionEquals(props?.requireAuthorization ?? true, true),
