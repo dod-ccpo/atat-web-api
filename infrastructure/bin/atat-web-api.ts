@@ -31,6 +31,10 @@ if (app.node.tryGetContext("TicketId")) {
 const environmentName = normalizeEnvironmentName(environmentParam);
 const environmentId = lowerCaseEnvironmentId(environmentParam);
 
+const netStack = new AtatNetStack(app, environmentName + "AtatNetStack", {
+  vpcCidr: ec2.Vpc.DEFAULT_CIDR_RANGE,
+});
+
 const stacks: cdk.Stack[] = [
   new AtatWebApiStack(app, environmentName + "AtatWebApiStack", {
     removalPolicy,
@@ -40,10 +44,9 @@ const stacks: cdk.Stack[] = [
       providerName: "ATATDevAAD",
     },
     requireAuthorization: process.env.ATAT_REQUIRE_AUTH !== "false",
+    vpc: netStack.vpc,
   }),
-  new AtatNetStack(app, environmentName + "AtatNetStack", {
-    vpcCidr: ec2.Vpc.DEFAULT_CIDR_RANGE,
-  }),
+  netStack,
 ];
 
 // Only deploy this stack if it has been explicitly enabled. Having duplicate

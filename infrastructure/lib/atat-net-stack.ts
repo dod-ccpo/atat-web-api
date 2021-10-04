@@ -25,6 +25,9 @@ export class AtatNetStack extends cdk.Stack {
       ],
     });
     this.vpc = vpc;
+    const vpcOutput = new cdk.CfnOutput(this, "VpcId", {
+      value: this.vpc.vpcId,
+    });
     const transitGatewayId = this.findTransitGateway();
     const tgwAttachment = new ec2.CfnTransitGatewayAttachment(this, "VpcTgwAttachment", {
       vpcId: vpc.vpcId,
