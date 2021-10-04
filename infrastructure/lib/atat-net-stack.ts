@@ -1,5 +1,4 @@
 import * as ec2 from "@aws-cdk/aws-ec2";
-import { CfnTransitGatewayAttachment, IVpcEndpoint } from "@aws-cdk/aws-ec2";
 import * as cdk from "@aws-cdk/core";
 import * as custom from "@aws-cdk/custom-resources";
 
@@ -9,7 +8,7 @@ export interface AtatNetStackProps extends cdk.StackProps {
 
 export class AtatNetStack extends cdk.Stack {
   public readonly vpc: ec2.IVpc;
-  public readonly endpoints: IVpcEndpoint[] = [];
+  public readonly endpoints: ec2.IVpcEndpoint[] = [];
 
   constructor(scope: cdk.Construct, id: string, props: AtatNetStackProps) {
     super(scope, id);
@@ -30,12 +29,9 @@ export class AtatNetStack extends cdk.Stack {
     const vpcOutput = new cdk.CfnOutput(this, "VpcId", {
       value: this.vpc.vpcId,
     });
+
     const transitGatewayId = this.findTransitGateway();
-    const tgwAttachment = new ec2.CfnTransitGatewayAttachment(this, "VpcTgwAttachment", {
-      vpcId: vpc.vpcId,
-      subnetIds: vpc.isolatedSubnets.map((subnet) => (subnet as ec2.Subnet).subnetId),
-      transitGatewayId: transitGatewayId,
-    });
+
     // This resource type does not seem to be available in AWS GovCloud (US) yet; however, it is
     // documented and available in the Commercial partition. It is far less fragile than
     // AWS::EC2::TransitGatewayAttachment and so we should try to make use of it.
@@ -47,12 +43,19 @@ export class AtatNetStack extends cdk.Stack {
     //   },
     //   transitGatewayId: transitGatewayId,
     // });
+    const tgwAttachment = new ec2.CfnTransitGatewayAttachment(this, "VpcTgwAttachment", {
+      vpcId: vpc.vpcId,
+      subnetIds: vpc.isolatedSubnets.map((subnet) => (subnet as ec2.Subnet).subnetId),
+      transitGatewayId: transitGatewayId,
+    });
     this.addDefaultTransitGatewayRoute(tgwAttachment);
 
     const dynamodbEndpoint = vpc.addGatewayEndpoint("DynamodbEndpoint", {
       service: ec2.GatewayVpcEndpointAwsService.DYNAMODB,
     });
     const s3Endpoint = vpc.addInterfaceEndpoint("S3Endpoint", {
+      // S3 Interface Endpoints are not currently available as a value under
+      // ec2.InterfaceVpcEndpointAwsService so we have to construct it manually.
       service: { name: `com.amazonaws.${cdk.Aws.REGION}.s3`, port: 443, privateDnsDefault: false },
     });
     const apiGatewayEndpoint = vpc.addInterfaceEndpoint("ApiGatewayEndpoint", {
@@ -70,7 +73,7 @@ export class AtatNetStack extends cdk.Stack {
     this.endpoints.push(dynamodbEndpoint, s3Endpoint, apiGatewayEndpoint, lambdaEndpoint, logsEndpoint, sqsEndpoint);
   }
 
-  private addDefaultTransitGatewayRoute(transitGatewayAttachment: CfnTransitGatewayAttachment) {
+  private addDefaultTransitGatewayRoute(transitGatewayAttachment: ec2.CfnTransitGatewayAttachment) {
     const subnets = this.vpc.isolatedSubnets as ec2.Subnet[];
     subnets.forEach((subnet, index) => {
       const table = subnet.routeTable.routeTableId;

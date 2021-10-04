@@ -34,7 +34,7 @@ export interface ApiFunctionProps {
   /**
    * The VPC where resources should be created
    */
-  readonly lambdaVpc?: ec2.IVpc;
+  readonly lambdaVpc: ec2.IVpc;
 }
 
 export abstract class ApiFunction extends cdk.Construct {

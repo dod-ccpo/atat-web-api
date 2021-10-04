@@ -26,7 +26,7 @@ export interface AtatWebApiStackProps extends cdk.StackProps {
   idpProps: AtatIdpProps;
   removalPolicy?: cdk.RemovalPolicy;
   requireAuthorization?: boolean;
-  vpc?: ec2.IVpc;
+  vpc: ec2.IVpc;
 }
 
 export class AtatWebApiStack extends cdk.Stack {
@@ -143,6 +143,7 @@ export class AtatWebApiStack extends cdk.Stack {
     const subscribePortfolioDraftRequest = new ApiSQSFunction(this, "subscribePortfolioDraftRequest", {
       table: table,
       queue: queue,
+      lambdaVpc: props.vpc,
       method: HttpMethod.POST,
       handlerPath: packageRoot() + "/api/portfolioDrafts/submit/subscribe.ts",
       createEventSource: true,
