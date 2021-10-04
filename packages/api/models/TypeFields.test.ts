@@ -8,6 +8,7 @@ describe("Test object trimming", () => {
   const portfolioDraft: PortfolioDraft = {
     id: "test",
     name: "test",
+    description: "test",
     status: ProvisioningStatus.IN_PROGRESS,
     created_at: "",
     updated_at: "",
