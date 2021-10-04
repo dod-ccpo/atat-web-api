@@ -12,7 +12,6 @@ import { SecureBucket, SecureTable, SecureRestApi, SecureQueue } from "./constru
 import { TaskOrderLifecycle } from "./constructs/task-order-lifecycle";
 import { HttpMethod } from "./http";
 import { packageRoot } from "./util";
-import * as sqs from "@aws-cdk/aws-sqs";
 
 interface AtatIdpProps {
   secretName: string;
