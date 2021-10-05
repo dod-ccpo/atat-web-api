@@ -24,16 +24,9 @@
     "experimentalDecorators": true,
     "strictPropertyInitialization": false,
     "resolveJsonModule": true,
-    "useUnknownInCatchVariables": false,
     "typeRoots": [
       "./node_modules/@types"
     ],
-    "baseUrl": ".",
-    "paths": {
-      "@/*": [
-        "src/*"
-      ]
-    },
     "outDir": "build"
   },
   "exclude": [
