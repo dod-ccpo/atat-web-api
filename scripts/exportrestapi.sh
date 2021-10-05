@@ -14,6 +14,6 @@ if [ $# -eq 0 ]
 fi
 today=$(date +"%Y-%m-%d")
 output=~/${AWS_PROFILE}-restapi-$1-${today}.json
-aws apigateway get-export --export-type swagger --parameters extensions='postman' --profile ${AWS_PROFILE} --stage-name prod --rest-api-id $1 ${output}
+aws apigateway get-export --export-type oas30 --parameters extensions='postman' --profile ${AWS_PROFILE} --stage-name prod --rest-api-id $1 ${output}
 echo
-echo "Swagger-type export with Postman extensions written to ${output}"
+echo "OpenAPI 3.0.x-type export with Postman extensions written to ${output}"
