@@ -1171,11 +1171,88 @@ x-amazon-apigateway-request-validators:
     validateRequestBody: false        
 
 x-amazon-apigateway-gateway-responses:
-  BAD_REQUEST_BODY:
-    statusCode: 400
-    responseTemplates: 
-      application/json: '{ "code": "OTHER", "message": "A valid request body must be provided" }'
+  # Gateway response types are documented at
+  # https://docs.aws.amazon.com/apigateway/latest/developerguide/supported-gateway-response-types.html
+  # The ordering is preserved here as well as comments highlighting which
+  # response handler will be used for responses we are not explicitly customizing.
+  ACCESS_DENIED:
+    statusCode: 403
+    responseTemplates:
+      application/json: |
+        {
+          "code": "OTHER",
+          "message": "The requested resource could not be accessed"
+        }
+  # API_CONFIGURATION_ERROR is handled by DEFAULT_5XX
+  # AUTHORIZER_CONFIGURATION_ERROR is handled by DEFAULT_5XX
+  # AUTHORIZER_FAILURE is handled by DEFAULT_5XX
   BAD_REQUEST_PARAMETERS:
     statusCode: 400
     responseTemplates: 
-      application/json: '{ "code": "OTHER", "message": "Required path parameter is missing" }'
+      application/json: |
+        {
+          "code": "OTHER",
+          "message": "Required path parameter is missing"
+        }
+  BAD_REQUEST_BODY:
+    statusCode: 400
+    responseTemplates: 
+      application/json: |
+        {
+          "code": "OTHER"
+          "message": "A valid request body must be provided"
+        }
+  DEFAULT_4XX:
+    # Use the original status code for 4XX errors
+    responseTemplates:
+      application/json: |
+        {
+          "code": "OTHER",
+          "message": "The request is not valid"
+        }
+  DEFAULT_5XX:
+    # Rewrite all 5XX errors as a 500
+    statusCode: 500
+    responseTemplates:
+      application/json: |
+        {
+          "code": "OTHER",
+          "message": "There was an error processing the request"
+        }
+  # EXPIRED_TOKEN is handled by DEFAULT_4XX
+  # INTEGRATION_FAILURE is handled by DEFAULT_5XX
+  # INTEGRATION_TIMEOUT is handled by DEFAULT_5XX
+  # INVALID_API_KEY is handled by DEFAULT_4XX
+  # INVALID_SIGNATURE is handled by DEFAULT_4XX
+  MISSING_AUTHENTICATION_TOKEN:
+    # Treat this the same way as a 404/403 would be treated
+    statusCode: 403
+    responseTemplates:
+      application/json: |
+        {
+          "code": "OTHER",
+          "message": "The requested resource could not be accessed"
+        }
+  # QUOTA_EXCEEDED is handled by DEFAULT_4XX
+  # REQUEST_TOO_LARGE is handled by DEFAULT_4XX
+  RESOURCE_NOT_FOUND:
+    # Mask gateway-level 404s as a 403 to prevent "guessing" whether
+    # a particular endpoint exists or not.
+    statusCode: 403
+    responseTemplates:
+      application/json: |
+        {
+          "code": "OTHER",
+          "message": "The requested resource could not be accessed"
+        }
+  # THROTTLED is handled by DEFAULT_4XX
+  UNAUTHORIZED:
+    statusCode: 401
+    responseTemplates:
+      application/json: |
+        {
+          "code": "OTHER",
+          "message": "Authentication is required for this endpoint"
+        }
+  # UNSUPPORTED_MEDIA_TYPE is handled by DEFAULT_4XX
+  # WAF_FILTERED is handled by DEFAULT_4XX
