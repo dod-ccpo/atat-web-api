@@ -19,3 +19,7 @@ tags-private.json
 
 # OSX
 .DS_Store
+
+# Sonar Scanner
+*.ucfg
+.scannerwork
