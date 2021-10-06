@@ -182,7 +182,10 @@ export class CognitoAuthentication extends cdk.Construct {
       // To be clear, users cannot register for our pool. But just in case one
       // were to be created by an administrator, this enforces that the password
       // policy and MFA for the pool is as secure as possible.
-      mfa: cognito.Mfa.REQUIRED,
+      // MFA cannot be enabled for existing user pools so we need to comment this
+      // out for now because CloudFormation doesn't recognize it as a scenario where
+      // the resource needs to be replaced.
+      // mfa: cognito.Mfa.REQUIRED,
       mfaSecondFactor: {
         sms: false,
         otp: true,
