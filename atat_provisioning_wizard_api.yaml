@@ -612,6 +612,7 @@ paths:
         '404':
           description: Task Order with the given number does not exist
       requestBody:
+        required: true
         content:
           application/pdf:
             schema:
@@ -840,6 +841,10 @@ components:
         updated_at:
           type: string
           format: "date-time"
+      required:
+        - id
+        - created_at
+        - updated_at
     PortfolioDraftSummary:
       type: object
       description: Portfolio Draft parent object
@@ -867,6 +872,14 @@ components:
                 - "in_progress"
                 - "complete"
                 - "failed"
+          required:
+            - status
+            - name
+            - description
+            - num_portfolio_managers
+            - num_applications
+            - num_environments
+            - num_task_orders
     Error:
       type: object
       description: Generic error model
@@ -903,6 +916,7 @@ components:
       type: object
       description: Metadata describing an uploaded file
       allOf:
+        # ? both BaseObject and FileMetadataSummary have an 'id' property are they needed in both?
         - $ref: '#/components/schemas/BaseObject'
         - $ref: '#/components/schemas/FileMetadataSummary'
         - type: object
@@ -924,6 +938,8 @@ components:
         - name
         - dod_components
         - portfolio_managers
+        - csp
+        - description
       properties:
         name:
           type: string
@@ -961,35 +977,52 @@ components:
         task_orders:
           type: array
           items:
-            type: object
-            properties:
-              task_order_number:
-                type: string
-              task_order_file:
-                allOf:
-                  - $ref: '#/components/schemas/FileMetadataSummary'
-                description: Metadata associated with file which was previously uploaded by POST /taskOrderFiles
-              clins:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    clin_number:
-                      type: string
-                    idiq_clin:
-                      type: string
-                    total_clin_value:
-                      type: "integer"
-                    obligated_funds:
-                      type: "integer"
-                    pop_start_date:
-                      type: string
-                      format: date
-                      example: '2021-07-01'
-                    pop_end_date:
-                      type: string
-                      format: date
-                      example: '2022-07-01'
+            $ref: '#/components/schemas/TaskOrderObject'
+    TaskOrderObject:
+      description: Represents a Task Order Object in the Funding Step
+      type: object
+      additionalProperties: false
+      properties:
+        task_order_number:
+          type: string
+        task_order_file:
+          description: Metadata associated with file which was previously uploaded by POST /taskOrderFiles
+          allOf:
+            - $ref: '#/components/schemas/FileMetadataSummary'
+        clins:
+          type: array
+          item:
+            $ref: '#/components/schemas/ClinObject'
+      required:
+        - task_order_number
+        - task_order_file
+        - clins
+    ClinObject:
+      description: Represents a Clin Object in the Funding Step
+      type: object
+      additionalProperties: false
+      properties:
+        clin_number:
+          type: string
+        idiq_clin:
+          type: string
+        total_clin_value:
+          type: "integer"
+        obligated_funds:
+          type: "integer"
+        pop_start_date:
+          type: string
+          format: date
+        pop_end_date:
+          type: string
+          format: date
+      required:
+        - clin_number
+        - idiq_clin
+        - total_clin_value
+        - obligated_funds
+        - pop_start_date
+        - pop_end_date
     ApplicationStep:
       description: Represents step 3 of the Portfolio Draft Wizard
       type: object
@@ -997,37 +1030,61 @@ components:
         applications:
           type: array
           items:
-            type: object
-            properties:
-              name:
-                type: string
-              description:
-                type: string
-              environments:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    name:
-                      type: string
-                    operators:
-                      type: array
-                      items:
-                        type: object
-                        properties:
-                          first_name:
-                            type: string
-                          last_name:
-                            type: string
-                          email:
-                            type: string
-                            format: "email"
-                          access:
-                            type: string
-                            description: Operator Access Level to Environment
-                            enum:
-                              - administrator
-                              - read_only
+            $ref: '#/components/schemas/ApplicationObject'
+    ApplicationObject:
+      description: Represents an Application in a Portfolio
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        environments:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnvironmentObject'
+      required:
+        - name
+        - description
+        - environments
+    EnvironmentObject:
+      description: Represents an Environment for a specific Application
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+        operators:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperatorObject'
+      required:
+        - name
+        - operators
+    OperatorObject:
+      description: Represents an Operator of an Environment for a specific Application
+      type: object
+      additionalProperties: false
+      properties:
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+          format: "email"
+        access:
+          description: Operator Access Level to Environment
+          type: string
+          enum:
+            - administrator
+            - read_only
+      required:
+        - first_name
+        - last_name
+        - email
+        - access
     PortfolioDraft:
       allOf:
         - $ref: '#/components/schemas/PortfolioDraftSummary'
