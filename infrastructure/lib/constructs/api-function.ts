@@ -1,4 +1,5 @@
 import * as apigw from "@aws-cdk/aws-apigateway";
+import * as ec2 from "@aws-cdk/aws-ec2";
 import * as iam from "@aws-cdk/aws-iam";
 import * as lambda from "@aws-cdk/aws-lambda";
 import * as lambdaNodeJs from "@aws-cdk/aws-lambda-nodejs";
@@ -29,6 +30,11 @@ export interface ApiFunctionProps {
    * the `entry` and `environment` if one is provided in this struct. Be careful.
    */
   readonly functionPropsOverride?: lambdaNodeJs.NodejsFunctionProps;
+
+  /**
+   * The VPC where resources should be created
+   */
+  readonly lambdaVpc: ec2.IVpc;
 }
 
 export abstract class ApiFunction extends cdk.Construct {
@@ -52,6 +58,7 @@ export abstract class ApiFunction extends cdk.Construct {
     this.method = props.method;
     this.fn = new lambdaNodeJs.NodejsFunction(this, "PackagedFunction", {
       entry: props.handlerPath,
+      vpc: props.lambdaVpc,
       ...props.functionPropsOverride,
     });
     this.fn.addPermission("AllowApiGatewayInvoke", { principal: APIGW_SERVICE_PRINCIPAL });

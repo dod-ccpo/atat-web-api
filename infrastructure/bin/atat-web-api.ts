@@ -1,8 +1,10 @@
 #!/usr/bin/env node
+import * as ec2 from "@aws-cdk/aws-ec2";
 import * as cdk from "@aws-cdk/core";
 import { NIST80053Checks } from "cdk-nag";
 import "source-map-support/register";
 import { AtatIamStack } from "../lib/atat-iam-stack";
+import { AtatNetStack } from "../lib/atat-net-stack";
 import { AtatWebApiStack } from "../lib/atat-web-api-stack";
 import { getTags } from "../lib/load-tags";
 import { isString, lowerCaseEnvironmentId, normalizeEnvironmentName } from "../lib/util";
@@ -29,6 +31,10 @@ if (app.node.tryGetContext("TicketId")) {
 const environmentName = normalizeEnvironmentName(environmentParam);
 const environmentId = lowerCaseEnvironmentId(environmentParam);
 
+const netStack = new AtatNetStack(app, environmentName + "AtatNetStack", {
+  vpcCidr: ec2.Vpc.DEFAULT_CIDR_RANGE,
+});
+
 const stacks: cdk.Stack[] = [
   new AtatWebApiStack(app, environmentName + "AtatWebApiStack", {
     removalPolicy,
@@ -38,7 +44,9 @@ const stacks: cdk.Stack[] = [
       providerName: "ATATDevAAD",
     },
     requireAuthorization: process.env.ATAT_REQUIRE_AUTH !== "false",
+    vpc: netStack.vpc,
   }),
+  netStack,
 ];
 
 // Only deploy this stack if it has been explicitly enabled. Having duplicate
