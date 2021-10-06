@@ -10,7 +10,9 @@ export function processSamlGroupData(groups: string[]): string[] {
     allGroups.push(
       ...groupString
         .trim()
-        .split(/\s*,\s*/)
+        .split(",")
+        .map((groupName) => groupName.trim())
+        // keep all non-empty values
         .filter((groupName) => groupName)
     );
   }
