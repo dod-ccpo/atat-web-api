@@ -18,7 +18,7 @@ export class AtatNetStack extends cdk.Stack {
       subnetConfiguration: [
         {
           cidrMask: 24,
-          name: "poc",
+          name: "app",
           subnetType: ec2.SubnetType.PRIVATE_ISOLATED,
         },
       ],
@@ -34,7 +34,8 @@ export class AtatNetStack extends cdk.Stack {
 
     // This resource type does not seem to be available in AWS GovCloud (US) yet; however, it is
     // documented and available in the Commercial partition. It is far less fragile than
-    // AWS::EC2::TransitGatewayAttachment and so we should try to make use of it.
+    // AWS::EC2::TransitGatewayAttachment and so we should try to make use of it when it
+    // becomes available.
     // const tgwAttachment = new ec2.CfnTransitGatewayVpcAttachment(this, "TgwAttachment", {
     //   vpcId: vpc.vpcId,
     //   subnetIds: vpc.isolatedSubnets.map((subnet) => (subnet as ec2.Subnet).subnetId),
@@ -53,10 +54,8 @@ export class AtatNetStack extends cdk.Stack {
     const dynamodbEndpoint = vpc.addGatewayEndpoint("DynamodbEndpoint", {
       service: ec2.GatewayVpcEndpointAwsService.DYNAMODB,
     });
-    const s3Endpoint = vpc.addInterfaceEndpoint("S3Endpoint", {
-      // S3 Interface Endpoints are not currently available as a value under
-      // ec2.InterfaceVpcEndpointAwsService so we have to construct it manually.
-      service: { name: `com.amazonaws.${cdk.Aws.REGION}.s3`, port: 443, privateDnsDefault: false },
+    const s3Endpoint = vpc.addGatewayEndpoint("S3Endpoint", {
+      service: ec2.GatewayVpcEndpointAwsService.S3,
     });
     const apiGatewayEndpoint = vpc.addInterfaceEndpoint("ApiGatewayEndpoint", {
       service: ec2.InterfaceVpcEndpointAwsService.APIGATEWAY,
@@ -99,6 +98,27 @@ export class AtatNetStack extends cdk.Stack {
   }
 
   private findTransitGateway(): string {
+    // Because we're performing a lookup at stack-creation time, a Custom Resource
+    // must be used because CloudFormation natively doesn't have a means to lookup
+    // resources. Doing the lookup at runtime is easier than trying to perform the
+    // lookup at synthesis time or requiring knowing the specific ID of the TGW.
+    //
+    // This also returns only the first Transit Gateway found in the account. If there
+    // is more than one Transit Gateway in the account, this is not guaranteed to always
+    // return the same Transit Gateway (because there is not guaranteed ordering in the
+    // EC2 DescribeTransitGateways API). This will fail if there are not any Transit
+    // Gateways in an account. Without writing custom code, there isn't an obvious way to
+    // return an error if there is more than one Transit Gateway.
+    //
+    // Using the EC2 DescribeTransitGateways API was selected over the RAM ListResources
+    // API to avoid relying on an implementation detail about how the resource is shared
+    // as well as the name of the EC2 API call being more expressive. ListResources does not
+    // provide any greater controls to filter the resource without knowing the ID of the
+    // account sharing the TGW or the resource ARN of the TGW.
+    //
+    // Ideally this information would instead be shared with us via Systems Manager Parameter
+    // Store (or at least the Account ID that owns the TGW) and we would not need to rely
+    // on a custom resource or "guessing" the right gateway.
     const findTgw = new custom.AwsCustomResource(this, "FindTransitGateway", {
       onCreate: {
         service: "EC2",
