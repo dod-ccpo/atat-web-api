@@ -939,7 +939,6 @@ components:
         - dod_components
         - portfolio_managers
         - csp
-        - description
       properties:
         name:
           type: string
@@ -977,8 +976,8 @@ components:
         task_orders:
           type: array
           items:
-            $ref: '#/components/schemas/TaskOrderObject'
-    TaskOrderObject:
+            $ref: '#/components/schemas/TaskOrder'
+    TaskOrder:
       description: Represents a Task Order Object in the Funding Step
       type: object
       additionalProperties: false
@@ -992,13 +991,13 @@ components:
         clins:
           type: array
           item:
-            $ref: '#/components/schemas/ClinObject'
+            $ref: '#/components/schemas/Clin'
       required:
         - task_order_number
         - task_order_file
         - clins
-    ClinObject:
-      description: Represents a Clin Object in the Funding Step
+    Clin:
+      description: Represents a Clin Object in a Task Order
       type: object
       additionalProperties: false
       properties:
@@ -1030,8 +1029,8 @@ components:
         applications:
           type: array
           items:
-            $ref: '#/components/schemas/ApplicationObject'
-    ApplicationObject:
+            $ref: '#/components/schemas/Application'
+    Application:
       description: Represents an Application in a Portfolio
       type: object
       additionalProperties: false
@@ -1043,12 +1042,12 @@ components:
         environments:
           type: array
           items:
-            $ref: '#/components/schemas/EnvironmentObject'
+            $ref: '#/components/schemas/Environment'
       required:
         - name
         - description
         - environments
-    EnvironmentObject:
+    Environment:
       description: Represents an Environment for a specific Application
       type: object
       additionalProperties: false
@@ -1058,11 +1057,11 @@ components:
         operators:
           type: array
           items:
-            $ref: '#/components/schemas/OperatorObject'
+            $ref: '#/components/schemas/Operator'
       required:
         - name
         - operators
-    OperatorObject:
+    Operator:
       description: Represents an Operator of an Environment for a specific Application
       type: object
       additionalProperties: false
