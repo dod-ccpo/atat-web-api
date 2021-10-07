@@ -870,14 +870,6 @@ components:
                 - "in_progress"
                 - "complete"
                 - "failed"
-          required:
-            - status
-            - name
-            - description
-            - num_portfolio_managers
-            - num_applications
-            - num_environments
-            - num_task_orders
     Error:
       type: object
       additionalProperties: false
@@ -981,7 +973,7 @@ components:
           items:
             $ref: '#/components/schemas/TaskOrder'
     TaskOrder:
-      description: Represents a Task Order Object in the Funding Step
+      description: Represents a Task Order in the Funding Step
       type: object
       additionalProperties: false
       properties:
@@ -1000,7 +992,7 @@ components:
         - task_order_file
         - clins
     Clin:
-      description: Represents a Clin Object in a Task Order
+      description: Represents a Clin in a Task Order
       type: object
       additionalProperties: false
       properties:
@@ -1009,9 +1001,9 @@ components:
         idiq_clin:
           type: string
         total_clin_value:
-          type: "integer"
+          type: number
         obligated_funds:
-          type: "integer"
+          type: number
         pop_start_date:
           type: string
           format: date
