@@ -1,5 +1,6 @@
-import { Operator } from "./Operator";
+import { AppEnvOperator } from "./AppEnvOperator";
+
 export interface Environment {
   name: string;
-  operators: Array<Operator>;
+  operators: Array<AppEnvOperator>;
 }
