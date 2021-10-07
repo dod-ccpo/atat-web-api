@@ -831,6 +831,7 @@ components:
   schemas:
     BaseObject:
       type: object
+      additionalProperties: false
       description: Base model common to all first-class objects (those with IDs)
       properties:
         id:
@@ -847,6 +848,7 @@ components:
         - updated_at
     PortfolioDraftSummary:
       type: object
+      additionalProperties: false
       description: Portfolio Draft parent object
       allOf:
         - $ref: '#/components/schemas/BaseObject'
@@ -882,6 +884,7 @@ components:
             - num_task_orders
     Error:
       type: object
+      additionalProperties: false
       description: Generic error model
       properties:
         code:
@@ -896,6 +899,7 @@ components:
       allOf:
         - $ref: '#/components/schemas/Error'
         - type: object
+          additionalProperties: false
           required:
             - error_map
           properties:
@@ -904,6 +908,7 @@ components:
               description: 'Maps form input IDs to validation error messages so that clients can display in-line errors'
     FileMetadataSummary:
       type: object
+      additionalProperties: false
       description: Metadata describing an uploaded file
       properties:
         id:
@@ -915,6 +920,7 @@ components:
     FileMetadata:
       type: object
       description: Metadata describing an uploaded file
+      additionalProperties: false
       allOf:
         # ? both BaseObject and FileMetadataSummary have an 'id' property are they needed in both?
         - $ref: '#/components/schemas/BaseObject'
@@ -934,6 +940,7 @@ components:
     PortfolioStep:
       description: Represents step 1 of the Portfolio Draft Wizard
       type: object
+      additionalProperties: false
       required:
         - name
         - dod_components
@@ -972,6 +979,7 @@ components:
     FundingStep:
       description: Represents step 2 of the Portfolio Draft Wizard
       type: object
+      additionalProperties: false
       properties:
         task_orders:
           type: array
@@ -1088,6 +1096,7 @@ components:
       allOf:
         - $ref: '#/components/schemas/PortfolioDraftSummary'
       type: object
+      additionalProperties: false
       properties:
         portfolio_step:
           $ref: '#/components/schemas/PortfolioStep'
