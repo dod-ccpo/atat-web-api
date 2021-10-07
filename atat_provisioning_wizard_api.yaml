@@ -985,7 +985,7 @@ components:
             - $ref: '#/components/schemas/FileMetadataSummary'
         clins:
           type: array
-          item:
+          items:
             $ref: '#/components/schemas/Clin'
       required:
         - task_order_number
@@ -1025,6 +1025,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Application'
+        operators:
+          type: array
+          items:
+            $ref: '#/components/schemas/PortfolioOperator'
     Application:
       description: Represents an Application in a Portfolio
       type: object
@@ -1038,10 +1042,15 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Environment'
+        operators:
+          type: array
+          items:
+            $ref: '#/components/schemas/AppEnvOperator'
       required:
         - name
         - description
         - environments
+        - operators
     Environment:
       description: Represents an Environment for a specific Application
       type: object
@@ -1052,7 +1061,7 @@ components:
         operators:
           type: array
           items:
-            $ref: '#/components/schemas/Operator'
+            $ref: '#/components/schemas/AppEnvOperator'
       required:
         - name
         - operators
@@ -1061,24 +1070,47 @@ components:
       type: object
       additionalProperties: false
       properties:
-        first_name:
-          type: string
-        last_name:
+        display_name:
           type: string
         email:
           type: string
           format: "email"
-        access:
-          description: Operator Access Level to Environment
-          type: string
-          enum:
-            - administrator
-            - read_only
       required:
         - first_name
         - last_name
         - email
+    PortfolioOperator:
+      allOf:
+        - $ref: '#/components/schemas/Operator'
+      type: object
+      additionalProperties: false
+      required:
         - access
+      properties:
+        access:
+          $ref: '#/components/schemas/PortfolioAccess'
+    AppEnvOperator:
+      allOf:
+        - $ref: '#/components/schemas/Operator'
+      type: object
+      additionalProperties: false
+      required:
+        - access
+      properties:
+        access:
+          $ref: '#/components/schemas/AppEnvAccess'
+    PortfolioAccess:
+      description: Represents a set of Operators who should be granted access to a Portfolio at a specific access level. Uses an enum construct for forward compatibility should other access levels be specified.
+      type: string
+      enum:
+        - root_administrator
+    AppEnvAccess:
+      description: Represents a set of Operators who should be granted access to an Application or Environment at a specific access level. Is a single type because the same access levels are available for both Applications & Environments.
+      type: string
+      enum:
+        - administrator
+        - contributor
+        - read_only
     PortfolioDraft:
       allOf:
         - $ref: '#/components/schemas/PortfolioDraftSummary'
