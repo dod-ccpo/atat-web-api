@@ -842,10 +842,6 @@ components:
         updated_at:
           type: string
           format: "date-time"
-      required:
-        - id
-        - created_at
-        - updated_at
     PortfolioDraftSummary:
       type: object
       additionalProperties: false
@@ -922,7 +918,6 @@ components:
       description: Metadata describing an uploaded file
       additionalProperties: false
       allOf:
-        # ? both BaseObject and FileMetadataSummary have an 'id' property are they needed in both?
         - $ref: '#/components/schemas/BaseObject'
         - $ref: '#/components/schemas/FileMetadataSummary'
         - type: object
