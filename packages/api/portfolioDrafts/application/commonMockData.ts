@@ -2,56 +2,60 @@ import { AccessLevel } from "../../models/AccessLevel";
 import { Application } from "../../models/Application";
 import { ApplicationStep } from "../../models/ApplicationStep";
 import { Environment } from "../../models/Environment";
-import { Operator } from "../../models/Operator";
 import { ProvisioningStatus } from "../../models/ProvisioningStatus";
 import { v4 as uuidv4 } from "uuid";
 import { PortfolioDraftSummary } from "../../models/PortfolioDraftSummary";
 import { PortfolioDraft } from "../../models/PortfolioDraft";
+import { PortfolioOperator } from "../../models/PortfolioOperator";
+import { AppEnvOperator } from "../../models/AppEnvOperator";
 
-const mockOperatorDarthVader: Operator = {
-  first_name: "Darth",
-  last_name: "Vader",
+const mockPortoflioOperatorYoda: PortfolioOperator = {
+  display_name: "Yoda",
+  email: "yoda@iam.com",
+  access: AccessLevel.PORTFOLIO_ADMINISTRATOR,
+};
+const mockAppEnvOperatorDarthVader: AppEnvOperator = {
+  display_name: "Darth Vader",
   email: "iam@yourfather.com",
   access: AccessLevel.ADMINISTRATOR,
 };
-const mockOperatorLandonisCalrissian: Operator = {
-  first_name: "Landonis",
-  last_name: "Calrissian",
+const mockAppEnvOperatorLandonisCalrissian: AppEnvOperator = {
+  display_name: "Landonis Calrissian",
   email: "thegambler@cloudcity.com",
   access: AccessLevel.READ_ONLY,
 };
-const mockOperatorLukeSkywalker: Operator = {
-  first_name: "Luke",
-  last_name: "Skywalker",
+const mockAppEnvOperatorLukeSkywalker: AppEnvOperator = {
+  display_name: "Luke Skywalker",
   email: "lostmy@hand.com",
   access: AccessLevel.READ_ONLY,
 };
-const mockOperatorSalaciousCrumb: Operator = {
-  first_name: "Salacious",
-  last_name: "Crumb",
+const mockAppEnvOperatorSalaciousCrumb: AppEnvOperator = {
+  display_name: "Salacious Crumb",
   email: "monkey@lizard.com",
   access: AccessLevel.ADMINISTRATOR,
 };
-const mockOperatorHanSolo: Operator = {
-  first_name: "Han",
-  last_name: "Solo",
+const mockAppEnvOperatorHanSolo: AppEnvOperator = {
+  display_name: "Han Solo",
   email: "frozen@carbonite.com",
   access: AccessLevel.READ_ONLY,
 };
-const mockOperatorBobaFett: Operator = {
-  first_name: "Boba",
-  last_name: "Fett",
+const mockAppEnvOperatorBobaFett: AppEnvOperator = {
+  display_name: "Boba Fett",
   email: "original@mandalorian.com",
   access: AccessLevel.READ_ONLY,
 };
 
 const mockEnvironmentCcepProd: Environment = {
   name: "production",
-  operators: [mockOperatorDarthVader, mockOperatorLandonisCalrissian, mockOperatorLukeSkywalker],
+  operators: [mockAppEnvOperatorDarthVader, mockAppEnvOperatorLandonisCalrissian, mockAppEnvOperatorLukeSkywalker],
+};
+const mockEnvironmentJpeaStage: Environment = {
+  name: "stage",
+  operators: [mockAppEnvOperatorSalaciousCrumb, mockAppEnvOperatorHanSolo, mockAppEnvOperatorBobaFett],
 };
 const mockEnvironmentJpeaDev: Environment = {
   name: "development",
-  operators: [mockOperatorSalaciousCrumb, mockOperatorHanSolo, mockOperatorBobaFett],
+  operators: [mockAppEnvOperatorSalaciousCrumb, mockAppEnvOperatorHanSolo, mockAppEnvOperatorBobaFett],
 };
 
 /**
@@ -61,6 +65,7 @@ export const mockApplicationCloudCityEvacPlanner: Application = {
   name: "Cloud City Evac Planner",
   description: "Application for planning an emergency evacuation",
   environments: [mockEnvironmentCcepProd],
+  operators: mockEnvironmentCcepProd.operators,
 };
 
 /**
@@ -69,7 +74,8 @@ export const mockApplicationCloudCityEvacPlanner: Application = {
 export const mockApplicationJabbasPalaceExpansionApp: Application = {
   name: "Jabba's Palace Expansion App",
   description: "Planning application for palace expansion",
-  environments: [mockEnvironmentJpeaDev],
+  environments: [mockEnvironmentJpeaDev, mockEnvironmentJpeaStage],
+  operators: mockEnvironmentJpeaDev.operators,
 };
 
 /**
@@ -78,7 +84,38 @@ export const mockApplicationJabbasPalaceExpansionApp: Application = {
  */
 export const mockApplicationStep: ApplicationStep = {
   applications: [mockApplicationCloudCityEvacPlanner, mockApplicationJabbasPalaceExpansionApp],
+  operators: [mockPortoflioOperatorYoda],
 };
+
+const now = new Date().toISOString();
+/**
+ * A base Portfolio Draft Summary
+ * @returns a base portfolio summary with good data
+ */
+export const mockBasePortfolioSummary: PortfolioDraftSummary = {
+  id: uuidv4(),
+  status: ProvisioningStatus.NOT_STARTED,
+  updated_at: now,
+  created_at: now,
+  name: "",
+  description: "",
+  num_portfolio_managers: 0,
+  num_task_orders: 0,
+  num_applications: 0,
+  num_environments: 0,
+};
+
+/**
+ * A good Portfolio Draft Summary item with the application step completed
+ * after a successful DynamoDB update
+ * @returns a Portfolio Draft Summary with good data
+ */
+export const mockPortfolioDraftSummary: PortfolioDraft = {
+  ...mockBasePortfolioSummary,
+  application_step: mockApplicationStep,
+  num_applications: mockApplicationStep.applications.length,
+  num_environments: mockApplicationStep.applications.flatMap((app) => app.environments).length,
+} as PortfolioDraft;
 
 /** ABOVE THIS LINE ARE VALID OBJECTS WITH GOOD DATA **/
 /** BELOW THIS LINE ARE INVALID OBJECTS WITH MISSING FIELDS AND BAD DATA **/
@@ -90,11 +127,11 @@ export const mockApplicationStep: ApplicationStep = {
 export const mockEnvironmentsMissingFields = [
   {
     // name: "production",
-    operators: [mockOperatorDarthVader, mockOperatorLandonisCalrissian, mockOperatorLukeSkywalker],
+    operators: [mockAppEnvOperatorSalaciousCrumb, mockAppEnvOperatorHanSolo, mockAppEnvOperatorBobaFett],
   },
   {
     name: "production",
-    // operators: [mockOperatorDarthVader, mockOperatorLandonisCalrissian, mockOperatorLukeSkywalker],
+    // operators: [mockAppEnvOperatorSalaciousCrumb, mockAppEnvOperatorHanSolo, mockAppEnvOperatorBobaFett],
   },
 ];
 
@@ -107,16 +144,25 @@ export const mockApplicationsMissingFields = [
     // name: "Cloud City Evac Planner",
     description: "Application for planning an emergency evacuation",
     environments: [mockEnvironmentCcepProd],
+    operators: mockEnvironmentJpeaDev.operators,
   },
   {
     name: "Cloud City Evac Planner",
     // description: "Application for planning an emergency evacuation",
     environments: [mockEnvironmentCcepProd],
+    operators: mockEnvironmentJpeaDev.operators,
   },
   {
     name: "Cloud City Evac Planner",
     description: "Application for planning an emergency evacuation",
     // environments: [mockEnvironmentCcepProd],
+    operators: mockEnvironmentJpeaDev.operators,
+  },
+  {
+    name: "Cloud City Evac Planner",
+    description: "Application for planning an emergency evacuation",
+    environments: [mockEnvironmentCcepProd],
+    // operators: mockEnvironmentJpeaDev.operators,
   },
 ];
 
@@ -127,6 +173,11 @@ export const mockApplicationsMissingFields = [
 export const mockApplicationStepsMissingFields = [
   {
     // applications: [],
+    operators: [mockPortoflioOperatorYoda],
+  },
+  {
+    applications: [],
+    // operators: [mockPortoflioOperatorYoda],
   },
 ];
 
@@ -182,48 +233,12 @@ export const mockApplicationStepsBadData: Array<ApplicationStep> = [
 ];
 
 /**
- * A base Portfolio Draft Summary
- * @returns a base portfolio summary with good data
- */
-export function mockBasePortfolioSummary(): PortfolioDraftSummary {
-  const now = new Date().toISOString();
-  return {
-    id: uuidv4(),
-    status: ProvisioningStatus.NOT_STARTED,
-    updated_at: now,
-    created_at: now,
-    name: "",
-    description: "",
-    num_portfolio_managers: 0,
-    num_task_orders: 0,
-    num_applications: 0,
-    num_environments: 0,
-  };
-}
-
-/**
- * A good Portfolio Draft Summary item with the application step completed
- * after a successful DynamoDB update
- * @returns a Portfolio Draft Summary with good data
- */
-export function mockPortfolioDraftSummary(): PortfolioDraft {
-  return {
-    ...mockBasePortfolioSummary(),
-    application_step: mockApplicationStep,
-    num_applications: mockApplicationStep.applications.length,
-    num_environments: mockApplicationStep.applications.flatMap((app) => app.environments).length,
-  } as PortfolioDraft;
-}
-
-/**
  * A bad Portfolio Draft Summary item with the application step completed
  * @returns a Portfolio Draft Summary with incorrect # of apps and envs
  */
-export function mockBadPortfolioDraftSummary(): PortfolioDraft {
-  return {
-    ...mockBasePortfolioSummary(),
-    application_step: mockApplicationStep,
-    num_applications: 77,
-    num_environments: 99,
-  } as PortfolioDraft;
-}
+export const mockBadPortfolioDraftSummary: PortfolioDraft = {
+  ...mockBasePortfolioSummary,
+  application_step: mockApplicationStep,
+  num_applications: 77,
+  num_environments: 99,
+} as PortfolioDraft;

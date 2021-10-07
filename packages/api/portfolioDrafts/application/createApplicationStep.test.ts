@@ -116,7 +116,7 @@ describe("Successful operation tests", function () {
     expect(result.body).toStrictEqual(JSON.stringify(mockApplicationStep));
   });
   it("should have correct number of applications and environments", async () => {
-    const mockResponseGoodPortfolioSummary = mockPortfolioDraftSummary();
+    const mockResponseGoodPortfolioSummary = mockPortfolioDraftSummary;
     ddbMock.on(UpdateCommand).resolves({
       Attributes: mockResponseGoodPortfolioSummary,
     });
@@ -131,7 +131,7 @@ describe("Successful operation tests", function () {
 
 describe("Incorrect number of applications and environments", function () {
   it("should have incorrect number of applications and environments false", async () => {
-    const mockBadPortfolioSummary = mockBadPortfolioDraftSummary();
+    const mockBadPortfolioSummary = mockBadPortfolioDraftSummary;
     ddbMock.on(UpdateCommand).resolves({
       Attributes: mockApplicationStepsBadData,
     });
