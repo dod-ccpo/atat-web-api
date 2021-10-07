@@ -612,6 +612,7 @@ paths:
         '404':
           description: Task Order with the given number does not exist
       requestBody:
+        required: true
         content:
           application/pdf:
             schema:
@@ -830,6 +831,7 @@ components:
   schemas:
     BaseObject:
       type: object
+      additionalProperties: false
       description: Base model common to all first-class objects (those with IDs)
       properties:
         id:
@@ -842,6 +844,7 @@ components:
           format: "date-time"
     PortfolioDraftSummary:
       type: object
+      additionalProperties: false
       description: Portfolio Draft parent object
       allOf:
         - $ref: '#/components/schemas/BaseObject'
@@ -869,6 +872,7 @@ components:
                 - "failed"
     Error:
       type: object
+      additionalProperties: false
       description: Generic error model
       properties:
         code:
@@ -883,6 +887,7 @@ components:
       allOf:
         - $ref: '#/components/schemas/Error'
         - type: object
+          additionalProperties: false
           required:
             - error_map
           properties:
@@ -891,6 +896,7 @@ components:
               description: 'Maps form input IDs to validation error messages so that clients can display in-line errors'
     FileMetadataSummary:
       type: object
+      additionalProperties: false
       description: Metadata describing an uploaded file
       properties:
         id:
@@ -902,6 +908,7 @@ components:
     FileMetadata:
       type: object
       description: Metadata describing an uploaded file
+      additionalProperties: false
       allOf:
         - $ref: '#/components/schemas/BaseObject'
         - $ref: '#/components/schemas/FileMetadataSummary'
@@ -920,10 +927,12 @@ components:
     PortfolioStep:
       description: Represents step 1 of the Portfolio Draft Wizard
       type: object
+      additionalProperties: false
       required:
         - name
         - dod_components
         - portfolio_managers
+        - csp
       properties:
         name:
           type: string
@@ -957,39 +966,57 @@ components:
     FundingStep:
       description: Represents step 2 of the Portfolio Draft Wizard
       type: object
+      additionalProperties: false
       properties:
         task_orders:
           type: array
           items:
-            type: object
-            properties:
-              task_order_number:
-                type: string
-              task_order_file:
-                allOf:
-                  - $ref: '#/components/schemas/FileMetadataSummary'
-                description: Metadata associated with file which was previously uploaded by POST /taskOrderFiles
-              clins:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    clin_number:
-                      type: string
-                    idiq_clin:
-                      type: string
-                    total_clin_value:
-                      type: "integer"
-                    obligated_funds:
-                      type: "integer"
-                    pop_start_date:
-                      type: string
-                      format: date
-                      example: '2021-07-01'
-                    pop_end_date:
-                      type: string
-                      format: date
-                      example: '2022-07-01'
+            $ref: '#/components/schemas/TaskOrder'
+    TaskOrder:
+      description: Represents a Task Order in the Funding Step
+      type: object
+      additionalProperties: false
+      properties:
+        task_order_number:
+          type: string
+        task_order_file:
+          description: Metadata associated with file which was previously uploaded by POST /taskOrderFiles
+          allOf:
+            - $ref: '#/components/schemas/FileMetadataSummary'
+        clins:
+          type: array
+          item:
+            $ref: '#/components/schemas/Clin'
+      required:
+        - task_order_number
+        - task_order_file
+        - clins
+    Clin:
+      description: Represents a Clin in a Task Order
+      type: object
+      additionalProperties: false
+      properties:
+        clin_number:
+          type: string
+        idiq_clin:
+          type: string
+        total_clin_value:
+          type: number
+        obligated_funds:
+          type: number
+        pop_start_date:
+          type: string
+          format: date
+        pop_end_date:
+          type: string
+          format: date
+      required:
+        - clin_number
+        - idiq_clin
+        - total_clin_value
+        - obligated_funds
+        - pop_start_date
+        - pop_end_date
     ApplicationStep:
       description: Represents step 3 of the Portfolio Draft Wizard
       type: object
@@ -997,41 +1024,66 @@ components:
         applications:
           type: array
           items:
-            type: object
-            properties:
-              name:
-                type: string
-              description:
-                type: string
-              environments:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    name:
-                      type: string
-                    operators:
-                      type: array
-                      items:
-                        type: object
-                        properties:
-                          first_name:
-                            type: string
-                          last_name:
-                            type: string
-                          email:
-                            type: string
-                            format: "email"
-                          access:
-                            type: string
-                            description: Operator Access Level to Environment
-                            enum:
-                              - administrator
-                              - read_only
+            $ref: '#/components/schemas/Application'
+    Application:
+      description: Represents an Application in a Portfolio
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        environments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Environment'
+      required:
+        - name
+        - description
+        - environments
+    Environment:
+      description: Represents an Environment for a specific Application
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+        operators:
+          type: array
+          items:
+            $ref: '#/components/schemas/Operator'
+      required:
+        - name
+        - operators
+    Operator:
+      description: Represents an Operator of an Environment for a specific Application
+      type: object
+      additionalProperties: false
+      properties:
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+          format: "email"
+        access:
+          description: Operator Access Level to Environment
+          type: string
+          enum:
+            - administrator
+            - read_only
+      required:
+        - first_name
+        - last_name
+        - email
+        - access
     PortfolioDraft:
       allOf:
         - $ref: '#/components/schemas/PortfolioDraftSummary'
       type: object
+      additionalProperties: false
       properties:
         portfolio_step:
           $ref: '#/components/schemas/PortfolioStep'
