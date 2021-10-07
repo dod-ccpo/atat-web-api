@@ -26,8 +26,46 @@ jobs:
             fi
           done
           exit $errors
+  cloudFormationSynth:
+    name: Run CDK Synthesis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v2
+      - name: Setup NodeJS
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+          cache: npm
+      - name: Install global dependencies
+        run: |
+          npm install -g aws-cdk
+      - name: Install project dependencies
+        run: |
+          npm ci
+          npm run bootstrap
+      - name: Synthesize CDK template
+        run: cdk synth -c "EnvironmentId=GITHUBWF"
+        env:
+          ATAT_DEPLOY_IAM: 1
+      - name: Synthesize CDK template with CDK Nag
+        # Errors are allowed here because if there was a true synthesis problem
+        # the previous step would have failed and we would not reach this step.
+        # cdk-nag does not have a "warn-only" mode so this is the best that we
+        # can do.
+        run: cdk synth -c "EnvironmentId=GITHUBWF" || exit 0
+        env:
+          CDK_NAG_ENABLED: 1
+          ATAT_DEPLOY_IAM: 1
+      - name: Gather CloudFormation artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: cloudformation-assets
+          path: |
+            cdk.out/*.template.json
+            cdk.out/asset.*/index.js
   build:
-    name: Build and Synthesize
+    name: Run Tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the repository
@@ -48,25 +86,12 @@ jobs:
         run: npm run lint
       - name: Build the project
         run: npm run build
-      - name: Synthesize CDK template
-        run: cdk synth -c "EnvironmentId=GITHUBWF"
-        env:
-          ATAT_DEPLOY_IAM: 1
-      - name: Synthesize CDK template with CDK Nag
-        # Errors are allowed here because if there was a true synthesis problem
-        # the previous step would have failed and we would not reach this step.
-        # cdk-nag does not have a "warn-only" mode so this is the best that we
-        # can do.
-        run: cdk synth -c "EnvironmentId=GITHUBWF" || exit 0
-        env:
-          CDK_NAG_ENABLED: 1
-          ATAT_DEPLOY_IAM: 1
       - name: Run test suite
         run: npm test
-      - name: Gather artifacts
+      - name: Gather test coverage artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: cloudformation-assets
+          name: coverage-artifacts
           path: |
-            cdk.out/*.template.json
-            cdk.out/asset.*/index.js
+            packages/*/coverage/lcov.info
+            infrastructure/coverage/lcov.info
