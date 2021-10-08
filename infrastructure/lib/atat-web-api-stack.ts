@@ -66,7 +66,7 @@ export class AtatWebApiStack extends cdk.Stack {
       table: table,
       lambdaVpc: props.vpc,
       method: HttpMethod.POST,
-      handlerPath: packageRoot() + "/api/portfolioDrafts/portfolio/createPortfolioStep.ts",
+      handlerPath: packageRoot() + "/api/portfolioDrafts/middyHandler.ts",
     });
 
     const createPortfolioDraft = new ApiDynamoDBFunction(this, "CreatePortfolioDraft", {
