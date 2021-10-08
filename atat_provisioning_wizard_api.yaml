@@ -272,6 +272,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/PortfolioStep'
+      x-amazon-apigateway-request-validator: "full-request-validator"
       x-amazon-apigateway-integration:
         httpMethod: "POST"
         uri:
