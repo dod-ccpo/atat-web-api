@@ -189,6 +189,7 @@ export const mockApplicationStepsBadData: Array<ApplicationStep> = [
   {
     ...mockApplicationStep,
     applications: [{ ...mockApplicationCloudCityEvacPlanner, name: "abc" }], // too short
+    operators: [{ ...mockPortoflioOperatorYoda, display_name: "" }], // too short display_name
   },
   {
     ...mockApplicationStep,
@@ -197,6 +198,14 @@ export const mockApplicationStepsBadData: Array<ApplicationStep> = [
         ...mockApplicationCloudCityEvacPlanner,
         // too long
         name: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut eleifend lectus ut luctus ultricies nisi.",
+        operators: [
+          {
+            ...mockAppEnvOperatorHanSolo,
+            // too long
+            display_name:
+              "waaaaaaaaaaaaaaaaaaaaaaaaayyyyyy tooooooooooooooooooooooooooooooooooooo loooooooooonnnnnnnnnnngggggggggg",
+          },
+        ],
       },
     ],
   },
@@ -210,6 +219,13 @@ export const mockApplicationStepsBadData: Array<ApplicationStep> = [
             ...mockEnvironmentCcepProd,
             // too short
             name: "abc",
+            operators: [
+              {
+                ...mockAppEnvOperatorBobaFett,
+                // too short
+                display_name: "",
+              },
+            ],
           },
         ],
       },
@@ -225,6 +241,14 @@ export const mockApplicationStepsBadData: Array<ApplicationStep> = [
             ...mockEnvironmentCcepProd,
             // too long
             name: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut eleifend lectus ut luctus ultricies nisi.",
+            operators: [
+              {
+                ...mockAppEnvOperatorLandonisCalrissian,
+                // too long
+                display_name:
+                  "waaaaaaaaaaaaaaaaaaaaaaaaayyyyyy tooooooooooooooooooooooooooooooooooooo loooooooooonnnnnnnnnnngggggggggg",
+              },
+            ],
           },
         ],
       },

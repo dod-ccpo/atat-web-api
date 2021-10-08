@@ -23,6 +23,7 @@ import {
   handler,
   performDataValidationOnApplication,
   performDataValidationOnEnvironment,
+  performDataValidationOnOperator,
 } from "./createApplicationStep";
 import {
   DATABASE_ERROR,
@@ -31,6 +32,7 @@ import {
   REQUEST_BODY_EMPTY,
   REQUEST_BODY_INVALID,
 } from "../../utils/errors";
+import { AccessLevel } from "../../models/AccessLevel";
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 beforeEach(() => {
@@ -204,9 +206,35 @@ describe("Individual Application input validation tests", function () {
   const tooShortName = "abc";
   const tooLongName =
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut eleifend lectus ut luctus ultricies nisi.";
-  it("should return error map entries when given Application has a name that is too short", () => {
-    const errors = performDataValidationOnApplication(mockApplicationStepsBadData[0].applications[0]);
+  const tooLongDisplayName =
+    "waaaaaaaaaaaaaaaaaaaaaaaaayyyyyy tooooooooooooooooooooooooooooooooooooo loooooooooonnnnnnnnnnngggggggggg";
+  it("should return error map entries when an operator has a name that is too short", () => {
+    const operator = { display_name: "", email: "dark@side.mil", access: AccessLevel.READ_ONLY };
+    const errors = performDataValidationOnOperator(operator);
     expect(errors.length).toEqual(1);
+    expect(errors).toContainEqual({
+      operatorDisplayName: "",
+      invalidParameterName: "display_name",
+      invalidParameterValue: "",
+      validationMessage: ValidationMessage.INVALID_OPERATOR_NAME,
+    });
+  });
+  it("should return error map entries when an operator has a name that is too long", () => {
+    const operator = { display_name: tooLongName, email: "dark@side.mil", access: AccessLevel.READ_ONLY };
+    const errors = performDataValidationOnOperator(operator);
+    expect(errors.length).toEqual(1);
+    expect(errors).toContainEqual({
+      operatorDisplayName: tooLongName,
+      invalidParameterName: "display_name",
+      invalidParameterValue: tooLongName,
+      validationMessage: ValidationMessage.INVALID_OPERATOR_NAME,
+    });
+  });
+  it("should return error map entries when given Application and Operator has a name that is too short", () => {
+    const appErrors = performDataValidationOnApplication(mockApplicationStepsBadData[0].applications[0]);
+    const opErrors = performDataValidationOnOperator(mockApplicationStepsBadData[0].operators[0]);
+    const errors = [...appErrors, ...opErrors];
+    expect(errors.length).toEqual(2);
     expect(errors).toContainEqual({
       applicationName: tooShortName,
       invalidParameterName: "name",
@@ -214,34 +242,52 @@ describe("Individual Application input validation tests", function () {
       validationMessage: ValidationMessage.INVALID_APPLICATION_NAME,
     });
   });
-  it("should return error map entries when given Application has a name that is too long", () => {
+  it("should return error map entries when given Application and Operator has a name that is too long", () => {
     const errors = performDataValidationOnApplication(mockApplicationStepsBadData[1].applications[0]);
-    expect(errors.length).toEqual(1);
+    expect(errors.length).toEqual(2);
     expect(errors).toContainEqual({
       applicationName: tooLongName,
       invalidParameterName: "name",
       invalidParameterValue: tooLongName,
       validationMessage: ValidationMessage.INVALID_APPLICATION_NAME,
     });
-  });
-  it("should return error map entries when given Application has an Environment with a name that is too short", () => {
-    const errors = performDataValidationOnEnvironment(mockApplicationStepsBadData[2].applications[0].environments[0]);
-    expect(errors.length).toEqual(1);
     expect(errors).toContainEqual({
-      applicationName: tooShortName,
+      operatorDisplayName: tooLongDisplayName,
+      invalidParameterName: "display_name",
+      invalidParameterValue: tooLongDisplayName,
+      validationMessage: ValidationMessage.INVALID_OPERATOR_NAME,
+    });
+  });
+  it("should return error map entries when given Application has an Environment and Operator with a name that is too short", () => {
+    const errors = performDataValidationOnEnvironment(mockApplicationStepsBadData[2].applications[0].environments[0]);
+    expect(errors.length).toEqual(2);
+    expect(errors).toContainEqual({
+      environmentName: tooShortName,
       invalidParameterName: "name",
       invalidParameterValue: tooShortName,
       validationMessage: ValidationMessage.INVALID_ENVIRONMENT_NAME,
     });
-  });
-  it("should return error map entries when given Application has an Environment with a name that is too long", () => {
-    const errors = performDataValidationOnEnvironment(mockApplicationStepsBadData[3].applications[0].environments[0]);
-    expect(errors.length).toEqual(1);
     expect(errors).toContainEqual({
-      applicationName: tooLongName,
+      operatorDisplayName: "",
+      invalidParameterName: "display_name",
+      invalidParameterValue: "",
+      validationMessage: ValidationMessage.INVALID_OPERATOR_NAME,
+    });
+  });
+  it("should return error map entries when given Application has an Environment and Operator with a name that is too long", () => {
+    const errors = performDataValidationOnEnvironment(mockApplicationStepsBadData[3].applications[0].environments[0]);
+    expect(errors.length).toEqual(2);
+    expect(errors).toContainEqual({
+      environmentName: tooLongName,
       invalidParameterName: "name",
       invalidParameterValue: tooLongName,
       validationMessage: ValidationMessage.INVALID_ENVIRONMENT_NAME,
+    });
+    expect(errors).toContainEqual({
+      operatorDisplayName: tooLongDisplayName,
+      invalidParameterName: "display_name",
+      invalidParameterValue: tooLongDisplayName,
+      validationMessage: ValidationMessage.INVALID_OPERATOR_NAME,
     });
   });
 });
