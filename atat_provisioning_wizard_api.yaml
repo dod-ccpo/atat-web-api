@@ -1194,7 +1194,7 @@ components:
         operators:
           - display_name: "Yoda"
             email: "yoda@iam.mil"
-            access: 'portfolio_administrator'
+            access: "portfolio_administrator"
         applications:
           - name: "Cloud City Evac Planner"
             description: "Application for planning an emergency evacuation"
