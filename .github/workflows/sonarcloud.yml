@@ -11,7 +11,8 @@ jobs:
       - name: Checkout PR code
         uses: actions/checkout@v2
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ github.event.workflow_run.head_branch }}
+          fetch-depth: 0
       - name: Download test artifacts
         uses: dawidd6/action-download-artifact@v2
         continue-on-error: true
