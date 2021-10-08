@@ -1191,9 +1191,17 @@ components:
                 pop_end_date: "2023-09-01"
     ApplicationStepEx:
       value:
+        operators:
+          - display_name: "Yoda"
+            email: "yoda@iam.mil"
+            access: 'portfolio_administrator'
         applications:
           - name: "Cloud City Evac Planner"
             description: "Application for planning an emergency evacuation"
+            operators:
+              - display_name: "Luke Skywalker"
+                email: "lostmy@hand.com"
+                access: "administrator"
             environments:
               - name: "production"
                 operators:
@@ -1202,24 +1210,28 @@ components:
                     access: "administrator"
                   - display_name: "Landonis Calrissian"
                     email: "thegambler@cloudcity.com"
-                    access: "read_only"
+                    access: "contributor"
                   - display_name: "Luke Skywalker"
                     email: "lostmy@hand.com"
                     access: "read_only"
           - name: "Jabba's Palace Expansion App"
             description: "Planning application for palace expansion"
+            operators:
+              - display_name: "Han Solo"
+                email: "frozen@carbonite.com"
+                access: "administrator"
             environments:
               - name: "development"
                 operators:
                   - display_name: "Salacious B. Crumb"
                     email: "monkey@lizard.com"
-                    access: "administrator"
+                    access: "contributor"
                   - display_name: "Han Solo"
                     email: "frozen@carbonite.com"
-                    access: "read_only"
+                    access: "administrator"
                   - display_name: "Boba Fett"
                     email: "original@mandalorian.com"
-                    access: "read_only"
+                    access: "contributor"
   securitySchemes:
     Fn::If:
       - IsAuthorizationRequired
