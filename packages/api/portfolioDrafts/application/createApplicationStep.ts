@@ -1,5 +1,8 @@
 import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
+import { Operator } from "../../models/Operator";
+import { AppEnvOperator } from "../../models/AppEnvOperator";
+
 import { Application } from "../../models/Application";
 import { ApplicationStep, ValidationMessage } from "../../models/ApplicationStep";
 import { Environment } from "../../models/Environment";
@@ -13,7 +16,16 @@ import {
   REQUEST_BODY_INVALID,
 } from "../../utils/errors";
 import { ApiSuccessResponse, SuccessStatusCode, ValidationErrorResponse } from "../../utils/response";
-import { isApplicationStep, isBodyPresent, isValidJson, isValidUuidV4 } from "../../utils/validation";
+import {
+  isApplication,
+  isApplicationStep,
+  isBodyPresent,
+  isEnvironment,
+  isOperator,
+  isValidJson,
+  isValidUuidV4,
+} from "../../utils/validation";
+
 export interface ApplicationValidationError {
   applicationName: string;
   invalidParameterName: string;
@@ -44,6 +56,25 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
   if (!isApplicationStep(requestBody)) {
     return REQUEST_BODY_INVALID;
   }
+
+  const { applications, operators } = requestBody;
+  if (applications.filter((app) => !isApplication(app)).length) {
+    return REQUEST_BODY_INVALID;
+  }
+
+  const appEnvs: Array<Environment> = applications.flatMap((app) => app.environments);
+  const invalidEnvs = appEnvs.filter((env) => !isEnvironment(env));
+  if (invalidEnvs.length) {
+    return REQUEST_BODY_INVALID;
+  }
+
+  const appOperators: Array<AppEnvOperator> = applications.flatMap((app) => app.operators);
+  const envOperators: Array<AppEnvOperator> = appEnvs.flatMap((env) => env.operators);
+  const allOperators: Array<Operator> = [...operators, ...appOperators, ...envOperators];
+  if (allOperators.filter((oper) => !isOperator(oper)).length) {
+    return REQUEST_BODY_INVALID;
+  }
+
   const applicationStep: ApplicationStep = requestBody;
   const errors: Array<ApplicationValidationError> = performDataValidation(applicationStep);
   if (errors.length) {

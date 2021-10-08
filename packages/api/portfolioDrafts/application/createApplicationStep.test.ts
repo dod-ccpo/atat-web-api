@@ -5,6 +5,7 @@ import {
   mockApplicationStepsBadData,
   mockPortfolioDraftSummary,
   mockBadPortfolioDraftSummary,
+  mockApplicationsMissingFields,
 } from "./commonMockData";
 import { mockClient } from "aws-sdk-client-mock";
 import { v4 as uuidv4 } from "uuid";
@@ -101,6 +102,55 @@ describe("Request body tests", function () {
       pathParameters: { portfolioDraftId: uuidv4() },
     } as any;
     const result = await handler(notApplicationStepRequest);
+    expect(result).toBeInstanceOf(OtherErrorResponse);
+    expect(result).toEqual(REQUEST_BODY_INVALID);
+    expect(result.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
+    expect(JSON.parse(result.body).message).toMatch(/A valid request body must be provided/);
+  });
+  it("should return an error when incorrect application shape found", async () => {
+    const invalidRequest: APIGatewayProxyEvent = {
+      body: JSON.stringify({ applications: mockApplicationsMissingFields, operators: [] }),
+      pathParameters: { portfolioDraftId: uuidv4() },
+    } as any;
+    const result = await handler(invalidRequest);
+    expect(result).toBeInstanceOf(OtherErrorResponse);
+    expect(result).toEqual(REQUEST_BODY_INVALID);
+    expect(result.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
+    expect(JSON.parse(result.body).message).toMatch(/A valid request body must be provided/);
+  });
+  it("should return an error when incorrect environment shape found", async () => {
+    const badEnvironmentInApplication = [
+      {
+        name: "Cloud City Evac Planner",
+        description: "Some Application",
+        environments: [
+          {
+            badName: "bad",
+            noOperators: [],
+          },
+        ],
+        operators: [],
+      },
+    ];
+    const invalidRequest: APIGatewayProxyEvent = {
+      body: JSON.stringify({ applications: badEnvironmentInApplication, operators: [] }),
+      pathParameters: { portfolioDraftId: uuidv4() },
+    } as any;
+    const result = await handler(invalidRequest);
+    expect(result).toBeInstanceOf(OtherErrorResponse);
+    expect(result).toEqual(REQUEST_BODY_INVALID);
+    expect(result.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
+    expect(JSON.parse(result.body).message).toMatch(/A valid request body must be provided/);
+  });
+  it("should return an error when incorrect operator shape found", async () => {
+    const invalidRequest: APIGatewayProxyEvent = {
+      body: JSON.stringify({
+        applications: [],
+        operators: [{ noName: "the dark side", noAcess: "take over the universe" }],
+      }),
+      pathParameters: { portfolioDraftId: uuidv4() },
+    } as any;
+    const result = await handler(invalidRequest);
     expect(result).toBeInstanceOf(OtherErrorResponse);
     expect(result).toEqual(REQUEST_BODY_INVALID);
     expect(result.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
