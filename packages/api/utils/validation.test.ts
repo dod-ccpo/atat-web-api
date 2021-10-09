@@ -5,6 +5,7 @@ import {
   mockApplicationsMissingFields,
   mockApplicationCloudCityEvacPlanner,
   mockEnvironmentsMissingFields,
+  mockApplicationJabbasPalaceExpansionApp,
 } from "../portfolioDrafts/application/commonMockData";
 import {
   isBodyPresent,
@@ -20,6 +21,7 @@ import {
   isApplicationStep,
   isApplication,
   isEnvironment,
+  isOperator,
 } from "./validation";
 
 describe("Testing validation of request body", function () {
@@ -228,6 +230,35 @@ describe("isEnvironment()", () => {
   });
   it("should reject an Environment missing any field", async () => {
     expect(isEnvironment(mockEnvironmentsMissingFields)).toEqual(false);
+  });
+});
+describe("isOperator()", () => {
+  const missingOperatorFields = [
+    {
+      // display_name: "name",
+      email: "yoda@iam.mil",
+      access: "administrator",
+    },
+    {
+      display_name: "name",
+      // email: "yoda@iam.mil",
+      access: "administrator",
+    },
+    {
+      display_name: "name",
+      email: "yoda@iam.mil",
+      // access: "administrator",
+    },
+  ];
+
+  it.each([true, 1, undefined, null])("should reject non-object", (item) => {
+    expect(isOperator(item)).toEqual(false);
+  });
+  it.each(mockApplicationJabbasPalaceExpansionApp.operators)("should accept an Operator object", (item) => {
+    expect(isOperator(item)).toBe(true);
+  });
+  it.each(missingOperatorFields)("should reject Operator with missing field", (item) => {
+    expect(isOperator(item)).toBe(false);
   });
 });
 
