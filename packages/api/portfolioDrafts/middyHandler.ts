@@ -1,110 +1,98 @@
-import middy from "@middy/core";
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-// import middleware from "../utils/middleware";
+import middy, { MiddyfiedHandler } from "@middy/core";
+import { APIGatewayProxyEvent, APIGatewayProxyResult, Handler, Context } from "aws-lambda";
 import jsonBodyParser from "@middy/http-json-body-parser";
-import httpErrorHandler from "@middy/http-error-handler";
 import validator from "@middy/validator";
-import { schema } from "../models/PortfolioStep";
+import { PortfolioStep, schema, schemaWrapper } from "../models/PortfolioStep";
+import { ApiSuccessResponse, DatabaseResult, DynamoDBException, SuccessStatusCode } from "../utils/response";
+import { NO_SUCH_PORTFOLIO_DRAFT } from "../utils/errors";
+import { PORTFOLIO_STEP } from "../models/PortfolioDraft";
+import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
+import { dynamodbDocumentClient as client } from "../utils/dynamodb";
+import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
+import httpEventNormalizer from "@middy/http-event-normalizer";
+import { customMiddleware } from "../utils/customMiddleware";
 
-// example baseHandler function
-async function baseHandler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+// This is a wrapper for the ApiGatewayProxyEvent will be moved somewhere else
+// middy validator & http-json-body-parser gives us a parsed, validated body in the APIGatewayProxyEvent with type of <T>
+// middy http-event-normalizer makes several fields on our ValidatedEvent NonNullable (see portfolioDraftId!, might need tweaking)
+interface NormalizedValidatedEvent<T> extends Omit<APIGatewayProxyEvent, "body"> {
+  queryStringParameters: NonNullable<APIGatewayProxyEvent["queryStringParameters"]>;
+  multiValueQueryStringParameters: NonNullable<APIGatewayProxyEvent["multiValueQueryStringParameters"]>;
+  pathParameters: NonNullable<APIGatewayProxyEvent["pathParameters"]>;
+  body: T; // parsed body is type T
+}
+// APIGatewayProxyEventHandler for our NormalizedValidatedEvent
+export type CustomAPIGatewayProxyEventHandler<T> = Handler<NormalizedValidatedEvent<T>, APIGatewayProxyResult>;
+
+// middyfy is a function that wraps the ApiGatewayProxyEvent
+export const middyfy = (
+  handler: CustomAPIGatewayProxyEventHandler<never>,
+  schema: Record<string, unknown>
+): MiddyfiedHandler<NormalizedValidatedEvent<never>, APIGatewayProxyResult, Error, Context> => {
+  handler.toString();
+  return middy(handler)
+    .use(jsonBodyParser()) // parse the event.body to ensure its valid json
+    .use(httpEventNormalizer()) // check the path params, query params, and ensure they are not null
+    .use(
+      validator({
+        // ajv validator module
+        // you could also try customMiddleware, but its slower
+        inputSchema: schema,
+      })
+    )
+    .use(JSONErrorHandlerMiddleware());
+};
+
+const hello: CustomAPIGatewayProxyEventHandler<PortfolioStep> = async (event) => {
   console.log(event.body);
-  return {
-    statusCode: 200,
-    body: "Hello world",
-  };
-}
+  const portfolioStep: PortfolioStep = event.body;
+  const portfolioDraftId = event.pathParameters.portfolioDraftId!;
+  // Perform database call
+  const databaseResult = await createPortfolioStepCommand(portfolioDraftId, portfolioStep);
+  if (databaseResult instanceof DynamoDBException) {
+    return databaseResult.errorResponse;
+  }
+  return new ApiSuccessResponse<PortfolioStep>(event.body, SuccessStatusCode.CREATED);
+};
 
-const handler = middy(baseHandler);
-handler
-  .use(jsonBodyParser()) // parses request body into JSON object
-  .use(validator({ inputSchema: schema })) // validates request body to see if it matches schema
-  .use(httpErrorHandler()); // http error handlers and responses
+export const handler = middyfy(hello, schemaWrapper);
 
-export { handler };
-
-// This is the model output for the schema of the portfoliostep, which will be taken from our api yaml as a TODO
-// Currently it is being exported from the PortfolioStep Model, but it needs to be taken right from the spec.
-// A problem in retrieving the model is that you need to wrap the model in a body object for it to validate properly
-// Below is the schema used in validation:
-/*
-const schema = {
-  type: "object",
-  properties: {
-    body: {
-      type: "object",
-      properties: {
-        name: { type: "string" },
-        csp: {
-          type: "string",
-          enum: ["aws", "azure"],
+export async function createPortfolioStepCommand(
+  portfolioDraftId: string,
+  portfolioStep: PortfolioStep
+): Promise<DatabaseResult> {
+  const now = new Date().toISOString();
+  try {
+    return await client.send(
+      new UpdateCommand({
+        TableName: process.env.ATAT_TABLE_NAME ?? "",
+        Key: {
+          id: portfolioDraftId,
         },
-        portfolio_managers: {
-          type: "array",
-          items: {
-            type: "string",
-            format: "email",
-          },
+        UpdateExpression: `set #portfolioVariable = :portfolio, updated_at = :now,
+          #portfolioName = :portfolioName, #portfolioDescription = :portfolioDescription, num_portfolio_managers = :numOfManagers`,
+        ExpressionAttributeNames: {
+          "#portfolioVariable": PORTFOLIO_STEP,
+          "#portfolioName": "name",
+          "#portfolioDescription": "description",
         },
-        dod_components: {
-          type: "array",
-          items: {
-            type: "string",
-            enum: [
-              "air_force",
-              "army",
-              "marine_corps",
-              "navy",
-              "space_force",
-              "combatant_command",
-              "joint_staff",
-              "dafa",
-              "osd_psas",
-              "nsa",
-            ],
-          },
+        ExpressionAttributeValues: {
+          ":portfolio": portfolioStep,
+          ":now": now,
+          ":portfolioName": portfolioStep.name,
+          ":portfolioDescription": portfolioStep.description,
+          ":numOfManagers": portfolioStep.portfolio_managers.length,
         },
-        description: {
-          type: "string",
-        },
-      },
-      required: ["name", "portfolio_managers", "description", "csp"], // Insert here all required event properties
-    },
-  },
-}; */
-// This is the schema output from our API yaml spec:
-/*
-{
-  "required" : [ "csp", "dod_components", "name", "portfolio_managers" ],
-  "type" : "object",
-  "properties" : {
-    "csp" : {
-      "type" : "string",
-      "enum" : [ "aws", "azure" ]
-    },
-    "portfolio_managers" : {
-      "type" : "array",
-      "items" : {
-        "type" : "string",
-        "format" : "email"
-      }
-    },
-    "dod_components" : {
-      "type" : "array",
-      "items" : {
-        "type" : "string",
-        "enum" : [ "air_force", "army", "marine_corps", "navy", "space_force", "combatant_command", "joint_staff", "dafa", "osd_psas", "nsa" ]
-      }
-    },
-    "name" : {
-      "type" : "string"
-    },
-    "description" : {
-      "type" : "string"
+        ConditionExpression: "attribute_exists(created_at)",
+        ReturnValues: "ALL_NEW",
+      })
+    );
+  } catch (error) {
+    if (error.name === "ConditionalCheckFailedException") {
+      return new DynamoDBException(NO_SUCH_PORTFOLIO_DRAFT);
     }
-  },
-  "additionalProperties" : false,
-  "description" : "Represents step 1 of the Portfolio Draft Wizard"
+    // 5xx error logging
+    console.log(error);
+    throw error;
+  }
 }
-*/
-// Notice how properties is wrapped in a body object, which is required to validate the event.body of the APIGatewayProxyEvent
