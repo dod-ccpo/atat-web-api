@@ -351,7 +351,7 @@
 											"variable": [
 												{
 													"key": "portfolioDraftId",
-													"value": null
+													"value": "{{portfolioDraftId}}"
 												}
 											]
 										}
@@ -605,7 +605,7 @@
 											"variable": [
 												{
 													"key": "portfolioDraftId",
-													"value": "4eeba8e3-3409-4a4d-beaf-7114d20d05da",
+													"value": "{{portfolioDraftId}}",
 													"description": "(Required) "
 												}
 											]
@@ -759,7 +759,7 @@
 											"variable": [
 												{
 													"key": "portfolioDraftId",
-													"value": null
+													"value": "{{portfolioDraftId}}"
 												}
 											]
 										}
@@ -1013,7 +1013,7 @@
 											"variable": [
 												{
 													"key": "portfolioDraftId",
-													"value": "4eeba8e3-3409-4a4d-beaf-7114d20d05da",
+													"value": "{{portfolioDraftId}}",
 													"description": "(Required) "
 												}
 											]
@@ -1129,7 +1129,7 @@
 											"variable": [
 												{
 													"key": "portfolioDraftId",
-													"value": null
+													"value": "{{portfolioDraftId}}"
 												}
 											]
 										}
@@ -1223,7 +1223,7 @@
 											"variable": [
 												{
 													"key": "portfolioDraftId",
-													"value": "do pariatur labore",
+													"value": "{{portfolioDraftId}}",
 													"description": "(Required) "
 												}
 											]
@@ -1399,7 +1399,7 @@
 											"variable": [
 												{
 													"key": "portfolioDraftId",
-													"value": null
+													"value": "{{portfolioDraftId}}"
 												}
 											]
 										}
@@ -1594,7 +1594,7 @@
 									"variable": [
 										{
 											"key": "portfolioDraftId",
-											"value": "do pariatur labore",
+											"value": "{{portfolioDraftId}}",
 											"description": "(Required) "
 										}
 									]
@@ -1699,7 +1699,7 @@
 									"variable": [
 										{
 											"key": "portfolioDraftId",
-											"value": null
+											"value": "{{portfolioDraftId}}"
 										}
 									]
 								}
@@ -2472,7 +2472,7 @@
 									"variable": [
 										{
 											"key": "taskOrderId",
-											"value": null
+											"value": "{{taskOrderId}}"
 										}
 									]
 								}
@@ -2800,6 +2800,10 @@
 		},
 		{
 			"key": "portfolioDraftId",
+			"value": ""
+		},
+		{
+			"key": "taskOrderId",
 			"value": ""
 		}
 	]
