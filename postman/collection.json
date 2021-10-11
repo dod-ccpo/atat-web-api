@@ -1,0 +1,2493 @@
+{
+	"info": {
+		"_postman_id": "81fa37bf-3a1d-40fe-836e-a974233af645",
+		"name": "ATAT Web API Collection",
+		"description": "This is a DRAFT version of the ATAT Portfolio Draft API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "portfolioDrafts",
+			"item": [
+				{
+					"name": "{portfolioDraftId}",
+					"item": [
+						{
+							"name": "application",
+							"item": [
+								{
+									"name": "getApplicationStep",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/portfolioDrafts/:portfolioDraftId/application",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"portfolioDrafts",
+												":portfolioDraftId",
+												"application"
+											],
+											"variable": [
+												{
+													"key": "portfolioDraftId",
+													"value": "do pariatur labore",
+													"description": "(Required) "
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "200 OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/portfolioDrafts/:portfolioDraftId/application",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"portfolioDrafts",
+														":portfolioDraftId",
+														"application"
+													],
+													"variable": [
+														{
+															"key": "portfolioDraftId"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"operators\": [\n  {\n   \"display_name\": \"commodo\",\n   \"email\": \"2my3C3H@PFcNOkBxmapMeTYHIBCLEYJYAmD.hoyh\"\n  },\n  {\n   \"display_name\": \"mollit et\",\n   \"email\": \"0rKOZm@X.qoc\"\n  }\n ],\n \"applications\": [\n  {\n   \"description\": \"pariatur ipsum esse Lorem occaecat\",\n   \"environments\": [\n    {\n     \"name\": \"ut adipisicing officia\",\n     \"operators\": [\n      {\n       \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n      },\n      {\n       \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n      }\n     ]\n    },\n    {\n     \"name\": \"eiusmod elit\",\n     \"operators\": [\n      {\n       \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n      },\n      {\n       \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n      }\n     ]\n    }\n   ],\n   \"name\": \"dolor culpa\",\n   \"operators\": [\n    {\n     \"display_name\": \"sint do Lorem qui\",\n     \"email\": \"W7nHqBPogUK@MTlTXLAf.xzia\"\n    },\n    {\n     \"display_name\": \"culpa nisi\",\n     \"email\": \"IpcPw-ihGCp6NNw@iSDcKwlAdhafJfjtMOIWYZrpNHbNrQIt.qnh\"\n    }\n   ]\n  },\n  {\n   \"description\": \"amet aute et esse\",\n   \"environments\": [\n    {\n     \"name\": \"ipsum quis\",\n     \"operators\": [\n      {\n       \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n      },\n      {\n       \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n      }\n     ]\n    },\n    {\n     \"name\": \"eiusmod voluptate laboris qui\",\n     \"operators\": [\n      {\n       \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n      },\n      {\n       \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n      }\n     ]\n    }\n   ],\n   \"name\": \"ut aute\",\n   \"operators\": [\n    {\n     \"display_name\": \"eiusmod pariatur sunt ad\",\n     \"email\": \"l9llYlQ@bBKIZdmCH.hvbm\"\n    },\n    {\n     \"display_name\": \"tempor \",\n     \"email\": \"TcqxBVZuY4@iOQVjWgIlWgKRKWTWSHbKoqaTgb.kp\"\n    }\n   ]\n  }\n ]\n}"
+										},
+										{
+											"name": "400 Bad Request",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/portfolioDrafts/:portfolioDraftId/application",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"portfolioDrafts",
+														":portfolioDraftId",
+														"application"
+													],
+													"variable": [
+														{
+															"key": "portfolioDraftId"
+														}
+													]
+												}
+											},
+											"status": "Bad Request",
+											"code": 400,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "text/plain"
+												}
+											],
+											"cookie": [],
+											"body": ""
+										},
+										{
+											"name": "404 Not Found",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/portfolioDrafts/:portfolioDraftId/application",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"portfolioDrafts",
+														":portfolioDraftId",
+														"application"
+													],
+													"variable": [
+														{
+															"key": "portfolioDraftId"
+														}
+													]
+												}
+											},
+											"status": "Not Found",
+											"code": 404,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "text/plain"
+												}
+											],
+											"cookie": [],
+											"body": ""
+										}
+									]
+								},
+								{
+									"name": "createApplicationStep",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"operators\": [\n        {\n            \"display_name\": \"{{$randomFirstName}} {{$randomLastName}}\",\n            \"email\": \"{{$randomExampleEmail}}\"\n        },\n        {\n            \"display_name\": \"{{$randomFirstName}} {{$randomLastName}}\",\n            \"email\": \"{{$randomExampleEmail}}\"\n        }\n    ],\n    \"applications\": [\n        {\n            \"description\": \"{{$randomLoremSentences}}\",\n            \"environments\": [\n                {\n                    \"name\": \"{{$randomColor}} environment\",\n                    \"operators\": [\n                        {\n                            \"display_name\": \"{{$randomFirstName}} {{$randomLastName}}\",\n                            \"email\": \"{{$randomExampleEmail}}\"\n                        },\n                        {\n                            \"display_name\": \"{{$randomFirstName}} {{$randomLastName}}\",\n                            \"email\": \"{{$randomExampleEmail}}\"\n                        }\n                    ]\n                },\n                {\n                    \"name\": \"{{$randomColor}} environment\",\n                    \"operators\": [\n                        {\n                            \"display_name\": \"{{$randomFirstName}} {{$randomLastName}}\",\n                            \"email\": \"{{$randomExampleEmail}}\"\n                        },\n                        {\n                            \"display_name\": \"{{$randomFirstName}} {{$randomLastName}}\",\n                            \"email\": \"{{$randomExampleEmail}}\"\n                        }\n                    ]\n                }\n            ],\n            \"name\": \"{{$randomBsAdjective}} {{$randomBsBuzz}} {{$randomNoun}} application\",\n            \"operators\": [\n                {\n                    \"display_name\": \"{{$randomFirstName}} {{$randomLastName}}\",\n                    \"email\": \"{{$randomExampleEmail}}\"\n                },\n                {\n                    \"display_name\": \"{{$randomFirstName}} {{$randomLastName}}\",\n                    \"email\": \"{{$randomExampleEmail}}\"\n                }\n            ]\n        },\n        {\n            \"description\": \"{{$randomLoremSentences}}\",\n            \"environments\": [\n                {\n                    \"name\": \"{{$randomColor}} environment\",\n                    \"operators\": [\n                        {\n                            \"display_name\": \"{{$randomFirstName}} {{$randomLastName}}\",\n                            \"email\": \"{{$randomExampleEmail}}\"\n                        },\n                        {\n                            \"display_name\": \"{{$randomFirstName}} {{$randomLastName}}\",\n                            \"email\": \"{{$randomExampleEmail}}\"\n                        }\n                    ]\n                },\n                {\n                    \"name\": \"{{$randomColor}} environment\",\n                    \"operators\": [\n                        {\n                            \"display_name\": \"{{$randomFirstName}} {{$randomLastName}}\",\n                            \"email\": \"{{$randomExampleEmail}}\"\n                        },\n                        {\n                            \"display_name\": \"{{$randomFirstName}} {{$randomLastName}}\",\n                            \"email\": \"{{$randomExampleEmail}}\"\n                        }\n                    ]\n                }\n            ],\n            \"name\": \"{{$randomWords}} application\",\n            \"operators\": [\n                {\n                    \"display_name\": \"{{$randomFirstName}} {{$randomLastName}}\",\n                    \"email\": \"{{$randomExampleEmail}}\"\n                },\n                {\n                    \"display_name\": \"{{$randomFirstName}} {{$randomLastName}}\",\n                    \"email\": \"{{$randomExampleEmail}}\"\n                }\n            ]\n        }\n    ]\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/portfolioDrafts/:portfolioDraftId/application",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"portfolioDrafts",
+												":portfolioDraftId",
+												"application"
+											],
+											"variable": [
+												{
+													"key": "portfolioDraftId",
+													"value": "4eeba8e3-3409-4a4d-beaf-7114d20d05da",
+													"description": "(Required) "
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "201 Created",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"operators\": [\n        {\n            \"display_name\": \"minim Ut\",\n            \"email\": \"FDDprHE@QDQOoYwTsRRnhuxOxaLpAxobMKLmaCZIv.wv\"\n        },\n        {\n            \"display_name\": \"cupidatat ut Duis\",\n            \"email\": \"x1S51vV@ksPgswhPAcnxTx.juz\"\n        }\n    ],\n    \"applications\": [\n        {\n            \"description\": \"voluptate ipsum sunt aliquip\",\n            \"environments\": [\n                {\n                    \"name\": \"u\",\n                    \"operators\": [\n                        {\n                            \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n                        },\n                        {\n                            \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n                        }\n                    ]\n                },\n                {\n                    \"name\": \"irure a\",\n                    \"operators\": [\n                        {\n                            \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n                        },\n                        {\n                            \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n                        }\n                    ]\n                }\n            ],\n            \"name\": \"quis enim\",\n            \"operators\": [\n                {\n                    \"display_name\": \"Lorem\",\n                    \"email\": \"O6lDNyXN@jhaBnzdOCsOutFZNEV.zol\"\n                },\n                {\n                    \"display_name\": \"non officia ad\",\n                    \"email\": \"BDMkbdKIdF1jF4@siqugkss.alep\"\n                }\n            ]\n        },\n        {\n            \"description\": \"pariatur id\",\n            \"environments\": [\n                {\n                    \"name\": \"ex ad dolor fugiat\",\n                    \"operators\": [\n                        {\n                            \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n                        },\n                        {\n                            \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n                        }\n                    ]\n                },\n                {\n                    \"name\": \"dolore do\",\n                    \"operators\": [\n                        {\n                            \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n                        },\n                        {\n                            \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n                        }\n                    ]\n                }\n            ],\n            \"name\": \"ipsum consectetur esse\",\n            \"operators\": [\n                {\n                    \"display_name\": \"exercitation occaecat deserunt dolor anim\",\n                    \"email\": \"Fva-hL@VIXDrxkNAPVvxShRcJFYVvVocGAumN.iv\"\n                },\n                {\n                    \"display_name\": \"do velit adipisicing ex\",\n                    \"email\": \"7e88BVsmn90J@RfBpNHRlFvttwXlV.ur\"\n                }\n            ]\n        }\n    ]\n}"
+												},
+												"url": {
+													"raw": "{{baseUrl}}/portfolioDrafts/:portfolioDraftId/application",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"portfolioDrafts",
+														":portfolioDraftId",
+														"application"
+													],
+													"variable": [
+														{
+															"key": "portfolioDraftId"
+														}
+													]
+												}
+											},
+											"status": "Created",
+											"code": 201,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"operators\": [\n  {\n   \"display_name\": \"minim Ut\",\n   \"email\": \"FDDprHE@QDQOoYwTsRRnhuxOxaLpAxobMKLmaCZIv.wv\"\n  },\n  {\n   \"display_name\": \"cupidatat ut Duis\",\n   \"email\": \"x1S51vV@ksPgswhPAcnxTx.juz\"\n  }\n ],\n \"applications\": [\n  {\n   \"description\": \"voluptate ipsum sunt aliquip\",\n   \"environments\": [\n    {\n     \"name\": \"u\",\n     \"operators\": [\n      {\n       \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n      },\n      {\n       \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n      }\n     ]\n    },\n    {\n     \"name\": \"irure a\",\n     \"operators\": [\n      {\n       \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n      },\n      {\n       \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n      }\n     ]\n    }\n   ],\n   \"name\": \"quis enim\",\n   \"operators\": [\n    {\n     \"display_name\": \"Lorem\",\n     \"email\": \"O6lDNyXN@jhaBnzdOCsOutFZNEV.zol\"\n    },\n    {\n     \"display_name\": \"non officia ad\",\n     \"email\": \"BDMkbdKIdF1jF4@siqugkss.alep\"\n    }\n   ]\n  },\n  {\n   \"description\": \"pariatur id\",\n   \"environments\": [\n    {\n     \"name\": \"ex ad dolor fugiat\",\n     \"operators\": [\n      {\n       \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n      },\n      {\n       \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n      }\n     ]\n    },\n    {\n     \"name\": \"dolore do\",\n     \"operators\": [\n      {\n       \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n      },\n      {\n       \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n      }\n     ]\n    }\n   ],\n   \"name\": \"ipsum consectetur esse\",\n   \"operators\": [\n    {\n     \"display_name\": \"exercitation occaecat deserunt dolor anim\",\n     \"email\": \"Fva-hL@VIXDrxkNAPVvxShRcJFYVvVocGAumN.iv\"\n    },\n    {\n     \"display_name\": \"do velit adipisicing ex\",\n     \"email\": \"7e88BVsmn90J@RfBpNHRlFvttwXlV.ur\"\n    }\n   ]\n  }\n ]\n}"
+										},
+										{
+											"name": "400 Bad Request",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"operators\": [\n        {\n            \"display_name\": \"minim Ut\",\n            \"email\": \"FDDprHE@QDQOoYwTsRRnhuxOxaLpAxobMKLmaCZIv.wv\"\n        },\n        {\n            \"display_name\": \"cupidatat ut Duis\",\n            \"email\": \"x1S51vV@ksPgswhPAcnxTx.juz\"\n        }\n    ],\n    \"applications\": [\n        {\n            \"description\": \"voluptate ipsum sunt aliquip\",\n            \"environments\": [\n                {\n                    \"name\": \"u\",\n                    \"operators\": [\n                        {\n                            \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n                        },\n                        {\n                            \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n                        }\n                    ]\n                },\n                {\n                    \"name\": \"irure a\",\n                    \"operators\": [\n                        {\n                            \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n                        },\n                        {\n                            \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n                        }\n                    ]\n                }\n            ],\n            \"name\": \"quis enim\",\n            \"operators\": [\n                {\n                    \"display_name\": \"Lorem\",\n                    \"email\": \"O6lDNyXN@jhaBnzdOCsOutFZNEV.zol\"\n                },\n                {\n                    \"display_name\": \"non officia ad\",\n                    \"email\": \"BDMkbdKIdF1jF4@siqugkss.alep\"\n                }\n            ]\n        },\n        {\n            \"description\": \"pariatur id\",\n            \"environments\": [\n                {\n                    \"name\": \"ex ad dolor fugiat\",\n                    \"operators\": [\n                        {\n                            \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n                        },\n                        {\n                            \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n                        }\n                    ]\n                },\n                {\n                    \"name\": \"dolore do\",\n                    \"operators\": [\n                        {\n                            \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n                        },\n                        {\n                            \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n                        }\n                    ]\n                }\n            ],\n            \"name\": \"ipsum consectetur esse\",\n            \"operators\": [\n                {\n                    \"display_name\": \"exercitation occaecat deserunt dolor anim\",\n                    \"email\": \"Fva-hL@VIXDrxkNAPVvxShRcJFYVvVocGAumN.iv\"\n                },\n                {\n                    \"display_name\": \"do velit adipisicing ex\",\n                    \"email\": \"7e88BVsmn90J@RfBpNHRlFvttwXlV.ur\"\n                }\n            ]\n        }\n    ]\n}"
+												},
+												"url": {
+													"raw": "{{baseUrl}}/portfolioDrafts/:portfolioDraftId/application",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"portfolioDrafts",
+														":portfolioDraftId",
+														"application"
+													],
+													"variable": [
+														{
+															"key": "portfolioDraftId"
+														}
+													]
+												}
+											},
+											"status": "Bad Request",
+											"code": 400,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"code\": \"INVALID_INPUT\",\n \"error_map\": {},\n \"message\": \"laboris et incididunt\"\n}"
+										},
+										{
+											"name": "404 Not Found",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"operators\": [\n        {\n            \"display_name\": \"minim Ut\",\n            \"email\": \"FDDprHE@QDQOoYwTsRRnhuxOxaLpAxobMKLmaCZIv.wv\"\n        },\n        {\n            \"display_name\": \"cupidatat ut Duis\",\n            \"email\": \"x1S51vV@ksPgswhPAcnxTx.juz\"\n        }\n    ],\n    \"applications\": [\n        {\n            \"description\": \"voluptate ipsum sunt aliquip\",\n            \"environments\": [\n                {\n                    \"name\": \"u\",\n                    \"operators\": [\n                        {\n                            \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n                        },\n                        {\n                            \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n                        }\n                    ]\n                },\n                {\n                    \"name\": \"irure a\",\n                    \"operators\": [\n                        {\n                            \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n                        },\n                        {\n                            \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n                        }\n                    ]\n                }\n            ],\n            \"name\": \"quis enim\",\n            \"operators\": [\n                {\n                    \"display_name\": \"Lorem\",\n                    \"email\": \"O6lDNyXN@jhaBnzdOCsOutFZNEV.zol\"\n                },\n                {\n                    \"display_name\": \"non officia ad\",\n                    \"email\": \"BDMkbdKIdF1jF4@siqugkss.alep\"\n                }\n            ]\n        },\n        {\n            \"description\": \"pariatur id\",\n            \"environments\": [\n                {\n                    \"name\": \"ex ad dolor fugiat\",\n                    \"operators\": [\n                        {\n                            \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n                        },\n                        {\n                            \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n                        }\n                    ]\n                },\n                {\n                    \"name\": \"dolore do\",\n                    \"operators\": [\n                        {\n                            \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n                        },\n                        {\n                            \"value\": \"<Error: Too many levels of nesting to fake this schema>\"\n                        }\n                    ]\n                }\n            ],\n            \"name\": \"ipsum consectetur esse\",\n            \"operators\": [\n                {\n                    \"display_name\": \"exercitation occaecat deserunt dolor anim\",\n                    \"email\": \"Fva-hL@VIXDrxkNAPVvxShRcJFYVvVocGAumN.iv\"\n                },\n                {\n                    \"display_name\": \"do velit adipisicing ex\",\n                    \"email\": \"7e88BVsmn90J@RfBpNHRlFvttwXlV.ur\"\n                }\n            ]\n        }\n    ]\n}"
+												},
+												"url": {
+													"raw": "{{baseUrl}}/portfolioDrafts/:portfolioDraftId/application",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"portfolioDrafts",
+														":portfolioDraftId",
+														"application"
+													],
+													"variable": [
+														{
+															"key": "portfolioDraftId"
+														}
+													]
+												}
+											},
+											"status": "Not Found",
+											"code": 404,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "text/plain"
+												}
+											],
+											"cookie": [],
+											"body": ""
+										}
+									]
+								},
+								{
+									"name": "/portfolioDrafts/:portfolioDraftId/application",
+									"request": {
+										"method": "OPTIONS",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/portfolioDrafts/:portfolioDraftId/application",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"portfolioDrafts",
+												":portfolioDraftId",
+												"application"
+											],
+											"variable": [
+												{
+													"key": "portfolioDraftId"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "200 OK",
+											"originalRequest": {
+												"method": "OPTIONS",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/portfolioDrafts/:portfolioDraftId/application",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"portfolioDrafts",
+														":portfolioDraftId",
+														"application"
+													],
+													"variable": [
+														{
+															"key": "portfolioDraftId"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Access-Control-Allow-Origin",
+													"value": "do pariatur labore",
+													"description": ""
+												},
+												{
+													"key": "Access-Control-Allow-Methods",
+													"value": "do pariatur labore",
+													"description": ""
+												},
+												{
+													"key": "Access-Control-Allow-Headers",
+													"value": "do pariatur labore",
+													"description": ""
+												},
+												{
+													"key": "Content-Type",
+													"value": "text/plain"
+												}
+											],
+											"cookie": [],
+											"body": ""
+										}
+									]
+								}
+							],
+							"description": "## application\n### Description\nOperations for storing and retrieving data for Step 3 Application (application_step), and Step 4 Operators"
+						},
+						{
+							"name": "funding",
+							"item": [
+								{
+									"name": "getFundingStep",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/portfolioDrafts/:portfolioDraftId/funding",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"portfolioDrafts",
+												":portfolioDraftId",
+												"funding"
+											],
+											"variable": [
+												{
+													"key": "portfolioDraftId",
+													"value": "do pariatur labore",
+													"description": "(Required) "
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "200 OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/portfolioDrafts/:portfolioDraftId/funding",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"portfolioDrafts",
+														":portfolioDraftId",
+														"funding"
+													],
+													"variable": [
+														{
+															"key": "portfolioDraftId"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"task_orders\": [\n  {\n   \"clins\": [\n    {\n     \"clin_number\": \"labore consectetur ci\",\n     \"idiq_clin\": \"non eiusmod amet deserunt nisi\",\n     \"obligated_funds\": 78682927.28900954,\n     \"pop_end_date\": \"1980-01-15\",\n     \"pop_start_date\": \"1955-05-08\",\n     \"total_clin_value\": -14116021.453246221\n    },\n    {\n     \"clin_number\": \"magna sint\",\n     \"idiq_clin\": \"est elit ut in\",\n     \"obligated_funds\": 43561991.93747127,\n     \"pop_end_date\": \"1945-03-23\",\n     \"pop_start_date\": \"1948-10-20\",\n     \"total_clin_value\": -16537865.479190648\n    }\n   ],\n   \"task_order_number\": \"adipisicing ea Ut deserunt\"\n  },\n  {\n   \"clins\": [\n    {\n     \"clin_number\": \"eiusmod amet adipisicing s\",\n     \"idiq_clin\": \"Duis esse\",\n     \"obligated_funds\": -10245927.623849481,\n     \"pop_end_date\": \"1949-11-27\",\n     \"pop_start_date\": \"1956-09-13\",\n     \"total_clin_value\": 63783364.752477825\n    },\n    {\n     \"clin_number\": \"sint tempor velit fugiat ut\",\n     \"idiq_clin\": \"qui officia sit\",\n     \"obligated_funds\": 67269727.1221245,\n     \"pop_end_date\": \"1963-11-26\",\n     \"pop_start_date\": \"1963-06-04\",\n     \"total_clin_value\": 85398247.28760284\n    }\n   ],\n   \"task_order_number\": \"id est minim exercitation aute\"\n  }\n ]\n}"
+										},
+										{
+											"name": "400 Bad Request",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/portfolioDrafts/:portfolioDraftId/funding",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"portfolioDrafts",
+														":portfolioDraftId",
+														"funding"
+													],
+													"variable": [
+														{
+															"key": "portfolioDraftId"
+														}
+													]
+												}
+											},
+											"status": "Bad Request",
+											"code": 400,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "text/plain"
+												}
+											],
+											"cookie": [],
+											"body": ""
+										},
+										{
+											"name": "404 Not Found",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/portfolioDrafts/:portfolioDraftId/funding",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"portfolioDrafts",
+														":portfolioDraftId",
+														"funding"
+													],
+													"variable": [
+														{
+															"key": "portfolioDraftId"
+														}
+													]
+												}
+											},
+											"status": "Not Found",
+											"code": 404,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "text/plain"
+												}
+											],
+											"cookie": [],
+											"body": ""
+										}
+									]
+								},
+								{
+									"name": "createFundingStep",
+									"event": [
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													"const millisInDay = 24 * 60 * 60 * 1000;\r",
+													"const now = Date.now();\r",
+													"const isoFormatDay = (base, offset = 0) => new Date(base + offset).toISOString().slice(0, 10);\r",
+													"const yesterday = isoFormatDay(now, -millisInDay);\r",
+													"const today = isoFormatDay(now);\r",
+													"const tomorrow = isoFormatDay(now, millisInDay);\r",
+													"\r",
+													"//full ISO datetime\r",
+													"pm.collectionVariables.set(\"now\", new Date(now).toISOString());\r",
+													"//short ISO date\r",
+													"pm.collectionVariables.set(\"yesterday\", yesterday);\r",
+													"pm.collectionVariables.set(\"today\", today);\r",
+													"pm.collectionVariables.set(\"tomorrow\", tomorrow);\r",
+													"\r",
+													"//clin\r",
+													"pm.collectionVariables.set(\"4digits\", _.random(1000, 9999));\r",
+													"//task_order_number\r",
+													"pm.collectionVariables.set(\"13digits\", _.random(1000000000000, 9999999999999));\r",
+													"//task_order_number modification\r",
+													"pm.collectionVariables.set(\"17digits\", _.random(10000000000000000, 99999999999999999));\r",
+													"\r",
+													"\r",
+													"const list = [\"air_force\",\"army\",\"marine_corps\", \"navy\", \"space_force\", \"combatant_command\", \"joint_staff\", \"dafa\", \"osd_psas\", \"nsa\"];\r",
+													"const dodComponents = _.sample(list, _.random(1, 10));\r",
+													"pm.collectionVariables.set(\"dodComponents\", dodComponents);\r",
+													"console.error(\"foo:\" + dodComponents);"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"task_orders\": [\n      {\n          \"clins\": [\n              {\n                  \"clin_number\": \"{{4digits}}\",\n                  \"idiq_clin\": \"{{$randomLoremWords}}\",\n                  \"obligated_funds\": {{$randomInt}},\n                  \"pop_end_date\": \"{{tomorrow}}\",\n                  \"pop_start_date\": \"{{yesterday}}\",\n                  \"total_clin_value\": {{$randomInt}}{{$randomInt}}\n              }\n          ],\n          \"task_order_number\": \"{{13digits}}\",\n          \"task_order_file\": {\n              \"id\": \"{{$randomUUID}}\",\n              \"name\": \"task-order-{{13digits}}-{{$randomLoremSlug}}.pdf\"\n          }\n      }\n  ]\n}"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/portfolioDrafts/:portfolioDraftId/funding",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"portfolioDrafts",
+												":portfolioDraftId",
+												"funding"
+											],
+											"variable": [
+												{
+													"key": "portfolioDraftId",
+													"value": "4eeba8e3-3409-4a4d-beaf-7114d20d05da",
+													"description": "(Required) "
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "201 Created",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"task_orders\": [\n        {\n            \"clins\": [\n                {\n                    \"clin_number\": \"cillum r\",\n                    \"idiq_clin\": \"aliqua esse\",\n                    \"obligated_funds\": -80235346.75909553,\n                    \"pop_end_date\": \"1987-08-05\",\n                    \"pop_start_date\": \"1975-01-26\",\n                    \"total_clin_value\": -12348319.616394714\n                },\n                {\n                    \"clin_number\": \"aliqua occaecat\",\n                    \"idiq_clin\": \"eu officia dolore\",\n                    \"obligated_funds\": -19696496.867627814,\n                    \"pop_end_date\": \"1958-12-19\",\n                    \"pop_start_date\": \"1985-01-18\",\n                    \"total_clin_value\": 19810610.729187235\n                }\n            ],\n            \"task_order_number\": \"irure magna\"\n        },\n        {\n            \"clins\": [\n                {\n                    \"clin_number\": \"nostrud Excepteur id ut ea\",\n                    \"idiq_clin\": \"ea ullamco Excepteur deserunt\",\n                    \"obligated_funds\": -86582139.75141709,\n                    \"pop_end_date\": \"1977-02-06\",\n                    \"pop_start_date\": \"2009-04-08\",\n                    \"total_clin_value\": -47915822.06972817\n                },\n                {\n                    \"clin_number\": \"cillum eiusmod sit ut in\",\n                    \"idiq_clin\": \"in et cupidatat\",\n                    \"obligated_funds\": -54789829.253351785,\n                    \"pop_end_date\": \"2006-01-23\",\n                    \"pop_start_date\": \"1988-03-09\",\n                    \"total_clin_value\": -15401047.299681902\n                }\n            ],\n            \"task_order_number\": \"consequat eiusmod adipisicing minim\"\n        }\n    ]\n}"
+												},
+												"url": {
+													"raw": "{{baseUrl}}/portfolioDrafts/:portfolioDraftId/funding",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"portfolioDrafts",
+														":portfolioDraftId",
+														"funding"
+													],
+													"variable": [
+														{
+															"key": "portfolioDraftId"
+														}
+													]
+												}
+											},
+											"status": "Created",
+											"code": 201,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"task_orders\": [\n  {\n   \"clins\": [\n    {\n     \"clin_number\": \"cillum r\",\n     \"idiq_clin\": \"aliqua esse\",\n     \"obligated_funds\": -80235346.75909553,\n     \"pop_end_date\": \"1987-08-05\",\n     \"pop_start_date\": \"1975-01-26\",\n     \"total_clin_value\": -12348319.616394714\n    },\n    {\n     \"clin_number\": \"aliqua occaecat\",\n     \"idiq_clin\": \"eu officia dolore\",\n     \"obligated_funds\": -19696496.867627814,\n     \"pop_end_date\": \"1958-12-19\",\n     \"pop_start_date\": \"1985-01-18\",\n     \"total_clin_value\": 19810610.729187235\n    }\n   ],\n   \"task_order_number\": \"irure magna\"\n  },\n  {\n   \"clins\": [\n    {\n     \"clin_number\": \"nostrud Excepteur id ut ea\",\n     \"idiq_clin\": \"ea ullamco Excepteur deserunt\",\n     \"obligated_funds\": -86582139.75141709,\n     \"pop_end_date\": \"1977-02-06\",\n     \"pop_start_date\": \"2009-04-08\",\n     \"total_clin_value\": -47915822.06972817\n    },\n    {\n     \"clin_number\": \"cillum eiusmod sit ut in\",\n     \"idiq_clin\": \"in et cupidatat\",\n     \"obligated_funds\": -54789829.253351785,\n     \"pop_end_date\": \"2006-01-23\",\n     \"pop_start_date\": \"1988-03-09\",\n     \"total_clin_value\": -15401047.299681902\n    }\n   ],\n   \"task_order_number\": \"consequat eiusmod adipisicing minim\"\n  }\n ]\n}"
+										},
+										{
+											"name": "400 Bad Request",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"task_orders\": [\n        {\n            \"clins\": [\n                {\n                    \"clin_number\": \"cillum r\",\n                    \"idiq_clin\": \"aliqua esse\",\n                    \"obligated_funds\": -80235346.75909553,\n                    \"pop_end_date\": \"1987-08-05\",\n                    \"pop_start_date\": \"1975-01-26\",\n                    \"total_clin_value\": -12348319.616394714\n                },\n                {\n                    \"clin_number\": \"aliqua occaecat\",\n                    \"idiq_clin\": \"eu officia dolore\",\n                    \"obligated_funds\": -19696496.867627814,\n                    \"pop_end_date\": \"1958-12-19\",\n                    \"pop_start_date\": \"1985-01-18\",\n                    \"total_clin_value\": 19810610.729187235\n                }\n            ],\n            \"task_order_number\": \"irure magna\"\n        },\n        {\n            \"clins\": [\n                {\n                    \"clin_number\": \"nostrud Excepteur id ut ea\",\n                    \"idiq_clin\": \"ea ullamco Excepteur deserunt\",\n                    \"obligated_funds\": -86582139.75141709,\n                    \"pop_end_date\": \"1977-02-06\",\n                    \"pop_start_date\": \"2009-04-08\",\n                    \"total_clin_value\": -47915822.06972817\n                },\n                {\n                    \"clin_number\": \"cillum eiusmod sit ut in\",\n                    \"idiq_clin\": \"in et cupidatat\",\n                    \"obligated_funds\": -54789829.253351785,\n                    \"pop_end_date\": \"2006-01-23\",\n                    \"pop_start_date\": \"1988-03-09\",\n                    \"total_clin_value\": -15401047.299681902\n                }\n            ],\n            \"task_order_number\": \"consequat eiusmod adipisicing minim\"\n        }\n    ]\n}"
+												},
+												"url": {
+													"raw": "{{baseUrl}}/portfolioDrafts/:portfolioDraftId/funding",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"portfolioDrafts",
+														":portfolioDraftId",
+														"funding"
+													],
+													"variable": [
+														{
+															"key": "portfolioDraftId"
+														}
+													]
+												}
+											},
+											"status": "Bad Request",
+											"code": 400,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"code\": \"INVALID_INPUT\",\n \"error_map\": {},\n \"message\": \"laboris et incididunt\"\n}"
+										},
+										{
+											"name": "404 Not Found",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"task_orders\": [\n        {\n            \"clins\": [\n                {\n                    \"clin_number\": \"cillum r\",\n                    \"idiq_clin\": \"aliqua esse\",\n                    \"obligated_funds\": -80235346.75909553,\n                    \"pop_end_date\": \"1987-08-05\",\n                    \"pop_start_date\": \"1975-01-26\",\n                    \"total_clin_value\": -12348319.616394714\n                },\n                {\n                    \"clin_number\": \"aliqua occaecat\",\n                    \"idiq_clin\": \"eu officia dolore\",\n                    \"obligated_funds\": -19696496.867627814,\n                    \"pop_end_date\": \"1958-12-19\",\n                    \"pop_start_date\": \"1985-01-18\",\n                    \"total_clin_value\": 19810610.729187235\n                }\n            ],\n            \"task_order_number\": \"irure magna\"\n        },\n        {\n            \"clins\": [\n                {\n                    \"clin_number\": \"nostrud Excepteur id ut ea\",\n                    \"idiq_clin\": \"ea ullamco Excepteur deserunt\",\n                    \"obligated_funds\": -86582139.75141709,\n                    \"pop_end_date\": \"1977-02-06\",\n                    \"pop_start_date\": \"2009-04-08\",\n                    \"total_clin_value\": -47915822.06972817\n                },\n                {\n                    \"clin_number\": \"cillum eiusmod sit ut in\",\n                    \"idiq_clin\": \"in et cupidatat\",\n                    \"obligated_funds\": -54789829.253351785,\n                    \"pop_end_date\": \"2006-01-23\",\n                    \"pop_start_date\": \"1988-03-09\",\n                    \"total_clin_value\": -15401047.299681902\n                }\n            ],\n            \"task_order_number\": \"consequat eiusmod adipisicing minim\"\n        }\n    ]\n}"
+												},
+												"url": {
+													"raw": "{{baseUrl}}/portfolioDrafts/:portfolioDraftId/funding",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"portfolioDrafts",
+														":portfolioDraftId",
+														"funding"
+													],
+													"variable": [
+														{
+															"key": "portfolioDraftId"
+														}
+													]
+												}
+											},
+											"status": "Not Found",
+											"code": 404,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "text/plain"
+												}
+											],
+											"cookie": [],
+											"body": ""
+										}
+									]
+								},
+								{
+									"name": "/portfolioDrafts/:portfolioDraftId/funding",
+									"request": {
+										"method": "OPTIONS",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/portfolioDrafts/:portfolioDraftId/funding",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"portfolioDrafts",
+												":portfolioDraftId",
+												"funding"
+											],
+											"variable": [
+												{
+													"key": "portfolioDraftId"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "200 OK",
+											"originalRequest": {
+												"method": "OPTIONS",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/portfolioDrafts/:portfolioDraftId/funding",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"portfolioDrafts",
+														":portfolioDraftId",
+														"funding"
+													],
+													"variable": [
+														{
+															"key": "portfolioDraftId"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Access-Control-Allow-Origin",
+													"value": "do pariatur labore",
+													"description": ""
+												},
+												{
+													"key": "Access-Control-Allow-Methods",
+													"value": "do pariatur labore",
+													"description": ""
+												},
+												{
+													"key": "Access-Control-Allow-Headers",
+													"value": "do pariatur labore",
+													"description": ""
+												},
+												{
+													"key": "Content-Type",
+													"value": "text/plain"
+												}
+											],
+											"cookie": [],
+											"body": ""
+										}
+									]
+								}
+							],
+							"description": "## funding\n### Description\nOperations for storing and retrieving data for Step 2 Funding (funding_step)"
+						},
+						{
+							"name": "portfolio",
+							"item": [
+								{
+									"name": "getPortfolioStep",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/portfolioDrafts/:portfolioDraftId/portfolio",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"portfolioDrafts",
+												":portfolioDraftId",
+												"portfolio"
+											],
+											"variable": [
+												{
+													"key": "portfolioDraftId",
+													"value": "do pariatur labore",
+													"description": "(Required) "
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "200 OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/portfolioDrafts/:portfolioDraftId/portfolio",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"portfolioDrafts",
+														":portfolioDraftId",
+														"portfolio"
+													],
+													"variable": [
+														{
+															"key": "portfolioDraftId"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"csp\": \"aws\",\n \"dod_components\": [\n  \"osd_psas\",\n  \"army\"\n ],\n \"name\": \"id Ut\",\n \"portfolio_managers\": [\n  \"tzcU@FjISBzBXCHkpBFuNhERWNnyNcEOI.wsi\",\n  \"1YN86zV@DRovfvVXXJLPMaMNGC.dsw\"\n ],\n \"description\": \"voluptate non amet fugiat\"\n}"
+										},
+										{
+											"name": "400 Bad Request",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/portfolioDrafts/:portfolioDraftId/portfolio",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"portfolioDrafts",
+														":portfolioDraftId",
+														"portfolio"
+													],
+													"variable": [
+														{
+															"key": "portfolioDraftId"
+														}
+													]
+												}
+											},
+											"status": "Bad Request",
+											"code": 400,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "text/plain"
+												}
+											],
+											"cookie": [],
+											"body": ""
+										},
+										{
+											"name": "404 Not Found",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/portfolioDrafts/:portfolioDraftId/portfolio",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"portfolioDrafts",
+														":portfolioDraftId",
+														"portfolio"
+													],
+													"variable": [
+														{
+															"key": "portfolioDraftId"
+														}
+													]
+												}
+											},
+											"status": "Not Found",
+											"code": 404,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "text/plain"
+												}
+											],
+											"cookie": [],
+											"body": ""
+										}
+									]
+								},
+								{
+									"name": "createPortfolioStep",
+									"event": [
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													"const listDodComponents = [\"air_force\",\"army\",\"marine_corps\", \"navy\", \"space_force\", \"combatant_command\", \"joint_staff\", \"dafa\", \"osd_psas\", \"nsa\"];\r",
+													"const componentA = _.sample(listDodComponents);\r",
+													"const componentB = _.sample(listDodComponents);\r",
+													"const componentC = _.sample(listDodComponents);\r",
+													"pm.collectionVariables.set(\"componentA\", componentA);\r",
+													"pm.collectionVariables.set(\"componentB\", componentB);\r",
+													"pm.collectionVariables.set(\"componentC\", componentC);\r",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"csp\": \"azure\",\n  \"dod_components\": [\n      \"{{componentA}}\",\n      \"{{componentB}}\",\n      \"{{componentC}}\"\n   ],\n  \"name\": \"{{$randomBsAdjective}} {{$randomWords}} portfolio\",\n  \"portfolio_managers\": [\n    \"{{$randomExampleEmail}}\",\n    \"{{$randomExampleEmail}}\",\n    \"{{$randomExampleEmail}}\"\n  ],\n  \"description\": \"{{$randomLoremParagraph}}\"\n}\n"
+										},
+										"url": {
+											"raw": "{{baseUrl}}/portfolioDrafts/:portfolioDraftId/portfolio",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"portfolioDrafts",
+												":portfolioDraftId",
+												"portfolio"
+											],
+											"variable": [
+												{
+													"key": "portfolioDraftId",
+													"value": "4eeba8e3-3409-4a4d-beaf-7114d20d05da",
+													"description": "(Required) "
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "201 Created",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"csp\": \"azure\",\n    \"dod_components\": [\n        \"nsa\",\n        \"air_force\"\n    ],\n    \"name\": \"dolor amet ex\",\n    \"portfolio_managers\": [\n        \"ARp8MKh8JFJ21SA@nvjZibSUHDhxuZHwverUoDnrmjefkbsV.xif\",\n        \"0XF2JtLTWqJrBUt@qOLIVHjpUjfovLkaVxHVcnlIjFQR.fbd\"\n    ],\n    \"description\": \"pariatur Excepteur sunt Duis\"\n}"
+												},
+												"url": {
+													"raw": "{{baseUrl}}/portfolioDrafts/:portfolioDraftId/portfolio",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"portfolioDrafts",
+														":portfolioDraftId",
+														"portfolio"
+													],
+													"variable": [
+														{
+															"key": "portfolioDraftId"
+														}
+													]
+												}
+											},
+											"status": "Created",
+											"code": 201,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"csp\": \"azure\",\n \"dod_components\": [\n  \"nsa\",\n  \"air_force\"\n ],\n \"name\": \"dolor amet ex\",\n \"portfolio_managers\": [\n  \"ARp8MKh8JFJ21SA@nvjZibSUHDhxuZHwverUoDnrmjefkbsV.xif\",\n  \"0XF2JtLTWqJrBUt@qOLIVHjpUjfovLkaVxHVcnlIjFQR.fbd\"\n ],\n \"description\": \"pariatur Excepteur sunt Duis\"\n}"
+										},
+										{
+											"name": "400 Bad Request",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"csp\": \"azure\",\n    \"dod_components\": [\n        \"nsa\",\n        \"air_force\"\n    ],\n    \"name\": \"dolor amet ex\",\n    \"portfolio_managers\": [\n        \"ARp8MKh8JFJ21SA@nvjZibSUHDhxuZHwverUoDnrmjefkbsV.xif\",\n        \"0XF2JtLTWqJrBUt@qOLIVHjpUjfovLkaVxHVcnlIjFQR.fbd\"\n    ],\n    \"description\": \"pariatur Excepteur sunt Duis\"\n}"
+												},
+												"url": {
+													"raw": "{{baseUrl}}/portfolioDrafts/:portfolioDraftId/portfolio",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"portfolioDrafts",
+														":portfolioDraftId",
+														"portfolio"
+													],
+													"variable": [
+														{
+															"key": "portfolioDraftId"
+														}
+													]
+												}
+											},
+											"status": "Bad Request",
+											"code": 400,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"code\": \"INVALID_INPUT\",\n \"error_map\": {},\n \"message\": \"laboris et incididunt\"\n}"
+										}
+									]
+								},
+								{
+									"name": "/portfolioDrafts/:portfolioDraftId/portfolio",
+									"request": {
+										"method": "OPTIONS",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/portfolioDrafts/:portfolioDraftId/portfolio",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"portfolioDrafts",
+												":portfolioDraftId",
+												"portfolio"
+											],
+											"variable": [
+												{
+													"key": "portfolioDraftId"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "200 OK",
+											"originalRequest": {
+												"method": "OPTIONS",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/portfolioDrafts/:portfolioDraftId/portfolio",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"portfolioDrafts",
+														":portfolioDraftId",
+														"portfolio"
+													],
+													"variable": [
+														{
+															"key": "portfolioDraftId"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Access-Control-Allow-Origin",
+													"value": "do pariatur labore",
+													"description": ""
+												},
+												{
+													"key": "Access-Control-Allow-Methods",
+													"value": "do pariatur labore",
+													"description": ""
+												},
+												{
+													"key": "Access-Control-Allow-Headers",
+													"value": "do pariatur labore",
+													"description": ""
+												},
+												{
+													"key": "Content-Type",
+													"value": "text/plain"
+												}
+											],
+											"cookie": [],
+											"body": ""
+										}
+									]
+								}
+							],
+							"description": "## portfolio\n### Description\nOperations for storing and retrieving data for Step 1 Portfolio (portfolio_step)"
+						},
+						{
+							"name": "submit",
+							"item": [
+								{
+									"name": "submitPortfolioDraft",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/portfolioDrafts/:portfolioDraftId/submit",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"portfolioDrafts",
+												":portfolioDraftId",
+												"submit"
+											],
+											"variable": [
+												{
+													"key": "portfolioDraftId",
+													"value": "do pariatur labore",
+													"description": "(Required) "
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "202 Accepted",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/portfolioDrafts/:portfolioDraftId/submit",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"portfolioDrafts",
+														":portfolioDraftId",
+														"submit"
+													],
+													"variable": [
+														{
+															"key": "portfolioDraftId"
+														}
+													]
+												}
+											},
+											"status": "Accepted",
+											"code": 202,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "text/plain"
+												}
+											],
+											"cookie": [],
+											"body": ""
+										},
+										{
+											"name": "400 Bad Request",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/portfolioDrafts/:portfolioDraftId/submit",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"portfolioDrafts",
+														":portfolioDraftId",
+														"submit"
+													],
+													"variable": [
+														{
+															"key": "portfolioDraftId"
+														}
+													]
+												}
+											},
+											"status": "Bad Request",
+											"code": 400,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n \"code\": \"INVALID_INPUT\",\n \"error_map\": {},\n \"message\": \"laboris et incididunt\"\n}"
+										},
+										{
+											"name": "403 Forbidden",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/portfolioDrafts/:portfolioDraftId/submit",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"portfolioDrafts",
+														":portfolioDraftId",
+														"submit"
+													],
+													"variable": [
+														{
+															"key": "portfolioDraftId"
+														}
+													]
+												}
+											},
+											"status": "Forbidden",
+											"code": 403,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "text/plain"
+												}
+											],
+											"cookie": [],
+											"body": ""
+										},
+										{
+											"name": "404 Not Found",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/portfolioDrafts/:portfolioDraftId/submit",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"portfolioDrafts",
+														":portfolioDraftId",
+														"submit"
+													],
+													"variable": [
+														{
+															"key": "portfolioDraftId"
+														}
+													]
+												}
+											},
+											"status": "Not Found",
+											"code": 404,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "text/plain"
+												}
+											],
+											"cookie": [],
+											"body": ""
+										}
+									]
+								},
+								{
+									"name": "/portfolioDrafts/:portfolioDraftId/submit",
+									"request": {
+										"method": "OPTIONS",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/portfolioDrafts/:portfolioDraftId/submit",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"portfolioDrafts",
+												":portfolioDraftId",
+												"submit"
+											],
+											"variable": [
+												{
+													"key": "portfolioDraftId"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "200 OK",
+											"originalRequest": {
+												"method": "OPTIONS",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/portfolioDrafts/:portfolioDraftId/submit",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"portfolioDrafts",
+														":portfolioDraftId",
+														"submit"
+													],
+													"variable": [
+														{
+															"key": "portfolioDraftId"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Access-Control-Allow-Origin",
+													"value": "do pariatur labore",
+													"description": ""
+												},
+												{
+													"key": "Access-Control-Allow-Methods",
+													"value": "do pariatur labore",
+													"description": ""
+												},
+												{
+													"key": "Access-Control-Allow-Headers",
+													"value": "do pariatur labore",
+													"description": ""
+												},
+												{
+													"key": "Content-Type",
+													"value": "text/plain"
+												}
+											],
+											"cookie": [],
+											"body": ""
+										}
+									]
+								}
+							],
+							"description": "## submit\n### Description\nOperations for Step 5 Submit the final step of the Portfolio Draft Wizard"
+						},
+						{
+							"name": "getPortfolioDraft",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/portfolioDrafts/:portfolioDraftId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"portfolioDrafts",
+										":portfolioDraftId"
+									],
+									"variable": [
+										{
+											"key": "portfolioDraftId",
+											"value": "do pariatur labore",
+											"description": "(Required) "
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "200 OK",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/portfolioDrafts/:portfolioDraftId",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"portfolioDrafts",
+												":portfolioDraftId"
+											],
+											"variable": [
+												{
+													"key": "portfolioDraftId"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n \"updated_at\": \"2017-03-23T12:33:47.149Z\",\n \"created_at\": \"1948-05-07T10:24:56.135Z\",\n \"id\": \"voluptate deserunt\",\n \"num_environments\": 96789803.73687005,\n \"num_applications\": -70490916.10086173,\n \"name\": \"sint occaecat do ullamco nulla\",\n \"description\": \"Ut\",\n \"num_portfolio_managers\": -31712693.23093462,\n \"num_task_orders\": 75028151.02861598,\n \"status\": \"not_started\"\n}"
+								},
+								{
+									"name": "404 Not Found",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/portfolioDrafts/:portfolioDraftId",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"portfolioDrafts",
+												":portfolioDraftId"
+											],
+											"variable": [
+												{
+													"key": "portfolioDraftId"
+												}
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "text/plain"
+										}
+									],
+									"cookie": [],
+									"body": ""
+								}
+							]
+						},
+						{
+							"name": "deletePortfolioDraft",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/portfolioDrafts/:portfolioDraftId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"portfolioDrafts",
+										":portfolioDraftId"
+									],
+									"variable": [
+										{
+											"key": "portfolioDraftId",
+											"value": "do pariatur labore",
+											"description": "(Required) "
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "204 No Content",
+									"originalRequest": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/portfolioDrafts/:portfolioDraftId",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"portfolioDrafts",
+												":portfolioDraftId"
+											],
+											"variable": [
+												{
+													"key": "portfolioDraftId"
+												}
+											]
+										}
+									},
+									"status": "No Content",
+									"code": 204,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "text/plain"
+										}
+									],
+									"cookie": [],
+									"body": ""
+								},
+								{
+									"name": "404 Not Found",
+									"originalRequest": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/portfolioDrafts/:portfolioDraftId",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"portfolioDrafts",
+												":portfolioDraftId"
+											],
+											"variable": [
+												{
+													"key": "portfolioDraftId"
+												}
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "text/plain"
+										}
+									],
+									"cookie": [],
+									"body": ""
+								}
+							]
+						},
+						{
+							"name": "/portfolioDrafts/:portfolioDraftId",
+							"request": {
+								"method": "OPTIONS",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/portfolioDrafts/:portfolioDraftId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"portfolioDrafts",
+										":portfolioDraftId"
+									],
+									"variable": [
+										{
+											"key": "portfolioDraftId"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "200 OK",
+									"originalRequest": {
+										"method": "OPTIONS",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/portfolioDrafts/:portfolioDraftId",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"portfolioDrafts",
+												":portfolioDraftId"
+											],
+											"variable": [
+												{
+													"key": "portfolioDraftId"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Access-Control-Allow-Origin",
+											"value": "do pariatur labore",
+											"description": ""
+										},
+										{
+											"key": "Access-Control-Allow-Methods",
+											"value": "do pariatur labore",
+											"description": ""
+										},
+										{
+											"key": "Access-Control-Allow-Headers",
+											"value": "do pariatur labore",
+											"description": ""
+										},
+										{
+											"key": "Content-Type",
+											"value": "text/plain"
+										}
+									],
+									"cookie": [],
+									"body": ""
+								}
+							]
+						}
+					],
+					"description": "## {portfolioDraftId}\n\n### Description\nThe identifier of a Portfolio Draft is used as a path parameter.  The id currently takes the form of a UUIDv4 generated upon request to \"POST /createPortfolioDraft\""
+				},
+				{
+					"name": "getPortfolioDrafts",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/portfolioDrafts?offset=do pariatur labore&limit=do pariatur labore",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"portfolioDrafts"
+							],
+							"query": [
+								{
+									"key": "offset",
+									"value": "do pariatur labore"
+								},
+								{
+									"key": "limit",
+									"value": "do pariatur labore"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/portfolioDrafts?offset=do pariatur labore&limit=do pariatur labore",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"portfolioDrafts"
+									],
+									"query": [
+										{
+											"key": "offset",
+											"value": "do pariatur labore"
+										},
+										{
+											"key": "limit",
+											"value": "do pariatur labore"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "[\n {\n  \"updated_at\": \"2008-06-17T13:52:45.534Z\",\n  \"created_at\": \"1962-08-17T08:07:04.574Z\",\n  \"id\": \"qui do\",\n  \"num_environments\": -80589958.16080219,\n  \"num_applications\": -41818804.181000635,\n  \"name\": \"velit id eu laborum esse\",\n  \"description\": \"deserunt est sed\",\n  \"num_portfolio_managers\": -90012365.51684073,\n  \"num_task_orders\": 69165190.89851213,\n  \"status\": \"not_started\"\n },\n {\n  \"updated_at\": \"1951-10-21T03:05:12.977Z\",\n  \"created_at\": \"2010-02-07T16:58:09.952Z\",\n  \"id\": \"amet eiusmod consequat mollit\",\n  \"num_environments\": 51815375.91433135,\n  \"num_applications\": -38913717.05288855,\n  \"name\": \"ad aliqua\",\n  \"description\": \"Ut culpa\",\n  \"num_portfolio_managers\": 62973803.01949081,\n  \"num_task_orders\": 72734929.5528107,\n  \"status\": \"complete\"\n }\n]"
+						},
+						{
+							"name": "400 Bad Request",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/portfolioDrafts?offset=do pariatur labore&limit=do pariatur labore",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"portfolioDrafts"
+									],
+									"query": [
+										{
+											"key": "offset",
+											"value": "do pariatur labore"
+										},
+										{
+											"key": "limit",
+											"value": "do pariatur labore"
+										}
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"code\": \"OTHER\",\n \"message\": \"enim esse officia\"\n}"
+						}
+					]
+				},
+				{
+					"name": "createPortfolioDraft",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.sendRequest(\"https://postman-echo.com/get\", function (err, response) {\r",
+									"    console.log(response.json());\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/portfolioDrafts",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"portfolioDrafts"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "201 Created",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/portfolioDrafts",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"portfolioDrafts"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Date",
+									"value": "Sun, 10 Oct 2021 00:23:32 GMT"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Content-Length",
+									"value": "264"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "x-amzn-RequestId",
+									"value": "f01a5770-b5e1-4898-b0b0-18b85ce72f5f"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Access-Control-Allow-Headers",
+									"value": "*"
+								},
+								{
+									"key": "x-amz-apigw-id",
+									"value": "G9zUtFcgvHMFr9g="
+								},
+								{
+									"key": "Access-Control-Allow-Methods",
+									"value": "*"
+								},
+								{
+									"key": "X-Amzn-Trace-Id",
+									"value": "Root=1-61623284-359ef42d35b4339c021ff0fc"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": \"2e9ce816-a445-4992-8026-6791d7300f0e\",\n    \"created_at\": \"2021-10-10T00:23:32.339Z\",\n    \"updated_at\": \"2021-10-10T00:23:32.339Z\",\n    \"name\": \"\",\n    \"description\": \"\",\n    \"num_portfolio_managers\": 0,\n    \"num_task_orders\": 0,\n    \"num_applications\": 0,\n    \"num_environments\": 0,\n    \"status\": \"not_started\"\n}"
+						}
+					]
+				},
+				{
+					"name": "/portfolioDrafts",
+					"request": {
+						"method": "OPTIONS",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/portfolioDrafts",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"portfolioDrafts"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "OPTIONS",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/portfolioDrafts",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"portfolioDrafts"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "do pariatur labore",
+									"description": ""
+								},
+								{
+									"key": "Access-Control-Allow-Methods",
+									"value": "do pariatur labore",
+									"description": ""
+								},
+								{
+									"key": "Access-Control-Allow-Headers",
+									"value": "do pariatur labore",
+									"description": ""
+								},
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				}
+			],
+			"description": "# /portfolioDrafts\n## Summary\nSupports data persistence for ATAT Portfolio Draft Wizard.\n### Detail\nInitial Portfolio Draft is created and an id is generated.  Successive steps are, Step 1 Portfolio, Step 2 Funding, Step 3 Application,\nStep 4 Operators, Step 5 Submit.  First three steps have corresponding top-level property under which all data for the step is stored (portfolio_step, funding_step, application_step).  Step 4 adds operators to the application_step.  Step 5 validates and submits Portfolio Draft to begin provisioning by CSPs. Transitions to a provisioned Portfolio.  Job enters an SQS queue and which point it will be serviced by invocation of the ATAT External API.\n\nKey AWS services:\n- API Gateway\n- Lambda\n- DynamoDB\n- Cognito\n\n### Status\nAll core operations are implemented and are subject to revision as we update the API spec to fill gaps due to evolution of UI design in Figma.\n\nAuthorization by Cognito user pool is present. ATAT Azure AD identity provider standing in for Global Directory until integration."
+		},
+		{
+			"name": "taskOrderFiles",
+			"item": [
+				{
+					"name": "{taskOrderId}",
+					"item": [
+						{
+							"name": "file",
+							"item": [
+								{
+									"name": "downloadTaskOrder",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/taskOrderFiles/:taskOrderId/file",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"taskOrderFiles",
+												":taskOrderId",
+												"file"
+											],
+											"variable": [
+												{
+													"key": "taskOrderId",
+													"value": "do pariatur labore",
+													"description": "(Required) "
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "200 OK",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/taskOrderFiles/:taskOrderId/file",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"taskOrderFiles",
+														":taskOrderId",
+														"file"
+													],
+													"variable": [
+														{
+															"key": "taskOrderId"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "text/plain"
+												}
+											],
+											"cookie": [],
+											"body": ""
+										},
+										{
+											"name": "404 Not Found",
+											"originalRequest": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/taskOrderFiles/:taskOrderId/file",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"taskOrderFiles",
+														":taskOrderId",
+														"file"
+													],
+													"variable": [
+														{
+															"key": "taskOrderId"
+														}
+													]
+												}
+											},
+											"status": "Not Found",
+											"code": 404,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "text/plain"
+												}
+											],
+											"cookie": [],
+											"body": ""
+										}
+									]
+								},
+								{
+									"name": "/taskOrderFiles/:taskOrderId/file",
+									"request": {
+										"method": "OPTIONS",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/taskOrderFiles/:taskOrderId/file",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"taskOrderFiles",
+												":taskOrderId",
+												"file"
+											],
+											"variable": [
+												{
+													"key": "taskOrderId"
+												}
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "200 OK",
+											"originalRequest": {
+												"method": "OPTIONS",
+												"header": [],
+												"url": {
+													"raw": "{{baseUrl}}/taskOrderFiles/:taskOrderId/file",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"taskOrderFiles",
+														":taskOrderId",
+														"file"
+													],
+													"variable": [
+														{
+															"key": "taskOrderId"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "text",
+											"header": [
+												{
+													"key": "Access-Control-Allow-Origin",
+													"value": "do pariatur labore",
+													"description": ""
+												},
+												{
+													"key": "Access-Control-Allow-Methods",
+													"value": "do pariatur labore",
+													"description": ""
+												},
+												{
+													"key": "Access-Control-Allow-Headers",
+													"value": "do pariatur labore",
+													"description": ""
+												},
+												{
+													"key": "Content-Type",
+													"value": "text/plain"
+												}
+											],
+											"cookie": [],
+											"body": ""
+										}
+									]
+								}
+							]
+						},
+						{
+							"name": "getTaskOrderMetadata",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/taskOrderFiles/:taskOrderId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"taskOrderFiles",
+										":taskOrderId"
+									],
+									"variable": [
+										{
+											"key": "taskOrderId",
+											"value": "do pariatur labore",
+											"description": "(Required) "
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "200 OK",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/taskOrderFiles/:taskOrderId",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"taskOrderFiles",
+												":taskOrderId"
+											],
+											"variable": [
+												{
+													"key": "taskOrderId"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n \"updated_at\": \"1991-08-13T05:32:12.290Z\",\n \"created_at\": \"1995-01-09T19:48:22.390Z\",\n \"id\": \"culpa laboris nisi sint Lorem\",\n \"name\": \"cupidatat ut dolore ex\",\n \"size\": 4006243.9480709434,\n \"status\": \"rejected\"\n}"
+								},
+								{
+									"name": "404 Not Found",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/taskOrderFiles/:taskOrderId",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"taskOrderFiles",
+												":taskOrderId"
+											],
+											"variable": [
+												{
+													"key": "taskOrderId"
+												}
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "text/plain"
+										}
+									],
+									"cookie": [],
+									"body": ""
+								}
+							]
+						},
+						{
+							"name": "deleteTaskOrder",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/taskOrderFiles/:taskOrderId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"taskOrderFiles",
+										":taskOrderId"
+									],
+									"variable": [
+										{
+											"key": "taskOrderId",
+											"value": "do pariatur labore",
+											"description": "(Required) "
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "204 No Content",
+									"originalRequest": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/taskOrderFiles/:taskOrderId",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"taskOrderFiles",
+												":taskOrderId"
+											],
+											"variable": [
+												{
+													"key": "taskOrderId"
+												}
+											]
+										}
+									},
+									"status": "No Content",
+									"code": 204,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "text/plain"
+										}
+									],
+									"cookie": [],
+									"body": ""
+								},
+								{
+									"name": "404 Not Found",
+									"originalRequest": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/taskOrderFiles/:taskOrderId",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"taskOrderFiles",
+												":taskOrderId"
+											],
+											"variable": [
+												{
+													"key": "taskOrderId"
+												}
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "text/plain"
+										}
+									],
+									"cookie": [],
+									"body": ""
+								}
+							]
+						},
+						{
+							"name": "/taskOrderFiles/:taskOrderId",
+							"request": {
+								"method": "OPTIONS",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/taskOrderFiles/:taskOrderId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"taskOrderFiles",
+										":taskOrderId"
+									],
+									"variable": [
+										{
+											"key": "taskOrderId"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "200 OK",
+									"originalRequest": {
+										"method": "OPTIONS",
+										"header": [],
+										"url": {
+											"raw": "{{baseUrl}}/taskOrderFiles/:taskOrderId",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"taskOrderFiles",
+												":taskOrderId"
+											],
+											"variable": [
+												{
+													"key": "taskOrderId"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "text",
+									"header": [
+										{
+											"key": "Access-Control-Allow-Origin",
+											"value": "do pariatur labore",
+											"description": ""
+										},
+										{
+											"key": "Access-Control-Allow-Methods",
+											"value": "do pariatur labore",
+											"description": ""
+										},
+										{
+											"key": "Access-Control-Allow-Headers",
+											"value": "do pariatur labore",
+											"description": ""
+										},
+										{
+											"key": "Content-Type",
+											"value": "text/plain"
+										}
+									],
+									"cookie": [],
+									"body": ""
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "uploadTaskOrder",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/taskOrderFiles",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"taskOrderFiles"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "201 Created",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/taskOrderFiles",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"taskOrderFiles"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n \"updated_at\": \"1991-08-13T05:32:12.290Z\",\n \"created_at\": \"1995-01-09T19:48:22.390Z\",\n \"id\": \"culpa laboris nisi sint Lorem\",\n \"name\": \"cupidatat ut dolore ex\",\n \"size\": 4006243.9480709434,\n \"status\": \"rejected\"\n}"
+						},
+						{
+							"name": "404 Not Found",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/taskOrderFiles",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"taskOrderFiles"
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "/taskOrderFiles",
+					"request": {
+						"method": "OPTIONS",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/taskOrderFiles",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"taskOrderFiles"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 OK",
+							"originalRequest": {
+								"method": "OPTIONS",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/taskOrderFiles",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"taskOrderFiles"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "text",
+							"header": [
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "do pariatur labore",
+									"description": ""
+								},
+								{
+									"key": "Access-Control-Allow-Methods",
+									"value": "do pariatur labore",
+									"description": ""
+								},
+								{
+									"key": "Access-Control-Allow-Headers",
+									"value": "do pariatur labore",
+									"description": ""
+								},
+								{
+									"key": "Content-Type",
+									"value": "text/plain"
+								}
+							],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				}
+			],
+			"description": "# /taskOrderFiles\n## Summary\nSupports upload of Task Order PDF files.\n### Detail\nSupports upload of Task Order PDF files to an S3 bucket.  Only requirement is that file is a PDF.  File metadata is returned upon upload.  Metadata includes the original filename, and S3 object id in UUIDv4 format, and file size in bytes.  Uploaded S3 objects will be scanned and moved between pending/accepted/rejected status and corresponding target buckets.\n### Status\n- Upload works.\n- Delete works.\n- Download not yet implemented.\n- Get Metadata not yet implemented.\n- File Scanner not yet implemented."
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://xqblafjype.execute-api.us-gov-west-1.amazonaws.com/prod"
+		},
+		{
+			"key": "now",
+			"value": ""
+		},
+		{
+			"key": "yesterday",
+			"value": ""
+		},
+		{
+			"key": "today",
+			"value": ""
+		},
+		{
+			"key": "tomorrow",
+			"value": ""
+		},
+		{
+			"key": "4digits",
+			"value": ""
+		},
+		{
+			"key": "13digits",
+			"value": ""
+		},
+		{
+			"key": "17digits",
+			"value": ""
+		},
+		{
+			"key": "dodComponents",
+			"value": ""
+		},
+		{
+			"key": "componentA",
+			"value": ""
+		},
+		{
+			"key": "componentB",
+			"value": ""
+		},
+		{
+			"key": "componentC",
+			"value": ""
+		}
+	]
+}
