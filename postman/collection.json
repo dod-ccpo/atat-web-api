@@ -17,6 +17,19 @@
 							"item": [
 								{
 									"name": "getApplicationStep",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", () => {\r",
+													"    pm.response.to.have.status(200);\r",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "GET",
 										"header": [],
@@ -33,7 +46,7 @@
 											"variable": [
 												{
 													"key": "portfolioDraftId",
-													"value": "do pariatur labore",
+													"value": "{{portfolioDraftId}}",
 													"description": "(Required) "
 												}
 											]
@@ -146,6 +159,19 @@
 								},
 								{
 									"name": "createApplicationStep",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 201\", () => {\r",
+													"    pm.response.to.have.status(201);\r",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "POST",
 										"header": [
@@ -171,7 +197,7 @@
 											"variable": [
 												{
 													"key": "portfolioDraftId",
-													"value": "4eeba8e3-3409-4a4d-beaf-7114d20d05da",
+													"value": "{{portfolioDraftId}}",
 													"description": "(Required) "
 												}
 											]
@@ -296,6 +322,19 @@
 								},
 								{
 									"name": "/portfolioDrafts/:portfolioDraftId/application",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", () => {\r",
+													"    pm.response.to.have.status(200);\r",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "OPTIONS",
 										"header": [],
@@ -311,7 +350,8 @@
 											],
 											"variable": [
 												{
-													"key": "portfolioDraftId"
+													"key": "portfolioDraftId",
+													"value": null
 												}
 											]
 										}
@@ -376,6 +416,19 @@
 							"item": [
 								{
 									"name": "getFundingStep",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", () => {\r",
+													"    pm.response.to.have.status(200);\r",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "GET",
 										"header": [],
@@ -392,7 +445,7 @@
 											"variable": [
 												{
 													"key": "portfolioDraftId",
-													"value": "do pariatur labore",
+													"value": "{{portfolioDraftId}}",
 													"description": "(Required) "
 												}
 											]
@@ -510,32 +563,18 @@
 											"listen": "prerequest",
 											"script": {
 												"exec": [
-													"const millisInDay = 24 * 60 * 60 * 1000;\r",
-													"const now = Date.now();\r",
-													"const isoFormatDay = (base, offset = 0) => new Date(base + offset).toISOString().slice(0, 10);\r",
-													"const yesterday = isoFormatDay(now, -millisInDay);\r",
-													"const today = isoFormatDay(now);\r",
-													"const tomorrow = isoFormatDay(now, millisInDay);\r",
-													"\r",
-													"//full ISO datetime\r",
-													"pm.collectionVariables.set(\"now\", new Date(now).toISOString());\r",
-													"//short ISO date\r",
-													"pm.collectionVariables.set(\"yesterday\", yesterday);\r",
-													"pm.collectionVariables.set(\"today\", today);\r",
-													"pm.collectionVariables.set(\"tomorrow\", tomorrow);\r",
-													"\r",
-													"//clin\r",
-													"pm.collectionVariables.set(\"4digits\", _.random(1000, 9999));\r",
-													"//task_order_number\r",
-													"pm.collectionVariables.set(\"13digits\", _.random(1000000000000, 9999999999999));\r",
-													"//task_order_number modification\r",
-													"pm.collectionVariables.set(\"17digits\", _.random(10000000000000000, 99999999999999999));\r",
-													"\r",
-													"\r",
-													"const list = [\"air_force\",\"army\",\"marine_corps\", \"navy\", \"space_force\", \"combatant_command\", \"joint_staff\", \"dafa\", \"osd_psas\", \"nsa\"];\r",
-													"const dodComponents = _.sample(list, _.random(1, 10));\r",
-													"pm.collectionVariables.set(\"dodComponents\", dodComponents);\r",
-													"console.error(\"foo:\" + dodComponents);"
+													""
+												],
+												"type": "text/javascript"
+											}
+										},
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 201\", () => {\r",
+													"    pm.response.to.have.status(201);\r",
+													"});"
 												],
 												"type": "text/javascript"
 											}
@@ -691,6 +730,19 @@
 								},
 								{
 									"name": "/portfolioDrafts/:portfolioDraftId/funding",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", () => {\r",
+													"    pm.response.to.have.status(200);\r",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "OPTIONS",
 										"header": [],
@@ -706,7 +758,8 @@
 											],
 											"variable": [
 												{
-													"key": "portfolioDraftId"
+													"key": "portfolioDraftId",
+													"value": null
 												}
 											]
 										}
@@ -771,6 +824,19 @@
 							"item": [
 								{
 									"name": "getPortfolioStep",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", () => {\r",
+													"    pm.response.to.have.status(200);\r",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "GET",
 										"header": [],
@@ -787,7 +853,7 @@
 											"variable": [
 												{
 													"key": "portfolioDraftId",
-													"value": "do pariatur labore",
+													"value": "{{portfolioDraftId}}",
 													"description": "(Required) "
 												}
 											]
@@ -905,14 +971,18 @@
 											"listen": "prerequest",
 											"script": {
 												"exec": [
-													"const listDodComponents = [\"air_force\",\"army\",\"marine_corps\", \"navy\", \"space_force\", \"combatant_command\", \"joint_staff\", \"dafa\", \"osd_psas\", \"nsa\"];\r",
-													"const componentA = _.sample(listDodComponents);\r",
-													"const componentB = _.sample(listDodComponents);\r",
-													"const componentC = _.sample(listDodComponents);\r",
-													"pm.collectionVariables.set(\"componentA\", componentA);\r",
-													"pm.collectionVariables.set(\"componentB\", componentB);\r",
-													"pm.collectionVariables.set(\"componentC\", componentC);\r",
 													""
+												],
+												"type": "text/javascript"
+											}
+										},
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 201\", () => {\r",
+													"    pm.response.to.have.status(201);\r",
+													"});"
 												],
 												"type": "text/javascript"
 											}
@@ -1030,6 +1100,19 @@
 								},
 								{
 									"name": "/portfolioDrafts/:portfolioDraftId/portfolio",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", () => {\r",
+													"    pm.response.to.have.status(200);\r",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "OPTIONS",
 										"header": [],
@@ -1045,7 +1128,8 @@
 											],
 											"variable": [
 												{
-													"key": "portfolioDraftId"
+													"key": "portfolioDraftId",
+													"value": null
 												}
 											]
 										}
@@ -1110,6 +1194,19 @@
 							"item": [
 								{
 									"name": "submitPortfolioDraft",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 202\", () => {\r",
+													"    pm.response.to.have.status(202);\r",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "POST",
 										"header": [],
@@ -1273,6 +1370,19 @@
 								},
 								{
 									"name": "/portfolioDrafts/:portfolioDraftId/submit",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", () => {\r",
+													"    pm.response.to.have.status(200);\r",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
 									"request": {
 										"method": "OPTIONS",
 										"header": [],
@@ -1288,7 +1398,8 @@
 											],
 											"variable": [
 												{
-													"key": "portfolioDraftId"
+													"key": "portfolioDraftId",
+													"value": null
 												}
 											]
 										}
@@ -1350,6 +1461,19 @@
 						},
 						{
 							"name": "getPortfolioDraft",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", () => {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"request": {
 								"method": "GET",
 								"header": [],
@@ -1365,7 +1489,7 @@
 									"variable": [
 										{
 											"key": "portfolioDraftId",
-											"value": "do pariatur labore",
+											"value": "{{portfolioDraftId}}",
 											"description": "(Required) "
 										}
 									]
@@ -1442,6 +1566,19 @@
 						},
 						{
 							"name": "deletePortfolioDraft",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 204\", () => {\r",
+											"    pm.response.to.have.status(204);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"request": {
 								"method": "DELETE",
 								"header": [],
@@ -1534,6 +1671,19 @@
 						},
 						{
 							"name": "/portfolioDrafts/:portfolioDraftId",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", () => {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"request": {
 								"method": "OPTIONS",
 								"header": [],
@@ -1548,7 +1698,8 @@
 									],
 									"variable": [
 										{
-											"key": "portfolioDraftId"
+											"key": "portfolioDraftId",
+											"value": null
 										}
 									]
 								}
@@ -1609,11 +1760,24 @@
 				},
 				{
 					"name": "getPortfolioDrafts",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", () => {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/portfolioDrafts?offset=do pariatur labore&limit=do pariatur labore",
+							"raw": "{{baseUrl}}/portfolioDrafts?offset=0&limit=50",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1623,11 +1787,11 @@
 							"query": [
 								{
 									"key": "offset",
-									"value": "do pariatur labore"
+									"value": "0"
 								},
 								{
 									"key": "limit",
-									"value": "do pariatur labore"
+									"value": "50"
 								}
 							]
 						}
@@ -1716,9 +1880,18 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.sendRequest(\"https://postman-echo.com/get\", function (err, response) {\r",
-									"    console.log(response.json());\r",
+									"pm.test(\"Status code is 201\", () => {\r",
+									"    pm.response.to.have.status(201);\r",
 									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
 								],
 								"type": "text/javascript"
 							}
@@ -1805,6 +1978,19 @@
 				},
 				{
 					"name": "/portfolioDrafts",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", () => {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "OPTIONS",
 						"header": [],
@@ -2048,6 +2234,19 @@
 						},
 						{
 							"name": "getTaskOrderMetadata",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", () => {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"request": {
 								"method": "GET",
 								"header": [],
@@ -2063,7 +2262,7 @@
 									"variable": [
 										{
 											"key": "taskOrderId",
-											"value": "do pariatur labore",
+											"value": "{{taskOrderId}}",
 											"description": "(Required) "
 										}
 									]
@@ -2140,6 +2339,19 @@
 						},
 						{
 							"name": "deleteTaskOrder",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 204\", () => {\r",
+											"    pm.response.to.have.status(204);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"request": {
 								"method": "DELETE",
 								"header": [],
@@ -2155,7 +2367,7 @@
 									"variable": [
 										{
 											"key": "taskOrderId",
-											"value": "do pariatur labore",
+											"value": "{{taskOrderId}}",
 											"description": "(Required) "
 										}
 									]
@@ -2232,6 +2444,19 @@
 						},
 						{
 							"name": "/taskOrderFiles/:taskOrderId",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", () => {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"request": {
 								"method": "OPTIONS",
 								"header": [],
@@ -2246,7 +2471,8 @@
 									],
 									"variable": [
 										{
-											"key": "taskOrderId"
+											"key": "taskOrderId",
+											"value": null
 										}
 									]
 								}
@@ -2306,6 +2532,19 @@
 				},
 				{
 					"name": "uploadTaskOrder",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", () => {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [],
@@ -2378,6 +2617,19 @@
 				},
 				{
 					"name": "/taskOrderFiles",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", () => {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "OPTIONS",
 						"header": [],
@@ -2440,14 +2692,71 @@
 			"description": "# /taskOrderFiles\n## Summary\nSupports upload of Task Order PDF files.\n### Detail\nSupports upload of Task Order PDF files to an S3 bucket.  Only requirement is that file is a PDF.  File metadata is returned upon upload.  Metadata includes the original filename, and S3 object id in UUIDv4 format, and file size in bytes.  Uploaded S3 objects will be scanned and moved between pending/accepted/rejected status and corresponding target buckets.\n### Status\n- Upload works.\n- Delete works.\n- Download not yet implemented.\n- Get Metadata not yet implemented.\n- File Scanner not yet implemented."
 		}
 	],
-	"variable": [
+	"event": [
 		{
-			"key": "baseUrl",
-			"value": "https://xqblafjype.execute-api.us-gov-west-1.amazonaws.com/prod"
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"pm.collectionVariables.set(\"portfolioDraftId\", \"4eeba8e3-3409-4a4d-beaf-7114d20d05da\");",
+					"pm.collectionVariables.set(\"taskOrderId\", \"4eeba8e3-3409-4a4d-beaf-7114d20d05da\");",
+					"",
+					"const millisInDay = 24 * 60 * 60 * 1000;",
+					"const now = Date.now();",
+					"const isoFormatDay = (base, offset = 0) => new Date(base + offset).toISOString().slice(0, 10);",
+					"const yesterday = isoFormatDay(now, -millisInDay);",
+					"const today = isoFormatDay(now);",
+					"const tomorrow = isoFormatDay(now, millisInDay);",
+					"",
+					"//short ISO date",
+					"pm.collectionVariables.set(\"yesterday\", yesterday);",
+					"pm.collectionVariables.set(\"today\", today);",
+					"pm.collectionVariables.set(\"tomorrow\", tomorrow);",
+					"",
+					"//clin",
+					"pm.collectionVariables.set(\"4digits\", _.random(1000, 9999));",
+					"//task_order_number",
+					"pm.collectionVariables.set(\"13digits\", _.random(1000000000000, 9999999999999));",
+					"//task_order_number modification",
+					"pm.collectionVariables.set(\"17digits\", _.random(10000000000000000, 99999999999999999));",
+					"",
+					"const listDodComponents = [\"air_force\",\"army\",\"marine_corps\", \"navy\", \"space_force\", \"combatant_command\", \"joint_staff\", \"dafa\", \"osd_psas\", \"nsa\"];",
+					"const componentA = _.sample(listDodComponents);",
+					"const componentB = _.sample(listDodComponents);",
+					"const componentC = _.sample(listDodComponents);",
+					"pm.collectionVariables.set(\"componentA\", componentA);",
+					"pm.collectionVariables.set(\"componentB\", componentB);",
+					"pm.collectionVariables.set(\"componentC\", componentC);",
+					""
+				]
+			}
 		},
 		{
-			"key": "now",
-			"value": ""
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "region",
+			"value": "us-gov-west-1"
+		},
+		{
+			"key": "stage",
+			"value": "prod"
+		},
+		{
+			"key": "restApiId",
+			"value": "xqblafjype"
+		},
+		{
+			"key": "baseUrl",
+			"value": "https://{{restApiId}}.execute-api.{{region}}.amazonaws.com/{{stage}}"
 		},
 		{
 			"key": "yesterday",
@@ -2487,6 +2796,10 @@
 		},
 		{
 			"key": "componentC",
+			"value": ""
+		},
+		{
+			"key": "portfolioDraftId",
 			"value": ""
 		}
 	]
