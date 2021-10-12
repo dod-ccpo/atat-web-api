@@ -9,10 +9,11 @@
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.36.0",
-    "@aws-sdk/client-sqs": "^3.36.0",
     "@aws-sdk/client-s3": "^3.36.0",
     "@aws-sdk/lib-dynamodb": "^3.36.0",
+    "@aws-sdk/client-sqs": "^3.36.0",
     "@types/aws-lambda": "^8.10.83",
+    "aws-xray-sdk": "^3.3.3",
     "lambda-multipart-parser": "^1.0.1",
     "uuid": "^8.3.2"
   },

@@ -59,6 +59,9 @@ export abstract class ApiFunction extends cdk.Construct {
     this.fn = new lambdaNodeJs.NodejsFunction(this, "PackagedFunction", {
       entry: props.handlerPath,
       vpc: props.lambdaVpc,
+      // Most functions are fronted by API Gateway, so we'll pass through
+      // the tracing information
+      tracing: lambda.Tracing.ACTIVE,
       ...props.functionPropsOverride,
     });
     this.fn.addPermission("AllowApiGatewayInvoke", { principal: APIGW_SERVICE_PRINCIPAL });

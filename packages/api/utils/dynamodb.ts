@@ -1,7 +1,8 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
+import * as AWSXRay from "aws-xray-sdk";
 
-const dynamodbClient = new DynamoDBClient({});
+const dynamodbClient = AWSXRay.captureAWSv3Client(new DynamoDBClient({}));
 
 const marshallOptions = {
   // Whether to automatically convert empty strings, blobs, and sets to `null`.
@@ -20,6 +21,6 @@ const unmarshallOptions = {
 const translateConfig = { marshallOptions, unmarshallOptions };
 
 // Create the DynamoDB Document client.
-const dynamodbDocumentClient = DynamoDBDocumentClient.from(dynamodbClient, translateConfig);
+const dynamodbDocumentClient = AWSXRay.captureAWSv3Client(DynamoDBDocumentClient.from(dynamodbClient, translateConfig));
 
 export { dynamodbClient, dynamodbDocumentClient };
