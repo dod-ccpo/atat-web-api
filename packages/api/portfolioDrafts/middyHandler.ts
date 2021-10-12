@@ -1,5 +1,5 @@
-import middy, { MiddyfiedHandler } from "@middy/core";
-import { APIGatewayProxyEvent, APIGatewayProxyResult, Handler, Context } from "aws-lambda";
+import middy from "@middy/core";
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import jsonBodyParser from "@middy/http-json-body-parser";
 import validator from "@middy/validator";
 import { PortfolioStep, schema, schemaWrapper } from "../models/PortfolioStep";
@@ -10,52 +10,31 @@ import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { dynamodbDocumentClient as client } from "../utils/dynamodb";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import httpEventNormalizer from "@middy/http-event-normalizer";
-import { customMiddleware } from "../utils/customMiddleware";
 
-// This is a wrapper for the ApiGatewayProxyEvent will be moved somewhere else
-// middy validator & http-json-body-parser gives us a parsed, validated body in the APIGatewayProxyEvent with type of <T>
-// middy http-event-normalizer makes several fields on our ValidatedEvent NonNullable (see portfolioDraftId!, might need tweaking)
-interface NormalizedValidatedEvent<T> extends Omit<APIGatewayProxyEvent, "body"> {
-  queryStringParameters: NonNullable<APIGatewayProxyEvent["queryStringParameters"]>;
-  multiValueQueryStringParameters: NonNullable<APIGatewayProxyEvent["multiValueQueryStringParameters"]>;
-  pathParameters: NonNullable<APIGatewayProxyEvent["pathParameters"]>;
-  body: T; // parsed body is type T
-}
-// APIGatewayProxyEventHandler for our NormalizedValidatedEvent
-export type CustomAPIGatewayProxyEventHandler<T> = Handler<NormalizedValidatedEvent<T>, APIGatewayProxyResult>;
-
-// middyfy is a function that wraps the ApiGatewayProxyEvent
-export const middyfy = (
-  handler: CustomAPIGatewayProxyEventHandler<never>,
-  schema: Record<string, unknown>
-): MiddyfiedHandler<NormalizedValidatedEvent<never>, APIGatewayProxyResult, Error, Context> => {
-  handler.toString();
-  return middy(handler)
-    .use(jsonBodyParser()) // parse the event.body to ensure its valid json
-    .use(httpEventNormalizer()) // check the path params, query params, and ensure they are not null
-    .use(
-      validator({
-        // ajv validator module
-        // you could also try customMiddleware, but its slower
-        inputSchema: schema,
-      })
-    )
-    .use(JSONErrorHandlerMiddleware());
-};
-
-const hello: CustomAPIGatewayProxyEventHandler<PortfolioStep> = async (event) => {
-  console.log(event.body);
-  const portfolioStep: PortfolioStep = event.body;
-  const portfolioDraftId = event.pathParameters.portfolioDraftId!;
+async function baseHandler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+  // the returned response will be checked against the type `APIGatewayProxyResult`
+  const portfolioDraftId = event.pathParameters?.portfolioDraftId;
   // Perform database call
-  const databaseResult = await createPortfolioStepCommand(portfolioDraftId, portfolioStep);
+  const databaseResult = await createPortfolioStepCommand(portfolioDraftId!, event.body as unknown as PortfolioStep);
   if (databaseResult instanceof DynamoDBException) {
     return databaseResult.errorResponse;
   }
-  return new ApiSuccessResponse<PortfolioStep>(event.body, SuccessStatusCode.CREATED);
-};
+  return new ApiSuccessResponse<PortfolioStep>(event.body as unknown as PortfolioStep, SuccessStatusCode.CREATED);
+}
 
-export const handler = middyfy(hello, schemaWrapper);
+const handler = middy(baseHandler);
+
+handler
+  .use(jsonBodyParser()) // parse the event.body to ensure its valid json
+  .use(httpEventNormalizer()) // check the path params, query params, and ensure they are not null
+  .use(
+    validator({
+      inputSchema: schemaWrapper,
+    })
+  )
+  .use(JSONErrorHandlerMiddleware());
+
+export { handler };
 
 export async function createPortfolioStepCommand(
   portfolioDraftId: string,
