@@ -21,6 +21,7 @@ import {
   isApplicationStep,
   isBodyPresent,
   isEnvironment,
+  isMilEmail,
   isOperator,
   isValidJson,
   isValidUuidV4,
@@ -70,9 +71,6 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
   const applicationStep: ApplicationStep = requestBody;
   const errors: Array<ApplicationStepValidationErrors> = performDataValidation(applicationStep);
-  // ? perform operators check here or in performDataValidation layers?
-  // errors.concat(allOperators.flatMap((op) => performDataValidationOnOperator(op)));
-
   if (errors.length) {
     return createValidationErrorResponse({ input_validation_errors: errors });
   }
@@ -184,6 +182,15 @@ export function performDataValidationOnOperator(operator: Operator): Array<Appli
       invalidParameterName: "display_name",
       invalidParameterValue: operator.display_name,
       validationMessage: ValidationMessage.INVALID_OPERATOR_NAME,
+    });
+  }
+
+  if (!isMilEmail(operator.email)) {
+    errors.push({
+      operatorEmail: operator.email,
+      invalidParameterName: "email",
+      invalidParameterValue: operator.email,
+      validationMessage: ValidationMessage.INVALID_OPERATOR_EMAIL,
     });
   }
   return errors;

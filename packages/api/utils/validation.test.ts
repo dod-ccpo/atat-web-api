@@ -22,6 +22,7 @@ import {
   isApplication,
   isEnvironment,
   isOperator,
+  isMilEmail,
 } from "./validation";
 
 describe("Testing validation of request body", function () {
@@ -259,6 +260,25 @@ describe("isOperator()", () => {
   });
   it.each(missingOperatorFields)("should reject Operator with missing field", (item) => {
     expect(isOperator(item)).toBe(false);
+  });
+});
+describe("isMilEmail()", () => {
+  const goodMilEmails = [
+    "good-email@testing.mil",
+    "good.email_1234567890@testing.mil",
+    "good_email_1234567890@testing_1234567-890.mil",
+  ];
+  const badMilEmails = [
+    "bad.email_1234567890@testing.au",
+    "bad-email!@#$%^&*()+=@testing.co",
+    "bad_email_1234567890@testing!@#$%^&*(+=).io",
+  ];
+
+  it.each(goodMilEmails)("should be true for good emails", (email) => {
+    expect(isMilEmail(email)).toEqual(true);
+  });
+  it.each(badMilEmails)("should be false for bad emails", (item) => {
+    expect(isMilEmail(item)).toBe(false);
   });
 });
 

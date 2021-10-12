@@ -233,3 +233,14 @@ export function isFundingAmount(str: string): boolean {
   const num: number = parseFloat(str);
   return num > 0;
 }
+
+/**
+ * Check whether an operator email is a valid email.
+ *
+ * @param email - The email to check
+ * @returns boolean - true if the email matches the regex pattern, and false if not
+ */
+export function isMilEmail(email: string): boolean {
+  const emailRegex = /^[\w.-]+@[\w-]+.mil$/i;
+  return emailRegex.test(email);
+}
