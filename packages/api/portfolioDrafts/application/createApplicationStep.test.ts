@@ -6,6 +6,7 @@ import {
   mockPortfolioDraftSummary,
   mockBadPortfolioDraftSummary,
   mockApplicationsMissingFields,
+  mockBadOperatorEmails,
 } from "./commonMockData";
 import { mockClient } from "aws-sdk-client-mock";
 import { v4 as uuidv4 } from "uuid";
@@ -209,7 +210,7 @@ describe("Individual Application input validation tests", function () {
   const tooLongDisplayName =
     "waaaaaaaaaaaaaaaaaaaaaaaaayyyyyy tooooooooooooooooooooooooooooooooooooo loooooooooonnnnnnnnnnngggggggggg";
   it("should return error map entries when an operator has a name that is too short", () => {
-    const operator = { display_name: "", email: "dark@side.mil", access: AccessLevel.READ_ONLY };
+    const operator = { display_name: "", email: "dark.1234-567890_@side.mil", access: AccessLevel.READ_ONLY };
     const errors = performDataValidationOnOperator(operator);
     expect(errors.length).toEqual(1);
     expect(errors).toContainEqual({
@@ -219,8 +220,13 @@ describe("Individual Application input validation tests", function () {
       validationMessage: ValidationMessage.INVALID_OPERATOR_NAME,
     });
   });
+  it.each(mockBadOperatorEmails)("should return an error map when incorrect operator email", (operator) => {
+    const errors = performDataValidationOnOperator(operator);
+    expect(errors.length).toEqual(1);
+    expect(errors[0].invalidParameterValue).toBe(operator.email);
+  });
   it("should return error map entries when an operator has a name that is too long", () => {
-    const operator = { display_name: tooLongName, email: "dark@side.mil", access: AccessLevel.READ_ONLY };
+    const operator = { display_name: tooLongName, email: "dark@side_123456789.MIL", access: AccessLevel.READ_ONLY };
     const errors = performDataValidationOnOperator(operator);
     expect(errors.length).toEqual(1);
     expect(errors).toContainEqual({

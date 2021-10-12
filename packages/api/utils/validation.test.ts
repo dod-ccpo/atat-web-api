@@ -256,10 +256,10 @@ describe("isOperator()", () => {
     expect(isOperator(item)).toEqual(false);
   });
   it.each(mockApplicationJabbasPalaceExpansionApp.operators)("should accept an Operator object", (item) => {
-    expect(isOperator(item)).toBe(true);
+    expect(isOperator(item)).toEqual(true);
   });
   it.each(missingOperatorFields)("should reject Operator with missing field", (item) => {
-    expect(isOperator(item)).toBe(false);
+    expect(isOperator(item)).toEqual(false);
   });
 });
 describe("isMilEmail()", () => {
@@ -274,11 +274,11 @@ describe("isMilEmail()", () => {
     "bad_email_1234567890@testing!@#$%^&*(+=).io",
   ];
 
-  it.each(goodMilEmails)("should be true for good emails", (email) => {
+  it.each(goodMilEmails)("should be true for good operator emails", (email) => {
     expect(isMilEmail(email)).toEqual(true);
   });
-  it.each(badMilEmails)("should be false for bad emails", (item) => {
-    expect(isMilEmail(item)).toBe(false);
+  it.each(badMilEmails)("should be false for bad operator emails", (email) => {
+    expect(isMilEmail(email)).toEqual(false);
   });
 });
 

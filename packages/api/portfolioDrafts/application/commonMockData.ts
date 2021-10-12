@@ -11,37 +11,37 @@ import { AppEnvOperator } from "../../models/AppEnvOperator";
 
 const mockPortoflioOperatorYoda: PortfolioOperator = {
   display_name: "Yoda",
-  email: "yoda@iam.com",
+  email: "yoda@iam.mil",
   access: AccessLevel.PORTFOLIO_ADMINISTRATOR,
 };
 const mockAppEnvOperatorDarthVader: AppEnvOperator = {
   display_name: "Darth Vader",
-  email: "iam@yourfather.com",
+  email: "iam@yourfather.mil",
   access: AccessLevel.ADMINISTRATOR,
 };
 const mockAppEnvOperatorLandonisCalrissian: AppEnvOperator = {
   display_name: "Landonis Calrissian",
-  email: "thegambler@cloudcity.com",
+  email: "thegambler@cloudcity.mil",
   access: AccessLevel.READ_ONLY,
 };
 const mockAppEnvOperatorLukeSkywalker: AppEnvOperator = {
   display_name: "Luke Skywalker",
-  email: "lostmy@hand.com",
+  email: "lostmy@hand.mil",
   access: AccessLevel.READ_ONLY,
 };
 const mockAppEnvOperatorSalaciousCrumb: AppEnvOperator = {
   display_name: "Salacious Crumb",
-  email: "monkey@lizard.com",
+  email: "monkey@lizard.mil",
   access: AccessLevel.ADMINISTRATOR,
 };
 const mockAppEnvOperatorHanSolo: AppEnvOperator = {
   display_name: "Han Solo",
-  email: "frozen@carbonite.com",
+  email: "frozen@carbonite.mil",
   access: AccessLevel.READ_ONLY,
 };
 const mockAppEnvOperatorBobaFett: AppEnvOperator = {
   display_name: "Boba Fett",
-  email: "original@mandalorian.com",
+  email: "original@mandalorian.mil",
   access: AccessLevel.READ_ONLY,
 };
 
@@ -120,6 +120,18 @@ export const mockPortfolioDraftSummary: PortfolioDraft = {
 /** ABOVE THIS LINE ARE VALID OBJECTS WITH GOOD DATA **/
 /** BELOW THIS LINE ARE INVALID OBJECTS WITH MISSING FIELDS AND BAD DATA **/
 
+/**
+ * An array of Environment-looking objects with missing fields
+ * that should be rejected by isEnvironment()
+ */
+export const mockBadOperatorEmails = [
+  { ...mockPortoflioOperatorYoda, email: "yoda@iam.com" },
+  { ...mockAppEnvOperatorSalaciousCrumb, email: "monkey@lizard.io" },
+  { ...mockAppEnvOperatorDarthVader, email: "dark!#$%^&*()-+=@side.mil" },
+  { ...mockAppEnvOperatorHanSolo, email: "frozen1234567890@carbonite!#$%^&*()-+=.123" },
+  { ...mockAppEnvOperatorLandonisCalrissian, email: "thegambler@cloudcity:<>,./_1234567890.MIL" },
+  { ...mockAppEnvOperatorLukeSkywalker, email: "lostmy@hand_!#$%@^&*()-+=.com" },
+];
 /**
  * An array of Environment-looking objects with missing fields
  * that should be rejected by isEnvironment()
