@@ -1006,10 +1006,8 @@ components:
           type: number
         pop_start_date:
           type: string
-          format: date
         pop_end_date:
           type: string
-          format: date
       required:
         - clin_number
         - idiq_clin
