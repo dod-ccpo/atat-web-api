@@ -9,9 +9,9 @@
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.36.0",
-    "@aws-sdk/client-sqs": "^3.36.0",
     "@aws-sdk/client-s3": "^3.36.0",
     "@aws-sdk/lib-dynamodb": "^3.36.0",
+    "@aws-sdk/client-sqs": "^3.36.0",
     "@middy/core": "^2.5.1",
     "@middy/http-event-normalizer": "^2.5.1",
     "@middy/http-json-body-parser": "^2.5.1",

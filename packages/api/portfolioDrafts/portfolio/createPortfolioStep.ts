@@ -58,7 +58,7 @@ export async function createPortfolioStepCommand(
           ":portfolio": portfolioStep,
           ":now": now,
           ":portfolioName": portfolioStep.name,
-          ":portfolioDescription": portfolioStep.description,
+          ":portfolioDescription": portfolioStep.description ?? "",
           ":numOfManagers": portfolioStep.portfolio_managers.length,
         },
         ConditionExpression: "attribute_exists(created_at)",

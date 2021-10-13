@@ -59,7 +59,7 @@ export function isPortfolioStep(object: unknown): object is PortfolioStep {
   if (!isValidObject(object)) {
     return false;
   }
-  return ["name", "csp", "description", "dod_components", "portfolio_managers"].every((item) => item in object);
+  return ["name", "csp", "dod_components", "portfolio_managers"].every((item) => item in object);
 }
 
 /**
@@ -156,15 +156,25 @@ export function isBodyPresent(body: string | null): body is string {
 }
 
 /**
- * Check whether a given string is a valid date.
- * The expected format is YYYY-MM-DD (ISO 8601).
+ * Checks whether the given string is a valid date.
  *
- * @param str - The string to check
- * @returns true if the string is a valid date; false otherwise
+ * This overcomes limitations in JSON Schema Draft 4 around the lack
+ * of a `date` `format` specifier.
+ *
+ * @param possibleDate - The string to check for formatting as a date
+ * @returns
  */
-export function isValidDate(str: string): boolean {
-  const date: Date = new Date(str);
-  return date instanceof Date && !isNaN(date.getTime());
+export function isValidDate(possibleDate: string): boolean {
+  const resultingDate = new Date(possibleDate);
+  if (!(resultingDate instanceof Date) || isNaN(resultingDate.getTime())) {
+    return false;
+  }
+  // Date does weird things like converting February 31st to a date in March.
+  // Because of that, we need to check that the resulting ISO String's date
+  // portion (the stuff before the T) is the same as the input. Otherwise,
+  // we might accept YYYY-02-31 as valid.
+  // TODO: Migrate to a reputable date-handling library.
+  return resultingDate.toISOString().split("T")[0] === possibleDate;
 }
 
 /**

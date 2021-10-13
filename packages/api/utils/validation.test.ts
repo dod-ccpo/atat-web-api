@@ -83,7 +83,7 @@ describe("Validation tests for createPortfolioStep function", function () {
     };
     expect(isPortfolioStep(requestBody)).toEqual(true);
   });
-  it("should fail to map body to portfolioStep object due to missing attribute", async () => {
+  it("should accept PortfolioStep objects with a missing description", async () => {
     const requestBodyMissingDescription = {
       name: "Zach's portfolio name",
       csp: CloudServiceProvider.AWS,
@@ -91,7 +91,51 @@ describe("Validation tests for createPortfolioStep function", function () {
       dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
       portfolio_managers: ["joe.manager@example.com", "jane.manager@example.com"],
     };
-    expect(isPortfolioStep(requestBodyMissingDescription)).toEqual(false);
+    expect(isPortfolioStep(requestBodyMissingDescription)).toEqual(true);
+  });
+  it.each([
+    {
+      description: "Missing Name",
+      body: {
+        // name: "Zach's portfolio name",
+        csp: CloudServiceProvider.AWS,
+        description: "Test Portfolio",
+        dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
+        portfolio_managers: ["joe.manager@example.com", "jane.manager@example.com"],
+      },
+    },
+    {
+      description: "Missing CSP",
+      body: {
+        name: "Zach's portfolio name",
+        // csp: CloudServiceProvider.AWS,
+        description: "Test Portfolio",
+        dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
+        portfolio_managers: ["joe.manager@example.com", "jane.manager@example.com"],
+      },
+    },
+    {
+      description: "Missing Components",
+      body: {
+        name: "Zach's portfolio name",
+        csp: CloudServiceProvider.AWS,
+        description: "Test Portfolio",
+        // dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
+        portfolio_managers: ["joe.manager@example.com", "jane.manager@example.com"],
+      },
+    },
+    {
+      description: "Missing Portfolio Managers",
+      body: {
+        name: "Zach's portfolio name",
+        csp: CloudServiceProvider.AWS,
+        description: "Test Portfolio",
+        dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
+        // portfolio_managers: ["joe.manager@example.com", "jane.manager@example.com"],
+      },
+    },
+  ])("should reject PortfolioStep objects missing required attributes", async (badRequest) => {
+    expect(isPortfolioStep(badRequest)).toEqual(false);
   });
   it("should fail to map body to portfolioStep object because request body is null", async () => {
     expect(isPortfolioStep(null)).toEqual(false);
@@ -203,14 +247,55 @@ describe("Testing validation of path parameter", function () {
 });
 
 describe("isValidDate()", function () {
-  it("should validate these strings", () => {
-    expect(isValidDate("1970-01-01")).toEqual(true);
-    expect(isValidDate(new Date().toISOString())).toEqual(true);
+  it.each([
+    "1970-01-01",
+    "2021-10-12",
+    "2000-02-29",
+    "2032-12-31",
+    "2019-10-02",
+    "1969-07-20",
+    "1977-05-25",
+    "2006-03-14",
+  ])("should accept valid dates", async (date) => {
+    expect(isValidDate(date)).toEqual(true);
   });
-  it("should not validate these strings", () => {
-    expect(isValidDate("")).toEqual(false);
-    expect(isValidDate("not an ISO date")).toEqual(false);
-    expect(isValidDate(NaN.toString())).toEqual(false);
+  it.each([
+    "",
+    "not an ISO date",
+    NaN.toString(),
+    "7",
+    "undefined",
+    "null",
+    "tomorrow",
+    "yesterday",
+    "today",
+    "Friday",
+    "0-14-7",
+    "not-a-date",
+    "2341-23-67",
+  ])("should not accept non-date values", async (date) => {
+    expect(isValidDate(date)).toEqual(false);
+  });
+  it.each(["2021-09-31", "2021-04-31", "2021-06-31", "2021-11-31"])(
+    "reject the 31st of months with 30 days",
+    async (date) => {
+      expect(isValidDate(date)).toEqual(false);
+    }
+  );
+  it.each(["2020-02-30", "2020-02-31", "2021-02-30", "2021-02-31", "2000-02-31", "3000-02-31"])(
+    "should reject the 30th and 31st of February every year",
+    async (date) => {
+      expect(isValidDate(date)).toEqual(false);
+    }
+  );
+  it.each(["1900-02-29", "2100-02-29", "2021-02-29", "2019-02-29", "3000-02-29"])(
+    "should reject the 29th in non-leap-years",
+    async (date) => {
+      expect(isValidDate(date)).toEqual(false);
+    }
+  );
+  it.each(["2020-02-29", "2000-02-29", "2024-02-29"])("should accept the 29th in leap years", async (date) => {
+    expect(isValidDate(date)).toEqual(true);
   });
 });
 
