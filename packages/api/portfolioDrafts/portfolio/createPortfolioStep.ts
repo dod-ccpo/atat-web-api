@@ -17,6 +17,7 @@ import jsonBodyParser from "@middy/http-json-body-parser";
 import validator from "@middy/validator";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
+import cors from "@middy/http-cors";
 
 /**
  * Submits the Portfolio Step of the Portfolio Draft Wizard
@@ -51,7 +52,8 @@ handler
       inputSchema: schemaWrapper,
     })
   )
-  .use(JSONErrorHandlerMiddleware());
+  .use(JSONErrorHandlerMiddleware())
+  .use(cors({ headers: "*", methods: "*" }));
 
 export { handler };
 
