@@ -1,4 +1,5 @@
 import * as ec2 from "@aws-cdk/aws-ec2";
+import { InterfaceVpcEndpointAwsService } from "@aws-cdk/aws-ec2";
 import * as cdk from "@aws-cdk/core";
 import * as custom from "@aws-cdk/custom-resources";
 
@@ -69,7 +70,18 @@ export class AtatNetStack extends cdk.Stack {
     const sqsEndpoint = vpc.addInterfaceEndpoint("SqsEndpoint", {
       service: ec2.InterfaceVpcEndpointAwsService.SQS,
     });
-    this.endpoints.push(dynamodbEndpoint, s3Endpoint, apiGatewayEndpoint, lambdaEndpoint, logsEndpoint, sqsEndpoint);
+    const xrayEndpoint = vpc.addInterfaceEndpoint("XrayEndpoint", {
+      service: new InterfaceVpcEndpointAwsService("xray"),
+    });
+    this.endpoints.push(
+      dynamodbEndpoint,
+      s3Endpoint,
+      apiGatewayEndpoint,
+      lambdaEndpoint,
+      logsEndpoint,
+      sqsEndpoint,
+      xrayEndpoint
+    );
   }
 
   private addDefaultTransitGatewayRoute(transitGatewayAttachment: ec2.CfnTransitGatewayAttachment) {
