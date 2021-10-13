@@ -127,9 +127,7 @@ export const mockPortfolioDraftSummary: PortfolioDraft = {
 export const mockBadOperatorEmails = [
   { ...mockPortoflioOperatorYoda, email: "yoda@iam.com" },
   { ...mockAppEnvOperatorSalaciousCrumb, email: "monkey@lizard.io" },
-  { ...mockAppEnvOperatorDarthVader, email: "dark!#$%^&*()-+=@side.mil" },
   { ...mockAppEnvOperatorHanSolo, email: "frozen1234567890@carbonite!#$%^&*()-+=.123" },
-  { ...mockAppEnvOperatorLandonisCalrissian, email: "thegambler@cloudcity:<>,./_1234567890.MIL" },
   { ...mockAppEnvOperatorLukeSkywalker, email: "lostmy@hand_!#$%@^&*()-+=.com" },
 ];
 /**

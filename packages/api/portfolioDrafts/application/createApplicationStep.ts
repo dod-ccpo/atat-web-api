@@ -19,7 +19,6 @@ import {
   isApplicationStep,
   isBodyPresent,
   isEnvironment,
-  isMilEmail,
   isOperator,
   isValidJson,
   isValidUuidV4,
@@ -181,8 +180,11 @@ export function performDataValidationOnOperator(operator: Operator): Array<Appli
       validationMessage: ValidationMessage.INVALID_OPERATOR_NAME,
     });
   }
-
-  if (!isMilEmail(operator.email)) {
+  // Using API Gateway "email" format to enforce the most common email rules
+  // and only ensuring the .mil top-level domain here.
+  // TODO: possibly add patterns into the internal API spec to help
+  const emailRegex = /.mil$/i;
+  if (!emailRegex.test(operator.email)) {
     errors.push({
       operatorEmail: operator.email,
       invalidParameterName: "email",
