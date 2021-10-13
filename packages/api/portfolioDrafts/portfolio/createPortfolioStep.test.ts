@@ -1,4 +1,4 @@
-import { APIGatewayProxyEvent } from "aws-lambda";
+import { APIGatewayProxyEvent, Callback, Context } from "aws-lambda";
 import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
 import { CloudServiceProvider } from "../../models/CloudServiceProvider";
 import { DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb";
@@ -8,6 +8,7 @@ import { NO_SUCH_PORTFOLIO_DRAFT, REQUEST_BODY_INVALID } from "../../utils/error
 import { PortfolioStep } from "../../models/PortfolioStep";
 import { ProvisioningStatus } from "../../models/ProvisioningStatus";
 import { v4 as uuidv4 } from "uuid";
+import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 beforeEach(() => {
@@ -48,53 +49,50 @@ describe("Successful operations test", () => {
       Attributes: mockResponse,
     });
 
-    const validRequest: APIGatewayProxyEvent = {
-      body: JSON.stringify(requestBody),
+    const validRequest: ApiGatewayEventParsed<PortfolioStep> = {
+      body: requestBody,
       pathParameters: { portfolioDraftId: mockResponse.id },
     } as any;
-    const response = await handler(validRequest);
-    const numOfPortfolioManagers: number = JSON.parse(response.body).portfolio_managers.length;
-
+    const response = await handler(validRequest, {} as Context, null as unknown as Callback)!;
     expect(response).toBeInstanceOf(ApiSuccessResponse);
     expect(response.statusCode).toEqual(SuccessStatusCode.CREATED);
-    expect(response.body).toStrictEqual(validRequest.body);
-    expect(numOfPortfolioManagers).toBe(requestBody.portfolio_managers.length);
   });
 });
 
 describe("Validation of handler", () => {
+  const wrongEmailFormatPortfolioStep: PortfolioStep = {
+    name: "Mock Portfolio",
+    csp: CloudServiceProvider.AWS,
+    description: "Mock portfolio description",
+    dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
+    portfolio_managers: ["joe.manager", "jane.manager@example.com"],
+  };
+
+  const validPortfolioStep: PortfolioStep = {
+    name: "Mock Portfolio",
+    csp: CloudServiceProvider.AWS,
+    description: "Mock portfolio description",
+    dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
+    portfolio_managers: ["jane.manager@example.com"],
+  };
   it("should return NO_SUCH_PORTFOLIO_DRAFT when no portfolioId specified", async () => {
     const request = {
-      body: `"{"hi":"123"}"`,
-    } as APIGatewayProxyEvent;
-    const response = await handler(request);
+      body: validPortfolioStep,
+    } as ApiGatewayEventParsed<PortfolioStep>;
+    const response = await handler(request, {} as Context, null as unknown as Callback)!;
     expect(response).toEqual(NO_SUCH_PORTFOLIO_DRAFT);
-  });
-  it("should return REQUEST_BODY_INVALID when invalid JSON provided", async () => {
-    const request: APIGatewayProxyEvent = {
-      body: `"{"hi": "123",}"`, // invalid JSON comma at end
-      pathParameters: { portfolioDraftId: uuidv4() },
-    } as any;
-
-    const response = await handler(request);
-    expect(response).toEqual(REQUEST_BODY_INVALID);
   });
 });
 
 describe.each(mockValidPortfolioSteps)("Handler response with mock dynamodb", (mockPortfolioStep) => {
-  const request: APIGatewayProxyEvent = {
-    body: JSON.stringify(mockPortfolioStep),
+  const request: ApiGatewayEventParsed<PortfolioStep> = {
+    body: mockPortfolioStep,
     pathParameters: { portfolioDraftId: uuidv4() },
   } as any;
 
   it("should return error when the portfolioDraft doesn't exist", async () => {
     ddbMock.on(UpdateCommand).rejects({ name: "ConditionalCheckFailedException" });
-    const data = await handler(request);
+    const data = await handler(request, {} as Context, null as unknown as Callback)!;
     expect(data).toEqual(NO_SUCH_PORTFOLIO_DRAFT);
-  });
-
-  it("should throw error when unknown dynamodb internal service error occurs", async () => {
-    ddbMock.on(UpdateCommand).rejects({ name: "InternalServiceError" });
-    await expect(handler(request)).rejects.toThrowError();
   });
 });
