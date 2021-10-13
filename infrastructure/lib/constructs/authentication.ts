@@ -173,9 +173,6 @@ export class CognitoAuthentication extends cdk.Construct {
       environment: {
         GROUPS_ATTRIBUTE_CLAIM_NAME: `custom:${props.groupsAttributeName ?? "groups"}`,
       },
-      // This doesn't have an upstream service with X-Ray enabled so active tracing
-      // is required for the function.
-      tracing: lambda.Tracing.ACTIVE,
     });
 
     this.userPool = new cognito.UserPool(this, "Pool", {
