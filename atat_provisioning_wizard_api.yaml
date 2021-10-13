@@ -854,13 +854,17 @@ components:
             description:
               type: string
             num_portfolio_managers:
-              type: number
+              type: integer
+              minimum: 0
             num_applications:
-              type: number
+              type: integer
+              minimum: 0
             num_environments:
-              type: number
+              type: integer
+              minimum: 0
             num_task_orders:
-              type: number
+              type: integer
+              minimum: 0
             status:
               type: string
               description: CSP Provisioning Status
@@ -904,6 +908,7 @@ components:
         name:
           type: string
           description: name of file when uploaded
+          example: "TaskOrder_9876543210123.pdf"
     FileMetadata:
       type: object
       description: Metadata describing an uploaded file
@@ -935,6 +940,7 @@ components:
       properties:
         name:
           type: string
+          pattern: '^[a-zA-Z\d -]{4,100}$'
         csp:
           type: string
           enum:
@@ -977,7 +983,9 @@ components:
       additionalProperties: false
       properties:
         task_order_number:
+          description: TO numbers are 13 characters. TO modifications are 17 characters.
           type: string
+          pattern: '^[\d]{13,17}$'
         task_order_file:
           description: Metadata associated with file which was previously uploaded by POST /taskOrderFiles
           allOf:
@@ -996,17 +1004,27 @@ components:
       additionalProperties: false
       properties:
         clin_number:
+          description: Contract Line Item Number (CLIN), 0001 through 9999
           type: string
+          pattern: '(?!^0{4}$)^\d{4}$'
         idiq_clin:
           type: string
         total_clin_value:
           type: number
+          minimum: 0
+          exclusiveMinimum: true
         obligated_funds:
           type: number
+          minimum: 0
+          exclusiveMinimum: true
         pop_start_date:
+          description: Start of period of performance
           type: string
+          example: "2021-10-01"
         pop_end_date:
+          description: End of period of performance
           type: string
+          example: "2022-09-30"
       required:
         - clin_number
         - idiq_clin
@@ -1033,6 +1051,7 @@ components:
       properties:
         name:
           type: string
+          pattern: '^[a-zA-Z\d _-]{4,100}$'
         description:
           type: string
         environments:
@@ -1055,6 +1074,7 @@ components:
       properties:
         name:
           type: string
+          pattern: '^[a-zA-Z\d _-]{4,100}$'
         operators:
           type: array
           items:
@@ -1156,13 +1176,13 @@ components:
     FundingStepEx:
       value:
         task_orders:
-          - task_order_number: "12345678910"
+          - task_order_number: "1234567891012"
             task_order_file:
               id: "b91db32f-40fa-4225-9885-b032f0d229fe"
               created_at: "2021-08-03T16:21:07.978Z"
               updated_at: "2021-08-03T16:21:07.978Z"
               size: 694331
-              name: "TO_12345678910.pdf"
+              name: "TO_1234567891012.pdf"
               status: "accepted"
             clins:
               - clin_number: "0001"
@@ -1171,13 +1191,13 @@ components:
                 obligated_funds: 10000
                 pop_start_date: "2021-09-01"
                 pop_end_date: "2022-09-01"
-          - task_order_number: "98765432101"
+          - task_order_number: "9876543210123"
             task_order_file:
               id: "824f7489-cabe-4c16-b41f-2eb196526995"
               created_at: "2021-09-07T12:48:11.387Z"
               updated_at: "2021-09-07T12:48:11.387Z"
               size: 2945459
-              name: "TaskOrder_98765432101.pdf"
+              name: "TaskOrder_9876543210123.pdf"
               status: "pending"
             clins:
               - clin_number: "0002"
