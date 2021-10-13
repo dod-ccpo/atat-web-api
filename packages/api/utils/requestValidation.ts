@@ -1,8 +1,7 @@
-import { NO_SUCH_PORTFOLIO_DRAFT, REQUEST_BODY_INVALID, REQUEST_BODY_EMPTY } from "./errors";
-import { APIGatewayProxyEvent } from "aws-lambda";
+import { NO_SUCH_PORTFOLIO_DRAFT, REQUEST_BODY_INVALID } from "./errors";
 import { SetupError, SetupResult, SetupSuccess } from "./response";
-import { isBodyPresent, isValidJson, isValidUuidV4 } from "./validation";
-
+import { isValidUuidV4 } from "./validation";
+import { ApiGatewayEventParsed } from "./eventHandlingTool";
 /**
  * Check if incoming POST Request passes basic shape validation
  *
@@ -11,26 +10,22 @@ import { isBodyPresent, isValidJson, isValidUuidV4 } from "./validation";
  * @returns SetUpSuccess object if event passes validation, otherwise it returns SetUpError
  */
 export function shapeValidationForPostRequest<T>(
-  event: APIGatewayProxyEvent,
+  event: ApiGatewayEventParsed<T>,
   ...extraValidators: Array<(obj: unknown) => obj is T>
 ): SetupResult<T> {
   if (!isValidUuidV4(event.pathParameters?.portfolioDraftId)) {
     return new SetupError(NO_SUCH_PORTFOLIO_DRAFT);
   }
-  if (!isBodyPresent(event.body)) {
-    return new SetupError(REQUEST_BODY_EMPTY);
-  }
   const portfolioDraftId = event.pathParameters!.portfolioDraftId!;
-  const bodyResult = isValidJson<T>(event.body);
+  const bodyResult = event.body;
   if (bodyResult === undefined) {
     return new SetupError(REQUEST_BODY_INVALID);
   }
-
   for (const validator of extraValidators) {
     if (!validator(event.body)) {
       return new SetupError(REQUEST_BODY_INVALID);
     }
   }
 
-  return new SetupSuccess<T>({ portfolioDraftId }, bodyResult);
+  return new SetupSuccess<T>({ portfolioDraftId }, bodyResult as unknown as T);
 }
