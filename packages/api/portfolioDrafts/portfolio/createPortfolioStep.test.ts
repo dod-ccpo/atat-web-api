@@ -74,9 +74,12 @@ describe("Successful operations test", () => {
     } as any;
 
     const response = await handler(badRequest);
-    const numOfPortfolioManagers = 0;
+    const numOfPortfolioManagers: number = JSON.parse(response.body).portfolio_managers.length;
 
-    expect(response.statusCode).not.toEqual(ErrorStatusCode.INTERNAL_SERVER_ERROR);
+    expect(response).toBeInstanceOf(ApiSuccessResponse);
+    expect(response.statusCode).toEqual(SuccessStatusCode.CREATED);
+    expect(response.body).toStrictEqual(JSON.stringify(mockResponse.portfolio_step));
+    expect(numOfPortfolioManagers).toBe(mockResponse.num_portfolio_managers);
   });
 });
 
