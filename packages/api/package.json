@@ -22,7 +22,8 @@
     "ajv-formats": "^2.1.1",
     "lambda-multipart-parser": "^1.0.1",
     "middy-middleware-json-error-handler": "^3.0.0",
-    "uuid": "^8.3.2"
+    "uuid": "^8.3.2",
+    "xss": "^1.0.10"
   },
   "devDependencies": {
     "@types/http-errors": "^1.8.1",
