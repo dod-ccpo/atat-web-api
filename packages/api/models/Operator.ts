@@ -1,5 +1,7 @@
 import { AccessLevel } from "./AccessLevel";
 import { ExhaustiveAttributeMap } from "./TypeFields";
+// TODO: Combine Operator, PortfolioOperator, AppEnvOperator and AccessLevel
+// since concepts are intertwined.
 export interface Operator {
   display_name: string;
   email: string;
