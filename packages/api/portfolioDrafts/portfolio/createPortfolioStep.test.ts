@@ -1,5 +1,5 @@
 import { APIGatewayProxyEvent } from "aws-lambda";
-import { ApiSuccessResponse, SuccessStatusCode, ErrorResponse, ErrorStatusCode } from "../../utils/response";
+import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
 import { CloudServiceProvider } from "../../models/CloudServiceProvider";
 import { DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { handler } from "./createPortfolioStep";
@@ -14,36 +14,42 @@ beforeEach(() => {
   ddbMock.reset();
 });
 
-/**
- * PortfolioStepEx from API spec
- * @returns a complete PortfolioStep with good data
- */
-const mockPortfolioStep: PortfolioStep = {
-  name: "Mock Portfolio",
-  csp: CloudServiceProvider.AWS,
-  description: "Mock portfolio description",
-  dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
-  portfolio_managers: ["joe.manager@example.com", "jane.manager@example.com"],
-};
-
 const now = new Date().toISOString();
+
+const mockValidPortfolioSteps: PortfolioStep[] = [
+  // The example PortfolioStepEx from the API Specification
+  {
+    name: "Mock Portfolio",
+    csp: CloudServiceProvider.AWS,
+    description: "Mock portfolio description",
+    dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
+    portfolio_managers: ["joe.manager@example.com", "jane.manager@example.com"],
+  },
+  // This checks that we don't regress and error on a body that we worked to debug.
+  // The issue at the time seemed to be due to a missing `description` field in the
+  // request body.
+  {
+    name: "Tonys Portfolio 10_13_10:14",
+    csp: CloudServiceProvider.AWS,
+    dod_components: ["marine_corps", "combatant_command", "joint_staff"],
+    portfolio_managers: [],
+  },
+];
 
 describe("Successful operations test", () => {
   const mockResponse = {
     updated_at: now,
     created_at: now,
-    portfolio_step: mockPortfolioStep,
     status: ProvisioningStatus.NOT_STARTED,
     id: uuidv4(),
-    num_portfolio_managers: mockPortfolioStep.portfolio_managers.length,
   };
-  it("should return portfolio step and http status code 201", async () => {
+  it.each(mockValidPortfolioSteps)("should return portfolio step and http status code 201", async (requestBody) => {
     ddbMock.on(UpdateCommand).resolves({
       Attributes: mockResponse,
     });
 
     const validRequest: APIGatewayProxyEvent = {
-      body: JSON.stringify(mockResponse.portfolio_step),
+      body: JSON.stringify(requestBody),
       pathParameters: { portfolioDraftId: mockResponse.id },
     } as any;
     const response = await handler(validRequest);
@@ -51,35 +57,8 @@ describe("Successful operations test", () => {
 
     expect(response).toBeInstanceOf(ApiSuccessResponse);
     expect(response.statusCode).toEqual(SuccessStatusCode.CREATED);
-    expect(response.body).toStrictEqual(JSON.stringify(mockResponse.portfolio_step));
-    expect(numOfPortfolioManagers).toBe(mockResponse.num_portfolio_managers);
-  });
-
-  // This checks that we don't regress and error on a body that we worked to debug.
-  // The issue at the time seemed to be due to a missing `description` field in the
-  // request body.
-  it("should not return a 500 for a valid object", async () => {
-    ddbMock.on(UpdateCommand).resolves({
-      Attributes: mockResponse,
-    });
-
-    const badRequest: APIGatewayProxyEvent = {
-      body: JSON.stringify({
-        name: "Tonys Portfolio 10_13_10:14",
-        csp: "aws",
-        dod_components: ["marine_corps", "combatant_command", "joint_staff"],
-        portfolio_managers: [],
-      }),
-      pathParameters: { portfolioDraftId: mockResponse.id },
-    } as any;
-
-    const response = await handler(badRequest);
-    const numOfPortfolioManagers: number = JSON.parse(response.body).portfolio_managers.length;
-
-    expect(response).toBeInstanceOf(ApiSuccessResponse);
-    expect(response.statusCode).toEqual(SuccessStatusCode.CREATED);
-    expect(response.body).toStrictEqual(JSON.stringify(mockResponse.portfolio_step));
-    expect(numOfPortfolioManagers).toBe(mockResponse.num_portfolio_managers);
+    expect(response.body).toStrictEqual(validRequest.body);
+    expect(numOfPortfolioManagers).toBe(requestBody.portfolio_managers.length);
   });
 });
 
@@ -102,11 +81,12 @@ describe("Validation of handler", () => {
   });
 });
 
-describe("Handler response with mock dynamodb", () => {
+describe.each(mockValidPortfolioSteps)("Handler response with mock dynamodb", (mockPortfolioStep) => {
   const request: APIGatewayProxyEvent = {
     body: JSON.stringify(mockPortfolioStep),
     pathParameters: { portfolioDraftId: uuidv4() },
   } as any;
+
   it("should return error when the portfolioDraft doesn't exist", async () => {
     ddbMock.on(UpdateCommand).rejects({ name: "ConditionalCheckFailedException" });
     const data = await handler(request);
