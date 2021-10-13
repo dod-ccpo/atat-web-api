@@ -1,5 +1,5 @@
 import { APIGatewayProxyEvent } from "aws-lambda";
-import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
+import { ApiSuccessResponse, SuccessStatusCode, ErrorResponse, ErrorStatusCode } from "../../utils/response";
 import { CloudServiceProvider } from "../../models/CloudServiceProvider";
 import { DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { handler } from "./createPortfolioStep";
@@ -54,6 +54,30 @@ describe("Successful operations test", () => {
     expect(response.body).toStrictEqual(JSON.stringify(mockResponse.portfolio_step));
     expect(numOfPortfolioManagers).toBe(mockResponse.num_portfolio_managers);
   });
+
+  // This checks that we don't regress and error on a body that we worked to debug.
+  // The issue at the time seemed to be due to a missing `description` field in the
+  // request body.
+  it("should not return a 500 for a valid object", async () => {
+    ddbMock.on(UpdateCommand).resolves({
+      Attributes: mockResponse,
+    });
+
+    const badRequest: APIGatewayProxyEvent = {
+      body: JSON.stringify({
+        name: "Tonys Portfolio 10_13_10:14",
+        csp: "aws",
+        dod_components: ["marine_corps", "combatant_command", "joint_staff"],
+        portfolio_managers: [],
+      }),
+      pathParameters: { portfolioDraftId: mockResponse.id },
+    } as any;
+
+    const response = await handler(badRequest);
+    const numOfPortfolioManagers = 0;
+
+    expect(response.statusCode).not.toEqual(ErrorStatusCode.INTERNAL_SERVER_ERROR);
+  });
 });
 
 describe("Validation of handler", () => {
@@ -74,6 +98,7 @@ describe("Validation of handler", () => {
     expect(response).toEqual(REQUEST_BODY_INVALID);
   });
 });
+
 describe("Handler response with mock dynamodb", () => {
   const request: APIGatewayProxyEvent = {
     body: JSON.stringify(mockPortfolioStep),
