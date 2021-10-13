@@ -83,7 +83,7 @@ describe("Validation tests for createPortfolioStep function", function () {
     };
     expect(isPortfolioStep(requestBody)).toEqual(true);
   });
-  it("should fail to map body to portfolioStep object due to missing attribute", async () => {
+  it("should accept PortfolioStep objects with a missing description", async () => {
     const requestBodyMissingDescription = {
       name: "Zach's portfolio name",
       csp: CloudServiceProvider.AWS,
@@ -91,7 +91,51 @@ describe("Validation tests for createPortfolioStep function", function () {
       dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
       portfolio_managers: ["joe.manager@example.com", "jane.manager@example.com"],
     };
-    expect(isPortfolioStep(requestBodyMissingDescription)).toEqual(false);
+    expect(isPortfolioStep(requestBodyMissingDescription)).toEqual(true);
+  });
+  it.each([
+    {
+      description: "Missing Name",
+      body: {
+        // name: "Zach's portfolio name",
+        csp: CloudServiceProvider.AWS,
+        description: "Test Portfolio",
+        dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
+        portfolio_managers: ["joe.manager@example.com", "jane.manager@example.com"],
+      },
+    },
+    {
+      description: "Missing CSP",
+      body: {
+        name: "Zach's portfolio name",
+        // csp: CloudServiceProvider.AWS,
+        description: "Test Portfolio",
+        dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
+        portfolio_managers: ["joe.manager@example.com", "jane.manager@example.com"],
+      },
+    },
+    {
+      description: "Missing Components",
+      body: {
+        name: "Zach's portfolio name",
+        csp: CloudServiceProvider.AWS,
+        description: "Test Portfolio",
+        // dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
+        portfolio_managers: ["joe.manager@example.com", "jane.manager@example.com"],
+      },
+    },
+    {
+      description: "Missing Portfolio Managers",
+      body: {
+        name: "Zach's portfolio name",
+        csp: CloudServiceProvider.AWS,
+        description: "Test Portfolio",
+        dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
+        // portfolio_managers: ["joe.manager@example.com", "jane.manager@example.com"],
+      },
+    },
+  ])("should reject PortfolioStep objects missing required attributes", async (badRequest) => {
+    expect(isPortfolioStep(badRequest)).toEqual(false);
   });
   it("should fail to map body to portfolioStep object because request body is null", async () => {
     expect(isPortfolioStep(null)).toEqual(false);

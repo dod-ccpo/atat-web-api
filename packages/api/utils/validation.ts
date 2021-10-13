@@ -59,7 +59,7 @@ export function isPortfolioStep(object: unknown): object is PortfolioStep {
   if (!isValidObject(object)) {
     return false;
   }
-  return ["name", "csp", "description", "dod_components", "portfolio_managers"].every((item) => item in object);
+  return ["name", "csp", "dod_components", "portfolio_managers"].every((item) => item in object);
 }
 
 /**
