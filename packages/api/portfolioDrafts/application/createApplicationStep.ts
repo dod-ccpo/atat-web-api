@@ -1,8 +1,6 @@
 import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { Operator } from "../../models/Operator";
-import { AppEnvOperator } from "../../models/AppEnvOperator";
-
 import { Application } from "../../models/Application";
 import { ApplicationStep, ApplicationStepValidationErrors, ValidationMessage } from "../../models/ApplicationStep";
 import { Environment } from "../../models/Environment";
@@ -52,20 +50,19 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
   }
 
   const { applications, operators } = requestBody;
-  if (applications.filter((app) => !isApplication(app)).length) {
+  if (!applications.every(isApplication)) {
     return REQUEST_BODY_INVALID;
   }
 
-  const appEnvs: Array<Environment> = applications.flatMap((app) => app.environments);
-  const invalidEnvs = appEnvs.filter((env) => !isEnvironment(env));
-  if (invalidEnvs.length) {
+  const appEnvs = applications.flatMap((app) => app.environments);
+  if (!appEnvs.every(isEnvironment)) {
     return REQUEST_BODY_INVALID;
   }
 
-  const appOperators: Array<AppEnvOperator> = applications.flatMap((app) => app.operators);
-  const envOperators: Array<AppEnvOperator> = appEnvs.flatMap((env) => env.operators);
-  const allOperators: Array<Operator> = [...operators, ...appOperators, ...envOperators];
-  if (allOperators.filter((oper) => !isOperator(oper)).length) {
+  const appOperators = applications.flatMap((app) => app.operators);
+  const envOperators = appEnvs.flatMap((env) => env.operators);
+  const allOperators = [...operators, ...appOperators, ...envOperators];
+  if (!allOperators.every(isOperator)) {
     return REQUEST_BODY_INVALID;
   }
 
@@ -120,7 +117,7 @@ export function performDataValidation(applicationStep: ApplicationStep): Array<A
     .map(performDataValidationOnApplication)
     .reduce((accumulator, validationErrors) => accumulator.concat(validationErrors), []);
 
-  return [...operatorErrors, ...applicationErrors];
+  return operatorErrors.concat(applicationErrors);
 }
 
 /**

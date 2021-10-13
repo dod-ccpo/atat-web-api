@@ -121,8 +121,8 @@ export const mockPortfolioDraftSummary: PortfolioDraft = {
 /** BELOW THIS LINE ARE INVALID OBJECTS WITH MISSING FIELDS AND BAD DATA **/
 
 /**
- * An array of Environment-looking objects with missing fields
- * that should be rejected by isEnvironment()
+ * An array of Operator objects with invalid emails
+ * that should be rejected in the Application Step
  */
 export const mockBadOperatorEmails = [
   { ...mockPortoflioOperatorYoda, email: "yoda@iam.com" },

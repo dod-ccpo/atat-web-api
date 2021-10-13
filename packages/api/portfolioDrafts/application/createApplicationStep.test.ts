@@ -198,7 +198,7 @@ describe("Incorrect number of applications and environments", function () {
 });
 
 describe("Individual Application input validation tests", function () {
-  it("should return no error map entries when given Application has good data", () => {
+  it("should return no error map entries when given Application has good data", async () => {
     const allerrors = mockApplicationStep.applications
       .map(performDataValidationOnApplication)
       .reduce((accumulator, validationErrors) => accumulator.concat(validationErrors), []);
@@ -209,7 +209,7 @@ describe("Individual Application input validation tests", function () {
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut eleifend lectus ut luctus ultricies nisi.";
   const tooLongDisplayName =
     "waaaaaaaaaaaaaaaaaaaaaaaaayyyyyy tooooooooooooooooooooooooooooooooooooo loooooooooonnnnnnnnnnngggggggggg";
-  it("should return error map entries when an operator has a name that is too short", () => {
+  it("should return error map entries when an operator has a name that is too short", async () => {
     const operator = { display_name: "", email: "dark.1234-567890_@side.mil", access: AccessLevel.READ_ONLY };
     const errors = performDataValidationOnOperator(operator);
     expect(errors.length).toEqual(1);
@@ -220,13 +220,13 @@ describe("Individual Application input validation tests", function () {
       validationMessage: ValidationMessage.INVALID_OPERATOR_NAME,
     });
   });
-  it.each(mockBadOperatorEmails)("should return an error map when incorrect operator email", (operator) => {
+  it.each(mockBadOperatorEmails)("should return an error map when incorrect operator email", async (operator) => {
     const errors = performDataValidationOnOperator(operator);
     expect(errors.length).toEqual(1);
     expect(errors[0].invalidParameterValue).toBe(operator.email);
   });
-  it("should return error map entries when an operator has a name that is too long", () => {
-    const operator = { display_name: tooLongName, email: "dark@side_123456789.MIL", access: AccessLevel.READ_ONLY };
+  it("should return error map entries when an operator has a name that is too long", async () => {
+    const operator = { display_name: tooLongName, email: "dark@side123456789.MIL", access: AccessLevel.READ_ONLY };
     const errors = performDataValidationOnOperator(operator);
     expect(errors.length).toEqual(1);
     expect(errors).toContainEqual({
@@ -236,7 +236,7 @@ describe("Individual Application input validation tests", function () {
       validationMessage: ValidationMessage.INVALID_OPERATOR_NAME,
     });
   });
-  it("should return error map entries when given Application and Operator has a name that is too short", () => {
+  it("should return error map entries when given Application and Operator has a name that is too short", async () => {
     const appErrors = performDataValidationOnApplication(mockApplicationStepsBadData[0].applications[0]);
     const opErrors = performDataValidationOnOperator(mockApplicationStepsBadData[0].operators[0]);
     const errors = [...appErrors, ...opErrors];
@@ -248,7 +248,7 @@ describe("Individual Application input validation tests", function () {
       validationMessage: ValidationMessage.INVALID_APPLICATION_NAME,
     });
   });
-  it("should return error map entries when given Application and Operator has a name that is too long", () => {
+  it("should return error map entries when given Application and Operator has a name that is too long", async () => {
     const errors = performDataValidationOnApplication(mockApplicationStepsBadData[1].applications[0]);
     expect(errors.length).toEqual(2);
     expect(errors).toContainEqual({
@@ -264,7 +264,7 @@ describe("Individual Application input validation tests", function () {
       validationMessage: ValidationMessage.INVALID_OPERATOR_NAME,
     });
   });
-  it("should return error map entries when given Application has an Environment and Operator with a name that is too short", () => {
+  it("should return error map entries when given Application has an Environment and Operator with a name that is too short", async () => {
     const errors = performDataValidationOnEnvironment(mockApplicationStepsBadData[2].applications[0].environments[0]);
     expect(errors.length).toEqual(2);
     expect(errors).toContainEqual({
@@ -280,7 +280,7 @@ describe("Individual Application input validation tests", function () {
       validationMessage: ValidationMessage.INVALID_OPERATOR_NAME,
     });
   });
-  it("should return error map entries when given Application has an Environment and Operator with a name that is too long", () => {
+  it("should return error map entries when given Application has an Environment and Operator with a name that is too long", async () => {
     const errors = performDataValidationOnEnvironment(mockApplicationStepsBadData[3].applications[0].environments[0]);
     expect(errors.length).toEqual(2);
     expect(errors).toContainEqual({
@@ -299,7 +299,7 @@ describe("Individual Application input validation tests", function () {
 });
 
 describe("Error response creation tests", function () {
-  it("should return error response that includes error_map in response body", () => {
+  it("should return error response that includes error_map in response body", async () => {
     const obj = { errors: { propertyA: "property_value", propertyB: "property_value" } };
     const invalidProperties: Record<string, unknown> = obj;
     const response = createValidationErrorResponse(invalidProperties);
@@ -320,13 +320,13 @@ describe("Error response creation tests", function () {
       expect(JSON.parse(result.body).error_map).not.toBeUndefined();
     }
   );
-  it("should throw error if invalid properties input is empty", () => {
+  it("should throw error if invalid properties input is empty", async () => {
     const emptyInvalidProperties: Record<string, unknown> = {};
     expect(() => {
       createValidationErrorResponse(emptyInvalidProperties);
     }).toThrow(Error("Parameter 'invalidProperties' must not be empty"));
   });
-  it("should throw error if invalid properties input has empty string as key", () => {
+  it("should throw error if invalid properties input has empty string as key", async () => {
     const emptyStringKeyInvalidProperties: Record<string, unknown> = {
       "": { propertyA: "property_value", propertyB: "property_value" },
     };
