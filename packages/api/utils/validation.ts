@@ -5,7 +5,7 @@ import { containsExactlyFields } from "../models/TypeFields";
 import { Environment } from "../models/Environment";
 import { FundingStep } from "../models/FundingStep";
 import { PortfolioStep } from "../models/PortfolioStep";
-import { Operator } from "../models/Operator";
+import { Operator, operatorFields } from "../models/Operator";
 import { TaskOrder, taskOrderFields } from "../models/TaskOrder";
 import { validate as uuidValidate, version as uuidVersion } from "uuid";
 
@@ -142,10 +142,7 @@ export function isEnvironment(object: unknown): object is Environment {
  * @returns true if the object has all the attributes of an {@link Operator}
  */
 export function isOperator(object: unknown): object is Operator {
-  if (!isValidObject(object)) {
-    return false;
-  }
-  return ["display_name", "email", "access"].every((item) => item in object);
+  return containsExactlyFields(object, operatorFields);
 }
 
 /**
@@ -241,6 +238,55 @@ export function isFundingAmount(str: string): boolean {
  * @returns boolean - true if the email matches the regex pattern, and false if not
  */
 export function isMilEmail(email: string): boolean {
-  const emailRegex = /^[\w.-]+@[\w-]+.mil$/i;
-  return emailRegex.test(email);
+  if (!email.includes("@")) {
+    return false;
+  }
+
+  // Users should not input email addresses with comments
+  // so we can safely reject those. They aren't part of the actual
+  // address and so get dropped when the email is being sent anyway.
+  if (email.includes("(")) {
+    return false;
+  }
+
+  // We make the assumption that we will not be receiving
+  // email addresses with quoted local parts so that we can
+  // ignore the complexities that come with parsing those.
+  if (email.includes('"')) {
+    return false;
+  }
+
+  const [localPart, domain] = email.split("@");
+
+  // Reject values that are too long
+  if (localPart.length > 63 || domain.length > 253) {
+    return false;
+  }
+
+  // Domain restrictions (per DNS spec and business logic)
+  // No need to handle IP address logic; those are rejected
+  // by business logic
+  // We're required to end in .mil per business logic and no
+  // domain can have any segment > 63 characters.
+  const domainRegex = /^([a-z0-9-]{1,63}\.)+mil$/i;
+  if (!domainRegex.test(domain)) {
+    return false;
+  }
+
+  // RFC 5321 defines the local part as a Dot-string (or Quoted-string, though we've
+  // rejected all those possible strings), which is an Atom followed by a dot and then
+  // an Atom any number of times.  An Atom is defined as one or more characters
+  // in the atext class, which per the errata is defined to be the same as in RFC 5322;
+  // the definition can be found at:
+  //   https://datatracker.ietf.org/doc/html/rfc5322#section-3.2.3.
+  // This lazily encodes that as a regular expression with some logic to forbid
+  // back-to-back `.` or starting/ending with `.`. Trying to do this in regex would likely
+  // require backtracking or other issues which might lead to a ReDoS vulnerability.
+  const localPartCharacters = /^[a-z0-9!#$%&'*+/=?^_`{|}~.-]+$/i;
+  return (
+    !localPart.startsWith(".") &&
+    !localPart.endsWith(".") &&
+    !localPart.includes("..") &&
+    localPartCharacters.test(localPart)
+  );
 }

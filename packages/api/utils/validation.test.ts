@@ -252,13 +252,13 @@ describe("isOperator()", () => {
     },
   ];
 
-  it.each([true, 1, undefined, null])("should reject non-object", (item) => {
+  it.each([true, 1, undefined, null])("should reject non-object", async (item) => {
     expect(isOperator(item)).toEqual(false);
   });
-  it.each(mockApplicationJabbasPalaceExpansionApp.operators)("should accept an Operator object", (item) => {
+  it.each(mockApplicationJabbasPalaceExpansionApp.operators)("should accept an Operator object", async (item) => {
     expect(isOperator(item)).toEqual(true);
   });
-  it.each(missingOperatorFields)("should reject Operator with missing field", (item) => {
+  it.each(missingOperatorFields)("should reject Operator with missing field", async (item) => {
     expect(isOperator(item)).toEqual(false);
   });
 });
@@ -266,18 +266,39 @@ describe("isMilEmail()", () => {
   const goodMilEmails = [
     "good-email@testing.mil",
     "good.email_1234567890@testing.mil",
-    "good_email_1234567890@testing_1234567-890.mil",
+    "good_email_1234567890@testing1234567-890.mil",
+    "good_email+test@testing.mil",
+    "good_email@atat.testing.mil",
+    "good-email!#$%&'*+/=?^_`{|}~.-@testing.mil",
   ];
   const badMilEmails = [
+    // Top level domain is not ".mil"
     "bad.email_1234567890@testing.au",
-    "bad-email!@#$%^&*()+=@testing.co",
-    "bad_email_1234567890@testing!@#$%^&*(+=).io",
+    // The local part cannot have "(" or ")"
+    "bad-email!@#$%^&*()+=@testing.mil",
+    // Domain has no special characters other than "-"
+    "bad_email_1234567890@testing!#$%&'*+/=?^_`{|}~.-.mil",
+    // Domains cannot have "null" segments
+    "bad_email@test..mil",
+    // Domains cannot start with a .
+    "bad_email@.test.mil",
+    // Email addresses may not begin with a dot
+    ".bad_email@test.mil",
+    // The local part may not end with a dot
+    "bad_email.@test.mil",
+    // A local part cannot have 2 or more . in a row
+    "bad..email@test.mil",
+    // An email address must contain a "@"
+    "bad_email",
+    // An email address must have characters before and after the .
+    "@",
+    "@test.mil",
+    "bad_email@",
   ];
-
-  it.each(goodMilEmails)("should be true for good operator emails", (email) => {
+  it.each(goodMilEmails)("should be true for good operator emails", async (email) => {
     expect(isMilEmail(email)).toEqual(true);
   });
-  it.each(badMilEmails)("should be false for bad operator emails", (email) => {
+  it.each(badMilEmails)("should be false for bad operator emails", async (email) => {
     expect(isMilEmail(email)).toEqual(false);
   });
 });
