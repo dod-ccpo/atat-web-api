@@ -5,6 +5,8 @@ import {
   mockApplicationStepsBadData,
   mockPortfolioDraftSummary,
   mockBadPortfolioDraftSummary,
+  mockApplicationsMissingFields,
+  mockBadOperatorEmails,
 } from "./commonMockData";
 import { mockClient } from "aws-sdk-client-mock";
 import { v4 as uuidv4 } from "uuid";
@@ -22,6 +24,7 @@ import {
   handler,
   performDataValidationOnApplication,
   performDataValidationOnEnvironment,
+  performDataValidationOnOperator,
 } from "./createApplicationStep";
 import {
   DATABASE_ERROR,
@@ -30,6 +33,7 @@ import {
   REQUEST_BODY_EMPTY,
   REQUEST_BODY_INVALID,
 } from "../../utils/errors";
+import { AccessLevel } from "../../models/AccessLevel";
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 beforeEach(() => {
@@ -106,6 +110,55 @@ describe("Request body tests", function () {
     expect(result.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
     expect(JSON.parse(result.body).message).toMatch(/A valid request body must be provided/);
   });
+  it("should return an error when incorrect application shape found", async () => {
+    const invalidRequest: APIGatewayProxyEvent = {
+      body: JSON.stringify({ applications: mockApplicationsMissingFields, operators: [] }),
+      pathParameters: { portfolioDraftId: uuidv4() },
+    } as any;
+    const result = await handler(invalidRequest);
+    expect(result).toBeInstanceOf(OtherErrorResponse);
+    expect(result).toEqual(REQUEST_BODY_INVALID);
+    expect(result.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
+    expect(JSON.parse(result.body).message).toMatch(/A valid request body must be provided/);
+  });
+  it("should return an error when incorrect environment shape found", async () => {
+    const badEnvironmentInApplication = [
+      {
+        name: "Cloud City Evac Planner",
+        description: "Some Application",
+        environments: [
+          {
+            badName: "bad",
+            noOperators: [],
+          },
+        ],
+        operators: [],
+      },
+    ];
+    const invalidRequest: APIGatewayProxyEvent = {
+      body: JSON.stringify({ applications: badEnvironmentInApplication, operators: [] }),
+      pathParameters: { portfolioDraftId: uuidv4() },
+    } as any;
+    const result = await handler(invalidRequest);
+    expect(result).toBeInstanceOf(OtherErrorResponse);
+    expect(result).toEqual(REQUEST_BODY_INVALID);
+    expect(result.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
+    expect(JSON.parse(result.body).message).toMatch(/A valid request body must be provided/);
+  });
+  it("should return an error when incorrect operator shape found", async () => {
+    const invalidRequest: APIGatewayProxyEvent = {
+      body: JSON.stringify({
+        applications: [],
+        operators: [{ noName: "the dark side", noAcess: "take over the universe" }],
+      }),
+      pathParameters: { portfolioDraftId: uuidv4() },
+    } as any;
+    const result = await handler(invalidRequest);
+    expect(result).toBeInstanceOf(OtherErrorResponse);
+    expect(result).toEqual(REQUEST_BODY_INVALID);
+    expect(result.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
+    expect(JSON.parse(result.body).message).toMatch(/A valid request body must be provided/);
+  });
 });
 
 describe("Successful operation tests", function () {
@@ -116,7 +169,7 @@ describe("Successful operation tests", function () {
     expect(result.body).toStrictEqual(JSON.stringify(mockApplicationStep));
   });
   it("should have correct number of applications and environments", async () => {
-    const mockResponseGoodPortfolioSummary = mockPortfolioDraftSummary();
+    const mockResponseGoodPortfolioSummary = mockPortfolioDraftSummary;
     ddbMock.on(UpdateCommand).resolves({
       Attributes: mockResponseGoodPortfolioSummary,
     });
@@ -131,7 +184,7 @@ describe("Successful operation tests", function () {
 
 describe("Incorrect number of applications and environments", function () {
   it("should have incorrect number of applications and environments false", async () => {
-    const mockBadPortfolioSummary = mockBadPortfolioDraftSummary();
+    const mockBadPortfolioSummary = mockBadPortfolioDraftSummary;
     ddbMock.on(UpdateCommand).resolves({
       Attributes: mockApplicationStepsBadData,
     });
@@ -145,7 +198,7 @@ describe("Incorrect number of applications and environments", function () {
 });
 
 describe("Individual Application input validation tests", function () {
-  it("should return no error map entries when given Application has good data", () => {
+  it("should return no error map entries when given Application has good data", async () => {
     const allerrors = mockApplicationStep.applications
       .map(performDataValidationOnApplication)
       .reduce((accumulator, validationErrors) => accumulator.concat(validationErrors), []);
@@ -154,9 +207,40 @@ describe("Individual Application input validation tests", function () {
   const tooShortName = "abc";
   const tooLongName =
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut eleifend lectus ut luctus ultricies nisi.";
-  it("should return error map entries when given Application has a name that is too short", () => {
-    const errors = performDataValidationOnApplication(mockApplicationStepsBadData[0].applications[0]);
+  const tooLongDisplayName =
+    "waaaaaaaaaaaaaaaaaaaaaaaaayyyyyy tooooooooooooooooooooooooooooooooooooo loooooooooonnnnnnnnnnngggggggggg";
+  it("should return error map entries when an operator has a name that is too short", async () => {
+    const operator = { display_name: "", email: "dark.1234-567890_@side.mil", access: AccessLevel.READ_ONLY };
+    const errors = performDataValidationOnOperator(operator);
     expect(errors.length).toEqual(1);
+    expect(errors).toContainEqual({
+      operatorDisplayName: "",
+      invalidParameterName: "display_name",
+      invalidParameterValue: "",
+      validationMessage: ValidationMessage.INVALID_OPERATOR_NAME,
+    });
+  });
+  it.each(mockBadOperatorEmails)("should return an error map when incorrect operator email", async (operator) => {
+    const errors = performDataValidationOnOperator(operator);
+    expect(errors.length).toEqual(1);
+    expect(errors[0].invalidParameterValue).toBe(operator.email);
+  });
+  it("should return error map entries when an operator has a name that is too long", async () => {
+    const operator = { display_name: tooLongName, email: "dark@side123456789.MIL", access: AccessLevel.READ_ONLY };
+    const errors = performDataValidationOnOperator(operator);
+    expect(errors.length).toEqual(1);
+    expect(errors).toContainEqual({
+      operatorDisplayName: tooLongName,
+      invalidParameterName: "display_name",
+      invalidParameterValue: tooLongName,
+      validationMessage: ValidationMessage.INVALID_OPERATOR_NAME,
+    });
+  });
+  it("should return error map entries when given Application and Operator has a name that is too short", async () => {
+    const appErrors = performDataValidationOnApplication(mockApplicationStepsBadData[0].applications[0]);
+    const opErrors = performDataValidationOnOperator(mockApplicationStepsBadData[0].operators[0]);
+    const errors = [...appErrors, ...opErrors];
+    expect(errors.length).toEqual(2);
     expect(errors).toContainEqual({
       applicationName: tooShortName,
       invalidParameterName: "name",
@@ -164,40 +248,58 @@ describe("Individual Application input validation tests", function () {
       validationMessage: ValidationMessage.INVALID_APPLICATION_NAME,
     });
   });
-  it("should return error map entries when given Application has a name that is too long", () => {
+  it("should return error map entries when given Application and Operator has a name that is too long", async () => {
     const errors = performDataValidationOnApplication(mockApplicationStepsBadData[1].applications[0]);
-    expect(errors.length).toEqual(1);
+    expect(errors.length).toEqual(2);
     expect(errors).toContainEqual({
       applicationName: tooLongName,
       invalidParameterName: "name",
       invalidParameterValue: tooLongName,
       validationMessage: ValidationMessage.INVALID_APPLICATION_NAME,
     });
-  });
-  it("should return error map entries when given Application has an Environment with a name that is too short", () => {
-    const errors = performDataValidationOnEnvironment(mockApplicationStepsBadData[2].applications[0].environments[0]);
-    expect(errors.length).toEqual(1);
     expect(errors).toContainEqual({
-      applicationName: tooShortName,
+      operatorDisplayName: tooLongDisplayName,
+      invalidParameterName: "display_name",
+      invalidParameterValue: tooLongDisplayName,
+      validationMessage: ValidationMessage.INVALID_OPERATOR_NAME,
+    });
+  });
+  it("should return error map entries when given Application has an Environment and Operator with a name that is too short", async () => {
+    const errors = performDataValidationOnEnvironment(mockApplicationStepsBadData[2].applications[0].environments[0]);
+    expect(errors.length).toEqual(2);
+    expect(errors).toContainEqual({
+      environmentName: tooShortName,
       invalidParameterName: "name",
       invalidParameterValue: tooShortName,
       validationMessage: ValidationMessage.INVALID_ENVIRONMENT_NAME,
     });
-  });
-  it("should return error map entries when given Application has an Environment with a name that is too long", () => {
-    const errors = performDataValidationOnEnvironment(mockApplicationStepsBadData[3].applications[0].environments[0]);
-    expect(errors.length).toEqual(1);
     expect(errors).toContainEqual({
-      applicationName: tooLongName,
+      operatorDisplayName: "",
+      invalidParameterName: "display_name",
+      invalidParameterValue: "",
+      validationMessage: ValidationMessage.INVALID_OPERATOR_NAME,
+    });
+  });
+  it("should return error map entries when given Application has an Environment and Operator with a name that is too long", async () => {
+    const errors = performDataValidationOnEnvironment(mockApplicationStepsBadData[3].applications[0].environments[0]);
+    expect(errors.length).toEqual(2);
+    expect(errors).toContainEqual({
+      environmentName: tooLongName,
       invalidParameterName: "name",
       invalidParameterValue: tooLongName,
       validationMessage: ValidationMessage.INVALID_ENVIRONMENT_NAME,
+    });
+    expect(errors).toContainEqual({
+      operatorDisplayName: tooLongDisplayName,
+      invalidParameterName: "display_name",
+      invalidParameterValue: tooLongDisplayName,
+      validationMessage: ValidationMessage.INVALID_OPERATOR_NAME,
     });
   });
 });
 
 describe("Error response creation tests", function () {
-  it("should return error response that includes error_map in response body", () => {
+  it("should return error response that includes error_map in response body", async () => {
     const obj = { errors: { propertyA: "property_value", propertyB: "property_value" } };
     const invalidProperties: Record<string, unknown> = obj;
     const response = createValidationErrorResponse(invalidProperties);
@@ -218,13 +320,13 @@ describe("Error response creation tests", function () {
       expect(JSON.parse(result.body).error_map).not.toBeUndefined();
     }
   );
-  it("should throw error if invalid properties input is empty", () => {
+  it("should throw error if invalid properties input is empty", async () => {
     const emptyInvalidProperties: Record<string, unknown> = {};
     expect(() => {
       createValidationErrorResponse(emptyInvalidProperties);
     }).toThrow(Error("Parameter 'invalidProperties' must not be empty"));
   });
-  it("should throw error if invalid properties input has empty string as key", () => {
+  it("should throw error if invalid properties input has empty string as key", async () => {
     const emptyStringKeyInvalidProperties: Record<string, unknown> = {
       "": { propertyA: "property_value", propertyB: "property_value" },
     };

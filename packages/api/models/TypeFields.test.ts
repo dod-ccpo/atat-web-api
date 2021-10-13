@@ -21,6 +21,7 @@ describe("Test object trimming", () => {
     },
     application_step: {
       applications: [],
+      operators: [],
     },
     portfolio_step: {
       name: "test",

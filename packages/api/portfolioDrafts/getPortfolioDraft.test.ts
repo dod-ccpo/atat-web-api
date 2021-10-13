@@ -6,12 +6,11 @@ import { DATABASE_ERROR } from "../utils/errors";
 import { SuccessStatusCode } from "../utils/response";
 import { ProvisioningStatus } from "../models/ProvisioningStatus";
 import { CloudServiceProvider } from "../models/CloudServiceProvider";
-import { ApplicationStep } from "../models/ApplicationStep";
-import { AccessLevel } from "../models/AccessLevel";
 import { PortfolioStep } from "../models/PortfolioStep";
 import { FundingStep } from "../models/FundingStep";
 import { Application } from "../models/Application";
 import { PortfolioDraft } from "../models/PortfolioDraft";
+import { mockApplicationStep } from "./application/commonMockData";
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 beforeEach(() => {
@@ -129,7 +128,7 @@ function mockPortfolioDraftSummaryGoodData(): PortfolioDraft {
     description: "Coolest portfolio description",
     portfolio_step: mockPortfolioStep(),
     num_portfolio_managers: 4,
-    application_step: mockApplicationStep(),
+    application_step: mockApplicationStep,
     num_applications: 2,
     num_environments: 3,
     funding_step: mockFundingStep(),
@@ -151,7 +150,7 @@ function mockPortfolioDraftSummaryBadData(): PortfolioDraft {
     description: "Crazy portfolio description",
     portfolio_step: mockPortfolioStep(),
     num_portfolio_managers: 77,
-    application_step: mockApplicationStep(),
+    application_step: mockApplicationStep,
     num_applications: 99,
     num_environments: 124,
     funding_step: mockFundingStep(),
@@ -170,86 +169,6 @@ function mockPortfolioStep(): PortfolioStep {
     description: "Description of something cool",
     portfolio_managers: ["coolIdea@example.com", "coolPerson@example.com", "support@example.com", "admin@example.com"],
     dod_components: ["space_force"],
-  };
-}
-
-/**
- * Application Step
- * @returns a valid application step
- */
-function mockApplicationStep(): ApplicationStep {
-  return {
-    applications: [
-      {
-        name: "The Dark Side",
-        description: "Application for planning an emergency evacuation",
-        environments: [
-          {
-            name: "production",
-            operators: [
-              {
-                first_name: "Darth",
-                last_name: "Vader",
-                email: "iam@yourfather.com",
-                access: AccessLevel.ADMINISTRATOR,
-              },
-              {
-                first_name: "Landonis",
-                last_name: "Calrissian",
-                email: "thegambler@cloudcity.com",
-                access: AccessLevel.READ_ONLY,
-              },
-              {
-                first_name: "Luke",
-                last_name: "Skywalker",
-                email: "lostmy@hand.com",
-                access: AccessLevel.READ_ONLY,
-              },
-            ],
-          },
-        ],
-      },
-      {
-        name: "The Palace",
-        description: "Planning application for palace expansion",
-        environments: [
-          {
-            name: "development",
-            operators: [
-              {
-                first_name: "Salacious B.",
-                last_name: "Crumb",
-                email: "monkey@lizard.com",
-                access: AccessLevel.ADMINISTRATOR,
-              },
-              {
-                first_name: "Han",
-                last_name: "Solo",
-                email: "frozen@carbonite.com",
-                access: AccessLevel.READ_ONLY,
-              },
-              {
-                first_name: "Boba",
-                last_name: "Fett",
-                email: "original@mandalorian.com",
-                access: AccessLevel.READ_ONLY,
-              },
-            ],
-          },
-          {
-            name: "power plant staging",
-            operators: [
-              {
-                first_name: "Homer",
-                last_name: "Simpson",
-                email: "homer@simpson.com",
-                access: AccessLevel.ADMINISTRATOR,
-              },
-            ],
-          },
-        ],
-      },
-    ],
   };
 }
 

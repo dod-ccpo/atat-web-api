@@ -5,6 +5,7 @@ import { containsExactlyFields } from "../models/TypeFields";
 import { Environment } from "../models/Environment";
 import { FundingStep } from "../models/FundingStep";
 import { PortfolioStep } from "../models/PortfolioStep";
+import { Operator, operatorFields } from "../models/Operator";
 import { TaskOrder, taskOrderFields } from "../models/TaskOrder";
 import { validate as uuidValidate, version as uuidVersion } from "uuid";
 
@@ -98,7 +99,7 @@ export function isApplicationStep(object: unknown): object is ApplicationStep {
   if (!isValidObject(object)) {
     return false;
   }
-  return ["applications"].every((item) => item in object);
+  return ["applications", "operators"].every((item) => item in object);
 }
 
 /**
@@ -114,7 +115,7 @@ export function isApplication(object: unknown): object is Application {
   if (!isValidObject(object)) {
     return false;
   }
-  return ["name", "description", "environments"].every((item) => item in object);
+  return ["name", "description", "environments", "operators"].every((item) => item in object);
 }
 /**
  * Check whether a given object is an {@link Environment}.
@@ -130,6 +131,18 @@ export function isEnvironment(object: unknown): object is Environment {
     return false;
   }
   return ["name", "operators"].every((item) => item in object);
+}
+/**
+ * Check whether a given object is an {@link Operator}.
+ *
+ * Note that this only asserts that the given object meets the interface. It does not validate
+ * that the object is a valid {@link Operator}.
+ *
+ * @param object - The object to check
+ * @returns true if the object has all the attributes of an {@link Operator}
+ */
+export function isOperator(object: unknown): object is Operator {
+  return containsExactlyFields(object, operatorFields);
 }
 
 /**
