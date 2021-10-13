@@ -1264,6 +1264,10 @@ x-amazon-apigateway-gateway-responses:
   # response handler will be used for responses we are not explicitly customizing.
   ACCESS_DENIED:
     statusCode: 403
+    responseParameters:
+      gatewayresponse.header.Access-Control-Allow-Headers: '''*'''
+      gatewayresponse.header.Access-Control-Allow-Methods: '''*'''
+      gatewayresponse.header.Access-Control-Allow-Origin: '''*'''
     responseTemplates:
       application/json: |
         {
@@ -1275,7 +1279,11 @@ x-amazon-apigateway-gateway-responses:
   # AUTHORIZER_FAILURE is handled by DEFAULT_5XX
   BAD_REQUEST_PARAMETERS:
     statusCode: 400
-    responseTemplates: 
+    responseParameters:
+      gatewayresponse.header.Access-Control-Allow-Headers: '''*'''
+      gatewayresponse.header.Access-Control-Allow-Methods: '''*'''
+      gatewayresponse.header.Access-Control-Allow-Origin: '''*'''
+    responseTemplates:
       application/json: |
         {
           "code": "OTHER",
@@ -1283,7 +1291,11 @@ x-amazon-apigateway-gateway-responses:
         }
   BAD_REQUEST_BODY:
     statusCode: 400
-    responseTemplates: 
+    responseParameters:
+      gatewayresponse.header.Access-Control-Allow-Headers: '''*'''
+      gatewayresponse.header.Access-Control-Allow-Methods: '''*'''
+      gatewayresponse.header.Access-Control-Allow-Origin: '''*'''
+    responseTemplates:
       application/json: |
         {
           "code": "OTHER"
@@ -1291,6 +1303,10 @@ x-amazon-apigateway-gateway-responses:
         }
   DEFAULT_4XX:
     # Use the original status code for 4XX errors
+    responseParameters:
+      gatewayresponse.header.Access-Control-Allow-Headers: '''*'''
+      gatewayresponse.header.Access-Control-Allow-Methods: '''*'''
+      gatewayresponse.header.Access-Control-Allow-Origin: '''*'''
     responseTemplates:
       application/json: |
         {
@@ -1300,6 +1316,10 @@ x-amazon-apigateway-gateway-responses:
   DEFAULT_5XX:
     # Rewrite all 5XX errors as a 500
     statusCode: 500
+    responseParameters:
+      gatewayresponse.header.Access-Control-Allow-Headers: '''*'''
+      gatewayresponse.header.Access-Control-Allow-Methods: '''*'''
+      gatewayresponse.header.Access-Control-Allow-Origin: '''*'''
     responseTemplates:
       application/json: |
         {
@@ -1314,6 +1334,10 @@ x-amazon-apigateway-gateway-responses:
   MISSING_AUTHENTICATION_TOKEN:
     # Treat this the same way as a 404/403 would be treated
     statusCode: 403
+    responseParameters:
+      gatewayresponse.header.Access-Control-Allow-Headers: '''*'''
+      gatewayresponse.header.Access-Control-Allow-Methods: '''*'''
+      gatewayresponse.header.Access-Control-Allow-Origin: '''*'''
     responseTemplates:
       application/json: |
         {
@@ -1326,6 +1350,10 @@ x-amazon-apigateway-gateway-responses:
     # Mask gateway-level 404s as a 403 to prevent "guessing" whether
     # a particular endpoint exists or not.
     statusCode: 403
+    responseParameters:
+      gatewayresponse.header.Access-Control-Allow-Headers: '''*'''
+      gatewayresponse.header.Access-Control-Allow-Methods: '''*'''
+      gatewayresponse.header.Access-Control-Allow-Origin: '''*'''
     responseTemplates:
       application/json: |
         {
@@ -1335,6 +1363,10 @@ x-amazon-apigateway-gateway-responses:
   # THROTTLED is handled by DEFAULT_4XX
   UNAUTHORIZED:
     statusCode: 401
+    responseParameters:
+      gatewayresponse.header.Access-Control-Allow-Headers: '''*'''
+      gatewayresponse.header.Access-Control-Allow-Methods: '''*'''
+      gatewayresponse.header.Access-Control-Allow-Origin: '''*'''
     responseTemplates:
       application/json: |
         {
