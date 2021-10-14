@@ -2,7 +2,7 @@ import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyResult, Context } from "aws-lambda";
 import { PORTFOLIO_STEP } from "../../models/PortfolioDraft";
 import { PortfolioStep, schemaWrapper } from "../../models/PortfolioStep";
-import { dynamodbDocumentClient as client } from "../../utils/dynamodb";
+import { dynamodbDocumentClient as client } from "../../utils/aws-sdk/dynamodb";
 import { NO_SUCH_PORTFOLIO_DRAFT } from "../../utils/errors";
 import {
   ApiSuccessResponse,

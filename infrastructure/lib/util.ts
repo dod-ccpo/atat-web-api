@@ -1,3 +1,5 @@
+import { HttpMethod } from "./http";
+
 // This is a suboptimal solution to finding the relative directory to the
 // git repo.
 export function packageRoot(): string {
@@ -8,7 +10,7 @@ export function packageRoot(): string {
   return `${cwd}/packages`;
 }
 
-const normalizationRejectionRegex = /[\W_-]/g;
+const normalizationRejectionRegex = /[\W_]/g;
 
 /**
  * Normalizes environment names.
@@ -56,4 +58,48 @@ export function isString(str: unknown): str is string {
     return true;
   }
   return false;
+}
+
+/**
+ * Based on the OpenAPI specification's operationId, provides the expected
+ * file name for the handler function.
+ *
+ * This does not make any assumptions about the location of this file in the
+ * file system.
+ *
+ * @param operationId The operation ID from the OpenAPI spec
+ * @returns the expected file (base) name for the handler
+ */
+export function apiSpecOperationFileName(operationId: string): string {
+  return operationId + ".ts";
+}
+
+/**
+ * Provides a method to normalize the operationId from the OpenAPI spec to
+ * a name (and logical ID) for the function.
+ *
+ * @param operationId The operation ID from the OpenAPI spec
+ * @returns the normalized Lambda Function name for the operation
+ */
+export function apiSpecOperationFunctionName(operationId: string): string {
+  return operationId[0].toUpperCase() + operationId.slice(1);
+}
+
+/**
+ * Provides the expected HTTP Method for the given operationId based on
+ * the first word of the operationId.
+ *
+ * @param operationId The operation ID from the OpenAPI spec
+ * @returns the expected operationId
+ */
+export function apiSpecOperationMethod(operationId: string): HttpMethod {
+  if (operationId.toLowerCase().startsWith("get")) {
+    return HttpMethod.GET;
+  }
+  if (operationId.toLowerCase().startsWith("delete")) {
+    return HttpMethod.DELETE;
+  }
+  // Default to POST because it is the most common with the least
+  // regularity in naming
+  return HttpMethod.POST;
 }

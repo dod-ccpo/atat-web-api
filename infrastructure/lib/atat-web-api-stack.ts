@@ -5,6 +5,8 @@ import * as s3asset from "@aws-cdk/aws-s3-assets";
 import * as secretsmanager from "@aws-cdk/aws-secretsmanager";
 import * as ssm from "@aws-cdk/aws-ssm";
 import * as cdk from "@aws-cdk/core";
+import * as lambda from "@aws-cdk/aws-lambda";
+import * as sqs from "@aws-cdk/aws-sqs";
 import { ApiDynamoDBFunction } from "./constructs/api-dynamodb-function";
 import { ApiS3Function } from "./constructs/api-s3-function";
 import { ApiSQSFunction } from "./constructs/api-sqs-function";
@@ -12,7 +14,7 @@ import { CognitoAuthentication } from "./constructs/authentication";
 import { SecureBucket, SecureQueue, SecureRestApi, SecureTable } from "./constructs/compliant-resources";
 import { TaskOrderLifecycle } from "./constructs/task-order-lifecycle";
 import { HttpMethod } from "./http";
-import { packageRoot } from "./util";
+import * as utils from "./util";
 
 interface AtatIdpProps {
   secretName: string;
@@ -31,137 +33,88 @@ export interface AtatWebApiStackProps extends cdk.StackProps {
 
 export class AtatWebApiStack extends cdk.Stack {
   private readonly environmentId: string;
+  public readonly restApi: apigw.IRestApi;
+  public readonly submitQueue: sqs.IQueue;
+  public readonly table: dynamodb.ITable;
+  public readonly functions: lambda.IFunction[] = [];
+  public readonly ssmParams: ssm.IParameter[] = [];
+  public readonly outputs: cdk.CfnOutput[] = [];
+
   constructor(scope: cdk.Construct, id: string, props: AtatWebApiStackProps) {
     super(scope, id, props);
 
     this.templateOptions.description = "Resources to support the ATAT application API";
-
     this.environmentId = props.environmentId;
+
     this.setupCognito(props.idpProps, props.removalPolicy);
 
     // Create a shared DynamoDB table that will be used by all the functions in the project.
-    const { table } = new SecureTable(this, "AtatTable", {
+    this.table = new SecureTable(this, "AtatTable", {
       tableProps: {
         partitionKey: { name: "id", type: dynamodb.AttributeType.STRING },
         billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
         removalPolicy: props?.removalPolicy,
       },
-    });
-    const tableOutput = new cdk.CfnOutput(this, "TableName", {
-      value: table.tableName,
-    });
+    }).table;
+    this.outputs.push(
+      new cdk.CfnOutput(this, "TableName", {
+        value: this.table.tableName,
+      })
+    );
 
     // Create a queue for PortfolioDraft submission
-    const { queue } = new SecureQueue(this, "SubmitQueue", { queueProps: {} });
-    const queueOutput = new cdk.CfnOutput(this, "QueueName", {
-      value: queue.queueName,
-    });
+    this.submitQueue = new SecureQueue(this, "SubmitQueue", { queueProps: {} }).queue;
+    this.outputs.push(
+      new cdk.CfnOutput(this, "QueueName", {
+        value: this.submitQueue.queueName,
+      })
+    );
 
     const forceAuth = new cdk.CfnCondition(this, "ForceAuthorization", {
       expression: cdk.Fn.conditionEquals(props?.requireAuthorization ?? true, true),
     });
     forceAuth.overrideLogicalId("IsAuthorizationRequired");
+    this.outputs.push(
+      new cdk.CfnOutput(this, "AuthenticationRequired", {
+        value: this.resolve(cdk.Fn.conditionIf(forceAuth.logicalId, "true", "false")),
+      })
+    );
 
-    const createPortfolioStep = new ApiDynamoDBFunction(this, "CreatePortfolioStep", {
-      table: table,
-      lambdaVpc: props.vpc,
-      method: HttpMethod.POST,
-      handlerPath: packageRoot() + "/api/portfolioDrafts/portfolio/createPortfolioStep.ts",
-    });
+    // PortfolioDraft Operations
+    this.addDatabaseApiFunction("getPortfolioDrafts", "portfolioDrafts/", props.vpc);
+    this.addDatabaseApiFunction("getPortfolioDraft", "portfolioDrafts/", props.vpc);
+    this.addDatabaseApiFunction("createPortfolioDraft", "portfolioDrafts/", props.vpc);
+    this.addDatabaseApiFunction("deletePortfolioDraft", "portfolioDrafts/", props.vpc);
+    // NotImplemented is the "default" method for unimplemented operations
+    this.addDatabaseApiFunction("notImplemented", "portfolioDrafts/", props.vpc);
 
-    const createPortfolioDraft = new ApiDynamoDBFunction(this, "CreatePortfolioDraft", {
-      table: table,
-      lambdaVpc: props.vpc,
-      method: HttpMethod.POST,
-      handlerPath: packageRoot() + "/api/portfolioDrafts/createPortfolioDraft.ts",
-    });
+    // PortfolioStep Operations (all files in the portfolio/ folder)
+    this.addDatabaseApiFunction("getPortfolioStep", "portfolioDrafts/portfolio/", props.vpc);
+    this.addDatabaseApiFunction("createPortfolioStep", "portfolioDrafts/portfolio/", props.vpc);
 
-    const getPortfolioDrafts = new ApiDynamoDBFunction(this, "GetPortfolioDrafts", {
-      table: table,
-      lambdaVpc: props.vpc,
-      method: HttpMethod.GET,
-      handlerPath: packageRoot() + "/api/portfolioDrafts/getPortfolioDrafts.ts",
-    });
+    // FundingStep Operations (all files live in the funding/ folder)
+    this.addDatabaseApiFunction("getFundingStep", "portfolioDrafts/funding/", props.vpc);
+    this.addDatabaseApiFunction("createFundingStep", "portfolioDrafts/funding/", props.vpc);
 
-    const deletePortfolioDraft = new ApiDynamoDBFunction(this, "DeletePortfolioDraft", {
-      table: table,
-      lambdaVpc: props.vpc,
-      method: HttpMethod.DELETE,
-      handlerPath: packageRoot() + "/api/portfolioDrafts/deletePortfolioDraft.ts",
-    });
+    // ApplicationStep Operations (all files live in the application/ folder)
+    this.addDatabaseApiFunction("getApplicationStep", "portfolioDrafts/application/", props.vpc);
+    this.addDatabaseApiFunction("createApplicationStep", "portfolioDrafts/application/", props.vpc);
 
-    const getPortfolioStep = new ApiDynamoDBFunction(this, "GetPortfolioStep", {
-      table: table,
-      lambdaVpc: props.vpc,
-      method: HttpMethod.GET,
-      handlerPath: packageRoot() + "/api/portfolioDrafts/portfolio/getPortfolioStep.ts",
-    });
+    // Submission operations (all files live in the submit/ folder)
+    this.addQueueApiFunction("submitPortfolioDraft", "portfolioDrafts/submit/", props.vpc);
 
-    const createFundingStep = new ApiDynamoDBFunction(this, "CreateFundingStep", {
-      table: table,
-      lambdaVpc: props.vpc,
-      method: HttpMethod.POST,
-      handlerPath: packageRoot() + "/api/portfolioDrafts/funding/createFundingStep.ts",
-    });
-
-    const getFundingStep = new ApiDynamoDBFunction(this, "GetFundingStep", {
-      table: table,
-      lambdaVpc: props.vpc,
-      method: HttpMethod.GET,
-      handlerPath: packageRoot() + "/api/portfolioDrafts/funding/getFundingStep.ts",
-    });
-
-    const createApplicationStep = new ApiDynamoDBFunction(this, "CreateApplicationStep", {
-      table: table,
-      lambdaVpc: props.vpc,
-      method: HttpMethod.POST,
-      handlerPath: packageRoot() + "/api/portfolioDrafts/application/createApplicationStep.ts",
-    });
-
-    const getApplicationStep = new ApiDynamoDBFunction(this, "GetApplicationStep", {
-      table: table,
-      lambdaVpc: props.vpc,
-      method: HttpMethod.GET,
-      handlerPath: packageRoot() + "/api/portfolioDrafts/application/getApplicationStep.ts",
-    });
-
-    const getPortfolioDraft = new ApiDynamoDBFunction(this, "GetPortfolioDraft", {
-      table: table,
-      lambdaVpc: props.vpc,
-      method: HttpMethod.GET,
-      handlerPath: packageRoot() + "/api/portfolioDrafts/getPortfolioDraft.ts",
-    });
-
-    const submitPortfolioDraft = new ApiSQSFunction(this, "SubmitPortfolioDraft", {
-      queue: queue,
-      table: table,
-      lambdaVpc: props.vpc,
-      method: HttpMethod.POST,
-      handlerPath: packageRoot() + "/api/portfolioDrafts/submit/submitPortfolioDraft.ts",
-    });
-
-    const subscribePortfolioDraftRequest = new ApiSQSFunction(this, "subscribePortfolioDraftRequest", {
-      table: table,
-      queue: queue,
-      lambdaVpc: props.vpc,
-      method: HttpMethod.POST,
-      handlerPath: packageRoot() + "/api/portfolioDrafts/submit/subscribe.ts",
-      createEventSource: true,
-    });
-
-    // All TODO functions will be pointed at this lambda function (in the atat_provisioning_wizard_api.yaml, search NotImplementedFunction)
-    const notImplemented = new ApiDynamoDBFunction(this, "NotImplemented", {
-      table: table,
-      lambdaVpc: props.vpc,
-      method: HttpMethod.GET,
-      handlerPath: packageRoot() + "/api/portfolioDrafts/notImplemented.ts",
-    });
+    // Functions that are triggered by events in the submit queue
+    // These, for now, can be treated just like regular API functions because they look
+    // and act like them in nearly every way except being accessible via API Gateway.
+    // This may require more significant refactoring as the design for these functions
+    // is further fleshed out.
+    this.addQueueApiFunction("subscribePortfolioDraftSubmission", "portfolioDrafts/submit/", props.vpc);
 
     // The API spec, which just so happens to be a valid CloudFormation snippet (with some actual CloudFormation
     // in it) gets uploaded to S3. The Asset resource reuses the same bucket that the CDK does, so this does not
     // require any additional buckets to be created.
     const apiAsset = new s3asset.Asset(this, "ApiSpecAsset", {
-      path: packageRoot() + "../../atat_provisioning_wizard_api.yaml",
+      path: utils.packageRoot() + "../../atat_provisioning_wizard_api.yaml",
     });
 
     // And now we include that snippet as an actual part of the template using the AWS::Include Transform. Since
@@ -173,12 +126,12 @@ export class AtatWebApiStack extends cdk.Stack {
     // And with the data now loaded from the template, we can use ApiDefinition.fromInline to parse it as real
     // OpenAPI spec (because it was!) and now we've got all our special AWS values and variables interpolated.
     // This will get used as the `Body:` parameter in the underlying CloudFormation resource.
-    const restApi = new SecureRestApi(this, "AtatSpecTest", {
+    this.restApi = new SecureRestApi(this, "AtatSpecTest", {
       apiDefinition: apigw.ApiDefinition.fromInline(apiSpecAsTemplateInclude),
       deployOptions: {
         tracingEnabled: true,
       },
-    });
+    }).restApi;
     this.addTaskOrderRoutes(props);
   }
 
@@ -202,24 +155,52 @@ export class AtatWebApiStack extends cdk.Stack {
         autoDeleteObjects: props?.removalPolicy === cdk.RemovalPolicy.DESTROY,
       },
     });
-    const uploadTaskOrder = new ApiS3Function(this, "UploadTaskOrder", {
-      lambdaVpc: props.vpc,
-      bucket: taskOrderManagement.pendingBucket,
-      method: HttpMethod.POST,
-      handlerPath: packageRoot() + "/api/taskOrderFiles/uploadTaskOrder.ts",
-      functionPropsOverride: {
-        memorySize: 256,
-      },
-    });
-    const deleteTaskOrder = new ApiS3Function(this, "DeleteTaskOrder", {
-      lambdaVpc: props.vpc,
-      bucket: taskOrderManagement.acceptedBucket,
-      method: HttpMethod.DELETE,
-      handlerPath: packageRoot() + "/api/taskOrderFiles/deleteTaskOrder.ts",
-    });
+    this.functions.push(
+      new ApiS3Function(this, "UploadTaskOrder", {
+        lambdaVpc: props.vpc,
+        bucket: taskOrderManagement.pendingBucket,
+        method: HttpMethod.POST,
+        handlerPath: this.determineApiHandlerPath("uploadTaskOrder", "taskOrderFiles/"),
+        functionPropsOverride: {
+          memorySize: 256,
+        },
+      }).fn,
+      new ApiS3Function(this, "DeleteTaskOrder", {
+        lambdaVpc: props.vpc,
+        bucket: taskOrderManagement.acceptedBucket,
+        method: HttpMethod.DELETE,
+        handlerPath: this.determineApiHandlerPath("deleteTaskOrder", "taskOrderFiles/"),
+      }).fn
+    );
 
     // TODO: getTaskOrderMetadata
     // TODO: downloadTaskOrder
+  }
+
+  private determineApiHandlerPath(operationId: string, handlerFolder: string): string {
+    return utils.packageRoot() + "/api/" + handlerFolder + utils.apiSpecOperationFileName(operationId);
+  }
+
+  private addDatabaseApiFunction(operationId: string, handlerFolder: string, vpc: ec2.IVpc) {
+    const props = {
+      table: this.table,
+      lambdaVpc: vpc,
+      method: utils.apiSpecOperationMethod(operationId),
+      handlerPath: this.determineApiHandlerPath(operationId, handlerFolder),
+    };
+    this.functions.push(new ApiDynamoDBFunction(this, utils.apiSpecOperationFunctionName(operationId), props).fn);
+  }
+
+  private addQueueApiFunction(operationId: string, handlerFolder: string, vpc: ec2.IVpc) {
+    const props = {
+      table: this.table,
+      queue: this.submitQueue,
+      lambdaVpc: vpc,
+      method: utils.apiSpecOperationMethod(operationId),
+      handlerPath: this.determineApiHandlerPath(operationId, handlerFolder),
+      createEventSource: operationId.startsWith("subscribe"),
+    };
+    this.functions.push(new ApiSQSFunction(this, utils.apiSpecOperationFunctionName(operationId), props).fn);
   }
 
   private setupCognito(props: AtatIdpProps, removalPolicy?: cdk.RemovalPolicy) {
@@ -242,15 +223,17 @@ export class AtatWebApiStack extends cdk.Stack {
         },
       ],
     });
-    const poolIdParam = new ssm.StringParameter(this, "UserPoolIdParameter", {
-      description: "Cognito User Pool ID",
-      stringValue: cognitoAuthentication.userPool.userPoolId,
-      parameterName: `/atat/${this.environmentId}/cognito/userpool/id`,
-    });
-    const idpNamesParam = new ssm.StringListParameter(this, "CognitoIdPNamesParameter", {
-      description: "Names of configured identity providers",
-      parameterName: `/atat/${this.environmentId}/cognito/idps`,
-      stringListValue: cognitoAuthentication.idps.map((idp) => idp.providerName),
-    });
+    this.ssmParams.push(
+      new ssm.StringParameter(this, "UserPoolIdParameter", {
+        description: "Cognito User Pool ID",
+        stringValue: cognitoAuthentication.userPool.userPoolId,
+        parameterName: `/atat/${this.environmentId}/cognito/userpool/id`,
+      }),
+      new ssm.StringListParameter(this, "CognitoIdPNamesParameter", {
+        description: "Names of configured identity providers",
+        parameterName: `/atat/${this.environmentId}/cognito/idps`,
+        stringListValue: cognitoAuthentication.idps.map((idp) => idp.providerName),
+      })
+    );
   }
 }

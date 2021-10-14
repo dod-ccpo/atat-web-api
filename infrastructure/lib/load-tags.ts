@@ -17,6 +17,5 @@ export interface AwsTag {
  */
 export function getTags(fileName: string): AwsTag[] {
   const data = fs.readFileSync(fileName, "utf-8");
-  const tags = JSON.parse(data) as AwsTag[];
-  return tags;
+  return JSON.parse(data) as AwsTag[];
 }

@@ -1,9 +1,10 @@
-import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import * as parser from "lambda-multipart-parser";
 import { v4 as uuidv4 } from "uuid";
 import { FileMetadata, FileScanStatus } from "../models/FileMetadata";
 import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusCode } from "../utils/response";
+import { s3Client } from "../utils/aws-sdk/s3";
 
 const bucketName = process.env.DATA_BUCKET;
 
@@ -33,7 +34,6 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
 }
 
 async function uploadFile(file: parser.MultipartFile): Promise<APIGatewayProxyResult> {
-  const client = new S3Client({});
   const key = uuidv4();
   const command = new PutObjectCommand({
     Bucket: bucketName,
@@ -41,7 +41,7 @@ async function uploadFile(file: parser.MultipartFile): Promise<APIGatewayProxyRe
     Body: file.content,
     ContentType: file.contentType,
   });
-  await client.send(command);
+  await s3Client.send(command);
   const now = new Date().toISOString();
   const metadata: FileMetadata = {
     id: key,

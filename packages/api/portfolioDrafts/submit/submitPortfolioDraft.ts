@@ -12,9 +12,9 @@ import {
 import { PortfolioDraft } from "../../models/PortfolioDraft";
 import { v4 as uuidv4 } from "uuid";
 import { ProvisioningStatus } from "../../models/ProvisioningStatus";
-import { dynamodbDocumentClient as client } from "../../utils/dynamodb";
+import { dynamodbDocumentClient as client } from "../../utils/aws-sdk/dynamodb";
 import { SendMessageCommand } from "@aws-sdk/client-sqs";
-import { sqsClient } from "../../utils/sqs";
+import { sqsClient } from "../../utils/aws-sdk/sqs";
 const TABLE_NAME = process.env.ATAT_TABLE_NAME ?? "";
 const QUEUE_URL = process.env.ATAT_QUEUE_URL ?? "";
 
@@ -36,7 +36,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
   try {
     const result = await submitPortfolioDraftCommand(TABLE_NAME, portfolioDraftId);
-    const data = await sqsClient.send(
+    await sqsClient.send(
       new SendMessageCommand({
         QueueUrl: QUEUE_URL,
         MessageBody: JSON.stringify(result.Attributes as PortfolioDraft),

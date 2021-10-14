@@ -1,7 +1,7 @@
 import { GetCommand } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { PortfolioDraft } from "../models/PortfolioDraft";
-import { dynamodbDocumentClient as client } from "../utils/dynamodb";
+import { dynamodbDocumentClient as client } from "../utils/aws-sdk/dynamodb";
 import { DATABASE_ERROR } from "../utils/errors";
 import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusCode } from "../utils/response";
 import { isPathParameterPresent } from "../utils/validation";

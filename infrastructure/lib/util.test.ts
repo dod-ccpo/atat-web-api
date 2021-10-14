@@ -1,4 +1,5 @@
-import { isString, lowerCaseEnvironmentId, normalizeEnvironmentName } from "./util";
+import { HttpMethod } from "./http";
+import * as utils from "./util";
 
 const testEnvironmentIds = [
   // Jira ticket ID-looking strings should be valid regardless of how they
@@ -53,26 +54,80 @@ const testEnvironmentIds = [
 
 describe("Validate environment normalization", () => {
   it.each(["AT-1234", "&!@#!@", "", "at1234"])("should not contain special characters", async (testStr) => {
-    expect(normalizeEnvironmentName(testStr)).not.toMatch(/[\W_-]+/g);
+    expect(utils.normalizeEnvironmentName(testStr)).not.toMatch(/[\W_-]+/g);
   });
 
   it.each(testEnvironmentIds)("should return a normalized name for ticket ID", async ({ inputs, expectedName }) => {
-    inputs.forEach((item) => expect(normalizeEnvironmentName(item)).toEqual(expectedName));
+    inputs.forEach((item) => expect(utils.normalizeEnvironmentName(item)).toEqual(expectedName));
   });
 
   it.each(testEnvironmentIds)("should return a normalized ID for ticket IDs", async ({ inputs, expectedId }) => {
-    inputs.forEach((item) => expect(lowerCaseEnvironmentId(item)).toEqual(expectedId));
+    inputs.forEach((item) => expect(utils.lowerCaseEnvironmentId(item)).toEqual(expectedId));
   });
 });
 
 describe("Validate string type guards", () => {
   it.each([1, {}, [], null, undefined, false, true])("should reject non-strings", async (item) => {
-    expect(isString(item)).toEqual(false);
+    expect(utils.isString(item)).toEqual(false);
   });
   it("should reject the empty string", async () => {
-    expect(isString("")).toEqual(false);
+    expect(utils.isString("")).toEqual(false);
   });
   it.each(["a", "longstring", "1312987A*&(^&*AHL"])("should accept strings", async (item) => {
-    expect(isString(item)).toEqual(true);
+    expect(utils.isString(item)).toEqual(true);
   });
+});
+
+const operationIdHelperTestData = [
+  {
+    operationId: "getPortfolioDraft",
+    handler: "getPortfolioDraft.ts",
+    method: HttpMethod.GET,
+    functionName: "GetPortfolioDraft",
+  },
+  {
+    operationId: "createPortfolioDraft",
+    handler: "createPortfolioDraft.ts",
+    method: HttpMethod.POST,
+    functionName: "CreatePortfolioDraft",
+  },
+  {
+    operationId: "fooBar",
+    handler: "fooBar.ts",
+    method: HttpMethod.POST,
+    functionName: "FooBar",
+  },
+  {
+    operationId: "deleteStuff",
+    handler: "deleteStuff.ts",
+    method: HttpMethod.DELETE,
+    functionName: "DeleteStuff",
+  },
+  {
+    operationId: "submitPortfolioDraft",
+    handler: "submitPortfolioDraft.ts",
+    method: HttpMethod.POST,
+    functionName: "SubmitPortfolioDraft",
+  },
+];
+
+describe("Validate handler function file name", () => {
+  it.each(operationIdHelperTestData)("should return the name of the handler", async ({ operationId, handler }) => {
+    expect(utils.apiSpecOperationFileName(operationId)).toEqual(handler);
+  });
+});
+
+describe("Validate HTTP method expectations", () => {
+  it.each(operationIdHelperTestData)("should return the appropriate HTTP method", async ({ operationId, method }) => {
+    expect(utils.apiSpecOperationMethod(operationId)).toEqual(method);
+  });
+});
+
+describe("Validate function name normalization", () => {
+  it.each(operationIdHelperTestData)(
+    "should return consistent function names",
+    async ({ operationId, functionName }) => {
+      expect(utils.apiSpecOperationFunctionName(operationId)).toEqual(functionName);
+    }
+  );
 });
