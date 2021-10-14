@@ -10,7 +10,7 @@ const xssOptions = {
 };
 const xssSanitizer = (): middy.MiddlewareObj<APIGatewayProxyEvent, APIGatewayProxyResult> => {
   const before: middy.MiddlewareFn<APIGatewayProxyEvent, APIGatewayProxyResult> = async (request): Promise<void> => {
-    request.event.body = xss(request.event.body ?? "", xssOptions);
+    request.event.body = JSON.parse(xss(JSON.stringify(request.event.body ?? {}), xssOptions));
   };
   return {
     before,
