@@ -2,7 +2,7 @@ import { ScanCommand, ScanCommandInput } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { portfolioDraftFields, PortfolioDraftSummary } from "../models/PortfolioDraftSummary";
 import { exhaustivePick } from "../models/TypeFields";
-import { dynamodbDocumentClient as client } from "../utils/dynamodb";
+import { dynamodbDocumentClient as client } from "../utils/aws-sdk/dynamodb";
 import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusCode } from "../utils/response";
 
 const TABLE_NAME = process.env.ATAT_TABLE_NAME;

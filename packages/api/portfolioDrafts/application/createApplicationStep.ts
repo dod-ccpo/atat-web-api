@@ -5,7 +5,7 @@ import { Application } from "../../models/Application";
 import { ApplicationStep, ApplicationStepValidationErrors, ValidationMessage } from "../../models/ApplicationStep";
 import { Environment } from "../../models/Environment";
 import { APPLICATION_STEP } from "../../models/PortfolioDraft";
-import { dynamodbDocumentClient as client } from "../../utils/dynamodb";
+import { dynamodbDocumentClient as client } from "../../utils/aws-sdk/dynamodb";
 import {
   DATABASE_ERROR,
   NO_SUCH_PORTFOLIO_DRAFT,

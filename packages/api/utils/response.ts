@@ -40,7 +40,7 @@ abstract class Response implements APIGatewayProxyResult {
   body: string;
   headers?: Headers;
   multiValueHeaders?: MultiValueHeaders;
-  isBase64Encoded?: boolean | undefined;
+  isBase64Encoded?: boolean;
 
   /**
    * Build an API response.

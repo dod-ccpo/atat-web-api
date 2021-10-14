@@ -10,6 +10,7 @@ export interface AtatNetStackProps extends cdk.StackProps {
 export class AtatNetStack extends cdk.Stack {
   public readonly vpc: ec2.IVpc;
   public readonly endpoints: ec2.IVpcEndpoint[] = [];
+  public readonly outputs: cdk.CfnOutput[] = [];
 
   constructor(scope: cdk.Construct, id: string, props: AtatNetStackProps) {
     super(scope, id);
@@ -27,9 +28,11 @@ export class AtatNetStack extends cdk.Stack {
     // Default is capturing all logs and pushing to CloudWatchLogs
     vpc.addFlowLog("AllFlowLogs");
     this.vpc = vpc;
-    const vpcOutput = new cdk.CfnOutput(this, "VpcId", {
-      value: this.vpc.vpcId,
-    });
+    this.outputs.push(
+      new cdk.CfnOutput(this, "VpcId", {
+        value: this.vpc.vpcId,
+      })
+    );
 
     const transitGatewayId = this.findTransitGateway();
 

@@ -1,7 +1,8 @@
-import { DeleteObjectCommand, DeleteObjectCommandOutput, S3Client } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, DeleteObjectCommandOutput } from "@aws-sdk/client-s3";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { ErrorStatusCode, NoContentResponse, OtherErrorResponse } from "../utils/response";
 import { isPathParameterPresent } from "../utils/validation";
+import { s3Client } from "../utils/aws-sdk/s3";
 
 const bucketName = process.env.DATA_BUCKET;
 export const NO_SUCH_TASK_ORDER_FILE = new OtherErrorResponse(
@@ -30,11 +31,10 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
 }
 
 async function deleteFile(taskOrderId: string): Promise<DeleteObjectCommandOutput> {
-  const client = new S3Client({});
-  const command = new DeleteObjectCommand({
-    Bucket: bucketName,
-    Key: taskOrderId,
-  });
-  const result = await client.send(command);
-  return result;
+  return s3Client.send(
+    new DeleteObjectCommand({
+      Bucket: bucketName,
+      Key: taskOrderId,
+    })
+  );
 }

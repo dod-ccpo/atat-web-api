@@ -1,9 +1,8 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { ApiSuccessResponse, SuccessStatusCode, ValidationErrorResponse } from "../../utils/response";
-import { dynamodbDocumentClient as client } from "../../utils/dynamodb";
+import { dynamodbDocumentClient as client } from "../../utils/aws-sdk/dynamodb";
 import { FUNDING_STEP } from "../../models/PortfolioDraft";
 import { FundingStep, ValidationMessage } from "../../models/FundingStep";
-import { Clin } from "../../models/Clin";
 import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import {
   DATABASE_ERROR,

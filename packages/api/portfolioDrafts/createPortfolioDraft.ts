@@ -3,7 +3,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { v4 as uuidv4 } from "uuid";
 import { PortfolioDraftSummary } from "../models/PortfolioDraftSummary";
 import { ProvisioningStatus } from "../models/ProvisioningStatus";
-import { dynamodbDocumentClient as client } from "../utils/dynamodb";
+import { dynamodbDocumentClient as client } from "../utils/aws-sdk/dynamodb";
 import { DATABASE_ERROR, REQUEST_BODY_NOT_EMPTY } from "../utils/errors";
 import { ApiSuccessResponse, SuccessStatusCode } from "../utils/response";
 
@@ -38,7 +38,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
         Item: item,
       })
     );
-    return new ApiSuccessResponse<PortfolioDraftSummary>(item as PortfolioDraftSummary, SuccessStatusCode.CREATED);
+    return new ApiSuccessResponse<PortfolioDraftSummary>(item, SuccessStatusCode.CREATED);
   } catch (error) {
     console.error("Database error: " + error);
     return DATABASE_ERROR;
