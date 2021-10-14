@@ -18,6 +18,7 @@ import validator from "@middy/validator";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
 import cors from "@middy/http-cors";
+import xssSanitizer from "../xssSanitizer";
 
 /**
  * Submits the Portfolio Step of the Portfolio Draft Wizard
@@ -46,6 +47,7 @@ export async function baseHandler(
 
 const handler = middy(baseHandler);
 handler
+  .use(xssSanitizer())
   .use(jsonBodyParser())
   .use(
     validator({
