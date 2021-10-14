@@ -1020,10 +1020,12 @@ components:
         pop_start_date:
           description: Start of period of performance
           type: string
+          pattern: '^\d{4}-((0[1-9])|(1[012]))-((0[1-9])|([12]\d)|(3[01]))$'
           example: "2021-10-01"
         pop_end_date:
           description: End of period of performance
           type: string
+          pattern: '^\d{4}-((0[1-9])|(1[012]))-((0[1-9])|([12]\d)|(3[01]))$'
           example: "2022-09-30"
       required:
         - clin_number
