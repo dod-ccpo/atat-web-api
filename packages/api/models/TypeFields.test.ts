@@ -25,7 +25,7 @@ describe("Test object trimming", () => {
     },
     portfolio_step: {
       name: "test",
-      csp: CloudServiceProvider.AWS,
+      csp: CloudServiceProvider.CSP_A,
       description: "test",
       dod_components: [],
       portfolio_managers: [],

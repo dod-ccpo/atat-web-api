@@ -1,4 +1,4 @@
 export enum CloudServiceProvider {
-  AWS = "aws",
-  AZURE = "azure",
+  CSP_A = "CSP A",
+  CSP_B = "CSP B",
 }

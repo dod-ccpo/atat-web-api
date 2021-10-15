@@ -13,7 +13,7 @@ export const schema = {
   properties: {
     csp: {
       type: "string",
-      enum: ["aws", "azure"],
+      enum: ["CSP A", "CSP B"],
     },
     portfolio_managers: {
       type: "array",
