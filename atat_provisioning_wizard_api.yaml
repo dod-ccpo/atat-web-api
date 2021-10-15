@@ -944,8 +944,8 @@ components:
         csp:
           type: string
           enum:
-            - "aws"
-            - "azure"
+            - "CSP A"
+            - "CSP B"
         description:
           type: string
         dod_components:
