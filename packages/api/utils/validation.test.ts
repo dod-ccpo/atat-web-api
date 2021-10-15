@@ -159,7 +159,7 @@ describe("Testing validation of fundingStep objects", () => {
       {
         task_order_number: "1234567890",
         task_order_file: toFile,
-        csp: "aws",
+        csp: CloudServiceProvider.CSP_A,
         clins: [fakeClinData],
       },
     ],
