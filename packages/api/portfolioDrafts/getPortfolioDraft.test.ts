@@ -165,7 +165,7 @@ function mockPortfolioDraftSummaryBadData(): PortfolioDraft {
 function mockPortfolioStep(): PortfolioStep {
   return {
     name: "Coolest Portfolio",
-    csp: CloudServiceProvider.AWS,
+    csp: CloudServiceProvider.CSP_A,
     description: "Description of something cool",
     portfolio_managers: ["coolIdea@example.com", "coolPerson@example.com", "support@example.com", "admin@example.com"],
     dod_components: ["space_force"],

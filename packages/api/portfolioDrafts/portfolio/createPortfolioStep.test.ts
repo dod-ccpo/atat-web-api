@@ -22,7 +22,7 @@ const mockValidPortfolioSteps: PortfolioStep[] = [
   // The example PortfolioStepEx from the API Specification
   {
     name: "Mock Portfolio",
-    csp: CloudServiceProvider.AWS,
+    csp: CloudServiceProvider.CSP_A,
     description: "Mock portfolio description",
     dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
     portfolio_managers: ["joe.manager@example.com", "jane.manager@example.com"],
@@ -32,7 +32,7 @@ const mockValidPortfolioSteps: PortfolioStep[] = [
   // request body.
   {
     name: "Tonys Portfolio 10_13_10:14",
-    csp: CloudServiceProvider.AWS,
+    csp: CloudServiceProvider.CSP_A,
     dod_components: ["marine_corps", "combatant_command", "joint_staff"],
     portfolio_managers: [],
   },
@@ -63,7 +63,7 @@ describe("Successful operations test", () => {
 describe("Validation of handler", () => {
   const wrongEmailFormatPortfolioStep: PortfolioStep = {
     name: "Mock Portfolio",
-    csp: CloudServiceProvider.AWS,
+    csp: CloudServiceProvider.CSP_A,
     description: "Mock portfolio description",
     dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
     portfolio_managers: ["joe.manager", "jane.manager@example.com"],
@@ -71,7 +71,7 @@ describe("Validation of handler", () => {
 
   const validPortfolioStep: PortfolioStep = {
     name: "Mock Portfolio",
-    csp: CloudServiceProvider.AWS,
+    csp: CloudServiceProvider.CSP_A,
     description: "Mock portfolio description",
     dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
     portfolio_managers: ["jane.manager@example.com"],

@@ -78,7 +78,7 @@ describe("Validation tests for createPortfolioStep function", function () {
   it("should map body to portfolioStep object", async () => {
     const requestBody = {
       name: "Zach's portfolio name",
-      csp: CloudServiceProvider.AWS,
+      csp: CloudServiceProvider.CSP_A,
       description: "team america",
       dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
       portfolio_managers: ["joe.manager@example.com", "jane.manager@example.com"],
@@ -88,7 +88,7 @@ describe("Validation tests for createPortfolioStep function", function () {
   it("should accept PortfolioStep objects with a missing description", async () => {
     const requestBodyMissingDescription = {
       name: "Zach's portfolio name",
-      csp: CloudServiceProvider.AWS,
+      csp: CloudServiceProvider.CSP_A,
       // description: "team america",
       dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
       portfolio_managers: ["joe.manager@example.com", "jane.manager@example.com"],
@@ -100,7 +100,7 @@ describe("Validation tests for createPortfolioStep function", function () {
       description: "Missing Name",
       body: {
         // name: "Zach's portfolio name",
-        csp: CloudServiceProvider.AWS,
+        csp: CloudServiceProvider.CSP_A,
         description: "Test Portfolio",
         dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
         portfolio_managers: ["joe.manager@example.com", "jane.manager@example.com"],
@@ -110,7 +110,7 @@ describe("Validation tests for createPortfolioStep function", function () {
       description: "Missing CSP",
       body: {
         name: "Zach's portfolio name",
-        // csp: CloudServiceProvider.AWS,
+        // csp: CloudServiceProvider.CSP_A,
         description: "Test Portfolio",
         dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
         portfolio_managers: ["joe.manager@example.com", "jane.manager@example.com"],
@@ -120,7 +120,7 @@ describe("Validation tests for createPortfolioStep function", function () {
       description: "Missing Components",
       body: {
         name: "Zach's portfolio name",
-        csp: CloudServiceProvider.AWS,
+        csp: CloudServiceProvider.CSP_A,
         description: "Test Portfolio",
         // dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
         portfolio_managers: ["joe.manager@example.com", "jane.manager@example.com"],
@@ -130,7 +130,7 @@ describe("Validation tests for createPortfolioStep function", function () {
       description: "Missing Portfolio Managers",
       body: {
         name: "Zach's portfolio name",
-        csp: CloudServiceProvider.AWS,
+        csp: CloudServiceProvider.CSP_A,
         description: "Test Portfolio",
         dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
         // portfolio_managers: ["joe.manager@example.com", "jane.manager@example.com"],
