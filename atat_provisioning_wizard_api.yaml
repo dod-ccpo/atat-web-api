@@ -1162,7 +1162,7 @@ components:
       value:
         name: "Mock Portfolio"
         csp:
-          - "aws"
+          - "CSP A"
         description: "Mock portfolio description"
         dod_components: 
           - "air_force"
