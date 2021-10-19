@@ -216,7 +216,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: './schemas/PortfolioStep.json'
+                $ref: './schemas/PortfolioStep.yaml'
               examples:
                 PortfolioStepEx:
                   $ref: '#/components/examples/PortfolioStepEx'
@@ -253,7 +253,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: './schemas/PortfolioStep.json'
+                $ref: './schemas/PortfolioStep.yaml'
               examples:
                 PortfolioStepEx:
                   $ref: '#/components/examples/PortfolioStepEx'
@@ -269,7 +269,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: './schemas/PortfolioStep.json'
+              $ref: './schemas/PortfolioStep.yaml'
       x-amazon-apigateway-integration:
         httpMethod: "POST"
         uri:
@@ -1089,7 +1089,7 @@ components:
       additionalProperties: false
       properties:
         portfolio_step:
-          $ref: './schemas/PortfolioStep.json'
+          $ref: './schemas/PortfolioStep.yaml'
         funding_step:
           $ref: '#/components/schemas/FundingStep'
         application_step:
