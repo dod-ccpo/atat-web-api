@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import * as ec2 from "@aws-cdk/aws-ec2";
 import * as cdk from "@aws-cdk/core";
-import { NIST80053Checks } from "cdk-nag";
+import { NIST80053R4Checks } from "cdk-nag";
 import "source-map-support/register";
 import { AtatIamStack } from "../lib/atat-iam-stack";
 import { AtatNetStack } from "../lib/atat-net-stack";
@@ -11,7 +11,7 @@ import { isString, lowerCaseEnvironmentId, normalizeEnvironmentName } from "../l
 
 const app = new cdk.App();
 if (process.env.CDK_NAG_ENABLED === "1") {
-  cdk.Aspects.of(app).add(new NIST80053Checks({ verbose: true }));
+  cdk.Aspects.of(app).add(new NIST80053R4Checks({ verbose: true }));
 }
 // TODO: Dynamically set this based on whether this is a sandbox environment,
 // a dev environment, or something else. For now, destroy everything on delete.
