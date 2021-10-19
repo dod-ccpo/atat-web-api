@@ -1,0 +1,134 @@
+openapi: 3.0.2
+info:
+  description: >-
+    This is a DRAFT version of the ATAT Portfolio Management and Reporting API
+  version: 1.0.0
+  title: ATAT Internal API - Portfolio Management and Reporting
+  contact:
+    email: replaceme@ccpo.mil
+tags:
+  - name: management
+    description: >-
+      These operations are for management of Provisioned Portfolios. Provisioned Portfolios represent a collection of cloud computing resources already provisioned by a CSP.
+  - name: reporting
+    description: >-
+      These operations return actual and forecast expenditure data for Provisioned Portfolios
+paths:
+  /portfolios/{portfolioId}/applications/{applicationId}/burndown:
+    get:
+      tags:
+        - reporting
+      description: Returns combined actual and forecast expenditure data for the given Application
+      operationId: getApplicationBurndownData
+      parameters:
+        - name: portfolioId
+          in: path
+          description: ID of the Portfolio
+          required: true
+          schema:
+            type: string
+        - name: applicationId
+          in: path
+          description: ID of the Application
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationBurndownData'
+              examples:
+                ApplicationBurndownDataEx:
+                  $ref: '#/components/examples/ApplicationBurndownDataEx'
+        '400':
+          description: Invalid request parameter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Portfolio or Application with the given ID does not exist
+components:
+  responses:
+    CorsHeaders:
+      description: Default response for CORS method
+      headers:
+        Access-Control-Allow-Origin:
+          schema:
+            type: string
+        Access-Control-Allow-Methods:
+          schema:
+            type: string
+        Access-Control-Allow-Headers:
+          schema:
+            type: string
+      content: {}
+  x-amazon-apigateway-request-validator: "request-params-validator"
+  x-amazon-apigateway-integration:
+    httpMethod: "POST"
+    uri:
+      Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetApplicationBurndownData.Arn}/invocations"
+    type: "aws_proxy"
+  security:
+    Fn::If:
+      - IsAuthorizationRequired
+      - 
+        - cognitoAuthorizer: []
+      - Ref: AWS::NoValue
+  schemas:
+    Error:
+      type: object
+      additionalProperties: false
+      description: Generic error model
+      properties:
+        code:
+          type: string
+          enum: [INVALID_INPUT, OTHER]
+        message:
+          type: string
+      required:
+        - code
+        - message
+    ValidationError:
+      allOf:
+        - $ref: '#/components/schemas/Error'
+        - type: object
+          additionalProperties: false
+          required:
+            - error_map
+          properties:
+            error_map:
+              type: object
+              description: 'Maps form input IDs to validation error messages so that clients can display in-line errors'
+    ApplicationBurndownData:
+      type: object
+      additionalProperties: false
+      description: Contains combined actual and forecast expenditure data for an Application
+      properties:
+        foo:
+          type: string
+        bar:
+          type: string
+  examples:
+    ApplicationBurndownDataEx:
+      value:
+        - foo: "foo"
+          bar: "bar"
+  securitySchemes:
+    Fn::If:
+      - IsAuthorizationRequired
+      - cognitoAuthorizer:
+          description: >-
+            Authorizes API access by token. Token obtained from custom IdP and provided in subsequent API requests.
+          type: apiKey
+          name: Authorization
+          in: header
+          x-amazon-apigateway-authtype: cognito_user_pools
+          x-amazon-apigateway-authorizer:
+            type: cognito_user_pools
+            providerARNs:
+              - Fn::GetAtt: AtatUserPool.Arn
+      - Ref: AWS::NoValue
