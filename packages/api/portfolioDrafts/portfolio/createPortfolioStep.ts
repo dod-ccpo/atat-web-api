@@ -1,7 +1,7 @@
 import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyResult, Context } from "aws-lambda";
 import { PORTFOLIO_STEP } from "../../models/PortfolioDraft";
-import { PortfolioStep, schemaWrapper } from "../../models/PortfolioStep";
+import { PortfolioStep } from "../../models/PortfolioStep";
 import { dynamodbDocumentClient as client } from "../../utils/aws-sdk/dynamodb";
 import { NO_SUCH_PORTFOLIO_DRAFT } from "../../utils/errors";
 import {
@@ -19,12 +19,21 @@ import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
 import cors from "@middy/http-cors";
 import xssSanitizer from "../xssSanitizer";
+import schema from "../../../../schemas/PortfolioStep.json";
 
 /**
  * Submits the Portfolio Step of the Portfolio Draft Wizard
  *
  * @param event - The POST request from API Gateway
  */
+
+export const schemaWrapper = {
+  type: "object",
+  required: ["body"],
+  properties: {
+    body: schema,
+  },
+};
 
 export async function baseHandler(
   event: ApiGatewayEventParsed<PortfolioStep>,

@@ -1,0 +1,39 @@
+description: Represents step 1 of the Portfolio Draft Wizard
+type: object
+additionalProperties: false
+required:
+  - name
+  - dod_components
+  - portfolio_managers
+  - csp
+properties:
+  name:
+    type: string
+    pattern: '^[a-zA-Z\d -]{4,100}$'
+  csp:
+    type: string
+    enum:
+      - "CSP A"
+      - "CSP B"
+  description:
+    type: string
+  dod_components:
+    type: array
+    items:
+      type: string
+      enum:
+        - "air_force"
+        - "army"
+        - "marine_corps"
+        - "navy"
+        - "space_force"
+        - "combatant_command"
+        - "joint_staff"
+        - "dafa"
+        - "osd_psas"
+        - "nsa"
+  portfolio_managers:
+    type: array
+    items:
+      type: string
+      format: "email"
