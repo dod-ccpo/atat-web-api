@@ -127,6 +127,7 @@ export class AtatWebApiStack extends cdk.Stack {
     // OpenAPI spec (because it was!) and now we've got all our special AWS values and variables interpolated.
     // This will get used as the `Body:` parameter in the underlying CloudFormation resource.
     this.restApi = new SecureRestApi(this, "AtatSpecTest", {
+      restApiName: `${props.environmentId} API`,
       apiDefinition: apigw.ApiDefinition.fromInline(apiSpecAsTemplateInclude),
       deployOptions: {
         tracingEnabled: true,
