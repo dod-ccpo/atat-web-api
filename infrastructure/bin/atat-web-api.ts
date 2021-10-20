@@ -43,6 +43,9 @@ const stacks: cdk.Stack[] = [
       secretName: "auth/oidc/aad",
       providerName: "ATATDevAAD",
     },
+    smtpProps: {
+      secretName: "email/smtp",
+    },
     requireAuthorization: process.env.ATAT_REQUIRE_AUTH !== "false",
     vpc: netStack.vpc,
   }),

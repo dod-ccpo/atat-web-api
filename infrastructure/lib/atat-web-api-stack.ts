@@ -24,11 +24,16 @@ interface AtatIdpProps {
   usersGroupName?: string;
 }
 
+interface AtatSmtpProps {
+  secretName: string;
+}
+
 export interface AtatWebApiStackProps extends cdk.StackProps {
   environmentId: string;
   idpProps: AtatIdpProps;
   removalPolicy?: cdk.RemovalPolicy;
   requireAuthorization?: boolean;
+  smtpProps: AtatSmtpProps;
   vpc: ec2.IVpc;
 }
 
@@ -177,7 +182,7 @@ export class AtatWebApiStack extends cdk.Stack {
         queue: this.emailQueue,
         lambdaVpc: props.vpc,
         method: HttpMethod.POST,
-        handlerPath: this.determineApiHandlerPath("submitSendEmails", "emails/"),
+        handlerPath: this.determineApiHandlerPath("submitEmails", "emails/"),
       }).fn,
       new ApiSQSFunction(this, "SendEmails", {
         queue: this.emailQueue,
@@ -188,6 +193,9 @@ export class AtatWebApiStack extends cdk.Stack {
           deadLetterQueue: this.emailDeadLetterQueue,
           // ? set reserved concurrency to zero?
           reservedConcurrentExecutions: 0,
+          environment: {
+            SMTP: props.smtpProps.secretName,
+          },
         },
       }).fn
     );

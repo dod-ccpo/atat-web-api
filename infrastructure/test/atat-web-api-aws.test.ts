@@ -12,6 +12,9 @@ test("DynamoDB Resource is present, and Partition Key is set.", () => {
       secretName: "/test/secret",
       providerName: "TestIdp",
     },
+    smtpProps: {
+      secretName: "/email/smtp-test",
+    },
     vpc: undefined as unknown as IVpc,
   });
   // THEN
