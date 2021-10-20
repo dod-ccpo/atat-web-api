@@ -5,7 +5,11 @@ updates:
     directory: "/"
     schedule:
       interval: daily
+    reviewers:
+      - dod-ccpo/platform-team
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
       interval: daily
+    reviewers:
+      - dod-ccpo/platform-team
