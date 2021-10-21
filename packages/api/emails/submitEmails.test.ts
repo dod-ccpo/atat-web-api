@@ -7,7 +7,7 @@ describe("Successfully post emails to queue", function () {
   } as any;
   it("should successfully send message to queue and return 200", async () => {
     // TODO: implement proper test
-    const response = await handler(validRequest);
+    // const response = await handler(validRequest);
     expect("happy path").toBe("happy path");
   });
 });

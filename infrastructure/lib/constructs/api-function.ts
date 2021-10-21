@@ -35,6 +35,11 @@ export interface ApiFunctionProps {
    * The VPC where resources should be created
    */
   readonly lambdaVpc: ec2.IVpc;
+  /**
+   * A prop to determine if the underlying Lambda function has read permissions
+   * for secrets managers.
+   */
+  readonly secretArn?: string;
 }
 
 export abstract class ApiFunction extends cdk.Construct {
@@ -63,5 +68,15 @@ export abstract class ApiFunction extends cdk.Construct {
     });
     this.fn.addPermission("AllowApiGatewayInvoke", { principal: APIGW_SERVICE_PRINCIPAL });
     (this.fn.node.defaultChild as lambda.CfnFunction).overrideLogicalId(id + "Function");
+
+    if (props.secretArn) {
+      this.fn.addToRolePolicy(
+        new iam.PolicyStatement({
+          resources: [props.secretArn],
+          actions: ["secretsManager:GetSecretValue"],
+          effect: iam.Effect.ALLOW,
+        })
+      );
+    }
   }
 }

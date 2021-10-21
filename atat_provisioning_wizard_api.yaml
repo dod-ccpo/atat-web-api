@@ -792,6 +792,68 @@ paths:
               method.response.header.Access-Control-Allow-Origin: '''*'''
             responseTemplates:
               application/json: "{}"
+  /email:
+    post:
+      tags:
+        - emails
+      description: Emails for invitations, alerts, etc. related to the Portfolio Drafts
+      operationId: submitEmails
+      responses:
+        '202':
+          description: Accepted
+        '400':
+          description: Validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '403':
+          description: User is not authorized to send emails
+      requestBody:
+        description: Input data for messages to send emails
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailQueueMessage'
+            examples:
+              EmailQueueMessageEx:
+                $ref: '#/components/examples/EmailQueueMessageEx'
+      x-amazon-apigateway-request-validator: "request-params-validator"
+      x-amazon-apigateway-integration:
+        httpMethod: "POST"
+        uri:
+          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SubmitEmailsFunction.Arn}/invocations"
+        type: "aws_proxy"
+      security:
+        Fn::If:
+          - IsAuthorizationRequired
+          -
+            - cognitoAuthorizer: []
+          - Ref: AWS::NoValue
+    options:
+      tags:
+        - cors
+      description: CORS headers
+      responses:
+        '200':
+          $ref: '#/components/responses/CorsHeaders'
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: |
+            {
+              "statusCode" : 200
+            }
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: '''*'''
+              method.response.header.Access-Control-Allow-Methods: '''*'''
+              method.response.header.Access-Control-Allow-Origin: '''*'''
+            responseTemplates:
+              application/json: "{}"
 
 components:
   parameters:
@@ -1139,6 +1201,26 @@ components:
           $ref: '#/components/schemas/FundingStep'
         application_step:
           $ref: '#/components/schemas/ApplicationStep'
+    EmailQueueMessage:
+      description: A message with data for sending emails in the Application
+      type: object
+      additionalProperties: false
+      properties:
+        emails:
+          description: Recipients to email.
+          type: array
+          items:
+            type: string
+            format: "email"
+        emailType:
+          description: Describes the kind of email to be sent.
+          enum:
+            - invitation
+            - alert
+      required:
+        - emails
+        - emailType
+
   examples:
     PortfolioDraftSummaryArrayEx:
       value:
@@ -1249,6 +1331,12 @@ components:
                   - display_name: "Boba Fett"
                     email: "original@mandalorian.mil"
                     access: "read_only"
+    EmailQueueMessageEx:
+      value:
+        emails:
+          - "monkey@lizard.mil"
+          - "frozen@carbonite.mil"
+        emailType: "invitation"
   securitySchemes:
     Fn::If:
       - IsAuthorizationRequired

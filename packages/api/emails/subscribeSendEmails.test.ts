@@ -40,6 +40,8 @@ describe("Successfully send emails", function () {
       ],
     };
     // TODO: add proper tests
+    // const response = await handler(queueEvent);
+    // console.log(response);
     expect("happy path").toBe("happy path");
   });
 });

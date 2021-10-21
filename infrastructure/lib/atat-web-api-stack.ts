@@ -79,11 +79,15 @@ export class AtatWebApiStack extends cdk.Stack {
     );
 
     // Create two queues for sending emails
-    this.emailQueue = new SecureQueue(this, "EmailQueue", { queueProps: {} }).queue;
     this.emailDeadLetterQueue = new SecureQueue(this, "EmailDLQ", {
       queueProps: {
-        visibilityTimeout: cdk.Duration.minutes(5),
-        // deadLetterQueue: { queue: this.emailDeadLetterQueue, maxReceiveCount: 2 },
+        visibilityTimeout: cdk.Duration.seconds(30),
+      },
+    }).queue;
+    this.emailQueue = new SecureQueue(this, "EmailQueue", {
+      queueProps: {
+        visibilityTimeout: cdk.Duration.seconds(30),
+        deadLetterQueue: { queue: this.emailDeadLetterQueue, maxReceiveCount: 1 },
       },
     }).queue;
     this.outputs.push(
@@ -177,6 +181,7 @@ export class AtatWebApiStack extends cdk.Stack {
   }
 
   private addEmailRoutes(props: AtatWebApiStackProps) {
+    const secrets = secretsmanager.Secret.fromSecretNameV2(this, "SMTPSecrets", props.smtpProps.secretName);
     this.functions.push(
       new ApiSQSFunction(this, "SubmitEmails", {
         queue: this.emailQueue,
@@ -184,15 +189,20 @@ export class AtatWebApiStack extends cdk.Stack {
         method: HttpMethod.POST,
         handlerPath: this.determineApiHandlerPath("submitEmails", "emails/"),
       }).fn,
+      // TODO: add IAM permissions to access secrets manager
       new ApiSQSFunction(this, "SendEmails", {
         queue: this.emailQueue,
         lambdaVpc: props.vpc,
         method: HttpMethod.GET,
         handlerPath: this.determineApiHandlerPath("subscribeSendEmails", "emails/"),
+        createEventSource: true,
+        // secretsAccess: true,
+        secretArn: secrets.secretArn,
         functionPropsOverride: {
-          deadLetterQueue: this.emailDeadLetterQueue,
-          // ? set reserved concurrency to zero?
-          reservedConcurrentExecutions: 0,
+          timeout: cdk.Duration.seconds(10),
+          // ! this DLQ might need to be on the source queue not here
+          // deadLetterQueue: this.emailDeadLetterQueue,
+          // retryAttempts: 0, // ! remove this
           environment: {
             SMTP: props.smtpProps.secretName,
           },
