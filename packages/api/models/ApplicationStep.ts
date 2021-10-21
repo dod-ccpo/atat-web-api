@@ -1,5 +1,5 @@
 import { Application } from "./Application";
-import { PortfolioOperator } from "./PortfolioOperator";
+import { PortfolioOperator } from "./Operator";
 
 export interface ApplicationStep {
   applications: Array<Application>;

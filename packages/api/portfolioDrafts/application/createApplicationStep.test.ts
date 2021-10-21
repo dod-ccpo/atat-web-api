@@ -33,7 +33,7 @@ import {
   REQUEST_BODY_EMPTY,
   REQUEST_BODY_INVALID,
 } from "../../utils/errors";
-import { AccessLevel } from "../../models/AccessLevel";
+import { AccessLevel } from "../../models/Operator";
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 beforeEach(() => {
