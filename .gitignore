@@ -23,3 +23,6 @@ tags-private.json
 # Sonar Scanner
 *.ucfg
 .scannerwork
+
+# newman-reporter-htmlextra
+newman/

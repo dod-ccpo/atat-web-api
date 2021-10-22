@@ -8,7 +8,7 @@
     "test": "lerna run test",
     "lint": "lerna run lint",
     "lint:fix": "lerna run lint:fix",
-    "newman": "newman run ./postman/collection.json"
+    "newman": "newman run ./postman/collection.json -r htmlextra"
   },
   "devDependencies": {
     "@types/jest": "^27.0.2",
@@ -26,6 +26,7 @@
     "jest": "^27.0.6",
     "lerna": "^4.0.0",
     "newman": "^5.3.0",
+    "newman-reporter-htmlextra": "^1.22.1",
     "prettier": "^2.3.2",
     "ts-node": "^10.2.0",
     "typescript": "~4.4.2"
