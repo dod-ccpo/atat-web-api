@@ -39,10 +39,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApplicationBurndownData'
+                $ref: '#/components/schemas/ApplicationMonthlyBurndownData'
               examples:
-                ApplicationBurndownDataEx:
-                  $ref: '#/components/examples/ApplicationBurndownDataEx'
+                ApplicationMonthlyBurndownDataEx:
+                  $ref: '#/components/examples/ApplicationMonthlyBurndownDataEx'
         '400':
           description: Invalid request parameter
           content:
@@ -103,20 +103,61 @@ components:
             error_map:
               type: object
               description: 'Maps form input IDs to validation error messages so that clients can display in-line errors'
-    ApplicationBurndownData:
+    MonthlyAvailableFunds:
+      description: Represents the amount of available funds for a given month
       type: object
       additionalProperties: false
-      description: Contains combined actual and forecast expenditure data for an Application
       properties:
-        foo:
+        month:
           type: string
-        bar:
-          type: string
+          example: "2019-09"
+        funds:
+          type: number
+          example: 200000
+    ApplicationMonthlyBurndownData:
+      description: Combines actual and forecast available funds data for an Application by month.  Input for burndown chart.
+      type: object
+      additionalProperties: false
+      properties:
+        actual:
+          type: array
+          items:
+            $ref: '#/components/schemas/MonthlyAvailableFunds'
+        forecast:
+          type: array
+          items:
+            $ref: '#/components/schemas/MonthlyAvailableFunds'
   examples:
-    ApplicationBurndownDataEx:
+    ApplicationMonthlyBurndownDataEx:
       value:
-        - foo: "foo"
-          bar: "bar"
+        actual:
+          - month: "2019-09"
+            funds: 200000
+          - month: "2019-10"
+            funds: 190000
+          - month: "2019-11"
+            funds: 175000
+          - month: "2019-12"
+            funds: 170000
+          - month: "2020-01"
+            funds: 150000
+          - month: "2020-02"
+            funds: 115000
+          - month: "2020-03"
+            funds: 95000
+          - month: "2020-04"
+            funds: 90000
+          - month: "2020-05"
+            funds: 75000
+          - month: "2020-06"
+            funds: 70000
+          - month: "2020-07"
+            funds: 50000
+          - month: "2020-08"
+            funds: 35000
+        forecast:
+          - month: "2020-09"
+            funds: 30000
   securitySchemes:
     Fn::If:
       - IsAuthorizationRequired
