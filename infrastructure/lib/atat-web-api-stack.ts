@@ -185,13 +185,15 @@ export class AtatWebApiStack extends cdk.Stack {
     this.functions.push(
       new ApiSQSFunction(this, "SubmitEmails", {
         queue: this.emailQueue,
-        lambdaVpc: props.vpc,
+        // TODO: revert to deploy in the vpc, after networking issue resolved (temporary only)
+        // lambdaVpc: props.vpc,
         method: HttpMethod.POST,
         handlerPath: this.determineApiHandlerPath("submitEmails", "emails/"),
       }).fn,
       new ApiSQSFunction(this, "SendEmails", {
         queue: this.emailQueue,
-        lambdaVpc: props.vpc,
+        // TODO: revert to deploy in the vpc, after networking issue resolved (temporary only)
+        // lambdaVpc: props.vpc,
         method: HttpMethod.GET,
         handlerPath: this.determineApiHandlerPath("subscribeSendEmails", "emails/"),
         createEventSource: true,

@@ -32,7 +32,7 @@ const environmentName = normalizeEnvironmentName(environmentParam);
 const environmentId = lowerCaseEnvironmentId(environmentParam);
 
 const netStack = new AtatNetStack(app, environmentName + "AtatNetStack", {
-  vpcCidr: ec2.Vpc.DEFAULT_CIDR_RANGE,
+  vpcCidr: "10.10.0.0/16",
 });
 
 const stacks: cdk.Stack[] = [

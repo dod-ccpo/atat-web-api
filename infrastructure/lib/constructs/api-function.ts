@@ -35,7 +35,7 @@ export interface ApiFunctionProps {
   /**
    * The VPC where resources should be created
    */
-  readonly lambdaVpc: ec2.IVpc;
+  readonly lambdaVpc?: ec2.IVpc;
   /**
    * A prop to determine if the underlying Lambda function has read permissions
    * for secrets managers.
