@@ -1,6 +1,7 @@
 import * as apigw from "@aws-cdk/aws-apigateway";
 import * as ec2 from "@aws-cdk/aws-ec2";
 import * as iam from "@aws-cdk/aws-iam";
+import * as secretsmanager from "@aws-cdk/aws-secretsmanager";
 import * as lambda from "@aws-cdk/aws-lambda";
 import * as lambdaNodeJs from "@aws-cdk/aws-lambda-nodejs";
 import * as cdk from "@aws-cdk/core";
@@ -39,7 +40,7 @@ export interface ApiFunctionProps {
    * A prop to determine if the underlying Lambda function has read permissions
    * for secrets managers.
    */
-  readonly secretArn?: string;
+  readonly smtpSecrets?: secretsmanager.ISecret;
 }
 
 export abstract class ApiFunction extends cdk.Construct {
@@ -68,15 +69,8 @@ export abstract class ApiFunction extends cdk.Construct {
     });
     this.fn.addPermission("AllowApiGatewayInvoke", { principal: APIGW_SERVICE_PRINCIPAL });
     (this.fn.node.defaultChild as lambda.CfnFunction).overrideLogicalId(id + "Function");
-
-    if (props.secretArn) {
-      this.fn.addToRolePolicy(
-        new iam.PolicyStatement({
-          resources: [props.secretArn],
-          actions: ["secretsManager:GetSecretValue"],
-          effect: iam.Effect.ALLOW,
-        })
-      );
+    if (props.smtpSecrets) {
+      props.smtpSecrets.grantRead(this.fn);
     }
   }
 }
