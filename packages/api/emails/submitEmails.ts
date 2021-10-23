@@ -1,10 +1,8 @@
-import { APIGatewayProxyResult, APIGatewayProxyEvent } from "aws-lambda";
+import { APIGatewayProxyResult, APIGatewayProxyEvent, Context } from "aws-lambda";
 import { sqsClient } from "../utils/aws-sdk/sqs";
 import { SendMessageCommand } from "@aws-sdk/client-sqs";
-import { DATABASE_ERROR, REQUEST_BODY_INVALID } from "../utils/errors";
 import { ApiSuccessResponse, SuccessStatusCode } from "../utils/response";
 import middy from "@middy/core";
-import { isBodyPresent } from "../utils/validation";
 import xssSanitizer from "../portfolioDrafts/xssSanitizer";
 import jsonBodyParser from "@middy/http-json-body-parser";
 import cors from "@middy/http-cors";
@@ -13,22 +11,21 @@ import validator from "@middy/validator";
 
 const QUEUE_URL = process.env.ATAT_QUEUE_URL ?? "";
 
-export async function baseHandler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
-  console.log("EVENT", event.body);
-
+export async function baseHandler(event: APIGatewayProxyEvent, context?: Context): Promise<APIGatewayProxyResult> {
   try {
     const response = await sqsClient.send(
       new SendMessageCommand({ MessageBody: JSON.stringify(event.body), QueueUrl: QUEUE_URL })
     );
-    return new ApiSuccessResponse(response.$metadata, SuccessStatusCode.ACCEPTED);
+    return new ApiSuccessResponse({ sqsResponse: response, messageBody: event.body }, SuccessStatusCode.ACCEPTED);
   } catch (error) {
-    console.log("Database error: " + error);
-    return DATABASE_ERROR;
+    console.log("Error sending message to EmailQueue: " + error);
+    return error;
   }
 }
 
+// TODO: remove once importing of spec for middy is implemented
 export const schema = {
-  required: ["emails", "emailType"],
+  required: ["emails", "emailType", "missionOwner"],
   type: "object",
   properties: {
     emails: {
@@ -39,6 +36,9 @@ export const schema = {
       },
     },
     emailType: {
+      type: "string",
+    },
+    missionOwner: {
       type: "string",
     },
   },
