@@ -19,6 +19,7 @@ const removalPolicy = cdk.RemovalPolicy.DESTROY;
 
 // Ugly hack to quickly isolate deployments for developers.  To be improved/removed later.
 const environmentParam = app.node.tryGetContext("EnvironmentId") ?? app.node.tryGetContext("TicketId");
+const vpcCidrParam = app.node.tryGetContext("VpcCidr") ?? ec2.Vpc.DEFAULT_CIDR_RANGE;
 
 if (!isString(environmentParam)) {
   console.error("An EnvironmentId must be provided");
@@ -32,7 +33,7 @@ const environmentName = normalizeEnvironmentName(environmentParam);
 const environmentId = lowerCaseEnvironmentId(environmentParam);
 
 const netStack = new AtatNetStack(app, environmentName + "AtatNetStack", {
-  vpcCidr: "10.10.0.0/16",
+  vpcCidr: vpcCidrParam,
 });
 
 const stacks: cdk.Stack[] = [

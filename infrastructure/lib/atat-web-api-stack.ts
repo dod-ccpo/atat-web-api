@@ -185,14 +185,14 @@ export class AtatWebApiStack extends cdk.Stack {
     this.functions.push(
       new ApiSQSFunction(this, "SubmitEmails", {
         queue: this.emailQueue,
-        // TODO: revert to deploy in the vpc, after networking issue resolved (temporary only)
+        // TODO(AT-6764): revert to deploy in the vpc, after networking issue resolved (temporary only)
         // lambdaVpc: props.vpc,
         method: HttpMethod.POST,
         handlerPath: this.determineApiHandlerPath("submitEmails", "emails/"),
       }).fn,
       new ApiSQSFunction(this, "SendEmails", {
         queue: this.emailQueue,
-        // TODO: revert to deploy in the vpc, after networking issue resolved (temporary only)
+        // TODO(AT-6764): revert to deploy in the vpc, after networking issue resolved (temporary only)
         // lambdaVpc: props.vpc,
         method: HttpMethod.GET,
         handlerPath: this.determineApiHandlerPath("subscribeSendEmails", "emails/"),
@@ -204,7 +204,7 @@ export class AtatWebApiStack extends cdk.Stack {
           // deadLetterQueue: this.emailDeadLetterQueue,
           // retryAttempts: 0,
           environment: {
-            SMTP: props.smtpProps.secretName,
+            SMTP_SECRET_NAME: props.smtpProps.secretName,
           },
         },
       }).fn
