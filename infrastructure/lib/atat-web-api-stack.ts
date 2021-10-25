@@ -197,6 +197,7 @@ export class AtatWebApiStack extends cdk.Stack {
         method: HttpMethod.GET,
         handlerPath: this.determineApiHandlerPath("subscribeSendEmails", "emails/"),
         createEventSource: true,
+        batchSize: 1,
         smtpSecrets: smtpSecrets,
         functionPropsOverride: {
           timeout: cdk.Duration.seconds(10),

@@ -14,6 +14,11 @@ export interface ApiSQSFunctionProps extends ApiFunctionProps {
    * Optional param to create an SQS event source to receive queue messages
    */
   readonly createEventSource?: boolean;
+  /**
+   * Optional param to change the batch size of messages received by the lambda
+   * from the SQS event source
+   */
+  readonly batchSize?: number;
 }
 
 /**
@@ -36,7 +41,7 @@ export class ApiSQSFunction extends ApiFunction {
     this.grantRequiredQueuePermissions();
     // allows the fn to subscribe to the queue using an EventSource
     if (props.createEventSource) {
-      this.fn.addEventSource(new SqsEventSource(this.queue));
+      this.fn.addEventSource(new SqsEventSource(this.queue, props.batchSize ? { batchSize: props.batchSize } : {}));
     }
   }
 
