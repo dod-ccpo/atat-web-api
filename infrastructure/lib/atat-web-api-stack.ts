@@ -182,27 +182,28 @@ export class AtatWebApiStack extends cdk.Stack {
 
   private addEmailRoutes(props: AtatWebApiStackProps) {
     const smtpSecrets = secretsmanager.Secret.fromSecretNameV2(this, "SMTPSecrets", props.smtpProps.secretName);
+    const submitEmailsPath = utils.packageRoot() + "/email/processingEmails/submitEmails.ts";
+    const processEmailsPath = utils.packageRoot() + "/email/processingEmails/index.ts";
+
     this.functions.push(
       new ApiSQSFunction(this, "SubmitEmails", {
         queue: this.emailQueue,
         // TODO(AT-6764): revert to deploy in the vpc, after networking issue resolved (temporary only)
         // lambdaVpc: props.vpc,
         method: HttpMethod.POST,
-        handlerPath: this.determineApiHandlerPath("submitEmails", "emails/"),
+        handlerPath: submitEmailsPath,
       }).fn,
       new ApiSQSFunction(this, "SendEmails", {
         queue: this.emailQueue,
         // TODO(AT-6764): revert to deploy in the vpc, after networking issue resolved (temporary only)
         // lambdaVpc: props.vpc,
         method: HttpMethod.GET,
-        handlerPath: this.determineApiHandlerPath("subscribeSendEmails", "emails/"),
+        handlerPath: processEmailsPath,
         createEventSource: true,
         batchSize: 1,
         smtpSecrets: smtpSecrets,
         functionPropsOverride: {
           timeout: cdk.Duration.seconds(10),
-          // deadLetterQueue: this.emailDeadLetterQueue,
-          // retryAttempts: 0,
           environment: {
             SMTP_SECRET_NAME: props.smtpProps.secretName,
           },
