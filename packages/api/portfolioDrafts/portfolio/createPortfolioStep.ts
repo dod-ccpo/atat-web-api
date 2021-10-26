@@ -19,7 +19,7 @@ import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
 import cors from "@middy/http-cors";
 import xssSanitizer from "../xssSanitizer";
-import schema from "../../models/schema.json";
+import schema = require("../../models/schema.json");
 const validatedSchema = schema.components.schemas.PortfolioStep;
 const schemaWrapper = {
   type: "object",
