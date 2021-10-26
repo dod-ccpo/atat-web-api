@@ -1,4 +1,4 @@
-import { handler } from "./submitEmails";
+import { baseHandler, handler } from "./submitEmails";
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from "aws-lambda";
 import { mockClient } from "aws-sdk-client-mock";
 import { SendMessageCommand, SQSClient } from "@aws-sdk/client-sqs";
@@ -24,7 +24,6 @@ describe("Successfully send messages to a queue for sending emails", function ()
       },
     };
     sqsMock.on(SendMessageCommand).resolves(messageResponse);
-    // with middy wrapper need to provide context and a callback as well
     const response = (await handler(validRequest, {} as Context, () => null)) as APIGatewayProxyResult;
     expect(response.body).toBe(JSON.stringify({ sqsResponse: messageResponse, messageBody: validRequest.body }));
     expect(response.statusCode).toBe(SuccessStatusCode.ACCEPTED);
@@ -91,21 +90,15 @@ describe("Errors when sending messages to the queue for sending emails", functio
     expect(response.statusCode).toBe(ErrorStatusCode.BAD_REQUEST);
     expect(responseBody.details).toHaveLength(4);
     expect(JSON.stringify(responseBody.details)).toMatch(/must NOT have additional properties/);
-    // TODO: figure out a way to get this test to pass so this object can be tested
-    // expect(responseBody.details).toEqual(
-    //   expect.arrayContaining([
-    //     expect.objectContaining({
-    //       instancePath: "/body",
-    //       schemaPath: "#/properties/body/additionalProperties",
-    //       keyword: "additionalProperties",
-    //       params: { additionalProperty: "bad" },
-    //       message: "must NOT have additional properties",
-    //     }),
-    //   ])
-    // );
   });
-  it("should return 5xx errors when ...", async () => {
-    // TODO: 5xx errors
-    expect("y").toBe("y");
+  it("should return 5xx error for an internal error", async () => {
+    const emptyRequest: APIGatewayProxyEvent = { body: { unknown: "property" } } as any;
+    sqsMock.on(SendMessageCommand).rejects("Internal queue error.");
+
+    const response = await baseHandler(emptyRequest);
+    expect(response).toEqual({
+      body: "Could not send message to EmailQueue. Error: Internal queue error.",
+      statusCode: ErrorStatusCode.INTERNAL_SERVER_ERROR,
+    });
   });
 });

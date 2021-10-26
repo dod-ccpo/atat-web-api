@@ -2,7 +2,7 @@ import { SQSEvent } from "aws-lambda";
 import { processEmailRecords } from "./processEmails";
 import { retrieveSecrets } from "../utils/retrieveSecrets";
 
-const SMTP_SECRET_NAME = process.env.SMTP ?? "";
+const SMTP_SECRET_NAME = process.env.SMTP_SECRET_NAME ?? "";
 
 /**
  * Receives SQS Events for sending emails
@@ -12,7 +12,6 @@ const SMTP_SECRET_NAME = process.env.SMTP ?? "";
 export async function handler(event: SQSEvent): Promise<void> {
   console.log("EVENT RECORDS: ", event.Records);
   const smtpSecrets = await retrieveSecrets(SMTP_SECRET_NAME);
-  // console.log("SMTP value is: " + smtpSecrets.port);
 
   // batch message polled from queue (max 10)
   // currently set to 1 since if the whole batch fails and retry duplicate
@@ -28,6 +27,6 @@ export async function handler(event: SQSEvent): Promise<void> {
     const processedEmails = await processEmailRecords(smtpSecrets, emailRecordsToProcess);
     console.log("Email responses after processing: " + processedEmails);
   } catch (error) {
-    console.log("Could not send emails: " + error);
+    throw new Error(`Could not send emails: ${error}`);
   }
 }

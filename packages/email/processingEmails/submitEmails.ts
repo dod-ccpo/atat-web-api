@@ -8,6 +8,7 @@ import jsonBodyParser from "@middy/http-json-body-parser";
 import cors from "@middy/http-cors";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import validator from "@middy/validator";
+import { ErrorStatusCode } from "../utils/statusCodesAndErrors";
 
 const QUEUE_URL = process.env.ATAT_QUEUE_URL ?? "";
 
@@ -18,8 +19,10 @@ export async function baseHandler(event: APIGatewayProxyEvent, context?: Context
     );
     return new ApiSuccessResponse({ sqsResponse: response, messageBody: event.body }, SuccessStatusCode.ACCEPTED);
   } catch (error) {
-    console.log("Error sending message to EmailQueue: " + error);
-    return error;
+    return {
+      statusCode: ErrorStatusCode.INTERNAL_SERVER_ERROR,
+      body: `Could not send message to EmailQueue. ${error}`,
+    };
   }
 }
 
