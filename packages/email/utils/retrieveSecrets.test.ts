@@ -1,6 +1,6 @@
 import { retrieveSecrets } from "../utils/retrieveSecrets";
 import * as getSecrets from "../utils/retrieveSecrets";
-import { SmtpConfiguration } from "../../api/emails/subscribeSendEmails";
+import { SmtpConfiguration } from "./retrieveSecrets";
 
 beforeEach(() => {
   jest.clearAllMocks();

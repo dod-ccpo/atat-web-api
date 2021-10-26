@@ -5,7 +5,7 @@ import * as processEmails from "./processEmails";
 import * as emailHandler from "./index";
 import { generateTestSQSEvent } from "../utils/sqs";
 import { v4 as uuidv4 } from "uuid";
-import { SmtpConfiguration } from "../../api/emails/subscribeSendEmails";
+import { SmtpConfiguration } from "../utils/retrieveSecrets";
 
 beforeEach(() => {
   jest.clearAllMocks();
