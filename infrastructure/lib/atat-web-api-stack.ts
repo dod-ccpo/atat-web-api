@@ -15,7 +15,7 @@ import { SecureBucket, SecureQueue, SecureRestApi, SecureTable } from "./constru
 import { TaskOrderLifecycle } from "./constructs/task-order-lifecycle";
 import { HttpMethod } from "./http";
 import * as utils from "./util";
-
+import { convertSchema } from "./load-schema";
 interface AtatIdpProps {
   secretName: string;
   providerName: string;
@@ -79,6 +79,9 @@ export class AtatWebApiStack extends cdk.Stack {
         value: this.resolve(cdk.Fn.conditionIf(forceAuth.logicalId, "true", "false")),
       })
     );
+
+    // Convert the YAML API spec to JSON, send the JSON schema to packages/api/models
+    convertSchema();
 
     // PortfolioDraft Operations
     this.addDatabaseApiFunction("getPortfolioDrafts", "portfolioDrafts/", props.vpc);

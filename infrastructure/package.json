@@ -15,6 +15,7 @@
   "devDependencies": {
     "@aws-cdk/assert": "1.129.0",
     "@types/jest": "^27.0.2",
+    "@types/js-yaml": "^4.0.4",
     "@types/node": "^16.9.6",
     "@types/uuid": "^8.3.1",
     "@typescript-eslint/eslint-plugin": "^4.31.2",
@@ -52,8 +53,10 @@
     "@aws-cdk/aws-ssm": "1.129.0",
     "@aws-cdk/core": "1.129.0",
     "@aws-cdk/custom-resources": "1.129.0",
+    "@openapi-contrib/openapi-schema-to-json-schema": "^3.1.1",
     "cdk-nag": "^0.1.8",
     "eslint": "^7.31.0",
+    "js-yaml": "^4.1.0",
     "source-map-support": "^0.5.16",
     "uuid": "^8.3.2"
   }

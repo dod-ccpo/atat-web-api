@@ -31,7 +31,7 @@ const mockValidPortfolioSteps: PortfolioStep[] = [
   // The issue at the time seemed to be due to a missing `description` field in the
   // request body.
   {
-    name: "Tonys Portfolio 10_13_10:14",
+    name: "Tonys Portfolio 10",
     csp: CloudServiceProvider.CSP_A,
     dod_components: ["marine_corps", "combatant_command", "joint_staff"],
     portfolio_managers: [],
@@ -94,6 +94,7 @@ describe.each(mockValidPortfolioSteps)("Handler response with mock dynamodb", (m
   it("should return error when the portfolioDraft doesn't exist", async () => {
     ddbMock.on(UpdateCommand).rejects({ name: "ConditionalCheckFailedException" });
     const data = await handler(request, {} as Context, null as unknown as Callback)!;
+    console.log(data);
     expect(data).toEqual(NO_SUCH_PORTFOLIO_DRAFT);
   });
 });
