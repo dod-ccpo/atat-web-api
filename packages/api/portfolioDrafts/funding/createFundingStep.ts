@@ -1,5 +1,5 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { ApiSuccessResponse, SuccessStatusCode, ValidationErrorResponse } from "../../utils/response";
+import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from "aws-lambda";
+import { ApiSuccessResponse, SetupError, SuccessStatusCode, ValidationErrorResponse } from "../../utils/response";
 import { dynamodbDocumentClient as client } from "../../utils/aws-sdk/dynamodb";
 import { FUNDING_STEP } from "../../models/PortfolioDraft";
 import { FundingStep, ValidationMessage } from "../../models/FundingStep";
@@ -21,6 +21,25 @@ import {
   isClinNumber,
   isFundingAmount,
 } from "../../utils/validation";
+import schema = require("../../models/schema.json");
+import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
+import { shapeValidationForPostRequest } from "../../utils/requestValidation";
+import middy from "@middy/core";
+import jsonBodyParser from "@middy/http-json-body-parser";
+import validator from "@middy/validator";
+import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
+import cors from "@middy/http-cors";
+import xssSanitizer from "../xssSanitizer";
+
+const validatedSchema = schema.FundingStep;
+const schemaWrapper = {
+  type: "object",
+  required: ["body"],
+  properties: {
+    body: validatedSchema,
+  },
+};
+/*
 
 export interface ClinValidationError {
   clinNumber: string;
@@ -28,24 +47,82 @@ export interface ClinValidationError {
   invalidParameterValue: string;
   validationMessage: ValidationMessage;
 }
-
+*/
 /**
  * Accepts a Funding Step and performs input validation
  * on all Clins contained therein.
  * @returns a collection of clin validation errors
  */
+/*
 export function validateFundingStepClins(fs: FundingStep): Array<ClinValidationError> {
   return fs.task_orders
     .flatMap((taskOrder) => taskOrder.clins)
     .map(validateClin)
     .reduce((accumulator, validationErrors) => accumulator.concat(validationErrors), []);
 }
-
+*/
 /**
  * Submits the Funding Step of the Portfolio Draft Wizard
  *
  * @param event - The POST request from API Gateway
  */
+export async function baseHandler(
+  event: ApiGatewayEventParsed<FundingStep>,
+  context?: Context
+): Promise<APIGatewayProxyResult> {
+  // Perform shape validation
+  const setupResult = shapeValidationForPostRequest<FundingStep>(event);
+  if (setupResult instanceof SetupError) {
+    return setupResult.errorResponse;
+  }
+  const portfolioDraftId = setupResult.path.portfolioDraftId;
+  const fundingStep = event.body;
+  // Perform database call
+  try {
+    await client.send(
+      new UpdateCommand({
+        TableName: process.env.ATAT_TABLE_NAME ?? "",
+        Key: {
+          id: portfolioDraftId,
+        },
+        UpdateExpression: "set #stepKey = :step, #updateAtKey = :now, num_task_orders = :numOfTaskOrders",
+        ExpressionAttributeNames: {
+          // values are JSON keys
+          "#stepKey": FUNDING_STEP,
+          "#updateAtKey": "updated_at",
+        },
+        ExpressionAttributeValues: {
+          ":step": fundingStep,
+          ":now": new Date().toISOString(),
+          ":numOfTaskOrders": fundingStep.task_orders.length,
+        },
+        ConditionExpression: "attribute_exists(created_at)",
+        ReturnValues: "ALL_NEW",
+      })
+    );
+  } catch (error) {
+    if (error.name === "ConditionalCheckFailedException") {
+      return NO_SUCH_PORTFOLIO_DRAFT;
+    }
+    console.error("Database error: " + error);
+    return DATABASE_ERROR;
+  }
+  return new ApiSuccessResponse<FundingStep>(fundingStep, SuccessStatusCode.CREATED);
+}
+const handler = middy(baseHandler);
+handler
+  .use(xssSanitizer())
+  .use(jsonBodyParser())
+  .use(
+    validator({
+      inputSchema: schemaWrapper,
+    })
+  )
+  .use(JSONErrorHandlerMiddleware())
+  .use(cors({ headers: "*", methods: "*" }));
+
+export { handler };
+/*
 export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   const portfolioDraftId = event.pathParameters?.portfolioDraftId;
   if (!isPathParameterPresent(portfolioDraftId)) {
@@ -100,12 +177,13 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
   }
   return new ApiSuccessResponse<FundingStep>(fundingStep, SuccessStatusCode.CREATED);
 }
-
+*/
 /**
  * Returns an error response containing 1) an error map containing the specified invalid properties, 2) an error code, 3) a message
  * @param invalidProperties object containing property names and their values which failed validation
  * @returns ValidationErrorResponse containing an error map, error code, and a message
  */
+/*
 export function createValidationErrorResponse(invalidProperties: Record<string, unknown>): ValidationErrorResponse {
   if (Object.keys(invalidProperties).length === 0) {
     throw Error("Parameter 'invalidProperties' must not be empty");
@@ -114,13 +192,14 @@ export function createValidationErrorResponse(invalidProperties: Record<string, 
     if (!key) throw Error("Parameter 'invalidProperties' must not have empty string as key");
   });
   return new ValidationErrorResponse("Invalid input", invalidProperties);
-}
+} */
 
 /**
  * Validates the given clin object
  * @param clin an object that looks like a Clin
  * @returns a collection of clin validation errors
  */
+/*
 export function validateClin(clin: unknown): Array<ClinValidationError> {
   if (!isClin(clin)) {
     throw Error("Input must be a Clin object");
@@ -209,3 +288,4 @@ export function validateClin(clin: unknown): Array<ClinValidationError> {
   }
   return errors;
 }
+*/

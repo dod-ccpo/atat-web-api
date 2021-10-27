@@ -37,6 +37,7 @@
     "typescript": "~4.4.2"
   },
   "dependencies": {
+    "@apidevtools/json-schema-ref-parser": "^9.0.9",
     "@aws-cdk/aws-apigateway": "1.129.0",
     "@aws-cdk/aws-cognito": "1.129.0",
     "@aws-cdk/aws-dynamodb": "1.129.0",
