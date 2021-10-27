@@ -333,7 +333,6 @@ paths:
           description: The given Portfolio Draft does not exist
         '404':
           description: Funding Step not found for this Portfolio Draft
-      x-amazon-apigateway-request-validator: "request-params-validator"
       x-amazon-apigateway-integration:
         httpMethod: "POST"
         uri:
@@ -382,7 +381,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/FundingStep'
-      x-amazon-apigateway-request-validator: "full-request-validator"
       x-amazon-apigateway-integration:
         httpMethod: "POST"
         uri:
