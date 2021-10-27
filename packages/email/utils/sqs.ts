@@ -1,6 +1,5 @@
 import { SQSClient } from "@aws-sdk/client-sqs";
 import { SQSEvent } from "aws-lambda";
-import crypto from "crypto";
 
 // Create SQS service object.
 export const sqsClient = new SQSClient({});
@@ -23,10 +22,7 @@ export function generateTestSQSEvent(body: string): SQSEvent {
           SentTimestamp: "1545082650636",
           SenderId: "AIDAIENQZJOLO23YVJ4VO",
         },
-        // The use of MD5 here is not for any cryptographic purpose. It is
-        // to mock a field of a Lambda event. This is only used for the
-        // purposes of a basic validation (much like CRC).
-        md5OfBody: crypto.createHash("md5").update(body).digest("hex"),
+        md5OfBody: "7bd852511b16055704096b64caeeee90",
       },
     ],
   };
