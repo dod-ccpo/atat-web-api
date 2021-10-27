@@ -129,14 +129,22 @@ export class AtatWebApiStack extends cdk.Stack {
     // And with the data now loaded from the template, we can use ApiDefinition.fromInline to parse it as real
     // OpenAPI spec (because it was!) and now we've got all our special AWS values and variables interpolated.
     // This will get used as the `Body:` parameter in the underlying CloudFormation resource.
-    this.restApi = new SecureRestApi(this, "AtatSpecTest", {
+    const apiGateway = new SecureRestApi(this, "AtatSpecTest", {
       restApiName: `${props.environmentId} API`,
       apiDefinition: apigw.ApiDefinition.fromInline(apiSpecAsTemplateInclude),
       deployOptions: {
         tracingEnabled: true,
       },
     }).restApi;
+    this.restApi = apiGateway;
     this.addTaskOrderRoutes(props);
+    this.ssmParams.push(
+      new ssm.StringParameter(this, "ApiGatewayUrl", {
+        description: "URL for the API Gateway",
+        stringValue: apiGateway.urlForPath(),
+        parameterName: `/atat/${this.environmentId}/api/url`,
+      })
+    );
   }
 
   private addTaskOrderRoutes(props: AtatWebApiStackProps) {
