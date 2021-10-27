@@ -23,10 +23,6 @@ export async function handler(event: SQSEvent): Promise<void> {
     body: JSON.parse(record.body),
   }));
 
-  try {
-    const processedEmails = await processEmailRecords(smtpSecrets, emailRecordsToProcess);
-    console.log("Email responses after processing: " + processedEmails);
-  } catch (error) {
-    throw new Error(`Could not send emails: ${error}`);
-  }
+  const processedEmails = await processEmailRecords(smtpSecrets, emailRecordsToProcess);
+  console.log("Email responses after processing: " + processedEmails);
 }

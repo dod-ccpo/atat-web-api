@@ -15,8 +15,9 @@ export async function retrieveSecrets(id: string): Promise<SmtpConfiguration> {
   } catch (error) {
     if (error.name === "CredentialsProviderError") {
       console.log(SECRETS_NOT_RETRIEVED);
+      throw error;
     }
     // unknown 5xx errors
-    return error;
+    throw error;
   }
 }

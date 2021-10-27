@@ -120,8 +120,7 @@ describe("handler", function () {
     try {
       await handler(generateTestSQSEvent(JSON.stringify(body)));
     } catch (e) {
-      expect(e).toBeInstanceOf(Error);
-      expect(e).toEqual(new Error(`Could not send emails: ${error}`));
+      expect(e).toEqual(error);
     }
     expect(consoleLogSpy).toHaveBeenCalledTimes(1);
   });
