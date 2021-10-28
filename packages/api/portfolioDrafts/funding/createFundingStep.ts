@@ -116,12 +116,18 @@ handler
   .use(
     validator({
       inputSchema: schemaWrapper,
+      ajvOptions: { strict: false },
     })
   )
   .use(JSONErrorHandlerMiddleware())
   .use(cors({ headers: "*", methods: "*" }));
 
 export { handler };
+// isValidDate
+
+
+
+
 /*
 export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   const portfolioDraftId = event.pathParameters?.portfolioDraftId;
@@ -183,7 +189,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
  * @param invalidProperties object containing property names and their values which failed validation
  * @returns ValidationErrorResponse containing an error map, error code, and a message
  */
-/*
+
 export function createValidationErrorResponse(invalidProperties: Record<string, unknown>): ValidationErrorResponse {
   if (Object.keys(invalidProperties).length === 0) {
     throw Error("Parameter 'invalidProperties' must not be empty");
@@ -192,14 +198,14 @@ export function createValidationErrorResponse(invalidProperties: Record<string, 
     if (!key) throw Error("Parameter 'invalidProperties' must not have empty string as key");
   });
   return new ValidationErrorResponse("Invalid input", invalidProperties);
-} */
+} 
 
 /**
  * Validates the given clin object
  * @param clin an object that looks like a Clin
  * @returns a collection of clin validation errors
  */
-/*
+
 export function validateClin(clin: unknown): Array<ClinValidationError> {
   if (!isClin(clin)) {
     throw Error("Input must be a Clin object");

@@ -975,6 +975,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TaskOrder'
+      required:
+        - "task_orders"
     TaskOrder:
       description: Represents a Task Order in the Funding Step
       type: object
@@ -1010,11 +1012,11 @@ components:
         total_clin_value:
           type: number
           minimum: 0
-          exclusiveMinimum: true
+          exclusiveMinimum: 0
         obligated_funds:
           type: number
           minimum: 0
-          exclusiveMinimum: true
+          exclusiveMinimum: 0
         pop_start_date:
           description: Start of period of performance
           type: string

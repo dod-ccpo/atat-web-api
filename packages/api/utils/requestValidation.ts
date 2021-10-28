@@ -29,3 +29,6 @@ export function shapeValidationForPostRequest<T>(
 
   return new SetupSuccess<T>({ portfolioDraftId }, bodyResult as unknown as T);
 }
+export function fundingStepBusinessRulesValidation<T>(event: ApiGatewayEventParsed<T>): SetupResult<T> {
+  return new SetupSuccess<T>({ portfolioDraftId }, bodyResult as unknown as T);
+}
