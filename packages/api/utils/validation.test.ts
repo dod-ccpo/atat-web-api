@@ -7,6 +7,7 @@ import {
   mockEnvironmentsMissingFields,
   mockApplicationJabbasPalaceExpansionApp,
 } from "../portfolioDrafts/application/commonApplicationMockData";
+import { mockPortfolioStepMissingFields } from "../portfolioDrafts/portfolio/commonPortfolioMockData";
 import {
   isBodyPresent,
   isFundingStep,
@@ -95,50 +96,12 @@ describe("Validation tests for createPortfolioStep function", function () {
     };
     expect(isPortfolioStep(requestBodyMissingDescription)).toEqual(true);
   });
-  it.each([
-    {
-      description: "Missing Name",
-      body: {
-        // name: "Zach's portfolio name",
-        csp: CloudServiceProvider.CSP_A,
-        description: "Test Portfolio",
-        dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
-        portfolio_managers: ["joe.manager@example.com", "jane.manager@example.com"],
-      },
-    },
-    {
-      description: "Missing CSP",
-      body: {
-        name: "Zach's portfolio name",
-        // csp: CloudServiceProvider.CSP_A,
-        description: "Test Portfolio",
-        dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
-        portfolio_managers: ["joe.manager@example.com", "jane.manager@example.com"],
-      },
-    },
-    {
-      description: "Missing Components",
-      body: {
-        name: "Zach's portfolio name",
-        csp: CloudServiceProvider.CSP_A,
-        description: "Test Portfolio",
-        // dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
-        portfolio_managers: ["joe.manager@example.com", "jane.manager@example.com"],
-      },
-    },
-    {
-      description: "Missing Portfolio Managers",
-      body: {
-        name: "Zach's portfolio name",
-        csp: CloudServiceProvider.CSP_A,
-        description: "Test Portfolio",
-        dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
-        // portfolio_managers: ["joe.manager@example.com", "jane.manager@example.com"],
-      },
-    },
-  ])("should reject PortfolioStep objects missing required attributes", async (badRequest) => {
-    expect(isPortfolioStep(badRequest)).toEqual(false);
-  });
+  it.each(mockPortfolioStepMissingFields)(
+    "should reject PortfolioStep objects missing required attributes",
+    async (missingRequiredFieldObject) => {
+      expect(isPortfolioStep(missingRequiredFieldObject)).toEqual(false);
+    }
+  );
   it("should fail to map body to portfolioStep object because request body is null", async () => {
     expect(isPortfolioStep(null)).toEqual(false);
   });

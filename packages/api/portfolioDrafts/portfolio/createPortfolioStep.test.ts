@@ -1,6 +1,5 @@
 import { Callback, Context } from "aws-lambda";
 import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
-import { CloudServiceProvider } from "../../models/CloudServiceProvider";
 import { DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { handler } from "./createPortfolioStep";
 import { mockClient } from "aws-sdk-client-mock";
@@ -9,7 +8,7 @@ import { PortfolioStep } from "../../models/PortfolioStep";
 import { ProvisioningStatus } from "../../models/ProvisioningStatus";
 import { v4 as uuidv4 } from "uuid";
 import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
-import xss from "xss";
+import { mockPortfolioStep, mockValidPortfolioSteps } from "./commonPortfolioMockData";
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 beforeEach(() => {
@@ -17,26 +16,6 @@ beforeEach(() => {
 });
 
 const now = new Date().toISOString();
-
-const mockValidPortfolioSteps: PortfolioStep[] = [
-  // The example PortfolioStepEx from the API Specification
-  {
-    name: "Mock Portfolio",
-    csp: CloudServiceProvider.CSP_A,
-    description: "Mock portfolio description",
-    dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
-    portfolio_managers: ["joe.manager@example.com", "jane.manager@example.com"],
-  },
-  // This checks that we don't regress and error on a body that we worked to debug.
-  // The issue at the time seemed to be due to a missing `description` field in the
-  // request body.
-  {
-    name: "Tonys Portfolio 10",
-    csp: CloudServiceProvider.CSP_A,
-    dod_components: ["marine_corps", "combatant_command", "joint_staff"],
-    portfolio_managers: [],
-  },
-];
 
 describe("Successful operations test", () => {
   const mockResponse = {
@@ -61,24 +40,9 @@ describe("Successful operations test", () => {
 });
 
 describe("Validation of handler", () => {
-  const wrongEmailFormatPortfolioStep: PortfolioStep = {
-    name: "Mock Portfolio",
-    csp: CloudServiceProvider.CSP_A,
-    description: "Mock portfolio description",
-    dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
-    portfolio_managers: ["joe.manager", "jane.manager@example.com"],
-  };
-
-  const validPortfolioStep: PortfolioStep = {
-    name: "Mock Portfolio",
-    csp: CloudServiceProvider.CSP_A,
-    description: "Mock portfolio description",
-    dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
-    portfolio_managers: ["jane.manager@example.com"],
-  };
   it("should return NO_SUCH_PORTFOLIO_DRAFT when no portfolioId specified", async () => {
     const request = {
-      body: validPortfolioStep,
+      body: mockPortfolioStep,
     } as ApiGatewayEventParsed<PortfolioStep>;
     const response = await handler(request, {} as Context, null as unknown as Callback)!;
     expect(response).toEqual(NO_SUCH_PORTFOLIO_DRAFT);
