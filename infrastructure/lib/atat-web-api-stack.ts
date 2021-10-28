@@ -7,6 +7,7 @@ import * as ssm from "@aws-cdk/aws-ssm";
 import * as cdk from "@aws-cdk/core";
 import * as lambda from "@aws-cdk/aws-lambda";
 import * as sqs from "@aws-cdk/aws-sqs";
+import * as iam from "@aws-cdk/aws-iam";
 import { ApiDynamoDBFunction } from "./constructs/api-dynamodb-function";
 import { ApiS3Function } from "./constructs/api-s3-function";
 import { ApiSQSFunction } from "./constructs/api-sqs-function";
@@ -179,34 +180,44 @@ export class AtatWebApiStack extends cdk.Stack {
 
   private addEmailRoutes(props: AtatWebApiStackProps) {
     const smtpSecrets = secretsmanager.Secret.fromSecretNameV2(this, "SMTPSecrets", props.smtpProps.secretName);
-    const submitEmailsPath = utils.packageRoot() + "/email/processingEmails/submitEmails.ts";
     const processEmailsPath = utils.packageRoot() + "/email/processingEmails/index.ts";
 
-    this.functions.push(
-      new ApiSQSFunction(this, "SubmitEmails", {
-        queue: this.emailQueue,
-        // TODO(AT-6764): revert to deploy in the vpc, after networking issue resolved (temporary only)
-        // lambdaVpc: props.vpc,
-        method: HttpMethod.POST,
-        handlerPath: submitEmailsPath,
-      }).fn,
-      new ApiSQSFunction(this, "SendEmails", {
-        queue: this.emailQueue,
-        // TODO(AT-6764): revert to deploy in the vpc, after networking issue resolved (temporary only)
-        // lambdaVpc: props.vpc,
-        method: HttpMethod.GET,
-        handlerPath: processEmailsPath,
-        createEventSource: true,
-        batchSize: 1,
-        smtpSecrets: smtpSecrets,
-        functionPropsOverride: {
-          timeout: cdk.Duration.seconds(10),
-          environment: {
-            SMTP_SECRET_NAME: props.smtpProps.secretName,
-          },
+    const sendEmailFn = new ApiSQSFunction(this, "SendEmails", {
+      queue: this.emailQueue,
+      // TODO(AT-6764): revert to deploy in the vpc, after networking issue resolved (temporary only)
+      // lambdaVpc: props.vpc,
+      method: HttpMethod.GET,
+      handlerPath: processEmailsPath,
+      createEventSource: true,
+      batchSize: 1,
+      smtpSecrets: smtpSecrets,
+      functionPropsOverride: {
+        timeout: cdk.Duration.seconds(10),
+        environment: {
+          SMTP_SECRET_NAME: props.smtpProps.secretName,
         },
-      }).fn
-    );
+      },
+    }).fn;
+
+    const rolesToGrant = [
+      iam.Role.fromRoleArn(this, "DeveloperRoleArn", cdk.Fn.importValue("AtatDeveloperRoleArn")),
+      iam.Role.fromRoleArn(this, "QaRoleArn", cdk.Fn.importValue("AtatQaTestRoleArn")),
+    ];
+    const temporaryTestInvokePolicy = new iam.Policy(this, "GrantTemporarySendEmailInvoke", {
+      statements: [
+        new iam.PolicyStatement({
+          actions: ["lambda:InvokeFunction", "lambda:GetFunction*"],
+          resources: [sendEmailFn.functionArn],
+        }),
+      ],
+    });
+
+    // Temporarily grant developers access to invoke the function
+    for (const role of rolesToGrant) {
+      role.attachInlinePolicy(temporaryTestInvokePolicy);
+    }
+
+    this.functions.push(sendEmailFn);
   }
 
   private addTaskOrderRoutes(props: AtatWebApiStackProps) {
