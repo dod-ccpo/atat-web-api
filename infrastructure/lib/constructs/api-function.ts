@@ -1,7 +1,6 @@
 import * as apigw from "@aws-cdk/aws-apigateway";
 import * as ec2 from "@aws-cdk/aws-ec2";
 import * as iam from "@aws-cdk/aws-iam";
-import * as secretsmanager from "@aws-cdk/aws-secretsmanager";
 import * as lambda from "@aws-cdk/aws-lambda";
 import * as lambdaNodeJs from "@aws-cdk/aws-lambda-nodejs";
 import * as cdk from "@aws-cdk/core";
@@ -35,12 +34,7 @@ export interface ApiFunctionProps {
   /**
    * The VPC where resources should be created
    */
-  readonly lambdaVpc?: ec2.IVpc;
-  /**
-   * A prop to determine if the underlying Lambda function has read permissions
-   * for secrets managers.
-   */
-  readonly smtpSecrets?: secretsmanager.ISecret;
+  readonly lambdaVpc: ec2.IVpc;
 }
 
 export abstract class ApiFunction extends cdk.Construct {
@@ -69,8 +63,5 @@ export abstract class ApiFunction extends cdk.Construct {
     });
     this.fn.addPermission("AllowApiGatewayInvoke", { principal: APIGW_SERVICE_PRINCIPAL });
     (this.fn.node.defaultChild as lambda.CfnFunction).overrideLogicalId(id + "Function");
-    if (props.smtpSecrets) {
-      props.smtpSecrets.grantRead(this.fn);
-    }
   }
 }
