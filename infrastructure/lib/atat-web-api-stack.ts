@@ -165,11 +165,8 @@ export class AtatWebApiStack extends cdk.Stack {
         tracingEnabled: true,
       },
     }).restApi;
-<<<<<<< HEAD
     this.restApi = apiGateway;
-=======
     this.addEmailRoutes(props);
->>>>>>> f803658 (Update atat-web-api-stack)
     this.addTaskOrderRoutes(props);
     this.ssmParams.push(
       new ssm.StringParameter(this, "ApiGatewayUrl", {
