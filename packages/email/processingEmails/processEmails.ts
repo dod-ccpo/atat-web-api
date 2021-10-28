@@ -22,9 +22,14 @@ export async function processEmailRecords(secrets: SmtpConfiguration, records: E
   const smtpOptions = {
     host: secrets.hostname,
     port: Number(secrets.port),
-    // nodemailer tries to use STARTTLS with secure false and requireTLS true
-    // even if not supported, and if an encrypted connection is not made the
-    // message is not sent. For more info https://nodemailer.com/smtp/
+    // Our current SMTP configuration requires the usage of STARTTLS rather
+    // than using TLS directly. Setting secure to false allows nodemailer to initiate
+    // the connection and requireTLS ensures that nodemailer always tries to
+    // upgrade using STARTTLS, regardless of whether the server advertises
+    // STARTTLS support. See https://nodemailer.com/smtp/
+    // Nodemailer will not send the mail if it cannot upgrade a connection with
+    // requireTLS set to true.
+    // TODO: Investigate using TLS on port 465 instead of STARTTLS.
     secure: false,
     requireTLS: true,
     auth: { user: secrets.username, pass: secrets.password },
