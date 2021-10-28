@@ -22,13 +22,7 @@ import {
   DATABASE_ERROR,
   NO_SUCH_PORTFOLIO_DRAFT,
 } from "../../utils/errors";
-
-const millisInDay = 24 * 60 * 60 * 1000;
-const now = Date.now();
-const isoFormatDay = (base: number, offset = 0) => new Date(base + offset).toISOString().slice(0, 10);
-const yesterday = isoFormatDay(now, -millisInDay);
-const today = isoFormatDay(now);
-const tomorrow = isoFormatDay(now, millisInDay);
+import { millisInDay, mockClin, now, today, tomorrow, yesterday } from "./commonFundingMockData";
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 beforeEach(() => {
@@ -172,7 +166,7 @@ describe("Individual Clin input validation tests", function () {
     }).toThrow(Error("Input must be a Clin object"));
   });
   it("should return no error map entries when given Clin has good data", () => {
-    expect(validateClin(mockClin())).toStrictEqual([]);
+    expect(validateClin(mockClin)).toStrictEqual([]);
   });
   it("should return error map entries when given Clin has invalid start and end dates", () => {
     const errors = validateClin(mockClinInvalidDates());
@@ -467,7 +461,7 @@ function mockFundingStepGoodData(): FundingStep {
       {
         task_order_number: "12345678910",
         task_order_file: mockTaskOrderFile,
-        clins: [mockClin()],
+        clins: [mockClin],
       },
     ],
   };
@@ -505,21 +499,6 @@ function mockFundingStepBadData(): FundingStep {
     ],
   };
 }
-
-/**
- * Returns a static clin containing only good inputs
- * @returns a complete Clin with values that should not cause validation errors
- */
-function mockClin(): Clin {
-  return {
-    clin_number: "0001",
-    idiq_clin: "1234",
-    obligated_funds: 10000,
-    pop_start_date: yesterday,
-    pop_end_date: tomorrow,
-    total_clin_value: 200000,
-  };
-}
 /**
  * Returns a static clin containing bad inputs
  * - clin number is too short
@@ -527,7 +506,7 @@ function mockClin(): Clin {
  */
 function mockClinInvalidClinNumberTooShort(): Clin {
   return {
-    ...mockClin(),
+    ...mockClin,
     clin_number: "1",
   };
 }
@@ -538,7 +517,7 @@ function mockClinInvalidClinNumberTooShort(): Clin {
  */
 function mockClinInvalidClinNumberTooLong(): Clin {
   return {
-    ...mockClin(),
+    ...mockClin,
     clin_number: "00001",
   };
 }
@@ -549,7 +528,7 @@ function mockClinInvalidClinNumberTooLong(): Clin {
  */
 function mockClinInvalidClinNumberAllZeros(): Clin {
   return {
-    ...mockClin(),
+    ...mockClin,
     clin_number: "0000",
   };
 }
@@ -560,7 +539,7 @@ function mockClinInvalidClinNumberAllZeros(): Clin {
  */
 function mockClinInvalidDates(): Clin {
   return {
-    ...mockClin(),
+    ...mockClin,
     pop_start_date: "not an ISO date",
     pop_end_date: "2021-13-01",
   };
@@ -572,7 +551,7 @@ function mockClinInvalidDates(): Clin {
  */
 function mockClinStartAfterEnd(): Clin {
   return {
-    ...mockClin(),
+    ...mockClin,
     pop_start_date: tomorrow,
     pop_end_date: today,
   };
@@ -584,7 +563,7 @@ function mockClinStartAfterEnd(): Clin {
  */
 function mockClinStartEqualsEnd(): Clin {
   return {
-    ...mockClin(),
+    ...mockClin,
     pop_start_date: today,
     pop_end_date: today,
   };
@@ -596,7 +575,7 @@ function mockClinStartEqualsEnd(): Clin {
  */
 function mockClinAlreadyEnded(): Clin {
   return {
-    ...mockClin(),
+    ...mockClin,
     pop_end_date: yesterday,
   };
 }
@@ -608,7 +587,7 @@ function mockClinAlreadyEnded(): Clin {
  */
 function mockClinLessThanZeroFunds(): Clin {
   return {
-    ...mockClin(),
+    ...mockClin,
     obligated_funds: -1,
     total_clin_value: -1,
   };
@@ -621,7 +600,7 @@ function mockClinLessThanZeroFunds(): Clin {
  */
 function mockClinZeroFunds(): Clin {
   return {
-    ...mockClin(),
+    ...mockClin,
     obligated_funds: 0,
     total_clin_value: 0,
   };
@@ -633,7 +612,7 @@ function mockClinZeroFunds(): Clin {
  */
 function mockClinObligatedGreaterThanTotal(): Clin {
   return {
-    ...mockClin(),
+    ...mockClin,
     obligated_funds: 2,
     total_clin_value: 1,
   };
@@ -645,7 +624,7 @@ function mockClinObligatedGreaterThanTotal(): Clin {
  */
 function mockClinObligatedEqualsTotal(): Clin {
   return {
-    ...mockClin(),
+    ...mockClin,
     obligated_funds: 1,
     total_clin_value: 1,
   };
@@ -660,7 +639,7 @@ function mockClinNotANumberFunds() {
   // return type can't be Clin for this mock because strings
   // below don't meet the Clin interface
   return {
-    ...mockClin(),
+    ...mockClin,
     obligated_funds: "not a number",
     total_clin_value: "not a number",
   };
