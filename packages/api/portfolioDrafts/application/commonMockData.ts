@@ -1,4 +1,4 @@
-import { AccessLevel } from "../../models/AccessLevel";
+import { AccessLevel, PortfolioOperator, AppEnvOperator } from "../../models/Operator";
 import { Application } from "../../models/Application";
 import { ApplicationStep } from "../../models/ApplicationStep";
 import { Environment } from "../../models/Environment";
@@ -6,8 +6,6 @@ import { ProvisioningStatus } from "../../models/ProvisioningStatus";
 import { v4 as uuidv4 } from "uuid";
 import { PortfolioDraftSummary } from "../../models/PortfolioDraftSummary";
 import { PortfolioDraft } from "../../models/PortfolioDraft";
-import { PortfolioOperator } from "../../models/PortfolioOperator";
-import { AppEnvOperator } from "../../models/AppEnvOperator";
 
 const mockPortoflioOperatorYoda: PortfolioOperator = {
   display_name: "Yoda",
