@@ -7,7 +7,7 @@ import {
   mockBadPortfolioDraftSummary,
   mockApplicationsMissingFields,
   mockBadOperatorEmails,
-} from "./commonMockData";
+} from "./commonApplicationMockData";
 import { mockClient } from "aws-sdk-client-mock";
 import { v4 as uuidv4 } from "uuid";
 import { ValidationMessage } from "../../models/ApplicationStep";

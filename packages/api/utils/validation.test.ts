@@ -6,7 +6,7 @@ import {
   mockApplicationCloudCityEvacPlanner,
   mockEnvironmentsMissingFields,
   mockApplicationJabbasPalaceExpansionApp,
-} from "../portfolioDrafts/application/commonMockData";
+} from "../portfolioDrafts/application/commonApplicationMockData";
 import {
   isBodyPresent,
   isFundingStep,

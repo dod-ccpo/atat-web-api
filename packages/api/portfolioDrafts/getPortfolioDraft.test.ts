@@ -10,7 +10,7 @@ import { PortfolioStep } from "../models/PortfolioStep";
 import { FundingStep } from "../models/FundingStep";
 import { Application } from "../models/Application";
 import { PortfolioDraft } from "../models/PortfolioDraft";
-import { mockApplicationStep } from "./application/commonMockData";
+import { mockApplicationStep } from "./application/commonApplicationMockData";
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 beforeEach(() => {
