@@ -3,6 +3,7 @@ import { SetupError, SetupResult, SetupSuccess, ValidationErrorResponse } from "
 import { isValidUuidV4, isValidDate, isClin, isClinNumber, isFundingAmount } from "./validation";
 import { ApiGatewayEventParsed } from "./eventHandlingTool";
 import { FundingStep, ValidationMessage } from "../models/FundingStep";
+import createError from "http-errors";
 /**
  * Check if incoming POST Request passes basic shape validation
  *
@@ -30,12 +31,13 @@ export function shapeValidationForPostRequest<T>(
 
   return new SetupSuccess<T>({ portfolioDraftId }, bodyResult as unknown as T);
 }
+/*
 export function fundingStepBusinessRulesValidation<T>(fundingStep: FundingStep): SetupResult<T> {
   if (!isValidDate(fundingStep.task_orders[0].clins[0].pop_start_date)) {
     return new SetupError(NO_SUCH_PORTFOLIO_DRAFT);
   }
   return new SetupSuccess<T>({ portfolioDraftId }, bodyResult as unknown as T);
-}
+} */
 export interface ClinValidationError {
   clinNumber: string;
   invalidParameterName: string;

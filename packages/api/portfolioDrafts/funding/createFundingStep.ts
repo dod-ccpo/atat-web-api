@@ -4,26 +4,15 @@ import { dynamodbDocumentClient as client } from "../../utils/aws-sdk/dynamodb";
 import { FUNDING_STEP } from "../../models/PortfolioDraft";
 import { FundingStep, ValidationMessage } from "../../models/FundingStep";
 import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
-import {
-  DATABASE_ERROR,
-  NO_SUCH_PORTFOLIO_DRAFT,
-  REQUEST_BODY_EMPTY,
-  REQUEST_BODY_INVALID,
-  PATH_PARAMETER_REQUIRED_BUT_MISSING,
-} from "../../utils/errors";
-import {
-  isFundingStep,
-  isValidJson,
-  isValidDate,
-  isPathParameterPresent,
-  isClin,
-  isValidUuidV4,
-  isClinNumber,
-  isFundingAmount,
-} from "../../utils/validation";
+import { DATABASE_ERROR, NO_SUCH_PORTFOLIO_DRAFT } from "../../utils/errors";
 import schema = require("../../models/schema.json");
 import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
-import { shapeValidationForPostRequest, fundingStepBusinessRulesValidation } from "../../utils/requestValidation";
+import {
+  ClinValidationError,
+  createValidationErrorResponse,
+  shapeValidationForPostRequest,
+  validateFundingStepClins,
+} from "../../utils/requestValidation";
 import middy from "@middy/core";
 import jsonBodyParser from "@middy/http-json-body-parser";
 import validator from "@middy/validator";
@@ -39,7 +28,6 @@ const schemaWrapper = {
     body: validatedSchema,
   },
 };
-
 /**
  * Submits the Funding Step of the Portfolio Draft Wizard
  *
@@ -51,19 +39,18 @@ export async function baseHandler(
 ): Promise<APIGatewayProxyResult> {
   // Perform shape validation
   const setupResult = shapeValidationForPostRequest<FundingStep>(event);
-  /**
-   * set up business validation by pulling in validation that doesn't occur at schema
-   * IsValidDate
-   *
-   *
-   *  */
-
   if (setupResult instanceof SetupError) {
     return setupResult.errorResponse;
   }
   const portfolioDraftId = setupResult.path.portfolioDraftId;
   const fundingStep = event.body;
-  const validatedFundingStep = fundingStepBusinessRulesValidation(fundingStep);
+  // Perform business rules validation
+  // const validatedFundingStep = validateFundingStepClins(fundingStep);
+  const errors: Array<ClinValidationError> = validateFundingStepClins(fundingStep);
+  if (errors.length) {
+    return createValidationErrorResponse({ input_validation_errors: errors });
+  }
+  // console.log(validatedFundingStep);
   // Perform database call
   try {
     await client.send(
