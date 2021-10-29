@@ -22,8 +22,9 @@ import {
 } from "../../utils/errors";
 import {
   millisInDay,
-  mockClin,
   mockClinAlreadyEnded,
+  mockClinArrayBadData,
+  mockClinArrayGoodData,
   mockClinInvalidClinNumberAllZeros,
   mockClinInvalidClinNumberTooLong,
   mockClinInvalidClinNumberTooShort,
@@ -63,7 +64,7 @@ it("sanity check; relative dates used for tests should make sense", () => {
   expect(new Date(today).valueOf() + millisInDay).toEqual(new Date(tomorrow).valueOf());
 });
 
-describe("Handle service level error", function () {
+describe("Handle service level error", () => {
   it("should return generic Error if exception caught", async () => {
     jest.spyOn(console, "error").mockImplementation(() => jest.fn()); // suppress output
     ddbMock.on(UpdateCommand).rejects("Some error occurred");
@@ -74,7 +75,7 @@ describe("Handle service level error", function () {
   });
 });
 
-describe("Path parameter tests", function () {
+describe("Path parameter tests", () => {
   it("should require path param", async () => {
     const emptyRequest: APIGatewayProxyEvent = {} as any;
     const result = await handler(emptyRequest);
@@ -94,7 +95,7 @@ describe("Path parameter tests", function () {
   });
 });
 
-describe("Request body tests", function () {
+describe("Request body tests", () => {
   it("should return error when request body is empty", async () => {
     const emptyRequest: APIGatewayProxyEvent = {
       body: "",
@@ -132,7 +133,7 @@ describe("Request body tests", function () {
   });
 });
 
-describe("Successful operation tests", function () {
+describe("Successful operation tests", () => {
   it("should return funding step and http status code 201", async () => {
     const now = new Date().toISOString();
     const mockResponse = {
@@ -159,7 +160,7 @@ describe("Successful operation tests", function () {
   });
 });
 
-describe("Incorrect number of task orders", function () {
+describe("Incorrect number of task orders", () => {
   it("should return falsy due to incorrect number of task orders", async () => {
     const mockResponse = {
       updated_at: now,
@@ -178,14 +179,21 @@ describe("Incorrect number of task orders", function () {
   });
 });
 
-describe("Individual Clin input validation tests", function () {
+describe("Individual Clin input validation tests", () => {
   it("should throw error if input does not look like a Clin", () => {
     expect(() => {
       validateClin({});
     }).toThrow(Error("Input must be a Clin object"));
   });
-  it("should return no error map entries when given Clin has good data", () => {
-    expect(validateClin(mockClin)).toStrictEqual([]);
+  it.each(mockClinArrayGoodData)("should return empty error map for each Clin with good data", (goodDataClin) => {
+    const errors = validateClin(goodDataClin);
+    expect(errors.length).toEqual(0);
+    expect(errors).toStrictEqual([]);
+  });
+  it.each(mockClinArrayBadData)("should return non-empty error map for each Clin with bad data", (badDataClin) => {
+    const errors = validateClin(badDataClin);
+    expect(errors.length).not.toEqual(0);
+    expect(errors).not.toStrictEqual([]);
   });
   it("should return error map entries when given Clin has invalid start and end dates", () => {
     const errors = validateClin(mockClinInvalidDates);
@@ -334,7 +342,7 @@ describe("Individual Clin input validation tests", function () {
   });
 });
 
-describe("All Clins in Funding Step input validation tests", function () {
+describe("All Clins in Funding Step input validation tests", () => {
   it("should accept a Funding Step and validate all Clins contained therein", () => {
     const errors = validateFundingStepClins(mockFundingStepBadData);
     expect(errors.length).toEqual(20);
@@ -443,7 +451,7 @@ describe("All Clins in Funding Step input validation tests", function () {
   });
 });
 
-describe("Error response creation tests", function () {
+describe("Error response creation tests", () => {
   it("should return error response that includes error_map in response body", () => {
     const obj = { errors: { propertyA: "property_value", propertyB: "property_value" } };
     const invalidProperties: Record<string, unknown> = obj;

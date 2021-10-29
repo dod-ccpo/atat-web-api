@@ -26,13 +26,13 @@ export const mockClin: Clin = {
   pop_end_date: tomorrow,
   total_clin_value: 200000,
 };
-
-// good data - this is acceptable per business rules
 export const mockClinObligatedEqualsTotal: Clin = {
   ...mockClin,
   obligated_funds: 1,
   total_clin_value: 1,
 };
+// clins containing good data that should not cause any validation errors
+export const mockClinArrayGoodData = [mockClin, mockClinObligatedEqualsTotal];
 
 export const mockFundingStep: FundingStep = {
   task_orders: [
@@ -101,7 +101,7 @@ export const mockClinNotANumberFunds = {
   total_clin_value: "not a number",
 };
 // clins containing bad data that should each cause validation errors
-const mockClinArrayBadData = [
+export const mockClinArrayBadData = [
   mockClinInvalidClinNumberTooShort,
   mockClinInvalidClinNumberTooLong,
   mockClinInvalidClinNumberAllZeros,
