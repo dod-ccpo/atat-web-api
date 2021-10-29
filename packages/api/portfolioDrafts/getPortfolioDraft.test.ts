@@ -39,7 +39,7 @@ describe("Validation tests", () => {
   });
 });
 
-describe("Successful operation tests", function () {
+describe("Successful operation tests", () => {
   beforeEach(() => {
     ddbMock.on(GetCommand).resolves({
       Item: mockPortfolioDraftSummaryGoodData(),
@@ -90,7 +90,7 @@ describe("Successful operation tests", function () {
   });
 });
 
-describe("Incorrect number of attributes for portfolio draft summary", function () {
+describe("Incorrect number of attributes for portfolio draft summary", () => {
   it("should return falsy for incorrect attributes ", async () => {
     const badMockResponse: PortfolioDraft = mockPortfolioDraftSummaryBadData();
     ddbMock.on(GetCommand).resolves({

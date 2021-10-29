@@ -25,7 +25,7 @@ import {
   isOperator,
 } from "./validation";
 
-describe("Testing validation of request body", function () {
+describe("Testing validation of request body", () => {
   it("should return true because request body is present", async () => {
     const requestBody = {
       name: "test name",
@@ -75,7 +75,7 @@ describe("Testing validation of request body", function () {
   });
 });
 
-describe("Validation tests for createPortfolioStep function", function () {
+describe("Validation tests for createPortfolioStep function", () => {
   it("should map body to portfolioStep object", async () => {
     const requestBody = {
       name: "Zach's portfolio name",
@@ -225,7 +225,7 @@ describe("isOperator()", () => {
   });
 });
 
-describe("Testing validation of path parameter", function () {
+describe("Testing validation of path parameter", () => {
   it("should return false because path parameter is an empty string", async () => {
     const pathParam = "";
     expect(isPathParameterPresent(pathParam)).toEqual(false);
@@ -240,7 +240,7 @@ describe("Testing validation of path parameter", function () {
   });
 });
 
-describe("isValidDate()", function () {
+describe("isValidDate()", () => {
   it.each([
     "1970-01-01",
     "2021-10-12",
@@ -293,7 +293,7 @@ describe("isValidDate()", function () {
   });
 });
 
-describe("isClin()", function () {
+describe("isClin()", () => {
   const mockClin = {
     clin_number: "0001",
     idiq_clin: "002",
@@ -369,7 +369,7 @@ describe("isClin()", function () {
   });
 });
 
-describe("isClinNumber()", function () {
+describe("isClinNumber()", () => {
   const goodClinNumbers = ["0001", "0010", "0500", "5000", "9999"];
   it.each(goodClinNumbers)("should accept a clin number with expected length and within accepted range", (num) => {
     expect(isClinNumber(num)).toEqual(true);
@@ -380,7 +380,7 @@ describe("isClinNumber()", function () {
   });
 });
 
-describe("isFundingAmount()", function () {
+describe("isFundingAmount()", () => {
   const goodAmounts = ["1", "1.1", "1.50", "1.99", "250000"];
   it.each(goodAmounts)("should accept a funding amount that is valid", (num) => {
     expect(isFundingAmount(num)).toEqual(true);

@@ -9,7 +9,7 @@ beforeEach(() => {
   sqsMock.reset();
 });
 
-describe("Successfully send messages to a queue for sending emails", function () {
+describe("Successfully send messages to a queue for sending emails", () => {
   const validRequest: APIGatewayProxyEvent = {
     body: { emails: ["test@email.mil"], emailType: "invitation", missionOwner: "Ms. Mission Owner" },
   } as any;
@@ -30,7 +30,7 @@ describe("Successfully send messages to a queue for sending emails", function ()
   });
 });
 
-describe("Errors when sending messages to the queue for sending emails", function () {
+describe("Errors when sending messages to the queue for sending emails", () => {
   it.each([{}, null, undefined])(
     "should return a 400 error when the object is empty, null or undefined",
     async (request) => {

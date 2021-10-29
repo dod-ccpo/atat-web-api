@@ -43,7 +43,7 @@ describe("Validation tests", () => {
     expect(response).toEqual(REQUEST_BODY_NOT_EMPTY);
   });
 });
-describe("Handler response with mock dynamodb", function () {
+describe("Handler response with mock dynamodb", () => {
   it("should return error when the submitPortfolioDraftCommand fails, and portfolioDraft exists", async () => {
     ddbMock.on(UpdateCommand).rejects({ name: "ConditionalCheckFailedException" });
     const item = { foo: "bar" };

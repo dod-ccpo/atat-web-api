@@ -68,7 +68,7 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-describe("processEmailRecords", function () {
+describe("processEmailRecords", () => {
   it.each(differentEmailTypes)("should return responses from emails sent", async (emailRequestBody) => {
     const processEmailsSpy = jest.spyOn(processEmails, "processEmailRecords");
     const emailMessages = [{ messageId: queueMessageId, body: emailRequestBody }];
@@ -96,7 +96,7 @@ describe("processEmailRecords", function () {
   });
 });
 
-describe("handler", function () {
+describe("handler", () => {
   it.each(differentEmailTypes)("should process emails successfully", async (eventBody) => {
     const sqsEvent = generateTestSQSEvent(JSON.stringify(eventBody));
     const emailHandlerSpy = jest.spyOn(emailHandler, "handler");
