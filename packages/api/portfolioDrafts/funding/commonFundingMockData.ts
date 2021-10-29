@@ -27,6 +27,13 @@ export const mockClin: Clin = {
   total_clin_value: 200000,
 };
 
+// good data - this is acceptable per business rules
+export const mockClinObligatedEqualsTotal: Clin = {
+  ...mockClin,
+  obligated_funds: 1,
+  total_clin_value: 1,
+};
+
 export const mockFundingStep: FundingStep = {
   task_orders: [
     {
@@ -39,3 +46,80 @@ export const mockFundingStep: FundingStep = {
 
 /** ABOVE THIS LINE ARE VALID OBJECTS WITH GOOD DATA **/
 /** BELOW THIS LINE ARE INVALID OBJECTS WITH MISSING FIELDS AND BAD DATA **/
+
+export const mockClinInvalidClinNumberTooShort: Clin = {
+  ...mockClin,
+  clin_number: "1",
+};
+export const mockClinInvalidClinNumberTooLong: Clin = {
+  ...mockClin,
+  clin_number: "55555",
+};
+export const mockClinInvalidClinNumberAllZeros: Clin = {
+  ...mockClin,
+  clin_number: "0000",
+};
+export const mockClinInvalidDates: Clin = {
+  ...mockClin,
+  pop_start_date: "not an ISO date",
+  pop_end_date: "2021-13-01",
+};
+export const mockClinStartAfterEnd: Clin = {
+  ...mockClin,
+  pop_start_date: tomorrow,
+  pop_end_date: today,
+};
+export const mockClinStartEqualsEnd: Clin = {
+  ...mockClin,
+  pop_start_date: today,
+  pop_end_date: today,
+};
+export const mockClinAlreadyEnded: Clin = {
+  ...mockClin,
+  pop_end_date: yesterday,
+};
+export const mockClinLessThanZeroFunds: Clin = {
+  ...mockClin,
+  obligated_funds: -1,
+  total_clin_value: -1,
+};
+export const mockClinZeroFunds: Clin = {
+  ...mockClin,
+  obligated_funds: 0,
+  total_clin_value: 0,
+};
+export const mockClinObligatedGreaterThanTotal: Clin = {
+  ...mockClin,
+  obligated_funds: 2,
+  total_clin_value: 1,
+};
+export const mockClinNotANumberFunds = {
+  // return type can't be Clin for this mock because strings
+  // below don't meet the Clin interface
+  ...mockClin,
+  obligated_funds: "not a number",
+  total_clin_value: "not a number",
+};
+// clins containing bad data that should each cause validation errors
+const mockClinArrayBadData = [
+  mockClinInvalidClinNumberTooShort,
+  mockClinInvalidClinNumberTooLong,
+  mockClinInvalidClinNumberAllZeros,
+  mockClinInvalidDates,
+  mockClinStartAfterEnd,
+  mockClinStartEqualsEnd,
+  mockClinAlreadyEnded,
+  mockClinLessThanZeroFunds,
+  mockClinZeroFunds,
+  mockClinObligatedGreaterThanTotal,
+  // mockClinNotANumberFunds, - doesn't satisfy Clin interface
+];
+export const mockFundingStepBadData: FundingStep = {
+  task_orders: [
+    {
+      task_order_number: "12345678910",
+      task_order_file: mockTaskOrderFile,
+      clins: mockClinArrayBadData,
+    },
+  ],
+};
