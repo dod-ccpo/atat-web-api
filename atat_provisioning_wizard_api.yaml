@@ -1034,6 +1034,7 @@ components:
         - pop_end_date
     ApplicationStep:
       description: Represents step 3 of the Portfolio Draft Wizard
+      additionalProperties: false
       type: object
       properties:
         applications:
@@ -1044,6 +1045,9 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PortfolioOperator'
+      required:
+        - applications
+        - operators
     Application:
       description: Represents an Application in a Portfolio
       type: object
@@ -1082,39 +1086,39 @@ components:
       required:
         - name
         - operators
-    Operator:
-      description: Represents an Operator of an Environment for a specific Application
-      type: object
+    # TODO: try with enum and required (possibly revert back to original form)
+    PortfolioOperator:
+      description: Represents a Portfolio (admin) Operator of an PortfolioDraft
       additionalProperties: false
+      type: object
       properties:
         display_name:
           type: string
         email:
           type: string
           format: "email"
+        access:
+          $ref: '#/components/schemas/PortfolioAccess'
       required:
         - display_name
         - email
-    PortfolioOperator:
-      allOf:
-        - $ref: '#/components/schemas/Operator'
-      type: object
-      additionalProperties: false
-      required:
         - access
-      properties:
-        access:
-          $ref: '#/components/schemas/PortfolioAccess'
     AppEnvOperator:
-      allOf:
-        - $ref: '#/components/schemas/Operator'
-      type: object
+      description: Represents an Application or Environment Operator
       additionalProperties: false
-      required:
-        - access
+      type: object
       properties:
+        display_name:
+          type: string
+        email:
+          type: string
+          format: "email"
         access:
           $ref: '#/components/schemas/AppEnvAccess'
+      required:
+        - display_name
+        - email
+        - access
     PortfolioAccess:
       description: Represents a set of Operators who should be granted access to a Portfolio at a specific access level. Uses an enum construct for forward compatibility should other access levels be specified.
       type: string
