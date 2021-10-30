@@ -70,7 +70,7 @@ export const mockApplicationCloudCityEvacPlanner: Application = {
  * "Jabba's Palace Expansion App" from API spec
  */
 export const mockApplicationJabbasPalaceExpansionApp: Application = {
-  name: "Jabba's Palace Expansion App",
+  name: "Jabba Palace Expansion App",
   description: "Planning application for palace expansion",
   environments: [mockEnvironmentJpeaDev, mockEnvironmentJpeaStage],
   operators: mockEnvironmentJpeaDev.operators,
@@ -136,10 +136,44 @@ export const mockEnvironmentsMissingFields = [
   {
     // name: "production",
     operators: [mockAppEnvOperatorSalaciousCrumb, mockAppEnvOperatorHanSolo, mockAppEnvOperatorBobaFett],
+    description: "Application for planning an emergency evacuation",
+    environments: [mockEnvironmentCcepProd],
   },
   {
     name: "production",
     // operators: [mockAppEnvOperatorSalaciousCrumb, mockAppEnvOperatorHanSolo, mockAppEnvOperatorBobaFett],
+    description: "Application for planning an emergency evacuation",
+    environments: [mockEnvironmentCcepProd],
+  },
+  {
+    name: "production",
+    operators: [mockAppEnvOperatorSalaciousCrumb, mockAppEnvOperatorHanSolo, mockAppEnvOperatorBobaFett],
+    // description: "Application for planning an emergency evacuation",
+    environments: [mockEnvironmentCcepProd],
+  },
+  {
+    name: "production",
+    operators: [mockAppEnvOperatorSalaciousCrumb, mockAppEnvOperatorHanSolo, mockAppEnvOperatorBobaFett],
+    description: "Application for planning an emergency evacuation",
+    // environments: [mockEnvironmentCcepProd],
+  },
+];
+
+/**
+ * An environment of Application-looking objects with invalid properties
+ * that should be rejected
+ */
+export const badEnvironmentInApplication = [
+  {
+    name: "Cloud City Evac Planner",
+    description: "Some Application",
+    environments: [
+      {
+        badName: "bad",
+        noOperators: [],
+      },
+    ],
+    operators: [],
   },
 ];
 
@@ -255,6 +289,160 @@ export const mockApplicationStepsBadData: Array<ApplicationStep> = [
                 // too long
                 display_name:
                   "waaaaaaaaaaaaaaaaaaaaaaaaayyyyyy tooooooooooooooooooooooooooooooooooooo loooooooooonnnnnnnnnnngggggggggg",
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+];
+
+/**
+ * An array of ApplicationStep objects with missing operator display_name
+ * property at each level that should cause input validation errors
+ */
+export const mockOperatorMissingDisplayNameFields = [
+  {
+    ...mockApplicationStep,
+    operators: [
+      {
+        // display_name: "Salacious Crumb",
+        email: "monkey@lizard.mil",
+        access: AccessLevel.PORTFOLIO_ADMINISTRATOR,
+      },
+    ],
+  },
+  {
+    ...mockApplicationStep,
+    applications: [
+      {
+        ...mockApplicationCloudCityEvacPlanner,
+        operators: [
+          {
+            // display_name: "Salacious Crumb",
+            email: "monkey@lizard.mil",
+            access: AccessLevel.ADMINISTRATOR,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    ...mockApplicationStep,
+    applications: [
+      {
+        ...mockApplicationCloudCityEvacPlanner,
+        environments: [
+          {
+            ...mockEnvironmentCcepProd,
+            operators: [
+              {
+                // display_name: "Salacious Crumb",
+                email: "monkey@lizard.mil",
+                access: AccessLevel.ADMINISTRATOR,
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+];
+/**
+ * An array of ApplicationStep objects with missing operator email
+ * property at each level that should cause input validation errors
+ */
+export const mockOperatorMissingEmailFields = [
+  {
+    ...mockApplicationStep,
+    operators: [
+      {
+        display_name: "Salacious Crumb",
+        // email: "monkey@lizard.mil",
+        access: AccessLevel.PORTFOLIO_ADMINISTRATOR,
+      },
+    ],
+  },
+  {
+    ...mockApplicationStep,
+    applications: [
+      {
+        ...mockApplicationCloudCityEvacPlanner,
+        operators: [
+          {
+            display_name: "Salacious Crumb",
+            // email: "monkey@lizard.mil",
+            access: AccessLevel.ADMINISTRATOR,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    ...mockApplicationStep,
+    applications: [
+      {
+        ...mockApplicationCloudCityEvacPlanner,
+        environments: [
+          {
+            ...mockEnvironmentCcepProd,
+            operators: [
+              {
+                display_name: "Salacious Crumb",
+                // email: "monkey@lizard.mil",
+                access: AccessLevel.ADMINISTRATOR,
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+];
+/**
+ * An array of ApplicationStep objects with missing operator access
+ * property at each level that should cause input validation errors
+ */
+export const mockOperatorMissingAccessFields = [
+  {
+    ...mockApplicationStep,
+    operators: [
+      {
+        display_name: "Salacious Crumb",
+        email: "monkey@lizard.mil",
+        // access: AccessLevel.PORTFOLIO_ADMINISTRATOR,
+      },
+    ],
+  },
+  {
+    ...mockApplicationStep,
+    applications: [
+      {
+        ...mockApplicationCloudCityEvacPlanner,
+        operators: [
+          {
+            display_name: "Salacious Crumb",
+            email: "monkey@lizard.mil",
+            // access: AccessLevel.ADMINISTRATOR,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    ...mockApplicationStep,
+    applications: [
+      {
+        ...mockApplicationCloudCityEvacPlanner,
+        environments: [
+          {
+            ...mockEnvironmentCcepProd,
+            operators: [
+              {
+                display_name: "Salacious Crumb",
+                email: "monkey@lizard.mil",
+                // access: AccessLevel.ADMINISTRATOR,
               },
             ],
           },
