@@ -907,6 +907,9 @@ components:
           type: string
           description: name of file when uploaded
           example: "TaskOrder_9876543210123.pdf"
+      required:
+        - "id"
+        - "name"
     FileMetadata:
       type: object
       description: Metadata describing an uploaded file
@@ -973,12 +976,9 @@ components:
       properties:
         task_orders:
           type: array
+          minItems: 1
           items:
-            $ref: '#/components/schemas/TaskOrder'
-          enum:
-            - task_order_number
-            - task_order_file
-            - clins
+            $ref: '#/components/schemas/TaskOrder'    
       required:
         - "task_orders"
 
@@ -997,8 +997,10 @@ components:
             - $ref: '#/components/schemas/FileMetadataSummary'
         clins:
           type: array
+          minItems: 1
           items:
             $ref: '#/components/schemas/Clin'
+            
       required:
         - task_order_number
         - task_order_file
@@ -1025,11 +1027,14 @@ components:
         pop_start_date:
           description: Start of period of performance
           type: string
+          format: date
           example: "2021-10-01"
         pop_end_date:
           description: End of period of performance
           type: string
+          format: date
           example: "2022-09-30"
+          
       required:
         - clin_number
         - idiq_clin
