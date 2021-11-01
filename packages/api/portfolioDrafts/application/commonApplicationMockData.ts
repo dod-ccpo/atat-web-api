@@ -136,26 +136,10 @@ export const mockEnvironmentsMissingFields = [
   {
     // name: "production",
     operators: [mockAppEnvOperatorSalaciousCrumb, mockAppEnvOperatorHanSolo, mockAppEnvOperatorBobaFett],
-    description: "Application for planning an emergency evacuation",
-    environments: [mockEnvironmentCcepProd],
   },
   {
     name: "production",
     // operators: [mockAppEnvOperatorSalaciousCrumb, mockAppEnvOperatorHanSolo, mockAppEnvOperatorBobaFett],
-    description: "Application for planning an emergency evacuation",
-    environments: [mockEnvironmentCcepProd],
-  },
-  {
-    name: "production",
-    operators: [mockAppEnvOperatorSalaciousCrumb, mockAppEnvOperatorHanSolo, mockAppEnvOperatorBobaFett],
-    // description: "Application for planning an emergency evacuation",
-    environments: [mockEnvironmentCcepProd],
-  },
-  {
-    name: "production",
-    operators: [mockAppEnvOperatorSalaciousCrumb, mockAppEnvOperatorHanSolo, mockAppEnvOperatorBobaFett],
-    description: "Application for planning an emergency evacuation",
-    // environments: [mockEnvironmentCcepProd],
   },
 ];
 
@@ -206,6 +190,13 @@ export const mockApplicationsMissingFields = [
     environments: [mockEnvironmentCcepProd],
     // operators: mockEnvironmentJpeaDev.operators,
   },
+  {
+    name: "Cloud City Evac Planner",
+    environments: [mockEnvironmentCcepProd],
+    operators: mockEnvironmentJpeaDev.operators,
+    noDescription: "This is not a description",
+    someOtherProp: "unknown",
+  },
 ];
 
 /**
@@ -230,63 +221,55 @@ export const mockApplicationStepsMissingFields = [
 export const mockApplicationStepsBadData: Array<ApplicationStep> = [
   {
     ...mockApplicationStep,
-    applications: [{ ...mockApplicationCloudCityEvacPlanner, name: "abc" }], // too short
-    operators: [{ ...mockPortoflioOperatorYoda, display_name: "" }], // too short display_name
+    applications: [
+      // too short application name
+      { ...mockApplicationCloudCityEvacPlanner, name: "abc" },
+      // too long application name
+      {
+        ...mockApplicationCloudCityEvacPlanner,
+        name: "app name that is way too long for this app name that is way too long for this app name that is way too long for this",
+      },
+    ],
   },
   {
     ...mockApplicationStep,
     applications: [
       {
         ...mockApplicationCloudCityEvacPlanner,
-        // too long
-        name: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut eleifend lectus ut luctus ultricies nisi.",
+        environments: [
+          {
+            ...mockEnvironmentCcepProd,
+            // too short environment name
+            name: "",
+          },
+          {
+            ...mockEnvironmentCcepProd,
+            // too long environment name
+            name: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut eleifend lectus ut luctus ultricies nisi.",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    ...mockApplicationStep,
+    applications: [
+      {
+        ...mockApplicationCloudCityEvacPlanner,
         operators: [
           {
-            ...mockAppEnvOperatorHanSolo,
-            // too long
-            display_name:
-              "waaaaaaaaaaaaaaaaaaaaaaaaayyyyyy tooooooooooooooooooooooooooooooooooooo loooooooooonnnnnnnnnnngggggggggg",
+            ...mockAppEnvOperatorDarthVader,
+            // too short operator name
+            display_name: "",
           },
         ],
-      },
-    ],
-  },
-  {
-    ...mockApplicationStep,
-    applications: [
-      {
-        ...mockApplicationCloudCityEvacPlanner,
         environments: [
           {
             ...mockEnvironmentCcepProd,
-            // too short
-            name: "abc",
-            operators: [
-              {
-                ...mockAppEnvOperatorBobaFett,
-                // too short
-                display_name: "",
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  },
-  {
-    ...mockApplicationStep,
-    applications: [
-      {
-        ...mockApplicationCloudCityEvacPlanner,
-        environments: [
-          {
-            ...mockEnvironmentCcepProd,
-            // too long
-            name: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut eleifend lectus ut luctus ultricies nisi.",
             operators: [
               {
                 ...mockAppEnvOperatorLandonisCalrissian,
-                // too long
+                // too long operator name
                 display_name:
                   "waaaaaaaaaaaaaaaaaaaaaaaaayyyyyy tooooooooooooooooooooooooooooooooooooo loooooooooonnnnnnnnnnngggggggggg",
               },

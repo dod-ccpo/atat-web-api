@@ -38,7 +38,6 @@ describe("Handle service level error", () => {
     jest.spyOn(console, "error").mockImplementation(() => jest.fn()); // suppress output
     ddbMock.on(UpdateCommand).rejects("Some error occurred");
     const result = await handler(validRequest, {} as Context, () => null);
-
     expect(result).toBeInstanceOf(OtherErrorResponse);
     expect(result).toEqual(DATABASE_ERROR);
     expect(result?.statusCode).toEqual(ErrorStatusCode.INTERNAL_SERVER_ERROR);
@@ -69,7 +68,7 @@ describe("Path parameter tests", () => {
   });
 });
 
-describe("Request body tests", function () {
+describe("Request body shape validations", function () {
   it.each([
     {
       body: "", // empty body
@@ -79,7 +78,7 @@ describe("Request body tests", function () {
       body: JSON.stringify({ foo: "bar" }) + "}", // invalid json
       pathParameters: { portfolioDraftId: uuidv4() },
     },
-  ])("should return an error when request body is empty or invalid json", async (badRequest) => {
+  ])("should return an error when the request body is empty or invalid json", async (badRequest) => {
     const invalidRequest: ApiGatewayEventParsed<ApplicationStep> = badRequest as any;
     const result = await handler(invalidRequest, {} as Context, () => null);
     expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
@@ -94,63 +93,43 @@ describe("Request body tests", function () {
       schemaPath: "#/properties/body/type",
     });
   });
-
   it("should return error when request body is not a application step", async () => {
     const emptyRequest: ApiGatewayEventParsed<ApplicationStep> = {
       body: { foo: "bar" }, // valid json, but not ApplicationStep
       pathParameters: { portfolioDraftId: uuidv4() },
     } as any;
     const result = await handler(emptyRequest, {} as Context, () => null);
-
     expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
     expect(JSON.parse(result?.body ?? "").message).toMatch(/Event object failed validation/);
     expect(JSON.parse(result?.body ?? "").name).toMatch(/BadRequestError/);
     expect(JSON.parse(result?.body ?? "").details).toHaveLength(3);
-    expect(result?.body).toMatch(/must have required property [applications|operators]/);
-    expect(result?.body).toMatch(/must NOT have additional properties/);
+    expect(result?.body).toMatch(/"must have required property [applications|operators]/);
+    expect(result?.body).toMatch(/"must NOT have additional properties"/);
     JSON.parse(result?.body ?? "").details.forEach((detail: any) => {
       expect(detail.instancePath).toBe("/body");
       expect(["required", "additionalProperties"]).toContain(detail.keyword);
     });
   });
-  it("should return an error when incorrect application shape found", async () => {
-    const invlaidShapeRequest: ApiGatewayEventParsed<ApplicationStep> = {
+  it("should return an error when incorrect or missing application properties", async () => {
+    const invalidShapeRequest: ApiGatewayEventParsed<ApplicationStep> = {
       body: { applications: mockApplicationsMissingFields, operators: [] },
       pathParameters: { portfolioDraftId: uuidv4() },
     } as any;
-    const result = await handler(invlaidShapeRequest, {} as Context, () => null);
+    const result = await handler(invalidShapeRequest, {} as Context, () => null);
     expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
     expect(JSON.parse(result?.body ?? "").message).toMatch(/Event object failed validation/);
     expect(JSON.parse(result?.body ?? "").name).toMatch(/BadRequestError/);
-
-    // 4 different applications, each with a missing field
-    expect(JSON.parse(result?.body ?? "").details).toHaveLength(4);
-    JSON.parse(result?.body ?? "").details.forEach((detail: any) => {
-      expect(["name", "description", "environments", "operators"]).toContain(detail.params.missingProperty);
-      expect(detail.keyword).toBe("required");
-      expect(detail.schemaPath).toBe("#/properties/body/properties/applications/items/required");
-    });
+    // 5 different applications, most with missing fields and last with incorrect fields
+    expect(JSON.parse(result?.body ?? "").details).toHaveLength(5);
+    expect(result?.body).toMatch(/"must have required property [name|environments|operators]/);
+    expect(result?.body).toMatch(/"must NOT have additional properties"/);
   });
-  it("should return an error when incorrect environment shape found", async () => {
-    const badEnvironmentRequest: ApiGatewayEventParsed<ApplicationStep> = {
-      body: { applications: mockEnvironmentsMissingFields, operators: [] },
-      pathParameters: { portfolioDraftId: uuidv4() },
-    } as any;
-    const result = await handler(badEnvironmentRequest, {} as Context, () => null);
-
-    expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-    expect(JSON.parse(result?.body ?? "").message).toMatch(/Event object failed validation/);
-    expect(JSON.parse(result?.body ?? "").name).toMatch(/BadRequestError/);
-    expect(JSON.parse(result?.body ?? "").details).toHaveLength(4);
-    expect(result?.body).toMatch(/must have required property [name|operators|description|environments]/);
-  });
-  it("should return an error when incorrect environment properties", async () => {
+  it("should return an error when incorrect or missing environment properties", async () => {
     const badEnvironmentRequest: ApiGatewayEventParsed<ApplicationStep> = {
       body: { applications: badEnvironmentInApplication, operators: [] },
       pathParameters: { portfolioDraftId: uuidv4() },
     } as any;
     const result = await handler(badEnvironmentRequest, {} as Context, () => null);
-
     JSON.parse(result?.body ?? "").details.forEach((detail: any) => {
       expect(detail.instancePath).toEqual("/body/applications/0/environments/0");
     });
@@ -158,16 +137,18 @@ describe("Request body tests", function () {
     expect(JSON.parse(result?.body ?? "").message).toMatch(/Event object failed validation/);
     expect(JSON.parse(result?.body ?? "").name).toMatch(/BadRequestError/);
     expect(JSON.parse(result?.body ?? "").details).toHaveLength(4);
-    expect(result?.body).toMatch(/must have required property [name|operators]/);
-    expect(result?.body).toMatch(/must NOT have additional properties/);
+    expect(result?.body).toMatch(/"must have required property [name|operators]/);
+    expect(result?.body).toMatch(/"must NOT have additional properties"/);
   });
-  it("should return an error when the incorrect operators shape found", async () => {
+  it("should return an error when the incorrect or missing operators properties", async () => {
     const badPortfolioOperatorRequest: ApiGatewayEventParsed<ApplicationStep> = {
-      body: { applications: [], operators: [{ noName: "the dark side", noAcess: "take over the universe" }] },
+      body: {
+        applications: mockApplicationStep.applications,
+        operators: [{ noName: "the dark side", noAcess: "take over the universe" }],
+      },
       pathParameters: { portfolioDraftId: uuidv4() },
     } as any;
     const result = await handler(badPortfolioOperatorRequest, {} as Context, () => null);
-
     expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
     expect(JSON.parse(result?.body ?? "").message).toMatch(/Event object failed validation/);
     expect(JSON.parse(result?.body ?? "").name).toMatch(/BadRequestError/);
@@ -175,72 +156,52 @@ describe("Request body tests", function () {
       expect(detail.instancePath).toEqual("/body/operators/0");
     });
     expect(JSON.parse(result?.body ?? "").details).toHaveLength(5);
-    expect(result?.body).toMatch(/must have required property [display_name|email|access]/);
-    expect(result?.body).toMatch(/must NOT have additional properties/);
-  });
-  it("should return an error when invalid operator properties are found", async () => {
-    const badPortfolioOperatorRequest: ApiGatewayEventParsed<ApplicationStep> = {
-      body: { applications: [], operators: [{ noName: "the dark side", noAcess: "take over the universe" }] },
-      pathParameters: { portfolioDraftId: uuidv4() },
-    } as any;
-    const result = await handler(badPortfolioOperatorRequest, {} as Context, () => null);
-
-    expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-    expect(JSON.parse(result?.body ?? "").message).toMatch(/Event object failed validation/);
-    expect(JSON.parse(result?.body ?? "").name).toMatch(/BadRequestError/);
-    JSON.parse(result?.body ?? "").details.forEach((detail: any) => {
-      expect(detail.instancePath).toEqual("/body/operators/0");
-    });
-    expect(JSON.parse(result?.body ?? "").details).toHaveLength(5);
-    expect(result?.body).toMatch(/must have required property [display_name|email|access]/);
-    expect(result?.body).toMatch(/must NOT have additional properties/);
+    expect(result?.body).toMatch(/"must have required property [display_name|email|access]/);
+    expect(result?.body).toMatch(/"must NOT have additional properties"/);
   });
   it.each(mockOperatorMissingDisplayNameFields)(
-    "should return an error when operator is missing display_name property at all levels of ApplicationStep",
+    "should return an error when an operator is missing a display_name (all levels of ApplicationStep)",
     async (operatorMissingDisplayNameApplicationStep) => {
       const badPortfolioOperatorRequest: ApiGatewayEventParsed<ApplicationStep> = {
         body: operatorMissingDisplayNameApplicationStep,
         pathParameters: { portfolioDraftId: uuidv4() },
       } as any;
       const result = await handler(badPortfolioOperatorRequest, {} as Context, () => null);
-
       expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
       expect(JSON.parse(result?.body ?? "").message).toMatch(/Event object failed validation/);
       expect(JSON.parse(result?.body ?? "").name).toMatch(/BadRequestError/);
       expect(JSON.parse(result?.body ?? "").details).toHaveLength(1);
-      expect(result?.body).toMatch(/must have required property display_name/);
+      expect(result?.body).toMatch(/"must have required property display_name"/);
     }
   );
   it.each(mockOperatorMissingEmailFields)(
-    "should return an error when operator is missing email property at all levels of ApplicationStep",
+    "should return an error when an operator is missing an email (all levels of ApplicationStep)",
     async (operatorMissingEmailApplicationStep) => {
       const badPortfolioOperatorRequest: ApiGatewayEventParsed<ApplicationStep> = {
         body: operatorMissingEmailApplicationStep,
         pathParameters: { portfolioDraftId: uuidv4() },
       } as any;
       const result = await handler(badPortfolioOperatorRequest, {} as Context, () => null);
-
       expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
       expect(JSON.parse(result?.body ?? "").message).toMatch(/Event object failed validation/);
       expect(JSON.parse(result?.body ?? "").name).toMatch(/BadRequestError/);
       expect(JSON.parse(result?.body ?? "").details).toHaveLength(1);
-      expect(result?.body).toMatch(/must have required property email/);
+      expect(result?.body).toMatch(/"must have required property email"/);
     }
   );
   it.each(mockOperatorMissingAccessFields)(
-    "should return an error when operator is missing access property at all levels of ApplicationStep",
+    "should return an error when an operator is missing an access role (all levels of ApplicationStep)",
     async (operatorMissingEmailApplicationStep) => {
       const badPortfolioOperatorRequest: ApiGatewayEventParsed<ApplicationStep> = {
         body: operatorMissingEmailApplicationStep,
         pathParameters: { portfolioDraftId: uuidv4() },
       } as any;
       const result = await handler(badPortfolioOperatorRequest, {} as Context, () => null);
-
       expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
       expect(JSON.parse(result?.body ?? "").message).toMatch(/Event object failed validation/);
       expect(JSON.parse(result?.body ?? "").name).toMatch(/BadRequestError/);
       expect(JSON.parse(result?.body ?? "").details).toHaveLength(1);
-      expect(result?.body).toMatch(/must have required property access/);
+      expect(result?.body).toMatch(/"must have required property access"/);
     }
   );
 });
@@ -284,138 +245,86 @@ describe("Incorrect number of applications and environments", () => {
   });
 });
 
-describe("Individual Application input validation tests", function () {
-  const tooShortName = "abc";
-  const tooLongName =
-    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut eleifend lectus ut luctus ultricies nisi.";
-  const tooLongDisplayName =
-    "waaaaaaaaaaaaaaaaaaaaaaaaayyyyyy tooooooooooooooooooooooooooooooooooooo loooooooooonnnnnnnnnnngggggggggg";
-<<<<<<< HEAD
-  it("should return error map entries when an operator has a name that is too short", async () => {
-    const operator = { display_name: "", email: "dark.1234-567890_@side.mil", access: AppEnvAccess.READ_ONLY };
-    const errors = performDataValidationOnOperator(operator);
-    expect(errors.length).toEqual(1);
-    expect(errors).toContainEqual({
-      operatorDisplayName: "",
-      invalidParameterName: "display_name",
-      invalidParameterValue: "",
-      validationMessage: ValidationMessage.INVALID_OPERATOR_NAME,
-    });
-  });
-  it.each(mockBadOperatorEmails)("should return an error map when incorrect operator email", async (operator) => {
-    const errors = performDataValidationOnOperator(operator);
-    expect(errors.length).toEqual(1);
-    expect(errors[0].invalidParameterValue).toBe(operator.email);
-  });
-  it("should return error map entries when an operator has a name that is too long", async () => {
-    const operator = { display_name: tooLongName, email: "dark@side123456789.MIL", access: AppEnvAccess.READ_ONLY };
-    const errors = performDataValidationOnOperator(operator);
-    expect(errors.length).toEqual(1);
-    expect(errors).toContainEqual({
-      operatorDisplayName: tooLongName,
-      invalidParameterName: "display_name",
-      invalidParameterValue: tooLongName,
-      validationMessage: ValidationMessage.INVALID_OPERATOR_NAME,
-    });
-  });
-  it("should return error map entries when given Application and Operator has a name that is too short", async () => {
-    const appErrors = performDataValidationOnApplication(mockApplicationStepsBadData[0].applications[0]);
-    const opErrors = performDataValidationOnOperator(mockApplicationStepsBadData[0].operators[0]);
-    const errors = [...appErrors, ...opErrors];
-    expect(errors.length).toEqual(2);
-    expect(errors).toContainEqual({
-      applicationName: tooShortName,
-      invalidParameterName: "name",
-      invalidParameterValue: tooShortName,
-      validationMessage: ValidationMessage.INVALID_APPLICATION_NAME,
-    });
-  });
-  it("should return error map entries when given Application and Operator has a name that is too long", async () => {
-    const errors = performDataValidationOnApplication(mockApplicationStepsBadData[1].applications[0]);
-    expect(errors.length).toEqual(2);
-    expect(errors).toContainEqual({
-      applicationName: tooLongName,
-      invalidParameterName: "name",
-      invalidParameterValue: tooLongName,
-      validationMessage: ValidationMessage.INVALID_APPLICATION_NAME,
-    });
-    expect(errors).toContainEqual({
-      operatorDisplayName: tooLongDisplayName,
-      invalidParameterName: "display_name",
-      invalidParameterValue: tooLongDisplayName,
-      validationMessage: ValidationMessage.INVALID_OPERATOR_NAME,
-    });
-  });
-  it("should return error map entries when given Application has an Environment and Operator with a name that is too short", async () => {
-    const errors = performDataValidationOnEnvironment(mockApplicationStepsBadData[2].applications[0].environments[0]);
-    expect(errors.length).toEqual(2);
-    expect(errors).toContainEqual({
-      environmentName: tooShortName,
-      invalidParameterName: "name",
-      invalidParameterValue: tooShortName,
-      validationMessage: ValidationMessage.INVALID_ENVIRONMENT_NAME,
-    });
-    expect(errors).toContainEqual({
-      operatorDisplayName: "",
-      invalidParameterName: "display_name",
-      invalidParameterValue: "",
-      validationMessage: ValidationMessage.INVALID_OPERATOR_NAME,
-    });
-  });
-  it("should return error map entries when given Application has an Environment and Operator with a name that is too long", async () => {
-    const errors = performDataValidationOnEnvironment(mockApplicationStepsBadData[3].applications[0].environments[0]);
-    expect(errors.length).toEqual(2);
-    expect(errors).toContainEqual({
-      environmentName: tooLongName,
-      invalidParameterName: "name",
-      invalidParameterValue: tooLongName,
-      validationMessage: ValidationMessage.INVALID_ENVIRONMENT_NAME,
-    });
-    expect(errors).toContainEqual({
-      operatorDisplayName: tooLongDisplayName,
-      invalidParameterName: "display_name",
-      invalidParameterValue: tooLongDisplayName,
-      validationMessage: ValidationMessage.INVALID_OPERATOR_NAME,
-=======
-  it("should return a validation error when application has a name that is too short or too long", async () => {
-    const badPortfolioOperatorRequest: ApiGatewayEventParsed<ApplicationStep> = {
-      body: {
-        applications: [mockApplicationStepsBadData[0].applications[0], mockApplicationStepsBadData[1].applications[0]],
-        operators: [],
-      },
+describe("Business rules validation tests", function () {
+  it("should return a validation error when application name is too short or too long", async () => {
+    const badApplicationNameRequest: ApiGatewayEventParsed<ApplicationStep> = {
+      body: { ...mockApplicationStepsBadData[0] },
       pathParameters: { portfolioDraftId: uuidv4() },
     } as any;
-    const result = await handler(badPortfolioOperatorRequest, {} as Context, () => null);
-
+    const result = await handler(badApplicationNameRequest, {} as Context, () => null);
     expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
     expect(JSON.parse(result?.body ?? "").message).toMatch(/Event object failed validation/);
     expect(JSON.parse(result?.body ?? "").name).toMatch(/BadRequestError/);
-    // 2 different operators, name too short and name too long
+    // 2 different applications, name too short and name too long
     expect(JSON.parse(result?.body ?? "").details).toHaveLength(2);
     JSON.parse(result?.body ?? "").details.forEach((detail: any) => {
       expect(detail.instancePath).toMatch(/\/body\/applications\/[0|1]\/name/);
       expect(detail.message).toEqual('must match pattern "^[a-zA-Z\\d _-]{4,100}$"');
       expect(detail.schemaPath).toEqual("#/properties/body/properties/applications/items/properties/name/pattern");
->>>>>>> 9cdf806 (Update unit tests for createApplicationStep)
     });
   });
-
-  // TODO: ensure tests for business rules are covered
-  //     const appErrors = performDataValidationOnApplication(mockApplicationStepsBadData[0].applications[0]);
-  //     const opErrors = performDataValidationOnOperator(mockApplicationStepsBadData[0].operators[0]);
-  //       applicationName: tooShortName,
-
-  //     const errors = performDataValidationOnApplication(mockApplicationStepsBadData[1].applications[0]);
-  //       applicationName: tooLongName,
-  //       operatorDisplayName: tooLongDisplayName,
-
-  //     const errors = performDataValidationOnEnvironment(mockApplicationStepsBadData[2].applications[0].environments[0]);
-  //       environmentName: tooShortName,
-  //       operatorDisplayName: "",
-
-  //     const errors = performDataValidationOnEnvironment(mockApplicationStepsBadData[3].applications[0].environments[0]);
-  //       environmentName: tooLongName,
-  //       operatorDisplayName: tooLongDisplayName,
+  it("should return a validation error when an environment name is too short or too long", async () => {
+    const badEnvironmentNameRequest: ApiGatewayEventParsed<ApplicationStep> = {
+      body: { ...mockApplicationStepsBadData[1] },
+      pathParameters: { portfolioDraftId: uuidv4() },
+    } as any;
+    const result = await handler(badEnvironmentNameRequest, {} as Context, () => null);
+    expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
+    expect(JSON.parse(result?.body ?? "").message).toMatch(/Event object failed validation/);
+    expect(JSON.parse(result?.body ?? "").name).toMatch(/BadRequestError/);
+    // 2 different environment, name too short and name too long
+    expect(JSON.parse(result?.body ?? "").details).toHaveLength(2);
+    expect(JSON.parse(result?.body ?? "").details[0].message).toEqual('must match pattern "^[a-zA-Z\\d ,.-]{1,100}$"');
+    expect(result?.body).toMatch(/"\/body\/applications\/0\/environments\/[0|1]\/name"/);
+  });
+  it("should return a validation error when an operator has a name that is too short or too long", async () => {
+    const badOperatorDisplayNameRequest: ApiGatewayEventParsed<ApplicationStep> = {
+      body: { ...mockApplicationStepsBadData[2] },
+      pathParameters: { portfolioDraftId: uuidv4() },
+    } as any;
+    const result = await handler(badOperatorDisplayNameRequest, {} as Context, () => null);
+    expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
+    expect(JSON.parse(result?.body ?? "").message).toMatch(/Event object failed validation/);
+    expect(JSON.parse(result?.body ?? "").name).toMatch(/BadRequestError/);
+    // 2 different operators, name too short and name too long
+    expect(JSON.parse(result?.body ?? "").details).toHaveLength(2);
+    expect(JSON.parse(result?.body ?? "").details[0].message).toEqual('must match pattern "^[a-zA-Z\\d ,.-]{1,100}$"');
+    expect(result?.body).toMatch(/"\/body\/applications\/0\/environments\/0\/operators\/0\/display_name"/);
+    expect(result?.body).toMatch(/"\/body\/applications\/0\/operators\/0\/display_name"/);
+  });
+  it("should return a validation error when there is not at least 1 application", async () => {
+    const badOperatorDisplayNameRequest: ApiGatewayEventParsed<ApplicationStep> = {
+      body: { ...mockApplicationStep, applications: [] },
+      pathParameters: { portfolioDraftId: uuidv4() },
+    } as any;
+    const result = await handler(badOperatorDisplayNameRequest, {} as Context, () => null);
+    expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
+    expect(JSON.parse(result?.body ?? "").message).toMatch(/Event object failed validation/);
+    expect(JSON.parse(result?.body ?? "").name).toMatch(/BadRequestError/);
+    expect(JSON.parse(result?.body ?? "").details).toHaveLength(1);
+    expect(JSON.parse(result?.body ?? "").details[0].message).toEqual("must NOT have less than 1 item");
+    expect(result?.body).toMatch(/\/body\/applications"/);
+  });
+  it("should return a validation error when there is not at least 1 environment", async () => {
+    const badOperatorDisplayNameRequest: ApiGatewayEventParsed<ApplicationStep> = {
+      body: { ...mockApplicationStep, applications: [{ ...mockApplicationStep.applications[0], environments: [] }] },
+      pathParameters: { portfolioDraftId: uuidv4() },
+    } as any;
+    const result = await handler(badOperatorDisplayNameRequest, {} as Context, () => null);
+    expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
+    expect(JSON.parse(result?.body ?? "").message).toMatch(/Event object failed validation/);
+    expect(JSON.parse(result?.body ?? "").name).toMatch(/BadRequestError/);
+    // 2 different operators, name too short and name too long
+    expect(JSON.parse(result?.body ?? "").details).toHaveLength(1);
+    expect(JSON.parse(result?.body ?? "").details[0].message).toEqual("must NOT have less than 1 item");
+    expect(result?.body).toMatch(/"\/body\/applications\/0\/environments"/);
+  });
+  it("should be an administrator operator at at least one level", async () => {
+    // TODO: add validation for admin operators
+    // 1 root admin
+    // 1 admin at each app level (no root operators)
+    // 1 admin each env level (no root or app operators)
+  });
 });
 
 describe("Portfolio Draft DNE tests", () => {
