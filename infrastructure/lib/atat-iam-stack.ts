@@ -193,6 +193,11 @@ export class AtatIamStack extends cdk.Stack {
         value: cloudFormationExecutionRole.roleArn,
       })
     );
+
+    // Service-Linked Roles
+    const openSearchSlr = new iam.CfnServiceLinkedRole(this, "OpenSearchSlr", {
+      awsServiceName: "es.amazonaws.com",
+    });
   }
 
   private findOrganizationManagementAccount(): string {

@@ -13,11 +13,12 @@ import { ApiS3Function } from "./constructs/api-s3-function";
 import { ApiSQSFunction } from "./constructs/api-sqs-function";
 import { ApiSQSDynamoDBFunction } from "./constructs/api-sqs-dynamodb-function";
 import { CognitoAuthentication } from "./constructs/authentication";
-import { SecureBucket, SecureQueue, SecureRestApi, SecureTable } from "./constructs/compliant-resources";
+import { SecureBucket, SecureQueue, SecureRestApi } from "./constructs/compliant-resources";
 import { TaskOrderLifecycle } from "./constructs/task-order-lifecycle";
 import { HttpMethod } from "./http";
 import * as utils from "./util";
 import { convertSchema } from "./load-schema";
+import { DataPersistence } from "./constructs/data-persistence";
 interface AtatIdpProps {
   secretName: string;
   providerName: string;
@@ -56,18 +57,18 @@ export class AtatWebApiStack extends cdk.Stack {
 
     this.setupCognito(props.idpProps);
 
-    // Create a shared DynamoDB table that will be used by all the functions in the project.
-    this.table = new SecureTable(this, "AtatTable", {
+    const data = new DataPersistence(this, "DataPersistence", {
+      vpc: props.vpc,
+      handlerFile: utils.packageRoot() + "/opensearch/dataCopy/index.ts",
+      // TODO: Fix double "tableProps"
       tableProps: {
-        partitionKey: { name: "id", type: dynamodb.AttributeType.STRING },
-        billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+        tableProps: {
+          partitionKey: { name: "id", type: dynamodb.AttributeType.STRING },
+          billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+        },
       },
-    }).table;
-    this.outputs.push(
-      new cdk.CfnOutput(this, "TableName", {
-        value: this.table.tableName,
-      })
-    );
+    });
+    this.table = data.table.table;
 
     // Create a queue for PortfolioDraft submission
     this.submitQueue = new SecureQueue(this, "SubmitQueue", { queueProps: {} }).queue;
@@ -112,7 +113,10 @@ export class AtatWebApiStack extends cdk.Stack {
     convertSchema();
 
     // PortfolioDraft Operations
-    this.addDatabaseApiFunction("getPortfolioDrafts", "portfolioDrafts/", props.vpc);
+    const getPortfolioDrafts = this.addDatabaseApiFunction("getPortfolioDrafts", "portfolioDrafts/", props.vpc);
+    data.opensearchDomain.grantRead(getPortfolioDrafts.fn);
+    getPortfolioDrafts.fn.addEnvironment("OPENSEARCH_DOMAIN", data.opensearchDomain.domainEndpoint);
+    data.opensearchDomain.connections.allowFrom(getPortfolioDrafts.fn, ec2.Port.tcp(443));
     this.addDatabaseApiFunction("getPortfolioDraft", "portfolioDrafts/", props.vpc);
     this.addDatabaseApiFunction("createPortfolioDraft", "portfolioDrafts/", props.vpc);
     this.addDatabaseApiFunction("deletePortfolioDraft", "portfolioDrafts/", props.vpc);
@@ -256,14 +260,16 @@ export class AtatWebApiStack extends cdk.Stack {
     return utils.packageRoot() + "/api/" + handlerFolder + utils.apiSpecOperationFileName(operationId);
   }
 
-  private addDatabaseApiFunction(operationId: string, handlerFolder: string, vpc: ec2.IVpc) {
+  private addDatabaseApiFunction(operationId: string, handlerFolder: string, vpc: ec2.IVpc): ApiDynamoDBFunction {
     const props = {
       table: this.table,
       lambdaVpc: vpc,
       method: utils.apiSpecOperationMethod(operationId),
       handlerPath: this.determineApiHandlerPath(operationId, handlerFolder),
     };
-    this.functions.push(new ApiDynamoDBFunction(this, utils.apiSpecOperationFunctionName(operationId), props).fn);
+    const fn = new ApiDynamoDBFunction(this, utils.apiSpecOperationFunctionName(operationId), props);
+    this.functions.push(fn.fn);
+    return fn;
   }
 
   private addQueueDatabaseApiFunction(operationId: string, handlerFolder: string, vpc: ec2.IVpc) {

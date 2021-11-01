@@ -137,6 +137,8 @@ export class SecureQueue extends cdk.Construct {
 
     const queue = new sqs.Queue(this, id, {
       ...props.queueProps,
+      // TODO: Consider switching to user-managed KMS
+      encryption: sqs.QueueEncryption.KMS_MANAGED,
     });
 
     this.queue = queue;

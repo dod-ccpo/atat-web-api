@@ -1,0 +1,26 @@
+{
+  "name": "atat-web-api-opensearch",
+  "version": "0.1.0",
+  "description": "Supporting functions for the ATAT API's OpenSearch data copy",
+  "scripts": {
+    "test": "jest --config=jest.config.js",
+    "lint": "eslint --ext .js,.ts,.json -c ../../.eslintrc.json .",
+    "lint:fix": "npm run lint -- --fix"
+  },
+  "dependencies": {
+    "@opensearch-project/opensearch": "1.0.0",
+    "@aws-sdk/signature-v4": "3.40.0",
+    "@aws-sdk/credential-providers": "3.40.0",
+    "@aws-sdk/protocol-http": "3.40.0",
+    "@aws-sdk/node-http-handler": "3.40.0",
+    "@aws-crypto/sha256-js": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^27.0.2",
+    "@types/aws-lambda": "^8.10.83",
+    "eslint": "^7.31.0",
+    "jest": "^27.0.6",
+    "ts-jest": "^27.0.4",
+    "typescript": "^4.4.3"
+  }
+}
