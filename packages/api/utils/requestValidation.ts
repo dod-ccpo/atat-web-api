@@ -72,22 +72,6 @@ export function validateClin(clin: unknown): Array<ClinValidationError> {
       validationMessage: ValidationMessage.INVALID_CLIN_NUMBER,
     });
   }
-  if (!isValidDate(clin.pop_start_date)) {
-    errors.push({
-      clinNumber: clin.clin_number,
-      invalidParameterName: "pop_start_date",
-      invalidParameterValue: clin.pop_start_date,
-      validationMessage: ValidationMessage.START_VALID,
-    });
-  }
-  if (!isValidDate(clin.pop_end_date)) {
-    errors.push({
-      clinNumber: clin.clin_number,
-      invalidParameterName: "pop_end_date",
-      invalidParameterValue: clin.pop_end_date,
-      validationMessage: ValidationMessage.END_VALID,
-    });
-  }
   if (new Date(clin.pop_start_date) >= new Date(clin.pop_end_date)) {
     const obj = {
       clinNumber: clin.clin_number,
