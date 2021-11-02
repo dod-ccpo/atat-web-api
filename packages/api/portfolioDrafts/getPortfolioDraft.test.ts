@@ -2,15 +2,15 @@ import { APIGatewayProxyEvent } from "aws-lambda";
 import { Application } from "../models/Application";
 import { DATABASE_ERROR } from "../utils/errors";
 import { DynamoDBDocumentClient, GetCommand, GetCommandOutput } from "@aws-sdk/lib-dynamodb";
-import { FundingStep } from "../models/FundingStep";
 import { handler, NO_PORTFOLIO_PATH_PARAM, NO_SUCH_PORTFOLIO } from "./getPortfolioDraft";
 import { mockApplicationStep } from "./application/commonApplicationMockData";
 import { mockClient } from "aws-sdk-client-mock";
+import { mockFundingStep } from "./funding/commonFundingMockData";
+import { mockPortfolioDraft, validRequest } from "./commonPortfolioDraftMockData";
+import { mockPortfolioStep } from "./portfolio/commonPortfolioMockData";
 import { PortfolioDraft } from "../models/PortfolioDraft";
 import { ProvisioningStatus } from "../models/ProvisioningStatus";
 import { SuccessStatusCode } from "../utils/response";
-import { mockPortfolioDraft, validRequest } from "./commonPortfolioDraftMockData";
-import { mockPortfolioStep } from "./portfolio/commonPortfolioMockData";
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 beforeEach(() => {
@@ -126,52 +126,7 @@ function mockPortfolioDraftSummaryBadData(): PortfolioDraft {
     application_step: mockApplicationStep,
     num_applications: 99,
     num_environments: 124,
-    funding_step: mockFundingStep(),
+    funding_step: mockFundingStep,
     num_task_orders: 22,
-  };
-}
-
-/**
- * Funding Step
- * @returns a valid funding step
- */
-function mockFundingStep(): FundingStep {
-  return {
-    task_orders: [
-      {
-        task_order_file: {
-          name: "TO_1234567890.pdf",
-          id: "b91db32f-40fa-4225-9885-b032f0d229fe",
-        },
-        clins: [
-          {
-            idiq_clin: "1010",
-            clin_number: "0100",
-            pop_start_date: "2021-07-01",
-            pop_end_date: "2022-07-01",
-            total_clin_value: 100000,
-            obligated_funds: 1,
-          },
-        ],
-        task_order_number: "1234567890",
-      },
-      {
-        task_order_file: {
-          name: "TO_0987654321",
-          id: "73fdb32f-40fa-4225-9885-b032f0d229fe",
-        },
-        clins: [
-          {
-            idiq_clin: "1010",
-            clin_number: "0100",
-            pop_start_date: "2021-05-01",
-            pop_end_date: "2022-06-01",
-            total_clin_value: 200000,
-            obligated_funds: 100,
-          },
-        ],
-        task_order_number: "0987654321",
-      },
-    ],
   };
 }
