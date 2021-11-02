@@ -1,6 +1,5 @@
 import { APIGatewayProxyEvent } from "aws-lambda";
 import { Application } from "../models/Application";
-import { CloudServiceProvider } from "../models/CloudServiceProvider";
 import { DATABASE_ERROR } from "../utils/errors";
 import { DynamoDBDocumentClient, GetCommand, GetCommandOutput } from "@aws-sdk/lib-dynamodb";
 import { FundingStep } from "../models/FundingStep";
@@ -8,10 +7,10 @@ import { handler, NO_PORTFOLIO_PATH_PARAM, NO_SUCH_PORTFOLIO } from "./getPortfo
 import { mockApplicationStep } from "./application/commonApplicationMockData";
 import { mockClient } from "aws-sdk-client-mock";
 import { PortfolioDraft } from "../models/PortfolioDraft";
-import { PortfolioStep } from "../models/PortfolioStep";
 import { ProvisioningStatus } from "../models/ProvisioningStatus";
 import { SuccessStatusCode } from "../utils/response";
 import { mockPortfolioDraft, validRequest } from "./commonPortfolioDraftMockData";
+import { mockPortfolioStep } from "./portfolio/commonPortfolioMockData";
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 beforeEach(() => {
@@ -122,27 +121,13 @@ function mockPortfolioDraftSummaryBadData(): PortfolioDraft {
     status: ProvisioningStatus.NOT_STARTED,
     name: "Crazy Portfolio",
     description: "Crazy portfolio description",
-    portfolio_step: mockPortfolioStep(),
+    portfolio_step: mockPortfolioStep,
     num_portfolio_managers: 77,
     application_step: mockApplicationStep,
     num_applications: 99,
     num_environments: 124,
     funding_step: mockFundingStep(),
     num_task_orders: 22,
-  };
-}
-
-/**
- * Portfolio Step
- * @returns a valid portfolio step
- */
-function mockPortfolioStep(): PortfolioStep {
-  return {
-    name: "Coolest Portfolio",
-    csp: CloudServiceProvider.CSP_A,
-    description: "Description of something cool",
-    portfolio_managers: ["coolIdea@example.com", "coolPerson@example.com", "support@example.com", "admin@example.com"],
-    dod_components: ["space_force"],
   };
 }
 
