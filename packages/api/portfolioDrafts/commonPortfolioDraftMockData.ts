@@ -26,4 +26,8 @@ export const mockPortfolioDraft: PortfolioDraft = {
   portfolio_step: mockPortfolioStep,
   funding_step: mockFundingStep,
   application_step: mockApplicationStep,
+  num_portfolio_managers: mockPortfolioStep.portfolio_managers.length,
+  num_task_orders: mockFundingStep.task_orders.length,
+  num_applications: mockApplicationStep.applications.length,
+  num_environments: mockApplicationStep.applications.flatMap((app) => app.environments).length,
 };
