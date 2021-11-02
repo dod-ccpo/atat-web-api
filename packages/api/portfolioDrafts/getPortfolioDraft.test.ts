@@ -3,13 +3,8 @@ import { Application } from "../models/Application";
 import { DATABASE_ERROR } from "../utils/errors";
 import { DynamoDBDocumentClient, GetCommand, GetCommandOutput } from "@aws-sdk/lib-dynamodb";
 import { handler, NO_PORTFOLIO_PATH_PARAM, NO_SUCH_PORTFOLIO } from "./getPortfolioDraft";
-import { mockApplicationStep } from "./application/commonApplicationMockData";
 import { mockClient } from "aws-sdk-client-mock";
-import { mockFundingStep } from "./funding/commonFundingMockData";
 import { mockPortfolioDraft, validRequest } from "./commonPortfolioDraftMockData";
-import { mockPortfolioStep } from "./portfolio/commonPortfolioMockData";
-import { PortfolioDraft } from "../models/PortfolioDraft";
-import { ProvisioningStatus } from "../models/ProvisioningStatus";
 import { SuccessStatusCode } from "../utils/response";
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
@@ -84,49 +79,3 @@ describe("Successful operation tests", () => {
     expect(numOfTaskOrders).toBe(mockPortfolioDraft.num_task_orders);
   });
 });
-
-describe("Incorrect number of attributes for portfolio draft summary", () => {
-  it("should return falsy for incorrect attributes ", async () => {
-    const badMockResponse: PortfolioDraft = mockPortfolioDraftSummaryBadData();
-    ddbMock.on(GetCommand).resolves({
-      Item: mockPortfolioDraftSummaryBadData(),
-    });
-
-    const result = await handler(validRequest);
-    const responseBody = JSON.parse(result.body);
-    const numOfTaskOrders: number = responseBody.funding_step.task_orders.length;
-    const numOfPortfolioManagers: number = responseBody.portfolio_step.portfolio_managers.length;
-    const numOfApplications: number = responseBody.application_step.applications.length;
-    const numOfEnvironments: number = responseBody.application_step.applications.flatMap(
-      (app: Application) => app.environments
-    ).length;
-
-    expect(responseBody.portfolio_name).not.toBe(badMockResponse.portfolio_step?.name);
-    expect(numOfPortfolioManagers).not.toBe(badMockResponse.num_portfolio_managers);
-    expect(numOfTaskOrders).not.toBe(badMockResponse.num_task_orders);
-    expect(numOfApplications).not.toBe(badMockResponse.num_applications);
-    expect(numOfEnvironments).not.toBe(badMockResponse.num_environments);
-  });
-});
-
-/**
- * Sample Portfolio Draft Summary with bad data
- * @returns a complete Portfolio Draft Summary with good data that should not cause errors
- */
-function mockPortfolioDraftSummaryBadData(): PortfolioDraft {
-  return {
-    id: "41ec495a-6fec-46f1-a4e5-5be6332f4115",
-    updated_at: "2021-09-15T00:15:40.076Z",
-    created_at: "2021-09-15T00:10:52.400Z",
-    status: ProvisioningStatus.NOT_STARTED,
-    name: "Crazy Portfolio",
-    description: "Crazy portfolio description",
-    portfolio_step: mockPortfolioStep,
-    num_portfolio_managers: 77,
-    application_step: mockApplicationStep,
-    num_applications: 99,
-    num_environments: 124,
-    funding_step: mockFundingStep,
-    num_task_orders: 22,
-  };
-}
