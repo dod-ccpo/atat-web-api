@@ -1,25 +1,22 @@
-import { DynamoDBDocumentClient, GetCommand, GetCommandOutput } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent } from "aws-lambda";
-import { mockClient } from "aws-sdk-client-mock";
-import { handler, NO_PORTFOLIO_PATH_PARAM, NO_SUCH_PORTFOLIO } from "./getPortfolioDraft";
-import { DATABASE_ERROR } from "../utils/errors";
-import { SuccessStatusCode } from "../utils/response";
-import { ProvisioningStatus } from "../models/ProvisioningStatus";
-import { CloudServiceProvider } from "../models/CloudServiceProvider";
-import { PortfolioStep } from "../models/PortfolioStep";
-import { FundingStep } from "../models/FundingStep";
 import { Application } from "../models/Application";
-import { PortfolioDraft } from "../models/PortfolioDraft";
+import { CloudServiceProvider } from "../models/CloudServiceProvider";
+import { DATABASE_ERROR } from "../utils/errors";
+import { DynamoDBDocumentClient, GetCommand, GetCommandOutput } from "@aws-sdk/lib-dynamodb";
+import { FundingStep } from "../models/FundingStep";
+import { handler, NO_PORTFOLIO_PATH_PARAM, NO_SUCH_PORTFOLIO } from "./getPortfolioDraft";
 import { mockApplicationStep } from "./application/commonApplicationMockData";
+import { mockClient } from "aws-sdk-client-mock";
+import { PortfolioDraft } from "../models/PortfolioDraft";
+import { PortfolioStep } from "../models/PortfolioStep";
+import { ProvisioningStatus } from "../models/ProvisioningStatus";
+import { SuccessStatusCode } from "../utils/response";
+import { validRequest } from "./commonPortfolioDraftMockData";
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 beforeEach(() => {
   ddbMock.reset();
 });
-
-const validRequest: APIGatewayProxyEvent = {
-  pathParameters: { portfolioDraftId: "41ec495a-6fec-46f1-a4e5-5be6332f4115" },
-} as any;
 
 describe("Validation tests", () => {
   it("should require path param", async () => {

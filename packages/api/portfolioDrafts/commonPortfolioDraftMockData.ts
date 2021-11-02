@@ -1,3 +1,4 @@
+import { APIGatewayProxyEvent } from "aws-lambda";
 import { mockApplicationStep } from "./application/commonApplicationMockData";
 import { mockFundingStep } from "./funding/commonFundingMockData";
 import { mockPortfolioStep } from "./portfolio/commonPortfolioMockData";
@@ -31,3 +32,7 @@ export const mockPortfolioDraft: PortfolioDraft = {
   num_applications: mockApplicationStep.applications.length,
   num_environments: mockApplicationStep.applications.flatMap((app) => app.environments).length,
 };
+
+export const validRequest: APIGatewayProxyEvent = {
+  pathParameters: { portfolioDraftId: uuidv4() },
+} as any;
