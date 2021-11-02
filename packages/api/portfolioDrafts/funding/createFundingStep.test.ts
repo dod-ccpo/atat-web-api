@@ -1,8 +1,10 @@
 import { APIGatewayProxyEvent } from "aws-lambda";
 import { createValidationErrorResponse, handler, validateClin, validateFundingStepClins } from "./createFundingStep";
 import { DynamoDBDocumentClient, UpdateCommand, UpdateCommandOutput } from "@aws-sdk/lib-dynamodb";
+import { FUNDING_STEP } from "../../models/PortfolioDraft";
 import { isFundingStep } from "../../utils/validation";
 import { mockClient } from "aws-sdk-client-mock";
+import { mockPortfolioDraft } from "../commonPortfolioDraftMockData";
 import { ProvisioningStatus } from "../../models/ProvisioningStatus";
 import { v4 as uuidv4 } from "uuid";
 import { ValidationMessage } from "../../models/FundingStep";
@@ -135,20 +137,11 @@ describe("Request body tests", () => {
 
 describe("Successful operation tests", () => {
   it("should return funding step and http status code 201", async () => {
-    const now = new Date().toISOString();
-    const mockResponse = {
-      updated_at: now,
-      created_at: now,
-      funding_step: mockFundingStep,
-      num_task_orders: 1,
-      status: ProvisioningStatus.NOT_STARTED,
-      id: uuidv4(),
-    };
     ddbMock.on(UpdateCommand).resolves({
-      Attributes: mockResponse,
+      Attributes: mockPortfolioDraft,
     });
     const fundingStepOutput: UpdateCommandOutput = {
-      Attributes: { funding_step: JSON.stringify(mockFundingStep) },
+      Attributes: { funding_step: JSON.stringify(mockPortfolioDraft[FUNDING_STEP]) },
     } as any;
     ddbMock.on(UpdateCommand).resolves(fundingStepOutput);
     const result = await handler(validRequest);
@@ -156,7 +149,7 @@ describe("Successful operation tests", () => {
     expect(result.statusCode).toEqual(SuccessStatusCode.CREATED);
     expect(result.body).toStrictEqual(JSON.stringify(mockFundingStep));
     const numOfTaskOrders = JSON.parse(result.body).task_orders.length;
-    expect(numOfTaskOrders).toBe(mockResponse.num_task_orders);
+    expect(numOfTaskOrders).toBe(mockPortfolioDraft.num_task_orders);
   });
 });
 
