@@ -45,11 +45,15 @@ export async function baseHandler(
   const portfolioDraftId = setupResult.path.portfolioDraftId;
   const fundingStep = event.body;
   // Perform business rules validation
+  validateFundingStepClins(fundingStep);
+
   // const validatedFundingStep = validateFundingStepClins(fundingStep);
+
+  /*
   const errors: Array<ClinValidationError> = validateFundingStepClins(fundingStep);
   if (errors.length) {
     return createValidationErrorResponse({ input_validation_errors: errors });
-  }
+  } */
   // console.log(validatedFundingStep);
   // Perform database call
   try {

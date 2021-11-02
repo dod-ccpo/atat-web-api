@@ -3,7 +3,9 @@ import { SetupError, SetupResult, SetupSuccess, ValidationErrorResponse } from "
 import { isValidUuidV4, isValidDate, isClin, isClinNumber, isFundingAmount } from "./validation";
 import { ApiGatewayEventParsed } from "./eventHandlingTool";
 import { FundingStep, ValidationMessage } from "../models/FundingStep";
+import { Clin } from "../models/Clin";
 import createError from "http-errors";
+import { ErrorCode } from "../models/Error";
 /**
  * Check if incoming POST Request passes basic shape validation
  *
@@ -31,13 +33,7 @@ export function shapeValidationForPostRequest<T>(
 
   return new SetupSuccess<T>({ portfolioDraftId }, bodyResult as unknown as T);
 }
-/*
-export function fundingStepBusinessRulesValidation<T>(fundingStep: FundingStep): SetupResult<T> {
-  if (!isValidDate(fundingStep.task_orders[0].clins[0].pop_start_date)) {
-    return new SetupError(NO_SUCH_PORTFOLIO_DRAFT);
-  }
-  return new SetupSuccess<T>({ portfolioDraftId }, bodyResult as unknown as T);
-} */
+
 export interface ClinValidationError {
   clinNumber: string;
   invalidParameterName: string;
@@ -45,11 +41,14 @@ export interface ClinValidationError {
   validationMessage: ValidationMessage;
 }
 
-export function validateFundingStepClins(fs: FundingStep): Array<ClinValidationError> {
-  return fs.task_orders
+export async function validateFundingStepClins(fs: FundingStep): Promise<void> {
+  const errors = fs.task_orders
     .flatMap((taskOrder) => taskOrder.clins)
     .map(validateClin)
     .reduce((accumulator, validationErrors) => accumulator.concat(validationErrors), []);
+  if (errors.length) {
+    createValidationErrorResponse({ input_validation_errors: errors });
+  }
 }
 
 /**
@@ -58,25 +57,14 @@ export function validateFundingStepClins(fs: FundingStep): Array<ClinValidationE
  * @returns a collection of clin validation errors
  */
 
-export function validateClin(clin: unknown): Array<ClinValidationError> {
-  if (!isClin(clin)) {
-    throw Error("Input must be a Clin object");
-  }
+export function validateClin(clin: Clin): Array<ClinValidationError> {
   const errors = Array<ClinValidationError>();
-
-  if (!isClinNumber(clin.clin_number)) {
-    errors.push({
-      clinNumber: clin.clin_number,
-      invalidParameterName: "clin_number",
-      invalidParameterValue: clin.clin_number,
-      validationMessage: ValidationMessage.INVALID_CLIN_NUMBER,
-    });
-  }
   if (new Date(clin.pop_start_date) >= new Date(clin.pop_end_date)) {
     const obj = {
       clinNumber: clin.clin_number,
       validationMessage: ValidationMessage.START_BEFORE_END,
     };
+
     errors.push({
       ...obj,
       invalidParameterName: "pop_start_date",
@@ -96,22 +84,7 @@ export function validateClin(clin: unknown): Array<ClinValidationError> {
       validationMessage: ValidationMessage.END_FUTURE,
     });
   }
-  if (!isFundingAmount(clin.total_clin_value.toString())) {
-    errors.push({
-      clinNumber: clin.clin_number,
-      invalidParameterName: "total_clin_value",
-      invalidParameterValue: clin.total_clin_value.toString(),
-      validationMessage: ValidationMessage.INVALID_FUNDING_AMOUNT,
-    });
-  }
-  if (!isFundingAmount(clin.obligated_funds.toString())) {
-    errors.push({
-      clinNumber: clin.clin_number,
-      invalidParameterName: "obligated_funds",
-      invalidParameterValue: clin.obligated_funds.toString(),
-      validationMessage: ValidationMessage.INVALID_FUNDING_AMOUNT,
-    });
-  }
+
   if (clin.obligated_funds > clin.total_clin_value) {
     const obj = {
       clinNumber: clin.clin_number,
@@ -144,5 +117,9 @@ export function createValidationErrorResponse(invalidProperties: Record<string, 
   Object.keys(invalidProperties).forEach((key) => {
     if (!key) throw Error("Parameter 'invalidProperties' must not have empty string as key");
   });
-  return new ValidationErrorResponse("Invalid input", invalidProperties);
+  // return new ValidationErrorResponse("Invalid input", invalidProperties);
+  const error = createError(400, ValidationMessage.END_FUTURE);
+  error.code = ErrorCode.INVALID_INPUT;
+  error.details = invalidProperties;
+  throw error;
 }
