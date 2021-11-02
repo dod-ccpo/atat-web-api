@@ -319,7 +319,7 @@ describe("Individual Clin input validation tests", () => {
 describe("All Clins in Funding Step input validation tests", () => {
   it("should accept a Funding Step and validate all Clins contained therein", () => {
     const errors = validateFundingStepClins(mockFundingStepBadData);
-    expect(errors.length).toEqual(20);
+    expect(errors.length).toEqual(20); // this is based upon the specific content of mockFundingStepBadData, update as necessary
     expect(errors).toContainEqual({
       clinNumber: "1",
       invalidParameterName: "clin_number",
