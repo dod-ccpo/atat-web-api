@@ -31,6 +31,7 @@ export const mockPortfolioDraft: PortfolioDraft = {
   num_task_orders: mockFundingStep.task_orders.length,
   num_applications: mockApplicationStep.applications.length,
   num_environments: mockApplicationStep.applications.flatMap((app) => app.environments).length,
+  name: mockPortfolioStep.name,
 };
 
 export const validRequest: APIGatewayProxyEvent = {

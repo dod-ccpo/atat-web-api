@@ -11,7 +11,7 @@ import { PortfolioDraft } from "../models/PortfolioDraft";
 import { PortfolioStep } from "../models/PortfolioStep";
 import { ProvisioningStatus } from "../models/ProvisioningStatus";
 import { SuccessStatusCode } from "../utils/response";
-import { validRequest } from "./commonPortfolioDraftMockData";
+import { mockPortfolioDraft, validRequest } from "./commonPortfolioDraftMockData";
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 beforeEach(() => {
@@ -39,10 +39,9 @@ describe("Validation tests", () => {
 describe("Successful operation tests", () => {
   beforeEach(() => {
     ddbMock.on(GetCommand).resolves({
-      Item: mockPortfolioDraftSummaryGoodData(),
+      Item: mockPortfolioDraft,
     });
   });
-  const goodMockResponse: PortfolioDraft = mockPortfolioDraftSummaryGoodData();
   const portfolioSummaryAttributes = [
     "id",
     "status",
@@ -57,7 +56,7 @@ describe("Successful operation tests", () => {
 
   it("should return Item", async () => {
     const result = await handler(validRequest);
-    expect(result.body).toStrictEqual(JSON.stringify(goodMockResponse));
+    expect(result.body).toStrictEqual(JSON.stringify(mockPortfolioDraft));
   });
   it("should return status code 200", async () => {
     const result = await handler(validRequest);
@@ -79,11 +78,11 @@ describe("Successful operation tests", () => {
     ).length;
     const numOfTaskOrders: number = responseBody.funding_step.task_orders.length;
 
-    expect(responseBody.name).toBe(goodMockResponse.portfolio_step?.name);
-    expect(numOfPortfolioManagers).toBe(goodMockResponse.num_portfolio_managers);
-    expect(numOfApplications).toBe(goodMockResponse.num_applications);
-    expect(numOfEnvironments).toBe(goodMockResponse.num_environments);
-    expect(numOfTaskOrders).toBe(goodMockResponse.num_task_orders);
+    expect(responseBody.name).toBe(mockPortfolioDraft.portfolio_step.name);
+    expect(numOfPortfolioManagers).toBe(mockPortfolioDraft.num_portfolio_managers);
+    expect(numOfApplications).toBe(mockPortfolioDraft.num_applications);
+    expect(numOfEnvironments).toBe(mockPortfolioDraft.num_environments);
+    expect(numOfTaskOrders).toBe(mockPortfolioDraft.num_task_orders);
   });
 });
 
@@ -110,28 +109,6 @@ describe("Incorrect number of attributes for portfolio draft summary", () => {
     expect(numOfEnvironments).not.toBe(badMockResponse.num_environments);
   });
 });
-
-/**
- * Sample Portfolio Draft Summary with good data
- * @returns a complete Portfolio Draft Summary with good data that should not cause errors
- */
-function mockPortfolioDraftSummaryGoodData(): PortfolioDraft {
-  return {
-    id: "41ec495a-6fec-46f1-a4e5-5be6332f4115",
-    updated_at: "2021-09-15T00:15:40.076Z",
-    created_at: "2021-09-15T00:10:52.400Z",
-    status: ProvisioningStatus.NOT_STARTED,
-    name: "Coolest Portfolio",
-    description: "Coolest portfolio description",
-    portfolio_step: mockPortfolioStep(),
-    num_portfolio_managers: 4,
-    application_step: mockApplicationStep,
-    num_applications: 2,
-    num_environments: 3,
-    funding_step: mockFundingStep(),
-    num_task_orders: 2,
-  };
-}
 
 /**
  * Sample Portfolio Draft Summary with bad data
