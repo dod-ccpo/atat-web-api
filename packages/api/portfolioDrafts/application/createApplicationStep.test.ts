@@ -14,6 +14,7 @@ import {
   mockOperatorMissingAccessFields,
   mockApplicationsStepWithGoodAdminRoles,
   mockApplicationsStepWithBadAdminRoles,
+  mockBadApplicationDescriptions,
 } from "./commonApplicationMockData";
 import { mockClient } from "aws-sdk-client-mock";
 import { v4 as uuidv4 } from "uuid";
@@ -84,11 +85,12 @@ describe("Request body shape validations", function () {
   ])("should return an error when the request body is empty or invalid json", async (badRequest) => {
     const invalidRequest: ApiGatewayEventParsed<ApplicationStep> = badRequest as any;
     const result = await handler(invalidRequest, {} as Context, () => null);
+    const responseBody = JSON.parse(result?.body ?? "");
     expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-    expect(JSON.parse(result?.body ?? "").message).toMatch(/Event object failed validation/);
-    expect(JSON.parse(result?.body ?? "").name).toMatch(/BadRequestError/);
-    expect(JSON.parse(result?.body ?? "").details).toHaveLength(1);
-    expect(JSON.parse(result?.body ?? "").details[0]).toEqual({
+    expect(responseBody.message).toMatch(/Event object failed validation/);
+    expect(responseBody.name).toMatch(/BadRequestError/);
+    expect(responseBody.details).toHaveLength(1);
+    expect(responseBody.details[0]).toEqual({
       instancePath: "/body",
       keyword: "type",
       message: "must be object",
@@ -102,13 +104,14 @@ describe("Request body shape validations", function () {
       pathParameters: { portfolioDraftId: uuidv4() },
     } as any;
     const result = await handler(emptyRequest, {} as Context, () => null);
+    const responseBody = JSON.parse(result?.body ?? "");
     expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-    expect(JSON.parse(result?.body ?? "").message).toMatch(/Event object failed validation/);
-    expect(JSON.parse(result?.body ?? "").name).toMatch(/BadRequestError/);
-    expect(JSON.parse(result?.body ?? "").details).toHaveLength(3);
+    expect(responseBody.message).toMatch(/Event object failed validation/);
+    expect(responseBody.name).toMatch(/BadRequestError/);
+    expect(responseBody.details).toHaveLength(3);
     expect(result?.body).toMatch(/"must have required property [applications|operators]/);
     expect(result?.body).toMatch(/"must NOT have additional properties"/);
-    JSON.parse(result?.body ?? "").details.forEach((detail: any) => {
+    responseBody.details.forEach((detail: any) => {
       expect(detail.instancePath).toBe("/body");
       expect(["required", "additionalProperties"]).toContain(detail.keyword);
     });
@@ -119,13 +122,29 @@ describe("Request body shape validations", function () {
       pathParameters: { portfolioDraftId: uuidv4() },
     } as any;
     const result = await handler(invalidShapeRequest, {} as Context, () => null);
+    const responseBody = JSON.parse(result?.body ?? "");
     expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-    expect(JSON.parse(result?.body ?? "").message).toMatch(/Event object failed validation/);
-    expect(JSON.parse(result?.body ?? "").name).toMatch(/BadRequestError/);
+    expect(responseBody.message).toMatch(/Event object failed validation/);
+    expect(responseBody.name).toMatch(/BadRequestError/);
     // 5 different applications, most with missing fields and last with incorrect fields
-    expect(JSON.parse(result?.body ?? "").details).toHaveLength(5);
+    expect(responseBody.details).toHaveLength(5);
     expect(result?.body).toMatch(/"must have required property [name|environments|operators]/);
     expect(result?.body).toMatch(/"must NOT have additional properties"/);
+  });
+  it("should return an error when application description is too long (max 300) or invalid special chars", async () => {
+    const badApplicationDescriptionsRequest: ApiGatewayEventParsed<ApplicationStep> = {
+      body: mockBadApplicationDescriptions,
+      pathParameters: { portfolioDraftId: uuidv4() },
+    } as any;
+    const result = await handler(badApplicationDescriptionsRequest, {} as Context, () => null);
+    const responseBody = JSON.parse(result?.body ?? "");
+    expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
+    expect(responseBody.message).toMatch(/Event object failed validation/);
+    expect(responseBody.name).toMatch(/BadRequestError/);
+    expect(responseBody.details).toHaveLength(2);
+    expect(responseBody.details[0].message).toEqual('must match pattern "^[\\w\\d !@#$%^&*_|:;.-]{0,300}$"');
+    expect(responseBody.details[0].instancePath).toEqual("/body/applications/1/description");
+    expect(responseBody.details[1].instancePath).toEqual("/body/applications/2/description");
   });
   it("should return an error when incorrect or missing environment properties", async () => {
     const badEnvironmentRequest: ApiGatewayEventParsed<ApplicationStep> = {
@@ -133,13 +152,14 @@ describe("Request body shape validations", function () {
       pathParameters: { portfolioDraftId: uuidv4() },
     } as any;
     const result = await handler(badEnvironmentRequest, {} as Context, () => null);
-    JSON.parse(result?.body ?? "").details.forEach((detail: any) => {
+    const responseBody = JSON.parse(result?.body ?? "");
+    responseBody.details.forEach((detail: any) => {
       expect(detail.instancePath).toEqual("/body/applications/0/environments/0");
     });
     expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-    expect(JSON.parse(result?.body ?? "").message).toMatch(/Event object failed validation/);
-    expect(JSON.parse(result?.body ?? "").name).toMatch(/BadRequestError/);
-    expect(JSON.parse(result?.body ?? "").details).toHaveLength(4);
+    expect(responseBody.message).toMatch(/Event object failed validation/);
+    expect(responseBody.name).toMatch(/BadRequestError/);
+    expect(responseBody.details).toHaveLength(4);
     expect(result?.body).toMatch(/"must have required property [name|operators]/);
     expect(result?.body).toMatch(/"must NOT have additional properties"/);
   });
@@ -152,13 +172,14 @@ describe("Request body shape validations", function () {
       pathParameters: { portfolioDraftId: uuidv4() },
     } as any;
     const result = await handler(badPortfolioOperatorRequest, {} as Context, () => null);
+    const responseBody = JSON.parse(result?.body ?? "");
     expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-    expect(JSON.parse(result?.body ?? "").message).toMatch(/Event object failed validation/);
-    expect(JSON.parse(result?.body ?? "").name).toMatch(/BadRequestError/);
-    JSON.parse(result?.body ?? "").details.forEach((detail: any) => {
+    expect(responseBody.message).toMatch(/Event object failed validation/);
+    expect(responseBody.name).toMatch(/BadRequestError/);
+    responseBody.details.forEach((detail: any) => {
       expect(detail.instancePath).toEqual("/body/operators/0");
     });
-    expect(JSON.parse(result?.body ?? "").details).toHaveLength(5);
+    expect(responseBody.details).toHaveLength(5);
     expect(result?.body).toMatch(/"must have required property [display_name|email|access]/);
     expect(result?.body).toMatch(/"must NOT have additional properties"/);
   });
@@ -170,10 +191,11 @@ describe("Request body shape validations", function () {
         pathParameters: { portfolioDraftId: uuidv4() },
       } as any;
       const result = await handler(badPortfolioOperatorRequest, {} as Context, () => null);
+      const responseBody = JSON.parse(result?.body ?? "");
       expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-      expect(JSON.parse(result?.body ?? "").message).toMatch(/Event object failed validation/);
-      expect(JSON.parse(result?.body ?? "").name).toMatch(/BadRequestError/);
-      expect(JSON.parse(result?.body ?? "").details).toHaveLength(1);
+      expect(responseBody.message).toMatch(/Event object failed validation/);
+      expect(responseBody.name).toMatch(/BadRequestError/);
+      expect(responseBody.details).toHaveLength(1);
       expect(result?.body).toMatch(/"must have required property display_name"/);
     }
   );
@@ -185,10 +207,11 @@ describe("Request body shape validations", function () {
         pathParameters: { portfolioDraftId: uuidv4() },
       } as any;
       const result = await handler(badPortfolioOperatorRequest, {} as Context, () => null);
+      const responseBody = JSON.parse(result?.body ?? "");
       expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-      expect(JSON.parse(result?.body ?? "").message).toMatch(/Event object failed validation/);
-      expect(JSON.parse(result?.body ?? "").name).toMatch(/BadRequestError/);
-      expect(JSON.parse(result?.body ?? "").details).toHaveLength(1);
+      expect(responseBody.message).toMatch(/Event object failed validation/);
+      expect(responseBody.name).toMatch(/BadRequestError/);
+      expect(responseBody.details).toHaveLength(1);
       expect(result?.body).toMatch(/"must have required property email"/);
     }
   );
@@ -200,10 +223,11 @@ describe("Request body shape validations", function () {
         pathParameters: { portfolioDraftId: uuidv4() },
       } as any;
       const result = await handler(badPortfolioOperatorRequest, {} as Context, () => null);
+      const responseBody = JSON.parse(result?.body ?? "");
       expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-      expect(JSON.parse(result?.body ?? "").message).toMatch(/Event object failed validation/);
-      expect(JSON.parse(result?.body ?? "").name).toMatch(/BadRequestError/);
-      expect(JSON.parse(result?.body ?? "").details).toHaveLength(1);
+      expect(responseBody.message).toMatch(/Event object failed validation/);
+      expect(responseBody.name).toMatch(/BadRequestError/);
+      expect(responseBody.details).toHaveLength(1);
       expect(result?.body).toMatch(/"must have required property access"/);
     }
   );
@@ -255,12 +279,13 @@ describe("Business rules validation tests", function () {
       pathParameters: { portfolioDraftId: uuidv4() },
     } as any;
     const result = await handler(badApplicationNameRequest, {} as Context, () => null);
+    const responseBody = JSON.parse(result?.body ?? "");
     expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-    expect(JSON.parse(result?.body ?? "").message).toMatch(/Event object failed validation/);
-    expect(JSON.parse(result?.body ?? "").name).toMatch(/BadRequestError/);
+    expect(responseBody.message).toMatch(/Event object failed validation/);
+    expect(responseBody.name).toMatch(/BadRequestError/);
     // 2 different applications, name too short and name too long
-    expect(JSON.parse(result?.body ?? "").details).toHaveLength(2);
-    JSON.parse(result?.body ?? "").details.forEach((detail: any) => {
+    expect(responseBody.details).toHaveLength(2);
+    responseBody.details.forEach((detail: any) => {
       expect(detail.instancePath).toMatch(/\/body\/applications\/[0|1]\/name/);
       expect(detail.message).toEqual('must match pattern "^[a-zA-Z\\d _-]{4,100}$"');
       expect(detail.schemaPath).toEqual("#/properties/body/properties/applications/items/properties/name/pattern");
@@ -272,12 +297,13 @@ describe("Business rules validation tests", function () {
       pathParameters: { portfolioDraftId: uuidv4() },
     } as any;
     const result = await handler(badEnvironmentNameRequest, {} as Context, () => null);
+    const responseBody = JSON.parse(result?.body ?? "");
     expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-    expect(JSON.parse(result?.body ?? "").message).toMatch(/Event object failed validation/);
-    expect(JSON.parse(result?.body ?? "").name).toMatch(/BadRequestError/);
+    expect(responseBody.message).toMatch(/Event object failed validation/);
+    expect(responseBody.name).toMatch(/BadRequestError/);
     // 2 different environment, name too short and name too long
-    expect(JSON.parse(result?.body ?? "").details).toHaveLength(2);
-    expect(JSON.parse(result?.body ?? "").details[0].message).toEqual('must match pattern "^[a-zA-Z\\d ,.-]{1,100}$"');
+    expect(responseBody.details).toHaveLength(2);
+    expect(responseBody.details[0].message).toEqual('must match pattern "^[a-zA-Z\\d ,.-]{1,100}$"');
     expect(result?.body).toMatch(/"\/body\/applications\/0\/environments\/[0|1]\/name"/);
   });
   it("should return a validation error when an operator has a name that is too short or too long", async () => {
@@ -286,12 +312,13 @@ describe("Business rules validation tests", function () {
       pathParameters: { portfolioDraftId: uuidv4() },
     } as any;
     const result = await handler(badOperatorDisplayNameRequest, {} as Context, () => null);
+    const responseBody = JSON.parse(result?.body ?? "");
     expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-    expect(JSON.parse(result?.body ?? "").message).toMatch(/Event object failed validation/);
-    expect(JSON.parse(result?.body ?? "").name).toMatch(/BadRequestError/);
+    expect(responseBody.message).toMatch(/Event object failed validation/);
+    expect(responseBody.name).toMatch(/BadRequestError/);
     // 2 different operators, name too short and name too long
-    expect(JSON.parse(result?.body ?? "").details).toHaveLength(2);
-    expect(JSON.parse(result?.body ?? "").details[0].message).toEqual('must match pattern "^[a-zA-Z\\d ,.-]{1,100}$"');
+    expect(responseBody.details).toHaveLength(2);
+    expect(responseBody.details[0].message).toEqual('must match pattern "^[a-zA-Z\\d ,.-]{1,100}$"');
     expect(result?.body).toMatch(/"\/body\/applications\/0\/environments\/0\/operators\/0\/display_name"/);
     expect(result?.body).toMatch(/"\/body\/applications\/0\/operators\/0\/display_name"/);
   });
@@ -301,11 +328,12 @@ describe("Business rules validation tests", function () {
       pathParameters: { portfolioDraftId: uuidv4() },
     } as any;
     const result = await handler(badOperatorDisplayNameRequest, {} as Context, () => null);
+    const responseBody = JSON.parse(result?.body ?? "");
     expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-    expect(JSON.parse(result?.body ?? "").message).toMatch(/Event object failed validation/);
-    expect(JSON.parse(result?.body ?? "").name).toMatch(/BadRequestError/);
-    expect(JSON.parse(result?.body ?? "").details).toHaveLength(1);
-    expect(JSON.parse(result?.body ?? "").details[0].message).toEqual("must NOT have less than 1 item");
+    expect(responseBody.message).toMatch(/Event object failed validation/);
+    expect(responseBody.name).toMatch(/BadRequestError/);
+    expect(responseBody.details).toHaveLength(1);
+    expect(responseBody.details[0].message).toEqual("must NOT have less than 1 item");
     expect(result?.body).toMatch(/\/body\/applications"/);
   });
   it("should return a validation error when there is not at least 1 environment", async () => {
@@ -314,12 +342,13 @@ describe("Business rules validation tests", function () {
       pathParameters: { portfolioDraftId: uuidv4() },
     } as any;
     const result = await handler(badOperatorDisplayNameRequest, {} as Context, () => null);
+    const responseBody = JSON.parse(result?.body ?? "");
     expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-    expect(JSON.parse(result?.body ?? "").message).toMatch(/Event object failed validation/);
-    expect(JSON.parse(result?.body ?? "").name).toMatch(/BadRequestError/);
+    expect(responseBody.message).toMatch(/Event object failed validation/);
+    expect(responseBody.name).toMatch(/BadRequestError/);
     // 2 different operators, name too short and name too long
-    expect(JSON.parse(result?.body ?? "").details).toHaveLength(1);
-    expect(JSON.parse(result?.body ?? "").details[0].message).toEqual("must NOT have less than 1 item");
+    expect(responseBody.details).toHaveLength(1);
+    expect(responseBody.details[0].message).toEqual("must NOT have less than 1 item");
     expect(result?.body).toMatch(/"\/body\/applications\/0\/environments"/);
   });
   it("should return a validation error when admin roles are not acceptable", async () => {
@@ -328,10 +357,11 @@ describe("Business rules validation tests", function () {
       pathParameters: { portfolioDraftId: uuidv4() },
     } as any;
     const result = await handler(badAdminRolesRequest, {} as Context, () => null);
+    const responseBody = JSON.parse(result?.body ?? "");
     expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-    expect(JSON.parse(result?.body ?? "").code).toMatch(/INVALID_INPUT/);
-    expect(JSON.parse(result?.body ?? "").message).toMatch(/Invalid admin roles/);
-    expect(JSON.parse(result?.body ?? "").error_map).toEqual({
+    expect(responseBody.code).toMatch(/INVALID_INPUT/);
+    expect(responseBody.message).toMatch(/Invalid admin roles/);
+    expect(responseBody.error_map).toEqual({
       acceptableAdministratorRoles: false,
       applicationsWithNoAdmin: [0, 1],
       environmentsWithNoAdmin: [

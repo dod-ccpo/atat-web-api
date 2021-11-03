@@ -556,3 +556,24 @@ export const mockApplicationsStepWithBadAdminRoles: ApplicationStep[] = [
     ],
   },
 ];
+
+export const mockBadApplicationDescriptions = {
+  ...mockApplicationStep,
+  applications: [
+    {
+      ...mockApplicationStep.applications[0],
+      description: "Application for planning an emergency evacuation !@#$%^&*_|:;.-.",
+    },
+    {
+      ...mockApplicationStep.applications[0],
+      // invalid special chars
+      description: "Application for planning an emergency evacuation (+=?{[]<>})",
+    },
+    {
+      ...mockApplicationStep.applications[1],
+      // too long
+      description:
+        "Application for planning an emergency evacuation. Application for planning an emergency evacuation.Application for planning an emergency evacuation.Application for planning an emergency evacuation.Application for planning an emergency evacuation.Application for planning an emergency evacuation.Application for planning an emergency evacuation.",
+    },
+  ],
+};
