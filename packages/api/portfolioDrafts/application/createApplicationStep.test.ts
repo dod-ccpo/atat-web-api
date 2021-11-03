@@ -12,6 +12,8 @@ import {
   mockOperatorMissingDisplayNameFields,
   mockOperatorMissingEmailFields,
   mockOperatorMissingAccessFields,
+  mockApplicationsStepWithGoodAdminRoles,
+  mockApplicationsStepWithBadAdminRoles,
 } from "./commonApplicationMockData";
 import { mockClient } from "aws-sdk-client-mock";
 import { v4 as uuidv4 } from "uuid";
@@ -22,6 +24,7 @@ import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusC
 import { handler } from "./createApplicationStep";
 import { DATABASE_ERROR, NO_SUCH_PORTFOLIO_DRAFT } from "../../utils/errors";
 import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
+import { findAdministrators } from "../../utils/requestValidation";
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 beforeEach(() => {
@@ -319,11 +322,86 @@ describe("Business rules validation tests", function () {
     expect(JSON.parse(result?.body ?? "").details[0].message).toEqual("must NOT have less than 1 item");
     expect(result?.body).toMatch(/"\/body\/applications\/0\/environments"/);
   });
-  it("should be an administrator operator at at least one level", async () => {
-    // TODO: add validation for admin operators
-    // 1 root admin
-    // 1 admin at each app level (no root operators)
-    // 1 admin each env level (no root or app operators)
+  it("should return a validation error when admin roles are not acceptable", async () => {
+    const badAdminRolesRequest: ApiGatewayEventParsed<ApplicationStep> = {
+      body: mockApplicationsStepWithBadAdminRoles[0],
+      pathParameters: { portfolioDraftId: uuidv4() },
+    } as any;
+    const result = await handler(badAdminRolesRequest, {} as Context, () => null);
+    expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
+    expect(JSON.parse(result?.body ?? "").code).toMatch(/INVALID_INPUT/);
+    expect(JSON.parse(result?.body ?? "").message).toMatch(/Invalid admin roles/);
+    expect(JSON.parse(result?.body ?? "").error_map).toEqual({
+      acceptableAdministratorRoles: false,
+      applicationsWithNoAdmin: [0, 1],
+      environmentsWithNoAdmin: [
+        { appIndex: 0, envIndex: 0 },
+        { appIndex: 1, envIndex: 0 },
+      ],
+      hasAdminForEachApplication: false,
+      hasAdminForEachEnvironment: false,
+      hasPortfolioAdminRole: false,
+    });
+  });
+});
+
+describe("findAdministrators", function () {
+  /**
+   * Acceptable admin roles in an application step according to the business rules:
+   * - 1 root portfolio admin role
+   * - 1 application admin role for each application (without a portfolio admin role above)
+   * - 1 environment admin role for each environment (without a portfolio or application admin role above)
+   */
+  it("should return acceptable admin role for at each level", async () => {
+    const administratorsFound = findAdministrators(mockApplicationsStepWithGoodAdminRoles[0]);
+    expect(administratorsFound.hasPortfolioAdminRole).toBeTruthy();
+    expect(administratorsFound.hasAdminForEachApplication).toBeTruthy();
+    expect(administratorsFound.hasAdminForEachEnvironment).toBeTruthy();
+    expect(administratorsFound.applicationsWithNoAdmin).toHaveLength(0);
+    expect(administratorsFound.environmentsWithNoAdmin).toHaveLength(0);
+    expect(administratorsFound.acceptableAdministratorRoles).toBeTruthy();
+  });
+  it("should return acceptable admin role for at both app and env level", async () => {
+    const administratorsFound = findAdministrators(mockApplicationsStepWithGoodAdminRoles[1]);
+    expect(administratorsFound.hasPortfolioAdminRole).toBeFalsy();
+    expect(administratorsFound.hasAdminForEachApplication).toBeTruthy();
+    expect(administratorsFound.hasAdminForEachEnvironment).toBeTruthy();
+    expect(administratorsFound.applicationsWithNoAdmin).toHaveLength(0);
+    expect(administratorsFound.environmentsWithNoAdmin).toHaveLength(0);
+    expect(administratorsFound.acceptableAdministratorRoles).toBeTruthy();
+  });
+  it("should return acceptable admin role with one at the app level and remainder at env level", async () => {
+    const administratorsFound = findAdministrators(mockApplicationsStepWithGoodAdminRoles[2]);
+    expect(administratorsFound.hasPortfolioAdminRole).toBeFalsy();
+    expect(administratorsFound.hasAdminForEachApplication).toBeFalsy();
+    expect(administratorsFound.hasAdminForEachEnvironment).toBeFalsy();
+    expect(administratorsFound.applicationsWithNoAdmin).toEqual([1]);
+    expect(administratorsFound.environmentsWithNoAdmin).toEqual([{ appIndex: 0, envIndex: 0 }]);
+    expect(administratorsFound.acceptableAdministratorRoles).toBeTruthy();
+  });
+  it("should return missing admin roles at all levels", async () => {
+    const administratorsFound = findAdministrators(mockApplicationsStepWithBadAdminRoles[0]);
+    expect(administratorsFound.hasPortfolioAdminRole).toBeFalsy();
+    expect(administratorsFound.hasAdminForEachApplication).toBeFalsy();
+    expect(administratorsFound.hasAdminForEachEnvironment).toBeFalsy();
+    expect(administratorsFound.applicationsWithNoAdmin).toEqual([0, 1]);
+    expect(administratorsFound.environmentsWithNoAdmin).toEqual([
+      { appIndex: 0, envIndex: 0 },
+      { appIndex: 1, envIndex: 0 },
+    ]);
+    expect(administratorsFound.acceptableAdministratorRoles).toBeFalsy();
+  });
+  it("should return missing admin role at one env with no root or app admin role ", async () => {
+    const administratorsFound = findAdministrators(mockApplicationsStepWithBadAdminRoles[1]);
+    expect(administratorsFound.hasPortfolioAdminRole).toBeFalsy();
+    expect(administratorsFound.hasAdminForEachApplication).toBeFalsy();
+    expect(administratorsFound.hasAdminForEachEnvironment).toBeFalsy();
+    expect(administratorsFound.applicationsWithNoAdmin).toEqual([1, 2]);
+    expect(administratorsFound.environmentsWithNoAdmin).toEqual([
+      { appIndex: 0, envIndex: 0 },
+      { appIndex: 2, envIndex: 1 },
+    ]);
+    expect(administratorsFound.acceptableAdministratorRoles).toBeFalsy();
   });
 });
 

@@ -115,8 +115,43 @@ export const mockPortfolioDraftSummary: PortfolioDraft = {
   num_environments: mockApplicationStep.applications.flatMap((app) => app.environments).length,
 } as PortfolioDraft;
 
-/* ABOVE THIS LINE ARE VALID OBJECTS WITH GOOD DATA */
-/* BELOW THIS LINE ARE INVALID OBJECTS WITH MISSING FIELDS AND BAD DATA */
+/**
+ * An array of good application step items with acceptable admin roles
+ * to match business rules
+ * @returns an array of good application steps
+ */
+export const mockApplicationsStepWithGoodAdminRoles: ApplicationStep[] = [
+  { ...mockApplicationStep },
+  { ...mockApplicationStep, operators: [] },
+  {
+    ...mockApplicationStep,
+    operators: [],
+    applications: [
+      {
+        name: "Cool App",
+        operators: [{ ...mockApplicationStep.applications[0].operators[0], access: AccessLevel.ADMINISTRATOR }],
+        environments: [{ name: "Paradise", operators: [] }],
+      },
+      {
+        name: "Different App",
+        operators: [],
+        environments: [
+          {
+            name: "sandbox",
+            operators: [{ ...mockApplicationStep.applications[0].operators[0], access: AccessLevel.ADMINISTRATOR }],
+          },
+          {
+            name: "develop",
+            operators: [{ ...mockApplicationStep.applications[0].operators[0], access: AccessLevel.ADMINISTRATOR }],
+          },
+        ],
+      },
+    ],
+  },
+];
+
+/** ABOVE THIS LINE ARE VALID OBJECTS WITH GOOD DATA **/
+/** BELOW THIS LINE ARE INVALID OBJECTS WITH MISSING FIELDS AND BAD DATA **/
 
 /**
  * An array of Operator objects with invalid emails
@@ -445,3 +480,79 @@ export const mockBadPortfolioDraftSummary: PortfolioDraft = {
   num_applications: 77,
   num_environments: 99,
 } as PortfolioDraft;
+
+/**
+ * An array of bad application step items with admin roles
+ * that do not follow the business rules
+ * @returns an array of bad application steps
+ */
+export const mockApplicationsStepWithBadAdminRoles: ApplicationStep[] = [
+  {
+    ...mockApplicationStep,
+    operators: [],
+    applications: [
+      {
+        name: "Cool App",
+        operators: [],
+        environments: [{ name: "Paradise", operators: [] }],
+      },
+      {
+        name: "Other App",
+        operators: [],
+        environments: [
+          {
+            name: "sandbox",
+            operators: [],
+          },
+          {
+            name: "develop",
+            operators: [{ ...mockApplicationStep.applications[0].operators[0], access: AccessLevel.ADMINISTRATOR }],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    ...mockApplicationStep,
+    operators: [],
+    applications: [
+      {
+        name: "Cool App",
+        operators: [{ ...mockApplicationStep.applications[0].operators[0], access: AccessLevel.ADMINISTRATOR }],
+        environments: [{ name: "Paradise", operators: [] }],
+      },
+      {
+        name: "Unknown App",
+        operators: [],
+        environments: [
+          {
+            name: "sandbox",
+            operators: [{ ...mockApplicationStep.applications[0].operators[0], access: AccessLevel.ADMINISTRATOR }],
+          },
+          {
+            name: "develop",
+            operators: [{ ...mockApplicationStep.applications[0].operators[0], access: AccessLevel.ADMINISTRATOR }],
+          },
+        ],
+      },
+      {
+        name: "Legacy App",
+        operators: [],
+        environments: [
+          {
+            name: "sandbox",
+            operators: [{ ...mockApplicationStep.applications[0].operators[0], access: AccessLevel.ADMINISTRATOR }],
+          },
+          {
+            name: "stage",
+            operators: [],
+          },
+          {
+            name: "develop",
+            operators: [{ ...mockApplicationStep.applications[0].operators[0], access: AccessLevel.ADMINISTRATOR }],
+          },
+        ],
+      },
+    ],
+  },
+];

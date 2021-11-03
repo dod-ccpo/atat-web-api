@@ -5,7 +5,7 @@ import { ApplicationStep } from "../../models/ApplicationStep";
 import { APPLICATION_STEP } from "../../models/PortfolioDraft";
 import { dynamodbDocumentClient as client } from "../../utils/aws-sdk/dynamodb";
 import { DATABASE_ERROR, NO_SUCH_PORTFOLIO_DRAFT } from "../../utils/errors";
-import { ApiSuccessResponse, SetupError, SuccessStatusCode } from "../../utils/response";
+import { ApiSuccessResponse, SetupError, SuccessStatusCode, ValidationErrorResponse } from "../../utils/response";
 import schema = require("../../models/schema.json");
 import middy from "@middy/core";
 import xssSanitizer from "../xssSanitizer";
@@ -14,7 +14,7 @@ import validator from "@middy/validator";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import cors from "@middy/http-cors";
 import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
-import { shapeValidationForPostRequest } from "../../utils/requestValidation";
+import { findAdministrators, shapeValidationForPostRequest } from "../../utils/requestValidation";
 
 /**
  * Submits the Application Step of the Portfolio Draft Wizard
@@ -31,6 +31,17 @@ export async function baseHandler(
   }
   const portfolioDraftId = setupResult.path.portfolioDraftId;
   const applicationStep = event.body;
+  const adminRoles = findAdministrators(applicationStep);
+  // TODO(AT-6734): add uniform validation response for business rules
+  if (!adminRoles.acceptableAdministratorRoles) {
+    return new ValidationErrorResponse(
+      `Invalid admin roles. Acceptable admin rules are:
+      - one portfolio admin role
+      - at least one app admin role for each app when no portfolio admin role
+      - at least one env admin role for each env when no app admin role one level up.`,
+      { ...adminRoles }
+    );
+  }
 
   try {
     await client.send(
@@ -75,10 +86,6 @@ const wrappedApplicationStepSchema = {
 export const handler = middy(baseHandler)
   .use(xssSanitizer())
   .use(jsonBodyParser())
-  // TODO(AT-): return strict to true
-  // tried to use false to get pass the validation errors, but did not work
-  .use(
-    validator({ inputSchema: wrappedApplicationStepSchema /* ajvOptions: { strict: false, strictSchema: false } */ })
-  )
+  .use(validator({ inputSchema: wrappedApplicationStepSchema }))
   .use(JSONErrorHandlerMiddleware())
   .use(cors({ headers: "*", methods: "*" }));
