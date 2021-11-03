@@ -9,6 +9,7 @@ import { Operator, operatorFields } from "../models/Operator";
 import { TaskOrder, taskOrderFields } from "../models/TaskOrder";
 import { validate as uuidValidate, version as uuidVersion } from "uuid";
 import { PortfolioDraftSummary, portfolioDraftSummaryProperties } from "../models/PortfolioDraftSummary";
+import { PortfolioDraft, portfolioDraftProperties } from "../models/PortfolioDraft";
 
 /**
  * Check whether a given string is valid JSON.
@@ -95,6 +96,16 @@ export function isTaskOrder(object: unknown): object is TaskOrder {
  */
 export function isPortfolioDraftSummary(object: unknown): object is PortfolioDraftSummary {
   return containsExactlyProperties(object, portfolioDraftSummaryProperties);
+}
+
+/**
+ * Check whether a given object is a {@link PortfolioDraft}
+ *
+ * @param object - The object to check
+ * @returns true if object has all attributes of a {@link PortfolioDraft}
+ */
+export function isPortfolioDraft(object: unknown): object is PortfolioDraft {
+  return containsExactlyProperties(object, portfolioDraftProperties);
 }
 
 /**

@@ -9,6 +9,8 @@ import {
   mockApplicationJabbasPalaceExpansionApp,
 } from "../portfolioDrafts/application/commonApplicationMockData";
 import {
+  mockPortfolioDraft,
+  mockPortfolioDraftMissingFields,
   mockPortfolioDraftSummary,
   mockPortfolioDraftSummaryMissingFields,
 } from "../portfolioDrafts/commonPortfolioDraftMockData";
@@ -28,6 +30,7 @@ import {
   isEnvironment,
   isOperator,
   isPortfolioDraftSummary,
+  isPortfolioDraft,
 } from "./validation";
 
 describe("Testing validation of request body", () => {
@@ -242,6 +245,17 @@ describe("isPortfolioDraftSummary()", () => {
       expect(isPortfolioDraftSummary(item)).toEqual(false);
     }
   );
+});
+describe("isPortfolioDraft()", () => {
+  it.each([true, 1, undefined, null])("should reject non-objects", async (item) => {
+    expect(isPortfolioDraft(item)).toEqual(false);
+  });
+  it("should accept a PortfolioDraft object", async () => {
+    expect(isPortfolioDraft(mockPortfolioDraft)).toEqual(true);
+  });
+  it.each(mockPortfolioDraftMissingFields)("should reject a PortfolioDraft missing any field", async (item) => {
+    expect(isPortfolioDraft(item)).toEqual(false);
+  });
 });
 
 describe("Testing validation of path parameter", () => {

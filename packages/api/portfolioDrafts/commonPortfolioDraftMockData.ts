@@ -167,3 +167,30 @@ export const mockPortfolioDraftSummaryMissingFields = [
     // num_environments: 0,
   },
 ];
+
+export const mockPortfolioDraftMissingFields = [
+  {
+    // ...mockPortfolioDraftSummary,
+    portfolio_step: null,
+    funding_step: null,
+    application_step: null,
+  },
+  {
+    ...mockPortfolioDraftSummary,
+    // portfolio_step: null,
+    funding_step: null,
+    application_step: null,
+  },
+  {
+    ...mockPortfolioDraftSummary,
+    portfolio_step: null,
+    // funding_step: null,
+    application_step: null,
+  },
+  {
+    ...mockPortfolioDraftSummary,
+    portfolio_step: null,
+    funding_step: null,
+    // application_step: null,
+  },
+];
