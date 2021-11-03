@@ -492,7 +492,7 @@ export const mockApplicationsStepWithBadAdminRoles: ApplicationStep[] = [
     operators: [],
     applications: [
       {
-        name: "Cool App",
+        name: "Escape App",
         operators: [],
         environments: [{ name: "Paradise", operators: [] }],
       },
@@ -501,11 +501,11 @@ export const mockApplicationsStepWithBadAdminRoles: ApplicationStep[] = [
         operators: [],
         environments: [
           {
-            name: "sandbox",
+            name: "Random Env 1",
             operators: [],
           },
           {
-            name: "develop",
+            name: "develop 1",
             operators: [{ ...mockApplicationStep.applications[0].operators[0], access: AccessLevel.ADMINISTRATOR }],
           },
         ],
@@ -517,21 +517,21 @@ export const mockApplicationsStepWithBadAdminRoles: ApplicationStep[] = [
     operators: [],
     applications: [
       {
-        name: "Cool App",
-        operators: [{ ...mockApplicationStep.applications[0].operators[0], access: AccessLevel.ADMINISTRATOR }],
-        environments: [{ name: "Paradise", operators: [] }],
+        ...mockApplicationStep.applications[0],
+        operators: [{ ...mockApplicationStep.applications[1].operators[0], access: AccessLevel.ADMINISTRATOR }],
+        environments: [{ name: "no operators", operators: [] }],
       },
       {
-        name: "Unknown App",
+        ...mockApplicationStep.applications[1],
         operators: [],
         environments: [
           {
-            name: "sandbox",
-            operators: [{ ...mockApplicationStep.applications[0].operators[0], access: AccessLevel.ADMINISTRATOR }],
+            name: "Best sandbox",
+            operators: [{ ...mockApplicationStep.applications[1].operators[1], access: AccessLevel.ADMINISTRATOR }],
           },
           {
-            name: "develop",
-            operators: [{ ...mockApplicationStep.applications[0].operators[0], access: AccessLevel.ADMINISTRATOR }],
+            name: "Best develop",
+            operators: [{ ...mockApplicationStep.applications[1].operators[3], access: AccessLevel.ADMINISTRATOR }],
           },
         ],
       },
@@ -540,16 +540,16 @@ export const mockApplicationsStepWithBadAdminRoles: ApplicationStep[] = [
         operators: [],
         environments: [
           {
-            name: "sandbox",
-            operators: [{ ...mockApplicationStep.applications[0].operators[0], access: AccessLevel.ADMINISTRATOR }],
+            name: "legacy-sandbox",
+            operators: [{ ...mockApplicationStep.applications[1].operators[0], access: AccessLevel.ADMINISTRATOR }],
           },
           {
-            name: "stage",
+            name: "legacy-stage",
             operators: [],
           },
           {
-            name: "develop",
-            operators: [{ ...mockApplicationStep.applications[0].operators[0], access: AccessLevel.ADMINISTRATOR }],
+            name: "legacy-develop",
+            operators: [{ ...mockApplicationStep.applications[1].operators[0], access: AccessLevel.ADMINISTRATOR }],
           },
         ],
       },
