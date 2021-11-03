@@ -1059,6 +1059,7 @@ components:
           pattern: '^[a-zA-Z\d _-]{4,100}$'
         description:
           type: string
+          pattern: '^[\w\d !@#$%^&*_|:;.-]{0,300}$'
         environments:
           type: array
           minItems: 1
