@@ -5,7 +5,7 @@ import { ApiGatewayEventParsed } from "./eventHandlingTool";
 import { FundingStep, ValidationMessage } from "../models/FundingStep";
 import { Clin } from "../models/Clin";
 import createError from "http-errors";
-import { ErrorCode } from "../models/Error";
+
 /**
  * Check if incoming POST Request passes basic shape validation
  *
@@ -33,7 +33,6 @@ export function shapeValidationForPostRequest<T>(
 
   return new SetupSuccess<T>({ portfolioDraftId }, bodyResult as unknown as T);
 }
-
 export interface ClinValidationError {
   clinNumber: string;
   invalidParameterName: string;
@@ -41,16 +40,28 @@ export interface ClinValidationError {
   validationMessage: ValidationMessage;
 }
 
-export async function validateFundingStepClins(fs: FundingStep): Promise<void> {
-  const errors = fs.task_orders
+/**
+ * Check if the given Funding Step object passed business rule validation
+ *
+ * @param fs - the FundingStep object that has passed schema validation
+ * @returns an ValidationErrorResponse (by throwing an error to the middleware) if there are Clin validation errors
+ */
+
+export function businessRulesValidationForFundingStep(fs: FundingStep): ValidationErrorResponse | undefined {
+  const errors: Array<ClinValidationError> = validateFundingStepClins(fs);
+  if (errors.length) {
+    return createBusinessRulesValidationErrorResponse({ input_validation_errors: errors });
+  }
+  console.log("Business rule validation succeded");
+  return undefined;
+}
+
+export function validateFundingStepClins(fs: FundingStep): Array<ClinValidationError> {
+  return fs.task_orders
     .flatMap((taskOrder) => taskOrder.clins)
     .map(validateClin)
     .reduce((accumulator, validationErrors) => accumulator.concat(validationErrors), []);
-  if (errors.length) {
-    createValidationErrorResponse({ input_validation_errors: errors });
-  }
 }
-
 /**
  * Validates the given clin object
  * @param clin an object that looks like a Clin
@@ -64,7 +75,6 @@ export function validateClin(clin: Clin): Array<ClinValidationError> {
       clinNumber: clin.clin_number,
       validationMessage: ValidationMessage.START_BEFORE_END,
     };
-
     errors.push({
       ...obj,
       invalidParameterName: "pop_start_date",
@@ -104,13 +114,9 @@ export function validateClin(clin: Clin): Array<ClinValidationError> {
   return errors;
 }
 
-/**
- * Returns an error response containing 1) an error map containing the specified invalid properties, 2) an error code, 3) a message
- * @param invalidProperties object containing property names and their values which failed validation
- * @returns ValidationErrorResponse containing an error map, error code, and a message
- */
-
-export function createValidationErrorResponse(invalidProperties: Record<string, unknown>): ValidationErrorResponse {
+export function createBusinessRulesValidationErrorResponse(
+  invalidProperties: Record<string, unknown>
+): ValidationErrorResponse {
   if (Object.keys(invalidProperties).length === 0) {
     throw Error("Parameter 'invalidProperties' must not be empty");
   }
@@ -118,8 +124,7 @@ export function createValidationErrorResponse(invalidProperties: Record<string, 
     if (!key) throw Error("Parameter 'invalidProperties' must not have empty string as key");
   });
   // return new ValidationErrorResponse("Invalid input", invalidProperties);
-  const error = createError(400, ValidationMessage.END_FUTURE);
-  error.code = ErrorCode.INVALID_INPUT;
+  const error = createError(400, "Business rules validation failed");
   error.details = invalidProperties;
   throw error;
 }
