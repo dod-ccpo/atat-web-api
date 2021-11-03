@@ -2,32 +2,21 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from "aws-lambda
 import { ApiSuccessResponse, SetupError, SuccessStatusCode, ValidationErrorResponse } from "../../utils/response";
 import { dynamodbDocumentClient as client } from "../../utils/aws-sdk/dynamodb";
 import { FUNDING_STEP } from "../../models/PortfolioDraft";
-import { FundingStep, ValidationMessage } from "../../models/FundingStep";
+import { FundingStep } from "../../models/FundingStep";
 import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { DATABASE_ERROR, NO_SUCH_PORTFOLIO_DRAFT } from "../../utils/errors";
 import schema = require("../../models/schema.json");
 import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
-import {
-  ClinValidationError,
-  createValidationErrorResponse,
-  shapeValidationForPostRequest,
-  validateFundingStepClins,
-} from "../../utils/requestValidation";
+import { shapeValidationForPostRequest, businessRulesValidationForFundingStep } from "../../utils/requestValidation";
 import middy from "@middy/core";
 import jsonBodyParser from "@middy/http-json-body-parser";
 import validator from "@middy/validator";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import cors from "@middy/http-cors";
 import xssSanitizer from "../xssSanitizer";
+import errorHandlingMiddleware from "../../utils/errorHandlingMiddleware";
+import { wrapSchema } from "../../utils/schemaWrapper";
 
-const validatedSchema = schema.FundingStep;
-const schemaWrapper = {
-  type: "object",
-  required: ["body"],
-  properties: {
-    body: validatedSchema,
-  },
-};
 /**
  * Submits the Funding Step of the Portfolio Draft Wizard
  *
@@ -45,16 +34,7 @@ export async function baseHandler(
   const portfolioDraftId = setupResult.path.portfolioDraftId;
   const fundingStep = event.body;
   // Perform business rules validation
-  validateFundingStepClins(fundingStep);
-
-  // const validatedFundingStep = validateFundingStepClins(fundingStep);
-
-  /*
-  const errors: Array<ClinValidationError> = validateFundingStepClins(fundingStep);
-  if (errors.length) {
-    return createValidationErrorResponse({ input_validation_errors: errors });
-  } */
-  // console.log(validatedFundingStep);
+  businessRulesValidationForFundingStep(fundingStep);
   // Perform database call
   try {
     await client.send(
@@ -93,10 +73,11 @@ handler
   .use(jsonBodyParser())
   .use(
     validator({
-      inputSchema: schemaWrapper,
+      inputSchema: wrapSchema(schema.FundingStep),
       ajvOptions: { strict: false },
     })
   )
+  .use(errorHandlingMiddleware())
   .use(JSONErrorHandlerMiddleware())
   .use(cors({ headers: "*", methods: "*" }));
 
