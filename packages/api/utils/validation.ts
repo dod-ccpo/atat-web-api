@@ -1,7 +1,7 @@
 import { Application } from "../models/Application";
 import { ApplicationStep } from "../models/ApplicationStep";
 import { Clin } from "../models/Clin";
-import { containsExactlyFields } from "../models/TypeFields";
+import { containsExactlyProperties } from "../models/TypeFields";
 import { Environment } from "../models/Environment";
 import { FundingStep } from "../models/FundingStep";
 import { PortfolioStep } from "../models/PortfolioStep";
@@ -83,7 +83,7 @@ export function isFundingStep(object: unknown): object is FundingStep {
  * @returns true if object has all attributes of a {@link TaskOrder}
  */
 export function isTaskOrder(object: unknown): object is TaskOrder {
-  return containsExactlyFields(object, taskOrderFields);
+  return containsExactlyProperties(object, taskOrderFields);
 }
 
 /**
@@ -142,7 +142,7 @@ export function isEnvironment(object: unknown): object is Environment {
  * @returns true if the object has all the attributes of an {@link Operator}
  */
 export function isOperator(object: unknown): object is Operator {
-  return containsExactlyFields(object, operatorFields);
+  return containsExactlyProperties(object, operatorFields);
 }
 
 /**

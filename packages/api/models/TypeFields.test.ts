@@ -1,5 +1,5 @@
 import { APPLICATION_STEP, FUNDING_STEP, PORTFOLIO_STEP } from "./PortfolioDraft";
-import { ExhaustiveAttributeMap, exhaustivePick } from "./TypeFields";
+import { ExhaustivePropertyMap, exhaustivePick } from "./TypeFields";
 import { mockPortfolioDraft } from "../portfolioDrafts/commonPortfolioDraftMockData";
 import { portfolioDraftSummaryProperties } from "./PortfolioDraftSummary";
 
@@ -7,7 +7,7 @@ describe("test object trimming with exhaustivePick()", () => {
   interface ParentObject {
     foo: number;
   }
-  const parentObjectProperties: ExhaustiveAttributeMap<ParentObject> = {
+  const parentObjectProperties: ExhaustivePropertyMap<ParentObject> = {
     foo: null,
   };
   interface ChildObject extends ParentObject {

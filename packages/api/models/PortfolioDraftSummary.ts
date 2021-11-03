@@ -1,6 +1,6 @@
 import { BaseDocument } from "./BaseDocument";
 import { ProvisioningStatus } from "./ProvisioningStatus";
-import { ExhaustiveAttributeMap } from "./TypeFields";
+import { ExhaustivePropertyMap } from "./TypeFields";
 
 export interface PortfolioDraftSummary extends BaseDocument {
   status: ProvisioningStatus;
@@ -12,7 +12,7 @@ export interface PortfolioDraftSummary extends BaseDocument {
   num_environments: number;
 }
 
-export const portfolioDraftSummaryProperties: ExhaustiveAttributeMap<PortfolioDraftSummary> = {
+export const portfolioDraftSummaryProperties: ExhaustivePropertyMap<PortfolioDraftSummary> = {
   // BaseDocument properties
   id: null,
   created_at: null,

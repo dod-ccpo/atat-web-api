@@ -1,4 +1,4 @@
-import { ExhaustiveAttributeMap } from "./TypeFields";
+import { ExhaustivePropertyMap } from "./TypeFields";
 
 export enum AccessLevel {
   ADMINISTRATOR = "administrator",
@@ -23,7 +23,7 @@ export interface Operator {
   access: AccessLevel;
 }
 
-export const operatorFields: ExhaustiveAttributeMap<Operator> = {
+export const operatorFields: ExhaustivePropertyMap<Operator> = {
   display_name: null,
   email: null,
   access: null,
