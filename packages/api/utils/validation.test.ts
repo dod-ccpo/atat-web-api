@@ -1,4 +1,5 @@
 import { CloudServiceProvider } from "../models/CloudServiceProvider";
+import { mockPortfolioStepMissingFields } from "../portfolioDrafts/portfolio/commonPortfolioMockData";
 import {
   mockApplicationStep,
   mockApplicationStepsMissingFields,
@@ -7,8 +8,10 @@ import {
   mockEnvironmentsMissingFields,
   mockApplicationJabbasPalaceExpansionApp,
 } from "../portfolioDrafts/application/commonApplicationMockData";
-import { mockPortfolioDraftSummary } from "../portfolioDrafts/commonPortfolioDraftMockData";
-import { mockPortfolioStepMissingFields } from "../portfolioDrafts/portfolio/commonPortfolioMockData";
+import {
+  mockPortfolioDraftSummary,
+  mockPortfolioDraftSummaryMissingFields,
+} from "../portfolioDrafts/commonPortfolioDraftMockData";
 import {
   isBodyPresent,
   isFundingStep,
@@ -227,7 +230,18 @@ describe("isOperator()", () => {
   });
 });
 describe("isPortfolioDraftSummary()", () => {
-  expect(isPortfolioDraftSummary(mockPortfolioDraftSummary)).toEqual(true);
+  it.each([true, 1, undefined, null])("should reject non-objects", async (item) => {
+    expect(isPortfolioDraftSummary(item)).toEqual(false);
+  });
+  it("should accept a PortfolioDraftSummary object", async () => {
+    expect(isPortfolioDraftSummary(mockPortfolioDraftSummary)).toEqual(true);
+  });
+  it.each(mockPortfolioDraftSummaryMissingFields)(
+    "should reject a PortfolioDraftSummary missing any field",
+    async (item) => {
+      expect(isPortfolioDraftSummary(item)).toEqual(false);
+    }
+  );
 });
 
 describe("Testing validation of path parameter", () => {
