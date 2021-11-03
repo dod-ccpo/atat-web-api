@@ -8,6 +8,7 @@ import { PortfolioStep } from "../models/PortfolioStep";
 import { Operator, operatorFields } from "../models/Operator";
 import { TaskOrder, taskOrderFields } from "../models/TaskOrder";
 import { validate as uuidValidate, version as uuidVersion } from "uuid";
+import { PortfolioDraftSummary, portfolioDraftSummaryProperties } from "../models/PortfolioDraftSummary";
 
 /**
  * Check whether a given string is valid JSON.
@@ -84,6 +85,16 @@ export function isFundingStep(object: unknown): object is FundingStep {
  */
 export function isTaskOrder(object: unknown): object is TaskOrder {
   return containsExactlyProperties(object, taskOrderFields);
+}
+
+/**
+ * Check whether a given object is a {@link PortfolioDraftSummary}
+ *
+ * @param object - The object to check
+ * @returns true if object has all attributes of a {@link PortfolioDraftSummary}
+ */
+export function isPortfolioDraftSummary(object: unknown): object is PortfolioDraftSummary {
+  return containsExactlyProperties(object, portfolioDraftSummaryProperties);
 }
 
 /**

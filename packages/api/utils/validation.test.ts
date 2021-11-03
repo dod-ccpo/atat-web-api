@@ -7,6 +7,7 @@ import {
   mockEnvironmentsMissingFields,
   mockApplicationJabbasPalaceExpansionApp,
 } from "../portfolioDrafts/application/commonApplicationMockData";
+import { mockPortfolioDraftSummary } from "../portfolioDrafts/commonPortfolioDraftMockData";
 import { mockPortfolioStepMissingFields } from "../portfolioDrafts/portfolio/commonPortfolioMockData";
 import {
   isBodyPresent,
@@ -23,6 +24,7 @@ import {
   isApplication,
   isEnvironment,
   isOperator,
+  isPortfolioDraftSummary,
 } from "./validation";
 
 describe("Testing validation of request body", () => {
@@ -223,6 +225,9 @@ describe("isOperator()", () => {
   it.each(missingOperatorFields)("should reject Operator with missing field", async (item) => {
     expect(isOperator(item)).toEqual(false);
   });
+});
+describe("isPortfolioDraftSummary()", () => {
+  expect(isPortfolioDraftSummary(mockPortfolioDraftSummary)).toEqual(true);
 });
 
 describe("Testing validation of path parameter", () => {
