@@ -174,8 +174,8 @@ describe("isApplicationStep()", () => {
   it("should accept an ApplicationStep object", async () => {
     expect(isApplicationStep(mockApplicationStep)).toEqual(true);
   });
-  it("should reject an ApplicationStep missing any field", async () => {
-    expect(isApplicationStep(mockApplicationStepsMissingFields)).toEqual(false);
+  it.each(mockApplicationStepsMissingFields)("should reject an ApplicationStep missing any field", async (item) => {
+    expect(isApplicationStep(item)).toEqual(false);
   });
 });
 describe("isApplication()", () => {
@@ -185,8 +185,8 @@ describe("isApplication()", () => {
   it.each(mockApplicationStep.applications)("should accept an Application object", async (item) => {
     expect(isApplication(item)).toEqual(true);
   });
-  it("should reject an Application missing any field", async () => {
-    expect(isApplication(mockApplicationsMissingFields)).toEqual(false);
+  it.each(mockApplicationsMissingFields)("should reject an Application missing any field", async (item) => {
+    expect(isApplication(item)).toEqual(false);
   });
 });
 describe("isEnvironment()", () => {
@@ -196,8 +196,8 @@ describe("isEnvironment()", () => {
   it.each(mockApplicationCloudCityEvacPlanner.environments)("should accept an Environment object", async (item) => {
     expect(isEnvironment(item)).toEqual(true);
   });
-  it("should reject an Environment missing any field", async () => {
-    expect(isEnvironment(mockEnvironmentsMissingFields)).toEqual(false);
+  it.each(mockEnvironmentsMissingFields)("should reject an Environment missing any field", async (item) => {
+    expect(isEnvironment(item)).toEqual(false);
   });
 });
 describe("isOperator()", () => {
