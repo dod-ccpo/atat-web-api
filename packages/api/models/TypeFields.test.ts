@@ -1,45 +1,18 @@
-import { CloudServiceProvider } from "./CloudServiceProvider";
+import { APPLICATION_STEP, FUNDING_STEP, PORTFOLIO_STEP } from "./PortfolioDraft";
 import { exhaustivePick } from "./TypeFields";
-import { PortfolioDraft } from "./PortfolioDraft";
-import { portfolioDraftFields } from "./PortfolioDraftSummary";
-import { ProvisioningStatus } from "./ProvisioningStatus";
+import { mockPortfolioDraft } from "../portfolioDrafts/commonPortfolioDraftMockData";
+import { portfolioDraftSummaryProperties } from "./PortfolioDraftSummary";
 
 describe("Test object trimming", () => {
-  const portfolioDraft: PortfolioDraft = {
-    id: "test",
-    name: "test",
-    description: "test",
-    status: ProvisioningStatus.IN_PROGRESS,
-    created_at: "",
-    updated_at: "",
-    num_task_orders: 0,
-    num_environments: 0,
-    num_applications: 0,
-    num_portfolio_managers: 0,
-    funding_step: {
-      task_orders: [],
-    },
-    application_step: {
-      applications: [],
-      operators: [],
-    },
-    portfolio_step: {
-      name: "test",
-      csp: CloudServiceProvider.CSP_A,
-      description: "test",
-      dod_components: [],
-      portfolio_managers: [],
-    },
-  };
   it("should not have extra attributes", async () => {
-    const trimmed = exhaustivePick(portfolioDraft, portfolioDraftFields);
-    expect(trimmed).not.toHaveProperty("funding_step");
-    expect(trimmed).not.toHaveProperty("portfolio_step");
-    expect(trimmed).not.toHaveProperty("application_step");
+    const trimmed = exhaustivePick(mockPortfolioDraft, portfolioDraftSummaryProperties);
+    expect(trimmed).not.toHaveProperty(PORTFOLIO_STEP);
+    expect(trimmed).not.toHaveProperty(FUNDING_STEP);
+    expect(trimmed).not.toHaveProperty(APPLICATION_STEP);
   });
   it("should contain all required attributes", async () => {
-    const trimmed = exhaustivePick(portfolioDraft, portfolioDraftFields);
-    Object.keys(portfolioDraftFields).forEach((key) => {
+    const trimmed = exhaustivePick(mockPortfolioDraft, portfolioDraftSummaryProperties);
+    Object.keys(portfolioDraftSummaryProperties).forEach((key) => {
       expect(trimmed).toHaveProperty(key);
     });
   });

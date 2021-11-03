@@ -12,10 +12,12 @@ export interface PortfolioDraftSummary extends BaseDocument {
   num_environments: number;
 }
 
-export const portfolioDraftFields: ExhaustiveAttributeMap<PortfolioDraftSummary> = {
+export const portfolioDraftSummaryProperties: ExhaustiveAttributeMap<PortfolioDraftSummary> = {
+  // BaseDocument properties
   id: null,
   created_at: null,
   updated_at: null,
+  // PortfolioDraftSummary properties
   status: null,
   name: null,
   description: null,
