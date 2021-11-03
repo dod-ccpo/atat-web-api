@@ -62,20 +62,31 @@ describe("Successful operation tests", () => {
     const responseBody = JSON.parse(result.body);
     expect(responseBody).toHaveProperty(attribute);
   });
-  it("should return portfolio summary with correct attribute value", async () => {
+  it("should return portfolio draft summary with correct portfolio name", async () => {
     const result = await handler(validRequest);
     const responseBody = JSON.parse(result.body);
-    const numOfPortfolioManagers: number = responseBody.portfolio_step.portfolio_managers.length;
-    const numOfApplications: number = responseBody.application_step.applications.length;
-    const numOfEnvironments: number = responseBody.application_step.applications.flatMap(
-      (app: Application) => app.environments
-    ).length;
-    const numOfTaskOrders: number = responseBody.funding_step.task_orders.length;
-
     expect(responseBody.name).toBe(mockPortfolioDraft.portfolio_step.name);
-    expect(numOfPortfolioManagers).toBe(mockPortfolioDraft.num_portfolio_managers);
-    expect(numOfApplications).toBe(mockPortfolioDraft.num_applications);
-    expect(numOfEnvironments).toBe(mockPortfolioDraft.num_environments);
-    expect(numOfTaskOrders).toBe(mockPortfolioDraft.num_task_orders);
+  });
+  it("should return portfolio draft summary with correct number of portfolio managers", async () => {
+    const result = await handler(validRequest);
+    const responseBody = JSON.parse(result.body);
+    expect(mockPortfolioDraft.num_portfolio_managers).toBe(responseBody.portfolio_step.portfolio_managers.length);
+  });
+  it("should return portfolio draft summary with correct number of task orders", async () => {
+    const result = await handler(validRequest);
+    const responseBody = JSON.parse(result.body);
+    expect(mockPortfolioDraft.num_task_orders).toBe(responseBody.funding_step.task_orders.length);
+  });
+  it("should return portfolio draft summary with correct number of applications", async () => {
+    const result = await handler(validRequest);
+    const responseBody = JSON.parse(result.body);
+    expect(mockPortfolioDraft.num_applications).toBe(responseBody.application_step.applications.length);
+  });
+  it("should return portfolio draft summary with correct number of environments", async () => {
+    const result = await handler(validRequest);
+    const responseBody = JSON.parse(result.body);
+    expect(mockPortfolioDraft.num_environments).toBe(
+      responseBody.application_step.applications.flatMap((app: Application) => app.environments).length
+    );
   });
 });
