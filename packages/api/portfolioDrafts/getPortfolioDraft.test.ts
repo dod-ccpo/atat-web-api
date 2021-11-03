@@ -6,6 +6,7 @@ import { handler, NO_PORTFOLIO_PATH_PARAM, NO_SUCH_PORTFOLIO } from "./getPortfo
 import { mockClient } from "aws-sdk-client-mock";
 import { mockPortfolioDraft, validRequest } from "./commonPortfolioDraftMockData";
 import { SuccessStatusCode } from "../utils/response";
+import { isPortfolioDraft } from "../utils/validation";
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 beforeEach(() => {
@@ -36,53 +37,41 @@ describe("Successful operation tests", () => {
       Item: mockPortfolioDraft,
     });
   });
-  const portfolioSummaryAttributes = [
-    "id",
-    "status",
-    "name",
-    "num_portfolio_managers",
-    "portfolio_step",
-    "funding_step",
-    "num_task_orders",
-    "num_applications",
-    "num_environments",
-  ];
-
   it("should return Item", async () => {
     const result = await handler(validRequest);
-    expect(result.body).toStrictEqual(JSON.stringify(mockPortfolioDraft));
+    const responseBody = JSON.parse(result.body);
+    expect(responseBody).toStrictEqual(mockPortfolioDraft);
   });
   it("should return status code 200", async () => {
     const result = await handler(validRequest);
     expect(result.statusCode).toEqual(SuccessStatusCode.OK);
   });
-  // NOTE: this test assumes all steps of the portfolio draft summary are completed
-  it.each(portfolioSummaryAttributes)("should have all attributes for portfolio summary", async (attribute) => {
+  it("should return portfolio draft object", async () => {
     const result = await handler(validRequest);
     const responseBody = JSON.parse(result.body);
-    expect(responseBody).toHaveProperty(attribute);
+    expect(isPortfolioDraft(responseBody)).toBe(true);
   });
-  it("should return portfolio draft summary with correct portfolio name", async () => {
+  it("should return portfolio draft with correct portfolio name", async () => {
     const result = await handler(validRequest);
     const responseBody = JSON.parse(result.body);
     expect(responseBody.name).toBe(mockPortfolioDraft.portfolio_step.name);
   });
-  it("should return portfolio draft summary with correct number of portfolio managers", async () => {
+  it("should return portfolio draft with correct number of portfolio managers", async () => {
     const result = await handler(validRequest);
     const responseBody = JSON.parse(result.body);
     expect(mockPortfolioDraft.num_portfolio_managers).toBe(responseBody.portfolio_step.portfolio_managers.length);
   });
-  it("should return portfolio draft summary with correct number of task orders", async () => {
+  it("should return portfolio draft with correct number of task orders", async () => {
     const result = await handler(validRequest);
     const responseBody = JSON.parse(result.body);
     expect(mockPortfolioDraft.num_task_orders).toBe(responseBody.funding_step.task_orders.length);
   });
-  it("should return portfolio draft summary with correct number of applications", async () => {
+  it("should return portfolio draft with correct number of applications", async () => {
     const result = await handler(validRequest);
     const responseBody = JSON.parse(result.body);
     expect(mockPortfolioDraft.num_applications).toBe(responseBody.application_step.applications.length);
   });
-  it("should return portfolio draft summary with correct number of environments", async () => {
+  it("should return portfolio draft with correct number of environments", async () => {
     const result = await handler(validRequest);
     const responseBody = JSON.parse(result.body);
     expect(mockPortfolioDraft.num_environments).toBe(
