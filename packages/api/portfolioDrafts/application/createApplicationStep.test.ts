@@ -142,7 +142,7 @@ describe("Request body shape validations", function () {
     expect(responseBody.message).toMatch(/Event object failed validation/);
     expect(responseBody.name).toMatch(/BadRequestError/);
     expect(responseBody.details).toHaveLength(2);
-    expect(responseBody.details[0].message).toEqual('must match pattern "^[\\w\\d !@#$%^&*_|:;.-]{0,300}$"');
+    expect(responseBody.details[0].message).toEqual('must match pattern "^[\\w\\d !@#$%^&*_|:;,\'.-]{0,300}$"');
     expect(responseBody.details[0].instancePath).toEqual("/body/applications/1/description");
     expect(responseBody.details[1].instancePath).toEqual("/body/applications/2/description");
   });
