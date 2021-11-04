@@ -1,12 +1,23 @@
 import { CloudServiceProvider } from "../models/CloudServiceProvider";
 import {
+  mockPortfolioStep,
+  mockPortfolioStepMissingFields,
+  mockValidPortfolioSteps,
+} from "../portfolioDrafts/portfolio/commonPortfolioMockData";
+import {
   mockApplicationStep,
   mockApplicationStepsMissingFields,
   mockApplicationsMissingFields,
   mockApplicationCloudCityEvacPlanner,
   mockEnvironmentsMissingFields,
   mockApplicationJabbasPalaceExpansionApp,
-} from "../portfolioDrafts/application/commonMockData";
+} from "../portfolioDrafts/application/commonApplicationMockData";
+import {
+  mockPortfolioDraft,
+  mockPortfolioDraftMissingFields,
+  mockPortfolioDraftSummary,
+  mockPortfolioDraftSummaryMissingFields,
+} from "../portfolioDrafts/commonPortfolioDraftMockData";
 import {
   isBodyPresent,
   isFundingStep,
@@ -22,9 +33,11 @@ import {
   isApplication,
   isEnvironment,
   isOperator,
+  isPortfolioDraftSummary,
+  isPortfolioDraft,
 } from "./validation";
 
-describe("Testing validation of request body", function () {
+describe("Testing validation of request body", () => {
   it("should return true because request body is present", async () => {
     const requestBody = {
       name: "test name",
@@ -74,71 +87,19 @@ describe("Testing validation of request body", function () {
   });
 });
 
-describe("Validation tests for createPortfolioStep function", function () {
+describe("Validation tests for createPortfolioStep function", () => {
   it("should map body to portfolioStep object", async () => {
-    const requestBody = {
-      name: "Zach's portfolio name",
-      csp: CloudServiceProvider.CSP_A,
-      description: "team america",
-      dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
-      portfolio_managers: ["joe.manager@example.com", "jane.manager@example.com"],
-    };
-    expect(isPortfolioStep(requestBody)).toEqual(true);
+    expect(isPortfolioStep(mockPortfolioStep)).toEqual(true);
   });
-  it("should accept PortfolioStep objects with a missing description", async () => {
-    const requestBodyMissingDescription = {
-      name: "Zach's portfolio name",
-      csp: CloudServiceProvider.CSP_A,
-      // description: "team america",
-      dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
-      portfolio_managers: ["joe.manager@example.com", "jane.manager@example.com"],
-    };
-    expect(isPortfolioStep(requestBodyMissingDescription)).toEqual(true);
+  it.each(mockValidPortfolioSteps)("should map body to portfolioStep object", async (mockPortfolioStep) => {
+    expect(isPortfolioStep(mockPortfolioStep)).toEqual(true);
   });
-  it.each([
-    {
-      description: "Missing Name",
-      body: {
-        // name: "Zach's portfolio name",
-        csp: CloudServiceProvider.CSP_A,
-        description: "Test Portfolio",
-        dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
-        portfolio_managers: ["joe.manager@example.com", "jane.manager@example.com"],
-      },
-    },
-    {
-      description: "Missing CSP",
-      body: {
-        name: "Zach's portfolio name",
-        // csp: CloudServiceProvider.CSP_A,
-        description: "Test Portfolio",
-        dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
-        portfolio_managers: ["joe.manager@example.com", "jane.manager@example.com"],
-      },
-    },
-    {
-      description: "Missing Components",
-      body: {
-        name: "Zach's portfolio name",
-        csp: CloudServiceProvider.CSP_A,
-        description: "Test Portfolio",
-        // dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
-        portfolio_managers: ["joe.manager@example.com", "jane.manager@example.com"],
-      },
-    },
-    {
-      description: "Missing Portfolio Managers",
-      body: {
-        name: "Zach's portfolio name",
-        csp: CloudServiceProvider.CSP_A,
-        description: "Test Portfolio",
-        dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
-        // portfolio_managers: ["joe.manager@example.com", "jane.manager@example.com"],
-      },
-    },
-  ])("should reject PortfolioStep objects missing required attributes", async (badRequest) => {
-    expect(isPortfolioStep(badRequest)).toEqual(false);
-  });
+  it.each(mockPortfolioStepMissingFields)(
+    "should reject PortfolioStep objects missing required attributes",
+    async (missingRequiredFieldObject) => {
+      expect(isPortfolioStep(missingRequiredFieldObject)).toEqual(false);
+    }
+  );
   it("should fail to map body to portfolioStep object because request body is null", async () => {
     expect(isPortfolioStep(null)).toEqual(false);
   });
@@ -206,8 +167,8 @@ describe("isApplicationStep()", () => {
   it("should accept an ApplicationStep object", async () => {
     expect(isApplicationStep(mockApplicationStep)).toEqual(true);
   });
-  it("should reject an ApplicationStep missing any field", async () => {
-    expect(isApplicationStep(mockApplicationStepsMissingFields)).toEqual(false);
+  it.each(mockApplicationStepsMissingFields)("should reject an ApplicationStep missing any field", async (item) => {
+    expect(isApplicationStep(item)).toEqual(false);
   });
 });
 describe("isApplication()", () => {
@@ -217,8 +178,8 @@ describe("isApplication()", () => {
   it.each(mockApplicationStep.applications)("should accept an Application object", async (item) => {
     expect(isApplication(item)).toEqual(true);
   });
-  it("should reject an Application missing any field", async () => {
-    expect(isApplication(mockApplicationsMissingFields)).toEqual(false);
+  it.each(mockApplicationsMissingFields)("should reject an Application missing any field", async (item) => {
+    expect(isApplication(item)).toEqual(false);
   });
 });
 describe("isEnvironment()", () => {
@@ -228,8 +189,8 @@ describe("isEnvironment()", () => {
   it.each(mockApplicationCloudCityEvacPlanner.environments)("should accept an Environment object", async (item) => {
     expect(isEnvironment(item)).toEqual(true);
   });
-  it("should reject an Environment missing any field", async () => {
-    expect(isEnvironment(mockEnvironmentsMissingFields)).toEqual(false);
+  it.each(mockEnvironmentsMissingFields)("should reject an Environment missing any field", async (item) => {
+    expect(isEnvironment(item)).toEqual(false);
   });
 });
 describe("isOperator()", () => {
@@ -261,8 +222,33 @@ describe("isOperator()", () => {
     expect(isOperator(item)).toEqual(false);
   });
 });
+describe("isPortfolioDraftSummary()", () => {
+  it.each([true, 1, undefined, null])("should reject non-objects", async (item) => {
+    expect(isPortfolioDraftSummary(item)).toEqual(false);
+  });
+  it("should accept a PortfolioDraftSummary object", async () => {
+    expect(isPortfolioDraftSummary(mockPortfolioDraftSummary)).toEqual(true);
+  });
+  it.each(mockPortfolioDraftSummaryMissingFields)(
+    "should reject a PortfolioDraftSummary missing any field",
+    async (item) => {
+      expect(isPortfolioDraftSummary(item)).toEqual(false);
+    }
+  );
+});
+describe("isPortfolioDraft()", () => {
+  it.each([true, 1, undefined, null])("should reject non-objects", async (item) => {
+    expect(isPortfolioDraft(item)).toEqual(false);
+  });
+  it("should accept a PortfolioDraft object", async () => {
+    expect(isPortfolioDraft(mockPortfolioDraft)).toEqual(true);
+  });
+  it.each(mockPortfolioDraftMissingFields)("should reject a PortfolioDraft missing any field", async (item) => {
+    expect(isPortfolioDraft(item)).toEqual(false);
+  });
+});
 
-describe("Testing validation of path parameter", function () {
+describe("Testing validation of path parameter", () => {
   it("should return false because path parameter is an empty string", async () => {
     const pathParam = "";
     expect(isPathParameterPresent(pathParam)).toEqual(false);
@@ -277,7 +263,7 @@ describe("Testing validation of path parameter", function () {
   });
 });
 
-describe("isValidDate()", function () {
+describe("isValidDate()", () => {
   it.each([
     "1970-01-01",
     "2021-10-12",
@@ -330,7 +316,7 @@ describe("isValidDate()", function () {
   });
 });
 
-describe("isClin()", function () {
+describe("isClin()", () => {
   const mockClin = {
     clin_number: "0001",
     idiq_clin: "002",
@@ -406,7 +392,7 @@ describe("isClin()", function () {
   });
 });
 
-describe("isClinNumber()", function () {
+describe("isClinNumber()", () => {
   const goodClinNumbers = ["0001", "0010", "0500", "5000", "9999"];
   it.each(goodClinNumbers)("should accept a clin number with expected length and within accepted range", (num) => {
     expect(isClinNumber(num)).toEqual(true);
@@ -417,7 +403,7 @@ describe("isClinNumber()", function () {
   });
 });
 
-describe("isFundingAmount()", function () {
+describe("isFundingAmount()", () => {
   const goodAmounts = ["1", "1.1", "1.50", "1.99", "250000"];
   it.each(goodAmounts)("should accept a funding amount that is valid", (num) => {
     expect(isFundingAmount(num)).toEqual(true);

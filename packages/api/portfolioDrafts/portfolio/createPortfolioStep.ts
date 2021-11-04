@@ -21,12 +21,11 @@ import cors from "@middy/http-cors";
 import xssSanitizer from "../xssSanitizer";
 import schema = require("../../models/schema.json");
 
-const validatedSchema = schema.PortfolioStep;
-const schemaWrapper = {
+const portfolioStepSchema = {
   type: "object",
   required: ["body"],
   properties: {
-    body: validatedSchema,
+    body: schema.PortfolioStep,
   },
 };
 /**
@@ -60,7 +59,7 @@ handler
   .use(jsonBodyParser())
   .use(
     validator({
-      inputSchema: schemaWrapper,
+      inputSchema: portfolioStepSchema,
     })
   )
   .use(JSONErrorHandlerMiddleware())

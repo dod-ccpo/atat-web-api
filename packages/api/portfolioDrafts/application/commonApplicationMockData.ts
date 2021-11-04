@@ -1,4 +1,4 @@
-import { AccessLevel } from "../../models/AccessLevel";
+import { AccessLevel, PortfolioOperator, AppEnvOperator } from "../../models/Operator";
 import { Application } from "../../models/Application";
 import { ApplicationStep } from "../../models/ApplicationStep";
 import { Environment } from "../../models/Environment";
@@ -6,8 +6,6 @@ import { ProvisioningStatus } from "../../models/ProvisioningStatus";
 import { v4 as uuidv4 } from "uuid";
 import { PortfolioDraftSummary } from "../../models/PortfolioDraftSummary";
 import { PortfolioDraft } from "../../models/PortfolioDraft";
-import { PortfolioOperator } from "../../models/PortfolioOperator";
-import { AppEnvOperator } from "../../models/AppEnvOperator";
 
 const mockPortoflioOperatorYoda: PortfolioOperator = {
   display_name: "Yoda",
@@ -117,8 +115,8 @@ export const mockPortfolioDraftSummary: PortfolioDraft = {
   num_environments: mockApplicationStep.applications.flatMap((app) => app.environments).length,
 } as PortfolioDraft;
 
-/** ABOVE THIS LINE ARE VALID OBJECTS WITH GOOD DATA **/
-/** BELOW THIS LINE ARE INVALID OBJECTS WITH MISSING FIELDS AND BAD DATA **/
+/* ABOVE THIS LINE ARE VALID OBJECTS WITH GOOD DATA */
+/* BELOW THIS LINE ARE INVALID OBJECTS WITH MISSING FIELDS AND BAD DATA */
 
 /**
  * An array of Operator objects with invalid emails

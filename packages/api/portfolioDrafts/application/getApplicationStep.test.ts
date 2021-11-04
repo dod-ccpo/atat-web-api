@@ -3,18 +3,14 @@ import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusC
 import { DATABASE_ERROR, NO_SUCH_APPLICATION_STEP, PATH_PARAMETER_REQUIRED_BUT_MISSING } from "../../utils/errors";
 import { DynamoDBDocumentClient, GetCommand, GetCommandOutput } from "@aws-sdk/lib-dynamodb";
 import { handler, NO_SUCH_PORTFOLIO_DRAFT } from "./getApplicationStep";
-import { mockApplicationStep } from "./commonMockData";
+import { mockApplicationStep } from "./commonApplicationMockData";
 import { mockClient } from "aws-sdk-client-mock";
-import { v4 as uuidv4 } from "uuid";
+import { validRequest } from "../commonPortfolioDraftMockData";
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 beforeEach(() => {
   ddbMock.reset();
 });
-
-const validRequest: APIGatewayProxyEvent = {
-  pathParameters: { portfolioDraftId: uuidv4() },
-} as any;
 
 it("should return generic Error if exception caught", async () => {
   jest.spyOn(console, "error").mockImplementation(() => jest.fn()); // suppress output

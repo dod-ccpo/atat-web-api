@@ -1,18 +1,15 @@
 {
-  "name": "atat-web-api",
+  "name": "atat-email",
   "version": "0.1.0",
-  "description": "The ATAT Web API is the internal API that supports the ATAT Web UI.",
+  "description": "Supporting functions for ATAT emailing",
   "scripts": {
     "test": "jest --config=jest.config.js",
     "lint": "eslint --ext .js,.ts,.json -c ../../.eslintrc.json .",
     "lint:fix": "npm run lint -- --fix"
   },
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.39.0",
-    "@aws-sdk/client-s3": "^3.39.0",
-    "@aws-sdk/client-sqs": "^3.39.0",
-    "@aws-sdk/client-secrets-manager": "^3.39.0",
-    "@aws-sdk/lib-dynamodb": "^3.39.0",
+    "@aws-sdk/client-secrets-manager": "3.39.0",
+    "@aws-sdk/client-sqs": "3.39.0",
     "@middy/core": "^2.5.2",
     "@middy/http-cors": "^2.5.2",
     "@middy/http-event-normalizer": "^2.5.2",
@@ -22,11 +19,11 @@
     "@types/nodemailer": "^6.4.4",
     "ajv": "^8.6.3",
     "ajv-formats": "^2.1.1",
-    "http-errors": "^1.8.0",
     "lambda-multipart-parser": "^1.0.1",
     "middy-middleware-json-error-handler": "^3.0.0",
-    "serialize-error": "^8.1.0",
     "nodemailer": "^6.7.0",
+    "nodemailer-mock": "^1.5.11",
+    "ts-mock-imports": "^1.3.7",
     "uuid": "^8.3.2",
     "xss": "^1.0.10"
   },

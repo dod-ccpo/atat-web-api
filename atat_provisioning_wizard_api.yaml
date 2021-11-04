@@ -1147,6 +1147,7 @@ components:
           $ref: '#/components/schemas/FundingStep'
         application_step:
           $ref: '#/components/schemas/ApplicationStep'
+
   examples:
     PortfolioDraftSummaryArrayEx:
       value:

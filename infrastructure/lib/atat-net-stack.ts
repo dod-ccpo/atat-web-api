@@ -76,6 +76,9 @@ export class AtatNetStack extends cdk.Stack {
     const xrayEndpoint = vpc.addInterfaceEndpoint("XrayEndpoint", {
       service: new InterfaceVpcEndpointAwsService("xray"),
     });
+    const secretsManagerEndpoint = vpc.addInterfaceEndpoint("SecretsManager", {
+      service: ec2.InterfaceVpcEndpointAwsService.SECRETS_MANAGER,
+    });
     this.endpoints.push(
       dynamodbEndpoint,
       s3Endpoint,
@@ -83,7 +86,8 @@ export class AtatNetStack extends cdk.Stack {
       lambdaEndpoint,
       logsEndpoint,
       sqsEndpoint,
-      xrayEndpoint
+      xrayEndpoint,
+      secretsManagerEndpoint
     );
   }
 

@@ -1,4 +1,4 @@
-import { AppEnvOperator } from "./AppEnvOperator";
+import { AppEnvOperator } from "./Operator";
 
 export interface Environment {
   name: string;

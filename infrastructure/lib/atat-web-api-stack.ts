@@ -7,9 +7,11 @@ import * as ssm from "@aws-cdk/aws-ssm";
 import * as cdk from "@aws-cdk/core";
 import * as lambda from "@aws-cdk/aws-lambda";
 import * as sqs from "@aws-cdk/aws-sqs";
+import * as iam from "@aws-cdk/aws-iam";
 import { ApiDynamoDBFunction } from "./constructs/api-dynamodb-function";
 import { ApiS3Function } from "./constructs/api-s3-function";
 import { ApiSQSFunction } from "./constructs/api-sqs-function";
+import { ApiSQSDynamoDBFunction } from "./constructs/api-sqs-dynamodb-function";
 import { CognitoAuthentication } from "./constructs/authentication";
 import { SecureBucket, SecureQueue, SecureRestApi, SecureTable } from "./constructs/compliant-resources";
 import { TaskOrderLifecycle } from "./constructs/task-order-lifecycle";
@@ -23,11 +25,16 @@ interface AtatIdpProps {
   usersGroupName?: string;
 }
 
+interface AtatSmtpProps {
+  secretName: string;
+}
+
 export interface AtatWebApiStackProps extends cdk.StackProps {
   environmentId: string;
   idpProps: AtatIdpProps;
   removalPolicy?: cdk.RemovalPolicy;
   requireAuthorization?: boolean;
+  smtpProps: AtatSmtpProps;
   vpc: ec2.IVpc;
 }
 
@@ -35,6 +42,8 @@ export class AtatWebApiStack extends cdk.Stack {
   private readonly environmentId: string;
   public readonly restApi: apigw.IRestApi;
   public readonly submitQueue: sqs.IQueue;
+  public readonly emailQueue: sqs.IQueue;
+  public readonly emailDeadLetterQueue: sqs.IQueue;
   public readonly table: dynamodb.ITable;
   public readonly functions: lambda.IFunction[] = [];
   public readonly ssmParams: ssm.IParameter[] = [];
@@ -65,8 +74,29 @@ export class AtatWebApiStack extends cdk.Stack {
     // Create a queue for PortfolioDraft submission
     this.submitQueue = new SecureQueue(this, "SubmitQueue", { queueProps: {} }).queue;
     this.outputs.push(
-      new cdk.CfnOutput(this, "QueueName", {
+      new cdk.CfnOutput(this, "SubmitQueueName", {
         value: this.submitQueue.queueName,
+      })
+    );
+
+    // Create two queues for sending emails
+    this.emailDeadLetterQueue = new SecureQueue(this, "EmailDLQ", {
+      queueProps: {
+        visibilityTimeout: cdk.Duration.seconds(30),
+      },
+    }).queue;
+    this.emailQueue = new SecureQueue(this, "EmailQueue", {
+      queueProps: {
+        visibilityTimeout: cdk.Duration.seconds(30),
+        deadLetterQueue: { queue: this.emailDeadLetterQueue, maxReceiveCount: 1 },
+      },
+    }).queue;
+    this.outputs.push(
+      new cdk.CfnOutput(this, "EmailQueueName", {
+        value: this.emailQueue.queueName,
+      }),
+      new cdk.CfnOutput(this, "EmailDLQName", {
+        value: this.emailDeadLetterQueue.queueName,
       })
     );
 
@@ -104,14 +134,14 @@ export class AtatWebApiStack extends cdk.Stack {
     this.addDatabaseApiFunction("createApplicationStep", "portfolioDrafts/application/", props.vpc);
 
     // Submission operations (all files live in the submit/ folder)
-    this.addQueueApiFunction("submitPortfolioDraft", "portfolioDrafts/submit/", props.vpc);
+    this.addQueueDatabaseApiFunction("submitPortfolioDraft", "portfolioDrafts/submit/", props.vpc);
 
     // Functions that are triggered by events in the submit queue
     // These, for now, can be treated just like regular API functions because they look
     // and act like them in nearly every way except being accessible via API Gateway.
     // This may require more significant refactoring as the design for these functions
     // is further fleshed out.
-    this.addQueueApiFunction("subscribePortfolioDraftSubmission", "portfolioDrafts/submit/", props.vpc);
+    this.addQueueDatabaseApiFunction("subscribePortfolioDraftSubmission", "portfolioDrafts/submit/", props.vpc);
 
     // The API spec, which just so happens to be a valid CloudFormation snippet (with some actual CloudFormation
     // in it) gets uploaded to S3. The Asset resource reuses the same bucket that the CDK does, so this does not
@@ -129,14 +159,65 @@ export class AtatWebApiStack extends cdk.Stack {
     // And with the data now loaded from the template, we can use ApiDefinition.fromInline to parse it as real
     // OpenAPI spec (because it was!) and now we've got all our special AWS values and variables interpolated.
     // This will get used as the `Body:` parameter in the underlying CloudFormation resource.
-    this.restApi = new SecureRestApi(this, "AtatSpecTest", {
+    const apiGateway = new SecureRestApi(this, "AtatSpecTest", {
       restApiName: `${props.environmentId} API`,
       apiDefinition: apigw.ApiDefinition.fromInline(apiSpecAsTemplateInclude),
       deployOptions: {
         tracingEnabled: true,
       },
     }).restApi;
+    this.restApi = apiGateway;
+    this.addEmailRoutes(props);
     this.addTaskOrderRoutes(props);
+    this.ssmParams.push(
+      new ssm.StringParameter(this, "ApiGatewayUrl", {
+        description: "URL for the API Gateway",
+        stringValue: apiGateway.urlForPath(),
+        parameterName: `/atat/${this.environmentId}/api/url`,
+      })
+    );
+  }
+
+  private addEmailRoutes(props: AtatWebApiStackProps) {
+    const smtpSecrets = secretsmanager.Secret.fromSecretNameV2(this, "SMTPSecrets", props.smtpProps.secretName);
+    const processEmailsPath = utils.packageRoot() + "/email/processingEmails/index.ts";
+
+    const sendEmailFn = new ApiSQSFunction(this, "SendEmails", {
+      queue: this.emailQueue,
+      // TODO(AT-6764): revert to deploy in the vpc, after networking issue resolved (temporary only)
+      // lambdaVpc: props.vpc,
+      method: HttpMethod.GET,
+      handlerPath: processEmailsPath,
+      createEventSource: true,
+      batchSize: 1,
+      smtpSecrets: smtpSecrets,
+      functionPropsOverride: {
+        timeout: cdk.Duration.seconds(10),
+        environment: {
+          SMTP_SECRET_NAME: props.smtpProps.secretName,
+        },
+      },
+    }).fn;
+
+    const rolesToGrant = [
+      iam.Role.fromRoleArn(this, "DeveloperRoleArn", cdk.Fn.importValue("AtatDeveloperRoleArn")),
+      iam.Role.fromRoleArn(this, "QaRoleArn", cdk.Fn.importValue("AtatQaTestRoleArn")),
+    ];
+    const temporaryTestInvokePolicy = new iam.Policy(this, "GrantTemporarySendEmailInvoke", {
+      statements: [
+        new iam.PolicyStatement({
+          actions: ["lambda:InvokeFunction", "lambda:GetFunction*"],
+          resources: [sendEmailFn.functionArn],
+        }),
+      ],
+    });
+
+    // Temporarily grant developers access to invoke the function
+    for (const role of rolesToGrant) {
+      role.attachInlinePolicy(temporaryTestInvokePolicy);
+    }
+
+    this.functions.push(sendEmailFn);
   }
 
   private addTaskOrderRoutes(props: AtatWebApiStackProps) {
@@ -195,7 +276,7 @@ export class AtatWebApiStack extends cdk.Stack {
     this.functions.push(new ApiDynamoDBFunction(this, utils.apiSpecOperationFunctionName(operationId), props).fn);
   }
 
-  private addQueueApiFunction(operationId: string, handlerFolder: string, vpc: ec2.IVpc) {
+  private addQueueDatabaseApiFunction(operationId: string, handlerFolder: string, vpc: ec2.IVpc) {
     const props = {
       table: this.table,
       queue: this.submitQueue,
@@ -204,7 +285,7 @@ export class AtatWebApiStack extends cdk.Stack {
       handlerPath: this.determineApiHandlerPath(operationId, handlerFolder),
       createEventSource: operationId.startsWith("subscribe"),
     };
-    this.functions.push(new ApiSQSFunction(this, utils.apiSpecOperationFunctionName(operationId), props).fn);
+    this.functions.push(new ApiSQSDynamoDBFunction(this, utils.apiSpecOperationFunctionName(operationId), props).fn);
   }
 
   private setupCognito(props: AtatIdpProps, removalPolicy?: cdk.RemovalPolicy) {

@@ -1,42 +1,47 @@
-import * as iam from "@aws-cdk/aws-iam";
 import * as cdk from "@aws-cdk/core";
-import { HttpMethod } from "../http";
-import { ApiDynamoDBFunction, ApiDynamoDBFunctionProps } from "./api-dynamodb-function";
 import * as sqs from "@aws-cdk/aws-sqs";
+import * as iam from "@aws-cdk/aws-iam";
+import { ApiFunction, ApiFunctionProps } from "./api-function";
 import { SqsEventSource } from "@aws-cdk/aws-lambda-event-sources";
+import { HttpMethod } from "../http";
 
-export interface ApiSQSFunctionProps extends ApiDynamoDBFunctionProps {
+export interface ApiSQSFunctionProps extends ApiFunctionProps {
   /**
-   * The SQS queue where data is sent
+   * The SQS queue where messages are sent
    */
   readonly queue: sqs.IQueue;
   /**
-   * Optional param to create an SQS event source to recieve queue data
+   * Optional param to create an SQS event source to receive queue messages
    */
   readonly createEventSource?: boolean;
+  /**
+   * Optional param to change the batch size of messages received by the lambda
+   * from the SQS event source
+   */
+  readonly batchSize?: number;
 }
 
 /**
- * Creates the required resources for a PortfolioDraft function for the ATAT API.
+ * Creates a function resource with access to a queue for the ATAT API.
  *
- * The route is added to the API Gateway resource and the Lambda function is packaged and
- * created. Additionally, the necessary permissions are granted on the DynamoDB table
- * corresponding to the HTTP method specified in the props.
+ * A route is added to the API Gateway resource along with the packaged Lambda function.
+ * The function is also granted necessary permissions on the SQS queue corresponding to
+ * the HTTP method specified in the props
  */
-export class ApiSQSFunction extends ApiDynamoDBFunction {
+export class ApiSQSFunction extends ApiFunction {
   /**
-   * The SQS queue where data is sent
+   * The SQS queue where messages are sent to or consumed from.
    */
-  public readonly queue: sqs.IQueue;
+  readonly queue: sqs.IQueue;
 
   constructor(scope: cdk.Construct, id: string, props: ApiSQSFunctionProps) {
     super(scope, id, props);
     this.queue = props.queue;
     this.fn.addEnvironment("ATAT_QUEUE_URL", props.queue.queueUrl);
     this.grantRequiredQueuePermissions();
-    // creating an EventSource allows the fn to subscribe to the queue
+    // allows the fn to subscribe to the queue using an EventSource
     if (props.createEventSource) {
-      this.fn.addEventSource(new SqsEventSource(this.queue));
+      this.fn.addEventSource(new SqsEventSource(this.queue, props.batchSize ? { batchSize: props.batchSize } : {}));
     }
   }
 

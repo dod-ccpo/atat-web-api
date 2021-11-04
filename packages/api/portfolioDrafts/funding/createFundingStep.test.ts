@@ -112,7 +112,6 @@ describe("Request body tests", function () {
     const result = await handler(invalidRequest, {} as Context, () => null);
     console.log(result);
     const response = JSON.parse(result?.body ?? "");
-
     expect(result).toBeInstanceOf(OtherErrorResponse);
     expect(result).toEqual(REQUEST_BODY_INVALID);
     expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);

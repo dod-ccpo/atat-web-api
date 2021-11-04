@@ -7,7 +7,7 @@ import {
   mockBadPortfolioDraftSummary,
   mockApplicationsMissingFields,
   mockBadOperatorEmails,
-} from "./commonMockData";
+} from "./commonApplicationMockData";
 import { mockClient } from "aws-sdk-client-mock";
 import { v4 as uuidv4 } from "uuid";
 import { ValidationMessage } from "../../models/ApplicationStep";
@@ -33,7 +33,7 @@ import {
   REQUEST_BODY_EMPTY,
   REQUEST_BODY_INVALID,
 } from "../../utils/errors";
-import { AccessLevel } from "../../models/AccessLevel";
+import { AccessLevel } from "../../models/Operator";
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 beforeEach(() => {
@@ -45,7 +45,7 @@ const validRequest: APIGatewayProxyEvent = {
   pathParameters: { portfolioDraftId: uuidv4() },
 } as any;
 
-describe("Handle service level error", function () {
+describe("Handle service level error", () => {
   it("should return generic Error if exception caught", async () => {
     jest.spyOn(console, "error").mockImplementation(() => jest.fn()); // suppress output
     ddbMock.on(UpdateCommand).rejects("Some error occurred");
@@ -56,7 +56,7 @@ describe("Handle service level error", function () {
   });
 });
 
-describe("Path parameter tests", function () {
+describe("Path parameter tests", () => {
   it("should require path param", async () => {
     const emptyRequest: APIGatewayProxyEvent = {} as any; // no pathParameters
     const result = await handler(emptyRequest);
@@ -76,7 +76,7 @@ describe("Path parameter tests", function () {
   });
 });
 
-describe("Request body tests", function () {
+describe("Request body tests", () => {
   it("should return error when request body is empty", async () => {
     const emptyRequest: APIGatewayProxyEvent = {
       body: "", // empty body
@@ -161,7 +161,7 @@ describe("Request body tests", function () {
   });
 });
 
-describe("Successful operation tests", function () {
+describe("Successful operation tests", () => {
   it("should return application step and http status code 201", async () => {
     const result = await handler(validRequest);
     expect(result).toBeInstanceOf(ApiSuccessResponse);
@@ -182,7 +182,7 @@ describe("Successful operation tests", function () {
   });
 });
 
-describe("Incorrect number of applications and environments", function () {
+describe("Incorrect number of applications and environments", () => {
   it("should have incorrect number of applications and environments false", async () => {
     const mockBadPortfolioSummary = mockBadPortfolioDraftSummary;
     ddbMock.on(UpdateCommand).resolves({
@@ -197,7 +197,7 @@ describe("Incorrect number of applications and environments", function () {
   });
 });
 
-describe("Individual Application input validation tests", function () {
+describe("Individual Application input validation tests", () => {
   it("should return no error map entries when given Application has good data", async () => {
     const allerrors = mockApplicationStep.applications
       .map(performDataValidationOnApplication)
@@ -298,7 +298,7 @@ describe("Individual Application input validation tests", function () {
   });
 });
 
-describe("Error response creation tests", function () {
+describe("Error response creation tests", () => {
   it("should return error response that includes error_map in response body", async () => {
     const obj = { errors: { propertyA: "property_value", propertyB: "property_value" } };
     const invalidProperties: Record<string, unknown> = obj;
