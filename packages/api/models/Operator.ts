@@ -13,17 +13,17 @@ export enum AppEnvAccess {
 export interface Operator {
   display_name: string;
   email: string;
-  access: string;
 }
 
 export interface PortfolioOperator extends Operator {
-  access: PortfolioAccess.PORTFOLIO_ADMINISTRATOR;
+  access: PortfolioAccess;
 }
 
 export interface AppEnvOperator extends Operator {
   access: AppEnvAccess.ADMINISTRATOR | AppEnvAccess.CONTRIBUTOR | AppEnvAccess.READ_ONLY;
 }
-export const operatorFields: ExhaustivePropertyMap<Operator> = {
+
+export const operatorFields: ExhaustivePropertyMap<PortfolioOperator | AppEnvOperator> = {
   display_name: null,
   email: null,
   access: null,
