@@ -7,7 +7,7 @@ import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { DATABASE_ERROR, NO_SUCH_PORTFOLIO_DRAFT } from "../../utils/errors";
 import schema = require("../../models/schema.json");
 import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
-import { shapeValidationForPostRequest, businessRulesValidationForFundingStep } from "../../utils/requestValidation";
+import { requestShapeValidation, businessRulesValidationForFundingStep } from "../../utils/requestValidation";
 import middy from "@middy/core";
 import jsonBodyParser from "@middy/http-json-body-parser";
 import validator from "@middy/validator";
@@ -27,7 +27,7 @@ export async function baseHandler(
   context?: Context
 ): Promise<APIGatewayProxyResult> {
   // Perform shape validation
-  const setupResult = shapeValidationForPostRequest<FundingStep>(event);
+  const setupResult = requestShapeValidation<FundingStep>(event);
   if (setupResult instanceof SetupError) {
     return setupResult.errorResponse;
   }

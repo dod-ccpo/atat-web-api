@@ -13,7 +13,7 @@ import createError from "http-errors";
  * @param extraValidators - Additional validators that check whether the body is a valid object of Type T
  * @returns SetUpSuccess object if event passes validation, otherwise it returns SetUpError
  */
-export function shapeValidationForPostRequest<T>(
+export function requestShapeValidation<T>(
   event: ApiGatewayEventParsed<T>,
   ...extraValidators: Array<(obj: unknown) => obj is T>
 ): SetupResult<T> {
