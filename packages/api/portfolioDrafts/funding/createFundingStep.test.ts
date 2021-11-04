@@ -5,7 +5,6 @@ import { FUNDING_STEP } from "../../models/PortfolioDraft";
 import { isFundingStep } from "../../utils/validation";
 import { mockClient } from "aws-sdk-client-mock";
 import { mockPortfolioDraft } from "../commonPortfolioDraftMockData";
-import { ProvisioningStatus } from "../../models/ProvisioningStatus";
 import { v4 as uuidv4 } from "uuid";
 import { ValidationMessage } from "../../models/FundingStep";
 import {
@@ -40,7 +39,6 @@ import {
   mockClinZeroFunds,
   mockFundingStep,
   mockFundingStepBadData,
-  now,
   today,
   tomorrow,
   yesterday,

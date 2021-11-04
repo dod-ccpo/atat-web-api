@@ -1,5 +1,5 @@
 import { Clin } from "../../models/Clin";
-import { FileMetadata, FileScanStatus } from "../../models/FileMetadata";
+import { FileMetadataSummary } from "../../models/FileMetadataSummary";
 import { FundingStep } from "../../models/FundingStep";
 
 const isoFormatDay = (base: number, offset = 0) => new Date(base + offset).toISOString().slice(0, 10);
@@ -9,13 +9,9 @@ export const yesterday = isoFormatDay(now, -millisInDay);
 export const today = isoFormatDay(now);
 export const tomorrow = isoFormatDay(now, millisInDay);
 
-export const mockTaskOrderFile: FileMetadata = {
-  created_at: "2021-08-03T16:21:07.978Z",
+export const mockFileMetadataSummary: FileMetadataSummary = {
   id: "b91db32f-40fa-4225-9885-b032f0d229fe",
   name: "TO_12345678910.pdf",
-  size: 694331,
-  status: FileScanStatus.ACCEPTED,
-  updated_at: "2021-08-03T16:21:07.978Z",
 };
 
 export const mockClin: Clin = {
@@ -38,7 +34,7 @@ export const mockFundingStep: FundingStep = {
   task_orders: [
     {
       task_order_number: "12345678910",
-      task_order_file: mockTaskOrderFile,
+      task_order_file: mockFileMetadataSummary,
       clins: [mockClin],
     },
   ],
@@ -118,7 +114,7 @@ export const mockFundingStepBadData: FundingStep = {
   task_orders: [
     {
       task_order_number: "12345678910",
-      task_order_file: mockTaskOrderFile,
+      task_order_file: mockFileMetadataSummary,
       clins: mockClinArrayBadData,
     },
   ],
