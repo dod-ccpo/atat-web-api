@@ -1,5 +1,9 @@
 import { CloudServiceProvider } from "../models/CloudServiceProvider";
-import { mockPortfolioStepMissingFields } from "../portfolioDrafts/portfolio/commonPortfolioMockData";
+import {
+  mockPortfolioStep,
+  mockPortfolioStepMissingFields,
+  mockValidPortfolioSteps,
+} from "../portfolioDrafts/portfolio/commonPortfolioMockData";
 import {
   mockApplicationStep,
   mockApplicationStepsMissingFields,
@@ -85,24 +89,10 @@ describe("Testing validation of request body", () => {
 
 describe("Validation tests for createPortfolioStep function", () => {
   it("should map body to portfolioStep object", async () => {
-    const requestBody = {
-      name: "Zach's portfolio name",
-      csp: CloudServiceProvider.CSP_A,
-      description: "team america",
-      dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
-      portfolio_managers: ["joe.manager@example.com", "jane.manager@example.com"],
-    };
-    expect(isPortfolioStep(requestBody)).toEqual(true);
+    expect(isPortfolioStep(mockPortfolioStep)).toEqual(true);
   });
-  it("should accept PortfolioStep objects with a missing description", async () => {
-    const requestBodyMissingDescription = {
-      name: "Zach's portfolio name",
-      csp: CloudServiceProvider.CSP_A,
-      // description: "team america",
-      dod_components: ["air_force", "army", "marine_corps", "navy", "space_force"],
-      portfolio_managers: ["joe.manager@example.com", "jane.manager@example.com"],
-    };
-    expect(isPortfolioStep(requestBodyMissingDescription)).toEqual(true);
+  it.each(mockValidPortfolioSteps)("should map body to portfolioStep object", async (mockPortfolioStep) => {
+    expect(isPortfolioStep(mockPortfolioStep)).toEqual(true);
   });
   it.each(mockPortfolioStepMissingFields)(
     "should reject PortfolioStep objects missing required attributes",
