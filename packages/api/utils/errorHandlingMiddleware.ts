@@ -2,6 +2,7 @@ import middy from "@middy/core";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { serializeError } from "serialize-error";
 import { ValidationErrorResponse } from "./response";
+import { REQUEST_BODY_INVALID } from "./errors";
 
 const errorHandlingMiddleware = (): middy.MiddlewareObj<APIGatewayProxyEvent, APIGatewayProxyResult> => {
   const onError: middy.MiddlewareFn<APIGatewayProxyEvent, APIGatewayProxyResult> = async (
@@ -20,6 +21,9 @@ const errorHandlingMiddleware = (): middy.MiddlewareObj<APIGatewayProxyEvent, AP
         "Request failed validation (business rules)",
         businessRules as Record<string, unknown>
       );
+    }
+    if (error.name === "UnprocessableEntityError") {
+      return REQUEST_BODY_INVALID;
     }
   };
   return {
