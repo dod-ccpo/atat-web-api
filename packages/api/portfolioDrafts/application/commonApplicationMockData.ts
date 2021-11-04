@@ -115,8 +115,8 @@ export const mockPortfolioDraftSummary: PortfolioDraft = {
   num_environments: mockApplicationStep.applications.flatMap((app) => app.environments).length,
 } as PortfolioDraft;
 
-/** ABOVE THIS LINE ARE VALID OBJECTS WITH GOOD DATA **/
-/** BELOW THIS LINE ARE INVALID OBJECTS WITH MISSING FIELDS AND BAD DATA **/
+/* ABOVE THIS LINE ARE VALID OBJECTS WITH GOOD DATA */
+/* BELOW THIS LINE ARE INVALID OBJECTS WITH MISSING FIELDS AND BAD DATA */
 
 /**
  * An array of Operator objects with invalid emails

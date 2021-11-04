@@ -23,8 +23,8 @@ export const mockValidPortfolioSteps: PortfolioStep[] = [
   },
 ];
 
-/** ABOVE THIS LINE ARE VALID OBJECTS WITH GOOD DATA **/
-/** BELOW THIS LINE ARE INVALID OBJECTS WITH MISSING FIELDS AND BAD DATA **/
+/* ABOVE THIS LINE ARE VALID OBJECTS WITH GOOD DATA */
+/* BELOW THIS LINE ARE INVALID OBJECTS WITH MISSING FIELDS AND BAD DATA */
 
 /**
  * An array of PortfolioStep-looking objects with missing fields

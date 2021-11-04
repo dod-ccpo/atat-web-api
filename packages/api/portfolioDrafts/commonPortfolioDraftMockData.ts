@@ -38,8 +38,8 @@ export const validRequest: APIGatewayProxyEvent = {
   pathParameters: { portfolioDraftId: uuidv4() },
 } as any;
 
-/** ABOVE THIS LINE ARE VALID OBJECTS WITH GOOD DATA **/
-/** BELOW THIS LINE ARE INVALID OBJECTS WITH MISSING FIELDS AND BAD DATA **/
+/* ABOVE THIS LINE ARE VALID OBJECTS WITH GOOD DATA */
+/* BELOW THIS LINE ARE INVALID OBJECTS WITH MISSING FIELDS AND BAD DATA */
 
 /**
  * An array of PortfolioDraftSummary-looking objects with missing fields
