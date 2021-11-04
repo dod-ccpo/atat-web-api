@@ -1,7 +1,7 @@
-import { GetCommand, DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent } from "aws-lambda";
-import { mockClient } from "aws-sdk-client-mock";
+import { DynamoDBDocumentClient, GetCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { handler } from "./submitPortfolioDraft";
+import { mockClient } from "aws-sdk-client-mock";
 import {
   NO_SUCH_PORTFOLIO_DRAFT,
   REQUEST_BODY_NOT_EMPTY,
@@ -9,15 +9,12 @@ import {
   PATH_PARAMETER_REQUIRED_BUT_MISSING,
   DATABASE_ERROR,
 } from "../../utils/errors";
+import { validRequest } from "../commonPortfolioDraftMockData";
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 beforeEach(() => {
   ddbMock.reset();
 });
-
-const validRequest: APIGatewayProxyEvent = {
-  pathParameters: { portfolioDraftId: "1234" },
-} as any;
 
 describe("Validation tests", () => {
   it("should require path param", async () => {
@@ -43,12 +40,11 @@ describe("Validation tests", () => {
     expect(response).toEqual(REQUEST_BODY_NOT_EMPTY);
   });
 });
-describe("Handler response with mock dynamodb", function () {
+describe("Handler response with mock dynamodb", () => {
   it("should return error when the submitPortfolioDraftCommand fails, and portfolioDraft exists", async () => {
     ddbMock.on(UpdateCommand).rejects({ name: "ConditionalCheckFailedException" });
-    const item = { foo: "bar" };
     ddbMock.on(GetCommand).resolves({
-      Item: item,
+      Item: {},
     });
     expect(await handler(validRequest)).toEqual(PORTFOLIO_ALREADY_SUBMITTED);
   });

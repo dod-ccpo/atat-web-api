@@ -1,7 +1,7 @@
 import middy from "@middy/core";
 import xssSanitizer from "./xssSanitizer";
 
-describe("Useable with middy", function () {
+describe("Useable with middy", () => {
   it("custom 'before' middleware can be attached with middys 'use'", async () => {
     const handler = middy();
     const middleware = xssSanitizer();

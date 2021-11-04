@@ -1,6 +1,6 @@
 import { Clin } from "./Clin";
 import { FileMetadataSummary } from "./FileMetadataSummary";
-import { ExhaustiveAttributeMap } from "./TypeFields";
+import { ExhaustivePropertyMap } from "./TypeFields";
 
 export interface TaskOrder {
   task_order_number: string;
@@ -8,7 +8,7 @@ export interface TaskOrder {
   clins: Array<Clin>;
 }
 
-export const taskOrderFields: ExhaustiveAttributeMap<TaskOrder> = {
+export const taskOrderFields: ExhaustivePropertyMap<TaskOrder> = {
   task_order_number: null,
   task_order_file: null,
   clins: null,

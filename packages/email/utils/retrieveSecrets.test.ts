@@ -16,7 +16,7 @@ beforeEach(() => {
   secretsSpy.mockReset();
 });
 
-describe("retrieveSecrets", function () {
+describe("retrieveSecrets", () => {
   it("should return a secrets object upon successfully getting secret value", async () => {
     secretsSpy.mockResolvedValue(secrets);
 
