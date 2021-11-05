@@ -1,4 +1,4 @@
-import { AppEnvAccess,PortfolioAccess, PortfolioOperator, AppEnvOperator } from "../../models/Operator";
+import { AppEnvAccess, PortfolioAccess, PortfolioOperator, AppEnvOperator } from "../../models/Operator";
 import { Application } from "../../models/Application";
 import { ApplicationStep } from "../../models/ApplicationStep";
 import { Environment } from "../../models/Environment";
