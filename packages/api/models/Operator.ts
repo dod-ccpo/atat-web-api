@@ -20,7 +20,7 @@ export interface PortfolioOperator extends Operator {
 }
 
 export interface AppEnvOperator extends Operator {
-  access: AppEnvAccess.ADMINISTRATOR | AppEnvAccess.CONTRIBUTOR | AppEnvAccess.READ_ONLY;
+  access: AppEnvAccess;
 }
 
 export const operatorFields: ExhaustivePropertyMap<PortfolioOperator | AppEnvOperator> = {
