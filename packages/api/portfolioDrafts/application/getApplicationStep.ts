@@ -3,25 +3,13 @@ import { APIGatewayProxyResult, Context } from "aws-lambda";
 import { ApplicationStep } from "../../models/ApplicationStep";
 import { APPLICATION_STEP } from "../../models/PortfolioDraft";
 import { dynamodbDocumentClient as client } from "../../utils/aws-sdk/dynamodb";
-import { DATABASE_ERROR, NO_SUCH_APPLICATION_STEP } from "../../utils/errors";
-import {
-  ApiSuccessResponse,
-  ErrorStatusCode,
-  OtherErrorResponse,
-  SetupError,
-  SuccessStatusCode,
-} from "../../utils/response";
+import { DATABASE_ERROR, NO_SUCH_APPLICATION_STEP, NO_SUCH_PORTFOLIO_DRAFT } from "../../utils/errors";
+import { ApiSuccessResponse, SetupError, SuccessStatusCode } from "../../utils/response";
 import middy from "@middy/core";
 import cors from "@middy/http-cors";
 import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
 import { shapeValidationForPostRequest } from "../../utils/requestValidation";
 import { CORS_CONFIGURATION } from "../../utils/corsConfig";
-
-// Note that API spec calls for 400 and not 404
-export const NO_SUCH_PORTFOLIO_DRAFT_FOUND = new OtherErrorResponse(
-  "The given Portfolio Draft does not exist",
-  ErrorStatusCode.BAD_REQUEST
-);
 
 /**
  * Gets the Application Step of the specified Portfolio Draft if it exists
@@ -49,7 +37,7 @@ export async function baseHandler(
       })
     );
     if (!result.Item) {
-      return NO_SUCH_PORTFOLIO_DRAFT_FOUND;
+      return NO_SUCH_PORTFOLIO_DRAFT;
     }
     if (!result.Item?.application_step) {
       return NO_SUCH_APPLICATION_STEP;

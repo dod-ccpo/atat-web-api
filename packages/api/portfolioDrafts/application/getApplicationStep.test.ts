@@ -4,7 +4,7 @@ import { DATABASE_ERROR, NO_SUCH_APPLICATION_STEP, NO_SUCH_PORTFOLIO_DRAFT } fro
 import { DynamoDBDocumentClient, GetCommand, GetCommandOutput } from "@aws-sdk/lib-dynamodb";
 import { mockApplicationStep } from "./commonApplicationMockData";
 import { mockClient } from "aws-sdk-client-mock";
-import { handler, NO_SUCH_PORTFOLIO_DRAFT_FOUND } from "./getApplicationStep";
+import { handler } from "./getApplicationStep";
 import { v4 as uuidv4 } from "uuid";
 import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
 import { ApplicationStep } from "../../models/ApplicationStep";
@@ -49,9 +49,9 @@ it("should return error if portfolio draft does not exist", async () => {
   ddbMock.on(GetCommand).resolves(emptyOutput);
   const result = await handler(validRequest, {} as Context, () => null);
   expect(result).toBeInstanceOf(OtherErrorResponse);
-  expect(result).toEqual(NO_SUCH_PORTFOLIO_DRAFT_FOUND);
-  expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-  expect(JSON.parse(result?.body ?? "").message).toMatch(/The given Portfolio Draft does not exist/);
+  expect(result).toEqual(NO_SUCH_PORTFOLIO_DRAFT);
+  expect(result?.statusCode).toEqual(ErrorStatusCode.NOT_FOUND);
+  expect(JSON.parse(result?.body ?? "").message).toMatch(/Portfolio Draft with the given ID does not exist/);
 });
 it("should return error if application step does not exist in portfolio draft", async () => {
   const itemOutput: GetCommandOutput = { Item: {} } as any;

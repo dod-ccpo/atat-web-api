@@ -6,8 +6,6 @@ import {
   mockPortfolioDraftSummary,
   mockBadPortfolioDraftSummary,
   mockApplicationsMissingFields,
-  mockBadOperatorEmails,
-  mockEnvironmentsMissingFields,
   badEnvironmentInApplication,
   mockOperatorMissingDisplayNameFields,
   mockOperatorMissingEmailFields,
@@ -72,7 +70,7 @@ describe("Path parameter tests", () => {
   });
 });
 
-describe("Request body shape validations", function () {
+describe("Request body shape validations", () => {
   it.each([
     {
       body: "", // empty body
@@ -272,7 +270,7 @@ describe("Incorrect number of applications and environments", () => {
   });
 });
 
-describe("Business rules validation tests", function () {
+describe("Business rules validation tests", () => {
   it("should return a validation error when application name is too short or too long", async () => {
     const badApplicationNameRequest: ApiGatewayEventParsed<ApplicationStep> = {
       body: { ...mockApplicationStepsBadData[0] },
@@ -375,7 +373,7 @@ describe("Business rules validation tests", function () {
   });
 });
 
-describe("findAdministrators", function () {
+describe("findAdministrators", () => {
   /**
    * Acceptable admin roles in an application step according to the business rules:
    * - 1 root portfolio admin role
