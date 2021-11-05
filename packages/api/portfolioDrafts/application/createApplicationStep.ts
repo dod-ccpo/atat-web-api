@@ -15,6 +15,7 @@ import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import cors from "@middy/http-cors";
 import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
 import { findAdministrators, shapeValidationForPostRequest } from "../../utils/requestValidation";
+import { CORS_CONFIGURATION } from "../../utils/corsConfig";
 
 /**
  * Submits the Application Step of the Portfolio Draft Wizard
@@ -88,4 +89,4 @@ export const handler = middy(baseHandler)
   .use(jsonBodyParser())
   .use(validator({ inputSchema: wrappedApplicationStepSchema }))
   .use(JSONErrorHandlerMiddleware())
-  .use(cors({ headers: "*", methods: "*" }));
+  .use(cors(CORS_CONFIGURATION));

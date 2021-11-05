@@ -15,6 +15,7 @@ import middy from "@middy/core";
 import cors from "@middy/http-cors";
 import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
 import { shapeValidationForPostRequest } from "../../utils/requestValidation";
+import { CORS_CONFIGURATION } from "../../utils/corsConfig";
 
 // Note that API spec calls for 400 and not 404
 export const NO_SUCH_PORTFOLIO_DRAFT_FOUND = new OtherErrorResponse(
@@ -63,4 +64,4 @@ export async function baseHandler(
   }
 }
 
-export const handler = middy(baseHandler).use(cors({ headers: "*", methods: "*" }));
+export const handler = middy(baseHandler).use(cors(CORS_CONFIGURATION));
