@@ -129,7 +129,7 @@ export const mockApplicationsStepWithGoodAdminRoles: ApplicationStep[] = [
     applications: [
       {
         name: "Cool App",
-        operators: [{ ...mockApplicationStep.applications[0].operators[0], access: AccessLevel.ADMINISTRATOR }],
+        operators: [{ ...mockApplicationStep.applications[0].operators[0], access: AppEnvAccess.ADMINISTRATOR }],
         environments: [{ name: "Paradise", operators: [] }],
       },
       {
@@ -138,11 +138,11 @@ export const mockApplicationsStepWithGoodAdminRoles: ApplicationStep[] = [
         environments: [
           {
             name: "sandbox",
-            operators: [{ ...mockApplicationStep.applications[0].operators[0], access: AccessLevel.ADMINISTRATOR }],
+            operators: [{ ...mockApplicationStep.applications[0].operators[0], access: AppEnvAccess.ADMINISTRATOR }],
           },
           {
             name: "develop",
-            operators: [{ ...mockApplicationStep.applications[0].operators[0], access: AccessLevel.ADMINISTRATOR }],
+            operators: [{ ...mockApplicationStep.applications[0].operators[0], access: AppEnvAccess.ADMINISTRATOR }],
           },
         ],
       },
@@ -327,7 +327,7 @@ export const mockOperatorMissingDisplayNameFields = [
       {
         // display_name: "Salacious Crumb",
         email: "monkey@lizard.mil",
-        access: AccessLevel.PORTFOLIO_ADMINISTRATOR,
+        access: PortfolioAccess.PORTFOLIO_ADMINISTRATOR,
       },
     ],
   },
@@ -340,7 +340,7 @@ export const mockOperatorMissingDisplayNameFields = [
           {
             // display_name: "Salacious Crumb",
             email: "monkey@lizard.mil",
-            access: AccessLevel.ADMINISTRATOR,
+            access: AppEnvAccess.ADMINISTRATOR,
           },
         ],
       },
@@ -358,7 +358,7 @@ export const mockOperatorMissingDisplayNameFields = [
               {
                 // display_name: "Salacious Crumb",
                 email: "monkey@lizard.mil",
-                access: AccessLevel.ADMINISTRATOR,
+                access: AppEnvAccess.ADMINISTRATOR,
               },
             ],
           },
@@ -378,7 +378,7 @@ export const mockOperatorMissingEmailFields = [
       {
         display_name: "Salacious Crumb",
         // email: "monkey@lizard.mil",
-        access: AccessLevel.PORTFOLIO_ADMINISTRATOR,
+        access: PortfolioAccess.PORTFOLIO_ADMINISTRATOR,
       },
     ],
   },
@@ -391,7 +391,7 @@ export const mockOperatorMissingEmailFields = [
           {
             display_name: "Salacious Crumb",
             // email: "monkey@lizard.mil",
-            access: AccessLevel.ADMINISTRATOR,
+            access: AppEnvAccess.ADMINISTRATOR,
           },
         ],
       },
@@ -409,7 +409,7 @@ export const mockOperatorMissingEmailFields = [
               {
                 display_name: "Salacious Crumb",
                 // email: "monkey@lizard.mil",
-                access: AccessLevel.ADMINISTRATOR,
+                access: AppEnvAccess.ADMINISTRATOR,
               },
             ],
           },
@@ -429,7 +429,7 @@ export const mockOperatorMissingAccessFields = [
       {
         display_name: "Salacious Crumb",
         email: "monkey@lizard.mil",
-        // access: AccessLevel.PORTFOLIO_ADMINISTRATOR,
+        // access: PortfolioAccess.PORTFOLIO_ADMINISTRATOR,
       },
     ],
   },
@@ -442,7 +442,7 @@ export const mockOperatorMissingAccessFields = [
           {
             display_name: "Salacious Crumb",
             email: "monkey@lizard.mil",
-            // access: AccessLevel.ADMINISTRATOR,
+            // access: AppEnvAccess.ADMINISTRATOR,
           },
         ],
       },
@@ -460,7 +460,7 @@ export const mockOperatorMissingAccessFields = [
               {
                 display_name: "Salacious Crumb",
                 email: "monkey@lizard.mil",
-                // access: AccessLevel.ADMINISTRATOR,
+                // access: AppEnvAccess.ADMINISTRATOR,
               },
             ],
           },
@@ -506,7 +506,7 @@ export const mockApplicationsStepWithBadAdminRoles: ApplicationStep[] = [
           },
           {
             name: "develop 1",
-            operators: [{ ...mockApplicationStep.applications[0].operators[0], access: AccessLevel.ADMINISTRATOR }],
+            operators: [{ ...mockApplicationStep.applications[0].operators[0], access: AppEnvAccess.ADMINISTRATOR }],
           },
         ],
       },
@@ -518,7 +518,7 @@ export const mockApplicationsStepWithBadAdminRoles: ApplicationStep[] = [
     applications: [
       {
         ...mockApplicationStep.applications[0],
-        operators: [{ ...mockApplicationStep.applications[1].operators[0], access: AccessLevel.ADMINISTRATOR }],
+        operators: [{ ...mockApplicationStep.applications[1].operators[0], access: AppEnvAccess.ADMINISTRATOR }],
         environments: [{ name: "no operators", operators: [] }],
       },
       {
@@ -527,11 +527,11 @@ export const mockApplicationsStepWithBadAdminRoles: ApplicationStep[] = [
         environments: [
           {
             name: "Best sandbox",
-            operators: [{ ...mockApplicationStep.applications[1].operators[1], access: AccessLevel.ADMINISTRATOR }],
+            operators: [{ ...mockApplicationStep.applications[1].operators[1], access: AppEnvAccess.ADMINISTRATOR }],
           },
           {
             name: "Best develop",
-            operators: [{ ...mockApplicationStep.applications[1].operators[3], access: AccessLevel.ADMINISTRATOR }],
+            operators: [{ ...mockApplicationStep.applications[1].operators[3], access: AppEnvAccess.ADMINISTRATOR }],
           },
         ],
       },
@@ -541,7 +541,7 @@ export const mockApplicationsStepWithBadAdminRoles: ApplicationStep[] = [
         environments: [
           {
             name: "legacy-sandbox",
-            operators: [{ ...mockApplicationStep.applications[1].operators[0], access: AccessLevel.ADMINISTRATOR }],
+            operators: [{ ...mockApplicationStep.applications[1].operators[0], access: AppEnvAccess.ADMINISTRATOR }],
           },
           {
             name: "legacy-stage",
@@ -549,7 +549,7 @@ export const mockApplicationsStepWithBadAdminRoles: ApplicationStep[] = [
           },
           {
             name: "legacy-develop",
-            operators: [{ ...mockApplicationStep.applications[1].operators[0], access: AccessLevel.ADMINISTRATOR }],
+            operators: [{ ...mockApplicationStep.applications[1].operators[0], access: AppEnvAccess.ADMINISTRATOR }],
           },
         ],
       },

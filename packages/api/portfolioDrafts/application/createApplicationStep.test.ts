@@ -18,7 +18,6 @@ import { mockClient } from "aws-sdk-client-mock";
 import { v4 as uuidv4 } from "uuid";
 import { ApplicationStep } from "../../models/ApplicationStep";
 import { Application } from "../../models/Application";
-import { AppEnvAccess } from "../../models/Operator";
 import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusCode } from "../../utils/response";
 import { handler } from "./createApplicationStep";
 import { DATABASE_ERROR, NO_SUCH_PORTFOLIO_DRAFT } from "../../utils/errors";

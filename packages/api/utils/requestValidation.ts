@@ -3,7 +3,7 @@ import { SetupError, SetupResult, SetupSuccess } from "./response";
 import { isValidUuidV4 } from "./validation";
 import { ApiGatewayEventParsed } from "./eventHandlingTool";
 import { ApplicationStep } from "../models/ApplicationStep";
-import { AccessLevel, Operator } from "../models/Operator";
+import { Operators, isAdministrator } from "../models/Operator";
 
 /**
  * Check if incoming POST Request passes basic shape validation
@@ -63,17 +63,19 @@ export function findAdministrators(applicationStep: ApplicationStep): Administra
   const hasPortfolioAdminRole = adminRoleFound(operators);
 
   // find apps and envs without admin roles
-  const applicationsWithNoAdmin: number[] = [];
   const environmentsWithNoAdmin: EnvironmentWithNoAdminProps[] = [];
-  applications.forEach((app, appIndex) => {
-    // apps without admin roles
-    !adminRoleFound(app.operators) && applicationsWithNoAdmin.push(appIndex);
+  const applicationsWithNoAdmin = applications
+    .map((app, appIndex) => {
+      // check each app for missing env admin roles
+      app.environments
+        .map((env, envIndex) => ({ env, envIndex }))
+        .filter(({ env }) => !adminRoleFound(env.operators))
+        .forEach(({ envIndex }) => environmentsWithNoAdmin.push({ appIndex, envIndex }));
 
-    // env without admin roles
-    app.environments.forEach((env, envIndex) => {
-      !adminRoleFound(env.operators) && environmentsWithNoAdmin.push({ appIndex, envIndex });
-    });
-  });
+      return { app, appIndex };
+    })
+    .filter(({ app }) => !adminRoleFound(app.operators))
+    .map(({ appIndex }) => appIndex);
 
   // if no missing admin roles in app or env, all app or env admins are considered present
   const hasAdminForEachApplication = applicationsWithNoAdmin.length === 0;
@@ -82,14 +84,11 @@ export function findAdministrators(applicationStep: ApplicationStep): Administra
   let acceptableAdministratorRoles = hasPortfolioAdminRole || hasAdminForEachApplication || hasAdminForEachEnvironment;
 
   if (!acceptableAdministratorRoles) {
-    let appsWithMissingAppAndEnvAdminRole = 0;
-    applicationsWithNoAdmin.forEach((appNoAdmin) => {
-      const missingEnvAdmins = environmentsWithNoAdmin.filter((obj) => obj.appIndex === appNoAdmin);
-      // if no missing env admin from apps with missing app admin, all env admins considered present
-      missingEnvAdmins.length !== 0 && appsWithMissingAppAndEnvAdminRole++;
-    });
+    const appsWithMissingAppAndEnvAdminRole = environmentsWithNoAdmin.filter(({ appIndex }) =>
+      applicationsWithNoAdmin.includes(appIndex)
+    );
 
-    acceptableAdministratorRoles = appsWithMissingAppAndEnvAdminRole === 0;
+    acceptableAdministratorRoles = appsWithMissingAppAndEnvAdminRole.length === 0;
   }
 
   return {
@@ -112,11 +111,6 @@ export function findAdministrators(applicationStep: ApplicationStep): Administra
  * @param operators - operators at one of the three application step levels
  * @returns - true if one operator admin found, and false otherwise
  */
-export function adminRoleFound(operators: Operator[]): boolean {
+export function adminRoleFound(operators: Operators[]): boolean {
   return operators.some(isAdministrator);
-}
-
-// TODO: move into Operators.ts and update with changes from Operators.ts
-export function isAdministrator(operator: Operator): boolean {
-  return operator.access === AccessLevel.PORTFOLIO_ADMINISTRATOR || operator.access === AccessLevel.ADMINISTRATOR;
 }
