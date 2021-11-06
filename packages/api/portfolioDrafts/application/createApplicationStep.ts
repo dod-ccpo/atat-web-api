@@ -4,7 +4,7 @@ import { Application } from "../../models/Application";
 import { ApplicationStep } from "../../models/ApplicationStep";
 import { APPLICATION_STEP } from "../../models/PortfolioDraft";
 import { dynamodbDocumentClient as client } from "../../utils/aws-sdk/dynamodb";
-import { DATABASE_ERROR, NO_SUCH_PORTFOLIO_DRAFT } from "../../utils/errors";
+import { DATABASE_ERROR, NO_SUCH_PORTFOLIO_DRAFT_404 } from "../../utils/errors";
 import { ApiSuccessResponse, SetupError, SuccessStatusCode, ValidationErrorResponse } from "../../utils/response";
 import schema = require("../../models/schema.json");
 import middy from "@middy/core";
@@ -68,7 +68,7 @@ export async function baseHandler(
     );
   } catch (error) {
     if (error.name === "ConditionalCheckFailedException") {
-      return NO_SUCH_PORTFOLIO_DRAFT;
+      return NO_SUCH_PORTFOLIO_DRAFT_404;
     }
     console.error("Database error: " + error);
     return DATABASE_ERROR;

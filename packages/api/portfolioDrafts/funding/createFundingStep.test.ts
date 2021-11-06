@@ -19,7 +19,7 @@ import {
   PATH_PARAMETER_REQUIRED_BUT_MISSING,
   REQUEST_BODY_INVALID,
   DATABASE_ERROR,
-  NO_SUCH_PORTFOLIO_DRAFT,
+  NO_SUCH_PORTFOLIO_DRAFT_404,
 } from "../../utils/errors";
 import {
   millisInDay,
@@ -89,7 +89,7 @@ describe("Path parameter tests", () => {
     } as any;
     const result = await handler(invalidRequest);
     expect(result).toBeInstanceOf(OtherErrorResponse);
-    expect(result).toEqual(NO_SUCH_PORTFOLIO_DRAFT);
+    expect(result).toEqual(NO_SUCH_PORTFOLIO_DRAFT_404);
     expect(result.statusCode).toEqual(ErrorStatusCode.NOT_FOUND);
     expect(JSON.parse(result.body).message).toMatch(/Portfolio Draft with the given ID does not exist/);
   });

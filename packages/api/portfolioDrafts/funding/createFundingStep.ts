@@ -6,7 +6,7 @@ import { FundingStep, ValidationMessage } from "../../models/FundingStep";
 import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import {
   DATABASE_ERROR,
-  NO_SUCH_PORTFOLIO_DRAFT,
+  NO_SUCH_PORTFOLIO_DRAFT_404,
   REQUEST_BODY_EMPTY,
   REQUEST_BODY_INVALID,
   PATH_PARAMETER_REQUIRED_BUT_MISSING,
@@ -52,7 +52,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
     return PATH_PARAMETER_REQUIRED_BUT_MISSING;
   }
   if (!portfolioDraftId || !isValidUuidV4(portfolioDraftId)) {
-    return NO_SUCH_PORTFOLIO_DRAFT;
+    return NO_SUCH_PORTFOLIO_DRAFT_404;
   }
   if (!event.body) {
     return REQUEST_BODY_EMPTY;
@@ -93,7 +93,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
     );
   } catch (error) {
     if (error.name === "ConditionalCheckFailedException") {
-      return NO_SUCH_PORTFOLIO_DRAFT;
+      return NO_SUCH_PORTFOLIO_DRAFT_404;
     }
     console.error("Database error: " + error);
     return DATABASE_ERROR;

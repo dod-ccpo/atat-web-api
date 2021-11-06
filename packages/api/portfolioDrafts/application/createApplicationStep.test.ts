@@ -20,7 +20,7 @@ import { ApplicationStep } from "../../models/ApplicationStep";
 import { Application } from "../../models/Application";
 import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusCode } from "../../utils/response";
 import { handler } from "./createApplicationStep";
-import { DATABASE_ERROR, NO_SUCH_PORTFOLIO_DRAFT } from "../../utils/errors";
+import { DATABASE_ERROR, NO_SUCH_PORTFOLIO_DRAFT_404 } from "../../utils/errors";
 import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
 import { findAdministrators } from "../../utils/requestValidation";
 
@@ -53,7 +53,7 @@ describe("Path parameter tests", () => {
     } as any;
     const result = await handler(emptyRequest, {} as Context, () => null);
     expect(result).toBeInstanceOf(OtherErrorResponse);
-    expect(result).toEqual(NO_SUCH_PORTFOLIO_DRAFT);
+    expect(result).toEqual(NO_SUCH_PORTFOLIO_DRAFT_404);
     expect(result?.statusCode).toEqual(ErrorStatusCode.NOT_FOUND);
   });
   it("should return error when path param not UUIDv4 (to avoid attempting update)", async () => {
@@ -63,7 +63,7 @@ describe("Path parameter tests", () => {
     } as any;
     const result = await handler(invalidRequest, {} as Context, () => null);
     expect(result).toBeInstanceOf(OtherErrorResponse);
-    expect(result).toEqual(NO_SUCH_PORTFOLIO_DRAFT);
+    expect(result).toEqual(NO_SUCH_PORTFOLIO_DRAFT_404);
     expect(result?.statusCode).toEqual(ErrorStatusCode.NOT_FOUND);
     expect(JSON.parse(result?.body ?? "").message).toMatch(/Portfolio Draft with the given ID does not exist/);
   });
@@ -436,6 +436,6 @@ describe("Portfolio Draft DNE tests", () => {
   it("should return error response when given portfolio draft does not exist", async () => {
     ddbMock.on(UpdateCommand).rejects({ name: "ConditionalCheckFailedException" });
     const result = await handler(validRequest, {} as Context, () => null);
-    expect(result).toEqual(NO_SUCH_PORTFOLIO_DRAFT);
+    expect(result).toEqual(NO_SUCH_PORTFOLIO_DRAFT_404);
   });
 });

@@ -1,6 +1,11 @@
 import { Context } from "aws-lambda";
 import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusCode } from "../../utils/response";
-import { DATABASE_ERROR, NO_SUCH_APPLICATION_STEP, NO_SUCH_PORTFOLIO_DRAFT } from "../../utils/errors";
+import {
+  DATABASE_ERROR,
+  NO_SUCH_APPLICATION_STEP,
+  NO_SUCH_PORTFOLIO_DRAFT_404,
+  NO_SUCH_PORTFOLIO_DRAFT_400,
+} from "../../utils/errors";
 import { DynamoDBDocumentClient, GetCommand, GetCommandOutput } from "@aws-sdk/lib-dynamodb";
 import { mockApplicationStep } from "./commonApplicationMockData";
 import { mockClient } from "aws-sdk-client-mock";
@@ -31,7 +36,7 @@ it("should require path param", async () => {
   const emptyRequest: ApiGatewayEventParsed<ApplicationStep> = {} as any;
   const result = await handler(emptyRequest, {} as Context, () => null);
   expect(result).toBeInstanceOf(OtherErrorResponse);
-  expect(result).toEqual(NO_SUCH_PORTFOLIO_DRAFT);
+  expect(result).toEqual(NO_SUCH_PORTFOLIO_DRAFT_404);
   expect(result?.statusCode).toEqual(ErrorStatusCode.NOT_FOUND);
 });
 it("should return error when path param not UUIDv4 (to avoid performing query)", async () => {
@@ -40,7 +45,7 @@ it("should return error when path param not UUIDv4 (to avoid performing query)",
   } as any;
   const result = await handler(invalidRequest, {} as Context, () => null);
   expect(result).toBeInstanceOf(OtherErrorResponse);
-  expect(result).toEqual(NO_SUCH_PORTFOLIO_DRAFT);
+  expect(result).toEqual(NO_SUCH_PORTFOLIO_DRAFT_404);
   expect(result?.statusCode).toEqual(ErrorStatusCode.NOT_FOUND);
   expect(JSON.parse(result?.body ?? "").message).toMatch(/Portfolio Draft with the given ID does not exist/);
 });
@@ -49,9 +54,9 @@ it("should return error if portfolio draft does not exist", async () => {
   ddbMock.on(GetCommand).resolves(emptyOutput);
   const result = await handler(validRequest, {} as Context, () => null);
   expect(result).toBeInstanceOf(OtherErrorResponse);
-  expect(result).toEqual(NO_SUCH_PORTFOLIO_DRAFT);
-  expect(result?.statusCode).toEqual(ErrorStatusCode.NOT_FOUND);
-  expect(JSON.parse(result?.body ?? "").message).toMatch(/Portfolio Draft with the given ID does not exist/);
+  expect(result).toEqual(NO_SUCH_PORTFOLIO_DRAFT_400);
+  expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
+  expect(JSON.parse(result?.body ?? "").message).toMatch(/The given Portfolio Draft does not exist/);
 });
 it("should return error if application step does not exist in portfolio draft", async () => {
   const itemOutput: GetCommandOutput = { Item: {} } as any;

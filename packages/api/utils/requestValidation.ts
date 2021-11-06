@@ -1,4 +1,4 @@
-import { NO_SUCH_PORTFOLIO_DRAFT, REQUEST_BODY_INVALID } from "./errors";
+import { NO_SUCH_PORTFOLIO_DRAFT_404, REQUEST_BODY_INVALID } from "./errors";
 import { SetupError, SetupResult, SetupSuccess } from "./response";
 import { isValidUuidV4 } from "./validation";
 import { ApiGatewayEventParsed } from "./eventHandlingTool";
@@ -17,7 +17,7 @@ export function shapeValidationForPostRequest<T>(
   ...extraValidators: Array<(obj: unknown) => obj is T>
 ): SetupResult<T> {
   if (!isValidUuidV4(event.pathParameters?.portfolioDraftId)) {
-    return new SetupError(NO_SUCH_PORTFOLIO_DRAFT);
+    return new SetupError(NO_SUCH_PORTFOLIO_DRAFT_404);
   }
   const portfolioDraftId = event.pathParameters!.portfolioDraftId!;
   const bodyResult = event.body;

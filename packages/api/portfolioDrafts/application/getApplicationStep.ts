@@ -3,7 +3,7 @@ import { APIGatewayProxyResult, Context } from "aws-lambda";
 import { ApplicationStep } from "../../models/ApplicationStep";
 import { APPLICATION_STEP } from "../../models/PortfolioDraft";
 import { dynamodbDocumentClient as client } from "../../utils/aws-sdk/dynamodb";
-import { DATABASE_ERROR, NO_SUCH_APPLICATION_STEP, NO_SUCH_PORTFOLIO_DRAFT } from "../../utils/errors";
+import { DATABASE_ERROR, NO_SUCH_APPLICATION_STEP, NO_SUCH_PORTFOLIO_DRAFT_400 } from "../../utils/errors";
 import { ApiSuccessResponse, SetupError, SuccessStatusCode } from "../../utils/response";
 import middy from "@middy/core";
 import cors from "@middy/http-cors";
@@ -37,7 +37,7 @@ export async function baseHandler(
       })
     );
     if (!result.Item) {
-      return NO_SUCH_PORTFOLIO_DRAFT;
+      return NO_SUCH_PORTFOLIO_DRAFT_400;
     }
     if (!result.Item?.application_step) {
       return NO_SUCH_APPLICATION_STEP;
