@@ -15,6 +15,7 @@ import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import cors from "@middy/http-cors";
 import xssSanitizer from "../xssSanitizer";
 import errorHandlingMiddleware from "../../utils/errorHandlingMiddleware";
+import { CORS_CONFIGURATION } from "../../utils/corsConfig";
 import { wrapSchema } from "../../utils/schemaWrapper";
 
 /**
@@ -75,6 +76,6 @@ handler
   )
   .use(errorHandlingMiddleware())
   .use(JSONErrorHandlerMiddleware())
-  .use(cors({ headers: "*", methods: "*" }));
+  .use(cors(CORS_CONFIGURATION));
 
 export { handler };

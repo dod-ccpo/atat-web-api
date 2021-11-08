@@ -9,6 +9,8 @@ import { requestShapeValidation } from "../../utils/requestValidation";
 import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
 import middy from "@middy/core";
 import cors from "@middy/http-cors";
+import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
+import { CORS_CONFIGURATION } from "../../utils/corsConfig";
 /**
  * Gets the Funding Step of the specified Portfolio Draft if it exists
  *
@@ -47,5 +49,5 @@ export async function baseHandler(
   }
 }
 const handler = middy(baseHandler);
-handler.use(cors({ headers: "*", methods: "*" }));
+handler.use(JSONErrorHandlerMiddleware()).use(cors(CORS_CONFIGURATION));
 export { handler };
