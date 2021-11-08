@@ -22,8 +22,10 @@
     "@types/nodemailer": "^6.4.4",
     "ajv": "^8.6.3",
     "ajv-formats": "^2.1.1",
+    "http-errors": "^1.8.0",
     "lambda-multipart-parser": "^1.0.1",
     "middy-middleware-json-error-handler": "^3.0.0",
+    "serialize-error": "^8.1.0",
     "nodemailer": "^6.7.0",
     "uuid": "^8.3.2",
     "xss": "^1.0.10"

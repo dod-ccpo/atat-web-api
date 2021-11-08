@@ -14,7 +14,7 @@ import validator from "@middy/validator";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import cors from "@middy/http-cors";
 import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
-import { findAdministrators, shapeValidationForPostRequest } from "../../utils/requestValidation";
+import { findAdministrators, validateRequestShape } from "../../utils/requestValidation";
 import { CORS_CONFIGURATION } from "../../utils/corsConfig";
 
 /**
@@ -26,7 +26,7 @@ export async function baseHandler(
   event: ApiGatewayEventParsed<ApplicationStep>,
   context?: Context
 ): Promise<APIGatewayProxyResult> {
-  const setupResult = shapeValidationForPostRequest<ApplicationStep>(event);
+  const setupResult = validateRequestShape<ApplicationStep>(event);
   if (setupResult instanceof SetupError) {
     return setupResult.errorResponse;
   }

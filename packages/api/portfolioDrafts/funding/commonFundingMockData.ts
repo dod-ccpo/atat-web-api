@@ -33,7 +33,7 @@ export const mockClinArrayGoodData = [mockClin, mockClinObligatedEqualsTotal];
 export const mockFundingStep: FundingStep = {
   task_orders: [
     {
-      task_order_number: "12345678910",
+      task_order_number: "12345678910123",
       task_order_file: mockFileMetadataSummary,
       clins: [mockClin],
     },
@@ -108,14 +108,29 @@ export const mockClinArrayBadData = [
   mockClinLessThanZeroFunds,
   mockClinZeroFunds,
   mockClinObligatedGreaterThanTotal,
-  // mockClinNotANumberFunds, - doesn't satisfy Clin interface
 ];
 export const mockFundingStepBadData: FundingStep = {
   task_orders: [
     {
-      task_order_number: "12345678910",
+      task_order_number: "12345678910", // invalid task number, too short
       task_order_file: mockFileMetadataSummary,
       clins: mockClinArrayBadData,
+    },
+  ],
+};
+
+export const mockClinArrayBadBusinessRulesData = [
+  mockClinStartAfterEnd,
+  mockClinAlreadyEnded,
+  mockClinObligatedGreaterThanTotal,
+];
+
+export const mockFundingStepBadBusinessRulesData: FundingStep = {
+  task_orders: [
+    {
+      task_order_number: "12345678910123",
+      task_order_file: mockFileMetadataSummary,
+      clins: mockClinArrayBadBusinessRulesData,
     },
   ],
 };
