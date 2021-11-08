@@ -981,7 +981,6 @@ components:
             $ref: '#/components/schemas/TaskOrder'    
       required:
         - "task_orders"
-
     TaskOrder:
       description: Represents a Task Order in the Funding Step
       type: object
