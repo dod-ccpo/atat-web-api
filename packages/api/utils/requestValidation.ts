@@ -103,7 +103,8 @@ export function findAdministrators(applicationStep: ApplicationStep): Administra
 
 /**
  * Checks if at least one operator admin is present in a group of operators
- * according to the business rules.
+ * according to the business rules which require an admin at an environment
+ * level or a higher in the Portfolio Draft.
  *
  * Only 'portfolio_administrator' operators are found at the top level, and
  * 'administrator' operators are found at the app and env levels.
