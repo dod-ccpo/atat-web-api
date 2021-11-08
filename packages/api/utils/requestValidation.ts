@@ -15,7 +15,7 @@ import { Operators, isAdministrator } from "../models/Operator";
  * @param extraValidators - Additional validators that check whether the body is a valid object of Type T
  * @returns SetUpSuccess object if event passes validation, otherwise it returns SetUpError
  */
-export function requestShapeValidation<T>(
+export function validateRequestShape<T>(
   event: ApiGatewayEventParsed<T>,
   ...extraValidators: Array<(obj: unknown) => obj is T>
 ): SetupResult<T> {

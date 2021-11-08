@@ -5,7 +5,7 @@ import { FUNDING_STEP } from "../../models/PortfolioDraft";
 import { FundingStep } from "../../models/FundingStep";
 import { GetCommand } from "@aws-sdk/lib-dynamodb";
 import { DATABASE_ERROR, NO_SUCH_PORTFOLIO_DRAFT_404, NO_SUCH_FUNDING_STEP } from "../../utils/errors";
-import { requestShapeValidation } from "../../utils/requestValidation";
+import { validateRequestShape } from "../../utils/requestValidation";
 import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
 import middy from "@middy/core";
 import cors from "@middy/http-cors";
@@ -21,7 +21,7 @@ export async function baseHandler(
   context?: Context
 ): Promise<APIGatewayProxyResult> {
   // Perform shape validation
-  const setupResult = requestShapeValidation<FundingStep>(event);
+  const setupResult = validateRequestShape<FundingStep>(event);
   if (setupResult instanceof SetupError) {
     return setupResult.errorResponse;
   }

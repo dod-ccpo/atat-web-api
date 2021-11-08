@@ -11,7 +11,7 @@ import {
   DynamoDBException,
   DatabaseResult,
 } from "../../utils/response";
-import { requestShapeValidation } from "../../utils/requestValidation";
+import { validateRequestShape } from "../../utils/requestValidation";
 import middy from "@middy/core";
 import jsonBodyParser from "@middy/http-json-body-parser";
 import validator from "@middy/validator";
@@ -39,7 +39,7 @@ export async function baseHandler(
   context?: Context
 ): Promise<APIGatewayProxyResult> {
   // Perform shape validation
-  const setupResult = requestShapeValidation<PortfolioStep>(event);
+  const setupResult = validateRequestShape<PortfolioStep>(event);
   if (setupResult instanceof SetupError) {
     return setupResult.errorResponse;
   }
