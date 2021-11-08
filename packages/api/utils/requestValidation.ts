@@ -123,8 +123,5 @@ export function createBusinessRulesValidationErrorResponse(
   Object.keys(invalidProperties).forEach((key) => {
     if (!key) throw Error("Parameter 'invalidProperties' must not have empty string as key");
   });
-  // return new ValidationErrorResponse("Invalid input", invalidProperties);
-  const error = createError(400, "Business rules validation failed");
-  error.details = invalidProperties;
-  throw error;
+  throw createError(400, "Business rules validation failed", { details: invalidProperties });
 }
