@@ -1089,7 +1089,7 @@ components:
       properties:
         name:
           type: string
-          pattern: '^[a-zA-Z\d ,.-]{1,100}$'
+          pattern: '^[a-zA-Z\d _-]{1,100}$'
         operators:
           type: array
           items:
@@ -1098,7 +1098,7 @@ components:
         - name
         - operators
     PortfolioOperator:
-      description: Represents a Portfolio (admin) Operator of an PortfolioDraft
+      description: Represents an operator of a Portfolio
       additionalProperties: false
       type: object
       properties:
@@ -1115,7 +1115,7 @@ components:
         - email
         - access
     AppEnvOperator:
-      description: Represents an Application or Environment Operator
+      description: Represents an operator of an Application or Environment
       additionalProperties: false
       type: object
       properties:
