@@ -47,7 +47,7 @@ export interface ClinValidationError {
  * @returns an ValidationErrorResponse (by throwing an error to the middleware) if there are Clin validation errors
  */
 
-export function businessRulesValidationForFundingStep(fs: FundingStep): ValidationErrorResponse | undefined {
+export function validateBusinessRulesForFundingStep(fs: FundingStep): ValidationErrorResponse | undefined {
   const errors: Array<ClinValidationError> = validateFundingStepClins(fs);
   if (errors.length) {
     return createBusinessRulesValidationErrorResponse({ input_validation_errors: errors });

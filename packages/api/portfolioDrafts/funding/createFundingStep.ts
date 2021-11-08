@@ -7,7 +7,7 @@ import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { DATABASE_ERROR, NO_SUCH_PORTFOLIO_DRAFT } from "../../utils/errors";
 import schema = require("../../models/schema.json");
 import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
-import { requestShapeValidation, businessRulesValidationForFundingStep } from "../../utils/requestValidation";
+import { requestShapeValidation, validateBusinessRulesForFundingStep } from "../../utils/requestValidation";
 import middy from "@middy/core";
 import jsonBodyParser from "@middy/http-json-body-parser";
 import validator from "@middy/validator";
@@ -34,7 +34,7 @@ export async function baseHandler(
   const portfolioDraftId = setupResult.path.portfolioDraftId;
   const fundingStep = event.body;
   // Perform business rules validation
-  businessRulesValidationForFundingStep(fundingStep);
+  validateBusinessRulesForFundingStep(fundingStep);
   // Perform database call
   try {
     await client.send(
