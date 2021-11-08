@@ -26,16 +26,13 @@ export async function baseHandler(
   event: ApiGatewayEventParsed<FundingStep>,
   context?: Context
 ): Promise<APIGatewayProxyResult> {
-  // Perform shape validation
   const setupResult = requestShapeValidation<FundingStep>(event);
   if (setupResult instanceof SetupError) {
     return setupResult.errorResponse;
   }
   const portfolioDraftId = setupResult.path.portfolioDraftId;
   const fundingStep = event.body;
-  // Perform business rules validation
   validateBusinessRulesForFundingStep(fundingStep);
-  // Perform database call
   try {
     await client.send(
       new UpdateCommand({
