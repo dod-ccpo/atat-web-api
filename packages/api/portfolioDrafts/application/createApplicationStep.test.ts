@@ -300,7 +300,7 @@ describe("Business rules validation tests", () => {
     expect(responseBody.name).toMatch(/BadRequestError/);
     // 2 different environment, name too short and name too long
     expect(responseBody.details).toHaveLength(2);
-    expect(responseBody.details[0].message).toEqual('must match pattern "^[a-zA-Z\\d ,.-]{1,100}$"');
+    expect(responseBody.details[0].message).toEqual('must match pattern "^[a-zA-Z\\d _-]{1,100}$"');
     expect(result?.body).toMatch(/"\/body\/applications\/0\/environments\/[0|1]\/name"/);
   });
   it("should return a validation error when an operator has a name that is too short or too long", async () => {
