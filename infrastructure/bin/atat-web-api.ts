@@ -3,19 +3,22 @@ import * as ec2 from "@aws-cdk/aws-ec2";
 import * as cdk from "@aws-cdk/core";
 import { NIST80053R4Checks } from "cdk-nag";
 import "source-map-support/register";
+import { RemovalPolicySetter } from "../lib/aspects/removal-policy";
 import { AtatIamStack } from "../lib/atat-iam-stack";
 import { AtatNetStack } from "../lib/atat-net-stack";
 import { AtatWebApiStack } from "../lib/atat-web-api-stack";
 import { getTags } from "../lib/load-tags";
-import { isString, lowerCaseEnvironmentId, normalizeEnvironmentName } from "../lib/util";
+import {
+  isString,
+  lowerCaseEnvironmentId,
+  normalizeEnvironmentName,
+  isPossibleTemporaryEnvironment,
+} from "../lib/util";
 
 const app = new cdk.App();
 if (process.env.CDK_NAG_ENABLED === "1") {
   cdk.Aspects.of(app).add(new NIST80053R4Checks({ verbose: true }));
 }
-// TODO: Dynamically set this based on whether this is a sandbox environment,
-// a dev environment, or something else. For now, destroy everything on delete.
-const removalPolicy = cdk.RemovalPolicy.DESTROY;
 
 // Ugly hack to quickly isolate deployments for developers.  To be improved/removed later.
 const environmentParam = app.node.tryGetContext("EnvironmentId") ?? app.node.tryGetContext("TicketId");
@@ -32,13 +35,19 @@ if (app.node.tryGetContext("TicketId")) {
 const environmentName = normalizeEnvironmentName(environmentParam);
 const environmentId = lowerCaseEnvironmentId(environmentParam);
 
+// Delete all resources in developer-specific sandbox environments by default, while
+// using the default for the specially-named long-lived "sandbox" resources, used
+// for persistent IAM configuration, etc.
+if (isPossibleTemporaryEnvironment(environmentId)) {
+  cdk.Aspects.of(app).add(new RemovalPolicySetter({ globalRemovalPolicy: cdk.RemovalPolicy.DESTROY }));
+}
+
 const netStack = new AtatNetStack(app, environmentName + "AtatNetStack", {
   vpcCidr: vpcCidrParam,
 });
 
 const stacks: cdk.Stack[] = [
   new AtatWebApiStack(app, environmentName + "AtatWebApiStack", {
-    removalPolicy,
     environmentId,
     idpProps: {
       secretName: "auth/oidc/aad",

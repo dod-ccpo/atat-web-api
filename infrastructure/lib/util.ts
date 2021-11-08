@@ -103,3 +103,18 @@ export function apiSpecOperationMethod(operationId: string): HttpMethod {
   // regularity in naming
   return HttpMethod.POST;
 }
+
+/**
+ * Checks whether the given environment ID may be considered temporary or
+ * not. This is not a complete check and should be understood to be based on
+ * a general guess. Returning true does not necessarily mean the environment is
+ * absolutely temporary.
+ *
+ * @param environmentId the environment id to check
+ * @returns true if the environment ID looks like it is for a temporary environment
+ */
+// TODO: Replace with a more complete means of indicating an environment is not a
+// long-lived environment.
+export function isPossibleTemporaryEnvironment(environmentId: string): boolean {
+  return !/^(sandbox|dev|stag|prod)/.test(environmentId);
+}

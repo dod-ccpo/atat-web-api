@@ -32,7 +32,6 @@ interface AtatSmtpProps {
 export interface AtatWebApiStackProps extends cdk.StackProps {
   environmentId: string;
   idpProps: AtatIdpProps;
-  removalPolicy?: cdk.RemovalPolicy;
   requireAuthorization?: boolean;
   smtpProps: AtatSmtpProps;
   vpc: ec2.IVpc;
@@ -55,14 +54,13 @@ export class AtatWebApiStack extends cdk.Stack {
     this.templateOptions.description = "Resources to support the ATAT application API";
     this.environmentId = props.environmentId;
 
-    this.setupCognito(props.idpProps, props.removalPolicy);
+    this.setupCognito(props.idpProps);
 
     // Create a shared DynamoDB table that will be used by all the functions in the project.
     this.table = new SecureTable(this, "AtatTable", {
       tableProps: {
         partitionKey: { name: "id", type: dynamodb.AttributeType.STRING },
         billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-        removalPolicy: props?.removalPolicy,
       },
     }).table;
     this.outputs.push(
@@ -226,19 +224,11 @@ export class AtatWebApiStack extends cdk.Stack {
     const taskOrdersAccessLogsBucket = new SecureBucket(this, "taskOrdersLogBucket", {
       logTargetBucket: "self", // access control set to LOG_DELIVERY_WRITE when "self"
       logTargetPrefix: "logs/logbucket/",
-      bucketProps: {
-        removalPolicy: props?.removalPolicy,
-        autoDeleteObjects: props?.removalPolicy === cdk.RemovalPolicy.DESTROY,
-      },
     });
     const taskOrderManagement = new TaskOrderLifecycle(this, "TaskOrders", {
       // enables server access logs for task order buckets (NIST SP 800-53 controls)
       logTargetBucket: taskOrdersAccessLogsBucket.bucket,
       logTargetPrefix: "logs/taskorders/",
-      bucketProps: {
-        removalPolicy: props?.removalPolicy,
-        autoDeleteObjects: props?.removalPolicy === cdk.RemovalPolicy.DESTROY,
-      },
     });
     this.functions.push(
       new ApiS3Function(this, "UploadTaskOrder", {
@@ -288,16 +278,13 @@ export class AtatWebApiStack extends cdk.Stack {
     this.functions.push(new ApiSQSDynamoDBFunction(this, utils.apiSpecOperationFunctionName(operationId), props).fn);
   }
 
-  private setupCognito(props: AtatIdpProps, removalPolicy?: cdk.RemovalPolicy) {
+  private setupCognito(props: AtatIdpProps) {
     const secret = secretsmanager.Secret.fromSecretNameV2(this, "OidcSecret", props.secretName);
     const cognitoAuthentication = new CognitoAuthentication(this, "Authentication", {
       groupsAttributeName: "groups",
       adminsGroupName: props.adminsGroupName ?? "atat-admins",
       usersGroupName: props.usersGroupName ?? "atat-users",
       cognitoDomain: "atat-api-" + this.environmentId,
-      userPoolProps: {
-        removalPolicy: removalPolicy,
-      },
       oidcIdps: [
         {
           providerName: props.providerName,
