@@ -54,7 +54,6 @@ export function validateBusinessRulesForFundingStep(fs: FundingStep): Validation
   if (errors.length) {
     return createBusinessRulesValidationErrorResponse({ input_validation_errors: errors });
   }
-  console.log("Business rule validation succeded");
   return undefined;
 }
 
