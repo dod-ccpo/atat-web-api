@@ -3,7 +3,7 @@ import { APIGatewayProxyResult, Context } from "aws-lambda";
 import { PORTFOLIO_STEP } from "../../models/PortfolioDraft";
 import { PortfolioStep } from "../../models/PortfolioStep";
 import { dynamodbDocumentClient as client } from "../../utils/aws-sdk/dynamodb";
-import { NO_SUCH_PORTFOLIO_DRAFT } from "../../utils/errors";
+import { NO_SUCH_PORTFOLIO_DRAFT_404 } from "../../utils/errors";
 import {
   ApiSuccessResponse,
   SuccessStatusCode,
@@ -99,7 +99,7 @@ export async function createPortfolioStepCommand(
     );
   } catch (error) {
     if (error.name === "ConditionalCheckFailedException") {
-      return new DynamoDBException(NO_SUCH_PORTFOLIO_DRAFT);
+      return new DynamoDBException(NO_SUCH_PORTFOLIO_DRAFT_404);
     }
     // 5xx error logging
     console.log(error);

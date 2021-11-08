@@ -7,7 +7,7 @@ import { GetCommand } from "@aws-sdk/lib-dynamodb";
 import { isPathParameterPresent, isValidUuidV4 } from "../../utils/validation";
 import {
   DATABASE_ERROR,
-  NO_SUCH_PORTFOLIO_DRAFT,
+  NO_SUCH_PORTFOLIO_DRAFT_404,
   NO_SUCH_FUNDING_STEP,
   PATH_PARAMETER_REQUIRED_BUT_MISSING,
 } from "../../utils/errors";
@@ -23,7 +23,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
     return PATH_PARAMETER_REQUIRED_BUT_MISSING;
   }
   if (!isValidUuidV4(portfolioDraftId)) {
-    return NO_SUCH_PORTFOLIO_DRAFT;
+    return NO_SUCH_PORTFOLIO_DRAFT_404;
   }
 
   try {
@@ -37,7 +37,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
       })
     );
     if (!result.Item) {
-      return NO_SUCH_PORTFOLIO_DRAFT;
+      return NO_SUCH_PORTFOLIO_DRAFT_404;
     }
     if (!result.Item?.funding_step) {
       return NO_SUCH_FUNDING_STEP;
