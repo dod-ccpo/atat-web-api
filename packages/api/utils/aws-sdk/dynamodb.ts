@@ -1,7 +1,7 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 
-const dynamodbClient = new DynamoDBClient({});
+const dynamodbClient = new DynamoDBClient({ useFipsEndpoint: true });
 
 const marshallOptions = {
   // Whether to automatically convert empty strings, blobs, and sets to `null`.

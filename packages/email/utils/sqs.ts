@@ -3,7 +3,7 @@ import { SQSEvent } from "aws-lambda";
 import crypto from "crypto";
 
 // Create SQS service object.
-export const sqsClient = new SQSClient({});
+export const sqsClient = new SQSClient({ useFipsEndpoint: true });
 
 // not sure this is the best place, but placed here to prevent duplication
 export function generateTestSQSEvent(body: string): SQSEvent {
