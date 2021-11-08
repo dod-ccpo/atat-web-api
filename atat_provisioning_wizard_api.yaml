@@ -1015,11 +1015,9 @@ components:
           type: string
         total_clin_value:
           type: number
-          minimum: 0
           exclusiveMinimum: 0
         obligated_funds:
           type: number
-          minimum: 0
           exclusiveMinimum: 0
         pop_start_date:
           description: Start of period of performance
