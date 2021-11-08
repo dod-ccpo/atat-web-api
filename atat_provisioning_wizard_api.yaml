@@ -999,7 +999,6 @@ components:
           minItems: 1
           items:
             $ref: '#/components/schemas/Clin'
-            
       required:
         - task_order_number
         - task_order_file
@@ -1031,7 +1030,6 @@ components:
           description: End of period of performance
           type: string
           format: date
-          
       required:
         - clin_number
         - idiq_clin
