@@ -3,7 +3,7 @@ import { DynamoDBDocumentClient, GetCommand, UpdateCommand } from "@aws-sdk/lib-
 import { handler } from "./submitPortfolioDraft";
 import { mockClient } from "aws-sdk-client-mock";
 import {
-  NO_SUCH_PORTFOLIO_DRAFT,
+  NO_SUCH_PORTFOLIO_DRAFT_404,
   REQUEST_BODY_NOT_EMPTY,
   PORTFOLIO_ALREADY_SUBMITTED,
   PATH_PARAMETER_REQUIRED_BUT_MISSING,
@@ -51,6 +51,6 @@ describe("Handler response with mock dynamodb", () => {
   it("should return error when the submitPortfolioDraftCommand fails, and portfolioDraft doesn't exist", async () => {
     ddbMock.on(UpdateCommand).rejects({ name: "ConditionalCheckFailedException" });
     ddbMock.on(GetCommand).resolves({}); // resolves, but doesn't include an Item (!results.Item)
-    expect(await handler(validRequest)).toEqual(NO_SUCH_PORTFOLIO_DRAFT);
+    expect(await handler(validRequest)).toEqual(NO_SUCH_PORTFOLIO_DRAFT_404);
   });
 });

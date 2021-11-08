@@ -4,7 +4,7 @@ import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
 import { isBodyPresent, isPathParameterPresent } from "../../utils/validation";
 import {
   DATABASE_ERROR,
-  NO_SUCH_PORTFOLIO_DRAFT,
+  NO_SUCH_PORTFOLIO_DRAFT_404,
   REQUEST_BODY_NOT_EMPTY,
   PORTFOLIO_ALREADY_SUBMITTED,
   PATH_PARAMETER_REQUIRED_BUT_MISSING,
@@ -53,7 +53,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
     if (error.name === "ConditionalCheckFailedException") {
       const getResult = await doesPortfolioDraftExistCommand(TABLE_NAME, portfolioDraftId);
       if (!getResult.Item) {
-        return NO_SUCH_PORTFOLIO_DRAFT;
+        return NO_SUCH_PORTFOLIO_DRAFT_404;
       }
       return PORTFOLIO_ALREADY_SUBMITTED;
     }

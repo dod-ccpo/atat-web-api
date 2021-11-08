@@ -135,6 +135,7 @@ paths:
                   $ref: '#/components/examples/PortfolioDraftEx'
         '404':
           description: Portfolio Draft with the given ID does not exist
+      x-amazon-apigateway-request-validator: "request-params-validator"
       x-amazon-apigateway-integration:
         httpMethod: "POST"
         uri:
@@ -272,6 +273,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/PortfolioStep'
+      x-amazon-apigateway-request-validator: "request-params-validator"
       x-amazon-apigateway-integration:
         httpMethod: "POST"
         uri:
@@ -443,6 +445,7 @@ paths:
           description: Application Step not found for this Portfolio Draft
         '400':
           description: The given Portfolio Draft does not exist
+      x-amazon-apigateway-request-validator: "request-params-validator"
       x-amazon-apigateway-integration:
         httpMethod: "POST"
         uri:
@@ -491,6 +494,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ApplicationStep'
+      x-amazon-apigateway-request-validator: "request-params-validator"
       x-amazon-apigateway-integration:
         httpMethod: "POST"
         uri: 
@@ -671,6 +675,7 @@ paths:
                 $ref: '#/components/schemas/FileMetadata'
         '404':
           description: Task Order with the given ID does not exist
+      x-amazon-apigateway-request-validator: "request-params-validator"
       x-amazon-apigateway-integration:
         httpMethod: "POST"
         uri:
@@ -699,6 +704,7 @@ paths:
           description: Successful operation
         '404':
           description: Task Order with the given ID does not exist
+      x-amazon-apigateway-request-validator: "request-params-validator"
       x-amazon-apigateway-integration:
         httpMethod: "POST"
         uri:
@@ -756,6 +762,7 @@ paths:
                 format: binary
         '404':
           description: Task Order with the given ID does not exist or is pending processing
+      x-amazon-apigateway-request-validator: "request-params-validator"
       x-amazon-apigateway-integration:
         httpMethod: "POST"
         uri: 
@@ -1036,16 +1043,21 @@ components:
         - pop_end_date
     ApplicationStep:
       description: Represents step 3 of the Portfolio Draft Wizard
+      additionalProperties: false
       type: object
       properties:
         applications:
           type: array
+          minItems: 1
           items:
             $ref: '#/components/schemas/Application'
         operators:
           type: array
           items:
             $ref: '#/components/schemas/PortfolioOperator'
+      required:
+        - applications
+        - operators
     Application:
       description: Represents an Application in a Portfolio
       type: object
@@ -1056,8 +1068,10 @@ components:
           pattern: '^[a-zA-Z\d _-]{4,100}$'
         description:
           type: string
+          pattern: ^[\w\d !@#$%^&*_|:;,'.-]{0,300}$
         environments:
           type: array
+          minItems: 1
           items:
             $ref: '#/components/schemas/Environment'
         operators:
@@ -1066,7 +1080,6 @@ components:
             $ref: '#/components/schemas/AppEnvOperator'
       required:
         - name
-        - description
         - environments
         - operators
     Environment:
@@ -1076,7 +1089,7 @@ components:
       properties:
         name:
           type: string
-          pattern: '^[a-zA-Z\d _-]{4,100}$'
+          pattern: '^[a-zA-Z\d ,.-]{1,100}$'
         operators:
           type: array
           items:
@@ -1084,39 +1097,40 @@ components:
       required:
         - name
         - operators
-    Operator:
-      description: Represents an Operator of an Environment for a specific Application
-      type: object
+    PortfolioOperator:
+      description: Represents a Portfolio (admin) Operator of an PortfolioDraft
       additionalProperties: false
+      type: object
       properties:
         display_name:
           type: string
+          pattern: '^[a-zA-Z\d ,.-]{1,100}$'
         email:
           type: string
           format: "email"
+        access:
+          $ref: '#/components/schemas/PortfolioAccess'
       required:
         - display_name
         - email
-    PortfolioOperator:
-      allOf:
-        - $ref: '#/components/schemas/Operator'
-      type: object
-      additionalProperties: false
-      required:
         - access
-      properties:
-        access:
-          $ref: '#/components/schemas/PortfolioAccess'
     AppEnvOperator:
-      allOf:
-        - $ref: '#/components/schemas/Operator'
-      type: object
+      description: Represents an Application or Environment Operator
       additionalProperties: false
-      required:
-        - access
+      type: object
       properties:
+        display_name:
+          type: string
+          pattern: '^[a-zA-Z\d ,.-]{1,100}$'
+        email:
+          type: string
+          format: "email"
         access:
           $ref: '#/components/schemas/AppEnvAccess'
+      required:
+        - display_name
+        - email
+        - access
     PortfolioAccess:
       description: Represents a set of Operators who should be granted access to a Portfolio at a specific access level. Uses an enum construct for forward compatibility should other access levels be specified.
       type: string

@@ -46,9 +46,17 @@ export const PATH_PARAMETER_REQUIRED_BUT_MISSING = new OtherErrorResponse(
 /**
  * To be used when the specified Portfolio Draft is not found
  */
-export const NO_SUCH_PORTFOLIO_DRAFT = new OtherErrorResponse(
+export const NO_SUCH_PORTFOLIO_DRAFT_404 = new OtherErrorResponse(
   "Portfolio Draft with the given ID does not exist",
   ErrorStatusCode.NOT_FOUND
+);
+
+/**
+ * To be used when a specified Portfolio Draft does not exist
+ */
+export const NO_SUCH_PORTFOLIO_DRAFT_400 = new OtherErrorResponse(
+  "The given Portfolio Draft does not exist",
+  ErrorStatusCode.BAD_REQUEST
 );
 
 /**

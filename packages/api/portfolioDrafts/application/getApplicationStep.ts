@@ -1,31 +1,32 @@
 import { GetCommand } from "@aws-sdk/lib-dynamodb";
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
+import { APIGatewayProxyResult, Context } from "aws-lambda";
 import { ApplicationStep } from "../../models/ApplicationStep";
 import { APPLICATION_STEP } from "../../models/PortfolioDraft";
 import { dynamodbDocumentClient as client } from "../../utils/aws-sdk/dynamodb";
-import { DATABASE_ERROR, NO_SUCH_APPLICATION_STEP, PATH_PARAMETER_REQUIRED_BUT_MISSING } from "../../utils/errors";
-import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusCode } from "../../utils/response";
-import { isPathParameterPresent, isValidUuidV4 } from "../../utils/validation";
-
-// Note that API spec calls for 400 and not 404
-export const NO_SUCH_PORTFOLIO_DRAFT = new OtherErrorResponse(
-  "The given Portfolio Draft does not exist",
-  ErrorStatusCode.BAD_REQUEST
-);
+import { DATABASE_ERROR, NO_SUCH_APPLICATION_STEP, NO_SUCH_PORTFOLIO_DRAFT_400 } from "../../utils/errors";
+import { ApiSuccessResponse, SetupError, SuccessStatusCode } from "../../utils/response";
+import middy from "@middy/core";
+import cors from "@middy/http-cors";
+import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
+import { requestShapeValidation } from "../../utils/requestValidation";
+import { CORS_CONFIGURATION } from "../../utils/corsConfig";
+import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 
 /**
  * Gets the Application Step of the specified Portfolio Draft if it exists
  *
  * @param event - The GET request from API Gateway
  */
-export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
-  const portfolioDraftId = event.pathParameters?.portfolioDraftId;
-  if (!isPathParameterPresent(portfolioDraftId)) {
-    return PATH_PARAMETER_REQUIRED_BUT_MISSING;
+export async function baseHandler(
+  event: ApiGatewayEventParsed<ApplicationStep>,
+  context?: Context
+): Promise<APIGatewayProxyResult> {
+  const setupResult = requestShapeValidation<ApplicationStep>(event);
+  if (setupResult instanceof SetupError) {
+    return setupResult.errorResponse;
   }
-  if (!isValidUuidV4(portfolioDraftId)) {
-    return NO_SUCH_PORTFOLIO_DRAFT;
-  }
+  const portfolioDraftId = setupResult.path.portfolioDraftId;
+
   try {
     const result = await client.send(
       new GetCommand({
@@ -37,7 +38,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
       })
     );
     if (!result.Item) {
-      return NO_SUCH_PORTFOLIO_DRAFT;
+      return NO_SUCH_PORTFOLIO_DRAFT_400;
     }
     if (!result.Item?.application_step) {
       return NO_SUCH_APPLICATION_STEP;
@@ -51,3 +52,5 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
     return DATABASE_ERROR;
   }
 }
+
+export const handler = middy(baseHandler).use(JSONErrorHandlerMiddleware()).use(cors(CORS_CONFIGURATION));

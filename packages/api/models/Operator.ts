@@ -23,8 +23,13 @@ export interface AppEnvOperator extends Operator {
   access: AppEnvAccess;
 }
 
-export const operatorFields: ExhaustivePropertyMap<PortfolioOperator | AppEnvOperator> = {
+export type Operators = PortfolioOperator | AppEnvOperator;
+export const operatorFields: ExhaustivePropertyMap<Operators> = {
   display_name: null,
   email: null,
   access: null,
 };
+
+export function isAdministrator(operator: Operators): boolean {
+  return operator.access === PortfolioAccess.PORTFOLIO_ADMINISTRATOR || operator.access === AppEnvAccess.ADMINISTRATOR;
+}

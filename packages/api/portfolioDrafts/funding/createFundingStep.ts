@@ -4,7 +4,7 @@ import { dynamodbDocumentClient as client } from "../../utils/aws-sdk/dynamodb";
 import { FUNDING_STEP } from "../../models/PortfolioDraft";
 import { FundingStep } from "../../models/FundingStep";
 import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
-import { DATABASE_ERROR, NO_SUCH_PORTFOLIO_DRAFT } from "../../utils/errors";
+import { DATABASE_ERROR, NO_SUCH_PORTFOLIO_DRAFT_404 } from "../../utils/errors";
 import schema = require("../../models/schema.json");
 import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
 import { requestShapeValidation, validateBusinessRulesForFundingStep } from "../../utils/requestValidation";
@@ -58,7 +58,7 @@ export async function baseHandler(
     );
   } catch (error) {
     if (error.name === "ConditionalCheckFailedException") {
-      return NO_SUCH_PORTFOLIO_DRAFT;
+      return NO_SUCH_PORTFOLIO_DRAFT_404;
     }
     console.error("Database error: " + error);
     return DATABASE_ERROR;

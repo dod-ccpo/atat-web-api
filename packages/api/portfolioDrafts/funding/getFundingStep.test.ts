@@ -5,7 +5,7 @@ import { DynamoDBDocumentClient, GetCommand, GetCommandOutput } from "@aws-sdk/l
 import { FundingStep, ValidationMessage } from "../../models/FundingStep";
 import { mockClient } from "aws-sdk-client-mock";
 import { v4 as uuidv4 } from "uuid";
-import { DATABASE_ERROR, NO_SUCH_FUNDING_STEP, NO_SUCH_PORTFOLIO_DRAFT } from "../../utils/errors";
+import { DATABASE_ERROR, NO_SUCH_FUNDING_STEP, NO_SUCH_PORTFOLIO_DRAFT_404 } from "../../utils/errors";
 import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
@@ -50,7 +50,7 @@ it("should return generic Error if exception caught", async () => {
 it("should require path param/ reject non UUIDv4 portfolioDraftIds", async () => {
   const result = await handler(emptyRequest, {} as Context, () => null);
   expect(result).toBeInstanceOf(OtherErrorResponse);
-  expect(result).toEqual(NO_SUCH_PORTFOLIO_DRAFT);
+  expect(result).toEqual(NO_SUCH_PORTFOLIO_DRAFT_404);
   expect(result?.statusCode).toEqual(ErrorStatusCode.NOT_FOUND);
 });
 
@@ -59,7 +59,7 @@ it("should return error if portfolio draft does not exist", async () => {
   ddbMock.on(GetCommand).resolves(emptyOutput);
   const result = await handler(validRequest, {} as Context, () => null);
   expect(result).toBeInstanceOf(OtherErrorResponse);
-  expect(result).toEqual(NO_SUCH_PORTFOLIO_DRAFT);
+  expect(result).toEqual(NO_SUCH_PORTFOLIO_DRAFT_404);
   expect(result?.statusCode).toEqual(ErrorStatusCode.NOT_FOUND);
   const responseBody = JSON.parse(result?.body ?? "");
   expect(responseBody.message).toMatch("Portfolio Draft with the given ID does not exist");

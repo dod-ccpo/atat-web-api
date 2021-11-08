@@ -13,7 +13,7 @@ import { FundingStep, ValidationMessage } from "../../models/FundingStep";
 import { mockClient } from "aws-sdk-client-mock";
 import { ProvisioningStatus } from "../../models/ProvisioningStatus";
 import { v4 as uuidv4 } from "uuid";
-import { DATABASE_ERROR, NO_SUCH_PORTFOLIO_DRAFT } from "../../utils/errors";
+import { DATABASE_ERROR, NO_SUCH_PORTFOLIO_DRAFT_404 } from "../../utils/errors";
 import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
 import { FileMetadataSummary } from "../../models/FileMetadataSummary";
 import {
@@ -86,7 +86,7 @@ describe("Handle service level error", () => {
     ddbMock.on(UpdateCommand).rejects({ name: "ConditionalCheckFailedException" });
     const result = await handler(validRequest, {} as Context, () => null);
     expect(result).toBeInstanceOf(OtherErrorResponse);
-    expect(result).toEqual(NO_SUCH_PORTFOLIO_DRAFT);
+    expect(result).toEqual(NO_SUCH_PORTFOLIO_DRAFT_404);
     expect(result?.statusCode).toEqual(ErrorStatusCode.NOT_FOUND);
   });
 });
@@ -98,7 +98,7 @@ describe("Path parameter tests", () => {
     } as any;
     const result = await handler(emptyRequest, {} as Context, () => null);
     expect(result).toBeInstanceOf(OtherErrorResponse);
-    expect(result).toEqual(NO_SUCH_PORTFOLIO_DRAFT);
+    expect(result).toEqual(NO_SUCH_PORTFOLIO_DRAFT_404);
     expect(result?.statusCode).toEqual(ErrorStatusCode.NOT_FOUND);
   });
 
@@ -110,7 +110,7 @@ describe("Path parameter tests", () => {
     const result = await handler(invalidRequest, {} as Context, () => null);
     expect(result).toBeInstanceOf(OtherErrorResponse);
     expect(result).toBeInstanceOf(OtherErrorResponse);
-    expect(result).toEqual(NO_SUCH_PORTFOLIO_DRAFT);
+    expect(result).toEqual(NO_SUCH_PORTFOLIO_DRAFT_404);
     expect(result?.statusCode).toEqual(ErrorStatusCode.NOT_FOUND);
   });
 });

@@ -3,7 +3,7 @@ import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
 import { DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { handler } from "./createPortfolioStep";
 import { mockClient } from "aws-sdk-client-mock";
-import { NO_SUCH_PORTFOLIO_DRAFT } from "../../utils/errors";
+import { NO_SUCH_PORTFOLIO_DRAFT_404 } from "../../utils/errors";
 import { PortfolioStep } from "../../models/PortfolioStep";
 import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
 import { mockPortfolioStep, mockValidPortfolioSteps } from "./commonPortfolioMockData";
@@ -36,7 +36,7 @@ describe("Validation of handler", () => {
       // no pathParameter portfolioDraftId
     } as ApiGatewayEventParsed<PortfolioStep>;
     const response = await handler(request, {} as Context, null as unknown as Callback)!;
-    expect(response).toEqual(NO_SUCH_PORTFOLIO_DRAFT);
+    expect(response).toEqual(NO_SUCH_PORTFOLIO_DRAFT_404);
   });
 });
 
@@ -49,7 +49,7 @@ describe.each(mockValidPortfolioSteps)("Handler response with mock dynamodb", (m
   it("should return error when the portfolioDraft doesn't exist", async () => {
     ddbMock.on(UpdateCommand).rejects({ name: "ConditionalCheckFailedException" });
     const response = await handler(request, {} as Context, null as unknown as Callback)!;
-    expect(response).toEqual(NO_SUCH_PORTFOLIO_DRAFT);
+    expect(response).toEqual(NO_SUCH_PORTFOLIO_DRAFT_404);
   });
 });
 
