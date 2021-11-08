@@ -906,7 +906,6 @@ components:
         name:
           type: string
           description: name of file when uploaded
-          example: "TaskOrder_9876543210123.pdf"
       required:
         - "id"
         - "name"

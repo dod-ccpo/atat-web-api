@@ -74,7 +74,6 @@ handler
   .use(
     validator({
       inputSchema: wrapSchema(schema.FundingStep),
-      ajvOptions: { strict: false },
     })
   )
   .use(errorHandlingMiddleware())
