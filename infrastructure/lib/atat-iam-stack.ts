@@ -40,6 +40,12 @@ export class AtatIamStack extends cdk.Stack {
           resources: [`arn:${cdk.Aws.PARTITION}:apigateway:*::/restapis*`],
         }),
         new iam.PolicyStatement({
+          sid: "StepFunctionsReadAccess",
+          effect: iam.Effect.ALLOW,
+          actions: ["states:List*", "states:Describe*", "states:GetExecutionHistory"],
+          resources: [`arn:${cdk.Aws.PARTITION}:states:*:${cdk.Aws.ACCOUNT_ID}:stateMachine:*`],
+        }),
+        new iam.PolicyStatement({
           sid: "XRayReadAccess",
           effect: iam.Effect.ALLOW,
           actions: ["xray:BatchGetTraces", "xray:Get*", "xray:List*"],
