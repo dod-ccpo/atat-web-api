@@ -1,4 +1,4 @@
-import { AccessLevel, PortfolioOperator, AppEnvOperator } from "../../models/Operator";
+import { AppEnvAccess, PortfolioAccess, PortfolioOperator, AppEnvOperator } from "../../models/Operator";
 import { Application } from "../../models/Application";
 import { ApplicationStep } from "../../models/ApplicationStep";
 import { Environment } from "../../models/Environment";
@@ -10,37 +10,37 @@ import { PortfolioDraft } from "../../models/PortfolioDraft";
 const mockPortoflioOperatorYoda: PortfolioOperator = {
   display_name: "Yoda",
   email: "yoda@iam.mil",
-  access: AccessLevel.PORTFOLIO_ADMINISTRATOR,
+  access: PortfolioAccess.PORTFOLIO_ADMINISTRATOR,
 };
 const mockAppEnvOperatorDarthVader: AppEnvOperator = {
   display_name: "Darth Vader",
   email: "iam@yourfather.mil",
-  access: AccessLevel.ADMINISTRATOR,
+  access: AppEnvAccess.ADMINISTRATOR,
 };
 const mockAppEnvOperatorLandonisCalrissian: AppEnvOperator = {
   display_name: "Landonis Calrissian",
   email: "thegambler@cloudcity.mil",
-  access: AccessLevel.READ_ONLY,
+  access: AppEnvAccess.READ_ONLY,
 };
 const mockAppEnvOperatorLukeSkywalker: AppEnvOperator = {
   display_name: "Luke Skywalker",
   email: "lostmy@hand.mil",
-  access: AccessLevel.READ_ONLY,
+  access: AppEnvAccess.READ_ONLY,
 };
 const mockAppEnvOperatorSalaciousCrumb: AppEnvOperator = {
   display_name: "Salacious Crumb",
   email: "monkey@lizard.mil",
-  access: AccessLevel.ADMINISTRATOR,
+  access: AppEnvAccess.ADMINISTRATOR,
 };
 const mockAppEnvOperatorHanSolo: AppEnvOperator = {
   display_name: "Han Solo",
   email: "frozen@carbonite.mil",
-  access: AccessLevel.READ_ONLY,
+  access: AppEnvAccess.READ_ONLY,
 };
 const mockAppEnvOperatorBobaFett: AppEnvOperator = {
   display_name: "Boba Fett",
   email: "original@mandalorian.mil",
-  access: AccessLevel.READ_ONLY,
+  access: AppEnvAccess.READ_ONLY,
 };
 
 const mockEnvironmentCcepProd: Environment = {

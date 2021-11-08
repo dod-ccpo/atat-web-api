@@ -33,7 +33,7 @@ import {
   REQUEST_BODY_EMPTY,
   REQUEST_BODY_INVALID,
 } from "../../utils/errors";
-import { AccessLevel } from "../../models/Operator";
+import { AppEnvAccess } from "../../models/Operator";
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 beforeEach(() => {
@@ -210,7 +210,7 @@ describe("Individual Application input validation tests", () => {
   const tooLongDisplayName =
     "waaaaaaaaaaaaaaaaaaaaaaaaayyyyyy tooooooooooooooooooooooooooooooooooooo loooooooooonnnnnnnnnnngggggggggg";
   it("should return error map entries when an operator has a name that is too short", async () => {
-    const operator = { display_name: "", email: "dark.1234-567890_@side.mil", access: AccessLevel.READ_ONLY };
+    const operator = { display_name: "", email: "dark.1234-567890_@side.mil", access: AppEnvAccess.READ_ONLY };
     const errors = performDataValidationOnOperator(operator);
     expect(errors.length).toEqual(1);
     expect(errors).toContainEqual({
@@ -226,7 +226,7 @@ describe("Individual Application input validation tests", () => {
     expect(errors[0].invalidParameterValue).toBe(operator.email);
   });
   it("should return error map entries when an operator has a name that is too long", async () => {
-    const operator = { display_name: tooLongName, email: "dark@side123456789.MIL", access: AccessLevel.READ_ONLY };
+    const operator = { display_name: tooLongName, email: "dark@side123456789.MIL", access: AppEnvAccess.READ_ONLY };
     const errors = performDataValidationOnOperator(operator);
     expect(errors.length).toEqual(1);
     expect(errors).toContainEqual({

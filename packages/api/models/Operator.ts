@@ -1,12 +1,5 @@
 import { ExhaustivePropertyMap } from "./TypeFields";
 
-export enum AccessLevel {
-  ADMINISTRATOR = "administrator",
-  CONTRIBUTOR = "contributor",
-  READ_ONLY = "read_only",
-  PORTFOLIO_ADMINISTRATOR = "portfolio_administrator",
-}
-
 export enum PortfolioAccess {
   PORTFOLIO_ADMINISTRATOR = "portfolio_administrator",
 }
@@ -20,19 +13,18 @@ export enum AppEnvAccess {
 export interface Operator {
   display_name: string;
   email: string;
-  access: AccessLevel;
 }
 
-export const operatorFields: ExhaustivePropertyMap<Operator> = {
+export interface PortfolioOperator extends Operator {
+  access: PortfolioAccess;
+}
+
+export interface AppEnvOperator extends Operator {
+  access: AppEnvAccess;
+}
+
+export const operatorFields: ExhaustivePropertyMap<PortfolioOperator | AppEnvOperator> = {
   display_name: null,
   email: null,
   access: null,
 };
-
-export interface PortfolioOperator extends Operator {
-  access: AccessLevel.PORTFOLIO_ADMINISTRATOR;
-}
-
-export interface AppEnvOperator extends Operator {
-  access: AccessLevel.ADMINISTRATOR | AccessLevel.CONTRIBUTOR | AccessLevel.READ_ONLY;
-}
