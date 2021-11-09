@@ -1,42 +1,16 @@
-import { APIGatewayProxyResult, Context } from "aws-lambda";
-import { PortfolioDraft, PORTFOLIO_STEP } from "../../models/PortfolioDraft";
-import { PortfolioStep } from "../../models/PortfolioStep";
-import { ApiSuccessResponse, SuccessStatusCode, SetupError } from "../../utils/response";
-import { validateRequestShape } from "../../utils/requestValidation";
+import { Context } from "aws-lambda";
+import { PortfolioDraft } from "../../models/PortfolioDraft";
 import middy from "@middy/core";
 import jsonBodyParser from "@middy/http-json-body-parser";
 import validator from "@middy/validator";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import schema = require("../../models/schema.json");
-import { PortfolioDraftSummary, portfolioDraftSummaryProperties } from "../../models/PortfolioDraftSummary";
+import errorHandlingMiddleware from "../../utils/errorHandlingMiddleware";
 
-const completePortfolioStepSchema = {
-  type: "object",
-  required: ["body"],
-  properties: {
-    body: {
-      type: "object",
-      required: ["portfolio_step", "funding_step", "application_step"],
-      properties: {
-        portfolio_step: schema.PortfolioStep,
-        funding_step: schema.FundingStep,
-        application_step: schema.ApplicationStep,
-        id: { type: "string" },
-        submit_id: { type: "string" },
-        status: { type: "string", enum: ["in_progress"] },
-        // this probably needs some work (or leave it out with Parameters/Payload in step fn)
-        // ...schema.PortfolioDraftSummary,
-      },
-    },
-  },
-};
-console.log("SCHEMA: " + JSON.stringify(completePortfolioStepSchema));
-
-enum ValidationResult {
+export enum ValidationResult {
   SUCCESS = "SUCCESS",
   FAILED = "FAILED",
 }
-
 export interface ValidatedPortfolioDraft extends PortfolioDraft {
   validationResult?: ValidationResult;
 }
@@ -47,7 +21,7 @@ export interface ValidatedPortfolioDraft extends PortfolioDraft {
  *
  * @param stateInput - The input to the Step Function start execution lambda
  */
-export async function handler(stateInput: PortfolioDraft, context?: Context): Promise<ValidatedPortfolioDraft> {
+export async function baseHandler(stateInput: PortfolioDraft, context?: Context): Promise<ValidatedPortfolioDraft> {
   console.log("EVENT INPUT (stringified): " + JSON.stringify(stateInput));
   console.log("EVENT INPUT: " + stateInput);
 
@@ -57,13 +31,48 @@ export async function handler(stateInput: PortfolioDraft, context?: Context): Pr
   return validationUpdate;
 }
 
-// export const handler = middy(baseHandler);
-// handler
-//   .use(jsonBodyParser())
-//   .use(
-//     validator({
-//       inputSchema: wrapSchema(completePortfolioStepSchema),
-//       ajvOptions: { strict: false },
-//     })
-//   )
-//   .use(JSONErrorHandlerMiddleware());
+const completePortfolioStepSchema = {
+  type: "object",
+  required: ["body"],
+  properties: {
+    body: {
+      type: "object",
+      required: ["portfolio_step", "funding_step", "application_step", "id", "submit_id", "status", "name"],
+      properties: {
+        portfolio_step: schema.PortfolioStep,
+        funding_step: schema.FundingStep,
+        application_step: schema.ApplicationStep,
+        id: schema.BaseObject.properties.id,
+        created_at: schema.BaseObject.properties.created_at,
+        updated_at: schema.BaseObject.properties.updated_at,
+        submit_id: { type: "string" },
+        status: { type: "string", enum: ["in_progress"] },
+        name: schema.PortfolioDraftSummary.allOf[1].properties.name,
+        description: schema.PortfolioDraftSummary.allOf[1].properties.description,
+        num_portfolio_managers: schema.PortfolioDraftSummary.allOf[1].properties.num_portfolio_managers,
+        num_environments: schema.PortfolioDraftSummary.allOf[1].properties.num_environments,
+        num_applications: schema.PortfolioDraftSummary.allOf[1].properties.num_applications,
+        num_task_orders: schema.PortfolioDraftSummary.allOf[1].properties.num_task_orders,
+      },
+    },
+  },
+};
+
+const provisioningValidationErrorHandlingMiddleware = (): middy.MiddlewareObj<PortfolioDraft> => {
+  const onError: middy.MiddlewareFn<any | ValidatedPortfolioDraft> = async (request): Promise<any | void> => {
+    return { ...request.event, validationResult: ValidationResult.FAILED, error: { ...request.error } };
+  };
+  return {
+    onError,
+  };
+};
+
+export const handler = middy(baseHandler)
+  .use(jsonBodyParser())
+  .use(
+    validator({
+      inputSchema: completePortfolioStepSchema,
+    })
+  )
+  .use(provisioningValidationErrorHandlingMiddleware());
+// .use(errorHandlingMiddleware())

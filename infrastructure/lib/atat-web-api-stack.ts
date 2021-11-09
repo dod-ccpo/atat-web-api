@@ -171,6 +171,10 @@ export class AtatWebApiStack extends cdk.Stack {
     }).restApi;
 
     // Provisioning State machine functions
+    // All but one function reuse API functions in the state machine. The validatePortfolio
+    // function does not require any AWS service so a simple constructor function was used.
+    // These functions also touch on a refactoring for the design of these functions that
+    // move away from the use case of the API functions.
     const validatePortfolio = new lambdaNodeJs.NodejsFunction(
       this,
       utils.apiSpecOperationFunctionName("validateCompletePortfolioDraft"),
