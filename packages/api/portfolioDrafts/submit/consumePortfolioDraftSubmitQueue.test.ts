@@ -1,5 +1,5 @@
 import { SQSEvent } from "aws-lambda";
-import { handler } from "./subscribePortfolioDraftSubmission";
+import { handler } from "./consumePortfolioDraftSubmitQueue";
 import * as crypto from "crypto";
 
 function generateTestEvent(body: string): SQSEvent {
@@ -28,7 +28,7 @@ function generateTestEvent(body: string): SQSEvent {
   };
 }
 
-describe("Test subscription handler", () => {
+describe("Test consumer handler", () => {
   it.each(["testEvent", "test", "", "4"])("should log data to stdout", async (eventBody) => {
     const event = generateTestEvent(eventBody);
     const consoleLogSpy = jest.spyOn(console, "log");
