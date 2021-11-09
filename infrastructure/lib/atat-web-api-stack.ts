@@ -2,18 +2,29 @@ import * as apigw from "@aws-cdk/aws-apigateway";
 import * as dynamodb from "@aws-cdk/aws-dynamodb";
 import * as ec2 from "@aws-cdk/aws-ec2";
 import * as s3asset from "@aws-cdk/aws-s3-assets";
+import * as sfn from "@aws-cdk/aws-stepfunctions";
+import * as logs from "@aws-cdk/aws-logs";
 import * as secretsmanager from "@aws-cdk/aws-secretsmanager";
 import * as ssm from "@aws-cdk/aws-ssm";
 import * as cdk from "@aws-cdk/core";
 import * as lambda from "@aws-cdk/aws-lambda";
+import * as lambdaNodeJs from "@aws-cdk/aws-lambda-nodejs";
 import * as sqs from "@aws-cdk/aws-sqs";
 import * as iam from "@aws-cdk/aws-iam";
 import { ApiDynamoDBFunction } from "./constructs/api-dynamodb-function";
 import { ApiS3Function } from "./constructs/api-s3-function";
 import { ApiSQSFunction } from "./constructs/api-sqs-function";
+import { ApiStepFnsSQSFunction } from "./constructs/api-sqs-sfn-function";
+import { SfnLambdaInvokeTask } from "./constructs/sfnLambdaInvokeTask";
 import { ApiSQSDynamoDBFunction } from "./constructs/api-sqs-dynamodb-function";
 import { CognitoAuthentication } from "./constructs/authentication";
-import { SecureBucket, SecureQueue, SecureRestApi, SecureTable } from "./constructs/compliant-resources";
+import {
+  SecureBucket,
+  SecureQueue,
+  SecureRestApi,
+  SecureTable,
+  SecureStateMachine,
+} from "./constructs/compliant-resources";
 import { TaskOrderLifecycle } from "./constructs/task-order-lifecycle";
 import { HttpMethod } from "./http";
 import * as utils from "./util";
@@ -43,6 +54,7 @@ export class AtatWebApiStack extends cdk.Stack {
   public readonly submitQueue: sqs.IQueue;
   public readonly emailQueue: sqs.IQueue;
   public readonly emailDeadLetterQueue: sqs.IQueue;
+  public readonly provisioningStateMachine: sfn.IStateMachine;
   public readonly table: dynamodb.ITable;
   public readonly functions: lambda.IFunction[] = [];
   public readonly ssmParams: ssm.IParameter[] = [];
@@ -134,13 +146,6 @@ export class AtatWebApiStack extends cdk.Stack {
     // Submission operations (all files live in the submit/ folder)
     this.addQueueDatabaseApiFunction("submitPortfolioDraft", "portfolioDrafts/submit/", props.vpc);
 
-    // Functions that are triggered by events in the submit queue
-    // These, for now, can be treated just like regular API functions because they look
-    // and act like them in nearly every way except being accessible via API Gateway.
-    // This may require more significant refactoring as the design for these functions
-    // is further fleshed out.
-    this.addQueueDatabaseApiFunction("subscribePortfolioDraftSubmission", "portfolioDrafts/submit/", props.vpc);
-
     // The API spec, which just so happens to be a valid CloudFormation snippet (with some actual CloudFormation
     // in it) gets uploaded to S3. The Asset resource reuses the same bucket that the CDK does, so this does not
     // require any additional buckets to be created.
@@ -164,6 +169,102 @@ export class AtatWebApiStack extends cdk.Stack {
         tracingEnabled: true,
       },
     }).restApi;
+
+    // Provisioning State machine functions
+    const validatePortfolio = new lambdaNodeJs.NodejsFunction(
+      this,
+      utils.apiSpecOperationFunctionName("validateCompletePortfolioDraft"),
+      {
+        entry: utils.packageRoot() + "/api/portfolioDrafts/submit/validateCompletePortfolioDraft.ts",
+        vpc: props.vpc,
+      }
+    );
+    const persistCspResponse = new ApiDynamoDBFunction(
+      this,
+      utils.apiSpecOperationFunctionName("persistPortfolioDraft"),
+      {
+        table: this.table,
+        lambdaVpc: props.vpc,
+        method: HttpMethod.POST,
+        handlerPath: this.determineApiHandlerPath("persistPortfolioDraft", "portfolioDrafts/submit/"),
+      }
+    );
+    const rejectPortfolio = new ApiDynamoDBFunction(this, utils.apiSpecOperationFunctionName("rejectPortfolioDraft"), {
+      table: this.table,
+      lambdaVpc: props.vpc,
+      method: HttpMethod.POST,
+      handlerPath: this.determineApiHandlerPath("rejectPortfolioDraft", "portfolioDrafts/submit/"),
+    });
+    this.functions.push(validatePortfolio, persistCspResponse.fn, rejectPortfolio.fn);
+    // State machine tasks
+    const portfolioValidationTask = new SfnLambdaInvokeTask(this, "ValidatePortfolioTask", {
+      sfnTask: {
+        lambdaFunction: validatePortfolio,
+        timeout: cdk.Duration.seconds(60),
+        inputPath: "$",
+        resultPath: "$.results",
+        outputPath: "$",
+      },
+    }).sfnTask;
+    const persistCspResponseTask = new SfnLambdaInvokeTask(this, "PersistCspTask", {
+      // update provisioning status to 'complete'
+      sfnTask: {
+        lambdaFunction: persistCspResponse.fn,
+        inputPath: "$.results.Payload",
+        timeout: cdk.Duration.seconds(60),
+      },
+    }).sfnTask;
+    const rejectResponseTask = new SfnLambdaInvokeTask(this, "RejectPortfolioTask", {
+      // update provisioning status to 'failed'
+      sfnTask: {
+        lambdaFunction: rejectPortfolio.fn,
+        inputPath: "$.results.Payload",
+        timeout: cdk.Duration.seconds(60),
+      },
+    }).sfnTask;
+
+    // Composing state machine
+    const stateMachineWorkflow = portfolioValidationTask.next(
+      new sfn.Choice(this, "ValidationResultCheck")
+        .when(sfn.Condition.stringEquals("$.results.Payload.validationResult", "SUCCESS"), persistCspResponseTask)
+        .when(sfn.Condition.stringEquals("$.results.Payload.validationResult", "FAILED"), rejectResponseTask)
+    );
+    const stateMachineLogGroup = new logs.LogGroup(this, "StepFunctionsLogs", {
+      retention: logs.RetentionDays.ONE_WEEK,
+    });
+    this.provisioningStateMachine = new SecureStateMachine(this, "ProvisioningStateMachine", {
+      stateMachineProps: {
+        definition: stateMachineWorkflow,
+      },
+      logGroup: stateMachineLogGroup,
+    }).stateMachine;
+
+    // Functions that are triggered by events in the submit queue
+    // These, for now, can be treated just like regular API functions because they look
+    // and act like them in nearly every way except being accessible via API Gateway.
+    // This may require more significant refactoring as the design for these functions
+    // is further fleshed out.
+    this.functions.push(
+      // This function is outside of step functions to provide the portfolio draft from the SQS
+      // and start the state machine execution. The services available to invoke Step Functions
+      // are limited. Therefore the previous subscribePortfolioDraftSubmissions function is being
+      // repurposed (name changed) to also invoke the state machine for portfolio provisioning.
+      // See https://docs.aws.amazon.com/step-functions/latest/dg/concepts-invoke-sfn.html
+      new ApiStepFnsSQSFunction(this, utils.apiSpecOperationFunctionName("consumePortfolioDraftSubmitQueue"), {
+        queue: this.submitQueue,
+        stateMachine: this.provisioningStateMachine,
+        lambdaVpc: props.vpc,
+        // Limiting to a batch of 1 to prevent portfolios from failing in batches.
+        // If one fails in a batch, all of the messages in that batch will also fail,
+        // which may cause portfolio drafts to be processed twice or cause other
+        // portfolios to never be processed.
+        batchSize: 1,
+        method: HttpMethod.GET,
+        handlerPath: this.determineApiHandlerPath("consumePortfolioDraftSubmitQueue", "portfolioDrafts/submit/"),
+        createEventSource: true,
+      }).fn
+    );
+
     this.restApi = apiGateway;
     this.addEmailRoutes(props);
     this.addTaskOrderRoutes(props);
@@ -273,7 +374,7 @@ export class AtatWebApiStack extends cdk.Stack {
       lambdaVpc: vpc,
       method: utils.apiSpecOperationMethod(operationId),
       handlerPath: this.determineApiHandlerPath(operationId, handlerFolder),
-      createEventSource: operationId.startsWith("subscribe"),
+      createEventSource: operationId.startsWith("consume"),
     };
     this.functions.push(new ApiSQSDynamoDBFunction(this, utils.apiSpecOperationFunctionName(operationId), props).fn);
   }
