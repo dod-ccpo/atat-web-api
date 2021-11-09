@@ -3,6 +3,8 @@ import * as dynamodb from "@aws-cdk/aws-dynamodb";
 import * as apigw from "@aws-cdk/aws-apigateway";
 import * as cdk from "@aws-cdk/core";
 import * as sqs from "@aws-cdk/aws-sqs";
+import * as sfn from "@aws-cdk/aws-stepfunctions";
+import * as logs from "@aws-cdk/aws-logs";
 
 export interface SecureBucketProps {
   logTargetBucket: s3.IBucket | "self";
@@ -140,5 +142,45 @@ export class SecureQueue extends cdk.Construct {
     });
 
     this.queue = queue;
+  }
+}
+
+interface SecureStateMachineProps {
+  /**
+   * Props to define a State Machine
+   */
+  readonly stateMachineProps: sfn.StateMachineProps;
+  /**
+   * Props to define the State Machine log group
+   */
+  readonly logGroup: logs.ILogGroup;
+}
+
+/**
+ * Creates a Secure State Machine in AWS Step Functions service
+ * - uses a Standard State Machine Type (default)
+ * - 130 seconds timeout (default)
+ *
+ * TODO(?): add secure features for creating a secure State Machine once
+ * it is known what requirements are needed to be considered being secure.
+ */
+export class SecureStateMachine extends cdk.Construct {
+  readonly stateMachine: sfn.IStateMachine;
+  constructor(scope: cdk.Construct, id: string, props: SecureStateMachineProps) {
+    super(scope, id);
+    const stateMachine = new sfn.StateMachine(this, id, {
+      // defaults that can be overridden
+      timeout: cdk.Duration.seconds(130),
+      stateMachineType: sfn.StateMachineType.STANDARD,
+      // configuration passed in
+      ...props.stateMachineProps,
+      // defaults that cannot be overridden
+      tracingEnabled: true,
+      logs: {
+        level: sfn.LogLevel.ALL,
+        destination: props.logGroup,
+      },
+    });
+    this.stateMachine = stateMachine;
   }
 }
