@@ -4,11 +4,13 @@ import { serializeError } from "serialize-error";
 import { ValidationErrorResponse } from "./response";
 import { REQUEST_BODY_INVALID } from "./errors";
 
-const errorHandlingMiddleware = (): middy.MiddlewareObj<APIGatewayProxyEvent, APIGatewayProxyResult> => {
+export const errorHandlingMiddleware = (): middy.MiddlewareObj<APIGatewayProxyEvent, APIGatewayProxyResult> => {
   const onError: middy.MiddlewareFn<APIGatewayProxyEvent, APIGatewayProxyResult> = async (
     request
   ): Promise<ValidationErrorResponse | void> => {
     const error = serializeError(request.error)!;
+    // AT-6734 catch setup error
+    // AT-6734 catch DB error
     // Catch middy validation error, wrap it in ValidationErrorResponse
     if (error.message === "Event object failed validation") {
       return new ValidationErrorResponse("Request failed validation", error.details as Record<string, unknown>);
@@ -30,5 +32,3 @@ const errorHandlingMiddleware = (): middy.MiddlewareObj<APIGatewayProxyEvent, AP
     onError,
   };
 };
-
-export default errorHandlingMiddleware;
