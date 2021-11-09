@@ -153,6 +153,11 @@ export class CognitoAuthentication extends cdk.Construct {
   public readonly preTokenGenerationFunction: lambda.IFunction;
 
   /**
+   * The Post-Authentication Function used to generate authentication event logs.
+   */
+  public readonly postAuthenticationFunction: lambda.IFunction;
+
+  /**
    * The User Pool Domain resource created with the custom or Cognito domain.
    */
   public readonly userPoolDomain: cognito.IUserPoolDomain;
@@ -174,11 +179,17 @@ export class CognitoAuthentication extends cdk.Construct {
         GROUPS_ATTRIBUTE_CLAIM_NAME: `custom:${props.groupsAttributeName ?? "groups"}`,
       },
     });
+    this.postAuthenticationFunction = new lambdaNodeJs.NodejsFunction(this, "PostAuthentication", {
+      entry: packageRoot() + "/cognito/postAuthentication/index.ts",
+    });
 
     this.userPool = new cognito.UserPool(this, "Pool", {
       ...(props?.userPoolProps ?? {}),
       signInAliases: {},
-      lambdaTriggers: { preTokenGeneration: this.preTokenGenerationFunction },
+      lambdaTriggers: {
+        preTokenGeneration: this.preTokenGenerationFunction,
+        postAuthentication: this.postAuthenticationFunction,
+      },
       // To be clear, users cannot register for our pool. But just in case one
       // were to be created by an administrator, this enforces that the password
       // policy and MFA for the pool is as secure as possible.
