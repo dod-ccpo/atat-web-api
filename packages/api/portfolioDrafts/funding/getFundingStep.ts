@@ -48,6 +48,4 @@ export async function baseHandler(
     return DATABASE_ERROR;
   }
 }
-const handler = middy(baseHandler);
-handler.use(JSONErrorHandlerMiddleware()).use(cors(CORS_CONFIGURATION));
-export { handler };
+export const handler = middy(baseHandler).use(JSONErrorHandlerMiddleware()).use(cors(CORS_CONFIGURATION));

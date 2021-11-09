@@ -53,8 +53,7 @@ export async function baseHandler(
   return new ApiSuccessResponse<PortfolioStep>(portfolioStep, SuccessStatusCode.CREATED);
 }
 
-const handler = middy(baseHandler);
-handler
+export const handler = middy(baseHandler)
   .use(xssSanitizer())
   .use(jsonBodyParser())
   .use(
@@ -64,8 +63,6 @@ handler
   )
   .use(JSONErrorHandlerMiddleware())
   .use(cors({ headers: "*", methods: "*" }));
-
-export { handler };
 
 export async function createPortfolioStepCommand(
   portfolioDraftId: string,
