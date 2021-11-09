@@ -348,7 +348,8 @@ describe("Business rules validation tests", () => {
     expect(responseBody.details[0].message).toEqual("must NOT have less than 1 item");
     expect(result?.body).toMatch(/"\/body\/applications\/0\/environments"/);
   });
-  it("should return a validation error when admin roles are not acceptable", async () => {
+  // TODO(AT-?): move to new operation that is implemented for Step 4 with adding operators
+  it.skip("should return a validation error when admin roles are not acceptable", async () => {
     const badAdminRolesRequest: ApiGatewayEventParsed<ApplicationStep> = {
       body: mockApplicationsStepWithBadAdminRoles[0],
       pathParameters: { portfolioDraftId: uuidv4() },
