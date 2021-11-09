@@ -16,6 +16,7 @@ import cors from "@middy/http-cors";
 import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
 import { findAdministrators, validateRequestShape } from "../../utils/requestValidation";
 import { CORS_CONFIGURATION } from "../../utils/corsConfig";
+import { wrapSchema } from "../../utils/schemaWrapper";
 
 /**
  * Submits the Application Step of the Portfolio Draft Wizard
@@ -75,18 +76,10 @@ export async function baseHandler(
   }
   return new ApiSuccessResponse<ApplicationStep>(applicationStep, SuccessStatusCode.CREATED);
 }
-const applicationStepSchema = schema.ApplicationStep;
 
-const wrappedApplicationStepSchema = {
-  type: "object",
-  required: ["body"],
-  properties: {
-    body: applicationStepSchema,
-  },
-};
 export const handler = middy(baseHandler)
   .use(xssSanitizer())
   .use(jsonBodyParser())
-  .use(validator({ inputSchema: wrappedApplicationStepSchema }))
+  .use(validator({ inputSchema: wrapSchema(schema.ApplicationStep) }))
   .use(JSONErrorHandlerMiddleware())
   .use(cors(CORS_CONFIGURATION));
