@@ -43,6 +43,7 @@ it("should return generic Error if exception caught", async () => {
   jest.spyOn(console, "error").mockImplementation(() => jest.fn()); // suppress output
   ddbMock.on(GetCommand).rejects("Some error occurred");
   const result = await handler(validRequest, {} as Context, () => null);
+  console.log(JSON.stringify(result));
   expect(result).toBeInstanceOf(OtherErrorResponse);
   expect(result).toEqual(DATABASE_ERROR);
   expect(result?.statusCode).toEqual(ErrorStatusCode.INTERNAL_SERVER_ERROR);

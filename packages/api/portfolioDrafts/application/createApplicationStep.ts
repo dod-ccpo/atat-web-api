@@ -5,7 +5,7 @@ import { ApplicationStep } from "../../models/ApplicationStep";
 import { APPLICATION_STEP } from "../../models/PortfolioDraft";
 import { dynamodbDocumentClient as client } from "../../utils/aws-sdk/dynamodb";
 import { DATABASE_ERROR, NO_SUCH_PORTFOLIO_DRAFT_404 } from "../../utils/errors";
-import { ApiSuccessResponse, SetupError, SuccessStatusCode, ValidationErrorResponse } from "../../utils/response";
+import { ApiSuccessResponse, SetupError, SuccessStatusCode } from "../../utils/response";
 import schema = require("../../models/schema.json");
 import middy from "@middy/core";
 import xssSanitizer from "../xssSanitizer";
@@ -14,8 +14,10 @@ import validator from "@middy/validator";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import cors from "@middy/http-cors";
 import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
-import { findAdministrators, validateRequestShape } from "../../utils/requestValidation";
+import { validateRequestShape } from "../../utils/requestValidation";
 import { CORS_CONFIGURATION } from "../../utils/corsConfig";
+import { wrapSchema } from "../../utils/schemaWrapper";
+import { errorHandlingMiddleware } from "../../utils/errorHandlingMiddleware";
 
 /**
  * Submits the Application Step of the Portfolio Draft Wizard
@@ -33,7 +35,8 @@ export async function baseHandler(
   const portfolioDraftId = setupResult.path.portfolioDraftId;
   const applicationStep = event.body;
 
-  // TODO(AT-?): add new endpoint for Step 4 that includes this below business rule
+  // validateBusinessRulesForApplicationStep(applicationStep);
+  // TODO(AT-6835): add new endpoint for Step 4 that includes this below business rule
   // This is only a quick fix and is reverting the admin operator role business
   // rule that was implemented in AT-6723. All other business rules are
   // are still covered by middy. This will allow the UI team to submit application
@@ -81,18 +84,10 @@ export async function baseHandler(
   }
   return new ApiSuccessResponse<ApplicationStep>(applicationStep, SuccessStatusCode.CREATED);
 }
-const applicationStepSchema = schema.ApplicationStep;
-
-const wrappedApplicationStepSchema = {
-  type: "object",
-  required: ["body"],
-  properties: {
-    body: applicationStepSchema,
-  },
-};
 export const handler = middy(baseHandler)
   .use(xssSanitizer())
   .use(jsonBodyParser())
-  .use(validator({ inputSchema: wrappedApplicationStepSchema }))
+  .use(validator({ inputSchema: wrapSchema(schema.ApplicationStep) }))
+  .use(errorHandlingMiddleware())
   .use(JSONErrorHandlerMiddleware())
   .use(cors(CORS_CONFIGURATION));

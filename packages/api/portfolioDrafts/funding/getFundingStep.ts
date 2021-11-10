@@ -1,5 +1,5 @@
 import { APIGatewayProxyResult, Context } from "aws-lambda";
-import { ApiSuccessResponse, SetupError, SuccessStatusCode } from "../../utils/response";
+import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
 import { dynamodbDocumentClient as client } from "../../utils/aws-sdk/dynamodb";
 import { FUNDING_STEP } from "../../models/PortfolioDraft";
 import { FundingStep } from "../../models/FundingStep";
@@ -11,6 +11,7 @@ import middy from "@middy/core";
 import cors from "@middy/http-cors";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import { CORS_CONFIGURATION } from "../../utils/corsConfig";
+import { errorHandlingMiddleware } from "../../utils/errorHandlingMiddleware";
 /**
  * Gets the Funding Step of the specified Portfolio Draft if it exists
  *
@@ -20,12 +21,8 @@ export async function baseHandler(
   event: ApiGatewayEventParsed<FundingStep>,
   context?: Context
 ): Promise<APIGatewayProxyResult> {
-  // Perform shape validation
-  const setupResult = validateRequestShape<FundingStep>(event);
-  if (setupResult instanceof SetupError) {
-    return setupResult.errorResponse;
-  }
-  const portfolioDraftId = setupResult.path.portfolioDraftId;
+  validateRequestShape<FundingStep>(event);
+  const portfolioDraftId = event.pathParameters?.portfolioDraftId as string;
   try {
     const result = await client.send(
       new GetCommand({
@@ -48,6 +45,7 @@ export async function baseHandler(
     return DATABASE_ERROR;
   }
 }
-const handler = middy(baseHandler);
-handler.use(JSONErrorHandlerMiddleware()).use(cors(CORS_CONFIGURATION));
-export { handler };
+export const handler = middy(baseHandler)
+  .use(errorHandlingMiddleware())
+  .use(JSONErrorHandlerMiddleware())
+  .use(cors(CORS_CONFIGURATION));

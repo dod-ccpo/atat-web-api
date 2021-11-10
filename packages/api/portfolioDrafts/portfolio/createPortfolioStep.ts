@@ -4,13 +4,7 @@ import { PORTFOLIO_STEP } from "../../models/PortfolioDraft";
 import { PortfolioStep } from "../../models/PortfolioStep";
 import { dynamodbDocumentClient as client } from "../../utils/aws-sdk/dynamodb";
 import { NO_SUCH_PORTFOLIO_DRAFT_404 } from "../../utils/errors";
-import {
-  ApiSuccessResponse,
-  SuccessStatusCode,
-  SetupError,
-  DynamoDBException,
-  DatabaseResult,
-} from "../../utils/response";
+import { ApiSuccessResponse, SuccessStatusCode, DynamoDBException, DatabaseResult } from "../../utils/response";
 import { validateRequestShape } from "../../utils/requestValidation";
 import middy from "@middy/core";
 import jsonBodyParser from "@middy/http-json-body-parser";
@@ -20,14 +14,9 @@ import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
 import cors from "@middy/http-cors";
 import xssSanitizer from "../xssSanitizer";
 import schema = require("../../models/schema.json");
+import { wrapSchema } from "../../utils/schemaWrapper";
+import { errorHandlingMiddleware } from "../../utils/errorHandlingMiddleware";
 
-const portfolioStepSchema = {
-  type: "object",
-  required: ["body"],
-  properties: {
-    body: schema.PortfolioStep,
-  },
-};
 /**
  * Submits the Portfolio Step of the Portfolio Draft Wizard
  *
@@ -38,12 +27,8 @@ export async function baseHandler(
   event: ApiGatewayEventParsed<PortfolioStep>,
   context?: Context
 ): Promise<APIGatewayProxyResult> {
-  // Perform shape validation
-  const setupResult = validateRequestShape<PortfolioStep>(event);
-  if (setupResult instanceof SetupError) {
-    return setupResult.errorResponse;
-  }
-  const portfolioDraftId = setupResult.path.portfolioDraftId;
+  validateRequestShape<PortfolioStep>(event);
+  const portfolioDraftId = event.pathParameters?.portfolioDraftId as string;
   const portfolioStep = event.body;
   // Perform database call
   const databaseResult = await createPortfolioStepCommand(portfolioDraftId, portfolioStep);
@@ -53,19 +38,17 @@ export async function baseHandler(
   return new ApiSuccessResponse<PortfolioStep>(portfolioStep, SuccessStatusCode.CREATED);
 }
 
-const handler = middy(baseHandler);
-handler
+export const handler = middy(baseHandler)
   .use(xssSanitizer())
   .use(jsonBodyParser())
   .use(
     validator({
-      inputSchema: portfolioStepSchema,
+      inputSchema: wrapSchema(schema.PortfolioStep),
     })
   )
+  .use(errorHandlingMiddleware())
   .use(JSONErrorHandlerMiddleware())
   .use(cors({ headers: "*", methods: "*" }));
-
-export { handler };
 
 export async function createPortfolioStepCommand(
   portfolioDraftId: string,

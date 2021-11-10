@@ -4,13 +4,14 @@ import { ApplicationStep } from "../../models/ApplicationStep";
 import { APPLICATION_STEP } from "../../models/PortfolioDraft";
 import { dynamodbDocumentClient as client } from "../../utils/aws-sdk/dynamodb";
 import { DATABASE_ERROR, NO_SUCH_APPLICATION_STEP, NO_SUCH_PORTFOLIO_DRAFT_400 } from "../../utils/errors";
-import { ApiSuccessResponse, SetupError, SuccessStatusCode } from "../../utils/response";
+import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
 import middy from "@middy/core";
 import cors from "@middy/http-cors";
 import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
 import { validateRequestShape } from "../../utils/requestValidation";
 import { CORS_CONFIGURATION } from "../../utils/corsConfig";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
+import { errorHandlingMiddleware } from "../../utils/errorHandlingMiddleware";
 
 /**
  * Gets the Application Step of the specified Portfolio Draft if it exists
@@ -21,11 +22,8 @@ export async function baseHandler(
   event: ApiGatewayEventParsed<ApplicationStep>,
   context?: Context
 ): Promise<APIGatewayProxyResult> {
-  const setupResult = validateRequestShape<ApplicationStep>(event);
-  if (setupResult instanceof SetupError) {
-    return setupResult.errorResponse;
-  }
-  const portfolioDraftId = setupResult.path.portfolioDraftId;
+  validateRequestShape<ApplicationStep>(event);
+  const portfolioDraftId = event.pathParameters?.portfolioDraftId as string;
 
   try {
     const result = await client.send(
@@ -53,4 +51,7 @@ export async function baseHandler(
   }
 }
 
-export const handler = middy(baseHandler).use(JSONErrorHandlerMiddleware()).use(cors(CORS_CONFIGURATION));
+export const handler = middy(baseHandler)
+  .use(errorHandlingMiddleware())
+  .use(JSONErrorHandlerMiddleware())
+  .use(cors(CORS_CONFIGURATION));
