@@ -15,12 +15,12 @@ const TABLE_NAME = process.env.TABLE_NAME ?? "";
  * @param stateInput - the input from the previous Portfolio Draft Validation
  *  Task in the Step Function
  */
-export async function handler(stateInput: ValidatedPortfolioDraft, context?: Context): Promise<void> {
-  const portfolioDraft = stateInput;
-  const portfolioDraftId = portfolioDraft.id;
-  console.log("SFN INPUT: " + JSON.stringify(stateInput));
+export async function handler(rejectedStateInput: ValidatedPortfolioDraft, context?: Context): Promise<void> {
+  const rejectedPortfolioDraft = rejectedStateInput;
+  const portfolioDraftId = rejectedPortfolioDraft.id;
+  console.log("SFN INPUT (rejected): " + JSON.stringify(rejectedStateInput));
   const databaseResult = await updatePortfolioDraftStatus(TABLE_NAME, portfolioDraftId);
-  console.log("DB UPDATE RESULT: " + JSON.stringify(databaseResult));
+  console.log("DB UPDATE RESULT (rejected): " + JSON.stringify(databaseResult));
 }
 
 export async function updatePortfolioDraftStatus(tableName: string, portfolioDraftId: string): Promise<DatabaseResult> {
@@ -28,7 +28,7 @@ export async function updatePortfolioDraftStatus(tableName: string, portfolioDra
   try {
     return await client.send(
       new UpdateCommand({
-        TableName: process.env.ATAT_TABLE_NAME ?? "",
+        TableName: tableName,
         Key: {
           id: portfolioDraftId,
         },
