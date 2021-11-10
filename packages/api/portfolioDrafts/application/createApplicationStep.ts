@@ -38,20 +38,24 @@ export async function baseHandler(
   }
   const portfolioDraftId = setupResult.path.portfolioDraftId;
   const applicationStep = event.body;
+
   validateBusinessRulesForApplicationStep(applicationStep);
-  /*
-  const adminRoles = findAdministrators(applicationStep);
+  // TODO(AT-?): add new endpoint for Step 4 that includes this below business rule
+  // This is only a quick fix and is reverting the admin operator role business
+  // rule that was implemented in AT-6723. All other business rules are
+  // are still covered by middy. This will allow the UI team to submit application
+  // in Step 3.
+  // const adminRoles = findAdministrators(applicationStep);
   // TODO(AT-6734): add uniform validation response for business rules
-  if (!adminRoles.acceptableAdministratorRoles) {
-    return new ValidationErrorResponse(
-      `Invalid admin roles. Acceptable admin rules are:
-      - one portfolio admin role
-      - at least one app admin role for each app when no portfolio admin role
-      - at least one env admin role for each env when no app admin role one level up.`,
-      { ...adminRoles }
-    );
-  }
-  */
+  // if (!adminRoles.acceptableAdministratorRoles) {
+  //   return new ValidationErrorResponse(
+  //     `Invalid admin roles. Acceptable admin rules are:
+  //     - one portfolio admin role
+  //     - at least one app admin role for each app when no portfolio admin role
+  //     - at least one env admin role for each env when no app admin role one level up.`,
+  //     { ...adminRoles }
+  //   );
+  // }
 
   try {
     await client.send(
