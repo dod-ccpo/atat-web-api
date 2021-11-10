@@ -116,25 +116,19 @@ describe("Path parameter tests", () => {
 });
 
 describe("Request body tests", () => {
-  /*
-  * TODO: AT-6734 Refactor this test due to it relying on the error wrapper
-  * This should return an OtherErrorResponse (it does with Postman), but when unit tested it
-  * returns a ValidationError for required field. Now this isn't wrong, but it seems that
-  * the test to check if the JSON can't be parsed is unacheivable because it is always parsed
-  * as a ApiGatewayEventParsed. Figure this out when errorHandlingMiddleware covers everything.
-  it("should return error when request body is empty or json is invalid", async () => {
+  it("should return error when request body is empty", async () => {
     const invalidRequest: ApiGatewayEventParsed<FundingStep> = {
       pathParameters: { portfolioDraftId: uuidv4() },
-      body: '["foo", "bar\\"]', // invalid JSON
+      body: undefined, // invalid JSON
     } as any;
     const result = await handler(invalidRequest, {} as Context, () => null);
-    console.log(result);
-    const response = JSON.parse(result?.body ?? "");
-    expect(result).toBeInstanceOf(OtherErrorResponse);
-    expect(result).toEqual(REQUEST_BODY_INVALID);
+    console.log(JSON.stringify(result));
+    const responseBody = JSON.parse(result?.body ?? "");
+    expect(result).toBeInstanceOf(ValidationErrorResponse);
+    // expect(result).toEqual(REQUEST_BODY_INVALID);
     expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-    expect(response.body.messsage).toMatch(/A valid request body must be provided/);
-  }); */
+    expect(responseBody.message).toMatch("Request failed validation");
+  });
 
   it("should return error when request body is not a funding step", async () => {
     const notFundingStepRequest: ApiGatewayEventParsed<FundingStep> = {

@@ -139,13 +139,14 @@ interface AdministratorsFound {
   environmentsWithNoAdmin: EnvironmentWithNoAdminProps[];
   acceptableAdministratorRoles: boolean;
 }
+/* Fix this in AT-6835
 export function validateBusinessRulesForApplicationStep(as: ApplicationStep): ValidationErrorResponse | undefined {
   const adminRoles = findAdministrators(as);
   if (!adminRoles.acceptableAdministratorRoles) {
     return createBusinessRulesValidationErrorResponse({ input_validation_errors: { ...adminRoles } });
   }
   return undefined;
-}
+} */
 
 /**
  * Find and determine if an application step has the correct business rules for
