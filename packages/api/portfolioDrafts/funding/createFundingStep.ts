@@ -1,5 +1,5 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from "aws-lambda";
-import { ApiSuccessResponse, SetupError, SuccessStatusCode, ValidationErrorResponse } from "../../utils/response";
+import { APIGatewayProxyResult, Context } from "aws-lambda";
+import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
 import { dynamodbDocumentClient as client } from "../../utils/aws-sdk/dynamodb";
 import { FUNDING_STEP } from "../../models/PortfolioDraft";
 import { FundingStep } from "../../models/FundingStep";
@@ -27,11 +27,8 @@ export async function baseHandler(
   event: ApiGatewayEventParsed<FundingStep>,
   context?: Context
 ): Promise<APIGatewayProxyResult> {
-  const setupResult = validateRequestShape<FundingStep>(event);
-  if (setupResult instanceof SetupError) {
-    return setupResult.errorResponse;
-  }
-  const portfolioDraftId = setupResult.path.portfolioDraftId;
+  validateRequestShape<FundingStep>(event);
+  const portfolioDraftId = event.pathParameters?.portfolioDraftId as string;
   const fundingStep = event.body;
   validateBusinessRulesForFundingStep(fundingStep);
   try {
