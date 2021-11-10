@@ -1,13 +1,9 @@
-import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { Context } from "aws-lambda";
-import { dynamodbDocumentClient as client } from "../../utils/aws-sdk/dynamodb";
-import { NO_SUCH_PORTFOLIO_DRAFT_404 } from "../../utils/errors";
-import { DynamoDBException, DatabaseResult } from "../../utils/response";
 import { ProvisioningStatus } from "../../models/ProvisioningStatus";
 import { ValidatedPortfolioDraft } from "./validateCompletePortfolioDraft";
 import { updatePortfolioDraftStatus } from "./persistPortfolioDraft";
 
-const TABLE_NAME = process.env.TABLE_NAME ?? "";
+const ATAT_TABLE_NAME = process.env.ATAT_TABLE_NAME ?? "";
 
 /**
  * Updates the status of the Provisioning Portfolio Draft to 'failed'
@@ -20,6 +16,6 @@ export async function handler(rejectedStateInput: ValidatedPortfolioDraft, conte
   const rejectedPortfolioDraft = rejectedStateInput;
   const portfolioDraftId = rejectedPortfolioDraft.id;
   console.log("SFN INPUT (rejected): " + JSON.stringify(rejectedStateInput));
-  const databaseResult = await updatePortfolioDraftStatus(TABLE_NAME, portfolioDraftId, ProvisioningStatus.FAILED);
+  const databaseResult = await updatePortfolioDraftStatus(ATAT_TABLE_NAME, portfolioDraftId, ProvisioningStatus.FAILED);
   console.log("DB UPDATE RESULT (rejected): " + JSON.stringify(databaseResult));
 }

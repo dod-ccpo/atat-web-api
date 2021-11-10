@@ -6,7 +6,7 @@ import { DynamoDBException, DatabaseResult } from "../../utils/response";
 import { ProvisioningStatus } from "../../models/ProvisioningStatus";
 import { ValidatedPortfolioDraft } from "./validateCompletePortfolioDraft";
 
-const TABLE_NAME = process.env.TABLE_NAME ?? "";
+const ATAT_TABLE_NAME = process.env.ATAT_TABLE_NAME ?? "";
 
 /**
  * Updates the status of the Provisioning Portfolio Draft at the end of
@@ -19,7 +19,11 @@ export async function handler(successfulStateInput: ValidatedPortfolioDraft, con
   const successfulPortfolioDraft = successfulStateInput;
   const portfolioDraftId = successfulPortfolioDraft.id;
   console.log("SFN INPUT (successful): " + JSON.stringify(successfulStateInput));
-  const databaseResult = await updatePortfolioDraftStatus(TABLE_NAME, portfolioDraftId, ProvisioningStatus.COMPLETE);
+  const databaseResult = await updatePortfolioDraftStatus(
+    ATAT_TABLE_NAME,
+    portfolioDraftId,
+    ProvisioningStatus.COMPLETE
+  );
   console.log("DB UPDATE RESULT (successful): " + JSON.stringify(databaseResult));
 }
 
