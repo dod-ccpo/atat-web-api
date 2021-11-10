@@ -11,10 +11,12 @@ const SFN_ARN = process.env.SFN_ARN ?? "";
 export async function handler(event: SQSEvent): Promise<void> {
   const records = event.Records.map((record) => record.body);
   console.log("Number of Records: " + records.length);
-  console.log("Sent Record: " + records[0]);
-  const result = await sfnClient.startExecution({
-    input: records[0],
-    stateMachineArn: SFN_ARN,
-  });
-  console.log("Response: " + JSON.stringify(result));
+  for (const record of records) {
+    console.log("Sent Record: " + record);
+    const result = await sfnClient.startExecution({
+      input: record,
+      stateMachineArn: SFN_ARN,
+    });
+    console.log("Response: " + JSON.stringify(result));
+  }
 }

@@ -17,11 +17,13 @@ describe("Reject provisioning Portfolio Draft handler", () => {
   it("should return a portfolio draft with a status of failed", async () => {
     jest.spyOn(console, "error").mockImplementation(() => jest.fn()); // suppress output
     const validatedBadPortfolioDraft: any = {
-      ...mockPortfolioDraft,
-      portfolio_step: {}, // no portfolio step
-      submit_id: uuidv4(),
-      status: ProvisioningStatus.IN_PROGRESS,
-      validatedResult: "FAILED",
+      body: {
+        ...mockPortfolioDraft,
+        portfolio_step: {}, // no portfolio step
+        submit_id: uuidv4(),
+        status: ProvisioningStatus.IN_PROGRESS,
+        validatedResult: "FAILED",
+      },
     };
     const updatedPortfolioDraft = { ...validatedBadPortfolioDraft, status: ProvisioningStatus.FAILED };
     ddbMock.on(UpdateCommand).resolves(updatedPortfolioDraft);

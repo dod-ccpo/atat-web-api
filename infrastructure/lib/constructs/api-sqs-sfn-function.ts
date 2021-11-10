@@ -29,10 +29,6 @@ export class ApiStepFnsSQSFunction extends ApiSQSFunction {
     super(scope, id, props);
     this.stateMachine = props.stateMachine;
     this.fn.addEnvironment("SFN_ARN", props.stateMachine.stateMachineArn);
-    this.grantRequiredStateMachinePermissions();
-  }
-
-  private grantRequiredStateMachinePermissions(): iam.Grant | undefined {
-    return this.stateMachine.grantStartExecution(this.fn);
+    this.stateMachine.grantStartExecution(this.fn);
   }
 }

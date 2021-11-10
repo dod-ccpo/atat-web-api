@@ -12,7 +12,7 @@ export interface ValidatedPortfolioDraft extends PortfolioDraft {
   validationResult: ValidationResult;
   error?: unknown;
 }
-interface StateInput {
+export interface StateInput {
   body: PortfolioDraft;
 }
 

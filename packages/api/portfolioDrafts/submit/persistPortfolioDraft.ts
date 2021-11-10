@@ -6,8 +6,6 @@ import { DynamoDBException, DatabaseResult } from "../../utils/response";
 import { ProvisioningStatus } from "../../models/ProvisioningStatus";
 import { ValidatedPortfolioDraft } from "./validateCompletePortfolioDraft";
 
-const ATAT_TABLE_NAME = process.env.ATAT_TABLE_NAME ?? "";
-
 /**
  * Updates the status of the Provisioning Portfolio Draft at the end of
  * being processed by the Step Functions
@@ -19,24 +17,16 @@ export async function handler(successfulStateInput: ValidatedPortfolioDraft, con
   const successfulPortfolioDraft = successfulStateInput;
   const portfolioDraftId = successfulPortfolioDraft.id;
   console.log("SFN INPUT (successful): " + JSON.stringify(successfulStateInput));
-  const databaseResult = await updatePortfolioDraftStatus(
-    ATAT_TABLE_NAME,
-    portfolioDraftId,
-    ProvisioningStatus.COMPLETE
-  );
+  const databaseResult = await updatePortfolioDraftStatus(portfolioDraftId, ProvisioningStatus.COMPLETE);
   console.log("DB UPDATE RESULT (successful): " + JSON.stringify(databaseResult));
 }
 
-export async function updatePortfolioDraftStatus(
-  tableName: string,
-  portfolioDraftId: string,
-  status: string
-): Promise<DatabaseResult> {
+export async function updatePortfolioDraftStatus(portfolioDraftId: string, status: string): Promise<DatabaseResult> {
   const now = new Date().toISOString();
   try {
     return await client.send(
       new UpdateCommand({
-        TableName: tableName,
+        TableName: process.env.ATAT_TABLE_NAME ?? "",
         Key: {
           id: portfolioDraftId,
         },
