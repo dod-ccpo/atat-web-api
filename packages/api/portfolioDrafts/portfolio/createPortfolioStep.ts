@@ -20,14 +20,9 @@ import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
 import cors from "@middy/http-cors";
 import xssSanitizer from "../xssSanitizer";
 import schema = require("../../models/schema.json");
+import { wrapSchema } from "../../utils/schemaWrapper";
+import { errorHandlingMiddleware } from "../../utils/errorHandlingMiddleware";
 
-const portfolioStepSchema = {
-  type: "object",
-  required: ["body"],
-  properties: {
-    body: schema.PortfolioStep,
-  },
-};
 /**
  * Submits the Portfolio Step of the Portfolio Draft Wizard
  *
@@ -39,11 +34,12 @@ export async function baseHandler(
   context?: Context
 ): Promise<APIGatewayProxyResult> {
   // Perform shape validation
-  const setupResult = validateRequestShape<PortfolioStep>(event);
+  validateRequestShape<PortfolioStep>(event);
+  /*
   if (setupResult instanceof SetupError) {
     return setupResult.errorResponse;
-  }
-  const portfolioDraftId = setupResult.path.portfolioDraftId;
+  } */
+  const portfolioDraftId = event.pathParameters?.portfolioDraftId as string;
   const portfolioStep = event.body;
   // Perform database call
   const databaseResult = await createPortfolioStepCommand(portfolioDraftId, portfolioStep);
@@ -58,9 +54,10 @@ export const handler = middy(baseHandler)
   .use(jsonBodyParser())
   .use(
     validator({
-      inputSchema: portfolioStepSchema,
+      inputSchema: wrapSchema(schema.PortfolioStep),
     })
   )
+  .use(errorHandlingMiddleware())
   .use(JSONErrorHandlerMiddleware())
   .use(cors({ headers: "*", methods: "*" }));
 
