@@ -10,6 +10,10 @@ import { Operators, isAdministrator } from "../models/Operator";
 /**
  * Check if incoming POST Request passes basic shape validation
  *
+ * This shape validation checks the pathParameter to ensure it is not null, undefined, or empty, and that is
+ * a valid UUIDv4.
+ * That is how we are able to cast portfolioDraftId as a string in the main handler function.
+ *
  * @param event - The incoming API Gateway Request proxied to Lambda
  * @param extraValidators - Additional validators that check whether the body is a valid object of Type T
  * @returns SetUpSuccess object if event passes validation, otherwise it throws an error
