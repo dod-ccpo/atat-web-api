@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import { Context } from "aws-lambda";
 import { DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import {
@@ -18,7 +19,13 @@ import { mockClient } from "aws-sdk-client-mock";
 import { v4 as uuidv4 } from "uuid";
 import { ApplicationStep } from "../../models/ApplicationStep";
 import { Application } from "../../models/Application";
-import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusCode } from "../../utils/response";
+import {
+  ApiSuccessResponse,
+  ErrorStatusCode,
+  OtherErrorResponse,
+  SuccessStatusCode,
+  ValidationErrorResponse,
+} from "../../utils/response";
 import { handler } from "./createApplicationStep";
 import { DATABASE_ERROR, NO_SUCH_PORTFOLIO_DRAFT_404 } from "../../utils/errors";
 import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
@@ -84,10 +91,11 @@ describe("Request body shape validations", () => {
     const result = await handler(invalidRequest, {} as Context, () => null);
     const responseBody = JSON.parse(result?.body ?? "");
     expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-    expect(responseBody.message).toMatch(/Event object failed validation/);
-    expect(responseBody.name).toMatch(/BadRequestError/);
-    expect(responseBody.details).toHaveLength(1);
-    expect(responseBody.details[0]).toEqual({
+    expect(responseBody.message).toMatch(/Request failed validation/);
+    expect(responseBody.code).toMatch(/INVALID_INPUT/);
+    expect(result).toBeInstanceOf(ValidationErrorResponse);
+    expect(responseBody.error_map).toHaveLength(1);
+    expect(responseBody.error_map[0]).toEqual({
       instancePath: "/body",
       keyword: "type",
       message: "must be object",
@@ -103,14 +111,15 @@ describe("Request body shape validations", () => {
     const result = await handler(emptyRequest, {} as Context, () => null);
     const responseBody = JSON.parse(result?.body ?? "");
     expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-    expect(responseBody.message).toMatch(/Event object failed validation/);
-    expect(responseBody.name).toMatch(/BadRequestError/);
-    expect(responseBody.details).toHaveLength(3);
+    expect(responseBody.message).toMatch(/Request failed validation/);
+    expect(responseBody.code).toMatch(/INVALID_INPUT/);
+    expect(result).toBeInstanceOf(ValidationErrorResponse);
+    expect(responseBody.error_map).toHaveLength(3);
     expect(result?.body).toMatch(/"must have required property [applications|operators]/);
     expect(result?.body).toMatch(/"must NOT have additional properties"/);
-    responseBody.details.forEach((detail: any) => {
-      expect(detail.instancePath).toBe("/body");
-      expect(["required", "additionalProperties"]).toContain(detail.keyword);
+    responseBody.error_map.forEach((error_map: any) => {
+      expect(error_map.instancePath).toBe("/body");
+      expect(["required", "additionalProperties"]).toContain(error_map.keyword);
     });
   });
   it("should return an error when incorrect or missing application properties", async () => {
@@ -121,10 +130,11 @@ describe("Request body shape validations", () => {
     const result = await handler(invalidShapeRequest, {} as Context, () => null);
     const responseBody = JSON.parse(result?.body ?? "");
     expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-    expect(responseBody.message).toMatch(/Event object failed validation/);
-    expect(responseBody.name).toMatch(/BadRequestError/);
+    expect(responseBody.message).toMatch(/Request failed validation/);
+    expect(responseBody.code).toMatch(/INVALID_INPUT/);
+    expect(result).toBeInstanceOf(ValidationErrorResponse);
     // 5 different applications, most with missing fields and last with incorrect fields
-    expect(responseBody.details).toHaveLength(5);
+    expect(responseBody.error_map).toHaveLength(5);
     expect(result?.body).toMatch(/"must have required property [name|environments|operators]/);
     expect(result?.body).toMatch(/"must NOT have additional properties"/);
   });
@@ -136,12 +146,13 @@ describe("Request body shape validations", () => {
     const result = await handler(badApplicationDescriptionsRequest, {} as Context, () => null);
     const responseBody = JSON.parse(result?.body ?? "");
     expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-    expect(responseBody.message).toMatch(/Event object failed validation/);
-    expect(responseBody.name).toMatch(/BadRequestError/);
-    expect(responseBody.details).toHaveLength(2);
-    expect(responseBody.details[0].message).toEqual('must match pattern "^[\\w\\d !@#$%^&*_|:;,\'.-]{0,300}$"');
-    expect(responseBody.details[0].instancePath).toEqual("/body/applications/1/description");
-    expect(responseBody.details[1].instancePath).toEqual("/body/applications/2/description");
+    expect(responseBody.message).toMatch(/Request failed validation/);
+    expect(responseBody.code).toMatch(/INVALID_INPUT/);
+    expect(result).toBeInstanceOf(ValidationErrorResponse);
+    expect(responseBody.error_map).toHaveLength(2);
+    expect(responseBody.error_map[0].message).toEqual('must match pattern "^[\\w\\d !@#$%^&*_|:;,\'.-]{0,300}$"');
+    expect(responseBody.error_map[0].instancePath).toEqual("/body/applications/1/description");
+    expect(responseBody.error_map[1].instancePath).toEqual("/body/applications/2/description");
   });
   it("should return an error when incorrect or missing environment properties", async () => {
     const badEnvironmentRequest: ApiGatewayEventParsed<ApplicationStep> = {
@@ -150,13 +161,14 @@ describe("Request body shape validations", () => {
     } as any;
     const result = await handler(badEnvironmentRequest, {} as Context, () => null);
     const responseBody = JSON.parse(result?.body ?? "");
-    responseBody.details.forEach((detail: any) => {
-      expect(detail.instancePath).toEqual("/body/applications/0/environments/0");
+    responseBody.error_map.forEach((error_map: any) => {
+      expect(error_map.instancePath).toEqual("/body/applications/0/environments/0");
     });
     expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-    expect(responseBody.message).toMatch(/Event object failed validation/);
-    expect(responseBody.name).toMatch(/BadRequestError/);
-    expect(responseBody.details).toHaveLength(4);
+    expect(responseBody.message).toMatch(/Request failed validation/);
+    expect(responseBody.code).toMatch(/INVALID_INPUT/);
+    expect(result).toBeInstanceOf(ValidationErrorResponse);
+    expect(responseBody.error_map).toHaveLength(4);
     expect(result?.body).toMatch(/"must have required property [name|operators]/);
     expect(result?.body).toMatch(/"must NOT have additional properties"/);
   });
@@ -171,12 +183,13 @@ describe("Request body shape validations", () => {
     const result = await handler(badPortfolioOperatorRequest, {} as Context, () => null);
     const responseBody = JSON.parse(result?.body ?? "");
     expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-    expect(responseBody.message).toMatch(/Event object failed validation/);
-    expect(responseBody.name).toMatch(/BadRequestError/);
-    responseBody.details.forEach((detail: any) => {
-      expect(detail.instancePath).toEqual("/body/operators/0");
+    expect(responseBody.message).toMatch(/Request failed validation/);
+    expect(responseBody.code).toMatch(/INVALID_INPUT/);
+    expect(result).toBeInstanceOf(ValidationErrorResponse);
+    responseBody.error_map.forEach((error_map: any) => {
+      expect(error_map.instancePath).toEqual("/body/operators/0");
     });
-    expect(responseBody.details).toHaveLength(5);
+    expect(responseBody.error_map).toHaveLength(5);
     expect(result?.body).toMatch(/"must have required property [display_name|email|access]/);
     expect(result?.body).toMatch(/"must NOT have additional properties"/);
   });
@@ -190,9 +203,10 @@ describe("Request body shape validations", () => {
       const result = await handler(badPortfolioOperatorRequest, {} as Context, () => null);
       const responseBody = JSON.parse(result?.body ?? "");
       expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-      expect(responseBody.message).toMatch(/Event object failed validation/);
-      expect(responseBody.name).toMatch(/BadRequestError/);
-      expect(responseBody.details).toHaveLength(1);
+      expect(responseBody.message).toMatch(/Request failed validation/);
+      expect(responseBody.code).toMatch(/INVALID_INPUT/);
+      expect(result).toBeInstanceOf(ValidationErrorResponse);
+      expect(responseBody.error_map).toHaveLength(1);
       expect(result?.body).toMatch(/"must have required property display_name"/);
     }
   );
@@ -206,9 +220,10 @@ describe("Request body shape validations", () => {
       const result = await handler(badPortfolioOperatorRequest, {} as Context, () => null);
       const responseBody = JSON.parse(result?.body ?? "");
       expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-      expect(responseBody.message).toMatch(/Event object failed validation/);
-      expect(responseBody.name).toMatch(/BadRequestError/);
-      expect(responseBody.details).toHaveLength(1);
+      expect(responseBody.message).toMatch(/Request failed validation/);
+      expect(responseBody.code).toMatch(/INVALID_INPUT/);
+      expect(result).toBeInstanceOf(ValidationErrorResponse);
+      expect(responseBody.error_map).toHaveLength(1);
       expect(result?.body).toMatch(/"must have required property email"/);
     }
   );
@@ -222,9 +237,10 @@ describe("Request body shape validations", () => {
       const result = await handler(badPortfolioOperatorRequest, {} as Context, () => null);
       const responseBody = JSON.parse(result?.body ?? "");
       expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-      expect(responseBody.message).toMatch(/Event object failed validation/);
-      expect(responseBody.name).toMatch(/BadRequestError/);
-      expect(responseBody.details).toHaveLength(1);
+      expect(responseBody.message).toMatch(/Request failed validation/);
+      expect(responseBody.code).toMatch(/INVALID_INPUT/);
+      expect(result).toBeInstanceOf(ValidationErrorResponse);
+      expect(responseBody.error_map).toHaveLength(1);
       expect(result?.body).toMatch(/"must have required property access"/);
     }
   );
@@ -278,14 +294,15 @@ describe("Business rules validation tests", () => {
     const result = await handler(badApplicationNameRequest, {} as Context, () => null);
     const responseBody = JSON.parse(result?.body ?? "");
     expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-    expect(responseBody.message).toMatch(/Event object failed validation/);
-    expect(responseBody.name).toMatch(/BadRequestError/);
+    expect(responseBody.message).toMatch(/Request failed validation/);
+    expect(responseBody.code).toMatch(/INVALID_INPUT/);
+    expect(result).toBeInstanceOf(ValidationErrorResponse);
     // 2 different applications, name too short and name too long
-    expect(responseBody.details).toHaveLength(2);
-    responseBody.details.forEach((detail: any) => {
-      expect(detail.instancePath).toMatch(/\/body\/applications\/[0|1]\/name/);
-      expect(detail.message).toEqual('must match pattern "^[a-zA-Z\\d _-]{4,100}$"');
-      expect(detail.schemaPath).toEqual("#/properties/body/properties/applications/items/properties/name/pattern");
+    expect(responseBody.error_map).toHaveLength(2);
+    responseBody.error_map.forEach((error_map: any) => {
+      expect(error_map.instancePath).toMatch(/\/body\/applications\/[0|1]\/name/);
+      expect(error_map.message).toEqual('must match pattern "^[a-zA-Z\\d _-]{4,100}$"');
+      expect(error_map.schemaPath).toEqual("#/properties/body/properties/applications/items/properties/name/pattern");
     });
   });
   it("should return a validation error when an environment name is too short or too long", async () => {
@@ -296,11 +313,12 @@ describe("Business rules validation tests", () => {
     const result = await handler(badEnvironmentNameRequest, {} as Context, () => null);
     const responseBody = JSON.parse(result?.body ?? "");
     expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-    expect(responseBody.message).toMatch(/Event object failed validation/);
-    expect(responseBody.name).toMatch(/BadRequestError/);
+    expect(responseBody.message).toMatch(/Request failed validation/);
+    expect(responseBody.code).toMatch(/INVALID_INPUT/);
+    expect(result).toBeInstanceOf(ValidationErrorResponse);
     // 2 different environment, name too short and name too long
-    expect(responseBody.details).toHaveLength(2);
-    expect(responseBody.details[0].message).toEqual('must match pattern "^[a-zA-Z\\d _-]{1,100}$"');
+    expect(responseBody.error_map).toHaveLength(2);
+    expect(responseBody.error_map[0].message).toEqual('must match pattern "^[a-zA-Z\\d _-]{1,100}$"');
     expect(result?.body).toMatch(/"\/body\/applications\/0\/environments\/[0|1]\/name"/);
   });
   it("should return a validation error when an operator has a name that is too short or too long", async () => {
@@ -311,11 +329,12 @@ describe("Business rules validation tests", () => {
     const result = await handler(badOperatorDisplayNameRequest, {} as Context, () => null);
     const responseBody = JSON.parse(result?.body ?? "");
     expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-    expect(responseBody.message).toMatch(/Event object failed validation/);
-    expect(responseBody.name).toMatch(/BadRequestError/);
+    expect(responseBody.message).toMatch(/Request failed validation/);
+    expect(responseBody.code).toMatch(/INVALID_INPUT/);
+    expect(result).toBeInstanceOf(ValidationErrorResponse);
     // 2 different operators, name too short and name too long
-    expect(responseBody.details).toHaveLength(2);
-    expect(responseBody.details[0].message).toEqual('must match pattern "^[a-zA-Z\\d ,.-]{1,100}$"');
+    expect(responseBody.error_map).toHaveLength(2);
+    expect(responseBody.error_map[0].message).toEqual('must match pattern "^[a-zA-Z\\d ,.-]{1,100}$"');
     expect(result?.body).toMatch(/"\/body\/applications\/0\/environments\/0\/operators\/0\/display_name"/);
     expect(result?.body).toMatch(/"\/body\/applications\/0\/operators\/0\/display_name"/);
   });
@@ -327,10 +346,11 @@ describe("Business rules validation tests", () => {
     const result = await handler(badOperatorDisplayNameRequest, {} as Context, () => null);
     const responseBody = JSON.parse(result?.body ?? "");
     expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-    expect(responseBody.message).toMatch(/Event object failed validation/);
-    expect(responseBody.name).toMatch(/BadRequestError/);
-    expect(responseBody.details).toHaveLength(1);
-    expect(responseBody.details[0].message).toEqual("must NOT have less than 1 item");
+    expect(responseBody.message).toMatch(/Request failed validation/);
+    expect(responseBody.code).toMatch(/INVALID_INPUT/);
+    expect(result).toBeInstanceOf(ValidationErrorResponse);
+    expect(responseBody.error_map).toHaveLength(1);
+    expect(responseBody.error_map[0].message).toEqual("must NOT have less than 1 item");
     expect(result?.body).toMatch(/\/body\/applications"/);
   });
   it("should return a validation error when there is not at least 1 environment", async () => {
@@ -341,11 +361,12 @@ describe("Business rules validation tests", () => {
     const result = await handler(badOperatorDisplayNameRequest, {} as Context, () => null);
     const responseBody = JSON.parse(result?.body ?? "");
     expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
-    expect(responseBody.message).toMatch(/Event object failed validation/);
-    expect(responseBody.name).toMatch(/BadRequestError/);
+    expect(responseBody.message).toMatch(/Request failed validation/);
+    expect(responseBody.code).toMatch(/INVALID_INPUT/);
+    expect(result).toBeInstanceOf(ValidationErrorResponse);
     // 2 different operators, name too short and name too long
-    expect(responseBody.details).toHaveLength(1);
-    expect(responseBody.details[0].message).toEqual("must NOT have less than 1 item");
+    expect(responseBody.error_map).toHaveLength(1);
+    expect(responseBody.error_map[0].message).toEqual("must NOT have less than 1 item");
     expect(result?.body).toMatch(/"\/body\/applications\/0\/environments"/);
   });
   // TODO(AT-?): move to new operation that is implemented for Step 4 with adding operators
