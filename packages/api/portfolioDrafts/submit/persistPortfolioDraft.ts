@@ -19,11 +19,15 @@ export async function handler(successfulStateInput: ValidatedPortfolioDraft, con
   const successfulPortfolioDraft = successfulStateInput;
   const portfolioDraftId = successfulPortfolioDraft.id;
   console.log("SFN INPUT (successful): " + JSON.stringify(successfulStateInput));
-  const databaseResult = await updatePortfolioDraftStatus(TABLE_NAME, portfolioDraftId);
+  const databaseResult = await updatePortfolioDraftStatus(TABLE_NAME, portfolioDraftId, ProvisioningStatus.COMPLETE);
   console.log("DB UPDATE RESULT (successful): " + JSON.stringify(databaseResult));
 }
 
-export async function updatePortfolioDraftStatus(tableName: string, portfolioDraftId: string): Promise<DatabaseResult> {
+export async function updatePortfolioDraftStatus(
+  tableName: string,
+  portfolioDraftId: string,
+  status: string
+): Promise<DatabaseResult> {
   const now = new Date().toISOString();
   try {
     return await client.send(
@@ -38,7 +42,7 @@ export async function updatePortfolioDraftStatus(tableName: string, portfolioDra
         },
         ExpressionAttributeValues: {
           ":now": now,
-          ":statusUpdate": ProvisioningStatus.COMPLETE,
+          ":statusUpdate": status,
           ":expectedStatus": ProvisioningStatus.IN_PROGRESS,
         },
         ConditionExpression:
