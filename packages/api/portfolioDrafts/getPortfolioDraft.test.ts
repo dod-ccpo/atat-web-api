@@ -6,7 +6,6 @@ import { handler, NO_PORTFOLIO_PATH_PARAM, NO_SUCH_PORTFOLIO } from "./getPortfo
 import { mockClient } from "aws-sdk-client-mock";
 import { mockPortfolioDraft, validRequest } from "./commonPortfolioDraftMockData";
 import { SuccessStatusCode } from "../utils/response";
-import { isPortfolioDraft } from "../utils/validation";
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 beforeEach(() => {
@@ -45,11 +44,6 @@ describe("Successful operation tests", () => {
   it("should return status code 200", async () => {
     const result = await handler(validRequest);
     expect(result.statusCode).toEqual(SuccessStatusCode.OK);
-  });
-  it("should return portfolio draft object", async () => {
-    const result = await handler(validRequest);
-    const responseBody = JSON.parse(result.body);
-    expect(isPortfolioDraft(responseBody)).toBe(true);
   });
   it("should return portfolio draft with correct portfolio name", async () => {
     const result = await handler(validRequest);
