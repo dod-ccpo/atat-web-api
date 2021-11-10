@@ -295,6 +295,10 @@ export class AtatWebApiStack extends cdk.Stack {
         },
       ],
     });
+    // When utilizing a custom domain, the `domainName` property of IUserPoolDomain
+    // contains the full domain; however, in other scenarios, it contains only the
+    // prefix.
+    const fullDomainName = `${cognitoAuthentication.userPoolDomain.domainName}.auth-fips.${cdk.Aws.REGION}.amazoncognito.com`;
     this.ssmParams.push(
       new ssm.StringParameter(this, "UserPoolIdParameter", {
         description: "Cognito User Pool ID",
@@ -305,6 +309,11 @@ export class AtatWebApiStack extends cdk.Stack {
         description: "Names of configured identity providers",
         parameterName: `/atat/${this.environmentId}/cognito/idps`,
         stringListValue: cognitoAuthentication.idps.map((idp) => idp.providerName),
+      }),
+      new ssm.StringParameter(this, "CognitoDomainParameter", {
+        description: "Cognito domain",
+        parameterName: `/atat/${this.environmentId}/cognito/domain`,
+        stringValue: fullDomainName,
       })
     );
   }
