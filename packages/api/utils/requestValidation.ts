@@ -20,7 +20,8 @@ export function validateRequestShape<T>(
   ...extraValidators: Array<(obj: unknown) => obj is T>
 ): SetupResult<T> {
   if (!isValidUuidV4(event.pathParameters?.portfolioDraftId)) {
-    return new SetupError(NO_SUCH_PORTFOLIO_DRAFT_404);
+    // return new SetupError(NO_SUCH_PORTFOLIO_DRAFT_404);
+    throw createError(404, "Shape validation failed, invalid UUIDv4");
   }
   const portfolioDraftId = event.pathParameters!.portfolioDraftId!;
   const bodyResult = event.body;
@@ -29,7 +30,8 @@ export function validateRequestShape<T>(
   }
   for (const validator of extraValidators) {
     if (!validator(event.body)) {
-      return new SetupError(REQUEST_BODY_INVALID);
+      // return new SetupError(REQUEST_BODY_INVALID);
+      throw createError(400, "Shape validation failed, invalid request body");
     }
   }
 
@@ -124,7 +126,10 @@ export function createBusinessRulesValidationErrorResponse(
   Object.keys(invalidProperties).forEach((key) => {
     if (!key) throw Error("Parameter 'invalidProperties' must not have empty string as key");
   });
-  throw createError(400, "Business rules validation failed", { details: invalidProperties });
+  // const errorMap = error.details as Record<string, unknown>;
+  //   const businessRules = errorMap.input_validation_errors;
+  const errorMap = invalidProperties.input_validation_errors;
+  throw createError(400, "Business rules validation failed", { error_map: errorMap });
 }
 
 interface EnvironmentWithNoAdminProps {
@@ -138,6 +143,14 @@ interface AdministratorsFound {
   applicationsWithNoAdmin: number[];
   environmentsWithNoAdmin: EnvironmentWithNoAdminProps[];
   acceptableAdministratorRoles: boolean;
+}
+export function validateBusinessRulesForApplicationStep(as: ApplicationStep): ValidationErrorResponse | undefined {
+  const adminRoles = findAdministrators(as);
+  // TODO(AT-6734): add uniform validation response for business rules
+  if (!adminRoles.acceptableAdministratorRoles) {
+    return createBusinessRulesValidationErrorResponse({ input_validation_errors: { ...adminRoles } });
+  }
+  return undefined;
 }
 
 /**
