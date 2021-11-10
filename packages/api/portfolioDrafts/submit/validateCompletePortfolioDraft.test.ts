@@ -13,7 +13,9 @@ describe("validate portfolio draft submission", () => {
   it("should return the portfolio draft with successful validation", async () => {
     const consoleLogSpy = jest.spyOn(console, "log");
     const completedPortfolioDraft: any = {
-      body: { ...mockPortfolioDraft, submit_id: uuidv4(), status: ProvisioningStatus.IN_PROGRESS },
+      ...mockPortfolioDraft,
+      submit_id: uuidv4(),
+      status: ProvisioningStatus.IN_PROGRESS,
     };
 
     const response = await handler(completedPortfolioDraft, {} as Context, () => null);

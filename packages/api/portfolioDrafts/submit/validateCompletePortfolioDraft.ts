@@ -1,18 +1,19 @@
 import { Context } from "aws-lambda";
 import { PortfolioDraft } from "../../models/PortfolioDraft";
 import middy from "@middy/core";
-import jsonBodyParser from "@middy/http-json-body-parser";
 import validator from "@middy/validator";
-import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import schema = require("../../models/schema.json");
-import errorHandlingMiddleware from "../../utils/errorHandlingMiddleware";
 
 export enum ValidationResult {
   SUCCESS = "SUCCESS",
   FAILED = "FAILED",
 }
 export interface ValidatedPortfolioDraft extends PortfolioDraft {
-  validationResult?: ValidationResult;
+  validationResult: ValidationResult;
+  error?: unknown;
+}
+interface StateInput {
+  body: PortfolioDraft;
 }
 
 /**
@@ -21,13 +22,12 @@ export interface ValidatedPortfolioDraft extends PortfolioDraft {
  *
  * @param stateInput - The input to the Step Function start execution lambda
  */
-export async function baseHandler(stateInput: PortfolioDraft, context?: Context): Promise<ValidatedPortfolioDraft> {
-  console.log("EVENT INPUT (stringified): " + JSON.stringify(stateInput));
-  console.log("EVENT INPUT: " + stateInput);
+export async function baseHandler(stateInput: StateInput, context?: Context): Promise<ValidatedPortfolioDraft> {
+  console.log("STATE INPUT: " + JSON.stringify(stateInput));
 
   // if it makes it pass middy to here, safe to say validation was good
-  const validationUpdate = { ...stateInput, validationResult: ValidationResult.SUCCESS };
-  console.log("UPDATED RESPONSE: " + JSON.stringify(validationUpdate));
+  const validationUpdate = { ...stateInput.body, validationResult: ValidationResult.SUCCESS };
+  console.log("UPDATED OUTPUT: " + JSON.stringify(validationUpdate));
   return validationUpdate;
 }
 
@@ -58,21 +58,32 @@ const completePortfolioStepSchema = {
   },
 };
 
-const provisioningValidationErrorHandlingMiddleware = (): middy.MiddlewareObj<PortfolioDraft> => {
-  const onError: middy.MiddlewareFn<any | ValidatedPortfolioDraft> = async (request): Promise<any | void> => {
+const wrapStateMachineInput = (): middy.MiddlewareObj<any, any> => {
+  // This wraps the input to the validation function in a body so that the validator is shaped
+  // properly before validation otherwise an error is thrown for not having a body and the
+  // input never gets pass the validator and into the validation function.
+  const before: middy.MiddlewareFn<any, any> = async (request): Promise<void> => {
+    request.event = { body: request.event };
+  };
+
+  // This catches any errors and adds a 'validationResult' to the output so that the next part
+  // of the state machine can evaluate and execute the next state.
+  const onError: middy.MiddlewareFn<any, any> = async (request): Promise<any | void> => {
+    console.log("ON ERROR: An error occurred while validating the portfolio draft");
+    console.log("ON ERROR: ", JSON.stringify(request));
     return { ...request.event, validationResult: ValidationResult.FAILED, error: { ...request.error } };
   };
+
   return {
+    before,
     onError,
   };
 };
 
 export const handler = middy(baseHandler)
-  .use(jsonBodyParser())
+  .use(wrapStateMachineInput())
   .use(
     validator({
       inputSchema: completePortfolioStepSchema,
     })
-  )
-  .use(provisioningValidationErrorHandlingMiddleware());
-// .use(errorHandlingMiddleware())
+  );
