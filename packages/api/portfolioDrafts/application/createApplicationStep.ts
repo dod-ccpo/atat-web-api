@@ -14,9 +14,14 @@ import validator from "@middy/validator";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import cors from "@middy/http-cors";
 import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
-import { findAdministrators, validateRequestShape } from "../../utils/requestValidation";
+import {
+  findAdministrators,
+  validateRequestShape,
+  validateBusinessRulesForApplicationStep,
+} from "../../utils/requestValidation";
 import { CORS_CONFIGURATION } from "../../utils/corsConfig";
 import { wrapSchema } from "../../utils/schemaWrapper";
+import { errorHandlingMiddleware } from "../../utils/errorHandlingMiddleware";
 
 /**
  * Submits the Application Step of the Portfolio Draft Wizard
@@ -33,6 +38,8 @@ export async function baseHandler(
   }
   const portfolioDraftId = setupResult.path.portfolioDraftId;
   const applicationStep = event.body;
+  validateBusinessRulesForApplicationStep(applicationStep);
+  /*
   const adminRoles = findAdministrators(applicationStep);
   // TODO(AT-6734): add uniform validation response for business rules
   if (!adminRoles.acceptableAdministratorRoles) {
@@ -44,6 +51,7 @@ export async function baseHandler(
       { ...adminRoles }
     );
   }
+  */
 
   try {
     await client.send(
@@ -76,10 +84,10 @@ export async function baseHandler(
   }
   return new ApiSuccessResponse<ApplicationStep>(applicationStep, SuccessStatusCode.CREATED);
 }
-
 export const handler = middy(baseHandler)
   .use(xssSanitizer())
   .use(jsonBodyParser())
   .use(validator({ inputSchema: wrapSchema(schema.ApplicationStep) }))
+  .use(errorHandlingMiddleware())
   .use(JSONErrorHandlerMiddleware())
   .use(cors(CORS_CONFIGURATION));
