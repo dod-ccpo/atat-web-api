@@ -1,10 +1,9 @@
-import { SetupError, SetupResult, SetupSuccess, ValidationErrorResponse } from "./response";
-import { isValidUuidV4, isValidDate, isClin, isClinNumber, isFundingAmount } from "./validation";
+import { SetupResult, SetupSuccess, ValidationErrorResponse } from "./response";
+import { isValidUuidV4 } from "./validation";
 import { ApiGatewayEventParsed } from "./eventHandlingTool";
 import { FundingStep, ValidationMessage } from "../models/FundingStep";
 import { Clin } from "../models/Clin";
 import createError from "http-errors";
-import { NO_SUCH_PORTFOLIO_DRAFT_404, REQUEST_BODY_INVALID } from "./errors";
 import { ApplicationStep } from "../models/ApplicationStep";
 import { Operators, isAdministrator } from "../models/Operator";
 
@@ -13,24 +12,22 @@ import { Operators, isAdministrator } from "../models/Operator";
  *
  * @param event - The incoming API Gateway Request proxied to Lambda
  * @param extraValidators - Additional validators that check whether the body is a valid object of Type T
- * @returns SetUpSuccess object if event passes validation, otherwise it returns SetUpError
+ * @returns SetUpSuccess object if event passes validation, otherwise it throws an error
  */
 export function validateRequestShape<T>(
   event: ApiGatewayEventParsed<T>,
   ...extraValidators: Array<(obj: unknown) => obj is T>
 ): SetupResult<T> {
   if (!isValidUuidV4(event.pathParameters?.portfolioDraftId)) {
-    // return new SetupError(NO_SUCH_PORTFOLIO_DRAFT_404);
     throw createError(404, "Shape validation failed, invalid UUIDv4");
   }
   const portfolioDraftId = event.pathParameters!.portfolioDraftId!;
   const bodyResult = event.body;
   if (bodyResult === undefined) {
-    return new SetupError(REQUEST_BODY_INVALID);
+    throw createError(400, "Shape validation failed, invalid request body");
   }
   for (const validator of extraValidators) {
     if (!validator(event.body)) {
-      // return new SetupError(REQUEST_BODY_INVALID);
       throw createError(400, "Shape validation failed, invalid request body");
     }
   }
@@ -126,8 +123,6 @@ export function createBusinessRulesValidationErrorResponse(
   Object.keys(invalidProperties).forEach((key) => {
     if (!key) throw Error("Parameter 'invalidProperties' must not have empty string as key");
   });
-  // const errorMap = error.details as Record<string, unknown>;
-  //   const businessRules = errorMap.input_validation_errors;
   const errorMap = invalidProperties.input_validation_errors;
   throw createError(400, "Business rules validation failed", { error_map: errorMap });
 }
@@ -146,7 +141,6 @@ interface AdministratorsFound {
 }
 export function validateBusinessRulesForApplicationStep(as: ApplicationStep): ValidationErrorResponse | undefined {
   const adminRoles = findAdministrators(as);
-  // TODO(AT-6734): add uniform validation response for business rules
   if (!adminRoles.acceptableAdministratorRoles) {
     return createBusinessRulesValidationErrorResponse({ input_validation_errors: { ...adminRoles } });
   }

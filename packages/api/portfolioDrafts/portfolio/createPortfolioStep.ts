@@ -4,13 +4,7 @@ import { PORTFOLIO_STEP } from "../../models/PortfolioDraft";
 import { PortfolioStep } from "../../models/PortfolioStep";
 import { dynamodbDocumentClient as client } from "../../utils/aws-sdk/dynamodb";
 import { NO_SUCH_PORTFOLIO_DRAFT_404 } from "../../utils/errors";
-import {
-  ApiSuccessResponse,
-  SuccessStatusCode,
-  SetupError,
-  DynamoDBException,
-  DatabaseResult,
-} from "../../utils/response";
+import { ApiSuccessResponse, SuccessStatusCode, DynamoDBException, DatabaseResult } from "../../utils/response";
 import { validateRequestShape } from "../../utils/requestValidation";
 import middy from "@middy/core";
 import jsonBodyParser from "@middy/http-json-body-parser";
@@ -33,12 +27,7 @@ export async function baseHandler(
   event: ApiGatewayEventParsed<PortfolioStep>,
   context?: Context
 ): Promise<APIGatewayProxyResult> {
-  // Perform shape validation
   validateRequestShape<PortfolioStep>(event);
-  /*
-  if (setupResult instanceof SetupError) {
-    return setupResult.errorResponse;
-  } */
   const portfolioDraftId = event.pathParameters?.portfolioDraftId as string;
   const portfolioStep = event.body;
   // Perform database call

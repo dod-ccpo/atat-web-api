@@ -1,5 +1,5 @@
 import { APIGatewayProxyResult, Context } from "aws-lambda";
-import { ApiSuccessResponse, SetupError, SuccessStatusCode } from "../../utils/response";
+import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
 import { dynamodbDocumentClient as client } from "../../utils/aws-sdk/dynamodb";
 import { FUNDING_STEP } from "../../models/PortfolioDraft";
 import { FundingStep } from "../../models/FundingStep";

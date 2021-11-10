@@ -5,7 +5,7 @@ import { ApplicationStep } from "../../models/ApplicationStep";
 import { APPLICATION_STEP } from "../../models/PortfolioDraft";
 import { dynamodbDocumentClient as client } from "../../utils/aws-sdk/dynamodb";
 import { DATABASE_ERROR, NO_SUCH_PORTFOLIO_DRAFT_404 } from "../../utils/errors";
-import { ApiSuccessResponse, SetupError, SuccessStatusCode, ValidationErrorResponse } from "../../utils/response";
+import { ApiSuccessResponse, SetupError, SuccessStatusCode } from "../../utils/response";
 import schema = require("../../models/schema.json");
 import middy from "@middy/core";
 import xssSanitizer from "../xssSanitizer";
@@ -14,11 +14,7 @@ import validator from "@middy/validator";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import cors from "@middy/http-cors";
 import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
-import {
-  findAdministrators,
-  validateRequestShape,
-  validateBusinessRulesForApplicationStep,
-} from "../../utils/requestValidation";
+import { validateRequestShape, validateBusinessRulesForApplicationStep } from "../../utils/requestValidation";
 import { CORS_CONFIGURATION } from "../../utils/corsConfig";
 import { wrapSchema } from "../../utils/schemaWrapper";
 import { errorHandlingMiddleware } from "../../utils/errorHandlingMiddleware";
