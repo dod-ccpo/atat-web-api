@@ -79,6 +79,9 @@ export class AtatNetStack extends cdk.Stack {
     const secretsManagerEndpoint = vpc.addInterfaceEndpoint("SecretsManager", {
       service: ec2.InterfaceVpcEndpointAwsService.SECRETS_MANAGER,
     });
+    const stepFunctionsEndpoint = vpc.addInterfaceEndpoint("StepFunctions", {
+      service: ec2.InterfaceVpcEndpointAwsService.STEP_FUNCTIONS,
+    });
     this.endpoints.push(
       dynamodbEndpoint,
       s3Endpoint,
@@ -87,7 +90,8 @@ export class AtatNetStack extends cdk.Stack {
       logsEndpoint,
       sqsEndpoint,
       xrayEndpoint,
-      secretsManagerEndpoint
+      secretsManagerEndpoint,
+      stepFunctionsEndpoint
     );
   }
 
