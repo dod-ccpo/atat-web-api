@@ -9,6 +9,7 @@ import cors from "@middy/http-cors";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import validator from "@middy/validator";
 import { ErrorStatusCode } from "../utils/statusCodesAndErrors";
+import { IpCheckerMiddleware } from "../../api/utils/ipLogging";
 
 const QUEUE_URL = process.env.ATAT_QUEUE_URL ?? "";
 
@@ -62,4 +63,5 @@ export const handler = middy(baseHandler)
   .use(jsonBodyParser())
   .use(validator({ inputSchema: schemaWrapper }))
   .use(JSONErrorHandlerMiddleware())
-  .use(cors({ headers: "*", methods: "*" }));
+  .use(cors({ headers: "*", methods: "*" }))
+  .use(IpCheckerMiddleware());

@@ -18,6 +18,7 @@ import { validateRequestShape } from "../../utils/requestValidation";
 import { CORS_CONFIGURATION } from "../../utils/corsConfig";
 import { wrapSchema } from "../../utils/schemaWrapper";
 import { errorHandlingMiddleware } from "../../utils/errorHandlingMiddleware";
+import { IpCheckerMiddleware } from "../../utils/ipLogging";
 
 /**
  * Submits the Application Step of the Portfolio Draft Wizard
@@ -90,4 +91,5 @@ export const handler = middy(baseHandler)
   .use(validator({ inputSchema: wrapSchema(schema.ApplicationStep) }))
   .use(errorHandlingMiddleware())
   .use(JSONErrorHandlerMiddleware())
-  .use(cors(CORS_CONFIGURATION));
+  .use(cors(CORS_CONFIGURATION))
+  .use(IpCheckerMiddleware());

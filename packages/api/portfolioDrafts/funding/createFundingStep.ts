@@ -17,6 +17,7 @@ import xssSanitizer from "../xssSanitizer";
 import { errorHandlingMiddleware } from "../../utils/errorHandlingMiddleware";
 import { CORS_CONFIGURATION } from "../../utils/corsConfig";
 import { wrapSchema } from "../../utils/schemaWrapper";
+import { IpCheckerMiddleware } from "../../utils/ipLogging";
 
 /**
  * Submits the Funding Step of the Portfolio Draft Wizard
@@ -63,6 +64,7 @@ export async function baseHandler(
   return new ApiSuccessResponse<FundingStep>(fundingStep, SuccessStatusCode.CREATED);
 }
 export const handler = middy(baseHandler)
+  .use(IpCheckerMiddleware())
   .use(xssSanitizer())
   .use(jsonBodyParser())
   .use(validator({ inputSchema: wrapSchema(schema.FundingStep) }))
