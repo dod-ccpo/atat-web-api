@@ -8,8 +8,8 @@
     "lint:fix": "npm run lint -- --fix"
   },
   "dependencies": {
-    "@aws-sdk/client-secrets-manager": "3.40.0",
-    "@aws-sdk/client-sqs": "3.40.0",
+    "@aws-sdk/client-secrets-manager": "3.41.0",
+    "@aws-sdk/client-sqs": "3.41.0",
     "@middy/core": "^2.5.2",
     "@middy/http-cors": "^2.5.2",
     "@middy/http-event-normalizer": "^2.5.2",
