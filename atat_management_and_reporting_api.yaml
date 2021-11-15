@@ -51,6 +51,18 @@ paths:
                 $ref: '#/components/schemas/Error'
         '404':
           description: Portfolio or Application with the given ID does not exist
+      x-amazon-apigateway-request-validator: "request-params-validator"
+      x-amazon-apigateway-integration:
+        httpMethod: "GET"
+        uri: 
+          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NotImplementedFunction.Arn}/invocations"
+        type: "aws_proxy"
+      security:
+        Fn::If:
+          - IsAuthorizationRequired
+          - 
+            - cognitoAuthorizer: []
+          - Ref: AWS::NoValue
 components:
   responses:
     CorsHeaders:
@@ -66,18 +78,6 @@ components:
           schema:
             type: string
       content: {}
-  x-amazon-apigateway-request-validator: "request-params-validator"
-  x-amazon-apigateway-integration:
-    httpMethod: "POST"
-    uri:
-      Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetApplicationBurndownData.Arn}/invocations"
-    type: "aws_proxy"
-  security:
-    Fn::If:
-      - IsAuthorizationRequired
-      - 
-        - cognitoAuthorizer: []
-      - Ref: AWS::NoValue
   schemas:
     Error:
       type: object
@@ -173,3 +173,13 @@ components:
             providerARNs:
               - Fn::GetAtt: AtatUserPool.Arn
       - Ref: AWS::NoValue
+x-amazon-apigateway-request-validators:
+  full-request-validator:
+    validateRequestParameters: true
+    validateRequestBody: true
+  request-body-validator:
+    validateRequestParameters: false
+    validateRequestBody: true
+  request-params-validator:
+    validateRequestParameters: true
+    validateRequestBody: false
