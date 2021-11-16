@@ -1,10 +1,40 @@
 import * as cdk from "@aws-cdk/core";
 import * as ec2 from "@aws-cdk/aws-ec2";
+import * as lambda from "@aws-cdk/aws-lambda";
+import * as lambdaNodeJs from "@aws-cdk/aws-lambda-nodejs";
+import * as customResources from "@aws-cdk/custom-resources";
 import * as rds from "@aws-cdk/aws-rds";
 import * as secretsmanager from "@aws-cdk/aws-secretsmanager";
 
+import { packageRoot } from "../util";
+
 export interface DatabaseProps {
   vpc: ec2.IVpc;
+  databaseName?: string;
+}
+
+interface BootstrapProps extends DatabaseProps {
+  secretName: string;
+}
+
+class DatabaseBootstrapper extends cdk.Construct {
+  public readonly bootstrapResource: cdk.CustomResource;
+  constructor(scope: cdk.Construct, id: string, props: BootstrapProps) {
+    super(scope, id);
+    const handler = new lambdaNodeJs.NodejsFunction(this, "Function", {
+      vpc: props.vpc,
+      entry: packageRoot() + "rds/initial-bootstrap.ts",
+      environment: {
+        DATABASE_SECRET_NAME: props.secretName,
+      },
+    });
+    this.bootstrapResource = new cdk.CustomResource(this, "CustomResource", {
+      serviceToken: handler.functionArn,
+      properties: {
+        DatabaseName: props.databaseName,
+      },
+    });
+  }
 }
 
 export class Database extends cdk.Construct {
@@ -54,5 +84,9 @@ export class Database extends cdk.Construct {
       automaticallyAfter: cdk.Duration.days(7),
     });
     this.adminSecret = cluster.secret!;
+    const bootstrapper = new DatabaseBootstrapper(this, "DatabaseBoostrapper", {
+      ...props,
+      secretName: this.adminSecret.secretName,
+    });
   }
 }

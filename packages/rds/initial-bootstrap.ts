@@ -24,6 +24,8 @@ const USERS: User[] = [
 ];
 
 async function connectWithoutDatabase(): Promise<Connection> {
+  // This always gets set by the infrastructure code.
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const dbAuth = await getDatabaseCredentials(process.env.DATABASE_SECRET_NAME!);
   return await createConnection({
     type: "postgres",
@@ -31,7 +33,7 @@ async function connectWithoutDatabase(): Promise<Connection> {
     port: 3306,
     username: dbAuth.username,
     password: dbAuth.password,
-    logging: true,
+    logging: "all",
   });
 }
 
