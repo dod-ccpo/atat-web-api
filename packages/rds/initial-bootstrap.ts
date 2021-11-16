@@ -1,4 +1,4 @@
-import { getAuthPassword } from "./auth/secrets";
+import { getDatabaseCredentials } from "./auth/secrets";
 import { createConnection, Connection } from "typeorm";
 
 import { CloudFormationCustomResourceEvent, CloudFormationCustomResourceResponse } from "aws-lambda";
@@ -8,24 +8,23 @@ type User = {
   dbPrivileges: string[];
 };
 
-const DB_NAME = "atat";
 const USERS: User[] = [
   {
-    name: "atat-read",
+    name: "atat-api-read",
     dbPrivileges: ["CONNECT", "SELECT"],
   },
   {
-    name: "atat-write",
+    name: "atat-api-write",
     dbPrivileges: ["CONNECT", "SELECT", "INSERT", "UPDATE", "DELETE"],
   },
   {
-    name: "atat-admin",
+    name: "atat-api-admin",
     dbPrivileges: ["ALL PRIVILEGES"],
   },
 ];
 
 async function connectWithoutDatabase(): Promise<Connection> {
-  const dbAuth = await getAuthPassword(process.env.DATABASE_SECRET_NAME!);
+  const dbAuth = await getDatabaseCredentials(process.env.DATABASE_SECRET_NAME!);
   return await createConnection({
     type: "postgres",
     host: process.env.DATABASE_HOST,
@@ -36,35 +35,36 @@ async function connectWithoutDatabase(): Promise<Connection> {
   });
 }
 
-async function handleCreate(): Promise<void> {
+async function handleCreate(databaseName: string): Promise<void> {
   const connection = await connectWithoutDatabase();
 
-  await connection.query(`CREATE DATABASE $1 ENCODING UTF8 LOCALE en_US.utf8`, [DB_NAME]);
+  await connection.query(`CREATE DATABASE $1 ENCODING UTF8 LOCALE en_US.utf8`, [databaseName]);
   for (const user of USERS) {
     await connection.query(`CREATE ROLE $1 WITH LOGIN IN ROLE rds_iam`, [user.name]);
-    await connection.query(`GRANT $1 ON $2 TO $3`, [user.dbPrivileges.join(", "), DB_NAME, user.name]);
+    await connection.query(`GRANT $1 ON $2 TO $3`, [user.dbPrivileges.join(", "), databaseName, user.name]);
   }
 }
 
-async function handleDelete(): Promise<void> {
+async function handleDelete(databaseName: string): Promise<void> {
   const connection = await connectWithoutDatabase();
 
   for (const user of USERS) {
     await connection.query(`DROP ROLE IF EXISTS $1`, [user.name]);
   }
-  await connection.query(`DROP DATABASE IF EXISTS $1 WITH FORCE`, [DB_NAME]);
+  await connection.query(`DROP DATABASE IF EXISTS $1 WITH FORCE`, [databaseName]);
 }
 
 export async function handler(event: CloudFormationCustomResourceEvent): Promise<CloudFormationCustomResourceResponse> {
+  const databaseName = event.ResourceProperties.DatabaseName ?? "atat";
   try {
     switch (event.RequestType) {
       case "Create":
-        await handleCreate();
+        await handleCreate(databaseName);
         break;
       case "Update":
         break;
       case "Delete":
-        await handleDelete();
+        await handleDelete(databaseName);
         break;
     }
 
@@ -73,7 +73,7 @@ export async function handler(event: CloudFormationCustomResourceEvent): Promise
       RequestId: event.RequestId,
       StackId: event.StackId,
       LogicalResourceId: event.LogicalResourceId,
-      PhysicalResourceId: DB_NAME,
+      PhysicalResourceId: databaseName,
     };
   } catch (err) {
     return {
@@ -81,7 +81,7 @@ export async function handler(event: CloudFormationCustomResourceEvent): Promise
       RequestId: event.RequestId,
       StackId: event.StackId,
       LogicalResourceId: event.LogicalResourceId,
-      PhysicalResourceId: DB_NAME,
+      PhysicalResourceId: databaseName,
       Reason: err,
     };
   }

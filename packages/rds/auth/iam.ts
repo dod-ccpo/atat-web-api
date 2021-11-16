@@ -4,6 +4,7 @@ import { Hash } from "@aws-sdk/hash-node";
 import { formatUrl } from "@aws-sdk/util-format-url";
 import { defaultProvider } from "@aws-sdk/credential-provider-node";
 import { Credentials } from "@aws-sdk/types";
+import { DatabaseCredentials } from "./creds";
 
 const DEFAULT_TOKEN_EXPIRATION = 15 * 60; // 15 minutes
 
@@ -42,7 +43,7 @@ export interface GetAuthTokenParams {
  * other SDKs currently implement it. This will be deprecated when the implementation is
  * available in the SDK.
  */
-export async function getAuthToken(options: GetAuthTokenParams): Promise<string> {
+export async function getDatabaseCredentials(options: GetAuthTokenParams): Promise<DatabaseCredentials> {
   // In any Lambda execution environment, the AWS_REGION variable will be set.
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const region = options.region ?? process.env.AWS_REGION!;
@@ -72,5 +73,8 @@ export async function getAuthToken(options: GetAuthTokenParams): Promise<string>
   });
 
   const presigned = await signer.presign(request, { expiresIn: expiration });
-  return formatUrl(presigned).replace(`${protocol}://`, "");
+  return {
+    username: options.username,
+    password: formatUrl(presigned).replace(`${protocol}://`, ""),
+  };
 }

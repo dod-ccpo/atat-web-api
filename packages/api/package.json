@@ -32,7 +32,8 @@
     "serialize-error": "^8.1.0",
     "typeorm": "^0.2.40",
     "uuid": "^8.3.2",
-    "xss": "^1.0.10"
+    "xss": "^1.0.10",
+    "atat-web-api-rds": "^0.1.0"
   },
   "devDependencies": {
     "@types/http-errors": "^1.8.1",
