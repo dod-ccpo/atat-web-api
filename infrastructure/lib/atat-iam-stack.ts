@@ -181,6 +181,29 @@ export class AtatIamStack extends cdk.Stack {
     });
     cloudFormationExecutionRole.grantPassRole(developerRole);
 
+    const githubOidcProvider = new iam.OpenIdConnectProvider(this, "GithubOidc", {
+      url: "https://token.actions.githubusercontent.com",
+      // This thumbprint is a well-known value, documented in the
+      // aws-actions/configure-aws-credentials README file
+      thumbprints: ["a031c46782e6e6c662c2c87c76da9aa62ccabd8e"],
+      // This client ID is specified/hardcoded into the official AWS action
+      clientIds: ["sts.amazonaws.com"],
+    });
+
+    const pipelineDeploymentRole = new iam.Role(this, "DeploymentRole", {
+      roleName: "AtatPipelineDeploymentRole",
+      description: "Role to perform deployments from a CI/CD pipeline",
+      // This provides a reasonable base set of policies but none are actually required
+      // for the initial implementation which just invokes an sts:GetCallerIdentity
+      // managedPolicies: [awsManagedCfnFullAccessPolicy, baseDenies],
+      assumedBy: new iam.OpenIdConnectPrincipal(githubOidcProvider).withConditions({
+        StringLike: {
+          // Allow deployments only from the develop branch of ATAT repos under the dod-ccpo org
+          "token.actions.githubusercontent.com:sub": "repo:dod-ccpo/atat-*:ref:refs/heads/feature/AT-6847",
+        },
+      }),
+    });
+
     this.outputs.push(
       new cdk.CfnOutput(this, "QaTestRoleArnOutput", {
         exportName: "AtatQaTestRoleArn",
@@ -197,6 +220,10 @@ export class AtatIamStack extends cdk.Stack {
       new cdk.CfnOutput(this, "CloudFormationRoleArn", {
         exportName: "AtatCloudFormationExecutionRoleArn",
         value: cloudFormationExecutionRole.roleArn,
+      }),
+      new cdk.CfnOutput(this, "DeploymentRoleArnOutput", {
+        exportName: "AtatDeploymentRoleArn",
+        value: pipelineDeploymentRole.roleArn,
       })
     );
   }
