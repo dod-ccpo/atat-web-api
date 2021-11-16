@@ -199,7 +199,7 @@ export class AtatIamStack extends cdk.Stack {
       assumedBy: new iam.OpenIdConnectPrincipal(githubOidcProvider).withConditions({
         StringLike: {
           // Allow deployments only from the develop branch of ATAT repos under the dod-ccpo org
-          "token.actions.githubusercontent.com:sub": "repo:dod-ccpo/atat-*:ref:refs/heads/feature/AT-6847",
+          "token.actions.githubusercontent.com:sub": "repo:dod-ccpo/atat-*:ref:refs/heads/develop",
         },
       }),
     });

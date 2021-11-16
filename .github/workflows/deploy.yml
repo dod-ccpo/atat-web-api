@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - develop
-      - feature/AT-6847
 
 jobs:
   deployInfrastructure:
