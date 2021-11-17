@@ -25,6 +25,7 @@
     "strictPropertyInitialization": false,
     "resolveJsonModule": true,
     "useUnknownInCatchVariables": false,
+    "emitDecoratorMetadata": true,
     "typeRoots": [
       "./node_modules/@types"
     ],
