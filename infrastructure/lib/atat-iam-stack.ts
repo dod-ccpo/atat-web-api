@@ -224,6 +224,10 @@ export class AtatIamStack extends cdk.Stack {
       new cdk.CfnOutput(this, "DeploymentRoleArnOutput", {
         exportName: "AtatDeploymentRoleArn",
         value: pipelineDeploymentRole.roleArn,
+      }),
+      new cdk.CfnOutput(this, "GitHubOidcProvider", {
+        exportName: "AtatGitHubOidcProvider",
+        value: githubOidcProvider.openIdConnectProviderArn,
       })
     );
   }
