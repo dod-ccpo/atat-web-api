@@ -29,7 +29,6 @@
     "typescript": "~4.5.2"
   },
   "dependencies": {
-    "esbuild": "^0.13.2",
-    "http-errors": "^1.8.1"
+    "esbuild": "^0.13.2"
   }
 }
