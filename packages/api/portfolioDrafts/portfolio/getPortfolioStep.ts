@@ -11,6 +11,8 @@ import {
   NO_SUCH_PORTFOLIO_STEP,
   PATH_PARAMETER_REQUIRED_BUT_MISSING,
 } from "../../utils/errors";
+import middy from "@middy/core";
+import { IpCheckerMiddleware } from "../../utils/ipLogging";
 
 /**
  * Gets the Portfolio Step of the Portfolio Draft Wizard
@@ -48,3 +50,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
     return DATABASE_ERROR;
   }
 }
+// IP logging middy
+const middyHandler = middy(handler);
+middyHandler.use(IpCheckerMiddleware());
+export { middyHandler };

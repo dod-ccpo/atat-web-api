@@ -16,7 +16,8 @@ import { dynamodbDocumentClient as client } from "../../utils/aws-sdk/dynamodb";
 import { SendMessageCommand } from "@aws-sdk/client-sqs";
 import { sqsClient } from "../../utils/aws-sdk/sqs";
 import { ProvisioningJob } from "../../utils/provisioningJob";
-
+import middy from "@middy/core";
+import { IpCheckerMiddleware } from "../../utils/ipLogging";
 const TABLE_NAME = process.env.ATAT_TABLE_NAME ?? "";
 const QUEUE_URL = process.env.ATAT_QUEUE_URL ?? "";
 
@@ -110,3 +111,7 @@ export async function doesPortfolioDraftExistCommand(
     })
   );
 }
+// IP logging middy
+const middyHandler = middy(handler);
+middyHandler.use(IpCheckerMiddleware());
+export { middyHandler };

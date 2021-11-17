@@ -1,10 +1,12 @@
 import { PutCommand } from "@aws-sdk/lib-dynamodb";
+import middy from "@middy/core";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { v4 as uuidv4 } from "uuid";
 import { PortfolioDraftSummary } from "../models/PortfolioDraftSummary";
 import { ProvisioningStatus } from "../models/ProvisioningStatus";
 import { dynamodbDocumentClient as client } from "../utils/aws-sdk/dynamodb";
 import { DATABASE_ERROR, REQUEST_BODY_NOT_EMPTY } from "../utils/errors";
+import { IpCheckerMiddleware } from "../utils/ipLogging";
 import { ApiSuccessResponse, SuccessStatusCode } from "../utils/response";
 
 /**
@@ -44,3 +46,8 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
     return DATABASE_ERROR;
   }
 }
+
+// IP logging middy
+const middyHandler = middy(handler);
+middyHandler.use(IpCheckerMiddleware());
+export { middyHandler };

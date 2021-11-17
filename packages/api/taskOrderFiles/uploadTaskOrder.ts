@@ -5,6 +5,8 @@ import { v4 as uuidv4 } from "uuid";
 import { FileMetadata, FileScanStatus } from "../models/FileMetadata";
 import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusCode } from "../utils/response";
 import { s3Client } from "../utils/aws-sdk/s3";
+import middy from "@middy/core";
+import { IpCheckerMiddleware } from "../utils/ipLogging";
 
 const bucketName = process.env.DATA_BUCKET;
 
@@ -53,3 +55,8 @@ async function uploadFile(file: parser.MultipartFile): Promise<APIGatewayProxyRe
   };
   return new ApiSuccessResponse<FileMetadata>(metadata, SuccessStatusCode.CREATED);
 }
+
+// IP logging middy
+const middyHandler = middy(handler);
+middyHandler.use(IpCheckerMiddleware());
+export { middyHandler };

@@ -86,10 +86,10 @@ export async function baseHandler(
   return new ApiSuccessResponse<ApplicationStep>(applicationStep, SuccessStatusCode.CREATED);
 }
 export const handler = middy(baseHandler)
+  .use(IpCheckerMiddleware())
   .use(xssSanitizer())
   .use(jsonBodyParser())
   .use(validator({ inputSchema: wrapSchema(schema.ApplicationStep) }))
   .use(errorHandlingMiddleware())
   .use(JSONErrorHandlerMiddleware())
-  .use(cors(CORS_CONFIGURATION))
-  .use(IpCheckerMiddleware());
+  .use(cors(CORS_CONFIGURATION));

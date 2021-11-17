@@ -63,6 +63,7 @@ export async function baseHandler(
   }
   return new ApiSuccessResponse<FundingStep>(fundingStep, SuccessStatusCode.CREATED);
 }
+
 export const handler = middy(baseHandler)
   .use(IpCheckerMiddleware())
   .use(xssSanitizer())
