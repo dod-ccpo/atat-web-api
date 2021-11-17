@@ -50,8 +50,8 @@ export interface AtatWebApiStackProps extends cdk.StackProps {
 
 export class AtatWebApiStack extends cdk.Stack {
   private readonly environmentId: string;
-  public readonly restApi: apigw.IRestApi;
-  public readonly restApi2: apigw.IRestApi;
+  public readonly provisioningApi: apigw.IRestApi;
+  public readonly reportingApi: apigw.IRestApi;
   public readonly submitQueue: sqs.IQueue;
   public readonly emailQueue: sqs.IQueue;
   public readonly emailDeadLetterQueue: sqs.IQueue;
@@ -249,11 +249,11 @@ export class AtatWebApiStack extends cdk.Stack {
     // The API spec, which just so happens to be a valid CloudFormation snippet (with some actual CloudFormation
     // in it) gets uploaded to S3. The Asset resource reuses the same bucket that the CDK does, so this does not
     // require any additional buckets to be created.
-    const apiAsset = new s3asset.Asset(this, "ApiSpecAsset", {
+    const provisioningApiAsset = new s3asset.Asset(this, "ProvisioningApiSpecAsset", {
       path: utils.packageRoot() + "../../atat_provisioning_wizard_api.yaml",
     });
     // AT-6769
-    const apiAsset2 = new s3asset.Asset(this, "ApiSpecAsset2", {
+    const reportingApiAsset = new s3asset.Asset(this, "ReportingApiSpecAsset", {
       path: utils.packageRoot() + "../../atat_management_and_reporting_api.yaml",
     });
 
@@ -261,36 +261,40 @@ export class AtatWebApiStack extends cdk.Stack {
     // snippet is valid CloudFormation with real Fn::Sub invocations, those will be interpreted. This results in
     // all of the function ARNs being inserted into the x-aws-apigateway-integration resources when the template
     // is evaluated.
-    const apiSpecAsTemplateInclude = cdk.Fn.transform("AWS::Include", { Location: apiAsset.s3ObjectUrl });
+    const provisioningApiSpecAsTemplateInclude = cdk.Fn.transform("AWS::Include", {
+      Location: provisioningApiAsset.s3ObjectUrl,
+    });
 
-    const apiSpecAsTemplateInclude2 = cdk.Fn.transform("AWS::Include", { Location: apiAsset2.s3ObjectUrl });
+    const reportingApiSpecAsTemplateInclude = cdk.Fn.transform("AWS::Include", {
+      Location: reportingApiAsset.s3ObjectUrl,
+    });
 
     // And with the data now loaded from the template, we can use ApiDefinition.fromInline to parse it as real
     // OpenAPI spec (because it was!) and now we've got all our special AWS values and variables interpolated.
     // This will get used as the `Body:` parameter in the underlying CloudFormation resource.
-    const apiGateway = new SecureRestApi(this, "AtatSpecTest", {
+    const provisioningApiGateway = new SecureRestApi(this, "ProvisioningApi", {
       restApiName: `${props.environmentId} API`,
-      apiDefinition: apigw.ApiDefinition.fromInline(apiSpecAsTemplateInclude),
+      apiDefinition: apigw.ApiDefinition.fromInline(provisioningApiSpecAsTemplateInclude),
       deployOptions: {
         tracingEnabled: true,
       },
     }).restApi;
 
-    const apiGateway2 = new SecureRestApi(this, "AtatSpecTest2", {
+    const reportingApiGateway = new SecureRestApi(this, "ReportingApi", {
       restApiName: `${props.environmentId}2 API`,
-      apiDefinition: apigw.ApiDefinition.fromInline(apiSpecAsTemplateInclude2),
+      apiDefinition: apigw.ApiDefinition.fromInline(reportingApiSpecAsTemplateInclude),
       deployOptions: {
         tracingEnabled: true,
       },
     }).restApi;
-    this.restApi = apiGateway;
-    this.restApi2 = apiGateway2;
+    this.provisioningApi = provisioningApiGateway;
+    this.reportingApi = reportingApiGateway;
     this.addEmailRoutes(props);
     this.addTaskOrderRoutes(props);
     this.ssmParams.push(
       new ssm.StringParameter(this, "ApiGatewayUrl", {
         description: "URL for the API Gateway",
-        stringValue: apiGateway.urlForPath(),
+        stringValue: provisioningApiGateway.urlForPath(),
         parameterName: `/atat/${this.environmentId}/api/url`,
       })
     );
