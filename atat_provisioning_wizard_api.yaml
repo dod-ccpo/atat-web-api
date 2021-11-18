@@ -917,7 +917,7 @@ paths:
           -
             - cognitoAuthorizer: []
           - Ref: AWS::NoValue
-  /portfolios/{portfolioId}/taskorders/{taskOrderNumber}/clins/{clinNumber}/burndown:
+  /portfolios/{portfolioId}/taskorders/{taskOrderNumber}/clins/{clin}/burndown:
     get:
       tags:
         - reporting
@@ -932,7 +932,13 @@ paths:
             type: string
         - name: taskOrderNumber
           in: path
-          description: Task Order Number (not assigned by ATAT)
+          description: Task Order Number - (not assigned by ATAT)
+          required: true
+          schema:
+            type: string
+        - name: clin
+          in: path
+          description: Contract Line Item Number (CLIN) - (not assigned by ATAT)
           required: true
           schema:
             type: string
