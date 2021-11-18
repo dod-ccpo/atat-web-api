@@ -21,6 +21,7 @@ describe("Successful operations test", () => {
       const request: ApiGatewayEventParsed<PortfolioStep> = {
         ...validRequest,
         body: mockPortfolioStep,
+        requestContext: { identity: { sourceIp: "10.2.2.2" } },
       } as any;
       const response = await handler(request, {} as Context, null as unknown as Callback)!;
       expect(response).toBeInstanceOf(ApiSuccessResponse);
