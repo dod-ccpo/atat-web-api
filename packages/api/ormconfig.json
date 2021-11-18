@@ -7,10 +7,10 @@
   "database": "atat",
   "synchronize": true,
   "logging": false,
-  "entities": ["models/orm/entity/**/*.js"],
-  "migrations": ["models/orm/migration/**/*.js"],
+  "entities": ["orm/entity/**/*.{j,t}s"],
+  "migrations": ["orm/migration/**/*.{j,t}s"],
   "cli": {
-    "entitiesDir": "models/orm/entity",
-    "migrationsDir": "models/orm/migration"
+    "entitiesDir": "orm/entity",
+    "migrationsDir": "orm/migration"
   }
 }
