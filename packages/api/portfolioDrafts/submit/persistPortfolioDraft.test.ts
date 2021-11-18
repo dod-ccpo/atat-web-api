@@ -16,10 +16,12 @@ beforeEach(() => {
 
 describe("Persist CSP response handler", () => {
   const validatedGoodPortfolioDraft: any = {
-    ...mockPortfolioDraft,
-    submit_id: uuidv4(),
-    status: ProvisioningStatus.IN_PROGRESS,
-    validatedResult: "SUCCESS",
+    body: JSON.stringify({
+      ...mockPortfolioDraft,
+      submit_id: uuidv4(),
+      status: ProvisioningStatus.IN_PROGRESS,
+      validatedResult: "SUCCESS",
+    }),
   };
   it("should return a portfolio draft with a status of complete", async () => {
     const updatedPortfolioDraft = { ...validatedGoodPortfolioDraft, status: ProvisioningStatus.COMPLETE };

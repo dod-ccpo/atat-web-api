@@ -4,7 +4,6 @@ import { dynamodbDocumentClient as client } from "../../utils/aws-sdk/dynamodb";
 import { NO_SUCH_PORTFOLIO_DRAFT_404 } from "../../utils/errors";
 import { DynamoDBException, DatabaseResult } from "../../utils/response";
 import { ProvisioningStatus } from "../../models/ProvisioningStatus";
-import { ValidatedPortfolioDraft } from "./validateCompletePortfolioDraft";
 
 /**
  * Updates the status of the Provisioning Portfolio Draft at the end of
@@ -13,10 +12,10 @@ import { ValidatedPortfolioDraft } from "./validateCompletePortfolioDraft";
  * @param stateInput - the input from the previous Portfolio Draft Validation
  *  Task in the Step Function
  */
-export async function handler(successfulStateInput: ValidatedPortfolioDraft, context?: Context): Promise<void> {
-  const successfulPortfolioDraft = successfulStateInput;
-  const portfolioDraftId = successfulPortfolioDraft.id;
+export async function handler(successfulStateInput: any, context?: Context): Promise<void> {
   console.log("SFN INPUT (successful): " + JSON.stringify(successfulStateInput));
+  const successfulPortfolioDraft = successfulStateInput.body;
+  const portfolioDraftId = successfulPortfolioDraft.id;
   const databaseResult = await updatePortfolioDraftStatus(portfolioDraftId, ProvisioningStatus.COMPLETE);
   console.log("DB UPDATE RESULT (successful): " + JSON.stringify(databaseResult));
 }

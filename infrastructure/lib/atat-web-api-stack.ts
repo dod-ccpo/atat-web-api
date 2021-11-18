@@ -175,11 +175,11 @@ export class AtatWebApiStack extends cdk.Stack {
     // function does not require any AWS service so a simple constructor function was used.
     // These functions also touch on a refactoring for the design of these functions that
     // move away from the use case of the API functions.
-    const validatePortfolio = new lambdaNodeJs.NodejsFunction(
+    const provisioningRequest = new lambdaNodeJs.NodejsFunction(
       this,
-      utils.apiSpecOperationFunctionName("validateCompletePortfolioDraft"),
+      utils.apiSpecOperationFunctionName("provisioningRequest"),
       {
-        entry: utils.packageRoot() + "/api/portfolioDrafts/submit/validateCompletePortfolioDraft.ts",
+        entry: utils.packageRoot() + "/api/portfolioDrafts/submit/provisioningRequest.ts",
         vpc: props.vpc,
       }
     );
@@ -199,14 +199,55 @@ export class AtatWebApiStack extends cdk.Stack {
       method: HttpMethod.POST,
       handlerPath: this.determineApiHandlerPath("rejectPortfolioDraft", "portfolioDrafts/submit/"),
     });
-    this.functions.push(validatePortfolio, persistCspResponse.fn, rejectPortfolio.fn);
+    this.functions.push(provisioningRequest, persistCspResponse.fn, rejectPortfolio.fn);
     // State machine tasks
-    const portfolioValidationTask = new SfnLambdaInvokeTask(this, "ValidatePortfolioTask", {
+    const provisioningTask = new SfnLambdaInvokeTask(this, "ProvisioningTask", {
       sfnTask: {
-        lambdaFunction: validatePortfolio,
+        lambdaFunction: provisioningRequest,
         timeout: cdk.Duration.seconds(60),
+        // "$"" sends all of the input to the lambda function, and in this task is coming from the
+        // SQS message being sent with the start of the step function execution
         inputPath: "$",
-        resultPath: "$.results",
+        // ResultSelector allows you to select and shape the raw output from the lambda which is
+        // placed in the resultPath. In this task the result is placed inside of "$.request" for the
+        // next task. ResultSelector is optional, but if there is a particular shape or information
+        // that the output should be in this can help
+        resultSelector: {
+          body: sfn.JsonPath.stringAt("$.Payload.body"),
+          type: sfn.JsonPath.stringAt("$.Payload.type"),
+          csp: sfn.JsonPath.stringAt("$.Payload.csp"),
+        },
+        // ResultPath is being combined with the original input under "request"
+        resultPath: "$.request",
+        // "$" outputs the original input, in addition to the "$.request" output from the lambda
+        outputPath: "$",
+      },
+    }).sfnTask;
+    const transformRequestTask = new SfnLambdaInvokeTask(this, "TranslateToCspApiRequest", {
+      sfnTask: {
+        lambdaFunction: provisioningRequest,
+        timeout: cdk.Duration.seconds(60),
+        inputPath: "$.request",
+        resultSelector: {
+          body: sfn.JsonPath.stringAt("$.Payload.body"),
+        },
+        resultPath: "$.transformedRequest",
+        outputPath: "$",
+      },
+    }).sfnTask;
+    const invokeCspApiTask = new SfnLambdaInvokeTask(this, "InvokeCspApi", {
+      sfnTask: {
+        lambdaFunction: provisioningRequest,
+        timeout: cdk.Duration.seconds(60),
+        inputPath: "$.transformedRequest",
+        resultSelector: {
+          // the status code is hardcoded currently, and will be replaced once
+          // the functions are each task is implemented
+          statusCode: sfn.JsonPath.stringAt("$.Payload.response.statusCode"),
+          body: sfn.JsonPath.stringAt("$.Payload.body"),
+          retryCount: sfn.JsonPath.stringAt("$$.State.RetryCount"),
+        },
+        resultPath: "$.cspResponse",
         outputPath: "$",
       },
     }).sfnTask;
@@ -214,7 +255,7 @@ export class AtatWebApiStack extends cdk.Stack {
       // update provisioning status to 'complete'
       sfnTask: {
         lambdaFunction: persistCspResponse.fn,
-        inputPath: "$.results.Payload",
+        inputPath: "$.cspResponse",
         timeout: cdk.Duration.seconds(60),
       },
     }).sfnTask;
@@ -222,17 +263,35 @@ export class AtatWebApiStack extends cdk.Stack {
       // update provisioning status to 'failed'
       sfnTask: {
         lambdaFunction: rejectPortfolio.fn,
-        inputPath: "$.results.Payload",
+        inputPath: "$.cspResponse",
         timeout: cdk.Duration.seconds(60),
       },
     }).sfnTask;
 
     // Composing state machine
-    const stateMachineWorkflow = portfolioValidationTask.next(
-      new sfn.Choice(this, "ValidationResultCheck")
-        .when(sfn.Condition.stringEquals("$.results.Payload.validationResult", "SUCCESS"), persistCspResponseTask)
-        .when(sfn.Condition.stringEquals("$.results.Payload.validationResult", "FAILED"), rejectResponseTask)
-    );
+    const stateMachineWorkflow = sfn.Chain.start(provisioningTask)
+      .next(transformRequestTask)
+      .next(invokeCspApiTask)
+      .next(
+        new sfn.Choice(this, "HttpResponse")
+          .when(sfn.Condition.numberEquals("$.cspResponse.statusCode", 200), persistCspResponseTask)
+          .when(
+            sfn.Condition.or(
+              sfn.Condition.numberEquals("$.cspResponse.statusCode", 400),
+              sfn.Condition.numberEquals("$.cspResponse.statusCode", 402),
+              sfn.Condition.numberEquals("$.cspResponse.statusCode", 404)
+            ),
+            rejectResponseTask
+          )
+          .when(
+            sfn.Condition.and(
+              sfn.Condition.numberGreaterThan("$.cspResponse.retryCount", 6),
+              sfn.Condition.numberGreaterThanEquals("$.cspResponse.statusCode", 500)
+            ),
+            rejectResponseTask
+          )
+          .when(sfn.Condition.numberGreaterThanEquals("$.cspResponse.statusCode", 500), invokeCspApiTask)
+      );
     const stateMachineLogGroup = new logs.LogGroup(this, "StepFunctionsLogs", {
       retention: logs.RetentionDays.ONE_WEEK,
     });
