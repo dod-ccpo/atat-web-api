@@ -5,6 +5,9 @@ import { CloudServiceProvider } from "../models/CloudServiceProvider";
 import { Portfolio } from "./entity/portfolio";
 import { Application } from "./entity/application";
 import { Environment } from "./entity/environment";
+import { TaskOrder } from "./entity/taskOrder";
+import { v4 as uuidv4 } from "uuid";
+import { FileScanStatus } from "../models/FileMetadata";
 
 createConnection()
   .then(async (connection) => {
@@ -46,5 +49,19 @@ createConnection()
 
     const envs = await connection.manager.find(Environment);
     console.log("Loaded environments: ", envs);
+
+    // TASK ORDER
+    const to = new TaskOrder();
+    to.taskOrderNumber = "123412341234";
+    to.fileId = uuidv4();
+    to.fileName = "to123412341234.pdf";
+    to.fileSize = 7823649;
+    to.fileScanStatus = FileScanStatus.PENDING;
+    to.clins = "";
+    await connection.manager.save(to);
+    console.log("Saved a task order with id: " + to.id);
+
+    const tos = await connection.manager.find(TaskOrder);
+    console.log("Loaded task orders: ", tos);
   })
   .catch((error) => console.log(error));
