@@ -8,6 +8,7 @@ import { Environment } from "./entity/environment";
 import { TaskOrder } from "./entity/taskOrder";
 import { v4 as uuidv4 } from "uuid";
 import { FileScanStatus } from "../models/FileMetadata";
+import { Clin } from "./entity/clin";
 
 createConnection()
   .then(async (connection) => {
@@ -63,5 +64,19 @@ createConnection()
 
     const tos = await connection.manager.find(TaskOrder);
     console.log("Loaded task orders: ", tos);
+
+    // CLIN
+    const clin = new Clin();
+    clin.clinNumber = "0001";
+    clin.idiqClin = "idiq clin 1001";
+    clin.totalClinValue = 99999999999999.98;
+    clin.obligatedFunds = 0.01;
+    clin.popStartDate = new Date("01-Jan-2021");
+    clin.popEndDate = new Date("31-Dec-2021");
+    await connection.manager.save(clin);
+    console.log("Saved a clin with id: " + clin.id);
+
+    const clins = await connection.manager.find(Clin);
+    console.log("Loaded clins: ", clins);
   })
   .catch((error) => console.log(error));
