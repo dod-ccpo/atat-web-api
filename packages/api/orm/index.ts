@@ -1,9 +1,10 @@
-import { createConnection } from "typeorm";
-import { Portfolio } from "./entity/portfolio";
-import { ProvisioningStatus } from "../models/ProvisioningStatus";
 import "reflect-metadata";
+import { createConnection } from "typeorm";
+import { ProvisioningStatus } from "../models/ProvisioningStatus";
 import { CloudServiceProvider } from "../models/CloudServiceProvider";
+import { Portfolio } from "./entity/portfolio";
 import { Application } from "./entity/application";
+import { Environment } from "./entity/environment";
 
 createConnection()
   .then(async (connection) => {
@@ -35,5 +36,15 @@ createConnection()
 
     const apps = await connection.manager.find(Application);
     console.log("Loaded applications: ", apps);
+
+    // ENVIRONMENT
+    const env = new Environment();
+    env.name = "Cheetah environment";
+    env.operators = "";
+    await connection.manager.save(env);
+    console.log("Saved a environment with id: " + env.id);
+
+    const envs = await connection.manager.find(Environment);
+    console.log("Loaded environments: ", envs);
   })
   .catch((error) => console.log(error));
