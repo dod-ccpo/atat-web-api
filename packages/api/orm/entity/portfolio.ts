@@ -31,6 +31,7 @@ export class Portfolio {
   @Column({
     type: "enum",
     enum: CloudServiceProvider,
+    nullable: false,
   })
   csp: CloudServiceProvider;
 
@@ -47,6 +48,18 @@ export class Portfolio {
     array: true,
   })
   portfolioManagers: Array<string>;
+
+  // TODO: task_orders: Array<TaskOrder>;
+  @Column()
+  taskOrders: string;
+
+  // TODO: applications: Array<Application>;
+  @Column()
+  applications: string;
+
+  // TODO: operators: Array<PortfolioOperator>;
+  @Column()
+  operators: string;
 
   @CreateDateColumn()
   createdDate: Date;
