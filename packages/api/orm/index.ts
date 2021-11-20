@@ -2,13 +2,13 @@ import "reflect-metadata";
 import { createConnection } from "typeorm";
 import { ProvisioningStatus } from "../models/ProvisioningStatus";
 import { CloudServiceProvider } from "../models/CloudServiceProvider";
-import { Portfolio } from "./entity/portfolio";
-import { Application } from "./entity/application";
-import { Environment } from "./entity/environment";
-import { TaskOrder } from "./entity/taskOrder";
+import { Portfolio } from "./entity/Portfolio";
+import { Application } from "./entity/Application";
+import { Environment } from "./entity/Environment";
+import { TaskOrder } from "./entity/TaskOrder";
 import { v4 as uuidv4 } from "uuid";
 import { FileScanStatus } from "../models/FileMetadata";
-import { Clin } from "./entity/clin";
+import { Clin } from "./entity/Clin";
 
 createConnection()
   .then(async (connection) => {

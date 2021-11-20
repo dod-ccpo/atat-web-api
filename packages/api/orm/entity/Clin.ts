@@ -1,10 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn } from "typeorm";
+import { BaseEntity } from "./ProvisionableEntity";
+import { Column, Entity } from "typeorm";
 
 @Entity()
-export class Clin {
-  @PrimaryGeneratedColumn("uuid")
-  id: string;
-
+export class Clin extends BaseEntity {
   @Column({ type: String, nullable: false, length: 4 })
   clinNumber: string;
 
@@ -23,13 +21,4 @@ export class Clin {
 
   @Column({ type: "date", nullable: false })
   popEndDate: Date;
-
-  @CreateDateColumn()
-  createdDate: Date;
-
-  @UpdateDateColumn()
-  updatedDate: Date;
-
-  @DeleteDateColumn()
-  deletedDate: Date;
 }
