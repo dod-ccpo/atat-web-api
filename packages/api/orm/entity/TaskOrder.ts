@@ -1,5 +1,6 @@
 import { BaseEntity } from "./ProvisionableEntity";
-import { Column, Entity, ManyToOne } from "typeorm";
+import { Clin } from "./Clin";
+import { Column, Entity, ManyToOne, OneToMany } from "typeorm";
 import { FileScanStatus } from "../../models/FileMetadata";
 import { Portfolio } from "./Portfolio";
 
@@ -28,7 +29,6 @@ export class TaskOrder extends BaseEntity {
   @ManyToOne(() => Portfolio, (portfolio) => portfolio.taskOrders)
   portfolio: Portfolio;
 
-  // TODO clins: Array<Clin>;
-  @Column()
-  clins: string;
+  @OneToMany(() => Clin, (clin) => clin.taskOrder)
+  clins: Clin[];
 }

@@ -1,5 +1,6 @@
 import { BaseEntity } from "./ProvisionableEntity";
-import { Column, Entity } from "typeorm";
+import { Column, Entity, ManyToOne } from "typeorm";
+import { TaskOrder } from "./TaskOrder";
 
 @Entity()
 export class Clin extends BaseEntity {
@@ -44,4 +45,7 @@ export class Clin extends BaseEntity {
 
   @Column({ type: "date", nullable: false, comment: "end of POP during which funds can be spent" })
   popEndDate: Date;
+
+  @ManyToOne(() => TaskOrder, (taskOrder) => taskOrder.clins)
+  taskOrder: TaskOrder;
 }

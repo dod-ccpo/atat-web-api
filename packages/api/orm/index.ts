@@ -58,7 +58,6 @@ createConnection()
     to.fileName = "to123412341234.pdf";
     to.fileSize = 7823649;
     to.fileScanStatus = FileScanStatus.PENDING;
-    to.clins = "";
     await connection.manager.save(to);
     console.log("Saved a task order with id: " + to.id);
 
@@ -67,6 +66,7 @@ createConnection()
 
     // CLIN
     const clin = new Clin();
+    clin.taskOrder = to;
     clin.clinNumber = "0001";
     clin.idiqClin = "idiq clin 1001";
     clin.totalClinValue = 99999999999999.98;
@@ -80,10 +80,15 @@ createConnection()
     console.log("Loaded clins: ", clins);
 
     // Retrieve relations
-    const pfAll = await connection.getRepository(Portfolio).find({ relations: ["applications", "taskOrders"] });
-    console.log("A portfolio and child objects: ", pfAll[0]);
+    const portfolioRelations = await connection
+      .getRepository(Portfolio)
+      .find({ relations: ["applications", "taskOrders"] });
+    console.log("A portfolio and child objects: ", portfolioRelations[0]);
 
-    const appsAll = await connection.getRepository(Application).find({ relations: ["environments"] });
-    console.log("An application and child objects: ", appsAll[0]);
+    const applicationRelations = await connection.getRepository(Application).find({ relations: ["environments"] });
+    console.log("An application and child objects: ", applicationRelations[0]);
+
+    const taskOrderRelations = await connection.getRepository(TaskOrder).find({ relations: ["clins"] });
+    console.log("A task order and child objects: ", taskOrderRelations[0]);
   })
   .catch((error) => console.log(error));
