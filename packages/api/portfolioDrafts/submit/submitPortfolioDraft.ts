@@ -9,12 +9,14 @@ import {
   PORTFOLIO_ALREADY_SUBMITTED,
   PATH_PARAMETER_REQUIRED_BUT_MISSING,
 } from "../../utils/errors";
-import { PortfolioDraft } from "../../models/PortfolioDraft";
+import { PortfolioDraft, PORTFOLIO_STEP } from "../../models/PortfolioDraft";
 import { v4 as uuidv4 } from "uuid";
-import { ProvisioningStatus } from "../../models/ProvisioningStatus";
+import { ProvisioningStatus, ProvisioningRequestType } from "../../models/ProvisioningStatus";
 import { dynamodbDocumentClient as client } from "../../utils/aws-sdk/dynamodb";
 import { SendMessageCommand } from "@aws-sdk/client-sqs";
 import { sqsClient } from "../../utils/aws-sdk/sqs";
+import { ProvisioningJob } from "../../utils/provisioningJob";
+
 const TABLE_NAME = process.env.ATAT_TABLE_NAME ?? "";
 const QUEUE_URL = process.env.ATAT_QUEUE_URL ?? "";
 
@@ -36,13 +38,20 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
   try {
     const result = await submitPortfolioDraftCommand(TABLE_NAME, portfolioDraftId);
+    const portfolioDraft = result.Attributes as PortfolioDraft;
+    // structure message body for provisioning state machine
+    const portfolioDraftToProvision = new ProvisioningJob<PortfolioDraft>(
+      portfolioDraft,
+      ProvisioningRequestType.FULL_PORTFOLIO,
+      portfolioDraft[PORTFOLIO_STEP].csp
+    );
     await sqsClient.send(
       new SendMessageCommand({
         QueueUrl: QUEUE_URL,
-        MessageBody: JSON.stringify(result.Attributes as PortfolioDraft),
+        MessageBody: JSON.stringify(portfolioDraftToProvision),
       })
     );
-    return new ApiSuccessResponse(result.Attributes as PortfolioDraft, SuccessStatusCode.ACCEPTED);
+    return new ApiSuccessResponse(portfolioDraftToProvision, SuccessStatusCode.ACCEPTED);
   } catch (error) {
     // The `ConditionExpression` that we're using performs two different types of validation. The first is that
     // the PortfolioDraft object actually exists in the database. If this condition fails, we need to return a 404.
