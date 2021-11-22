@@ -1,7 +1,7 @@
 import { SQSEvent } from "aws-lambda";
 import { handler } from "./consumePortfolioDraftSubmitQueue";
 import { mockClient } from "aws-sdk-client-mock";
-import { sfnClient } from "../../utils/aws-sdk/stepFunctions";
+import { sfnClient } from "../utils/aws-sdk/stepFunctions";
 import * as crypto from "crypto";
 
 function generateTestEvent(body: string): SQSEvent {

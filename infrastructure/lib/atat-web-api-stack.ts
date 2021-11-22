@@ -180,7 +180,7 @@ export class AtatWebApiStack extends cdk.Stack {
       this,
       utils.apiSpecOperationFunctionName("provisioningRequest"),
       {
-        entry: utils.packageRoot() + "/api/portfolioDrafts/submit/provisioningRequest.ts",
+        entry: utils.packageRoot() + "/api/provision/provisioningRequest.ts",
         vpc: props.vpc,
       }
     );
@@ -191,14 +191,14 @@ export class AtatWebApiStack extends cdk.Stack {
         table: this.table,
         lambdaVpc: props.vpc,
         method: HttpMethod.POST,
-        handlerPath: this.determineApiHandlerPath("persistPortfolioDraft", "portfolioDrafts/submit/"),
+        handlerPath: this.determineApiHandlerPath("persistPortfolioDraft", "provision/"),
       }
     );
     const rejectPortfolio = new ApiDynamoDBFunction(this, utils.apiSpecOperationFunctionName("rejectPortfolioDraft"), {
       table: this.table,
       lambdaVpc: props.vpc,
       method: HttpMethod.POST,
-      handlerPath: this.determineApiHandlerPath("rejectPortfolioDraft", "portfolioDrafts/submit/"),
+      handlerPath: this.determineApiHandlerPath("rejectPortfolioDraft", "provision/"),
     });
     this.functions.push(provisioningRequest, persistCspResponse.fn, rejectPortfolio.fn);
 
@@ -337,7 +337,7 @@ export class AtatWebApiStack extends cdk.Stack {
         // portfolios to never be processed.
         batchSize: 1,
         method: HttpMethod.GET,
-        handlerPath: this.determineApiHandlerPath("consumePortfolioDraftSubmitQueue", "portfolioDrafts/submit/"),
+        handlerPath: this.determineApiHandlerPath("consumePortfolioDraftSubmitQueue", "provision/"),
         createEventSource: true,
       }).fn
     );

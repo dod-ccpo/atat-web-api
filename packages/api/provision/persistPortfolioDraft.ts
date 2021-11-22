@@ -1,9 +1,9 @@
 import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { Context } from "aws-lambda";
-import { dynamodbDocumentClient as client } from "../../utils/aws-sdk/dynamodb";
-import { NO_SUCH_PORTFOLIO_DRAFT_404 } from "../../utils/errors";
-import { DynamoDBException, DatabaseResult } from "../../utils/response";
-import { ProvisioningStatus } from "../../models/ProvisioningStatus";
+import { dynamodbDocumentClient as client } from "../utils/aws-sdk/dynamodb";
+import { NO_SUCH_PORTFOLIO_DRAFT_404 } from "../utils/errors";
+import { DynamoDBException, DatabaseResult } from "../utils/response";
+import { ProvisioningStatus } from "../models/ProvisioningStatus";
 
 /**
  * Updates the status of the Provisioning Portfolio Draft at the end of

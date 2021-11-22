@@ -3,9 +3,8 @@ import { DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { mockClient } from "aws-sdk-client-mock";
 import { v4 as uuidv4 } from "uuid";
 import { handler } from "./persistPortfolioDraft";
-import { mockPortfolioDraft } from "../commonPortfolioDraftMockData";
-import { ProvisioningStatus } from "../../models/ProvisioningStatus";
-import { DATABASE_ERROR } from "../../utils/errors";
+import { mockPortfolioDraft } from "../portfolioDrafts/commonPortfolioDraftMockData";
+import { ProvisioningStatus } from "../models/ProvisioningStatus";
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const consoleLogSpy = jest.spyOn(console, "log");

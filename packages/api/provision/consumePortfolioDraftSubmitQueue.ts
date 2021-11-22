@@ -1,5 +1,5 @@
 import { SQSEvent } from "aws-lambda";
-import { sfnClient } from "../../utils/aws-sdk/stepFunctions";
+import { sfnClient } from "../utils/aws-sdk/stepFunctions";
 
 const SFN_ARN = process.env.SFN_ARN ?? "";
 

@@ -1,5 +1,5 @@
 import { Context } from "aws-lambda";
-import { ProvisioningTaskInput } from "../../models/ProvisioningStatus";
+import { ProvisioningTaskInput } from "../models/ProvisioningStatus";
 
 /**
  * Mock lambda for provisioning requests submitted by user
