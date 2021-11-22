@@ -4,19 +4,21 @@ import { FileScanStatus } from "../../models/FileMetadata";
 
 @Entity()
 export class TaskOrder extends BaseEntity {
-  @Column({ type: String, nullable: false, length: 17 })
+  @Column({
+    type: String,
+    nullable: false,
+    length: 17,
+    comment: "13 character TO number, or 17 character TO modification number",
+  })
   taskOrderNumber: string;
 
-  // S3 Object Key
-  @Column({ type: "uuid", nullable: true })
+  @Column({ type: "uuid", nullable: true, comment: "S3 object key of task order pdf" })
   fileId: string;
 
-  // name of file when uploaded
-  @Column({ type: String, nullable: true, length: 256 })
+  @Column({ type: String, nullable: true, length: 256, comment: "name of pdf file when uploaded" })
   fileName: string;
 
-  // size in bytes
-  @Column({ nullable: true })
+  @Column({ nullable: true, comment: "pdf file size in bytes" })
   fileSize: number;
 
   @Column({ type: "enum", nullable: true, enum: FileScanStatus })
