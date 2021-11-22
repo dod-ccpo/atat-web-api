@@ -1,4 +1,5 @@
-import { Column, Entity, ManyToOne } from "typeorm";
+import { Column, Entity, ManyToOne, OneToMany } from "typeorm";
+import { Environment } from "./Environment";
 import { Portfolio } from "./Portfolio";
 import { ProvisionableEntity } from "./ProvisionableEntity";
 
@@ -13,9 +14,8 @@ export class Application extends ProvisionableEntity {
   @ManyToOne(() => Portfolio, (portfolio) => portfolio.applications)
   portfolio: Portfolio;
 
-  // TODO environments: Array<Environment>;
-  @Column()
-  environments: string;
+  @OneToMany(() => Environment, (environment) => environment.application)
+  environments: Environment[];
 
   // TODO operators: Array<AppEnvOperator>;
   @Column()

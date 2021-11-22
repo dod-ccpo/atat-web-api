@@ -32,7 +32,6 @@ createConnection()
     app.portfolio = pd;
     app.name = "Cheetah application";
     app.description = "Description of application";
-    app.environments = "";
     app.operators = "";
     await connection.manager.save(app);
     console.log("Saved a application with id: " + app.id);
@@ -42,6 +41,7 @@ createConnection()
 
     // ENVIRONMENT
     const env = new Environment();
+    env.application = app;
     env.name = "Cheetah environment";
     env.operators = "";
     await connection.manager.save(env);
@@ -79,7 +79,11 @@ createConnection()
     const clins = await connection.manager.find(Clin);
     console.log("Loaded clins: ", clins);
 
+    // Retrieve relations
     const pfAll = await connection.getRepository(Portfolio).find({ relations: ["applications", "taskOrders"] });
     console.log("A portfolio and child objects: ", pfAll[0]);
+
+    const appsAll = await connection.getRepository(Application).find({ relations: ["environments"] });
+    console.log("An application and child objects: ", appsAll[0]);
   })
   .catch((error) => console.log(error));
