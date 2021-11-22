@@ -16,6 +16,7 @@ import { ApiS3Function } from "./constructs/api-s3-function";
 import { ApiSQSFunction } from "./constructs/api-sqs-function";
 import { ApiStepFnsSQSFunction } from "./constructs/api-sqs-sfn-function";
 import { SfnLambdaInvokeTask } from "./constructs/sfnLambdaInvokeTask";
+import { SfnPassState } from "./constructs/sfnPass";
 import { ApiSQSDynamoDBFunction } from "./constructs/api-sqs-dynamodb-function";
 import { CognitoAuthentication } from "./constructs/authentication";
 import {
@@ -200,7 +201,20 @@ export class AtatWebApiStack extends cdk.Stack {
       handlerPath: this.determineApiHandlerPath("rejectPortfolioDraft", "portfolioDrafts/submit/"),
     });
     this.functions.push(provisioningRequest, persistCspResponse.fn, rejectPortfolio.fn);
-    // State machine tasks
+
+    // State machine tasks/passes
+    const provisioningPass = new SfnPassState(this, "ProvisioningPass", {
+      sfnPass: {
+        comment: "Pass state that passes the original input along with a status code used later in the state machine.",
+        inputPath: "$",
+        parameters: {
+          // temporarily hardcoded status code to always reach the persistCspResponseTask
+          response: { statusCode: 200 },
+          input: sfn.JsonPath.stringAt("$"),
+        },
+        resultPath: "$.passRequest",
+      },
+    }).sfnPass;
     const provisioningTask = new SfnLambdaInvokeTask(this, "ProvisioningTask", {
       sfnTask: {
         lambdaFunction: provisioningRequest,
@@ -211,22 +225,25 @@ export class AtatWebApiStack extends cdk.Stack {
         // ResultSelector allows you to select and shape the raw output from the lambda which is
         // placed in the resultPath. In this task the result is placed inside of "$.request" for the
         // next task. ResultSelector is optional, but if there is a particular shape or information
-        // that the output should be in this can help
+        // that the output should it can help.
         resultSelector: {
           body: sfn.JsonPath.stringAt("$.Payload.body"),
           type: sfn.JsonPath.stringAt("$.Payload.type"),
           csp: sfn.JsonPath.stringAt("$.Payload.csp"),
         },
-        // ResultPath is being combined with the original input under "request"
+        // ResultPath is being combined with the original input under "request".
+        // If no resultPath is specified the entire input is replaced with the output which is
+        // effectively setting ResultPath to "$".
         resultPath: "$.request",
         // "$" outputs the original input, in addition to the "$.request" output from the lambda
+        // this can be cut down, by specifying only what you want (e.g., $.request) to be
+        // sent to the next state
         outputPath: "$",
       },
     }).sfnTask;
     const transformRequestTask = new SfnLambdaInvokeTask(this, "TranslateToCspApiRequest", {
       sfnTask: {
         lambdaFunction: provisioningRequest,
-        timeout: cdk.Duration.seconds(60),
         inputPath: "$.request",
         resultSelector: {
           body: sfn.JsonPath.stringAt("$.Payload.body"),
@@ -238,12 +255,9 @@ export class AtatWebApiStack extends cdk.Stack {
     const invokeCspApiTask = new SfnLambdaInvokeTask(this, "InvokeCspApi", {
       sfnTask: {
         lambdaFunction: provisioningRequest,
-        timeout: cdk.Duration.seconds(60),
-        inputPath: "$.transformedRequest",
+        inputPath: "$",
         resultSelector: {
-          // the status code is hardcoded currently, and will be replaced once
-          // the functions are each task is implemented
-          statusCode: sfn.JsonPath.stringAt("$.Payload.response.statusCode"),
+          statusCode: sfn.JsonPath.stringAt("$.Payload.passRequest.response.statusCode"),
           body: sfn.JsonPath.stringAt("$.Payload.body"),
           retryCount: sfn.JsonPath.stringAt("$$.State.RetryCount"),
         },
@@ -256,7 +270,6 @@ export class AtatWebApiStack extends cdk.Stack {
       sfnTask: {
         lambdaFunction: persistCspResponse.fn,
         inputPath: "$.cspResponse",
-        timeout: cdk.Duration.seconds(60),
       },
     }).sfnTask;
     const rejectResponseTask = new SfnLambdaInvokeTask(this, "RejectPortfolioTask", {
@@ -264,34 +277,35 @@ export class AtatWebApiStack extends cdk.Stack {
       sfnTask: {
         lambdaFunction: rejectPortfolio.fn,
         inputPath: "$.cspResponse",
-        timeout: cdk.Duration.seconds(60),
       },
     }).sfnTask;
 
+    // State machine conditions
+    const successResponse = sfn.Condition.numberEquals("$.cspResponse.statusCode", 200);
+    const clientErrorResponse = sfn.Condition.or(
+      sfn.Condition.numberEquals("$.cspResponse.statusCode", 400),
+      sfn.Condition.numberEquals("$.cspResponse.statusCode", 402),
+      sfn.Condition.numberEquals("$.cspResponse.statusCode", 404)
+    );
+    const maxRetires = sfn.Condition.and(
+      sfn.Condition.numberGreaterThan("$.cspResponse.retryCount", 6),
+      sfn.Condition.numberGreaterThanEquals("$.cspResponse.statusCode", 500)
+    );
+    const internalErrorResponse = sfn.Condition.numberGreaterThanEquals("$.cspResponse.statusCode", 500);
+
+    // State machine choices
+    const httpResponseChoices = new sfn.Choice(this, "HttpResponse")
+      .when(successResponse, persistCspResponseTask)
+      .when(clientErrorResponse, rejectResponseTask)
+      .when(maxRetires, rejectResponseTask)
+      .when(internalErrorResponse, invokeCspApiTask);
+
     // Composing state machine
-    const stateMachineWorkflow = sfn.Chain.start(provisioningTask)
+    const stateMachineWorkflow = provisioningPass
+      .next(provisioningTask) // previously used for input validation, but removed
       .next(transformRequestTask)
       .next(invokeCspApiTask)
-      .next(
-        new sfn.Choice(this, "HttpResponse")
-          .when(sfn.Condition.numberEquals("$.cspResponse.statusCode", 200), persistCspResponseTask)
-          .when(
-            sfn.Condition.or(
-              sfn.Condition.numberEquals("$.cspResponse.statusCode", 400),
-              sfn.Condition.numberEquals("$.cspResponse.statusCode", 402),
-              sfn.Condition.numberEquals("$.cspResponse.statusCode", 404)
-            ),
-            rejectResponseTask
-          )
-          .when(
-            sfn.Condition.and(
-              sfn.Condition.numberGreaterThan("$.cspResponse.retryCount", 6),
-              sfn.Condition.numberGreaterThanEquals("$.cspResponse.statusCode", 500)
-            ),
-            rejectResponseTask
-          )
-          .when(sfn.Condition.numberGreaterThanEquals("$.cspResponse.statusCode", 500), invokeCspApiTask)
-      );
+      .next(httpResponseChoices);
     const stateMachineLogGroup = new logs.LogGroup(this, "StepFunctionsLogs", {
       retention: logs.RetentionDays.ONE_WEEK,
     });
