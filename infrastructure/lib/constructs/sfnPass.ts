@@ -1,6 +1,5 @@
 import * as cdk from "@aws-cdk/core";
 import * as sfn from "@aws-cdk/aws-stepfunctions";
-import * as sfnTasks from "@aws-cdk/aws-stepfunctions-tasks";
 
 export interface SfnPassProps extends sfn.PassProps {
   /**
