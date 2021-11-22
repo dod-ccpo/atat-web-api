@@ -797,7 +797,195 @@ paths:
               method.response.header.Access-Control-Allow-Origin: '''*'''
             responseTemplates:
               application/json: "{}"
-
+  /portfolios/{portfolioId}/burndown:
+    get:
+      tags:
+        - reporting
+      description: Returns combined actual and forecast expenditure data for the given Portfolio
+      operationId: getPortfolioBurndownData
+      parameters:
+        - name: portfolioId
+          in: path
+          description: ID of the Portfolio
+          required: true
+          schema:
+            type: string
+        - name: start_date
+          in: query
+          description: Start date for the query. Defaults to the earliest pop_start date of all active CLINs funding this Portfolio.
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: end_date
+          in: query
+          description: End date for the query. Defaults to the latest pop_end date of all active CLINs funding this Portfolio.
+          required: false
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonthlyBurndownData'
+              examples:
+                ApplicationMonthlyBurndownDataEx:
+                  $ref: '#/components/examples/MonthlyBurndownDataEx'
+        '400':
+          description: Invalid request parameter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Portfolio with the given ID does not exist
+      x-amazon-apigateway-request-validator: "request-params-validator"
+      x-amazon-apigateway-integration:
+        httpMethod: "GET"
+        uri:
+          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NotImplementedFunction.Arn}/invocations"
+        type: "aws_proxy"
+      security:
+        Fn::If:
+          - IsAuthorizationRequired
+          -
+            - cognitoAuthorizer: []
+          - Ref: AWS::NoValue
+  /portfolios/{portfolioId}/taskorders/{taskOrderNumber}/burndown:
+    get:
+      tags:
+        - reporting
+      description: Returns combined actual and forecast expenditure data for the given Task Order
+      operationId: getTaskOrderBurndownData
+      parameters:
+        - name: portfolioId
+          in: path
+          description: ID of the Portfolio
+          required: true
+          schema:
+            type: string
+        - name: taskOrderNumber
+          in: path
+          description: Task Order Number (not assigned by ATAT)
+          required: true
+          schema:
+            type: string
+        - name: start_date
+          in: query
+          description: Start date for the query. Defaults to the earliest pop_start date of all active CLINs which are part of the given Task Order.
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: end_date
+          in: query
+          description: End date for the query. Defaults to the latest pop_end date of all active CLINs which are part of the given Task Order.
+          required: false
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonthlyBurndownData'
+              examples:
+                ApplicationMonthlyBurndownDataEx:
+                  $ref: '#/components/examples/MonthlyBurndownDataEx'
+        '400':
+          description: Invalid request parameter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Portfolio with the given ID does not exist or Task Order with the given number does not exist
+      x-amazon-apigateway-request-validator: "request-params-validator"
+      x-amazon-apigateway-integration:
+        httpMethod: "GET"
+        uri:
+          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NotImplementedFunction.Arn}/invocations"
+        type: "aws_proxy"
+      security:
+        Fn::If:
+          - IsAuthorizationRequired
+          -
+            - cognitoAuthorizer: []
+          - Ref: AWS::NoValue
+  /portfolios/{portfolioId}/taskorders/{taskOrderNumber}/clins/{clin}/burndown:
+    get:
+      tags:
+        - reporting
+      description: Returns combined actual and forecast expenditure data for the given CLIN
+      operationId: getClinBurndownData
+      parameters:
+        - name: portfolioId
+          in: path
+          description: ID of the Portfolio
+          required: true
+          schema:
+            type: string
+        - name: taskOrderNumber
+          in: path
+          description: Task Order Number - (not assigned by ATAT)
+          required: true
+          schema:
+            type: string
+        - name: clin
+          in: path
+          description: Contract Line Item Number (CLIN) - (not assigned by ATAT)
+          required: true
+          schema:
+            type: string
+        - name: start_date
+          in: query
+          description: Start date for the query. Defaults to the pop_start date of the given CLIN.
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: end_date
+          in: query
+          description: End date for the query. Defaults to the pop_end date of the given CLIN.
+          required: false
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonthlyBurndownData'
+              examples:
+                ApplicationMonthlyBurndownDataEx:
+                  $ref: '#/components/examples/MonthlyBurndownDataEx'
+        '400':
+          description: Invalid request parameter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Portfolio with the given ID does not exist, Task Order with the given number does not exist or CLIN with the given number does not exist
+      x-amazon-apigateway-request-validator: "request-params-validator"
+      x-amazon-apigateway-integration:
+        httpMethod: "GET"
+        uri:
+          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NotImplementedFunction.Arn}/invocations"
+        type: "aws_proxy"
+      security:
+        Fn::If:
+          - IsAuthorizationRequired
+          -
+            - cognitoAuthorizer: []
+          - Ref: AWS::NoValue
 components:
   parameters:
     offsetParam:
@@ -1155,7 +1343,30 @@ components:
           $ref: '#/components/schemas/FundingStep'
         application_step:
           $ref: '#/components/schemas/ApplicationStep'
-
+    MonthlyAvailableFunds:
+      description: Represents the amount of available funds for a given month
+      type: object
+      additionalProperties: false
+      properties:
+        month:
+          type: string
+          example: "2019-09"
+        funds:
+          type: number
+          example: 200000
+    MonthlyBurndownData:
+      description: Combines actual and forecast available funds data by month.  Input for burndown chart.
+      type: object
+      additionalProperties: false
+      properties:
+        actual:
+          type: array
+          items:
+            $ref: '#/components/schemas/MonthlyAvailableFunds'
+        forecast:
+          type: array
+          items:
+            $ref: '#/components/schemas/MonthlyAvailableFunds'
   examples:
     PortfolioDraftSummaryArrayEx:
       value:
@@ -1266,6 +1477,36 @@ components:
                   - display_name: "Boba Fett"
                     email: "original@mandalorian.mil"
                     access: "read_only"
+    MonthlyBurndownDataEx:
+      value:
+        actual:
+          - month: "2019-09"
+            funds: 200000
+          - month: "2019-10"
+            funds: 190000
+          - month: "2019-11"
+            funds: 175000
+          - month: "2019-12"
+            funds: 170000
+          - month: "2020-01"
+            funds: 150000
+          - month: "2020-02"
+            funds: 115000
+          - month: "2020-03"
+            funds: 95000
+          - month: "2020-04"
+            funds: 90000
+          - month: "2020-05"
+            funds: 75000
+          - month: "2020-06"
+            funds: 70000
+          - month: "2020-07"
+            funds: 50000
+          - month: "2020-08"
+            funds: 35000
+        forecast:
+          - month: "2020-09"
+            funds: 30000
   securitySchemes:
     Fn::If:
       - IsAuthorizationRequired
