@@ -1,6 +1,8 @@
+import { Application } from "./Application";
 import { CloudServiceProvider } from "../../models/CloudServiceProvider";
-import { Column, Entity } from "typeorm";
+import { Column, Entity, OneToMany } from "typeorm";
 import { ProvisionableEntity } from "./ProvisionableEntity";
+import { TaskOrder } from "./TaskOrder";
 
 @Entity()
 export class Portfolio extends ProvisionableEntity {
@@ -19,13 +21,11 @@ export class Portfolio extends ProvisionableEntity {
   @Column({ type: String, nullable: false, array: true })
   portfolioManagers: Array<string>;
 
-  // TODO: task_orders: Array<TaskOrder>;
-  @Column()
-  taskOrders: string;
+  @OneToMany(() => TaskOrder, (taskOrder) => taskOrder.portfolio)
+  taskOrders: TaskOrder[];
 
-  // TODO: applications: Array<Application>;
-  @Column()
-  applications: string;
+  @OneToMany(() => Application, (application) => application.portfolio)
+  applications: Application[];
 
   // TODO: operators: Array<PortfolioOperator>;
   @Column()

@@ -20,8 +20,6 @@ createConnection()
     pd.csp = CloudServiceProvider.CSP_A;
     pd.dodComponents = ["army", "navy"];
     pd.portfolioManagers = ["jane.manager@dod.mil", "john.manager@dod.mil"];
-    pd.taskOrders = "";
-    pd.applications = "";
     pd.operators = "";
     await connection.manager.save(pd);
     console.log("Saved a new portfolio with id: " + pd.id);
@@ -31,6 +29,7 @@ createConnection()
 
     // APPLICATION
     const app = new Application();
+    app.portfolio = pd;
     app.name = "Cheetah application";
     app.description = "Description of application";
     app.environments = "";
@@ -53,6 +52,7 @@ createConnection()
 
     // TASK ORDER
     const to = new TaskOrder();
+    to.portfolio = pd;
     to.taskOrderNumber = "123412341234";
     to.fileId = uuidv4();
     to.fileName = "to123412341234.pdf";
@@ -78,5 +78,8 @@ createConnection()
 
     const clins = await connection.manager.find(Clin);
     console.log("Loaded clins: ", clins);
+
+    const pfAll = await connection.getRepository(Portfolio).find({ relations: ["applications", "taskOrders"] });
+    console.log("A portfolio and child objects: ", pfAll[0]);
   })
   .catch((error) => console.log(error));

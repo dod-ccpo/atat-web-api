@@ -1,6 +1,7 @@
 import { BaseEntity } from "./ProvisionableEntity";
-import { Column, Entity } from "typeorm";
+import { Column, Entity, ManyToOne } from "typeorm";
 import { FileScanStatus } from "../../models/FileMetadata";
+import { Portfolio } from "./Portfolio";
 
 @Entity()
 export class TaskOrder extends BaseEntity {
@@ -23,6 +24,9 @@ export class TaskOrder extends BaseEntity {
 
   @Column({ type: "enum", nullable: false, enum: FileScanStatus, default: FileScanStatus.PENDING })
   fileScanStatus: FileScanStatus;
+
+  @ManyToOne(() => Portfolio, (portfolio) => portfolio.taskOrders)
+  portfolio: Portfolio;
 
   // TODO clins: Array<Clin>;
   @Column()
