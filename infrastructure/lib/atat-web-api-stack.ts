@@ -50,7 +50,8 @@ export interface AtatWebApiStackProps extends cdk.StackProps {
 
 export class AtatWebApiStack extends cdk.Stack {
   private readonly environmentId: string;
-  public readonly restApi: apigw.IRestApi;
+  public readonly draftApi: apigw.IRestApi;
+  public readonly internalApi: apigw.IRestApi;
   public readonly submitQueue: sqs.IQueue;
   public readonly emailQueue: sqs.IQueue;
   public readonly emailDeadLetterQueue: sqs.IQueue;
@@ -149,22 +150,35 @@ export class AtatWebApiStack extends cdk.Stack {
     // The API spec, which just so happens to be a valid CloudFormation snippet (with some actual CloudFormation
     // in it) gets uploaded to S3. The Asset resource reuses the same bucket that the CDK does, so this does not
     // require any additional buckets to be created.
-    const apiAsset = new s3asset.Asset(this, "ApiSpecAsset", {
+    const draftApiAsset = new s3asset.Asset(this, "DraftApiSpecAsset", {
       path: utils.packageRoot() + "../../atat_provisioning_wizard_api.yaml",
+    });
+    const internalApiAsset = new s3asset.Asset(this, "InternalApiSpecAsset", {
+      path: utils.packageRoot() + "../../atat_internal_api.yaml",
     });
 
     // And now we include that snippet as an actual part of the template using the AWS::Include Transform. Since
     // snippet is valid CloudFormation with real Fn::Sub invocations, those will be interpreted. This results in
     // all of the function ARNs being inserted into the x-aws-apigateway-integration resources when the template
     // is evaluated.
-    const apiSpecAsTemplateInclude = cdk.Fn.transform("AWS::Include", { Location: apiAsset.s3ObjectUrl });
+    const draftApiSpecAsTemplateInclude = cdk.Fn.transform("AWS::Include", { Location: draftApiAsset.s3ObjectUrl });
+    const internalApiSpecAsTemplateInclude = cdk.Fn.transform("AWS::Include", {
+      Location: internalApiAsset.s3ObjectUrl,
+    });
 
     // And with the data now loaded from the template, we can use ApiDefinition.fromInline to parse it as real
     // OpenAPI spec (because it was!) and now we've got all our special AWS values and variables interpolated.
     // This will get used as the `Body:` parameter in the underlying CloudFormation resource.
-    const apiGateway = new SecureRestApi(this, "AtatSpecTest", {
-      restApiName: `${props.environmentId} API`,
-      apiDefinition: apigw.ApiDefinition.fromInline(apiSpecAsTemplateInclude),
+    const draftApiGateway = new SecureRestApi(this, "AtatDraftApi", {
+      restApiName: `${props.environmentId} Draft API`,
+      apiDefinition: apigw.ApiDefinition.fromInline(draftApiSpecAsTemplateInclude),
+      deployOptions: {
+        tracingEnabled: true,
+      },
+    }).restApi;
+    const internalApiGateway = new SecureRestApi(this, "AtatInternalApi", {
+      restApiName: `${props.environmentId} Internal API`,
+      apiDefinition: apigw.ApiDefinition.fromInline(internalApiSpecAsTemplateInclude),
       deployOptions: {
         tracingEnabled: true,
       },
@@ -269,14 +283,22 @@ export class AtatWebApiStack extends cdk.Stack {
       }).fn
     );
 
-    this.restApi = apiGateway;
+    this.draftApi = draftApiGateway;
+    this.internalApi = internalApiGateway;
     this.addEmailRoutes(props);
     this.addTaskOrderRoutes(props);
     this.ssmParams.push(
-      new ssm.StringParameter(this, "ApiGatewayUrl", {
-        description: "URL for the API Gateway",
-        stringValue: apiGateway.urlForPath(),
-        parameterName: `/atat/${this.environmentId}/api/url`,
+      new ssm.StringParameter(this, "DraftApiGatewayUrl", {
+        description: "URL for the Draft API Gateway instance",
+        stringValue: draftApiGateway.urlForPath(),
+        parameterName: `/atat/${this.environmentId}/draftApi/url`,
+      })
+    );
+    this.ssmParams.push(
+      new ssm.StringParameter(this, "InternalApiGatewayUrl", {
+        description: "URL for the Internal API Gateway instance",
+        stringValue: draftApiGateway.urlForPath(),
+        parameterName: `/atat/${this.environmentId}/internalApi/url`,
       })
     );
   }
