@@ -57,7 +57,7 @@
     "@aws-cdk/core": "1.132.0",
     "@aws-cdk/custom-resources": "1.132.0",
     "@openapi-contrib/openapi-schema-to-json-schema": "^3.1.1",
-    "cdk-nag": "^0.2.0",
+    "cdk-nag": "^1.0.4",
     "eslint": "^7.31.0",
     "js-yaml": "^4.1.0",
     "source-map-support": "^0.5.16",
