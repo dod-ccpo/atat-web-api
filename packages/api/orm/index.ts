@@ -20,7 +20,7 @@ createConnection()
     pd.csp = CloudServiceProvider.CSP_A;
     pd.dodComponents = ["army", "navy"];
     pd.portfolioManagers = ["jane.manager@dod.mil", "john.manager@dod.mil"];
-    pd.operators = "";
+    // pd.operators = "";
     await connection.manager.save(pd);
     console.log("Saved a new portfolio with id: " + pd.id);
 
@@ -32,7 +32,7 @@ createConnection()
     app.portfolio = pd;
     app.name = "Cheetah application";
     app.description = "Description of application";
-    app.operators = "";
+    // app.operators = "";
     await connection.manager.save(app);
     console.log("Saved a application with id: " + app.id);
 
@@ -43,7 +43,7 @@ createConnection()
     const env = new Environment();
     env.application = app;
     env.name = "Cheetah environment";
-    env.operators = "";
+    // env.operators = "";
     await connection.manager.save(env);
     console.log("Saved a environment with id: " + env.id);
 
@@ -83,12 +83,12 @@ createConnection()
     const portfolioRelations = await connection
       .getRepository(Portfolio)
       .find({ relations: ["applications", "taskOrders"] });
-    console.log("A portfolio and child objects: ", portfolioRelations[0]);
+    console.log("Portfolio and child objects: ", portfolioRelations[0]);
 
     const applicationRelations = await connection.getRepository(Application).find({ relations: ["environments"] });
-    console.log("An application and child objects: ", applicationRelations[0]);
+    console.log("Application and child objects: ", applicationRelations[0]);
 
     const taskOrderRelations = await connection.getRepository(TaskOrder).find({ relations: ["clins"] });
-    console.log("A task order and child objects: ", taskOrderRelations[0]);
+    console.log("Task Order and child objects: ", taskOrderRelations[0]);
   })
   .catch((error) => console.log(error));

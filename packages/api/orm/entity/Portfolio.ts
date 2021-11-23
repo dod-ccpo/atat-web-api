@@ -27,7 +27,5 @@ export class Portfolio extends ProvisionableEntity {
   @OneToMany(() => Application, (application) => application.portfolio)
   applications: Application[];
 
-  // TODO: operators: Array<PortfolioOperator>;
-  @Column()
-  operators: string;
+  // TODO: add operators - simple-array or PortfolioOperator[] ?
 }

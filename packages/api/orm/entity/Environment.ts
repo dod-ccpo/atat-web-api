@@ -10,7 +10,5 @@ export class Environment extends ProvisionableEntity {
   @ManyToOne(() => Application, (application) => application.environments)
   application: Application;
 
-  // TODO operators: Array<AppEnvOperator>;
-  @Column()
-  operators: string;
+  // TODO: add operators - simple-array or AppEnvOperator[] ?
 }
