@@ -287,7 +287,7 @@ export class AtatWebApiStack extends cdk.Stack {
       sfn.Condition.numberEquals("$.cspResponse.statusCode", 402),
       sfn.Condition.numberEquals("$.cspResponse.statusCode", 404)
     );
-    const maxRetires = sfn.Condition.and(
+    const maxRetries = sfn.Condition.and(
       sfn.Condition.numberGreaterThan("$.cspResponse.retryCount", 6),
       sfn.Condition.numberGreaterThanEquals("$.cspResponse.statusCode", 500)
     );
@@ -297,7 +297,7 @@ export class AtatWebApiStack extends cdk.Stack {
     const httpResponseChoices = new sfn.Choice(this, "HttpResponse")
       .when(successResponse, persistCspResponseTask)
       .when(clientErrorResponse, rejectResponseTask)
-      .when(maxRetires, rejectResponseTask)
+      .when(maxRetries, rejectResponseTask)
       .when(internalErrorResponse, invokeCspApiTask);
 
     // Composing state machine
