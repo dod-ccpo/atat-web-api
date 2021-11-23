@@ -1,4 +1,4 @@
-import { BaseEntity } from "./ProvisionableEntity";
+import { BaseEntity } from "./BaseEntity";
 import { Column, Entity, ManyToOne } from "typeorm";
 import { TaskOrder } from "./TaskOrder";
 

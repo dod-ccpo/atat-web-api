@@ -1,4 +1,4 @@
-import { BaseEntity } from "./ProvisionableEntity";
+import { BaseEntity } from "./BaseEntity";
 import { Clin } from "./Clin";
 import { Column, Entity, ManyToOne, OneToMany } from "typeorm";
 import { FileScanStatus } from "../../models/FileMetadata";
