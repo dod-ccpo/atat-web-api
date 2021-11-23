@@ -53,6 +53,9 @@ export interface AtatWebApiStackProps extends cdk.StackProps {
 
 export class AtatWebApiStack extends cdk.Stack {
   private readonly environmentId: string;
+  /**
+   * @deprecated Use {@link internaApi} instead
+   */
   public readonly draftApi: apigw.IRestApi;
   public readonly internalApi: apigw.IRestApi;
   public readonly submitQueue: sqs.IQueue;
