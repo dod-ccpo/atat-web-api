@@ -14,7 +14,8 @@ createConnection()
   .then(async (connection) => {
     // PORTFOLIO
     const pd = new Portfolio();
-    pd.status = ProvisioningStatus.IN_PROGRESS;
+    pd.provisioningStatus = ProvisioningStatus.IN_PROGRESS;
+    pd.owner = "portfolio.owner@dod.mil";
     pd.name = "Cheetah portfolio";
     pd.description = "Description of portfolio";
     pd.csp = CloudServiceProvider.CSP_A;
@@ -30,6 +31,7 @@ createConnection()
     // APPLICATION
     const app = new Application();
     app.portfolio = pd;
+    app.provisioningStatus = ProvisioningStatus.IN_PROGRESS;
     app.name = "Cheetah application";
     app.description = "Description of application";
     // app.operators = "";
@@ -42,6 +44,7 @@ createConnection()
     // ENVIRONMENT
     const env = new Environment();
     env.application = app;
+    env.provisioningStatus = ProvisioningStatus.IN_PROGRESS;
     env.name = "Cheetah environment";
     // env.operators = "";
     await connection.manager.save(env);

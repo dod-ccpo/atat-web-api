@@ -8,5 +8,5 @@ export abstract class ProvisionableEntity extends BaseEntity {
     enum: ProvisioningStatus,
     default: ProvisioningStatus.NOT_STARTED,
   })
-  status: string;
+  provisioningStatus: string;
 }

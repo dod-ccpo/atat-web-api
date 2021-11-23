@@ -12,6 +12,9 @@ export class Portfolio extends ProvisionableEntity {
   @Column({ type: String, nullable: true, length: 300 })
   description: string;
 
+  @Column({ type: String, nullable: false })
+  owner: string;
+
   @Column({ type: "enum", enum: CloudServiceProvider, nullable: false })
   csp: CloudServiceProvider;
 

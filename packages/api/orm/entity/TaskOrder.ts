@@ -10,7 +10,7 @@ export class TaskOrder extends BaseEntity {
     type: String,
     nullable: false,
     length: 17,
-    comment: "13 character TO number, or 17 character TO modification number",
+    comment: "TO numbers are 13 characters. TO modifications are 17 characters.",
   })
   taskOrderNumber: string;
 
