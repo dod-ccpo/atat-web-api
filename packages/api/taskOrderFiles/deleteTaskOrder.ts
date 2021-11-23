@@ -17,7 +17,7 @@ export const NO_SUCH_TASK_ORDER_FILE = new OtherErrorResponse(
  *
  * @param event - The DELETE request from API Gateway
  */
-export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+export async function baseHandler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   const taskOrderId = event.pathParameters?.taskOrderId;
   if (!isPathParameterPresent(taskOrderId)) {
     return NO_SUCH_TASK_ORDER_FILE;
@@ -42,6 +42,4 @@ async function deleteFile(taskOrderId: string): Promise<DeleteObjectCommandOutpu
 }
 
 // IP logging middy
-const middyHandler = middy(handler);
-middyHandler.use(IpCheckerMiddleware());
-export { middyHandler };
+export const handler = middy(baseHandler).use(IpCheckerMiddleware());

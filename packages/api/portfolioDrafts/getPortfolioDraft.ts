@@ -22,7 +22,7 @@ export const NO_SUCH_PORTFOLIO = new OtherErrorResponse(
  *
  * @param event - The GET request from API Gateway
  */
-export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+export async function baseHandler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   const portfolioDraftId = event.pathParameters?.portfolioDraftId;
 
   // TODO: validate that we get a valid ATAT_TABLE_NAME env variable
@@ -51,6 +51,4 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
 }
 
 // IP logging middy
-const middyHandler = middy(handler);
-middyHandler.use(IpCheckerMiddleware());
-export { middyHandler };
+export const handler = middy(baseHandler).use(IpCheckerMiddleware());

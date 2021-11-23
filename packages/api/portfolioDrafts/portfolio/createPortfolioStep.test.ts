@@ -34,6 +34,7 @@ describe("Validation of handler", () => {
   it("should return NO_SUCH_PORTFOLIO_DRAFT when no portfolioDraftId specified", async () => {
     const request = {
       body: mockPortfolioStep,
+      requestContext: { identity: { sourceIp: "10.2.2.2" } },
       // no pathParameter portfolioDraftId
     } as ApiGatewayEventParsed<PortfolioStep>;
     const response = await handler(request, {} as Context, null as unknown as Callback)!;
@@ -45,6 +46,7 @@ describe.each(mockValidPortfolioSteps)("Handler response with mock dynamodb", (m
   const request: ApiGatewayEventParsed<PortfolioStep> = {
     ...validRequest,
     body: mockPortfolioStep,
+    requestContext: { identity: { sourceIp: "10.2.2.2" } },
   } as any;
 
   it("should return error when the portfolioDraft doesn't exist", async () => {

@@ -59,9 +59,9 @@ const schemaWrapper = {
 };
 
 export const handler = middy(baseHandler)
+  .use(IpCheckerMiddleware())
   .use(xssSanitizer())
   .use(jsonBodyParser())
   .use(validator({ inputSchema: schemaWrapper }))
   .use(JSONErrorHandlerMiddleware())
-  .use(cors({ headers: "*", methods: "*" }))
-  .use(IpCheckerMiddleware());
+  .use(cors({ headers: "*", methods: "*" }));

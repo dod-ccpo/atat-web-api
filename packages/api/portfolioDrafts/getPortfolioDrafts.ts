@@ -1,8 +1,10 @@
 import { ScanCommand, ScanCommandInput } from "@aws-sdk/lib-dynamodb";
+import middy from "@middy/core";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { portfolioDraftSummaryProperties, PortfolioDraftSummary } from "../models/PortfolioDraftSummary";
 import { exhaustivePick } from "../models/TypeFields";
 import { dynamodbDocumentClient as client } from "../utils/aws-sdk/dynamodb";
+import { IpCheckerMiddleware } from "../utils/ipLogging";
 import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusCode } from "../utils/response";
 
 const TABLE_NAME = process.env.ATAT_TABLE_NAME;
@@ -27,7 +29,7 @@ function evaluateQueryParameterInteger(qparam: string | undefined, defaultInt: n
  * Revisit once authentication and authorization are in place.
  * @param event - The GET request from API Gateway
  */
-export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+export async function baseHandler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   // Optional query param 'limit' must be integer with minimum value of 1 and maximum value of 50. Defaults to 20.
   // Limit is the number of items to return.
   const limit = evaluateQueryParameterInteger(event.queryStringParameters?.limit, 20);
@@ -63,3 +65,5 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
     return new OtherErrorResponse("Database error", ErrorStatusCode.INTERNAL_SERVER_ERROR);
   }
 }
+
+export const handler = middy(baseHandler).use(IpCheckerMiddleware());

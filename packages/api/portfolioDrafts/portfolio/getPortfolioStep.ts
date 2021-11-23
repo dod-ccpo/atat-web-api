@@ -19,7 +19,7 @@ import { IpCheckerMiddleware } from "../../utils/ipLogging";
  *
  * @param event - The GET request from API Gateway
  */
-export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+export async function baseHandler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   const portfolioDraftId = event.pathParameters?.portfolioDraftId;
   if (!isPathParameterPresent(portfolioDraftId)) {
     return PATH_PARAMETER_REQUIRED_BUT_MISSING;
@@ -51,6 +51,4 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
   }
 }
 // IP logging middy
-const middyHandler = middy(handler);
-middyHandler.use(IpCheckerMiddleware());
-export { middyHandler };
+export const handler = middy(baseHandler).use(IpCheckerMiddleware());

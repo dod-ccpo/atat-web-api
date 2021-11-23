@@ -14,7 +14,7 @@ import { ApiSuccessResponse, SuccessStatusCode } from "../utils/response";
  *
  * @param event - The POST request from API Gateway
  */
-export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+export async function baseHandler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   if (event.body && !JSON.parse(event.body)) {
     return REQUEST_BODY_NOT_EMPTY;
   }
@@ -48,6 +48,4 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
 }
 
 // IP logging middy
-const middyHandler = middy(handler);
-middyHandler.use(IpCheckerMiddleware());
-export { middyHandler };
+export const handler = middy(baseHandler).use(IpCheckerMiddleware());

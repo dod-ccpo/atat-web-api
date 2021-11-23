@@ -15,7 +15,7 @@ const bucketName = process.env.DATA_BUCKET;
  *
  * @param event - The POST request from API Gateway
  */
-export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+export async function baseHandler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   const result = await parser.parse(event);
 
   if (result.files.length !== 1) {
@@ -57,6 +57,4 @@ async function uploadFile(file: parser.MultipartFile): Promise<APIGatewayProxyRe
 }
 
 // IP logging middy
-const middyHandler = middy(handler);
-middyHandler.use(IpCheckerMiddleware());
-export { middyHandler };
+export const handler = middy(baseHandler).use(IpCheckerMiddleware());

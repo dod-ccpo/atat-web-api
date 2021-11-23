@@ -12,6 +12,7 @@ beforeEach(() => {
 describe("Successfully send messages to a queue for sending emails", () => {
   const validRequest: APIGatewayProxyEvent = {
     body: { emails: ["test@email.mil"], emailType: "invitation", missionOwner: "Ms. Mission Owner" },
+    requestContext: { identity: { sourceIp: "10.2.2.2" } },
   } as any;
 
   it("should successfully send message to queue and return 202", async () => {
