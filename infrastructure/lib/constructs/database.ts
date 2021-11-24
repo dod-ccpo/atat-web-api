@@ -15,17 +15,26 @@ export interface DatabaseProps {
 
 interface BootstrapProps extends DatabaseProps {
   secretName: string;
+  cluster: rds.IDatabaseCluster;
 }
 
 class DatabaseBootstrapper extends cdk.Construct {
   public readonly bootstrapResource: cdk.CustomResource;
+  public readonly backingLambda: lambda.IFunction;
   constructor(scope: cdk.Construct, id: string, props: BootstrapProps) {
     super(scope, id);
     const handler = new lambdaNodeJs.NodejsFunction(this, "Function", {
       vpc: props.vpc,
-      entry: packageRoot() + "rds/initial-bootstrap.ts",
+      entry: packageRoot() + "/rds/initial-bootstrap.ts",
       environment: {
         DATABASE_SECRET_NAME: props.secretName,
+        DATABASE_HOST: props.cluster.clusterEndpoint.hostname,
+      },
+      memorySize: 1024,
+      timeout: cdk.Duration.minutes(5),
+      bundling: {
+        // forceDockerBundling: true,
+        externalModules: ["pg-native"],
       },
     });
     this.bootstrapResource = new cdk.CustomResource(this, "CustomResource", {
@@ -34,9 +43,16 @@ class DatabaseBootstrapper extends cdk.Construct {
         DatabaseName: props.databaseName,
       },
     });
+    this.backingLambda = handler;
   }
 }
 
+/**
+ * A highly-opinionated RDS configuration.
+ *
+ * Builds an Aurora PostgreSQL database with various security settings as well as
+ * automatic bootstrapping of an underlying database.
+ */
 export class Database extends cdk.Construct {
   public readonly cluster: rds.IDatabaseCluster;
   public readonly adminSecret: secretsmanager.ISecret;
@@ -54,7 +70,8 @@ export class Database extends cdk.Construct {
       engine: dbEngine,
       instanceProps: {
         vpc: props.vpc,
-        instanceType: ec2.InstanceType.of(ec2.InstanceClass.M5, ec2.InstanceSize.LARGE),
+        // The cheapest available instance type for the engine we've chosen.
+        instanceType: ec2.InstanceType.of(ec2.InstanceClass.R6G, ec2.InstanceSize.LARGE),
         allowMajorVersionUpgrade: true,
         autoMinorVersionUpgrade: true,
         deleteAutomatedBackups: false,
@@ -66,10 +83,10 @@ export class Database extends cdk.Construct {
       backup: {
         // Time window is in UTC. This is approximately between
         // 12AM and 4AM ET (depending on Daylight Saving Time)
-        preferredWindow: "06:00-08:00",
+        preferredWindow: "06:00-07:00",
         retention: cdk.Duration.days(7),
       },
-      preferredMaintenanceWindow: "Sun:06:00-Sun:08:00",
+      preferredMaintenanceWindow: "Sun:07:00-Sun:08:00",
       parameterGroup: parameters,
       copyTagsToSnapshot: true,
       iamAuthentication: true,
@@ -77,16 +94,22 @@ export class Database extends cdk.Construct {
       cloudwatchLogsExports: ["postgresql"],
     });
     this.cluster = cluster;
-    cluster.addRotationSingleUser({
-      // Default value is 30 days, so this makes the secret much shorter-lived.
-      // The primary means for access will be via IAM; however, we will use this
-      // for initial bootstrapping and rare maintenance.
-      automaticallyAfter: cdk.Duration.days(7),
-    });
+    // cluster.addRotationSingleUser({
+    //   // Default value is 30 days, so this makes the secret much shorter-lived.
+    //   // The primary means for access will be via IAM; however, we will use this
+    //   // for initial bootstrapping and rare maintenance.
+    //   automaticallyAfter: cdk.Duration.days(7),
+    // });
+    // We bound the secret itself as a rotating secret so we can be sure that there
+    // is in fact a secret for the cluster.
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.adminSecret = cluster.secret!;
-    const bootstrapper = new DatabaseBootstrapper(this, "DatabaseBoostrapper", {
+    const bootstrapper = new DatabaseBootstrapper(this, "DatabaseBootstrapper", {
       ...props,
       secretName: this.adminSecret.secretName,
+      cluster: cluster,
     });
+    this.adminSecret.grantRead(bootstrapper.backingLambda);
+    cluster.connections.allowDefaultPortFrom(bootstrapper.backingLambda);
   }
 }

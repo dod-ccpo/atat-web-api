@@ -3,6 +3,9 @@ import { createConnection, Connection } from "typeorm";
 
 import { CloudFormationCustomResourceEvent, CloudFormationCustomResourceResponse } from "aws-lambda";
 
+import * as https from "https";
+import * as url from "url";
+
 type User = {
   name: string;
   dbPrivileges: string[];
@@ -56,35 +59,70 @@ async function handleDelete(databaseName: string): Promise<void> {
   await connection.query(`DROP DATABASE IF EXISTS $1 WITH FORCE`, [databaseName]);
 }
 
-export async function handler(event: CloudFormationCustomResourceEvent): Promise<CloudFormationCustomResourceResponse> {
+async function sendResponse(
+  event: CloudFormationCustomResourceEvent,
+  response: CloudFormationCustomResourceResponse
+): Promise<void> {
+  const body = JSON.stringify(response);
+  const responseUrl = new url.URL(event.ResponseURL);
+
+  const request = https.request(
+    responseUrl,
+    {
+      method: "PUT",
+      headers: {
+        "content-type": "application/json",
+        "content-length": body.length,
+      },
+    },
+    (response) => {
+      console.log("Status: " + response.statusCode);
+      console.log("Headers: " + JSON.stringify(response.headers));
+    }
+  );
+  request.on("error", (error) => {
+    console.log("Error sending response: " + error);
+  });
+
+  request.write(body);
+  request.end();
+  console.log("Response sent");
+}
+
+export async function handler(event: CloudFormationCustomResourceEvent): Promise<void> {
+  console.log(JSON.stringify(event));
   const databaseName = event.ResourceProperties.DatabaseName ?? "atat";
   try {
     switch (event.RequestType) {
       case "Create":
-        await handleCreate(databaseName);
-        break;
       case "Update":
+        await handleCreate(databaseName);
         break;
       case "Delete":
         await handleDelete(databaseName);
         break;
     }
 
-    return {
+    const result: CloudFormationCustomResourceResponse = {
       Status: "SUCCESS",
       RequestId: event.RequestId,
       StackId: event.StackId,
       LogicalResourceId: event.LogicalResourceId,
       PhysicalResourceId: databaseName,
     };
+    console.log(JSON.stringify(result));
+    await sendResponse(event, result);
   } catch (err) {
-    return {
-      Status: "FAILED",
+    const result: CloudFormationCustomResourceResponse = {
+      Status: "SUCCESS",
       RequestId: event.RequestId,
       StackId: event.StackId,
       LogicalResourceId: event.LogicalResourceId,
       PhysicalResourceId: databaseName,
-      Reason: err,
+      Reason: JSON.stringify(err),
     };
+    console.log(JSON.stringify(result));
+    await sendResponse(event, result);
   }
+  console.log("End of handler for request: " + event.RequestId);
 }

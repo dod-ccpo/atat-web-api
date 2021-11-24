@@ -32,6 +32,8 @@ import { QueuePermissions } from "./queue-permissions";
 import * as utils from "./util";
 import { convertSchema } from "./load-schema";
 import { ApiFlexFunction } from "./constructs/lambda-fn";
+import { Database } from "./constructs/database";
+
 interface AtatIdpProps {
   secretName: string;
   providerName: string;
@@ -87,6 +89,11 @@ export class AtatWebApiStack extends cdk.Stack {
         value: this.table.tableName,
       })
     );
+
+    const database = new Database(this, "AtatDatabase", {
+      vpc: props.vpc,
+      databaseName: this.environmentId + "atat",
+    });
 
     // Create a queue for PortfolioDraft submission
     this.submitQueue = new SecureQueue(this, "SubmitQueue", { queueProps: {} }).queue;
