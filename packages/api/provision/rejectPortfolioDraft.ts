@@ -1,5 +1,5 @@
 import { Context } from "aws-lambda";
-import { ProvisioningStatus } from "../../models/ProvisioningStatus";
+import { ProvisioningStatus } from "../models/ProvisioningStatus";
 import { StateInput } from "./validateCompletePortfolioDraft";
 import { updatePortfolioDraftStatus } from "./persistPortfolioDraft";
 

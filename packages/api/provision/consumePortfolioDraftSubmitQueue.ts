@@ -1,5 +1,5 @@
 import { SQSEvent } from "aws-lambda";
-import { sfnClient } from "../../utils/aws-sdk/stepFunctions";
+import { sfnClient } from "../utils/aws-sdk/stepFunctions";
 
 const SFN_ARN = process.env.SFN_ARN ?? "";
 
@@ -13,6 +13,7 @@ export async function handler(event: SQSEvent): Promise<void> {
   console.log("Number of Records: " + records.length);
   for (const record of records) {
     console.log("Sent Record: " + record);
+
     const result = await sfnClient.startExecution({
       input: record,
       stateMachineArn: SFN_ARN,
