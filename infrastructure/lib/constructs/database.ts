@@ -7,6 +7,7 @@ import * as rds from "@aws-cdk/aws-rds";
 import * as secretsmanager from "@aws-cdk/aws-secretsmanager";
 
 import { packageRoot } from "../util";
+import { CfnDBInstance } from "@aws-cdk/aws-rds";
 
 export interface DatabaseProps {
   vpc: ec2.IVpc;
@@ -71,7 +72,7 @@ export class Database extends cdk.Construct {
       instanceProps: {
         vpc: props.vpc,
         // The cheapest available instance type for the engine we've chosen.
-        instanceType: ec2.InstanceType.of(ec2.InstanceClass.R6G, ec2.InstanceSize.LARGE),
+        instanceType: ec2.InstanceType.of(ec2.InstanceClass.T3, ec2.InstanceSize.LARGE),
         allowMajorVersionUpgrade: true,
         autoMinorVersionUpgrade: true,
         deleteAutomatedBackups: false,
@@ -111,5 +112,8 @@ export class Database extends cdk.Construct {
     });
     this.adminSecret.grantRead(bootstrapper.backingLambda);
     cluster.connections.allowDefaultPortFrom(bootstrapper.backingLambda);
+    cluster.node.children
+      .filter((child) => child instanceof CfnDBInstance)
+      .forEach((dbInstance) => bootstrapper.bootstrapResource.node.addDependency(dbInstance));
   }
 }
