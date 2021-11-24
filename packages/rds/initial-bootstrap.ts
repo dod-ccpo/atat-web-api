@@ -30,7 +30,7 @@ async function connectWithoutDatabase(): Promise<Connection> {
   return await createConnection({
     type: "postgres",
     host: process.env.DATABASE_HOST,
-    port: 3306,
+    port: 5432,
     username: dbAuth.username,
     password: dbAuth.password,
     logging: "all",
