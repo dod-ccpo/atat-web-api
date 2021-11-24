@@ -8,7 +8,7 @@ export async function getDatabaseCredentials(secretName: string): Promise<Databa
   const credentialString = ssmResult.SecretString;
   const credentials = JSON.parse(credentialString!);
   return {
-    username: credentials.user_name,
+    username: credentials.username,
     password: credentials.password,
   };
 }
