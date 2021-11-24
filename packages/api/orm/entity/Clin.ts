@@ -17,21 +17,14 @@ export class Clin extends BaseEntity {
   })
   idiqClin: string;
 
-  // decimal(17,2) allows tens of trillions
   @Column({
-    type: "decimal",
-    precision: 17,
-    scale: 2,
-    default: 0.0,
+    type: "money",
     comment: "full amount requested by customer from USG for project or contract",
   })
   totalClinValue: number;
 
   @Column({
-    type: "decimal",
-    precision: 17,
-    scale: 2,
-    default: 0.0,
+    type: "money",
     comment: "amount already disbursed by USG for project or contract to be spent during CLIN POP",
   })
   obligatedFunds: number;
