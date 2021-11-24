@@ -29,5 +29,5 @@ export class TaskOrder extends BaseEntity {
   portfolio: Portfolio;
 
   @OneToMany(() => Clin, (clin) => clin.taskOrder)
-  clins: Clin[];
+  clins: Array<Clin>;
 }

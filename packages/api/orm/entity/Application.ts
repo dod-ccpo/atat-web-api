@@ -15,15 +15,15 @@ export class Application extends ProvisionableEntity {
   portfolio: Portfolio;
 
   @OneToMany(() => Environment, (environment) => environment.application)
-  environments: Environment[];
+  environments: Array<Environment>;
 
   // operators - simple-array or AppEnvOperator[] ?
   @Column({ type: "simple-array", default: "" })
-  administrators: string[];
+  administrators: Array<string>;
 
   @Column({ type: "simple-array", default: "" })
-  contributors: string[];
+  contributors: Array<string>;
 
   @Column({ type: "simple-array", default: "" })
-  readOnlyOperators: string[];
+  readOnlyOperators: Array<string>;
 }

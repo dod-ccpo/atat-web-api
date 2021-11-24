@@ -12,11 +12,11 @@ export class Environment extends ProvisionableEntity {
 
   // operators - simple-array or AppEnvOperator[] ?
   @Column({ type: "simple-array", default: "" })
-  administrators: string[];
+  administrators: Array<string>;
 
   @Column({ type: "simple-array", default: "" })
-  contributors: string[];
+  contributors: Array<string>;
 
   @Column({ type: "simple-array", default: "" })
-  readOnlyOperators: string[];
+  readOnlyOperators: Array<string>;
 }
