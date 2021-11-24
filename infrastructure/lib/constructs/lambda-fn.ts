@@ -144,6 +144,7 @@ export class ApiFunctiontest extends cdk.Construct {
     // Optional - create DynamoDB connection and grant permissions
     if (props.table && props.tablePermissions) {
       this.table = props.table;
+      this.fn.addEnvironment("ATAT_TABLE_NAME", props.table.tableName);
       this.grantRequiredTablePermissions(props.tablePermissions);
     }
 
