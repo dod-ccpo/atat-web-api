@@ -16,6 +16,7 @@ import { ApiS3Function } from "./constructs/api-s3-function";
 import { ApiSQSFunction } from "./constructs/api-sqs-function";
 import { ApiStepFnsSQSFunction } from "./constructs/api-sqs-sfn-function";
 import { SfnLambdaInvokeTask } from "./constructs/sfnLambdaInvokeTask";
+import { SfnPassState } from "./constructs/sfnPass";
 import { ApiSQSDynamoDBFunction } from "./constructs/api-sqs-dynamodb-function";
 import { CognitoAuthentication } from "./constructs/authentication";
 import {
@@ -175,11 +176,11 @@ export class AtatWebApiStack extends cdk.Stack {
     // function does not require any AWS service so a simple constructor function was used.
     // These functions also touch on a refactoring for the design of these functions that
     // move away from the use case of the API functions.
-    const validatePortfolio = new lambdaNodeJs.NodejsFunction(
+    const provisioningRequest = new lambdaNodeJs.NodejsFunction(
       this,
-      utils.apiSpecOperationFunctionName("validateCompletePortfolioDraft"),
+      utils.apiSpecOperationFunctionName("provisioningRequest"),
       {
-        entry: utils.packageRoot() + "/api/portfolioDrafts/submit/validateCompletePortfolioDraft.ts",
+        entry: utils.packageRoot() + "/api/provision/provisioningRequest.ts",
         vpc: props.vpc,
       }
     );
@@ -190,23 +191,77 @@ export class AtatWebApiStack extends cdk.Stack {
         table: this.table,
         lambdaVpc: props.vpc,
         method: HttpMethod.POST,
-        handlerPath: this.determineApiHandlerPath("persistPortfolioDraft", "portfolioDrafts/submit/"),
+        handlerPath: this.determineApiHandlerPath("persistPortfolioDraft", "provision/"),
       }
     );
     const rejectPortfolio = new ApiDynamoDBFunction(this, utils.apiSpecOperationFunctionName("rejectPortfolioDraft"), {
       table: this.table,
       lambdaVpc: props.vpc,
       method: HttpMethod.POST,
-      handlerPath: this.determineApiHandlerPath("rejectPortfolioDraft", "portfolioDrafts/submit/"),
+      handlerPath: this.determineApiHandlerPath("rejectPortfolioDraft", "provision/"),
     });
-    this.functions.push(validatePortfolio, persistCspResponse.fn, rejectPortfolio.fn);
-    // State machine tasks
-    const portfolioValidationTask = new SfnLambdaInvokeTask(this, "ValidatePortfolioTask", {
-      sfnTask: {
-        lambdaFunction: validatePortfolio,
-        timeout: cdk.Duration.seconds(60),
+    this.functions.push(provisioningRequest, persistCspResponse.fn, rejectPortfolio.fn);
+
+    // State machine tasks/passes
+    const provisioningPass = new SfnPassState(this, "ProvisioningPass", {
+      sfnPass: {
+        comment: "Pass state that passes the original input along with a status code used later in the state machine.",
         inputPath: "$",
-        resultPath: "$.results",
+        parameters: {
+          // temporarily hardcoded status code to always reach the persistCspResponseTask
+          response: { statusCode: 200 },
+          input: sfn.JsonPath.stringAt("$"),
+        },
+        resultPath: "$.passRequest",
+      },
+    }).sfnPass;
+    const provisioningTask = new SfnLambdaInvokeTask(this, "ProvisioningTask", {
+      sfnTask: {
+        lambdaFunction: provisioningRequest,
+        timeout: cdk.Duration.seconds(60),
+        // "$"" sends all of the input to the lambda function, and in this task is coming from the
+        // SQS message being sent with the start of the step function execution
+        inputPath: "$",
+        // ResultSelector allows you to select and shape the raw output from the lambda which is
+        // placed in the resultPath. In this task the result is placed inside of "$.request" for the
+        // next task. ResultSelector is optional, but if there is a particular shape or information
+        // that the output should it can help.
+        resultSelector: {
+          body: sfn.JsonPath.stringAt("$.Payload.body"),
+          type: sfn.JsonPath.stringAt("$.Payload.type"),
+          csp: sfn.JsonPath.stringAt("$.Payload.csp"),
+        },
+        // ResultPath is being combined with the original input under "request".
+        // If no resultPath is specified the entire input is replaced with the output which is
+        // effectively setting ResultPath to "$".
+        resultPath: "$.request",
+        // "$" outputs the original input, in addition to the "$.request" output from the lambda
+        // this can be cut down, by specifying only what you want (e.g., $.request) to be
+        // sent to the next state
+        outputPath: "$",
+      },
+    }).sfnTask;
+    const transformRequestTask = new SfnLambdaInvokeTask(this, "TranslateToCspApiRequest", {
+      sfnTask: {
+        lambdaFunction: provisioningRequest,
+        inputPath: "$.request",
+        resultSelector: {
+          body: sfn.JsonPath.stringAt("$.Payload.body"),
+        },
+        resultPath: "$.transformedRequest",
+        outputPath: "$",
+      },
+    }).sfnTask;
+    const invokeCspApiTask = new SfnLambdaInvokeTask(this, "InvokeCspApi", {
+      sfnTask: {
+        lambdaFunction: provisioningRequest,
+        inputPath: "$",
+        resultSelector: {
+          statusCode: sfn.JsonPath.stringAt("$.Payload.passRequest.response.statusCode"),
+          body: sfn.JsonPath.stringAt("$.Payload.body"),
+          retryCount: sfn.JsonPath.stringAt("$$.State.RetryCount"),
+        },
+        resultPath: "$.cspResponse",
         outputPath: "$",
       },
     }).sfnTask;
@@ -214,25 +269,43 @@ export class AtatWebApiStack extends cdk.Stack {
       // update provisioning status to 'complete'
       sfnTask: {
         lambdaFunction: persistCspResponse.fn,
-        inputPath: "$.results.Payload",
-        timeout: cdk.Duration.seconds(60),
+        inputPath: "$.cspResponse",
       },
     }).sfnTask;
     const rejectResponseTask = new SfnLambdaInvokeTask(this, "RejectPortfolioTask", {
       // update provisioning status to 'failed'
       sfnTask: {
         lambdaFunction: rejectPortfolio.fn,
-        inputPath: "$.results.Payload",
-        timeout: cdk.Duration.seconds(60),
+        inputPath: "$.cspResponse",
       },
     }).sfnTask;
 
-    // Composing state machine
-    const stateMachineWorkflow = portfolioValidationTask.next(
-      new sfn.Choice(this, "ValidationResultCheck")
-        .when(sfn.Condition.stringEquals("$.results.Payload.validationResult", "SUCCESS"), persistCspResponseTask)
-        .when(sfn.Condition.stringEquals("$.results.Payload.validationResult", "FAILED"), rejectResponseTask)
+    // State machine conditions
+    const successResponse = sfn.Condition.numberEquals("$.cspResponse.statusCode", 200);
+    const clientErrorResponse = sfn.Condition.or(
+      sfn.Condition.numberEquals("$.cspResponse.statusCode", 400),
+      sfn.Condition.numberEquals("$.cspResponse.statusCode", 402),
+      sfn.Condition.numberEquals("$.cspResponse.statusCode", 404)
     );
+    const maxRetries = sfn.Condition.and(
+      sfn.Condition.numberGreaterThan("$.cspResponse.retryCount", 6),
+      sfn.Condition.numberGreaterThanEquals("$.cspResponse.statusCode", 500)
+    );
+    const internalErrorResponse = sfn.Condition.numberGreaterThanEquals("$.cspResponse.statusCode", 500);
+
+    // State machine choices
+    const httpResponseChoices = new sfn.Choice(this, "HttpResponse")
+      .when(successResponse, persistCspResponseTask)
+      .when(clientErrorResponse, rejectResponseTask)
+      .when(maxRetries, rejectResponseTask)
+      .when(internalErrorResponse, invokeCspApiTask);
+
+    // Composing state machine
+    const stateMachineWorkflow = provisioningPass
+      .next(provisioningTask) // previously used for input validation, but removed
+      .next(transformRequestTask)
+      .next(invokeCspApiTask)
+      .next(httpResponseChoices);
     const stateMachineLogGroup = new logs.LogGroup(this, "StepFunctionsLogs", {
       retention: logs.RetentionDays.ONE_WEEK,
     });
@@ -264,7 +337,7 @@ export class AtatWebApiStack extends cdk.Stack {
         // portfolios to never be processed.
         batchSize: 1,
         method: HttpMethod.GET,
-        handlerPath: this.determineApiHandlerPath("consumePortfolioDraftSubmitQueue", "portfolioDrafts/submit/"),
+        handlerPath: this.determineApiHandlerPath("consumePortfolioDraftSubmitQueue", "provision/"),
         createEventSource: true,
       }).fn
     );

@@ -3,9 +3,8 @@ import { DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { mockClient } from "aws-sdk-client-mock";
 import { v4 as uuidv4 } from "uuid";
 import { handler } from "./persistPortfolioDraft";
-import { mockPortfolioDraft } from "../commonPortfolioDraftMockData";
-import { ProvisioningStatus } from "../../models/ProvisioningStatus";
-import { DATABASE_ERROR } from "../../utils/errors";
+import { mockPortfolioDraft } from "../portfolioDrafts/commonPortfolioDraftMockData";
+import { ProvisioningStatus } from "../models/ProvisioningStatus";
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const consoleLogSpy = jest.spyOn(console, "log");
@@ -16,10 +15,12 @@ beforeEach(() => {
 
 describe("Persist CSP response handler", () => {
   const validatedGoodPortfolioDraft: any = {
-    ...mockPortfolioDraft,
-    submit_id: uuidv4(),
-    status: ProvisioningStatus.IN_PROGRESS,
-    validatedResult: "SUCCESS",
+    body: JSON.stringify({
+      ...mockPortfolioDraft,
+      submit_id: uuidv4(),
+      status: ProvisioningStatus.IN_PROGRESS,
+      validatedResult: "SUCCESS",
+    }),
   };
   it("should return a portfolio draft with a status of complete", async () => {
     const updatedPortfolioDraft = { ...validatedGoodPortfolioDraft, status: ProvisioningStatus.COMPLETE };

@@ -1,7 +1,7 @@
 import { SQSEvent } from "aws-lambda";
 import { handler } from "./consumePortfolioDraftSubmitQueue";
 import { mockClient } from "aws-sdk-client-mock";
-import { sfnClient } from "../../utils/aws-sdk/stepFunctions";
+import { sfnClient } from "../utils/aws-sdk/stepFunctions";
 import * as crypto from "crypto";
 
 function generateTestEvent(body: string): SQSEvent {
@@ -38,10 +38,13 @@ beforeEach(() => {
 });
 
 describe("Test consumer handler", () => {
-  it.each(["testEvent", "test", "", "4"])("should log data to stdout", async (eventBody) => {
-    const event = generateTestEvent(eventBody);
-    await handler(event);
-    expect(consoleLogSpy).toBeCalledWith(`Sent Record: ${eventBody}`);
-    expect(consoleLogSpy).toHaveBeenCalledTimes(3);
-  });
+  it.each([{ body: "testEvent" }, { test: "test" }, {}, { number: 4 }])(
+    "should log data to stdout",
+    async (eventBody) => {
+      const event = generateTestEvent(JSON.stringify(eventBody));
+      await handler(event);
+      expect(consoleLogSpy).toBeCalledWith(`Sent Record: ${JSON.stringify(eventBody)}`);
+      expect(consoleLogSpy).toHaveBeenCalledTimes(3);
+    }
+  );
 });

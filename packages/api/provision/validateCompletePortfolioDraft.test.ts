@@ -1,8 +1,8 @@
 import { handler, ValidationResult } from "./validateCompletePortfolioDraft";
-import { mockPortfolioDraft } from "../commonPortfolioDraftMockData";
+import { mockPortfolioDraft } from "../portfolioDrafts/commonPortfolioDraftMockData";
 import { v4 as uuidv4 } from "uuid";
-import { APPLICATION_STEP, FUNDING_STEP, PORTFOLIO_STEP } from "../../models/PortfolioDraft";
-import { ProvisioningStatus } from "../../models/ProvisioningStatus";
+import { APPLICATION_STEP, FUNDING_STEP, PORTFOLIO_STEP } from "../models/PortfolioDraft";
+import { ProvisioningStatus } from "../models/ProvisioningStatus";
 import { Context } from "aws-lambda";
 
 describe("validate portfolio draft submission", () => {

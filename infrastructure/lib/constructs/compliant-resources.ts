@@ -170,7 +170,7 @@ export class SecureStateMachine extends cdk.Construct {
     super(scope, id);
     const stateMachine = new sfn.StateMachine(this, id, {
       // defaults that can be overridden
-      timeout: cdk.Duration.seconds(130),
+      timeout: cdk.Duration.minutes(15),
       stateMachineType: sfn.StateMachineType.STANDARD,
       // configuration passed in
       ...props.stateMachineProps,

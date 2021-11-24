@@ -1,8 +1,8 @@
 import { Context } from "aws-lambda";
-import { PortfolioDraft } from "../../models/PortfolioDraft";
+import { PortfolioDraft } from "../models/PortfolioDraft";
 import middy from "@middy/core";
 import validator from "@middy/validator";
-import schema = require("../../models/schema.json");
+import schema = require("../models/schema.json");
 
 export enum ValidationResult {
   SUCCESS = "SUCCESS",
