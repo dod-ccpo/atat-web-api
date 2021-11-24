@@ -1,0 +1,16 @@
+{
+  "type": "postgres",
+  "host": "localhost",
+  "port": 5432,
+  "username": "postgres",
+  "password": "postgres",
+  "database": "atat",
+  "synchronize": true,
+  "logging": false,
+  "entities": ["orm/entity/**/*.{j,t}s"],
+  "migrations": ["orm/migration/**/*.{j,t}s"],
+  "cli": {
+    "entitiesDir": "orm/entity",
+    "migrationsDir": "orm/migration"
+  }
+}
