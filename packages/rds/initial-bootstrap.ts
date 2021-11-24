@@ -1,10 +1,8 @@
-import { getDatabaseCredentials } from "./auth/secrets";
+import axios from "axios";
 import { createConnection, Connection } from "typeorm";
-
 import { CloudFormationCustomResourceEvent, CloudFormationCustomResourceResponse } from "aws-lambda";
 
-import * as https from "https";
-import * as url from "url";
+import { getDatabaseCredentials } from "./auth/secrets";
 
 type User = {
   name: string;
@@ -64,29 +62,12 @@ async function sendResponse(
   response: CloudFormationCustomResourceResponse
 ): Promise<void> {
   const body = JSON.stringify(response);
-  const responseUrl = new url.URL(event.ResponseURL);
+  console.log("Result body: " + body);
 
-  const request = https.request(
-    responseUrl,
-    {
-      method: "PUT",
-      headers: {
-        "content-type": "application/json",
-        "content-length": body.length,
-      },
-    },
-    (response) => {
-      console.log("Status: " + response.statusCode);
-      console.log("Headers: " + JSON.stringify(response.headers));
-    }
-  );
-  request.on("error", (error) => {
-    console.log("Error sending response: " + error);
-  });
-
-  request.write(body);
-  request.end();
-  console.log("Response sent");
+  const cfnResponse = await axios.put(event.ResponseURL, body);
+  console.log("Status: " + cfnResponse.status);
+  console.log("Headers: " + JSON.stringify(cfnResponse.headers));
+  console.log("Response: " + cfnResponse.data);
 }
 
 export async function handler(event: CloudFormationCustomResourceEvent): Promise<void> {

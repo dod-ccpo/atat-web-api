@@ -16,6 +16,7 @@
     "@aws-sdk/signature-v4": "3.40.0",
     "@aws-sdk/util-format-url": "3.40.0",
     "@types/aws-lambda": "^8.10.83",
+    "axios": "^0.24.0",
     "pg": "^8.7.1",
     "reflect-metadata": "^0.1.13",
     "typeorm": "^0.2.40"
