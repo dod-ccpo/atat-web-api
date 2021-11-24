@@ -2,7 +2,7 @@ openapi: 3.0.2
 info:
   description: >-
     This is the ATAT Internal API. It has operations for creating, updating and destroying ATAT resources, as well as
-    for obtaining reporting data on provisioned Portfolios.
+    for obtaining reporting data about provisioned Portfolios.
   version: 1.0.0
   title: ATAT Internal API
   contact:
@@ -51,7 +51,7 @@ paths:
     post:
       operationId: createPortfolio
       requestBody:
-        description: Use an empty String to create an empty Portfolio or pass a complete object to create a complete version.
+        description: Use an empty request body to create an empty Portfolio or pass a complete object to create a complete version.
         content:
           application/json:
             schema:
@@ -189,7 +189,7 @@ paths:
             - cognitoAuthorizer: []
           - Ref: AWS::NoValue
     delete:
-      description: Deletes a Portfolio (hard delete if not provisioned, soft delete otherwise)
+      description: Deletes a Portfolio (soft delete if provisioned, hard delete otherwise)
       operationId: deletePortfolio
       parameters:
         - name: portfolioId
@@ -710,7 +710,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/EnvironmentDetail'
         '404':
-          description: Portfolio, Application ot Environment with the given ID does not exist
+          description: Portfolio, Application or Environment with the given ID does not exist
       x-amazon-apigateway-request-validator: "request-params-validator"
       x-amazon-apigateway-integration:
         httpMethod: "POST"
@@ -1735,8 +1735,8 @@ components:
         code:
           type: string
           enum:
-          - INVALID_INPUT
-          - OTHER
+            - INVALID_INPUT
+            - OTHER
         message:
           type: string
       required:
@@ -1973,8 +1973,9 @@ components:
           items:
             $ref: "#/components/schemas/Clin"
         taskOrderFile:
-          description: "Metadata associated with file which was previously uploaded\
-            \ by POST /taskOrderFiles"
+          description: >-
+            Metadata associated with file which was previously uploaded
+            by POST /taskOrderFiles
           allOf:
             - $ref: "#/components/schemas/FileMetadataSummary"
         taskOrderNumber:
@@ -1998,9 +1999,10 @@ components:
       additionalProperties: false
       description: "Metadata describing an uploaded file"
     PortfolioAccess:
-      description: "Represents a set of Operators who should be granted access to\
-        \ a Portfolio at a specific access level. Uses an enum construct for forward\
-        \ compatibility should other access levels be specified."
+      description: >-
+        Represents a set of Operators who should be granted access to
+        a Portfolio at a specific access level. Uses an enum construct for forward
+        compatibility should other access levels be specified.
       properties:
         portfolioAdministrators:
           type: array
@@ -2008,9 +2010,10 @@ components:
             type: string
             format: email
     AppEnvAccess:
-      description: "Represents a set of Operators who should be granted access to\
-        \ an Application or Environment at a specific access level. The same access\
-        \ levels are available for both Applications & Environments."
+      description: >-
+        Represents a set of Operators who should be granted access to
+        an Application or Environment at a specific access level. The same access
+        levels are available for both Applications & Environments.
       properties:
         administrators:
           type: array
