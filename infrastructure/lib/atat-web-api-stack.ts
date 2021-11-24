@@ -29,6 +29,7 @@ import {
 import { TaskOrderLifecycle } from "./constructs/task-order-lifecycle";
 import { HttpMethod } from "./http";
 import { TablePermissions } from "./table-permissions";
+import { QueuePermissions } from "./queue-permissions";
 import * as utils from "./util";
 import { convertSchema } from "./load-schema";
 import { ApiFunctiontest } from "./constructs/lambda-fn";
@@ -166,7 +167,8 @@ export class AtatWebApiStack extends cdk.Stack {
       "submitPortfolioDraft",
       "portfolioDrafts/submit/",
       props.vpc,
-      TablePermissions.READ_WRITE
+      TablePermissions.READ_WRITE,
+      QueuePermissions.SEND
     );
 
     // The API spec, which just so happens to be a valid CloudFormation snippet (with some actual CloudFormation
@@ -456,7 +458,12 @@ export class AtatWebApiStack extends cdk.Stack {
     return utils.packageRoot() + "/api/" + handlerFolder + utils.apiSpecOperationFileName(operationId);
   }
 
-  private addDatabaseApiFunction(operationId: string, handlerFolder: string, vpc: ec2.IVpc, permissions: string) {
+  private addDatabaseApiFunction(
+    operationId: string,
+    handlerFolder: string,
+    vpc: ec2.IVpc,
+    permissions: TablePermissions
+  ) {
     const props = {
       table: this.table,
       tablePermissions: permissions,
@@ -467,11 +474,18 @@ export class AtatWebApiStack extends cdk.Stack {
     this.functions.push(new ApiFunctiontest(this, utils.apiSpecOperationFunctionName(operationId), props).fn);
   }
 
-  private addQueueDatabaseApiFunction(operationId: string, handlerFolder: string, vpc: ec2.IVpc, permissions: string) {
+  private addQueueDatabaseApiFunction(
+    operationId: string,
+    handlerFolder: string,
+    vpc: ec2.IVpc,
+    tablePermissions: TablePermissions,
+    queuePermissions: QueuePermissions
+  ) {
     const props = {
       table: this.table,
-      tablePermissions: permissions,
+      tablePermissions: tablePermissions,
       queue: this.submitQueue,
+      queuePermissions: queuePermissions,
       lambdaVpc: vpc,
       method: utils.apiSpecOperationMethod(operationId),
       handlerPath: this.determineApiHandlerPath(operationId, handlerFolder),
