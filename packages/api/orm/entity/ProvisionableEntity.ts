@@ -10,14 +10,14 @@ export abstract class ProvisionableEntity extends BaseEntity {
   })
   provisioningStatus: string;
 
-  @Column({ type: "simple-array", default: "" })
+  @Column({ type: "varchar", array: true, default: "{}" })
   administrators: Array<string>;
 
   // Not valid for Portfolio
-  @Column({ type: "simple-array", default: "" })
+  @Column({ type: "varchar", array: true, default: "{}" })
   contributors: Array<string>;
 
   // Not valid for Portfolio
-  @Column({ type: "simple-array", default: "" })
+  @Column({ type: "varchar", array: true, default: "{}" })
   readOnlyOperators: Array<string>;
 }
