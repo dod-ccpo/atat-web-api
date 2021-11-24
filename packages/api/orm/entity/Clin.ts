@@ -6,7 +6,6 @@ import { TaskOrder } from "./TaskOrder";
 export class Clin extends BaseEntity {
   @Column({
     type: String,
-    nullable: false,
     length: 4,
     comment: "contract line item number from task order, 0001 through 9999",
   })
@@ -14,7 +13,6 @@ export class Clin extends BaseEntity {
 
   @Column({
     type: String,
-    nullable: false,
     comment: "indefinite-delivery, indefinite-quantity CLIN specific to JWCC",
   })
   idiqClin: string;
@@ -22,7 +20,6 @@ export class Clin extends BaseEntity {
   // decimal(17,2) allows tens of trillions
   @Column({
     type: "decimal",
-    nullable: false,
     precision: 17,
     scale: 2,
     default: 0.0,
@@ -32,7 +29,6 @@ export class Clin extends BaseEntity {
 
   @Column({
     type: "decimal",
-    nullable: false,
     precision: 17,
     scale: 2,
     default: 0.0,
@@ -40,10 +36,10 @@ export class Clin extends BaseEntity {
   })
   obligatedFunds: number;
 
-  @Column({ type: "date", nullable: false, comment: "start of POP during which funds can be spent" })
+  @Column({ type: "date", comment: "start of POP during which funds can be spent" })
   popStartDate: Date;
 
-  @Column({ type: "date", nullable: false, comment: "end of POP during which funds can be spent" })
+  @Column({ type: "date", comment: "end of POP during which funds can be spent" })
   popEndDate: Date;
 
   @ManyToOne(() => TaskOrder, (taskOrder) => taskOrder.clins)

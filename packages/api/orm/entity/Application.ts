@@ -5,7 +5,7 @@ import { ProvisionableEntity } from "./ProvisionableEntity";
 
 @Entity()
 export class Application extends ProvisionableEntity {
-  @Column({ type: String, nullable: false, length: 100 })
+  @Column({ type: String, length: 100 })
   name: string;
 
   @Column({ type: String, nullable: true, length: 300 })

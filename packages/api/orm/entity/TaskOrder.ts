@@ -8,22 +8,21 @@ import { Portfolio } from "./Portfolio";
 export class TaskOrder extends BaseEntity {
   @Column({
     type: String,
-    nullable: false,
     length: 17,
     comment: "TO numbers are 13 characters. TO modifications are 17 characters.",
   })
   taskOrderNumber: string;
 
-  @Column({ type: "uuid", nullable: false, comment: "S3 object key of task order pdf" })
+  @Column({ type: "uuid", comment: "S3 object key of task order pdf" })
   fileId: string;
 
-  @Column({ type: String, nullable: false, length: 256, comment: "name of pdf file when uploaded" })
+  @Column({ type: String, length: 256, comment: "name of pdf file when uploaded" })
   fileName: string;
 
   @Column({ nullable: true, comment: "pdf file size in bytes" })
   fileSize: number;
 
-  @Column({ type: "enum", nullable: false, enum: FileScanStatus, default: FileScanStatus.PENDING })
+  @Column({ type: "enum", enum: FileScanStatus, default: FileScanStatus.PENDING })
   fileScanStatus: FileScanStatus;
 
   @ManyToOne(() => Portfolio, (portfolio) => portfolio.taskOrders)

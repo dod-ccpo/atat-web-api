@@ -6,22 +6,22 @@ import { TaskOrder } from "./TaskOrder";
 
 @Entity()
 export class Portfolio extends ProvisionableEntity {
-  @Column({ type: String, nullable: false, length: 100 })
+  @Column({ type: String, length: 100 })
   name: string;
 
   @Column({ type: String, nullable: true, length: 300 })
   description: string;
 
-  @Column({ type: String, nullable: false })
+  @Column({ type: String })
   owner: string;
 
-  @Column({ type: "enum", enum: CloudServiceProvider, nullable: false })
+  @Column({ type: "enum", enum: CloudServiceProvider })
   csp: CloudServiceProvider;
 
-  @Column({ type: String, nullable: false, array: true })
+  @Column({ type: String, array: true })
   dodComponents: Array<string>;
 
-  @Column({ type: String, nullable: false, array: true })
+  @Column({ type: String, array: true })
   portfolioManagers: Array<string>;
 
   @OneToMany(() => TaskOrder, (taskOrder) => taskOrder.portfolio)
