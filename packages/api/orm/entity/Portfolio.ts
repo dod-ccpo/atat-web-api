@@ -18,10 +18,10 @@ export class Portfolio extends ProvisionableEntity {
   @Column({ type: "enum", enum: CloudServiceProvider })
   csp: CloudServiceProvider;
 
-  @Column({ type: String, array: true })
+  @Column({ type: "varchar", array: true })
   dodComponents: Array<string>;
 
-  @Column({ type: String, array: true })
+  @Column({ type: "varchar", array: true })
   portfolioManagers: Array<string>;
 
   @OneToMany(() => TaskOrder, (taskOrder) => taskOrder.portfolio)
