@@ -9,4 +9,15 @@ export abstract class ProvisionableEntity extends BaseEntity {
     default: ProvisioningStatus.NOT_STARTED,
   })
   provisioningStatus: string;
+
+  @Column({ type: "simple-array", default: "" })
+  administrators: Array<string>;
+
+  // Not valid for Portfolio
+  @Column({ type: "simple-array", default: "" })
+  contributors: Array<string>;
+
+  // Not valid for Portfolio
+  @Column({ type: "simple-array", default: "" })
+  readOnlyOperators: Array<string>;
 }

@@ -16,14 +16,4 @@ export class Application extends ProvisionableEntity {
 
   @OneToMany(() => Environment, (environment) => environment.application)
   environments: Array<Environment>;
-
-  // operators - simple-array or AppEnvOperator[] ?
-  @Column({ type: "simple-array", default: "" })
-  administrators: Array<string>;
-
-  @Column({ type: "simple-array", default: "" })
-  contributors: Array<string>;
-
-  @Column({ type: "simple-array", default: "" })
-  readOnlyOperators: Array<string>;
 }
