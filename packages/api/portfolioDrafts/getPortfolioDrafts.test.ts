@@ -2,7 +2,7 @@ import middy from "@middy/core";
 import { Context } from "aws-lambda";
 import { validRequest } from "../portfolioDrafts/commonPortfolioDraftMockData";
 import { mockPortfolioStep } from "../portfolioDrafts/portfolio/commonPortfolioMockData";
-import { IpCheckerMiddleware } from "./ipLogging";
+import { IpCheckerMiddleware } from "../utils/ipLogging";
 
 describe("Test console logging", function () {
   it("should console log the event", async () => {
