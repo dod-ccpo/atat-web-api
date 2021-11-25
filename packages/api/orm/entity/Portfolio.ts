@@ -6,13 +6,13 @@ import { TaskOrder } from "./TaskOrder";
 
 @Entity()
 export class Portfolio extends ProvisionableEntity {
-  @Column({ type: String, length: 100 })
+  @Column({ length: 100 })
   name: string;
 
-  @Column({ type: String, nullable: true, length: 300 })
+  @Column({ nullable: true, length: 300 })
   description: string;
 
-  @Column({ type: String })
+  @Column()
   owner: string;
 
   @Column({ type: "enum", enum: CloudServiceProvider })
