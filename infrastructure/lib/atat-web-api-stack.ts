@@ -17,7 +17,6 @@ import { ApiSQSFunction } from "./constructs/api-sqs-function";
 import { ApiStepFnsSQSFunction } from "./constructs/api-sqs-sfn-function";
 import { SfnLambdaInvokeTask } from "./constructs/sfnLambdaInvokeTask";
 import { SfnPassState } from "./constructs/sfnPass";
-import { ApiSQSDynamoDBFunction } from "./constructs/api-sqs-dynamodb-function";
 import { CognitoAuthentication } from "./constructs/authentication";
 import {
   SecureBucket,
@@ -28,8 +27,11 @@ import {
 } from "./constructs/compliant-resources";
 import { TaskOrderLifecycle } from "./constructs/task-order-lifecycle";
 import { HttpMethod } from "./http";
+import { TablePermissions } from "./table-permissions";
+import { QueuePermissions } from "./queue-permissions";
 import * as utils from "./util";
 import { convertSchema } from "./load-schema";
+import { ApiFlexFunction } from "./constructs/lambda-fn";
 interface AtatIdpProps {
   secretName: string;
   providerName: string;
@@ -125,27 +127,48 @@ export class AtatWebApiStack extends cdk.Stack {
     convertSchema();
 
     // PortfolioDraft Operations
-    this.addDatabaseApiFunction("getPortfolioDrafts", "portfolioDrafts/", props.vpc);
-    this.addDatabaseApiFunction("getPortfolioDraft", "portfolioDrafts/", props.vpc);
-    this.addDatabaseApiFunction("createPortfolioDraft", "portfolioDrafts/", props.vpc);
-    this.addDatabaseApiFunction("deletePortfolioDraft", "portfolioDrafts/", props.vpc);
+    this.addDatabaseApiFunction("getPortfolioDrafts", "portfolioDrafts/", props.vpc, TablePermissions.READ);
+    this.addDatabaseApiFunction("getPortfolioDraft", "portfolioDrafts/", props.vpc, TablePermissions.READ);
+    this.addDatabaseApiFunction("createPortfolioDraft", "portfolioDrafts/", props.vpc, TablePermissions.READ_WRITE);
+    this.addDatabaseApiFunction("deletePortfolioDraft", "portfolioDrafts/", props.vpc, TablePermissions.READ_WRITE);
     // NotImplemented is the "default" method for unimplemented operations
-    this.addDatabaseApiFunction("notImplemented", "portfolioDrafts/", props.vpc);
+    this.addDatabaseApiFunction("notImplemented", "portfolioDrafts/", props.vpc, TablePermissions.READ);
 
     // PortfolioStep Operations (all files in the portfolio/ folder)
-    this.addDatabaseApiFunction("getPortfolioStep", "portfolioDrafts/portfolio/", props.vpc);
-    this.addDatabaseApiFunction("createPortfolioStep", "portfolioDrafts/portfolio/", props.vpc);
+    this.addDatabaseApiFunction("getPortfolioStep", "portfolioDrafts/portfolio/", props.vpc, TablePermissions.READ);
+    this.addDatabaseApiFunction(
+      "createPortfolioStep",
+      "portfolioDrafts/portfolio/",
+      props.vpc,
+      TablePermissions.READ_WRITE
+    );
 
     // FundingStep Operations (all files live in the funding/ folder)
-    this.addDatabaseApiFunction("getFundingStep", "portfolioDrafts/funding/", props.vpc);
-    this.addDatabaseApiFunction("createFundingStep", "portfolioDrafts/funding/", props.vpc);
+    this.addDatabaseApiFunction("getFundingStep", "portfolioDrafts/funding/", props.vpc, TablePermissions.READ);
+    this.addDatabaseApiFunction(
+      "createFundingStep",
+      "portfolioDrafts/funding/",
+      props.vpc,
+      TablePermissions.READ_WRITE
+    );
 
     // ApplicationStep Operations (all files live in the application/ folder)
-    this.addDatabaseApiFunction("getApplicationStep", "portfolioDrafts/application/", props.vpc);
-    this.addDatabaseApiFunction("createApplicationStep", "portfolioDrafts/application/", props.vpc);
+    this.addDatabaseApiFunction("getApplicationStep", "portfolioDrafts/application/", props.vpc, TablePermissions.READ);
+    this.addDatabaseApiFunction(
+      "createApplicationStep",
+      "portfolioDrafts/application/",
+      props.vpc,
+      TablePermissions.READ_WRITE
+    );
 
     // Submission operations (all files live in the submit/ folder)
-    this.addQueueDatabaseApiFunction("submitPortfolioDraft", "portfolioDrafts/submit/", props.vpc);
+    this.addQueueDatabaseApiFunction(
+      "submitPortfolioDraft",
+      "portfolioDrafts/submit/",
+      props.vpc,
+      TablePermissions.READ_WRITE,
+      QueuePermissions.SEND
+    );
 
     // The API spec, which just so happens to be a valid CloudFormation snippet (with some actual CloudFormation
     // in it) gets uploaded to S3. The Asset resource reuses the same bucket that the CDK does, so this does not
@@ -434,26 +457,40 @@ export class AtatWebApiStack extends cdk.Stack {
     return utils.packageRoot() + "/api/" + handlerFolder + utils.apiSpecOperationFileName(operationId);
   }
 
-  private addDatabaseApiFunction(operationId: string, handlerFolder: string, vpc: ec2.IVpc) {
+  private addDatabaseApiFunction(
+    operationId: string,
+    handlerFolder: string,
+    vpc: ec2.IVpc,
+    permissions: TablePermissions
+  ) {
     const props = {
       table: this.table,
+      tablePermissions: permissions,
       lambdaVpc: vpc,
       method: utils.apiSpecOperationMethod(operationId),
       handlerPath: this.determineApiHandlerPath(operationId, handlerFolder),
     };
-    this.functions.push(new ApiDynamoDBFunction(this, utils.apiSpecOperationFunctionName(operationId), props).fn);
+    this.functions.push(new ApiFlexFunction(this, utils.apiSpecOperationFunctionName(operationId), props).fn);
   }
 
-  private addQueueDatabaseApiFunction(operationId: string, handlerFolder: string, vpc: ec2.IVpc) {
+  private addQueueDatabaseApiFunction(
+    operationId: string,
+    handlerFolder: string,
+    vpc: ec2.IVpc,
+    tablePermissions: TablePermissions,
+    queuePermissions: QueuePermissions
+  ) {
     const props = {
       table: this.table,
+      tablePermissions: tablePermissions,
       queue: this.submitQueue,
+      queuePermissions: queuePermissions,
       lambdaVpc: vpc,
       method: utils.apiSpecOperationMethod(operationId),
       handlerPath: this.determineApiHandlerPath(operationId, handlerFolder),
       createEventSource: operationId.startsWith("consume"),
     };
-    this.functions.push(new ApiSQSDynamoDBFunction(this, utils.apiSpecOperationFunctionName(operationId), props).fn);
+    this.functions.push(new ApiFlexFunction(this, utils.apiSpecOperationFunctionName(operationId), props).fn);
   }
 
   private setupCognito(props: AtatIdpProps) {
