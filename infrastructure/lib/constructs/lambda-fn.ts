@@ -144,7 +144,7 @@ export class ApiFunctiontest extends cdk.Construct {
     if (props.table && props.tablePermissions) {
       this.table = props.table;
       this.fn.addEnvironment("ATAT_TABLE_NAME", props.table.tableName);
-      this.grantRequiredTablePermissions(props.tablePermissions);
+      this.grantTablePermissions(props.tablePermissions);
     }
 
     // Optional - grant permissions for secrets manager
@@ -156,14 +156,14 @@ export class ApiFunctiontest extends cdk.Construct {
     if (props.bucket && props.bucketPermissions) {
       this.bucket = props.bucket.bucket;
       this.fn.addEnvironment("DATA_BUCKET", this.bucket.bucketName);
-      this.grantRequiredBucketPermissions(props.bucketPermissions);
+      this.grantBucketPermissions(props.bucketPermissions);
     }
 
     // Optional - create SQS connection and grant permissions
     if (props.queue && props.queuePermissions) {
       this.queue = props.queue;
       this.fn.addEnvironment("ATAT_QUEUE_URL", props.queue.queueUrl);
-      this.grantRequiredSQSPermissions(props.queuePermissions);
+      this.grantSQSPermissions(props.queuePermissions);
       // allows the fn to subscribe to the queue using an EventSource
       if (props.createEventSource) {
         this.fn.addEventSource(new SqsEventSource(this.queue, props.batchSize ? { batchSize: props.batchSize } : {}));
@@ -178,7 +178,7 @@ export class ApiFunctiontest extends cdk.Construct {
     }
   }
 
-  private grantRequiredTablePermissions(tablePermissions: string | undefined): iam.Grant | undefined {
+  private grantTablePermissions(tablePermissions: string | undefined): iam.Grant | undefined {
     switch (tablePermissions) {
       case "ALL":
         return this.table.grantFullAccess(this.fn);
@@ -193,7 +193,7 @@ export class ApiFunctiontest extends cdk.Construct {
     }
   }
 
-  private grantRequiredBucketPermissions(bucketPermissions: string | undefined): iam.Grant | undefined {
+  private grantBucketPermissions(bucketPermissions: string | undefined): iam.Grant | undefined {
     switch (bucketPermissions) {
       case "READ":
         return this.bucket.grantRead(this.fn);
@@ -206,7 +206,7 @@ export class ApiFunctiontest extends cdk.Construct {
     }
   }
 
-  private grantRequiredSQSPermissions(queuePermissions: string | undefined): iam.Grant | undefined {
+  private grantSQSPermissions(queuePermissions: string | undefined): iam.Grant | undefined {
     switch (queuePermissions) {
       case "SEND":
         return this.queue.grantSendMessages(this.fn);
