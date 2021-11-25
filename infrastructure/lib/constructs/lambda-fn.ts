@@ -105,7 +105,7 @@ export interface ApiFunctionPropstest {
   readonly stateMachine?: sfn.IStateMachine;
 }
 
-export class ApiFunctiontest extends cdk.Construct {
+export class ApiFlexFunction extends cdk.Construct {
   /**
    * Required resources
    * @param fn - the NodejsFunction, named with the @id passed to the function

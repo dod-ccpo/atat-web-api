@@ -31,7 +31,7 @@ import { TablePermissions } from "./table-permissions";
 import { QueuePermissions } from "./queue-permissions";
 import * as utils from "./util";
 import { convertSchema } from "./load-schema";
-import { ApiFunctiontest } from "./constructs/lambda-fn";
+import { ApiFlexFunction } from "./constructs/lambda-fn";
 interface AtatIdpProps {
   secretName: string;
   providerName: string;
@@ -470,7 +470,7 @@ export class AtatWebApiStack extends cdk.Stack {
       method: utils.apiSpecOperationMethod(operationId),
       handlerPath: this.determineApiHandlerPath(operationId, handlerFolder),
     };
-    this.functions.push(new ApiFunctiontest(this, utils.apiSpecOperationFunctionName(operationId), props).fn);
+    this.functions.push(new ApiFlexFunction(this, utils.apiSpecOperationFunctionName(operationId), props).fn);
   }
 
   private addQueueDatabaseApiFunction(
@@ -490,7 +490,7 @@ export class AtatWebApiStack extends cdk.Stack {
       handlerPath: this.determineApiHandlerPath(operationId, handlerFolder),
       createEventSource: operationId.startsWith("consume"),
     };
-    this.functions.push(new ApiFunctiontest(this, utils.apiSpecOperationFunctionName(operationId), props).fn);
+    this.functions.push(new ApiFlexFunction(this, utils.apiSpecOperationFunctionName(operationId), props).fn);
   }
 
   private setupCognito(props: AtatIdpProps) {
