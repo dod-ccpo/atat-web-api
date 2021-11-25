@@ -17,7 +17,6 @@ import { ApiSQSFunction } from "./constructs/api-sqs-function";
 import { ApiStepFnsSQSFunction } from "./constructs/api-sqs-sfn-function";
 import { SfnLambdaInvokeTask } from "./constructs/sfnLambdaInvokeTask";
 import { SfnPassState } from "./constructs/sfnPass";
-import { ApiSQSDynamoDBFunction } from "./constructs/api-sqs-dynamodb-function";
 import { CognitoAuthentication } from "./constructs/authentication";
 import {
   SecureBucket,

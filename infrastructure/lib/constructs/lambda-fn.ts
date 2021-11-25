@@ -1,4 +1,3 @@
-import * as apigw from "@aws-cdk/aws-apigateway";
 import * as ec2 from "@aws-cdk/aws-ec2";
 import * as iam from "@aws-cdk/aws-iam";
 import * as secretsmanager from "@aws-cdk/aws-secretsmanager";
