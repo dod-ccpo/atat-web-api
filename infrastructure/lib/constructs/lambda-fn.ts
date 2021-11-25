@@ -123,7 +123,7 @@ export class ApiFunctiontest extends cdk.Construct {
   public readonly table: dynamodb.ITable;
   public readonly bucket: s3.IBucket;
   public readonly queue: sqs.IQueue;
-  public readonly stateMachine?: sfn.IStateMachine;
+  public readonly stateMachine: sfn.IStateMachine;
 
   constructor(scope: cdk.Construct, id: string, props: ApiFunctionPropstest) {
     super(scope, id);
