@@ -47,5 +47,4 @@ export async function baseHandler(event: APIGatewayProxyEvent): Promise<APIGatew
   }
 }
 
-// IP logging middy
 export const handler = middy(baseHandler).use(IpCheckerMiddleware());
