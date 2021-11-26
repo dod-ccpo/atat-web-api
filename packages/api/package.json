@@ -26,8 +26,11 @@
     "http-errors": "^1.8.0",
     "lambda-multipart-parser": "^1.0.1",
     "middy-middleware-json-error-handler": "^3.0.0",
-    "serialize-error": "^8.1.0",
     "nodemailer": "^6.7.0",
+    "pg": "^8.7.1",
+    "reflect-metadata": "^0.1.13",
+    "serialize-error": "^8.1.0",
+    "typeorm": "^0.2.40",
     "uuid": "^8.3.2",
     "xss": "^1.0.10"
   },
@@ -39,6 +42,7 @@
     "eslint": "^7.31.0",
     "jest": "^27.1.1",
     "ts-jest": "^27.0.4",
+    "ts-node": "3.3.0",
     "typescript": "^4.5.2"
   }
 }
