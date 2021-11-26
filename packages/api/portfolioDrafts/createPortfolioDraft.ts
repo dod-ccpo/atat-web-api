@@ -6,6 +6,7 @@ import { ProvisioningStatus } from "../models/ProvisioningStatus";
 import { dynamodbDocumentClient as client } from "../utils/aws-sdk/dynamodb";
 import { DATABASE_ERROR, REQUEST_BODY_NOT_EMPTY } from "../utils/errors";
 import { ApiSuccessResponse, SuccessStatusCode } from "../utils/response";
+import { createConnection } from "../utils/database";
 
 /**
  * Creates a new Portfolio Draft
@@ -16,6 +17,10 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
   if (event.body && !JSON.parse(event.body)) {
     return REQUEST_BODY_NOT_EMPTY;
   }
+
+  const databaseConnection = await createConnection();
+  // SAMPLE CODE -- TODO: REMOVE DURING ACTUAL IMPLEMENTATION
+  console.log(await databaseConnection.query("SELECT * FROM pg_catalog.pg_tables;"));
 
   const now = new Date().toISOString();
   const item: PortfolioDraftSummary = {

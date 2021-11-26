@@ -5,6 +5,7 @@ import * as lambdaNodeJs from "@aws-cdk/aws-lambda-nodejs";
 import * as rds from "@aws-cdk/aws-rds";
 import * as iam from "@aws-cdk/aws-iam";
 import * as secretsmanager from "@aws-cdk/aws-secretsmanager";
+import * as customResources from "@aws-cdk/custom-resources";
 
 import { packageRoot } from "../util";
 import { CfnDBInstance } from "@aws-cdk/aws-rds";
@@ -88,6 +89,8 @@ export class Database extends cdk.Construct {
   // resources in the ConcreteDependable.
   public readonly databaseReady: cdk.ConcreteDependable;
 
+  public readonly clusterResourceId: string;
+
   constructor(scope: cdk.Construct, id: string, props: DatabaseProps) {
     super(scope, id);
     const dbEngine = rds.DatabaseClusterEngine.auroraPostgres({ version: rds.AuroraPostgresEngineVersion.VER_13_4 });
@@ -154,6 +157,17 @@ export class Database extends cdk.Construct {
     // Provide a resource to determine whether the database has been created.
     this.databaseReady = new ConcreteDependable();
     this.databaseReady.add(bootstrapper.bootstrapResource);
+
+    this.clusterResourceId = this.clusterIdGetterCustomResource();
+  }
+
+  public get clusterArn(): string {
+    return cdk.Stack.of(this).formatArn({
+      arnFormat: cdk.ArnFormat.COLON_RESOURCE_NAME,
+      service: "rds",
+      resource: "cluster",
+      resourceName: this.cluster.clusterIdentifier,
+    });
   }
 
   private clusterUserArn(user: string): string {
@@ -161,7 +175,7 @@ export class Database extends cdk.Construct {
       arnFormat: cdk.ArnFormat.COLON_RESOURCE_NAME,
       service: "rds-db",
       resource: "dbuser",
-      resourceName: `${this.cluster.clusterIdentifier}/${user}`,
+      resourceName: `${this.clusterResourceId}/${user}`,
     });
   }
 
@@ -211,5 +225,21 @@ export class Database extends cdk.Construct {
         resources: [this.clusterUserArn("atat_api_admin")],
       })
     );
+  }
+
+  public clusterIdGetterCustomResource(): string {
+    const selector = "DBClusters.0.DbClusterResourceId";
+    const resource = new customResources.AwsCustomResource(this, "ClusterIdGetter", {
+      onCreate: {
+        service: "RDS",
+        action: "describeDBClusters",
+        parameters: {
+          DBClusterIdentifier: this.cluster.clusterIdentifier,
+        },
+        physicalResourceId: customResources.PhysicalResourceId.fromResponse(selector),
+      },
+      policy: customResources.AwsCustomResourcePolicy.fromSdkCalls({ resources: [this.clusterArn] }),
+    });
+    return resource.getResponseField(selector);
   }
 }
