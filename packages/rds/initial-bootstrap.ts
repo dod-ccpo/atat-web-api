@@ -3,6 +3,8 @@ import { createConnection, Connection } from "typeorm";
 import { CloudFormationCustomResourceEvent, CloudFormationCustomResourceResponse } from "aws-lambda";
 
 import { getDatabaseCredentials } from "./auth/secrets";
+import path from "path";
+import * as fs from "fs";
 
 type User = {
   name: string;
@@ -11,50 +13,60 @@ type User = {
 
 const USERS: User[] = [
   {
-    name: "atat-api-read",
+    name: "atat_api_read",
     dbPrivileges: ["CONNECT", "SELECT"],
   },
   {
-    name: "atat-api-write",
+    name: "atat_api_write",
     dbPrivileges: ["CONNECT", "SELECT", "INSERT", "UPDATE", "DELETE"],
   },
   {
-    name: "atat-api-admin",
+    name: "atat_api_admin",
     dbPrivileges: ["ALL PRIVILEGES"],
   },
 ];
 
-async function connectWithoutDatabase(): Promise<Connection> {
-  // This always gets set by the infrastructure code.
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const dbAuth = await getDatabaseCredentials(process.env.DATABASE_SECRET_NAME!);
+async function connectWithoutDatabase(secretName: string, host: string, caBundle: string): Promise<Connection> {
+  const dbAuth = await getDatabaseCredentials(secretName);
   return await createConnection({
     type: "postgres",
-    host: process.env.DATABASE_HOST,
+    host: host,
     port: 5432,
     username: dbAuth.username,
     password: dbAuth.password,
     logging: "all",
+    ssl: {
+      minVersion: "TLSv1.2",
+      ca: fs.readFileSync(path.join(__dirname, caBundle)),
+    },
   });
 }
 
-async function handleCreate(databaseName: string): Promise<void> {
-  const connection = await connectWithoutDatabase();
+async function dbExists(connection: Connection, dbName: string): Promise<boolean> {
+  return !!(await connection.query(`SELECT * FROM pg_database WHERE datname='${dbName}';`)).length;
+}
 
-  await connection.query(`CREATE DATABASE $1 ENCODING UTF8 LOCALE en_US.utf8`, [databaseName]);
+async function userExists(connection: Connection, userName: string): Promise<boolean> {
+  return !!(await connection.query(`SELECT * FROM pg_roles WHERE rolname='${userName}';`)).length;
+}
+
+async function handleCreate(connection: Connection, databaseName: string): Promise<void> {
+  if (!dbExists(connection, databaseName)) {
+    await connection.query(`CREATE DATABASE ${databaseName} WITH ENCODING 'UTF8'`);
+  }
   for (const user of USERS) {
-    await connection.query(`CREATE ROLE $1 WITH LOGIN IN ROLE rds_iam`, [user.name]);
-    await connection.query(`GRANT $1 ON $2 TO $3`, [user.dbPrivileges.join(", "), databaseName, user.name]);
+    if (!userExists(connection, user.name)) {
+      await connection.query(`CREATE ROLE ${user.name} WITH LOGIN IN ROLE rds_iam`);
+    }
+    await connection.query(`GRANT ${user.dbPrivileges.join(", ")} ON DATABASE ${databaseName} TO ${user.name}`);
   }
 }
 
-async function handleDelete(databaseName: string): Promise<void> {
-  const connection = await connectWithoutDatabase();
-
+async function handleDelete(connection: Connection, databaseName: string): Promise<void> {
   for (const user of USERS) {
-    await connection.query(`DROP ROLE IF EXISTS $1`, [user.name]);
+    await connection.query(`DROP ROLE IF EXISTS ${user.name}`);
   }
-  await connection.query(`DROP DATABASE IF EXISTS $1 WITH FORCE`, [databaseName]);
+  await connection.query(`DROP DATABASE IF EXISTS ${databaseName} WITH FORCE`);
 }
 
 async function sendResponse(
@@ -72,35 +84,53 @@ async function sendResponse(
 
 export async function handler(event: CloudFormationCustomResourceEvent): Promise<void> {
   console.log(JSON.stringify(event));
-  const databaseName = event.ResourceProperties.DatabaseName ?? "atat";
+  const databaseName = event.ResourceProperties.DatabaseName;
+  const secretName = event.ResourceProperties.DatabaseSecretName;
+  const databaseHost = event.ResourceProperties.DatabaseHost;
+  const certBundleName = "rds-ca-2017.pem";
+
+  const resultBase = {
+    RequestId: event.RequestId,
+    StackId: event.StackId,
+    LogicalResourceId: event.LogicalResourceId,
+    PhysicalResourceId: databaseName,
+  };
+
+  if (!databaseName || !secretName || !databaseHost) {
+    const result: CloudFormationCustomResourceResponse = {
+      Status: "FAILED",
+      Reason: "DatabaseName, DatabaseSecretName, and DatabaseHost are required parameters",
+      ...resultBase,
+    };
+    console.log(JSON.stringify(result));
+    await sendResponse(event, result);
+    return;
+  }
+
   try {
+    const connection = await connectWithoutDatabase(secretName, databaseHost, certBundleName);
+
     switch (event.RequestType) {
       case "Create":
       case "Update":
-        await handleCreate(databaseName);
+        await handleCreate(connection, databaseName);
         break;
       case "Delete":
-        await handleDelete(databaseName);
+        await handleDelete(connection, databaseName);
         break;
     }
 
     const result: CloudFormationCustomResourceResponse = {
       Status: "SUCCESS",
-      RequestId: event.RequestId,
-      StackId: event.StackId,
-      LogicalResourceId: event.LogicalResourceId,
-      PhysicalResourceId: databaseName,
+      ...resultBase,
     };
     console.log(JSON.stringify(result));
     await sendResponse(event, result);
   } catch (err) {
     const result: CloudFormationCustomResourceResponse = {
-      Status: "SUCCESS",
-      RequestId: event.RequestId,
-      StackId: event.StackId,
-      LogicalResourceId: event.LogicalResourceId,
-      PhysicalResourceId: databaseName,
+      Status: "FAILED",
       Reason: JSON.stringify(err),
+      ...resultBase,
     };
     console.log(JSON.stringify(result));
     await sendResponse(event, result);

@@ -27,21 +27,33 @@ class DatabaseBootstrapper extends cdk.Construct {
     const handler = new lambdaNodeJs.NodejsFunction(this, "Function", {
       vpc: props.vpc,
       entry: packageRoot() + "/rds/initial-bootstrap.ts",
-      environment: {
-        DATABASE_SECRET_NAME: props.secretName,
-        DATABASE_HOST: props.cluster.clusterEndpoint.hostname,
-      },
       memorySize: 1024,
       timeout: cdk.Duration.minutes(5),
       bundling: {
         // forceDockerBundling: true,
         externalModules: ["pg-native"],
+        commandHooks: {
+          beforeBundling() {
+            return [];
+          },
+          afterBundling(inputDir: string, outputDir: string): string[] {
+            return [
+              `curl -sL -o /tmp/rds-ca-2017.pem https://truststore.pki.us-gov-west-1.rds.amazonaws.com/global/global-bundle.pem`,
+              `cp /tmp/rds-ca-2017.pem ${outputDir}/rds-ca-2017.pem`,
+            ];
+          },
+          beforeInstall() {
+            return [];
+          },
+        },
       },
     });
     this.bootstrapResource = new cdk.CustomResource(this, "CustomResource", {
       serviceToken: handler.functionArn,
       properties: {
         DatabaseName: props.databaseName,
+        DatabaseHost: props.cluster.clusterEndpoint.hostname,
+        DatabaseSecretName: props.secretName,
       },
     });
     this.backingLambda = handler;
