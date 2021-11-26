@@ -111,5 +111,5 @@ export async function doesPortfolioDraftExistCommand(
     })
   );
 }
-// IP logging middy
+
 export const handler = middy(baseHandler).use(IpCheckerMiddleware());

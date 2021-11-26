@@ -36,6 +36,7 @@ export const mockPortfolioDraft: PortfolioDraft = {
 
 export const validRequest: APIGatewayProxyEvent = {
   pathParameters: { portfolioDraftId: uuidv4() },
+  requestContext: { identity: { sourceIp: "10.2.2.2" } },
 } as any;
 
 /* ABOVE THIS LINE ARE VALID OBJECTS WITH GOOD DATA */
