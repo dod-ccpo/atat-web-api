@@ -39,7 +39,7 @@ const USERS: User[] = [
 
 async function connect(connectConfig: Config, useDatabase = true): Promise<Connection> {
   const dbAuth = await getDatabaseCredentials(connectConfig.secretName);
-  return await createConnection({
+  return createConnection({
     type: "postgres",
     host: connectConfig.databaseHost,
     port: 5432,
