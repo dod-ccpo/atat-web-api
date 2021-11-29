@@ -58,7 +58,7 @@ export interface ApiFunctionPropstest {
   /**
    * The RDS database to grant access to.
    */
-  readonly database: Database;
+  readonly database?: Database;
 
   /**
    * Optional table permissions to grant to the Lambda function.
