@@ -26,3 +26,7 @@ tags-private.json
 
 # typeorm local config
 ormconfig.json
+
+# generated json schema
+packages/api/models/schema.json
+packages/api/models/internalSchema.json
