@@ -25,4 +25,4 @@ tags-private.json
 .scannerwork
 
 # typeorm local config
-packages/api/ormconfig.json
+ormconfig.json
