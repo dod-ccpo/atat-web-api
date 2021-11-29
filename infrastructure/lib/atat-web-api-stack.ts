@@ -503,26 +503,10 @@ export class AtatWebApiStack extends cdk.Stack {
       lambdaVpc: vpc,
       method: utils.apiSpecOperationMethod(operationId),
       handlerPath: this.determineApiHandlerPath(operationId, handlerFolder),
+      database: this.database,
     };
     const fn = new ApiFlexFunction(this, utils.apiSpecOperationFunctionName(operationId), props).fn;
     this.functions.push(fn);
-    switch (permissions) {
-      case TablePermissions.READ:
-        this.database.grantRead(fn);
-        fn.addEnvironment("ATAT_DATABASE_USER", "atat_api_read");
-        break;
-      default:
-        this.database.grantWrite(fn);
-        fn.addEnvironment("ATAT_DATABASE_USER", "atat_api_write");
-        break;
-    }
-    fn.addEnvironment("ATAT_DATABASE_WRITE_HOST", this.database.cluster.clusterEndpoint.hostname);
-    fn.addEnvironment("ATAT_DATABASE_READ_HOST", this.database.cluster.clusterReadEndpoint.hostname);
-    // This value must be resolved to a string token, otherwise it remains as a stringified integer token,
-    // which does not get replaced. This results in the Lambda function attempting to connect to the database
-    // on a totally invalid port, such as `-1`.
-    fn.addEnvironment("ATAT_DATABASE_PORT", cdk.Stack.of(this).resolve(this.database.cluster.clusterEndpoint.port));
-    fn.addEnvironment("ATAT_DATABASE_NAME", this.environmentId + "atat");
   }
 
   private addQueueDatabaseApiFunction(
@@ -541,6 +525,7 @@ export class AtatWebApiStack extends cdk.Stack {
       method: utils.apiSpecOperationMethod(operationId),
       handlerPath: this.determineApiHandlerPath(operationId, handlerFolder),
       createEventSource: operationId.startsWith("consume"),
+      database: this.database,
     };
     this.functions.push(new ApiFlexFunction(this, utils.apiSpecOperationFunctionName(operationId), props).fn);
   }

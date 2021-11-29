@@ -11,6 +11,8 @@ import { SecureBucket } from "./compliant-resources";
 import * as sqs from "@aws-cdk/aws-sqs";
 import { SqsEventSource } from "@aws-cdk/aws-lambda-event-sources";
 import * as sfn from "@aws-cdk/aws-stepfunctions";
+import { Database } from "./database";
+import { TablePermissions } from "../table-permissions";
 
 /**
  * An IAM service principal for the API Gateway service, used to grant Lambda
@@ -54,12 +56,17 @@ export interface ApiFunctionPropstest {
   readonly table?: dynamodb.ITable;
 
   /**
+   * The RDS database to grant access to.
+   */
+  readonly database: Database;
+
+  /**
    * Optional table permissions to grant to the Lambda function.
    * One of the following may be specified: "ALL", "READ", "READ_WRITE", "WRITE".
    *
    * @default - Read/write access is given to the Lambda function if no value is specified.
    */
-  readonly tablePermissions?: string;
+  readonly tablePermissions?: TablePermissions;
 
   /**
    * Secure bucket for S3 functions
@@ -156,6 +163,29 @@ export class ApiFlexFunction extends cdk.Construct {
       this.fn.addPermission("AllowApiGatewayInvoke", { principal: APIGW_SERVICE_PRINCIPAL });
       // editing name from API spec
       (this.fn.node.defaultChild as lambda.CfnFunction).overrideLogicalId(id + "Function");
+    }
+
+    if (props.database && props.tablePermissions) {
+      switch (props.tablePermissions) {
+        case TablePermissions.READ:
+          props.database.grantRead(this.fn);
+          this.fn.addEnvironment("ATAT_DATABASE_USER", "atat_api_read");
+          break;
+        default:
+          props.database.grantWrite(this.fn);
+          this.fn.addEnvironment("ATAT_DATABASE_USER", "atat_api_write");
+          break;
+      }
+      this.fn.addEnvironment("ATAT_DATABASE_WRITE_HOST", props.database.cluster.clusterEndpoint.hostname);
+      this.fn.addEnvironment("ATAT_DATABASE_READ_HOST", props.database.cluster.clusterReadEndpoint.hostname);
+      // This value must be resolved to a string token, otherwise it remains as a stringified integer token,
+      // which does not get replaced. This results in the Lambda function attempting to connect to the database
+      // on a totally invalid port, such as `-1`.
+      this.fn.addEnvironment(
+        "ATAT_DATABASE_PORT",
+        cdk.Stack.of(this).resolve(props.database.cluster.clusterEndpoint.port)
+      );
+      this.fn.addEnvironment("ATAT_DATABASE_NAME", props.database.databaseName);
     }
 
     // Optional - create DynamoDB connection and grant permissions

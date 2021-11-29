@@ -6,14 +6,11 @@ import * as rds from "@aws-cdk/aws-rds";
 import * as iam from "@aws-cdk/aws-iam";
 import * as secretsmanager from "@aws-cdk/aws-secretsmanager";
 import * as customResources from "@aws-cdk/custom-resources";
-
-import { packageRoot } from "../util";
-import { CfnDBInstance } from "@aws-cdk/aws-rds";
-import { ConcreteDependable } from "@aws-cdk/core";
+import * as util from "../util";
 
 export interface DatabaseProps {
   vpc: ec2.IVpc;
-  databaseName?: string;
+  databaseName: string;
 }
 
 interface BootstrapProps extends DatabaseProps {
@@ -28,7 +25,7 @@ class DatabaseBootstrapper extends cdk.Construct {
     super(scope, id);
     const handler = new lambdaNodeJs.NodejsFunction(this, "Function", {
       vpc: props.vpc,
-      entry: packageRoot() + "/rds/initial-bootstrap.ts",
+      entry: util.packageRoot() + "/rds/initial-bootstrap.ts",
       memorySize: 1024,
       timeout: cdk.Duration.minutes(5),
       bundling: {
@@ -91,8 +88,13 @@ export class Database extends cdk.Construct {
 
   public readonly clusterResourceId: string;
 
+  public readonly databaseName: string;
+
   constructor(scope: cdk.Construct, id: string, props: DatabaseProps) {
     super(scope, id);
+
+    this.databaseName = props.databaseName;
+
     const dbEngine = rds.DatabaseClusterEngine.auroraPostgres({ version: rds.AuroraPostgresEngineVersion.VER_13_4 });
     const parameters = new rds.ParameterGroup(this, "PostgresParams", {
       engine: dbEngine,
@@ -129,14 +131,19 @@ export class Database extends cdk.Construct {
     });
     this.cluster = cluster;
 
+    // Automatic secrets rotation is not yet supported via the CDK in GovCloud even
+    // though the underlying resources do exist. There is a PR open against the CDK
+    // upstream in order to add this functionality:
+    //    https://github.com/aws/aws-cdk/pull/17673
     // cluster.addRotationSingleUser({
     //   // Default value is 30 days, so this makes the secret much shorter-lived.
     //   // The primary means for access will be via IAM; however, we will use this
     //   // for initial bootstrapping and rare maintenance.
     //   automaticallyAfter: cdk.Duration.days(7),
     // });
-    // We bound the secret itself as a rotating secret so we can be sure that there
-    // is in fact a secret for the cluster.
+    // This secret will be present since we're using the default configuration; however,
+    // it will require additional workarounds (or the featuring be added) to rotate
+    // automatically.
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.adminSecret = cluster.secret!;
 
@@ -149,13 +156,13 @@ export class Database extends cdk.Construct {
     cluster.connections.allowDefaultPortFrom(bootstrapper.backingLambda);
 
     // Ensure the DB is not created until all instances in the cluster are ready
-    const instances = cluster.node.children.filter((child) => child instanceof CfnDBInstance);
-    const instancesReady = new ConcreteDependable();
+    const instances = cluster.node.children.filter((child) => child instanceof rds.CfnDBInstance);
+    const instancesReady = new cdk.ConcreteDependable();
     instances.forEach((dbInstance) => instancesReady.add(dbInstance));
     bootstrapper.bootstrapResource.node.addDependency(instancesReady);
 
     // Provide a resource to determine whether the database has been created.
-    this.databaseReady = new ConcreteDependable();
+    this.databaseReady = new cdk.ConcreteDependable();
     this.databaseReady.add(bootstrapper.bootstrapResource);
 
     this.clusterResourceId = this.clusterIdGetterCustomResource();
@@ -227,6 +234,14 @@ export class Database extends cdk.Construct {
     );
   }
 
+  /**
+   * The only place this identifier seems to actually be used is in db-user
+   * ARNs within an IAM policy. Unfortunately, it is not exposed as an attribute
+   * in CloudFormation that we can access. Therefore, we have to make an API call
+   * via a custom resource in order to expose this value.
+   *
+   * @returns The Cluster Resource ID of the Aurora DB Cluster
+   */
   public clusterIdGetterCustomResource(): string {
     const selector = "DBClusters.0.DbClusterResourceId";
     const resource = new customResources.AwsCustomResource(this, "ClusterIdGetter", {
