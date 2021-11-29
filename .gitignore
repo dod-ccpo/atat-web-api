@@ -23,3 +23,6 @@ tags-private.json
 # Sonar Scanner
 *.ucfg
 .scannerwork
+
+# typeorm local config
+packages/api/ormconfig.json
