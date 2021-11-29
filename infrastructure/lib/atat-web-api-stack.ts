@@ -504,8 +504,7 @@ export class AtatWebApiStack extends cdk.Stack {
       handlerPath: this.determineApiHandlerPath(operationId, handlerFolder),
       database: this.database,
     };
-    const fn = new ApiFlexFunction(this, utils.apiSpecOperationFunctionName(operationId), props).fn;
-    this.functions.push(fn);
+    this.functions.push(new ApiFlexFunction(this, utils.apiSpecOperationFunctionName(operationId), props).fn);
   }
 
   private addQueueDatabaseApiFunction(
