@@ -137,7 +137,7 @@ export async function handler(event: CloudFormationCustomResourceEvent): Promise
     databaseName,
     databaseHost,
     secretName,
-    caBundleFile: "rds-ca-2017.pem",
+    caBundleFile: "rds-gov-ca-bundle-2017.pem",
   };
 
   try {

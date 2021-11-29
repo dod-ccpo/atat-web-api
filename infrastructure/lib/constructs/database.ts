@@ -38,7 +38,7 @@ class DatabaseBootstrapper extends cdk.Construct {
           afterBundling(inputDir: string, outputDir: string): string[] {
             return [
               `curl -sL -o /tmp/rds-ca-2017.pem https://truststore.pki.us-gov-west-1.rds.amazonaws.com/global/global-bundle.pem`,
-              `cp /tmp/rds-ca-2017.pem ${outputDir}/rds-ca-2017.pem`,
+              `cp /tmp/rds-ca-2017.pem ${outputDir}/rds-gov-ca-bundle-2017.pem`,
             ];
           },
           beforeInstall() {
