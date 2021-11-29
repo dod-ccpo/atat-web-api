@@ -44,6 +44,9 @@ jobs:
         run: |
           npm ci
           npm run bootstrap
+      - name: Generate schema.json
+        run: |
+          npm run prebuild
       - name: Synthesize CDK template
         run: cdk synth -c "EnvironmentId=GITHUBWF"
         env:
