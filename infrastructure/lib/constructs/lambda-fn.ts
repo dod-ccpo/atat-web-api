@@ -276,7 +276,8 @@ export class ApiFlexFunction extends cdk.Construct {
       case "CONSUME":
         return this.queue.grantConsumeMessages(this.fn);
       default:
-        return this.queue.grantSendMessages(this.fn);
+        cdk.Annotations.of(this).addError("Unknown BucketPermissions requested: " + queuePermissions);
+        return undefined;
     }
   }
 }
