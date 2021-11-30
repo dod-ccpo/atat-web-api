@@ -176,6 +176,8 @@ export class ApiFlexFunction extends cdk.Construct {
           this.fn.addEnvironment("ATAT_DATABASE_USER", "atat_api_write");
           break;
       }
+      // Note: Always pass the cluster endpoints, never endpoints for a particular instance. The roles of an
+      // instance can change over time.
       this.fn.addEnvironment("ATAT_DATABASE_WRITE_HOST", props.database.cluster.clusterEndpoint.hostname);
       this.fn.addEnvironment("ATAT_DATABASE_READ_HOST", props.database.cluster.clusterReadEndpoint.hostname);
       // This value must be resolved to a string token, otherwise it remains as a stringified integer token,

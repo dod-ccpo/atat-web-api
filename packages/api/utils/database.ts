@@ -18,6 +18,21 @@ export async function createConnection(): Promise<Connection> {
   const databasePort = parseInt(process.env.ATAT_DATABASE_PORT!);
   /* eslint-enable @typescript-eslint/no-non-null-assertion */
 
+  // The difference in the credentials here, as seen by the parameters, has little to do
+  // with properly selecting a read user or a write user (though we could) but instead
+  // around ensuring that we configure the credentials correctly for each host. A read-only
+  // user who connects to the write host can still only perform reads. A read-write user
+  // who connects to the read host can only perform reads.
+  // The AWSv4 algorithm takes the host into consideration when generating the signature
+  // which is why that field matters; when we're connecting to the RO endpoint, we should
+  // use its name to generate the signature.
+  //
+  // TODO: Determine whether the RO endpoint accepts credentials for the regular write
+  // endpoint (or whether it requires them, honestly.) Adjust the above comment depending
+  // on what the truth actually is. This might be entirely incorrect and we may always
+  // have to use the write host in which case we can just use a single set of credentials.
+  // Honestly, using IAM to connect to the Aurora Cluster read endpoint doesn't really seem
+  // to be especially thoroughly documented anywhere.
   const writeCredentials = await rdsIam.getDatabaseCredentials({
     hostname: databaseWriteHost,
     port: databasePort,
