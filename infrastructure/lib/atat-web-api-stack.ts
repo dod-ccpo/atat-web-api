@@ -32,6 +32,8 @@ import { QueuePermissions } from "./queue-permissions";
 import * as utils from "./util";
 import { convertSchema } from "./load-schema";
 import { ApiFlexFunction } from "./constructs/lambda-fn";
+import { Database } from "./constructs/database";
+
 interface AtatIdpProps {
   secretName: string;
   providerName: string;
@@ -63,6 +65,7 @@ export class AtatWebApiStack extends cdk.Stack {
   public readonly emailDeadLetterQueue: sqs.IQueue;
   public readonly provisioningStateMachine: sfn.IStateMachine;
   public readonly table: dynamodb.ITable;
+  public readonly database: Database;
   public readonly functions: lambda.IFunction[] = [];
   public readonly ssmParams: ssm.IParameter[] = [];
   public readonly outputs: cdk.CfnOutput[] = [];
@@ -87,6 +90,11 @@ export class AtatWebApiStack extends cdk.Stack {
         value: this.table.tableName,
       })
     );
+
+    this.database = new Database(this, "AtatDatabase", {
+      vpc: props.vpc,
+      databaseName: this.environmentId + "atat",
+    });
 
     // Create a queue for PortfolioDraft submission
     this.submitQueue = new SecureQueue(this, "SubmitQueue", { queueProps: {} }).queue;
@@ -494,6 +502,7 @@ export class AtatWebApiStack extends cdk.Stack {
       lambdaVpc: vpc,
       method: utils.apiSpecOperationMethod(operationId),
       handlerPath: this.determineApiHandlerPath(operationId, handlerFolder),
+      database: this.database,
     };
     this.functions.push(new ApiFlexFunction(this, utils.apiSpecOperationFunctionName(operationId), props).fn);
   }
@@ -514,6 +523,7 @@ export class AtatWebApiStack extends cdk.Stack {
       method: utils.apiSpecOperationMethod(operationId),
       handlerPath: this.determineApiHandlerPath(operationId, handlerFolder),
       createEventSource: operationId.startsWith("consume"),
+      database: this.database,
     };
     this.functions.push(new ApiFlexFunction(this, utils.apiSpecOperationFunctionName(operationId), props).fn);
   }

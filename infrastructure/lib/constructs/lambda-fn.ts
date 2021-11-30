@@ -11,6 +11,10 @@ import { SecureBucket } from "./compliant-resources";
 import * as sqs from "@aws-cdk/aws-sqs";
 import { SqsEventSource } from "@aws-cdk/aws-lambda-event-sources";
 import * as sfn from "@aws-cdk/aws-stepfunctions";
+import { Database } from "./database";
+import { TablePermissions } from "../table-permissions";
+
+const RDS_CA_BUNDLE_NAME = "rds-gov-ca-bundle-2017.pem";
 
 /**
  * An IAM service principal for the API Gateway service, used to grant Lambda
@@ -54,12 +58,17 @@ export interface ApiFunctionPropstest {
   readonly table?: dynamodb.ITable;
 
   /**
+   * The RDS database to grant access to.
+   */
+  readonly database?: Database;
+
+  /**
    * Optional table permissions to grant to the Lambda function.
    * One of the following may be specified: "ALL", "READ", "READ_WRITE", "WRITE".
    *
    * @default - Read/write access is given to the Lambda function if no value is specified.
    */
-  readonly tablePermissions?: string;
+  readonly tablePermissions?: TablePermissions;
 
   /**
    * Secure bucket for S3 functions
@@ -131,13 +140,59 @@ export class ApiFlexFunction extends cdk.Construct {
     this.fn = new lambdaNodeJs.NodejsFunction(this, "PackagedFunction", {
       entry: props.handlerPath,
       vpc: props.lambdaVpc,
+      memorySize: 256,
+      timeout: cdk.Duration.seconds(5),
       ...props.functionPropsOverride,
+      bundling: {
+        // forceDockerBundling: true,
+        externalModules: ["pg-native"],
+        commandHooks: {
+          beforeBundling() {
+            return [];
+          },
+          afterBundling(inputDir: string, outputDir: string): string[] {
+            return [
+              `curl -sL -o /tmp/rds-ca-2017.pem https://truststore.pki.us-gov-west-1.rds.amazonaws.com/global/global-bundle.pem`,
+              `cp /tmp/rds-ca-2017.pem ${outputDir}/${RDS_CA_BUNDLE_NAME}`,
+            ];
+          },
+          beforeInstall() {
+            return [];
+          },
+        },
+      },
     });
     // Optional - create API Gateway connection and grant permissions
     if (props.method) {
       this.fn.addPermission("AllowApiGatewayInvoke", { principal: APIGW_SERVICE_PRINCIPAL });
       // editing name from API spec
       (this.fn.node.defaultChild as lambda.CfnFunction).overrideLogicalId(id + "Function");
+    }
+
+    if (props.database && props.tablePermissions) {
+      switch (props.tablePermissions) {
+        case TablePermissions.READ:
+          props.database.grantRead(this.fn);
+          this.fn.addEnvironment("ATAT_DATABASE_USER", "atat_api_read");
+          break;
+        default:
+          props.database.grantWrite(this.fn);
+          this.fn.addEnvironment("ATAT_DATABASE_USER", "atat_api_write");
+          break;
+      }
+      // Note: Always pass the cluster endpoints, never endpoints for a particular instance. The roles of an
+      // instance can change over time.
+      this.fn.addEnvironment("ATAT_DATABASE_WRITE_HOST", props.database.cluster.clusterEndpoint.hostname);
+      this.fn.addEnvironment("ATAT_DATABASE_READ_HOST", props.database.cluster.clusterReadEndpoint.hostname);
+      // This value must be resolved to a string token, otherwise it remains as a stringified integer token,
+      // which does not get replaced. This results in the Lambda function attempting to connect to the database
+      // on a totally invalid port, such as `-1`.
+      this.fn.addEnvironment(
+        "ATAT_DATABASE_PORT",
+        cdk.Stack.of(this).resolve(props.database.cluster.clusterEndpoint.port)
+      );
+      this.fn.addEnvironment("ATAT_DATABASE_NAME", props.database.databaseName);
+      this.fn.addEnvironment("ATAT_RDS_CA_BUNDLE_NAME", RDS_CA_BUNDLE_NAME);
     }
 
     // Optional - create DynamoDB connection and grant permissions

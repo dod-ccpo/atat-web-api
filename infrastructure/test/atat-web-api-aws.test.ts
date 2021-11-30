@@ -1,10 +1,11 @@
 import { expect as expectCDK, haveResource } from "@aws-cdk/assert";
-import { IVpc } from "@aws-cdk/aws-ec2";
 import * as cdk from "@aws-cdk/core";
 import * as AtatWebApi from "../lib/atat-web-api-stack";
+import * as AtatNetStack from "../lib/atat-net-stack";
 
 test("DynamoDB Resource is present, and Partition Key is set.", () => {
   const app = new cdk.App();
+  const vpcStack = new AtatNetStack.AtatNetStack(app, "TestNetStack", {});
   // WHEN
   const stack = new AtatWebApi.AtatWebApiStack(app, "MyTestStack", {
     environmentId: "testrunner",
@@ -15,7 +16,7 @@ test("DynamoDB Resource is present, and Partition Key is set.", () => {
     smtpProps: {
       secretName: "/test/smtp",
     },
-    vpc: undefined as unknown as IVpc,
+    vpc: vpcStack.vpc,
   });
   // THEN
   expectCDK(stack).to(
