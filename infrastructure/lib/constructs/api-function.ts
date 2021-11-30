@@ -66,7 +66,6 @@ export abstract class ApiFunction extends cdk.Construct {
       entry: props.handlerPath,
       vpc: props.lambdaVpc,
       ...props.functionPropsOverride,
-      timeout: cdk.Duration.seconds(10),
     });
     this.fn.addPermission("AllowApiGatewayInvoke", { principal: APIGW_SERVICE_PRINCIPAL });
     (this.fn.node.defaultChild as lambda.CfnFunction).overrideLogicalId(id + "Function");

@@ -138,6 +138,8 @@ export class ApiFlexFunction extends cdk.Construct {
     this.fn = new lambdaNodeJs.NodejsFunction(this, "PackagedFunction", {
       entry: props.handlerPath,
       vpc: props.lambdaVpc,
+      memorySize: 256,
+      timeout: cdk.Duration.seconds(5),
       ...props.functionPropsOverride,
       bundling: {
         // forceDockerBundling: true,
