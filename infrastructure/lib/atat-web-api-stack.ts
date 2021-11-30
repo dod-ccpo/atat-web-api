@@ -30,7 +30,6 @@ import { HttpMethod } from "./http";
 import { TablePermissions } from "./table-permissions";
 import { QueuePermissions } from "./queue-permissions";
 import * as utils from "./util";
-import { convertSchema } from "./load-schema";
 import { ApiFlexFunction } from "./constructs/lambda-fn";
 import { Database } from "./constructs/database";
 
