@@ -59,7 +59,7 @@ async function dbExists(connection: Connection, dbName: string): Promise<boolean
 }
 
 async function userExists(connection: Connection, userName: string): Promise<boolean> {
-  return !!(await connection.query(`SELECT * FROM pg_roles WHERE rolname='${userName}';`));
+  return !!(await connection.query(`SELECT * FROM pg_roles WHERE rolname='${userName}';`)).length;
 }
 
 async function handleCreate(connectConfig: Config): Promise<void> {
