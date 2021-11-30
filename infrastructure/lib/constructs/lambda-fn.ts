@@ -13,6 +13,7 @@ import { SqsEventSource } from "@aws-cdk/aws-lambda-event-sources";
 import * as sfn from "@aws-cdk/aws-stepfunctions";
 import { Database } from "./database";
 import { TablePermissions } from "../table-permissions";
+import { QueuePermissions } from "../queue-permissions";
 
 /**
  * The path within the Lambda function where the RDS CA Bundle is stored.
@@ -97,7 +98,7 @@ export interface ApiFunctionPropstest {
    *
    * @default - Read access is given to the Lambda function if no value is specified.
    */
-  readonly queuePermissions?: string;
+  readonly queuePermissions?: QueuePermissions;
 
   /**
    * Optional param to create an SQS event source to receive queue messages
