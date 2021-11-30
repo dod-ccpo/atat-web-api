@@ -249,7 +249,8 @@ export class ApiFlexFunction extends cdk.Construct {
       case "WRITE":
         return this.table.grantWriteData(this.fn);
       default:
-        return this.table.grantReadWriteData(this.fn);
+        cdk.Annotations.of(this).addError("Unknown TablePermission requested: " + tablePermissions);
+        return undefined;
     }
   }
 
