@@ -7,6 +7,7 @@ import * as iam from "@aws-cdk/aws-iam";
 import * as secretsmanager from "@aws-cdk/aws-secretsmanager";
 import * as customResources from "@aws-cdk/custom-resources";
 import * as util from "../util";
+import { ApiFlexFunction } from "./lambda-fn";
 
 export interface DatabaseProps {
   vpc: ec2.IVpc;
@@ -18,44 +19,31 @@ interface BootstrapProps extends DatabaseProps {
   cluster: rds.IDatabaseCluster;
 }
 
+type ConnectableResource = iam.IGrantable & ec2.IConnectable;
+
 class DatabaseBootstrapper extends cdk.Construct {
   public readonly bootstrapResource: cdk.CustomResource;
   public readonly backingLambda: lambda.IFunction;
   constructor(scope: cdk.Construct, id: string, props: BootstrapProps) {
     super(scope, id);
-    const handler = new lambdaNodeJs.NodejsFunction(this, "Function", {
-      vpc: props.vpc,
-      entry: util.packageRoot() + "/rds/initial-bootstrap.ts",
-      memorySize: 1024,
-      timeout: cdk.Duration.minutes(5),
-      bundling: {
-        // forceDockerBundling: true,
-        externalModules: ["pg-native"],
-        commandHooks: {
-          beforeBundling() {
-            return [];
-          },
-          afterBundling(inputDir: string, outputDir: string): string[] {
-            return [
-              `curl -sL -o /tmp/rds-ca-2017.pem https://truststore.pki.us-gov-west-1.rds.amazonaws.com/global/global-bundle.pem`,
-              `cp /tmp/rds-ca-2017.pem ${outputDir}/rds-gov-ca-bundle-2017.pem`,
-            ];
-          },
-          beforeInstall() {
-            return [];
-          },
-        },
+    const handler = new ApiFlexFunction(this, "Function", {
+      handlerPath: util.packageRoot() + "/rds/initial-bootstrap.ts",
+      lambdaVpc: props.vpc,
+      functionPropsOverride: {
+        memorySize: 1024,
+        timeout: cdk.Duration.minutes(5),
       },
     });
+
     this.bootstrapResource = new cdk.CustomResource(this, "CustomResource", {
-      serviceToken: handler.functionArn,
+      serviceToken: handler.fn.functionArn,
       properties: {
         DatabaseName: props.databaseName,
         DatabaseHost: props.cluster.clusterEndpoint.hostname,
         DatabaseSecretName: props.secretName,
       },
     });
-    this.backingLambda = handler;
+    this.backingLambda = handler.fn;
   }
 }
 
@@ -107,12 +95,11 @@ export class Database extends cdk.Construct {
       instanceProps: {
         vpc: props.vpc,
         // The cheapest available instance type for the engine we've chosen.
+        // TODO(AT-6849): Dynamically chose instance based on environment
         instanceType: ec2.InstanceType.of(ec2.InstanceClass.T3, ec2.InstanceSize.LARGE),
         allowMajorVersionUpgrade: true,
         autoMinorVersionUpgrade: true,
         deleteAutomatedBackups: false,
-        // Performance Insights are not available in AWS GovCloud (US)
-        // enablePerformanceInsights: true,
         publiclyAccessible: false,
         vpcSubnets: props.vpc.selectSubnets({ subnetType: ec2.SubnetType.PRIVATE_ISOLATED }),
       },
@@ -142,8 +129,9 @@ export class Database extends cdk.Construct {
     //   automaticallyAfter: cdk.Duration.days(7),
     // });
     // This secret will be present since we're using the default configuration; however,
-    // it will require additional workarounds (or the featuring be added) to rotate
+    // it will require additional workarounds (or the feature being added) to rotate
     // automatically.
+    // TODO(AT-6924): Perform the implementation of automatic secrets rotation
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.adminSecret = cluster.secret!;
 
@@ -186,20 +174,24 @@ export class Database extends cdk.Construct {
     });
   }
 
-  /**
-   * Grant network and IAM permissions necessary to read from the database.
-   *
-   * @param resource The resource to grant access to
-   */
-  public grantRead(resource: ec2.IConnectable & iam.IGrantable): void {
+  #allowResourceToConnectAsUser(resource: ConnectableResource, user: string): void {
     this.cluster.connections.allowDefaultPortFrom(resource);
     resource.grantPrincipal.addToPrincipalPolicy(
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
         actions: ["rds-db:connect"],
-        resources: [this.clusterUserArn("atat_api_read")],
+        resources: [this.clusterUserArn(user)],
       })
     );
+  }
+
+  /**
+   * Grant network and IAM permissions necessary to read from the database.
+   *
+   * @param resource The resource to grant access to
+   */
+  public grantRead(resource: ConnectableResource): void {
+    this.#allowResourceToConnectAsUser(resource, "atat_api_read");
   }
 
   /**
@@ -207,15 +199,8 @@ export class Database extends cdk.Construct {
    *
    * @param resource The resource to grant access to
    */
-  public grantWrite(resource: ec2.IConnectable & iam.IGrantable): void {
-    this.cluster.connections.allowDefaultPortFrom(resource);
-    resource.grantPrincipal.addToPrincipalPolicy(
-      new iam.PolicyStatement({
-        effect: iam.Effect.ALLOW,
-        actions: ["rds-db:connect"],
-        resources: [this.clusterUserArn("atat_api_write")],
-      })
-    );
+  public grantWrite(resource: ConnectableResource): void {
+    this.#allowResourceToConnectAsUser(resource, "atat_api_write");
   }
 
   /**
@@ -223,15 +208,8 @@ export class Database extends cdk.Construct {
    *
    * @param resource The resource to grant access to
    */
-  public grantAdmin(resource: ec2.IConnectable & iam.IGrantable): void {
-    this.cluster.connections.allowDefaultPortFrom(resource);
-    resource.grantPrincipal.addToPrincipalPolicy(
-      new iam.PolicyStatement({
-        effect: iam.Effect.ALLOW,
-        actions: ["rds-db:connect"],
-        resources: [this.clusterUserArn("atat_api_admin")],
-      })
-    );
+  public grantAdmin(resource: ConnectableResource): void {
+    this.#allowResourceToConnectAsUser(resource, "atat_api_admin");
   }
 
   /**
