@@ -14,6 +14,8 @@ import * as sfn from "@aws-cdk/aws-stepfunctions";
 import { Database } from "./database";
 import { TablePermissions } from "../table-permissions";
 
+const RDS_CA_BUNDLE_NAME = "rds-gov-ca-bundle-2017.pem";
+
 /**
  * An IAM service principal for the API Gateway service, used to grant Lambda
  * invocation permissions.
@@ -151,7 +153,7 @@ export class ApiFlexFunction extends cdk.Construct {
           afterBundling(inputDir: string, outputDir: string): string[] {
             return [
               `curl -sL -o /tmp/rds-ca-2017.pem https://truststore.pki.us-gov-west-1.rds.amazonaws.com/global/global-bundle.pem`,
-              `cp /tmp/rds-ca-2017.pem ${outputDir}/rds-gov-ca-bundle-2017.pem`,
+              `cp /tmp/rds-ca-2017.pem ${outputDir}/${RDS_CA_BUNDLE_NAME}`,
             ];
           },
           beforeInstall() {
@@ -190,6 +192,7 @@ export class ApiFlexFunction extends cdk.Construct {
         cdk.Stack.of(this).resolve(props.database.cluster.clusterEndpoint.port)
       );
       this.fn.addEnvironment("ATAT_DATABASE_NAME", props.database.databaseName);
+      this.fn.addEnvironment("ATAT_RDS_CA_BUNDLE_NAME", RDS_CA_BUNDLE_NAME);
     }
 
     // Optional - create DynamoDB connection and grant permissions

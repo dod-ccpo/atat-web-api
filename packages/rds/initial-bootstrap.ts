@@ -59,8 +59,7 @@ async function dbExists(connection: Connection, dbName: string): Promise<boolean
 }
 
 async function userExists(connection: Connection, userName: string): Promise<boolean> {
-  const result = await connection.query(`SELECT * FROM pg_roles WHERE rolname='${userName}';`);
-  return !!result.length;
+  return !!(await connection.query(`SELECT * FROM pg_roles WHERE rolname='${userName}';`));
 }
 
 async function handleCreate(connectConfig: Config): Promise<void> {
@@ -137,7 +136,8 @@ export async function handler(event: CloudFormationCustomResourceEvent): Promise
     databaseName,
     databaseHost,
     secretName,
-    caBundleFile: "rds-gov-ca-bundle-2017.pem",
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    caBundleFile: process.env.ATAT_RDS_CA_BUNDLE_NAME!,
   };
 
   try {

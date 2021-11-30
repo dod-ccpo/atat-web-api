@@ -4,8 +4,6 @@ import path from "path";
 import * as fs from "fs";
 import { TlsOptions } from "tls";
 
-const CA_BUNDLE_FILE = "rds-gov-ca-bundle-2017.pem";
-
 export async function createConnection(): Promise<Connection> {
   // This check is disabled for the following block because per our function infrastructure
   // configuration these values must be set. If they aren't this this won't be recoverable
@@ -16,6 +14,7 @@ export async function createConnection(): Promise<Connection> {
   const databaseReadHost = process.env.ATAT_DATABASE_READ_HOST!;
   const databaseUser = process.env.ATAT_DATABASE_USER!;
   const databasePort = parseInt(process.env.ATAT_DATABASE_PORT!);
+  const caBundleFile = process.env.ATAT_RDS_CA_BUNDLE_NAME!;
   /* eslint-enable @typescript-eslint/no-non-null-assertion */
 
   // Because the AWSv4 signature algorithm takes the host into account when creating the
@@ -41,7 +40,7 @@ export async function createConnection(): Promise<Connection> {
 
   const sslConfig: TlsOptions = {
     minVersion: "TLSv1.2",
-    ca: fs.readFileSync(path.join(__dirname, CA_BUNDLE_FILE)),
+    ca: fs.readFileSync(path.join(__dirname, caBundleFile)),
   };
 
   console.info(`Establishing connection to ${databaseWriteHost} and ${databaseReadHost}`);

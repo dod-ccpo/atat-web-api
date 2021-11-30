@@ -1,7 +1,6 @@
 import * as cdk from "@aws-cdk/core";
 import * as ec2 from "@aws-cdk/aws-ec2";
 import * as lambda from "@aws-cdk/aws-lambda";
-import * as lambdaNodeJs from "@aws-cdk/aws-lambda-nodejs";
 import * as rds from "@aws-cdk/aws-rds";
 import * as iam from "@aws-cdk/aws-iam";
 import * as secretsmanager from "@aws-cdk/aws-secretsmanager";
@@ -20,6 +19,17 @@ interface BootstrapProps extends DatabaseProps {
 }
 
 type ConnectableResource = iam.IGrantable & ec2.IConnectable;
+
+/**
+ * The users on the database that map to particular access levels.
+ * These get defined during the custom resource that performs the
+ * initial bootstrapping of the database.
+ */
+enum DatabaseUsers {
+  READ = "atat_api_read",
+  WRITE = "atat_api_write",
+  ADMIN = "atat_api_admin",
+}
 
 class DatabaseBootstrapper extends cdk.Construct {
   public readonly bootstrapResource: cdk.CustomResource;
@@ -191,7 +201,7 @@ export class Database extends cdk.Construct {
    * @param resource The resource to grant access to
    */
   public grantRead(resource: ConnectableResource): void {
-    this.#allowResourceToConnectAsUser(resource, "atat_api_read");
+    this.#allowResourceToConnectAsUser(resource, DatabaseUsers.READ);
   }
 
   /**
@@ -200,7 +210,7 @@ export class Database extends cdk.Construct {
    * @param resource The resource to grant access to
    */
   public grantWrite(resource: ConnectableResource): void {
-    this.#allowResourceToConnectAsUser(resource, "atat_api_write");
+    this.#allowResourceToConnectAsUser(resource, DatabaseUsers.WRITE);
   }
 
   /**
@@ -209,7 +219,7 @@ export class Database extends cdk.Construct {
    * @param resource The resource to grant access to
    */
   public grantAdmin(resource: ConnectableResource): void {
-    this.#allowResourceToConnectAsUser(resource, "atat_api_admin");
+    this.#allowResourceToConnectAsUser(resource, DatabaseUsers.ADMIN);
   }
 
   /**
