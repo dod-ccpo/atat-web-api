@@ -14,6 +14,7 @@ import * as sfn from "@aws-cdk/aws-stepfunctions";
 import { Database } from "./database";
 import { TablePermissions } from "../table-permissions";
 import { QueuePermissions } from "../queue-permissions";
+import { BucketPermissions } from "../bucket-permissions";
 
 /**
  * The path within the Lambda function where the RDS CA Bundle is stored.
@@ -85,7 +86,7 @@ export interface ApiFunctionPropstest {
    *
    * @default - Read access is given to the Lambda function if no value is specified.
    */
-  readonly bucketPermissions?: string;
+  readonly bucketPermissions?: BucketPermissions;
 
   /**
    * The SQS queue where messages are sent
@@ -249,7 +250,7 @@ export class ApiFlexFunction extends cdk.Construct {
       case "WRITE":
         return this.table.grantWriteData(this.fn);
       default:
-        cdk.Annotations.of(this).addError("Unknown TablePermission requested: " + tablePermissions);
+        cdk.Annotations.of(this).addError("Unknown TablePermissions requested: " + tablePermissions);
         return undefined;
     }
   }
@@ -263,7 +264,8 @@ export class ApiFlexFunction extends cdk.Construct {
       case "DELETE":
         return this.bucket.grantDelete(this.fn);
       default:
-        return this.bucket.grantRead(this.fn);
+        cdk.Annotations.of(this).addError("Unknown BucketPermissions requested: " + bucketPermissions);
+        return undefined;
     }
   }
 
