@@ -14,6 +14,9 @@ import * as sfn from "@aws-cdk/aws-stepfunctions";
 import { Database } from "./database";
 import { TablePermissions } from "../table-permissions";
 
+/**
+ * The path within the Lambda function where the RDS CA Bundle is stored.
+ */
 const RDS_CA_BUNDLE_NAME = "rds-gov-ca-bundle-2017.pem";
 
 /**
@@ -162,6 +165,8 @@ export class ApiFlexFunction extends cdk.Construct {
         },
       },
     });
+    this.fn.addEnvironment("ATAT_RDS_CA_BUNDLE_NAME", RDS_CA_BUNDLE_NAME);
+
     // Optional - create API Gateway connection and grant permissions
     if (props.method) {
       this.fn.addPermission("AllowApiGatewayInvoke", { principal: APIGW_SERVICE_PRINCIPAL });
@@ -192,7 +197,6 @@ export class ApiFlexFunction extends cdk.Construct {
         cdk.Stack.of(this).resolve(props.database.cluster.clusterEndpoint.port)
       );
       this.fn.addEnvironment("ATAT_DATABASE_NAME", props.database.databaseName);
-      this.fn.addEnvironment("ATAT_RDS_CA_BUNDLE_NAME", RDS_CA_BUNDLE_NAME);
     }
 
     // Optional - create DynamoDB connection and grant permissions
