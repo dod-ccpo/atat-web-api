@@ -27,7 +27,7 @@ const RDS_CA_BUNDLE_NAME = "rds-gov-ca-bundle-2017.pem";
  */
 const APIGW_SERVICE_PRINCIPAL = new iam.ServicePrincipal("apigateway.amazonaws.com");
 
-export interface ApiFunctionPropstest {
+export interface ApiFlexFunctionProps {
   /**
    * The HTTP method this route applies to.
    */
@@ -139,7 +139,7 @@ export class ApiFlexFunction extends cdk.Construct {
   public readonly queue: sqs.IQueue;
   public readonly stateMachine: sfn.IStateMachine;
 
-  constructor(scope: cdk.Construct, id: string, props: ApiFunctionPropstest) {
+  constructor(scope: cdk.Construct, id: string, props: ApiFlexFunctionProps) {
     super(scope, id);
     // Create the lambda fn
     this.fn = new lambdaNodeJs.NodejsFunction(this, "PackagedFunction", {
