@@ -7,7 +7,10 @@
     "watch": "lerna run watch",
     "test": "lerna run test",
     "lint": "lerna run lint",
-    "lint:fix": "lerna run lint:fix"
+    "lint:fix": "lerna run lint:fix",
+    "generate-schema": "npx ts-node scripts/generate-schemas.ts",
+    "prebuild": "npm run generate-schema",
+    "pretest": "npm run generate-schema"
   },
   "devDependencies": {
     "@types/jest": "^27.0.2",
