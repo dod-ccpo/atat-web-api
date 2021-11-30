@@ -18,21 +18,16 @@ export async function createConnection(): Promise<Connection> {
   const databasePort = parseInt(process.env.ATAT_DATABASE_PORT!);
   /* eslint-enable @typescript-eslint/no-non-null-assertion */
 
-  // The difference in the credentials here, as seen by the parameters, has little to do
-  // with properly selecting a read user or a write user (though we could) but instead
-  // around ensuring that we configure the credentials correctly for each host. A read-only
-  // user who connects to the write host can still only perform reads. A read-write user
-  // who connects to the read host can only perform reads.
-  // The AWSv4 algorithm takes the host into consideration when generating the signature
-  // which is why that field matters; when we're connecting to the RO endpoint, we should
-  // use its name to generate the signature.
-  //
-  // TODO: Determine whether the RO endpoint accepts credentials for the regular write
-  // endpoint (or whether it requires them, honestly.) Adjust the above comment depending
-  // on what the truth actually is. This might be entirely incorrect and we may always
-  // have to use the write host in which case we can just use a single set of credentials.
-  // Honestly, using IAM to connect to the Aurora Cluster read endpoint doesn't really seem
-  // to be especially thoroughly documented anywhere.
+  // Because the AWSv4 signature algorithm takes the host into account when creating the
+  // credentials, we *likely* need to include the host we plan to authenticate to as part
+  // of the generation; however, it is unclear whether Aurora Cluster Read Endpoints are
+  // treated as a separate "host" for authentication from the main Aurora Cluster Endpoint.
+  // We don't have a great way to test this because TypeORM does not use the read host(s) for
+  // `query` invocations, which are the only things created in the code base at the time
+  // this was implemented. We would need to perform SELECTs on entities defined via TypeORM
+  // for it to leverage the read replicas; therefore, we may not see failures in credential
+  // generation until we implement our first GET function. If we do, the likely fix is to
+  // use a single set of credentials using only the `databaseWriteHost` credentials.
   const writeCredentials = await rdsIam.getDatabaseCredentials({
     hostname: databaseWriteHost,
     port: databasePort,
@@ -49,6 +44,7 @@ export async function createConnection(): Promise<Connection> {
     ca: fs.readFileSync(path.join(__dirname, CA_BUNDLE_FILE)),
   };
 
+  console.info(`Establishing connection to ${databaseWriteHost} and ${databaseReadHost}`);
   return typeormConnection({
     type: "postgres",
     replication: {
@@ -60,6 +56,10 @@ export async function createConnection(): Promise<Connection> {
         database: databaseName,
         ssl: sslConfig,
       },
+      // Only one read host should ever be configured, and that is the cluster read endpoint
+      // for the Aurora Cluster. The host should always be set to the value of the
+      // `databaseReadHost` variable (regardless of what hostname is used to generate credentials).
+      // Load balancing is handled automatically be the Aurora Cluster.
       slaves: [
         {
           host: databaseReadHost,
