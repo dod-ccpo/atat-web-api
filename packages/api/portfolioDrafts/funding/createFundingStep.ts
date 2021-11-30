@@ -13,7 +13,7 @@ import jsonBodyParser from "@middy/http-json-body-parser";
 import validator from "@middy/validator";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import cors from "@middy/http-cors";
-import xssSanitizer from "../xssSanitizer";
+import xssSanitizer from "../../utils/xssSanitizer";
 import { errorHandlingMiddleware } from "../../utils/errorHandlingMiddleware";
 import { CORS_CONFIGURATION } from "../../utils/corsConfig";
 import { wrapSchema } from "../../utils/schemaWrapper";

@@ -8,7 +8,7 @@ import { DATABASE_ERROR, NO_SUCH_PORTFOLIO_DRAFT_404 } from "../../utils/errors"
 import { ApiSuccessResponse, SetupError, SuccessStatusCode } from "../../utils/response";
 import schema = require("../../models/schema.json");
 import middy from "@middy/core";
-import xssSanitizer from "../xssSanitizer";
+import xssSanitizer from "../../utils/xssSanitizer";
 import jsonBodyParser from "@middy/http-json-body-parser";
 import validator from "@middy/validator";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";

@@ -3,7 +3,7 @@ import { sqsClient } from "../utils/sqs";
 import { SendMessageCommand } from "@aws-sdk/client-sqs";
 import { ApiSuccessResponse, SuccessStatusCode } from "../../api/utils/response";
 import middy from "@middy/core";
-import xssSanitizer from "../../api/portfolioDrafts/xssSanitizer";
+import xssSanitizer from "../../api/utils/xssSanitizer";
 import jsonBodyParser from "@middy/http-json-body-parser";
 import cors from "@middy/http-cors";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";

@@ -12,7 +12,7 @@ import validator from "@middy/validator";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
 import cors from "@middy/http-cors";
-import xssSanitizer from "../xssSanitizer";
+import xssSanitizer from "../../utils/xssSanitizer";
 import schema = require("../../models/schema.json");
 import { wrapSchema } from "../../utils/schemaWrapper";
 import { errorHandlingMiddleware } from "../../utils/errorHandlingMiddleware";
