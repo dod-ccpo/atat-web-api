@@ -34,11 +34,12 @@ enum DatabaseUsers {
 class DatabaseBootstrapper extends cdk.Construct {
   public readonly bootstrapResource: cdk.CustomResource;
   public readonly backingLambda: lambda.IFunction;
-  constructor(scope: cdk.Construct, id: string, props: BootstrapProps) {
+  constructor(scope: Database, id: string, props: BootstrapProps) {
     super(scope, id);
     const handler = new ApiFlexFunction(this, "Function", {
       handlerPath: util.packageRoot() + "/rds/initial-bootstrap.ts",
       lambdaVpc: props.vpc,
+      database: scope,
       functionPropsOverride: {
         memorySize: 1024,
         timeout: cdk.Duration.minutes(5),
@@ -128,6 +129,8 @@ export class Database extends cdk.Construct {
     });
     this.cluster = cluster;
 
+    this.clusterResourceId = this.clusterIdGetterCustomResource();
+
     // Automatic secrets rotation is not yet supported via the CDK in GovCloud even
     // though the underlying resources do exist. There is a PR open against the CDK
     // upstream in order to add this functionality:
@@ -162,8 +165,6 @@ export class Database extends cdk.Construct {
     // Provide a resource to determine whether the database has been created.
     this.databaseReady = new cdk.ConcreteDependable();
     this.databaseReady.add(bootstrapper.bootstrapResource);
-
-    this.clusterResourceId = this.clusterIdGetterCustomResource();
   }
 
   public get clusterArn(): string {

@@ -12,9 +12,7 @@ import * as sqs from "@aws-cdk/aws-sqs";
 import { SqsEventSource } from "@aws-cdk/aws-lambda-event-sources";
 import * as sfn from "@aws-cdk/aws-stepfunctions";
 import { Database } from "./database";
-import { TablePermissions } from "../table-permissions";
-import { QueuePermissions } from "../queue-permissions";
-import { BucketPermissions } from "../bucket-permissions";
+import { TablePermissions, QueuePermissions, BucketPermissions } from "../resource-permissions";
 
 /**
  * The path within the Lambda function where the RDS CA Bundle is stored.
@@ -121,48 +119,30 @@ export interface ApiFlexFunctionProps {
 
 export class ApiFlexFunction extends cdk.Construct {
   /**
-   * Required resources
    * @param fn - the NodejsFunction, named with the @id passed to the function
    */
   public readonly fn: lambda.Function;
-  /**
-   * Optional resources to add to function:
-   * @param method - HTTP Method, indicates that the function uses API Gateway
-   * @param table - DynamoDB table connection
-   * @param bucket - S3 bucket connection
-   * @param queue - SQS queue connection
-   * @param stateMachine - State Machine connection
-   */
-  public readonly method: HttpMethod;
-  public readonly table: dynamodb.ITable;
-  public readonly bucket: s3.IBucket;
-  public readonly queue: sqs.IQueue;
-  public readonly stateMachine: sfn.IStateMachine;
 
   constructor(scope: cdk.Construct, id: string, props: ApiFlexFunctionProps) {
     super(scope, id);
     // Create the lambda fn
     this.fn = new lambdaNodeJs.NodejsFunction(this, "PackagedFunction", {
-      entry: props.handlerPath,
-      vpc: props.lambdaVpc,
       memorySize: 256,
       timeout: cdk.Duration.seconds(5),
       ...props.functionPropsOverride,
+      entry: props.handlerPath,
+      vpc: props.lambdaVpc,
       bundling: {
-        // forceDockerBundling: true,
         externalModules: ["pg-native"],
+        ...props.functionPropsOverride?.bundling,
         commandHooks: {
-          beforeBundling() {
-            return [];
-          },
+          beforeBundling: props.functionPropsOverride?.bundling?.commandHooks?.beforeBundling ?? (() => []),
+          beforeInstall: props.functionPropsOverride?.bundling?.commandHooks?.beforeInstall ?? (() => []),
           afterBundling(inputDir: string, outputDir: string): string[] {
             return [
-              `curl -sL -o /tmp/rds-ca-2017.pem https://truststore.pki.us-gov-west-1.rds.amazonaws.com/global/global-bundle.pem`,
-              `cp /tmp/rds-ca-2017.pem ${outputDir}/${RDS_CA_BUNDLE_NAME}`,
+              ...(props.functionPropsOverride?.bundling?.commandHooks?.afterBundling(inputDir, outputDir) ?? []),
+              `curl -sL -o ${outputDir}/${RDS_CA_BUNDLE_NAME} https://truststore.pki.us-gov-west-1.rds.amazonaws.com/global/global-bundle.pem`,
             ];
-          },
-          beforeInstall() {
-            return [];
           },
         },
       },
@@ -171,41 +151,28 @@ export class ApiFlexFunction extends cdk.Construct {
 
     // Optional - create API Gateway connection and grant permissions
     if (props.method) {
-      this.fn.addPermission("AllowApiGatewayInvoke", { principal: APIGW_SERVICE_PRINCIPAL });
+      this.fn.addPermission("AllowApiGatewayInvoke", {
+        principal: APIGW_SERVICE_PRINCIPAL,
+        sourceAccount: cdk.Aws.ACCOUNT_ID,
+      });
       // editing name from API spec
       (this.fn.node.defaultChild as lambda.CfnFunction).overrideLogicalId(id + "Function");
     }
 
+    // Optional - Grant access to the database and set environment variables
     if (props.database && props.tablePermissions) {
-      switch (props.tablePermissions) {
-        case TablePermissions.READ:
-          props.database.grantRead(this.fn);
-          this.fn.addEnvironment("ATAT_DATABASE_USER", "atat_api_read");
-          break;
-        default:
-          props.database.grantWrite(this.fn);
-          this.fn.addEnvironment("ATAT_DATABASE_USER", "atat_api_write");
-          break;
-      }
-      // Note: Always pass the cluster endpoints, never endpoints for a particular instance. The roles of an
-      // instance can change over time.
-      this.fn.addEnvironment("ATAT_DATABASE_WRITE_HOST", props.database.cluster.clusterEndpoint.hostname);
-      this.fn.addEnvironment("ATAT_DATABASE_READ_HOST", props.database.cluster.clusterReadEndpoint.hostname);
-      // This value must be resolved to a string token, otherwise it remains as a stringified integer token,
-      // which does not get replaced. This results in the Lambda function attempting to connect to the database
-      // on a totally invalid port, such as `-1`.
-      this.fn.addEnvironment(
-        "ATAT_DATABASE_PORT",
-        cdk.Stack.of(this).resolve(props.database.cluster.clusterEndpoint.port)
-      );
-      this.fn.addEnvironment("ATAT_DATABASE_NAME", props.database.databaseName);
+      this.grantDatabasePermissions(props.database, props.tablePermissions);
+      this.fn
+        .addEnvironment("ATAT_DATABASE_NAME", props.database.databaseName)
+        .addEnvironment("ATAT_DATABASE_WRITE_HOST", props.database.cluster.clusterEndpoint.hostname)
+        .addEnvironment("ATAT_DATABASE_READ_HOST", props.database.cluster.clusterReadEndpoint.hostname)
+        .addEnvironment("ATAT_DATABASE_PORT", cdk.Stack.of(this).resolve(props.database.cluster.clusterEndpoint.port));
     }
 
     // Optional - create DynamoDB connection and grant permissions
     if (props.table && props.tablePermissions) {
-      this.table = props.table;
       this.fn.addEnvironment("ATAT_TABLE_NAME", props.table.tableName);
-      this.grantTablePermissions(props.tablePermissions);
+      this.grantTablePermissions(props.table, props.tablePermissions);
     }
 
     // Optional - grant permissions for secrets manager
@@ -215,66 +182,77 @@ export class ApiFlexFunction extends cdk.Construct {
 
     // Optional - create S3 bucket connection and grant permissions
     if (props.bucket && props.bucketPermissions) {
-      this.bucket = props.bucket.bucket;
-      this.fn.addEnvironment("DATA_BUCKET", this.bucket.bucketName);
-      this.grantBucketPermissions(props.bucketPermissions);
+      this.fn.addEnvironment("DATA_BUCKET", props.bucket.bucket.bucketName);
+      this.grantBucketPermissions(props.bucket.bucket, props.bucketPermissions);
     }
 
     // Optional - create SQS connection and grant permissions
     if (props.queue && props.queuePermissions) {
-      this.queue = props.queue;
       this.fn.addEnvironment("ATAT_QUEUE_URL", props.queue.queueUrl);
-      this.grantSQSPermissions(props.queuePermissions);
+      this.grantSQSPermissions(props.queue, props.queuePermissions);
       // allows the fn to subscribe to the queue using an EventSource
       if (props.createEventSource) {
-        this.fn.addEventSource(new SqsEventSource(this.queue, props.batchSize ? { batchSize: props.batchSize } : {}));
+        this.fn.addEventSource(new SqsEventSource(props.queue, props.batchSize ? { batchSize: props.batchSize } : {}));
       }
     }
 
     // Optional - create State Machine and grant permissions
     if (props.stateMachine) {
-      this.stateMachine = props.stateMachine;
       this.fn.addEnvironment("SFN_ARN", props.stateMachine.stateMachineArn);
-      this.stateMachine.grantStartExecution(this.fn);
+      props.stateMachine.grantStartExecution(this.fn);
     }
   }
 
-  private grantTablePermissions(tablePermissions: string | undefined): iam.Grant | undefined {
-    switch (tablePermissions) {
-      case "ALL":
-        return this.table.grantFullAccess(this.fn);
-      case "READ":
-        return this.table.grantReadData(this.fn);
-      case "READ_WRITE":
-        return this.table.grantReadWriteData(this.fn);
-      case "WRITE":
-        return this.table.grantWriteData(this.fn);
-      default:
-        cdk.Annotations.of(this).addError("Unknown TablePermissions requested: " + tablePermissions);
-        return undefined;
+  private grantDatabasePermissions(database: Database, tablePermissions: TablePermissions): void {
+    // These grants happen in order so that the proper sets of permissions are all granted and
+    // so that database user environment variable ends up being set to the most privileged user
+    // that the function should have access to assume.
+    if (tablePermissions & TablePermissions.READ) {
+      database.grantRead(this.fn);
+      this.fn.addEnvironment("ATAT_DATABASE_USER", "atat_api_read");
+    }
+    if (tablePermissions & TablePermissions.WRITE) {
+      database.grantWrite(this.fn);
+      this.fn.addEnvironment("ATAT_DATABASE_USER", "atat_api_write");
+    }
+    if (tablePermissions & TablePermissions.ADMINISTER) {
+      database.grantAdmin(this.fn);
+      this.fn.addEnvironment("ATAT_DATABASE_USER", "atat_api_admin");
     }
   }
 
-  private grantBucketPermissions(bucketPermissions: string | undefined): iam.Grant | undefined {
+  private grantTablePermissions(table: dynamodb.ITable, tablePermissions: TablePermissions): void {
+    if (tablePermissions & TablePermissions.READ) {
+      table.grantReadData(this.fn);
+    }
+    if (tablePermissions & TablePermissions.WRITE) {
+      table.grantWriteData(this.fn);
+    }
+    if (tablePermissions & TablePermissions.ADMINISTER) {
+      table.grantFullAccess(this.fn);
+    }
+  }
+
+  private grantBucketPermissions(bucket: s3.IBucket, bucketPermissions: string | undefined): iam.Grant | undefined {
     switch (bucketPermissions) {
       case "READ":
-        return this.bucket.grantRead(this.fn);
+        return bucket.grantRead(this.fn);
       case "PUT":
-        return this.bucket.grantPut(this.fn);
+        return bucket.grantPut(this.fn);
       case "DELETE":
-        return this.bucket.grantDelete(this.fn);
+        return bucket.grantDelete(this.fn);
       default:
         cdk.Annotations.of(this).addError("Unknown BucketPermissions requested: " + bucketPermissions);
         return undefined;
     }
   }
 
-  private grantSQSPermissions(queuePermissions: string | undefined): iam.Grant | undefined {
+  private grantSQSPermissions(queue: sqs.IQueue, queuePermissions: string | undefined): iam.Grant | undefined {
     switch (queuePermissions) {
       case "SEND":
-        return this.queue.grantSendMessages(this.fn);
+        return queue.grantSendMessages(this.fn);
       case "CONSUME":
-        return this.queue.grantConsumeMessages(this.fn);
+        return queue.grantConsumeMessages(this.fn);
       default:
         cdk.Annotations.of(this).addError("Unknown BucketPermissions requested: " + queuePermissions);
         return undefined;
