@@ -8,12 +8,12 @@
     "lint:fix": "npm run lint -- --fix"
   },
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.42.0",
-    "@aws-sdk/client-s3": "^3.42.0",
-    "@aws-sdk/client-secrets-manager": "^3.42.0",
-    "@aws-sdk/client-sfn": "^3.42.0",
-    "@aws-sdk/client-sqs": "^3.42.0",
-    "@aws-sdk/lib-dynamodb": "^3.42.0",
+    "@aws-sdk/client-dynamodb": "^3.43.0",
+    "@aws-sdk/client-s3": "^3.43.0",
+    "@aws-sdk/client-secrets-manager": "^3.43.0",
+    "@aws-sdk/client-sfn": "^3.43.0",
+    "@aws-sdk/client-sqs": "^3.43.0",
+    "@aws-sdk/lib-dynamodb": "^3.43.0",
     "@middy/core": "^2.5.2",
     "@middy/http-cors": "^2.5.2",
     "@middy/http-event-normalizer": "^2.5.2",
