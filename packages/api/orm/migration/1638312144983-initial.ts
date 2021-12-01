@@ -23,12 +23,12 @@ export class initial1638312144983 implements MigrationInterface {
         'complete'
     );
     
-    CREATE TYPE portfolio_csp_enum AS ENUM (
+    CREATE TYPE csp_enum AS ENUM (
         'CSP A',
         'CSP B'
     );
     
-    CREATE TYPE task_order_filescanstatus_enum AS ENUM (
+    CREATE TYPE file_scan_status_enum AS ENUM (
         'pending',
         'accepted',
         'rejected'
@@ -93,7 +93,7 @@ export class initial1638312144983 implements MigrationInterface {
         name character varying(100) NOT NULL,
         description character varying(300),
         owner character varying NOT NULL,
-        csp portfolio_csp_enum NOT NULL,
+        csp csp_enum NOT NULL,
         "dodComponents" character varying[] NOT NULL,
         "portfolioManagers" character varying[] NOT NULL
     );
@@ -109,7 +109,7 @@ export class initial1638312144983 implements MigrationInterface {
         "fileId" uuid NOT NULL,
         "fileName" character varying(256) NOT NULL,
         "fileSize" integer,
-        "fileScanStatus" task_order_filescanstatus_enum DEFAULT 'pending'::task_order_filescanstatus_enum NOT NULL,
+        "fileScanStatus" file_scan_status_enum DEFAULT 'pending'::file_scan_status_enum NOT NULL,
         "portfolioId" uuid
     );
     
