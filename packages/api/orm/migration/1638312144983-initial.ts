@@ -26,7 +26,7 @@ export class initial1638312144983 implements MigrationInterface {
     );
     
     
-    ALTER TYPE public.application_provisioningstatus_enum OWNER TO postgres;
+    ALTER TYPE public.application_provisioningstatus_enum OWNER TO atat_api_admin;
     
     CREATE TYPE public.application_status_enum AS ENUM (
         'not_started',
@@ -35,7 +35,7 @@ export class initial1638312144983 implements MigrationInterface {
         'complete'
     );
     
-    ALTER TYPE public.application_status_enum OWNER TO postgres;
+    ALTER TYPE public.application_status_enum OWNER TO atat_api_admin;
     
     CREATE TYPE public.environment_provisioningstatus_enum AS ENUM (
         'not_started',
@@ -44,7 +44,7 @@ export class initial1638312144983 implements MigrationInterface {
         'complete'
     );
     
-    ALTER TYPE public.environment_provisioningstatus_enum OWNER TO postgres;
+    ALTER TYPE public.environment_provisioningstatus_enum OWNER TO atat_api_admin;
     
     CREATE TYPE public.environment_status_enum AS ENUM (
         'not_started',
@@ -53,14 +53,14 @@ export class initial1638312144983 implements MigrationInterface {
         'complete'
     );
     
-    ALTER TYPE public.environment_status_enum OWNER TO postgres;
+    ALTER TYPE public.environment_status_enum OWNER TO atat_api_admin;
     
     CREATE TYPE public.portfolio_csp_enum AS ENUM (
         'CSP A',
         'CSP B'
     );
     
-    ALTER TYPE public.portfolio_csp_enum OWNER TO postgres;
+    ALTER TYPE public.portfolio_csp_enum OWNER TO atat_api_admin;
     
     CREATE TYPE public.portfolio_provisioningstatus_enum AS ENUM (
         'not_started',
@@ -69,7 +69,7 @@ export class initial1638312144983 implements MigrationInterface {
         'complete'
     );
     
-    ALTER TYPE public.portfolio_provisioningstatus_enum OWNER TO postgres;
+    ALTER TYPE public.portfolio_provisioningstatus_enum OWNER TO atat_api_admin;
     
     CREATE TYPE public.portfolio_status_enum AS ENUM (
         'not_started',
@@ -78,7 +78,7 @@ export class initial1638312144983 implements MigrationInterface {
         'complete'
     );
     
-    ALTER TYPE public.portfolio_status_enum OWNER TO postgres;
+    ALTER TYPE public.portfolio_status_enum OWNER TO atat_api_admin;
     
     CREATE TYPE public.task_order_filescanstatus_enum AS ENUM (
         'pending',
@@ -86,7 +86,7 @@ export class initial1638312144983 implements MigrationInterface {
         'rejected'
     );
     
-    ALTER TYPE public.task_order_filescanstatus_enum OWNER TO postgres;
+    ALTER TYPE public.task_order_filescanstatus_enum OWNER TO atat_api_admin;
     
     SET default_tablespace = '';
     SET default_table_access_method = heap;
@@ -105,7 +105,7 @@ export class initial1638312144983 implements MigrationInterface {
         "portfolioId" uuid
     );
     
-    ALTER TABLE public.application OWNER TO postgres;
+    ALTER TABLE public.application OWNER TO atat_api_admin;
     
     CREATE TABLE public.clin (
         id uuid DEFAULT public.uuid_generate_v4() NOT NULL,
@@ -121,7 +121,7 @@ export class initial1638312144983 implements MigrationInterface {
         "taskOrderId" uuid
     );
     
-    ALTER TABLE public.clin OWNER TO postgres;
+    ALTER TABLE public.clin OWNER TO atat_api_admin;
     
     COMMENT ON COLUMN public.clin."clinNumber" IS 'contract line item number from task order, 0001 through 9999';
     COMMENT ON COLUMN public.clin."idiqClin" IS 'indefinite-delivery, indefinite-quantity CLIN specific to JWCC';
@@ -143,7 +143,7 @@ export class initial1638312144983 implements MigrationInterface {
         "applicationId" uuid
     );
     
-    ALTER TABLE public.environment OWNER TO postgres;
+    ALTER TABLE public.environment OWNER TO atat_api_admin;
     
     CREATE TABLE public.portfolio (
         id uuid DEFAULT public.uuid_generate_v4() NOT NULL,
@@ -162,7 +162,7 @@ export class initial1638312144983 implements MigrationInterface {
         "portfolioManagers" character varying[] NOT NULL
     );
     
-    ALTER TABLE public.portfolio OWNER TO postgres;
+    ALTER TABLE public.portfolio OWNER TO atat_api_admin;
     
     CREATE TABLE public.task_order (
         id uuid DEFAULT public.uuid_generate_v4() NOT NULL,
@@ -177,7 +177,7 @@ export class initial1638312144983 implements MigrationInterface {
         "portfolioId" uuid
     );
     
-    ALTER TABLE public.task_order OWNER TO postgres;
+    ALTER TABLE public.task_order OWNER TO atat_api_admin;
     
     COMMENT ON COLUMN public.task_order."taskOrderNumber" IS 'TO numbers are 13 characters. TO modifications are 17 characters.';
     COMMENT ON COLUMN public.task_order."fileId" IS 'S3 object key of task order pdf';
@@ -195,7 +195,7 @@ export class initial1638312144983 implements MigrationInterface {
     );
     
     
-    ALTER TABLE public.typeorm_metadata OWNER TO postgres;
+    ALTER TABLE public.typeorm_metadata OWNER TO atat_api_admin;
     
     ALTER TABLE ONLY public.task_order
         ADD CONSTRAINT "PK_15e973a09676013165565bc6243" PRIMARY KEY (id);
