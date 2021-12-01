@@ -16,15 +16,12 @@ export class initial1638312144983 implements MigrationInterface {
     
     CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA public;
     
-    COMMENT ON EXTENSION "uuid-ossp" IS 'generate universally unique identifiers (UUIDs)';
-    
     CREATE TYPE public.application_provisioningstatus_enum AS ENUM (
         'not_started',
         'in_progress',
         'failed',
         'complete'
     );
-    
     
     ALTER TYPE public.application_provisioningstatus_enum OWNER TO atat_api_admin;
     
@@ -123,13 +120,6 @@ export class initial1638312144983 implements MigrationInterface {
     
     ALTER TABLE public.clin OWNER TO atat_api_admin;
     
-    COMMENT ON COLUMN public.clin."clinNumber" IS 'contract line item number from task order, 0001 through 9999';
-    COMMENT ON COLUMN public.clin."idiqClin" IS 'indefinite-delivery, indefinite-quantity CLIN specific to JWCC';
-    COMMENT ON COLUMN public.clin."totalClinValue" IS 'full amount requested by customer from USG for project or contract';
-    COMMENT ON COLUMN public.clin."obligatedFunds" IS 'amount already disbursed by USG for project or contract to be spent during CLIN POP';
-    COMMENT ON COLUMN public.clin."popStartDate" IS 'start of POP during which funds can be spent';
-    COMMENT ON COLUMN public.clin."popEndDate" IS 'end of POP during which funds can be spent';
-    
     CREATE TABLE public.environment (
         id uuid DEFAULT public.uuid_generate_v4() NOT NULL,
         "createdAt" timestamp without time zone DEFAULT now() NOT NULL,
@@ -178,12 +168,6 @@ export class initial1638312144983 implements MigrationInterface {
     );
     
     ALTER TABLE public.task_order OWNER TO atat_api_admin;
-    
-    COMMENT ON COLUMN public.task_order."taskOrderNumber" IS 'TO numbers are 13 characters. TO modifications are 17 characters.';
-    COMMENT ON COLUMN public.task_order."fileId" IS 'S3 object key of task order pdf';
-    COMMENT ON COLUMN public.task_order."fileName" IS 'name of pdf file when uploaded';
-    COMMENT ON COLUMN public.task_order."fileSize" IS 'pdf file size in bytes';
-    
     
     CREATE TABLE public.typeorm_metadata (
         type character varying NOT NULL,
