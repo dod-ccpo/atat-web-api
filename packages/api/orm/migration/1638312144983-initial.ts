@@ -34,7 +34,6 @@ export class initial1638312144983 implements MigrationInterface {
         'rejected'
     );
     
-    SET default_tablespace = '';
     SET default_table_access_method = heap;
     
     CREATE TABLE application (
