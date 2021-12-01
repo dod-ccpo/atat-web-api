@@ -1,18 +1,17 @@
-import * as ec2 from "@aws-cdk/aws-ec2";
-import { InterfaceVpcEndpointAwsService } from "@aws-cdk/aws-ec2";
-import * as cdk from "@aws-cdk/core";
-import * as custom from "@aws-cdk/custom-resources";
+import { CfnOutput, Stack, StackProps, aws_ec2 as ec2, custom_resources as custom } from "aws-cdk-lib";
 
-export interface AtatNetStackProps extends cdk.StackProps {
+import { Construct } from "constructs";
+
+export interface AtatNetStackProps extends StackProps {
   vpcCidr?: string;
 }
 
-export class AtatNetStack extends cdk.Stack {
+export class AtatNetStack extends Stack {
   public readonly vpc: ec2.IVpc;
   public readonly endpoints: ec2.IVpcEndpoint[] = [];
-  public readonly outputs: cdk.CfnOutput[] = [];
+  public readonly outputs: CfnOutput[] = [];
 
-  constructor(scope: cdk.Construct, id: string, props: AtatNetStackProps) {
+  constructor(scope: Construct, id: string, props: AtatNetStackProps) {
     super(scope, id);
     const vpc = new ec2.Vpc(this, "AtatVpc", {
       cidr: props.vpcCidr,
@@ -29,7 +28,7 @@ export class AtatNetStack extends cdk.Stack {
     vpc.addFlowLog("AllFlowLogs");
     this.vpc = vpc;
     this.outputs.push(
-      new cdk.CfnOutput(this, "VpcId", {
+      new CfnOutput(this, "VpcId", {
         value: this.vpc.vpcId,
       })
     );
@@ -74,7 +73,7 @@ export class AtatNetStack extends cdk.Stack {
       service: ec2.InterfaceVpcEndpointAwsService.SQS,
     });
     const xrayEndpoint = vpc.addInterfaceEndpoint("XrayEndpoint", {
-      service: new InterfaceVpcEndpointAwsService("xray"),
+      service: new ec2.InterfaceVpcEndpointAwsService("xray"),
     });
     const secretsManagerEndpoint = vpc.addInterfaceEndpoint("SecretsManager", {
       service: ec2.InterfaceVpcEndpointAwsService.SECRETS_MANAGER,

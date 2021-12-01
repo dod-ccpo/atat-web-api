@@ -1,8 +1,13 @@
-import * as cognito from "@aws-cdk/aws-cognito";
-import { CfnUserPool } from "@aws-cdk/aws-cognito";
-import * as lambda from "@aws-cdk/aws-lambda";
-import * as lambdaNodeJs from "@aws-cdk/aws-lambda-nodejs";
-import * as cdk from "@aws-cdk/core";
+import {
+  Duration,
+  SecretValue,
+  aws_cognito as cognito,
+  aws_lambda as lambda,
+  aws_lambda_nodejs as lambdaNodeJs,
+} from "aws-cdk-lib";
+
+import { Construct } from "constructs";
+
 import { HttpMethod } from "../http";
 import { packageRoot } from "../util";
 
@@ -34,12 +39,12 @@ export interface OIDCIdentityProviderProps extends IdentityProviderProps {
   /**
    * The OIDC client ID for Cognito to communicate with the upstream IdP.
    */
-  clientId: cdk.SecretValue | string;
+  clientId: SecretValue | string;
 
   /**
    * The OIDC client secret for Cognito to communicate with the upstream IdP.
    */
-  clientSecret: cdk.SecretValue;
+  clientSecret: SecretValue;
 
   /**
    * The method that should be used to request attributes.
@@ -51,7 +56,7 @@ export interface OIDCIdentityProviderProps extends IdentityProviderProps {
   /**
    * The URL for the OIDC issuer.
    */
-  oidcIssuerUrl: cdk.SecretValue | string;
+  oidcIssuerUrl: SecretValue | string;
 }
 
 /**
@@ -131,7 +136,7 @@ function oidcAttributeMapping(props: CognitoAuthenticationProps): { [key: string
 /**
  * Configure Cognito for use with an upstream IdP and for a client application.
  */
-export class CognitoAuthentication extends cdk.Construct {
+export class CognitoAuthentication extends Construct {
   /**
    * The created Cognito User Pool.
    */
@@ -168,7 +173,7 @@ export class CognitoAuthentication extends cdk.Construct {
    */
   public readonly idps: cognito.CfnUserPoolIdentityProvider[] = [];
 
-  constructor(scope: cdk.Construct, id: string, props: CognitoAuthenticationProps) {
+  constructor(scope: Construct, id: string, props: CognitoAuthenticationProps) {
     super(scope, id);
     // The Pre-Token Generation Function is responsible for setting attributes on the User resource
     // prior to the token being generated. This is used here for setting the groups based on the
@@ -206,7 +211,7 @@ export class CognitoAuthentication extends cdk.Construct {
         // This is the highest possible value
         minLength: 98,
         // This is the lowest possible value
-        tempPasswordValidity: cdk.Duration.days(1),
+        tempPasswordValidity: Duration.days(1),
         // These require all possible types of characters.
         requireDigits: true,
         requireLowercase: true,
@@ -214,7 +219,7 @@ export class CognitoAuthentication extends cdk.Construct {
         requireUppercase: true,
       },
     });
-    const cfnPool = this.userPool.node.defaultChild as CfnUserPool;
+    const cfnPool = this.userPool.node.defaultChild as cognito.CfnUserPool;
     cfnPool.overrideLogicalId("AtatUserPool");
     cfnPool.schema = [
       {

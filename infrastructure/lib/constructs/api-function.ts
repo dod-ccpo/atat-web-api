@@ -1,10 +1,13 @@
-import * as apigw from "@aws-cdk/aws-apigateway";
-import * as ec2 from "@aws-cdk/aws-ec2";
-import * as iam from "@aws-cdk/aws-iam";
-import * as secretsmanager from "@aws-cdk/aws-secretsmanager";
-import * as lambda from "@aws-cdk/aws-lambda";
-import * as lambdaNodeJs from "@aws-cdk/aws-lambda-nodejs";
-import * as cdk from "@aws-cdk/core";
+import {
+  aws_apigateway as apigw,
+  aws_ec2 as ec2,
+  aws_iam as iam,
+  aws_lambda as lambda,
+  aws_lambda_nodejs as lambdaNodeJs,
+  aws_secretsmanager as secretsmanager,
+} from "aws-cdk-lib";
+import { Construct } from "constructs";
+
 import { HttpMethod } from "../http";
 
 /**
@@ -43,7 +46,7 @@ export interface ApiFunctionProps {
   readonly smtpSecrets?: secretsmanager.ISecret;
 }
 
-export abstract class ApiFunction extends cdk.Construct {
+export abstract class ApiFunction extends Construct {
   /**
    * The underlying Lambda function for the API call.
    */
@@ -59,7 +62,7 @@ export abstract class ApiFunction extends cdk.Construct {
    */
   public readonly route: apigw.Method;
 
-  protected constructor(scope: cdk.Construct, id: string, props: ApiFunctionProps) {
+  protected constructor(scope: Construct, id: string, props: ApiFunctionProps) {
     super(scope, id);
     this.method = props.method;
     this.fn = new lambdaNodeJs.NodejsFunction(this, "PackagedFunction", {

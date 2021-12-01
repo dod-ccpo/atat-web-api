@@ -1,6 +1,5 @@
-import * as dynamodb from "@aws-cdk/aws-dynamodb";
-import * as iam from "@aws-cdk/aws-iam";
-import * as cdk from "@aws-cdk/core";
+import { Annotations, aws_dynamodb as dynamodb, aws_iam as iam } from "aws-cdk-lib";
+import { Construct } from "constructs";
 import { HttpMethod } from "../http";
 import { ApiFunction, ApiFunctionProps } from "./api-function";
 
@@ -24,7 +23,7 @@ export class ApiDynamoDBFunction extends ApiFunction {
    */
   public readonly table: dynamodb.ITable;
 
-  constructor(scope: cdk.Construct, id: string, props: ApiDynamoDBFunctionProps) {
+  constructor(scope: Construct, id: string, props: ApiDynamoDBFunctionProps) {
     super(scope, id, props);
     this.table = props.table;
     this.fn.addEnvironment("ATAT_TABLE_NAME", props.table.tableName);
@@ -45,7 +44,7 @@ export class ApiDynamoDBFunction extends ApiFunction {
       default:
         // This will allow Synthesis to continue; however, the error will stop the
         // CDK from moving forward with a diff or deploy action.
-        cdk.Annotations.of(this).addError("Unknown HTTP method " + this.method);
+        Annotations.of(this).addError("Unknown HTTP method " + this.method);
         return undefined;
     }
   }

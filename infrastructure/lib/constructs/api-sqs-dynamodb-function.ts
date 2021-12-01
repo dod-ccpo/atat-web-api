@@ -1,9 +1,12 @@
-import * as iam from "@aws-cdk/aws-iam";
-import * as cdk from "@aws-cdk/core";
+import {
+  Annotations,
+  aws_iam as iam,
+  aws_lambda_event_sources as lambdaEventSources,
+  aws_sqs as sqs,
+} from "aws-cdk-lib";
+import { Construct } from "constructs";
 import { HttpMethod } from "../http";
 import { ApiDynamoDBFunction, ApiDynamoDBFunctionProps } from "./api-dynamodb-function";
-import * as sqs from "@aws-cdk/aws-sqs";
-import { SqsEventSource } from "@aws-cdk/aws-lambda-event-sources";
 
 export interface ApiSQSDynamoDBFunctionProps extends ApiDynamoDBFunctionProps {
   /**
@@ -29,14 +32,14 @@ export class ApiSQSDynamoDBFunction extends ApiDynamoDBFunction {
    */
   public readonly queue: sqs.IQueue;
 
-  constructor(scope: cdk.Construct, id: string, props: ApiSQSDynamoDBFunctionProps) {
+  constructor(scope: Construct, id: string, props: ApiSQSDynamoDBFunctionProps) {
     super(scope, id, props);
     this.queue = props.queue;
     this.fn.addEnvironment("ATAT_QUEUE_URL", props.queue.queueUrl);
     this.grantRequiredQueuePermissions();
     // creating an EventSource allows the fn to subscribe to the queue
     if (props.createEventSource) {
-      this.fn.addEventSource(new SqsEventSource(this.queue));
+      this.fn.addEventSource(new lambdaEventSources.SqsEventSource(this.queue));
     }
   }
 
@@ -54,7 +57,7 @@ export class ApiSQSDynamoDBFunction extends ApiDynamoDBFunction {
       default:
         // This will allow Synthesis to continue; however, the error will stop the
         // CDK from moving forward with a diff or deploy action.
-        cdk.Annotations.of(this).addError("Unknown HTTP method " + this.method);
+        Annotations.of(this).addError("Unknown HTTP method " + this.method);
         return undefined;
     }
   }

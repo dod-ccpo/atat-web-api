@@ -1,5 +1,5 @@
-import * as cdk from "@aws-cdk/core";
-import * as sfnTasks from "@aws-cdk/aws-stepfunctions-tasks";
+import { Duration, aws_stepfunctions_tasks as sfnTasks } from "aws-cdk-lib";
+import { Construct } from "constructs";
 
 export interface SfnTasksProps {
   /**
@@ -12,16 +12,16 @@ export interface SfnTasksProps {
  * Creates a Lambda invoking Task that represents a State in the workflow of a
  * State Machine once execution starts.
  */
-export class SfnLambdaInvokeTask extends cdk.Construct {
+export class SfnLambdaInvokeTask extends Construct {
   /**
    * A Step Function Lambda invoking Task used within a State Machine
    */
   readonly sfnTask: sfnTasks.LambdaInvoke;
 
-  constructor(scope: cdk.Construct, id: string, props: SfnTasksProps) {
+  constructor(scope: Construct, id: string, props: SfnTasksProps) {
     super(scope, id);
     const sfnTask = new sfnTasks.LambdaInvoke(this, id, {
-      timeout: cdk.Duration.seconds(60),
+      timeout: Duration.seconds(60),
       ...props.sfnTask,
     });
 

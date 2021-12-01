@@ -1,6 +1,5 @@
-import * as cdk from "@aws-cdk/core";
-import * as sfn from "@aws-cdk/aws-stepfunctions";
-import * as iam from "@aws-cdk/aws-iam";
+import { aws_stepfunctions as sfn } from "aws-cdk-lib";
+import { Construct } from "constructs";
 import { ApiSQSFunction, ApiSQSFunctionProps } from "./api-sqs-function";
 
 export interface ApiStepFnsSQSFunctionProps extends ApiSQSFunctionProps {
@@ -25,7 +24,7 @@ export class ApiStepFnsSQSFunction extends ApiSQSFunction {
    */
   readonly stateMachine: sfn.IStateMachine;
 
-  constructor(scope: cdk.Construct, id: string, props: ApiStepFnsSQSFunctionProps) {
+  constructor(scope: Construct, id: string, props: ApiStepFnsSQSFunctionProps) {
     super(scope, id, props);
     this.stateMachine = props.stateMachine;
     this.fn.addEnvironment("SFN_ARN", props.stateMachine.stateMachineArn);

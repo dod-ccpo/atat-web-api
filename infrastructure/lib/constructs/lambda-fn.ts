@@ -1,16 +1,22 @@
-import * as ec2 from "@aws-cdk/aws-ec2";
-import * as iam from "@aws-cdk/aws-iam";
-import * as secretsmanager from "@aws-cdk/aws-secretsmanager";
-import * as lambda from "@aws-cdk/aws-lambda";
-import * as lambdaNodeJs from "@aws-cdk/aws-lambda-nodejs";
-import * as cdk from "@aws-cdk/core";
-import * as s3 from "@aws-cdk/aws-s3";
+import {
+  Duration,
+  Stack,
+  aws_dynamodb as dynamodb,
+  aws_ec2 as ec2,
+  aws_iam as iam,
+  aws_lambda as lambda,
+  aws_lambda_nodejs as lambdaNodeJs,
+  aws_lambda_event_sources as lambdaEventSources,
+  aws_s3 as s3,
+  aws_secretsmanager as secretsmanager,
+  aws_stepfunctions as sfn,
+  aws_sqs as sqs,
+} from "aws-cdk-lib";
+
+import { Construct } from "constructs";
+
 import { HttpMethod } from "../http";
-import * as dynamodb from "@aws-cdk/aws-dynamodb";
 import { SecureBucket } from "./compliant-resources";
-import * as sqs from "@aws-cdk/aws-sqs";
-import { SqsEventSource } from "@aws-cdk/aws-lambda-event-sources";
-import * as sfn from "@aws-cdk/aws-stepfunctions";
 import { Database } from "./database";
 import { TablePermissions } from "../table-permissions";
 
@@ -117,7 +123,7 @@ export interface ApiFunctionPropstest {
   readonly stateMachine?: sfn.IStateMachine;
 }
 
-export class ApiFlexFunction extends cdk.Construct {
+export class ApiFlexFunction extends Construct {
   /**
    * Required resources
    * @param fn - the NodejsFunction, named with the @id passed to the function
@@ -137,14 +143,14 @@ export class ApiFlexFunction extends cdk.Construct {
   public readonly queue: sqs.IQueue;
   public readonly stateMachine: sfn.IStateMachine;
 
-  constructor(scope: cdk.Construct, id: string, props: ApiFunctionPropstest) {
+  constructor(scope: Construct, id: string, props: ApiFunctionPropstest) {
     super(scope, id);
     // Create the lambda fn
     this.fn = new lambdaNodeJs.NodejsFunction(this, "PackagedFunction", {
       entry: props.handlerPath,
       vpc: props.lambdaVpc,
       memorySize: 256,
-      timeout: cdk.Duration.seconds(5),
+      timeout: Duration.seconds(5),
       ...props.functionPropsOverride,
       bundling: {
         // forceDockerBundling: true,
@@ -192,10 +198,7 @@ export class ApiFlexFunction extends cdk.Construct {
       // This value must be resolved to a string token, otherwise it remains as a stringified integer token,
       // which does not get replaced. This results in the Lambda function attempting to connect to the database
       // on a totally invalid port, such as `-1`.
-      this.fn.addEnvironment(
-        "ATAT_DATABASE_PORT",
-        cdk.Stack.of(this).resolve(props.database.cluster.clusterEndpoint.port)
-      );
+      this.fn.addEnvironment("ATAT_DATABASE_PORT", Stack.of(this).resolve(props.database.cluster.clusterEndpoint.port));
       this.fn.addEnvironment("ATAT_DATABASE_NAME", props.database.databaseName);
     }
 
@@ -225,7 +228,9 @@ export class ApiFlexFunction extends cdk.Construct {
       this.grantSQSPermissions(props.queuePermissions);
       // allows the fn to subscribe to the queue using an EventSource
       if (props.createEventSource) {
-        this.fn.addEventSource(new SqsEventSource(this.queue, props.batchSize ? { batchSize: props.batchSize } : {}));
+        this.fn.addEventSource(
+          new lambdaEventSources.SqsEventSource(this.queue, props.batchSize ? { batchSize: props.batchSize } : {})
+        );
       }
     }
 

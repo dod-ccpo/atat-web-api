@@ -1,8 +1,12 @@
-import * as cdk from "@aws-cdk/core";
-import * as sqs from "@aws-cdk/aws-sqs";
-import * as iam from "@aws-cdk/aws-iam";
+import {
+  Annotations,
+  aws_iam as iam,
+  aws_lambda_event_sources as lambdaEventSources,
+  aws_sqs as sqs,
+} from "aws-cdk-lib";
+import { Construct } from "constructs";
+
 import { ApiFunction, ApiFunctionProps } from "./api-function";
-import { SqsEventSource } from "@aws-cdk/aws-lambda-event-sources";
 import { HttpMethod } from "../http";
 
 export interface ApiSQSFunctionProps extends ApiFunctionProps {
@@ -34,14 +38,16 @@ export class ApiSQSFunction extends ApiFunction {
    */
   readonly queue: sqs.IQueue;
 
-  constructor(scope: cdk.Construct, id: string, props: ApiSQSFunctionProps) {
+  constructor(scope: Construct, id: string, props: ApiSQSFunctionProps) {
     super(scope, id, props);
     this.queue = props.queue;
     this.fn.addEnvironment("ATAT_QUEUE_URL", props.queue.queueUrl);
     this.grantRequiredQueuePermissions();
     // allows the fn to subscribe to the queue using an EventSource
     if (props.createEventSource) {
-      this.fn.addEventSource(new SqsEventSource(this.queue, props.batchSize ? { batchSize: props.batchSize } : {}));
+      this.fn.addEventSource(
+        new lambdaEventSources.SqsEventSource(this.queue, props.batchSize ? { batchSize: props.batchSize } : {})
+      );
     }
   }
 
@@ -59,7 +65,7 @@ export class ApiSQSFunction extends ApiFunction {
       default:
         // This will allow Synthesis to continue; however, the error will stop the
         // CDK from moving forward with a diff or deploy action.
-        cdk.Annotations.of(this).addError("Unknown HTTP method " + this.method);
+        Annotations.of(this).addError("Unknown HTTP method " + this.method);
         return undefined;
     }
   }

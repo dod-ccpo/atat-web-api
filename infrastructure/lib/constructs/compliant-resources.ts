@@ -1,10 +1,14 @@
-import * as s3 from "@aws-cdk/aws-s3";
-import * as dynamodb from "@aws-cdk/aws-dynamodb";
-import * as apigw from "@aws-cdk/aws-apigateway";
-import * as cdk from "@aws-cdk/core";
-import * as sqs from "@aws-cdk/aws-sqs";
-import * as sfn from "@aws-cdk/aws-stepfunctions";
-import * as logs from "@aws-cdk/aws-logs";
+import {
+  Duration,
+  aws_apigateway as apigw,
+  aws_dynamodb as dynamodb,
+  aws_logs as logs,
+  aws_s3 as s3,
+  aws_stepfunctions as sfn,
+  aws_sqs as sqs,
+} from "aws-cdk-lib";
+
+import { Construct } from "constructs";
 
 export interface SecureBucketProps {
   logTargetBucket: s3.IBucket | "self";
@@ -15,10 +19,10 @@ export interface SecureBucketProps {
 /**
  * Creates a secure bucket with enabled server access logs.
  */
-export class SecureBucket extends cdk.Construct {
+export class SecureBucket extends Construct {
   public readonly bucket: s3.IBucket;
 
-  constructor(scope: cdk.Construct, id: string, props: SecureBucketProps) {
+  constructor(scope: Construct, id: string, props: SecureBucketProps) {
     super(scope, id);
 
     const bucket = new s3.Bucket(this, id, {
@@ -49,13 +53,13 @@ export interface SecureTableProps {
  * Creates a secure DynamoDB table with properties enabled for compliance
  *  - point-in-time recover (PITR) enabled by default
  */
-export class SecureTable extends cdk.Construct {
+export class SecureTable extends Construct {
   /**
    * The created DynamoDB table
    */
   public readonly table: dynamodb.ITable;
 
-  constructor(scope: cdk.Construct, id: string, props: SecureTableProps) {
+  constructor(scope: Construct, id: string, props: SecureTableProps) {
     super(scope, id);
 
     const table = new dynamodb.Table(this, id, {
@@ -81,10 +85,10 @@ export interface SecureRestApiProps extends apigw.RestApiBaseProps {
  *  - cache enabled and encrypted by default
  *  - execution logs enabled by default
  */
-export class SecureRestApi extends cdk.Construct {
+export class SecureRestApi extends Construct {
   readonly restApi: apigw.RestApiBase;
 
-  constructor(scope: cdk.Construct, id: string, props: SecureRestApiProps) {
+  constructor(scope: Construct, id: string, props: SecureRestApiProps) {
     super(scope, id);
     const baseProps = {
       // This is slightly repetitive between endpointTypes and parameters.endpointConfigurationTypes; however, due
@@ -101,7 +105,7 @@ export class SecureRestApi extends cdk.Construct {
         // secure defaults that cannot be overridden
         cachingEnabled: true,
         cacheDataEncrypted: true,
-        cacheTtl: cdk.Duration.minutes(0),
+        cacheTtl: Duration.minutes(0),
         loggingLevel: apigw.MethodLoggingLevel.INFO, // execution logging
       },
     };
@@ -128,13 +132,13 @@ export interface SecureQueueProps {
  * Creates a secure(?) SQS Queue with properties enabled for compliance
  *  - TODO
  */
-export class SecureQueue extends cdk.Construct {
+export class SecureQueue extends Construct {
   /**
    * The created SQS Queue
    */
   public readonly queue: sqs.IQueue;
 
-  constructor(scope: cdk.Construct, id: string, props: SecureQueueProps) {
+  constructor(scope: Construct, id: string, props: SecureQueueProps) {
     super(scope, id);
 
     const queue = new sqs.Queue(this, id, {
@@ -164,13 +168,13 @@ interface SecureStateMachineProps {
  * TODO(?): add secure features for creating a secure State Machine once
  * it is known what requirements are needed to be considered being secure.
  */
-export class SecureStateMachine extends cdk.Construct {
+export class SecureStateMachine extends Construct {
   readonly stateMachine: sfn.IStateMachine;
-  constructor(scope: cdk.Construct, id: string, props: SecureStateMachineProps) {
+  constructor(scope: Construct, id: string, props: SecureStateMachineProps) {
     super(scope, id);
     const stateMachine = new sfn.StateMachine(this, id, {
       // defaults that can be overridden
-      timeout: cdk.Duration.minutes(15),
+      timeout: Duration.minutes(15),
       stateMachineType: sfn.StateMachineType.STANDARD,
       // configuration passed in
       ...props.stateMachineProps,

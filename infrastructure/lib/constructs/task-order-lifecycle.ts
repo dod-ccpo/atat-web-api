@@ -1,5 +1,5 @@
-import * as s3 from "@aws-cdk/aws-s3";
-import * as cdk from "@aws-cdk/core";
+import { aws_s3 as s3 } from "aws-cdk-lib";
+import { Construct } from "constructs";
 import { SecureBucket } from "./compliant-resources";
 
 export interface TaskOrderLifecycleProps {
@@ -14,12 +14,12 @@ export interface TaskOrderLifecycleProps {
  * This does not create the public API routes and functions; however, it creates the "backend"
  * parts of the architecture.
  */
-export class TaskOrderLifecycle extends cdk.Construct {
+export class TaskOrderLifecycle extends Construct {
   public readonly pendingBucket: SecureBucket;
   public readonly acceptedBucket: SecureBucket;
   public readonly rejectedBucket: SecureBucket;
 
-  constructor(scope: cdk.Construct, id: string, props: TaskOrderLifecycleProps) {
+  constructor(scope: Construct, id: string, props: TaskOrderLifecycleProps) {
     super(scope, id);
     const taskOrderBucketProps = {
       logTargetBucket: props.logTargetBucket,

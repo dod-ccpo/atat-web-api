@@ -1,10 +1,9 @@
-import * as iam from "@aws-cdk/aws-iam";
-import * as cdk from "@aws-cdk/core";
-import * as custom from "@aws-cdk/custom-resources";
+import { ArnFormat, Aws, CfnOutput, Stack, StackProps, aws_iam as iam, custom_resources as custom } from "aws-cdk-lib";
+import { Construct } from "constructs";
 
-export class AtatIamStack extends cdk.Stack {
-  private readonly outputs: cdk.CfnOutput[] = [];
-  constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
+export class AtatIamStack extends Stack {
+  private readonly outputs: CfnOutput[] = [];
+  constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
     this.templateOptions.description = "Creates the IAM permissions for ATAT developers, testers, and auditors.";
 
@@ -31,19 +30,19 @@ export class AtatIamStack extends cdk.Stack {
           sid: "DynamoDBItemAccess",
           effect: iam.Effect.ALLOW,
           actions: ["dynamodb:*GetItem", "dynamodb:PartiQLSelect", "dynamodb:Scan", "dynamodb:Query"],
-          resources: [`arn:${cdk.Aws.PARTITION}:dynamodb:*:${cdk.Aws.ACCOUNT_ID}:table/*`],
+          resources: [`arn:${Aws.PARTITION}:dynamodb:*:${Aws.ACCOUNT_ID}:table/*`],
         }),
         new iam.PolicyStatement({
           sid: "APIGatewayRestApiReadAccess",
           effect: iam.Effect.ALLOW,
           actions: ["apigateway:GET"],
-          resources: [`arn:${cdk.Aws.PARTITION}:apigateway:*::/restapis*`],
+          resources: [`arn:${Aws.PARTITION}:apigateway:*::/restapis*`],
         }),
         new iam.PolicyStatement({
           sid: "StepFunctionsReadAccess",
           effect: iam.Effect.ALLOW,
           actions: ["states:List*", "states:Describe*", "states:GetExecutionHistory"],
-          resources: [`arn:${cdk.Aws.PARTITION}:states:*:${cdk.Aws.ACCOUNT_ID}:stateMachine:*`],
+          resources: [`arn:${Aws.PARTITION}:states:*:${Aws.ACCOUNT_ID}:stateMachine:*`],
         }),
         new iam.PolicyStatement({
           sid: "XRayReadAccess",
@@ -64,7 +63,7 @@ export class AtatIamStack extends cdk.Stack {
           sid: "AllowArtifactReportPackageAccess",
           effect: iam.Effect.ALLOW,
           actions: ["artifact:Get"],
-          resources: [`arn:${cdk.Aws.PARTITION}:artifact:::report-package/*`],
+          resources: [`arn:${Aws.PARTITION}:artifact:::report-package/*`],
         }),
         new iam.PolicyStatement({
           sid: "AllowArtifactAgreementDownload",
@@ -85,8 +84,8 @@ export class AtatIamStack extends cdk.Stack {
           effect: iam.Effect.ALLOW,
           actions: ["sts:AssumeRole"],
           resources: ["deployment", "file-publishing"].map((roleName) =>
-            cdk.Stack.of(this).formatArn({
-              arnFormat: cdk.ArnFormat.SLASH_RESOURCE_NAME,
+            Stack.of(this).formatArn({
+              arnFormat: ArnFormat.SLASH_RESOURCE_NAME,
               service: "iam",
               resource: "role",
               // IAM resources are global
@@ -96,7 +95,7 @@ export class AtatIamStack extends cdk.Stack {
               // But querying for it adds additional complexities so using the hardcoded value is easiest
               // in this context.
               // See "Changing the Qualifier": https://docs.aws.amazon.com/cdk/latest/guide/bootstrapping.html#bootstrapping-synthesizers
-              resourceName: `cdk-hnb659fds-${roleName}-role-${cdk.Aws.ACCOUNT_ID}-${cdk.Aws.REGION}`,
+              resourceName: `cdk-hnb659fds-${roleName}-role-${Aws.ACCOUNT_ID}-${Aws.REGION}`,
             })
           ),
         }),
@@ -203,27 +202,27 @@ export class AtatIamStack extends cdk.Stack {
     });
 
     this.outputs.push(
-      new cdk.CfnOutput(this, "QaTestRoleArnOutput", {
+      new CfnOutput(this, "QaTestRoleArnOutput", {
         exportName: "AtatQaTestRoleArn",
         value: qaAndTestRole.roleArn,
       }),
-      new cdk.CfnOutput(this, "DeveloperRoleArnOutput", {
+      new CfnOutput(this, "DeveloperRoleArnOutput", {
         exportName: "AtatDeveloperRoleArn",
         value: developerRole.roleArn,
       }),
-      new cdk.CfnOutput(this, "AuditorRoleArnOutput", {
+      new CfnOutput(this, "AuditorRoleArnOutput", {
         exportName: "AtatAuditorRoleArn",
         value: auditorRole.roleArn,
       }),
-      new cdk.CfnOutput(this, "CloudFormationRoleArn", {
+      new CfnOutput(this, "CloudFormationRoleArn", {
         exportName: "AtatCloudFormationExecutionRoleArn",
         value: cloudFormationExecutionRole.roleArn,
       }),
-      new cdk.CfnOutput(this, "DeploymentRoleArnOutput", {
+      new CfnOutput(this, "DeploymentRoleArnOutput", {
         exportName: "AtatDeploymentRoleArn",
         value: pipelineDeploymentRole.roleArn,
       }),
-      new cdk.CfnOutput(this, "GitHubOidcProvider", {
+      new CfnOutput(this, "GitHubOidcProvider", {
         exportName: "AtatGitHubOidcProvider",
         value: githubOidcProvider.openIdConnectProviderArn,
       })

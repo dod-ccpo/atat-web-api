@@ -1,16 +1,25 @@
-import * as apigw from "@aws-cdk/aws-apigateway";
-import * as dynamodb from "@aws-cdk/aws-dynamodb";
-import * as ec2 from "@aws-cdk/aws-ec2";
-import * as s3asset from "@aws-cdk/aws-s3-assets";
-import * as sfn from "@aws-cdk/aws-stepfunctions";
-import * as logs from "@aws-cdk/aws-logs";
-import * as secretsmanager from "@aws-cdk/aws-secretsmanager";
-import * as ssm from "@aws-cdk/aws-ssm";
-import * as cdk from "@aws-cdk/core";
-import * as lambda from "@aws-cdk/aws-lambda";
-import * as lambdaNodeJs from "@aws-cdk/aws-lambda-nodejs";
-import * as sqs from "@aws-cdk/aws-sqs";
-import * as iam from "@aws-cdk/aws-iam";
+import {
+  Aws,
+  CfnCondition,
+  CfnOutput,
+  Duration,
+  Fn,
+  Stack,
+  StackProps,
+  aws_apigateway as apigw,
+  aws_dynamodb as dynamodb,
+  aws_ec2 as ec2,
+  aws_iam as iam,
+  aws_lambda as lambda,
+  aws_lambda_nodejs as lambdaNodeJs,
+  aws_logs as logs,
+  aws_s3_assets as s3asset,
+  aws_secretsmanager as secretsmanager,
+  aws_ssm as ssm,
+  aws_stepfunctions as sfn,
+  aws_sqs as sqs,
+} from "aws-cdk-lib";
+import { Construct } from "constructs";
 import { ApiDynamoDBFunction } from "./constructs/api-dynamodb-function";
 import { ApiS3Function } from "./constructs/api-s3-function";
 import { ApiSQSFunction } from "./constructs/api-sqs-function";
@@ -44,7 +53,7 @@ interface AtatSmtpProps {
   secretName: string;
 }
 
-export interface AtatWebApiStackProps extends cdk.StackProps {
+export interface AtatWebApiStackProps extends StackProps {
   environmentId: string;
   idpProps: AtatIdpProps;
   requireAuthorization?: boolean;
@@ -52,7 +61,7 @@ export interface AtatWebApiStackProps extends cdk.StackProps {
   vpc: ec2.IVpc;
 }
 
-export class AtatWebApiStack extends cdk.Stack {
+export class AtatWebApiStack extends Stack {
   private readonly environmentId: string;
   /**
    * @deprecated Use {@link internaApi} instead
@@ -67,9 +76,9 @@ export class AtatWebApiStack extends cdk.Stack {
   public readonly database: Database;
   public readonly functions: lambda.IFunction[] = [];
   public readonly ssmParams: ssm.IParameter[] = [];
-  public readonly outputs: cdk.CfnOutput[] = [];
+  public readonly outputs: CfnOutput[] = [];
 
-  constructor(scope: cdk.Construct, id: string, props: AtatWebApiStackProps) {
+  constructor(scope: Construct, id: string, props: AtatWebApiStackProps) {
     super(scope, id, props);
 
     this.templateOptions.description = "Resources to support the ATAT application API";
@@ -85,7 +94,7 @@ export class AtatWebApiStack extends cdk.Stack {
       },
     }).table;
     this.outputs.push(
-      new cdk.CfnOutput(this, "TableName", {
+      new CfnOutput(this, "TableName", {
         value: this.table.tableName,
       })
     );
@@ -98,7 +107,7 @@ export class AtatWebApiStack extends cdk.Stack {
     // Create a queue for PortfolioDraft submission
     this.submitQueue = new SecureQueue(this, "SubmitQueue", { queueProps: {} }).queue;
     this.outputs.push(
-      new cdk.CfnOutput(this, "SubmitQueueName", {
+      new CfnOutput(this, "SubmitQueueName", {
         value: this.submitQueue.queueName,
       })
     );
@@ -106,31 +115,31 @@ export class AtatWebApiStack extends cdk.Stack {
     // Create two queues for sending emails
     this.emailDeadLetterQueue = new SecureQueue(this, "EmailDLQ", {
       queueProps: {
-        visibilityTimeout: cdk.Duration.seconds(30),
+        visibilityTimeout: Duration.seconds(30),
       },
     }).queue;
     this.emailQueue = new SecureQueue(this, "EmailQueue", {
       queueProps: {
-        visibilityTimeout: cdk.Duration.seconds(30),
+        visibilityTimeout: Duration.seconds(30),
         deadLetterQueue: { queue: this.emailDeadLetterQueue, maxReceiveCount: 1 },
       },
     }).queue;
     this.outputs.push(
-      new cdk.CfnOutput(this, "EmailQueueName", {
+      new CfnOutput(this, "EmailQueueName", {
         value: this.emailQueue.queueName,
       }),
-      new cdk.CfnOutput(this, "EmailDLQName", {
+      new CfnOutput(this, "EmailDLQName", {
         value: this.emailDeadLetterQueue.queueName,
       })
     );
 
-    const forceAuth = new cdk.CfnCondition(this, "ForceAuthorization", {
-      expression: cdk.Fn.conditionEquals(props?.requireAuthorization ?? true, true),
+    const forceAuth = new CfnCondition(this, "ForceAuthorization", {
+      expression: Fn.conditionEquals(props?.requireAuthorization ?? true, true),
     });
     forceAuth.overrideLogicalId("IsAuthorizationRequired");
     this.outputs.push(
-      new cdk.CfnOutput(this, "AuthenticationRequired", {
-        value: this.resolve(cdk.Fn.conditionIf(forceAuth.logicalId, "true", "false")),
+      new CfnOutput(this, "AuthenticationRequired", {
+        value: this.resolve(Fn.conditionIf(forceAuth.logicalId, "true", "false")),
       })
     );
 
@@ -192,8 +201,8 @@ export class AtatWebApiStack extends cdk.Stack {
     // snippet is valid CloudFormation with real Fn::Sub invocations, those will be interpreted. This results in
     // all of the function ARNs being inserted into the x-aws-apigateway-integration resources when the template
     // is evaluated.
-    const draftApiSpecAsTemplateInclude = cdk.Fn.transform("AWS::Include", { Location: draftApiAsset.s3ObjectUrl });
-    const internalApiSpecAsTemplateInclude = cdk.Fn.transform("AWS::Include", {
+    const draftApiSpecAsTemplateInclude = Fn.transform("AWS::Include", { Location: draftApiAsset.s3ObjectUrl });
+    const internalApiSpecAsTemplateInclude = Fn.transform("AWS::Include", {
       Location: internalApiAsset.s3ObjectUrl,
     });
 
@@ -262,7 +271,7 @@ export class AtatWebApiStack extends cdk.Stack {
     const provisioningTask = new SfnLambdaInvokeTask(this, "ProvisioningTask", {
       sfnTask: {
         lambdaFunction: provisioningRequest,
-        timeout: cdk.Duration.seconds(60),
+        timeout: Duration.seconds(60),
         // "$"" sends all of the input to the lambda function, and in this task is coming from the
         // SQS message being sent with the start of the step function execution
         inputPath: "$",
@@ -420,7 +429,7 @@ export class AtatWebApiStack extends cdk.Stack {
       batchSize: 1,
       smtpSecrets: smtpSecrets,
       functionPropsOverride: {
-        timeout: cdk.Duration.seconds(10),
+        timeout: Duration.seconds(10),
         environment: {
           SMTP_SECRET_NAME: props.smtpProps.secretName,
         },
@@ -428,8 +437,8 @@ export class AtatWebApiStack extends cdk.Stack {
     }).fn;
 
     const rolesToGrant = [
-      iam.Role.fromRoleArn(this, "DeveloperRoleArn", cdk.Fn.importValue("AtatDeveloperRoleArn")),
-      iam.Role.fromRoleArn(this, "QaRoleArn", cdk.Fn.importValue("AtatQaTestRoleArn")),
+      iam.Role.fromRoleArn(this, "DeveloperRoleArn", Fn.importValue("AtatDeveloperRoleArn")),
+      iam.Role.fromRoleArn(this, "QaRoleArn", Fn.importValue("AtatQaTestRoleArn")),
     ];
     const temporaryTestInvokePolicy = new iam.Policy(this, "GrantTemporarySendEmailInvoke", {
       statements: [
@@ -544,7 +553,7 @@ export class AtatWebApiStack extends cdk.Stack {
     // When utilizing a custom domain, the `domainName` property of IUserPoolDomain
     // contains the full domain; however, in other scenarios, it contains only the
     // prefix.
-    const fullDomainName = `${cognitoAuthentication.userPoolDomain.domainName}.auth-fips.${cdk.Aws.REGION}.amazoncognito.com`;
+    const fullDomainName = `${cognitoAuthentication.userPoolDomain.domainName}.auth-fips.${Aws.REGION}.amazoncognito.com`;
     this.ssmParams.push(
       new ssm.StringParameter(this, "UserPoolIdParameter", {
         description: "Cognito User Pool ID",

@@ -1,10 +1,16 @@
-import * as cdk from "@aws-cdk/core";
-import * as ec2 from "@aws-cdk/aws-ec2";
-import * as lambda from "@aws-cdk/aws-lambda";
-import * as rds from "@aws-cdk/aws-rds";
-import * as iam from "@aws-cdk/aws-iam";
-import * as secretsmanager from "@aws-cdk/aws-secretsmanager";
-import * as customResources from "@aws-cdk/custom-resources";
+import {
+  ArnFormat,
+  CustomResource,
+  Duration,
+  Stack,
+  aws_ec2 as ec2,
+  aws_lambda as lambda,
+  aws_rds as rds,
+  aws_iam as iam,
+  aws_secretsmanager as secretsmanager,
+  custom_resources as customResources,
+} from "aws-cdk-lib";
+import { Construct, DependencyGroup } from "constructs";
 import * as util from "../util";
 import { ApiFlexFunction } from "./lambda-fn";
 
@@ -31,21 +37,21 @@ enum DatabaseUsers {
   ADMIN = "atat_api_admin",
 }
 
-class DatabaseBootstrapper extends cdk.Construct {
-  public readonly bootstrapResource: cdk.CustomResource;
+class DatabaseBootstrapper extends Construct {
+  public readonly bootstrapResource: CustomResource;
   public readonly backingLambda: lambda.IFunction;
-  constructor(scope: cdk.Construct, id: string, props: BootstrapProps) {
+  constructor(scope: Construct, id: string, props: BootstrapProps) {
     super(scope, id);
     const handler = new ApiFlexFunction(this, "Function", {
       handlerPath: util.packageRoot() + "/rds/initial-bootstrap.ts",
       lambdaVpc: props.vpc,
       functionPropsOverride: {
         memorySize: 1024,
-        timeout: cdk.Duration.minutes(5),
+        timeout: Duration.minutes(5),
       },
     });
 
-    this.bootstrapResource = new cdk.CustomResource(this, "CustomResource", {
+    this.bootstrapResource = new CustomResource(this, "CustomResource", {
       serviceToken: handler.fn.functionArn,
       properties: {
         DatabaseName: props.databaseName,
@@ -63,7 +69,7 @@ class DatabaseBootstrapper extends cdk.Construct {
  * Builds an Aurora PostgreSQL database with various security settings as well as
  * automatic bootstrapping of an underlying database.
  */
-export class Database extends cdk.Construct {
+export class Database extends Construct {
   /**
    * The underlying Aurora cluster.
    */
@@ -82,13 +88,13 @@ export class Database extends cdk.Construct {
   // Using a ConcreteDependable means that we can change the underlying definition of what it
   // means for this to be "ready" without having to update the API. We just need to add/change
   // resources in the ConcreteDependable.
-  public readonly databaseReady: cdk.ConcreteDependable;
+  public readonly databaseReady: DependencyGroup;
 
   public readonly clusterResourceId: string;
 
   public readonly databaseName: string;
 
-  constructor(scope: cdk.Construct, id: string, props: DatabaseProps) {
+  constructor(scope: Construct, id: string, props: DatabaseProps) {
     super(scope, id);
 
     this.databaseName = props.databaseName;
@@ -117,7 +123,7 @@ export class Database extends cdk.Construct {
         // Time window is in UTC. This is approximately between
         // 12AM and 4AM ET (depending on Daylight Saving Time)
         preferredWindow: "06:00-07:00",
-        retention: cdk.Duration.days(7),
+        retention: Duration.days(7),
       },
       preferredMaintenanceWindow: "Sun:07:00-Sun:08:00",
       parameterGroup: parameters,
@@ -155,20 +161,20 @@ export class Database extends cdk.Construct {
 
     // Ensure the DB is not created until all instances in the cluster are ready
     const instances = cluster.node.children.filter((child) => child instanceof rds.CfnDBInstance);
-    const instancesReady = new cdk.ConcreteDependable();
+    const instancesReady = new DependencyGroup();
     instances.forEach((dbInstance) => instancesReady.add(dbInstance));
     bootstrapper.bootstrapResource.node.addDependency(instancesReady);
 
     // Provide a resource to determine whether the database has been created.
-    this.databaseReady = new cdk.ConcreteDependable();
+    this.databaseReady = new DependencyGroup();
     this.databaseReady.add(bootstrapper.bootstrapResource);
 
     this.clusterResourceId = this.clusterIdGetterCustomResource();
   }
 
   public get clusterArn(): string {
-    return cdk.Stack.of(this).formatArn({
-      arnFormat: cdk.ArnFormat.COLON_RESOURCE_NAME,
+    return Stack.of(this).formatArn({
+      arnFormat: ArnFormat.COLON_RESOURCE_NAME,
       service: "rds",
       resource: "cluster",
       resourceName: this.cluster.clusterIdentifier,
@@ -176,8 +182,8 @@ export class Database extends cdk.Construct {
   }
 
   private clusterUserArn(user: string): string {
-    return cdk.Stack.of(this).formatArn({
-      arnFormat: cdk.ArnFormat.COLON_RESOURCE_NAME,
+    return Stack.of(this).formatArn({
+      arnFormat: ArnFormat.COLON_RESOURCE_NAME,
       service: "rds-db",
       resource: "dbuser",
       resourceName: `${this.clusterResourceId}/${user}`,

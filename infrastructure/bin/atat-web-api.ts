@@ -1,6 +1,5 @@
 #!/usr/bin/env node
-import * as ec2 from "@aws-cdk/aws-ec2";
-import * as cdk from "@aws-cdk/core";
+import { App, Annotations, Aspects, RemovalPolicy, Stack, Tags, aws_ec2 as ec2 } from "aws-cdk-lib";
 import { NIST80053R4Checks } from "cdk-nag";
 import "source-map-support/register";
 import { RemovalPolicySetter } from "../lib/aspects/removal-policy";
@@ -15,9 +14,9 @@ import {
   isPossibleTemporaryEnvironment,
 } from "../lib/util";
 
-const app = new cdk.App();
+const app = new App();
 if (process.env.CDK_NAG_ENABLED === "1") {
-  cdk.Aspects.of(app).add(new NIST80053R4Checks({ verbose: true }));
+  Aspects.of(app).add(new NIST80053R4Checks({ verbose: true }));
 }
 
 // Ugly hack to quickly isolate deployments for developers.  To be improved/removed later.
@@ -39,14 +38,14 @@ const environmentId = lowerCaseEnvironmentId(environmentParam);
 // using the default for the specially-named long-lived "sandbox" resources, used
 // for persistent IAM configuration, etc.
 if (isPossibleTemporaryEnvironment(environmentId)) {
-  cdk.Aspects.of(app).add(new RemovalPolicySetter({ globalRemovalPolicy: cdk.RemovalPolicy.DESTROY }));
+  Aspects.of(app).add(new RemovalPolicySetter({ globalRemovalPolicy: RemovalPolicy.DESTROY }));
 }
 
 const netStack = new AtatNetStack(app, environmentName + "AtatNetStack", {
   vpcCidr: vpcCidrParam,
 });
 
-const stacks: cdk.Stack[] = [
+const stacks: Stack[] = [
   new AtatWebApiStack(app, environmentName + "AtatWebApiStack", {
     environmentId,
     idpProps: {
@@ -71,7 +70,7 @@ const stacks: cdk.Stack[] = [
 // so
 if (process.env.ATAT_DEPLOY_IAM === "1") {
   stacks.push(new AtatIamStack(app, environmentName + "AtatIamStack"));
-  cdk.Annotations.of(stacks[stacks.length - 1]).addWarning(
+  Annotations.of(stacks[stacks.length - 1]).addWarning(
     "Deploying multiple IAM stacks in an account may cause issues. " +
       "Verify there is not already an IAM stack or that the existing stack is " +
       "being updated."
@@ -84,9 +83,9 @@ for (const stack of stacks) {
   const tagFiles = ["tags.json", "tags-private.json"];
   for (const tagFile of tagFiles) {
     try {
-      getTags(tagFile).forEach((tag) => cdk.Tags.of(stack).add(tag.key, tag.value));
+      getTags(tagFile).forEach((tag) => Tags.of(stack).add(tag.key, tag.value));
     } catch (err) {
-      cdk.Annotations.of(stack).addInfo("Unable to load tags from " + tagFile);
+      Annotations.of(stack).addInfo("Unable to load tags from " + tagFile);
     }
   }
 }
