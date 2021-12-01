@@ -19,7 +19,6 @@ beforeEach(() => {
 describe("Validation tests", () => {
   it("should require path param", async () => {
     const emptyRequest: APIGatewayProxyEvent = {
-      // ...validRequest,
       requestContext: { identity: { sourceIp: "10.2.2.2" } },
     } as any;
     expect(await handler(emptyRequest, {} as Context, () => null)).toEqual(PATH_PARAMETER_REQUIRED_BUT_MISSING);

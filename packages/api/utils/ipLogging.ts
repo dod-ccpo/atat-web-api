@@ -6,7 +6,7 @@ export const IpCheckerMiddleware = (): middy.MiddlewareObj<APIGatewayProxyEvent,
   // Set up a before check, this will run before the handler
   const before: middy.MiddlewareFn<APIGatewayProxyEvent, APIGatewayProxyResult> = async (request): Promise<void> => {
     // log the sourceIp
-    console.log(request.event.requestContext.identity.sourceIp);
+    console.log("Client IP address: " + request.event.requestContext.identity.sourceIp);
   };
   return {
     before,
