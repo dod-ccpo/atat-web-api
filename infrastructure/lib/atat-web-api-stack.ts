@@ -30,7 +30,6 @@ import { HttpMethod } from "./http";
 import { TablePermissions } from "./table-permissions";
 import { QueuePermissions } from "./queue-permissions";
 import * as utils from "./util";
-import { convertSchema } from "./load-schema";
 import { ApiFlexFunction } from "./constructs/lambda-fn";
 import { Database } from "./constructs/database";
 
@@ -135,8 +134,6 @@ export class AtatWebApiStack extends cdk.Stack {
       })
     );
 
-    // Convert the YAML API spec to JSON, send the JSON schema to packages/api/models
-    convertSchema();
     // PortfolioDraft Operations
     this.addDatabaseApiFunction("getPortfolioDrafts", "portfolioDrafts/", props.vpc, TablePermissions.READ);
     this.addDatabaseApiFunction("getPortfolioDraft", "portfolioDrafts/", props.vpc, TablePermissions.READ);
