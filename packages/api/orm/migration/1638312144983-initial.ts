@@ -107,17 +107,6 @@ export class initial1638312144983 implements MigrationInterface {
     );
     
     ALTER TABLE task_order OWNER TO atat_api_admin;
-    
-    CREATE TABLE typeorm_metadata (
-        type character varying NOT NULL,
-        database character varying,
-        schema character varying,
-        "table" character varying,
-        name character varying,
-        value text
-    );
-    
-    ALTER TABLE typeorm_metadata OWNER TO atat_api_admin;
     `;
     await queryRunner.query(sql);
   }
@@ -133,7 +122,6 @@ export class initial1638312144983 implements MigrationInterface {
     DROP TABLE environment;
     DROP TABLE portfolio;
     DROP TABLE task_order;
-    DROP TABLE typeorm_metadata;
     `;
     await queryRunner.query(sql);
   }
