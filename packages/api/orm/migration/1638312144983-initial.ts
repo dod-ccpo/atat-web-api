@@ -23,6 +23,19 @@ export class initial1638312144983 implements MigrationInterface {
         'REJECTED'
     );
     
+    CREATE TYPE dod_component_enum AS ENUM (
+        'AIR_FORCE',
+        'ARMY',
+        'MARINE_CORPS',
+        'NAVY',
+        'SPACE_FORCE',
+        'COMBATANT_COMMAND',
+        'JOINT_STAFF',
+        'DAFA',
+        'OSD_PSAS',
+        'NSA'
+    );
+    
     CREATE TABLE application (
         id uuid DEFAULT uuid_generate_v4() CONSTRAINT "pk_application" PRIMARY KEY,
         "createdAt" timestamp without time zone DEFAULT now() NOT NULL,
@@ -86,7 +99,7 @@ export class initial1638312144983 implements MigrationInterface {
         description character varying(300),
         owner character varying NOT NULL,
         csp csp_enum NOT NULL,
-        "dodComponents" character varying[] NOT NULL,
+        "dodComponents" dod_component_enum[] NOT NULL,
         "portfolioManagers" character varying[] NOT NULL
     );
     
@@ -117,6 +130,7 @@ export class initial1638312144983 implements MigrationInterface {
     DROP TYPE provisioning_status_enum;
     DROP TYPE csp_enum;
     DROP TYPE file_scan_status_enum;
+    DROP TYPE dod_component_enum;
     DROP TABLE application;
     DROP TABLE clin;
     DROP TABLE environment;

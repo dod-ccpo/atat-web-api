@@ -1,6 +1,7 @@
 import { Application } from "./Application";
 import { CloudServiceProvider } from "../../models/CloudServiceProvider";
 import { Column, Entity, OneToMany } from "typeorm";
+import { DodComponent } from "../../models/DodComponent";
 import { ProvisionableEntity } from "./ProvisionableEntity";
 import { TaskOrder } from "./TaskOrder";
 
@@ -18,8 +19,8 @@ export class Portfolio extends ProvisionableEntity {
   @Column({ type: "enum", enum: CloudServiceProvider })
   csp: CloudServiceProvider;
 
-  @Column({ type: "varchar", array: true })
-  dodComponents: Array<string>;
+  @Column({ type: "enum", enum: DodComponent, array: true })
+  dodComponents: Array<DodComponent>;
 
   @Column({ type: "varchar", array: true })
   portfolioManagers: Array<string>;
