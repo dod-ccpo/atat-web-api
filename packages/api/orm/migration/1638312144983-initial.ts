@@ -35,7 +35,7 @@ export class initial1638312144983 implements MigrationInterface {
     );
     
     CREATE TABLE application (
-        id uuid DEFAULT uuid_generate_v4() CONSTRAINT "pk_application" PRIMARY KEY NOT NULL,
+        id uuid DEFAULT uuid_generate_v4() CONSTRAINT "pk_application" PRIMARY KEY,
         "createdAt" timestamp without time zone DEFAULT now() NOT NULL,
         "updatedAt" timestamp without time zone DEFAULT now() NOT NULL,
         "archivedAt" timestamp without time zone,
@@ -51,7 +51,7 @@ export class initial1638312144983 implements MigrationInterface {
     ALTER TABLE application OWNER TO atat_api_admin;
     
     CREATE TABLE clin (
-        id uuid DEFAULT uuid_generate_v4() CONSTRAINT "pk_clin" PRIMARY KEY NOT NULL,
+        id uuid DEFAULT uuid_generate_v4() CONSTRAINT "pk_clin" PRIMARY KEY,
         "createdAt" timestamp without time zone DEFAULT now() NOT NULL,
         "updatedAt" timestamp without time zone DEFAULT now() NOT NULL,
         "archivedAt" timestamp without time zone,
@@ -67,7 +67,7 @@ export class initial1638312144983 implements MigrationInterface {
     ALTER TABLE clin OWNER TO atat_api_admin;
     
     CREATE TABLE environment (
-        id uuid DEFAULT uuid_generate_v4() CONSTRAINT "pk_environment" PRIMARY KEY NOT NULL,
+        id uuid DEFAULT uuid_generate_v4() CONSTRAINT "pk_environment" PRIMARY KEY,
         "createdAt" timestamp without time zone DEFAULT now() NOT NULL,
         "updatedAt" timestamp without time zone DEFAULT now() NOT NULL,
         "archivedAt" timestamp without time zone,
@@ -82,7 +82,7 @@ export class initial1638312144983 implements MigrationInterface {
     ALTER TABLE environment OWNER TO atat_api_admin;
     
     CREATE TABLE portfolio (
-        id uuid DEFAULT uuid_generate_v4() CONSTRAINT "pk_portfolio" PRIMARY KEY NOT NULL,
+        id uuid DEFAULT uuid_generate_v4() CONSTRAINT "pk_portfolio" PRIMARY KEY,
         "createdAt" timestamp without time zone DEFAULT now() NOT NULL,
         "updatedAt" timestamp without time zone DEFAULT now() NOT NULL,
         "archivedAt" timestamp without time zone,
@@ -101,7 +101,7 @@ export class initial1638312144983 implements MigrationInterface {
     ALTER TABLE portfolio OWNER TO atat_api_admin;
     
     CREATE TABLE task_order (
-        id uuid DEFAULT uuid_generate_v4() CONSTRAINT "pk_task_order" PRIMARY KEY NOT NULL,
+        id uuid DEFAULT uuid_generate_v4() CONSTRAINT "pk_task_order" PRIMARY KEY,
         "createdAt" timestamp without time zone DEFAULT now() NOT NULL,
         "updatedAt" timestamp without time zone DEFAULT now() NOT NULL,
         "archivedAt" timestamp without time zone,
