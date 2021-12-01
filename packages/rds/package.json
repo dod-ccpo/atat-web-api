@@ -8,9 +8,8 @@
     "lint:fix": "npm run lint -- --fix"
   },
   "dependencies": {
-    "@aws-sdk/client-secrets-manager": "3.41.0",
+    "@aws-sdk/client-secrets-manager": "3.43.0",
     "@aws-sdk/credential-provider-node": "3.41.0",
-    "@aws-sdk/credential-providers": "3.41.0",
     "@aws-sdk/hash-node": "3.40.0",
     "@aws-sdk/protocol-http": "3.40.0",
     "@aws-sdk/signature-v4": "3.40.0",
