@@ -23,16 +23,12 @@ export class initial1638312144983 implements MigrationInterface {
         'complete'
     );
     
-    ALTER TYPE application_provisioningstatus_enum OWNER TO atat_api_admin;
-    
     CREATE TYPE application_status_enum AS ENUM (
         'not_started',
         'in_progress',
         'failed',
         'complete'
     );
-    
-    ALTER TYPE application_status_enum OWNER TO atat_api_admin;
     
     CREATE TYPE environment_provisioningstatus_enum AS ENUM (
         'not_started',
@@ -41,8 +37,6 @@ export class initial1638312144983 implements MigrationInterface {
         'complete'
     );
     
-    ALTER TYPE environment_provisioningstatus_enum OWNER TO atat_api_admin;
-    
     CREATE TYPE environment_status_enum AS ENUM (
         'not_started',
         'in_progress',
@@ -50,14 +44,10 @@ export class initial1638312144983 implements MigrationInterface {
         'complete'
     );
     
-    ALTER TYPE environment_status_enum OWNER TO atat_api_admin;
-    
     CREATE TYPE portfolio_csp_enum AS ENUM (
         'CSP A',
         'CSP B'
     );
-    
-    ALTER TYPE portfolio_csp_enum OWNER TO atat_api_admin;
     
     CREATE TYPE portfolio_provisioningstatus_enum AS ENUM (
         'not_started',
@@ -66,8 +56,6 @@ export class initial1638312144983 implements MigrationInterface {
         'complete'
     );
     
-    ALTER TYPE portfolio_provisioningstatus_enum OWNER TO atat_api_admin;
-    
     CREATE TYPE portfolio_status_enum AS ENUM (
         'not_started',
         'in_progress',
@@ -75,15 +63,11 @@ export class initial1638312144983 implements MigrationInterface {
         'complete'
     );
     
-    ALTER TYPE portfolio_status_enum OWNER TO atat_api_admin;
-    
     CREATE TYPE task_order_filescanstatus_enum AS ENUM (
         'pending',
         'accepted',
         'rejected'
     );
-    
-    ALTER TYPE task_order_filescanstatus_enum OWNER TO atat_api_admin;
     
     SET default_tablespace = '';
     SET default_table_access_method = heap;
