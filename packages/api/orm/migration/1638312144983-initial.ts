@@ -14,86 +14,86 @@ export class initial1638312144983 implements MigrationInterface {
     SET client_min_messages = warning;
     SET row_security = off;
     
-    CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA public;
+    CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
     
-    CREATE TYPE public.application_provisioningstatus_enum AS ENUM (
+    CREATE TYPE application_provisioningstatus_enum AS ENUM (
         'not_started',
         'in_progress',
         'failed',
         'complete'
     );
     
-    ALTER TYPE public.application_provisioningstatus_enum OWNER TO atat_api_admin;
+    ALTER TYPE application_provisioningstatus_enum OWNER TO atat_api_admin;
     
-    CREATE TYPE public.application_status_enum AS ENUM (
+    CREATE TYPE application_status_enum AS ENUM (
         'not_started',
         'in_progress',
         'failed',
         'complete'
     );
     
-    ALTER TYPE public.application_status_enum OWNER TO atat_api_admin;
+    ALTER TYPE application_status_enum OWNER TO atat_api_admin;
     
-    CREATE TYPE public.environment_provisioningstatus_enum AS ENUM (
+    CREATE TYPE environment_provisioningstatus_enum AS ENUM (
         'not_started',
         'in_progress',
         'failed',
         'complete'
     );
     
-    ALTER TYPE public.environment_provisioningstatus_enum OWNER TO atat_api_admin;
+    ALTER TYPE environment_provisioningstatus_enum OWNER TO atat_api_admin;
     
-    CREATE TYPE public.environment_status_enum AS ENUM (
+    CREATE TYPE environment_status_enum AS ENUM (
         'not_started',
         'in_progress',
         'failed',
         'complete'
     );
     
-    ALTER TYPE public.environment_status_enum OWNER TO atat_api_admin;
+    ALTER TYPE environment_status_enum OWNER TO atat_api_admin;
     
-    CREATE TYPE public.portfolio_csp_enum AS ENUM (
+    CREATE TYPE portfolio_csp_enum AS ENUM (
         'CSP A',
         'CSP B'
     );
     
-    ALTER TYPE public.portfolio_csp_enum OWNER TO atat_api_admin;
+    ALTER TYPE portfolio_csp_enum OWNER TO atat_api_admin;
     
-    CREATE TYPE public.portfolio_provisioningstatus_enum AS ENUM (
+    CREATE TYPE portfolio_provisioningstatus_enum AS ENUM (
         'not_started',
         'in_progress',
         'failed',
         'complete'
     );
     
-    ALTER TYPE public.portfolio_provisioningstatus_enum OWNER TO atat_api_admin;
+    ALTER TYPE portfolio_provisioningstatus_enum OWNER TO atat_api_admin;
     
-    CREATE TYPE public.portfolio_status_enum AS ENUM (
+    CREATE TYPE portfolio_status_enum AS ENUM (
         'not_started',
         'in_progress',
         'failed',
         'complete'
     );
     
-    ALTER TYPE public.portfolio_status_enum OWNER TO atat_api_admin;
+    ALTER TYPE portfolio_status_enum OWNER TO atat_api_admin;
     
-    CREATE TYPE public.task_order_filescanstatus_enum AS ENUM (
+    CREATE TYPE task_order_filescanstatus_enum AS ENUM (
         'pending',
         'accepted',
         'rejected'
     );
     
-    ALTER TYPE public.task_order_filescanstatus_enum OWNER TO atat_api_admin;
+    ALTER TYPE task_order_filescanstatus_enum OWNER TO atat_api_admin;
     
     SET default_tablespace = '';
     SET default_table_access_method = heap;
     
-    CREATE TABLE public.application (
-        id uuid DEFAULT public.uuid_generate_v4() NOT NULL,
+    CREATE TABLE application (
+        id uuid DEFAULT uuid_generate_v4() NOT NULL,
         "createdAt" timestamp without time zone DEFAULT now() NOT NULL,
         "updatedAt" timestamp without time zone DEFAULT now() NOT NULL,
         "archivedAt" timestamp without time zone,
-        "provisioningStatus" public.application_provisioningstatus_enum DEFAULT 'not_started'::public.application_provisioningstatus_enum NOT NULL,
+        "provisioningStatus" application_provisioningstatus_enum DEFAULT 'not_started'::application_provisioningstatus_enum NOT NULL,
         administrators character varying[] DEFAULT '{}'::character varying[] NOT NULL,
         contributors character varying[] DEFAULT '{}'::character varying[] NOT NULL,
         "readOnlyOperators" character varying[] DEFAULT '{}'::character varying[] NOT NULL,
@@ -102,10 +102,10 @@ export class initial1638312144983 implements MigrationInterface {
         "portfolioId" uuid
     );
     
-    ALTER TABLE public.application OWNER TO atat_api_admin;
+    ALTER TABLE application OWNER TO atat_api_admin;
     
-    CREATE TABLE public.clin (
-        id uuid DEFAULT public.uuid_generate_v4() NOT NULL,
+    CREATE TABLE clin (
+        id uuid DEFAULT uuid_generate_v4() NOT NULL,
         "createdAt" timestamp without time zone DEFAULT now() NOT NULL,
         "updatedAt" timestamp without time zone DEFAULT now() NOT NULL,
         "archivedAt" timestamp without time zone,
@@ -118,14 +118,14 @@ export class initial1638312144983 implements MigrationInterface {
         "taskOrderId" uuid
     );
     
-    ALTER TABLE public.clin OWNER TO atat_api_admin;
+    ALTER TABLE clin OWNER TO atat_api_admin;
     
-    CREATE TABLE public.environment (
-        id uuid DEFAULT public.uuid_generate_v4() NOT NULL,
+    CREATE TABLE environment (
+        id uuid DEFAULT uuid_generate_v4() NOT NULL,
         "createdAt" timestamp without time zone DEFAULT now() NOT NULL,
         "updatedAt" timestamp without time zone DEFAULT now() NOT NULL,
         "archivedAt" timestamp without time zone,
-        "provisioningStatus" public.environment_provisioningstatus_enum DEFAULT 'not_started'::public.environment_provisioningstatus_enum NOT NULL,
+        "provisioningStatus" environment_provisioningstatus_enum DEFAULT 'not_started'::environment_provisioningstatus_enum NOT NULL,
         administrators character varying[] DEFAULT '{}'::character varying[] NOT NULL,
         contributors character varying[] DEFAULT '{}'::character varying[] NOT NULL,
         "readOnlyOperators" character varying[] DEFAULT '{}'::character varying[] NOT NULL,
@@ -133,29 +133,29 @@ export class initial1638312144983 implements MigrationInterface {
         "applicationId" uuid
     );
     
-    ALTER TABLE public.environment OWNER TO atat_api_admin;
+    ALTER TABLE environment OWNER TO atat_api_admin;
     
-    CREATE TABLE public.portfolio (
-        id uuid DEFAULT public.uuid_generate_v4() NOT NULL,
+    CREATE TABLE portfolio (
+        id uuid DEFAULT uuid_generate_v4() NOT NULL,
         "createdAt" timestamp without time zone DEFAULT now() NOT NULL,
         "updatedAt" timestamp without time zone DEFAULT now() NOT NULL,
         "archivedAt" timestamp without time zone,
-        "provisioningStatus" public.portfolio_provisioningstatus_enum DEFAULT 'not_started'::public.portfolio_provisioningstatus_enum NOT NULL,
+        "provisioningStatus" portfolio_provisioningstatus_enum DEFAULT 'not_started'::portfolio_provisioningstatus_enum NOT NULL,
         administrators character varying[] DEFAULT '{}'::character varying[] NOT NULL,
         contributors character varying[] DEFAULT '{}'::character varying[] NOT NULL,
         "readOnlyOperators" character varying[] DEFAULT '{}'::character varying[] NOT NULL,
         name character varying(100) NOT NULL,
         description character varying(300),
         owner character varying NOT NULL,
-        csp public.portfolio_csp_enum NOT NULL,
+        csp portfolio_csp_enum NOT NULL,
         "dodComponents" character varying[] NOT NULL,
         "portfolioManagers" character varying[] NOT NULL
     );
     
-    ALTER TABLE public.portfolio OWNER TO atat_api_admin;
+    ALTER TABLE portfolio OWNER TO atat_api_admin;
     
-    CREATE TABLE public.task_order (
-        id uuid DEFAULT public.uuid_generate_v4() NOT NULL,
+    CREATE TABLE task_order (
+        id uuid DEFAULT uuid_generate_v4() NOT NULL,
         "createdAt" timestamp without time zone DEFAULT now() NOT NULL,
         "updatedAt" timestamp without time zone DEFAULT now() NOT NULL,
         "archivedAt" timestamp without time zone,
@@ -163,13 +163,13 @@ export class initial1638312144983 implements MigrationInterface {
         "fileId" uuid NOT NULL,
         "fileName" character varying(256) NOT NULL,
         "fileSize" integer,
-        "fileScanStatus" public.task_order_filescanstatus_enum DEFAULT 'pending'::public.task_order_filescanstatus_enum NOT NULL,
+        "fileScanStatus" task_order_filescanstatus_enum DEFAULT 'pending'::task_order_filescanstatus_enum NOT NULL,
         "portfolioId" uuid
     );
     
-    ALTER TABLE public.task_order OWNER TO atat_api_admin;
+    ALTER TABLE task_order OWNER TO atat_api_admin;
     
-    CREATE TABLE public.typeorm_metadata (
+    CREATE TABLE typeorm_metadata (
         type character varying NOT NULL,
         database character varying,
         schema character varying,
@@ -179,34 +179,34 @@ export class initial1638312144983 implements MigrationInterface {
     );
     
     
-    ALTER TABLE public.typeorm_metadata OWNER TO atat_api_admin;
+    ALTER TABLE typeorm_metadata OWNER TO atat_api_admin;
     
-    ALTER TABLE ONLY public.task_order
+    ALTER TABLE ONLY task_order
         ADD CONSTRAINT "PK_15e973a09676013165565bc6243" PRIMARY KEY (id);
     
-    ALTER TABLE ONLY public.application
+    ALTER TABLE ONLY application
         ADD CONSTRAINT "PK_569e0c3e863ebdf5f2408ee1670" PRIMARY KEY (id);
     
-    ALTER TABLE ONLY public.portfolio
+    ALTER TABLE ONLY portfolio
         ADD CONSTRAINT "PK_6936bb92ca4b7cda0ff28794e48" PRIMARY KEY (id);
     
-    ALTER TABLE ONLY public.clin
+    ALTER TABLE ONLY clin
         ADD CONSTRAINT "PK_e32ec78a5e701ad41d0ceeba73d" PRIMARY KEY (id);
     
-    ALTER TABLE ONLY public.environment
+    ALTER TABLE ONLY environment
         ADD CONSTRAINT "PK_f0ec97d0ac5e0e2f50f7475699f" PRIMARY KEY (id);
     
-    ALTER TABLE ONLY public.application
-        ADD CONSTRAINT "FK_1462a81e180a036f207e96e0f93" FOREIGN KEY ("portfolioId") REFERENCES public.portfolio(id);
+    ALTER TABLE ONLY application
+        ADD CONSTRAINT "FK_1462a81e180a036f207e96e0f93" FOREIGN KEY ("portfolioId") REFERENCES portfolio(id);
     
-    ALTER TABLE ONLY public.task_order
-        ADD CONSTRAINT "FK_446ee9f80c83b0de3fd2d9891b9" FOREIGN KEY ("portfolioId") REFERENCES public.portfolio(id);
+    ALTER TABLE ONLY task_order
+        ADD CONSTRAINT "FK_446ee9f80c83b0de3fd2d9891b9" FOREIGN KEY ("portfolioId") REFERENCES portfolio(id);
     
-    ALTER TABLE ONLY public.environment
-        ADD CONSTRAINT "FK_4934116062d67f9aef3725972ff" FOREIGN KEY ("applicationId") REFERENCES public.application(id);
+    ALTER TABLE ONLY environment
+        ADD CONSTRAINT "FK_4934116062d67f9aef3725972ff" FOREIGN KEY ("applicationId") REFERENCES application(id);
     
-    ALTER TABLE ONLY public.clin
-        ADD CONSTRAINT "FK_b919a2f2b8cc2d03fbc3d3d9456" FOREIGN KEY ("taskOrderId") REFERENCES public.task_order(id);
+    ALTER TABLE ONLY clin
+        ADD CONSTRAINT "FK_b919a2f2b8cc2d03fbc3d3d9456" FOREIGN KEY ("taskOrderId") REFERENCES task_order(id);
     
     `;
     await queryRunner.query(sql);
