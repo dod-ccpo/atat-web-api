@@ -45,7 +45,8 @@ export class initial1638312144983 implements MigrationInterface {
         "readOnlyOperators" character varying[] DEFAULT '{}'::character varying[] NOT NULL,
         name character varying(100) NOT NULL,
         description character varying(300),
-        "portfolioId" uuid
+        "portfolioId" uuid,
+        CONSTRAINT "fk_application_portfolio" FOREIGN KEY ("portfolioId") REFERENCES portfolio(id)
     );
     
     ALTER TABLE application OWNER TO atat_api_admin;
@@ -61,7 +62,8 @@ export class initial1638312144983 implements MigrationInterface {
         "obligatedFunds" money NOT NULL,
         "popStartDate" date NOT NULL,
         "popEndDate" date NOT NULL,
-        "taskOrderId" uuid
+        "taskOrderId" uuid,
+        CONSTRAINT "fk_clin_task_order" FOREIGN KEY ("taskOrderId") REFERENCES task_order(id)
     );
     
     ALTER TABLE clin OWNER TO atat_api_admin;
@@ -76,7 +78,8 @@ export class initial1638312144983 implements MigrationInterface {
         contributors character varying[] DEFAULT '{}'::character varying[] NOT NULL,
         "readOnlyOperators" character varying[] DEFAULT '{}'::character varying[] NOT NULL,
         name character varying(100) NOT NULL,
-        "applicationId" uuid
+        "applicationId" uuid,
+        CONSTRAINT "fk_environment_application" FOREIGN KEY ("applicationId") REFERENCES application(id)
     );
     
     ALTER TABLE environment OWNER TO atat_api_admin;
@@ -110,7 +113,8 @@ export class initial1638312144983 implements MigrationInterface {
         "fileName" character varying(256) NOT NULL,
         "fileSize" integer,
         "fileScanStatus" file_scan_status_enum DEFAULT 'pending'::file_scan_status_enum NOT NULL,
-        "portfolioId" uuid
+        "portfolioId" uuid,
+        CONSTRAINT "fk_task_order_portfolio" FOREIGN KEY ("portfolioId") REFERENCES portfolio(id)
     );
     
     ALTER TABLE task_order OWNER TO atat_api_admin;
@@ -124,21 +128,7 @@ export class initial1638312144983 implements MigrationInterface {
         value text
     );
     
-    
     ALTER TABLE typeorm_metadata OWNER TO atat_api_admin;
-    
-    ALTER TABLE ONLY application
-        ADD CONSTRAINT "FK_1462a81e180a036f207e96e0f93" FOREIGN KEY ("portfolioId") REFERENCES portfolio(id);
-    
-    ALTER TABLE ONLY task_order
-        ADD CONSTRAINT "FK_446ee9f80c83b0de3fd2d9891b9" FOREIGN KEY ("portfolioId") REFERENCES portfolio(id);
-    
-    ALTER TABLE ONLY environment
-        ADD CONSTRAINT "FK_4934116062d67f9aef3725972ff" FOREIGN KEY ("applicationId") REFERENCES application(id);
-    
-    ALTER TABLE ONLY clin
-        ADD CONSTRAINT "FK_b919a2f2b8cc2d03fbc3d3d9456" FOREIGN KEY ("taskOrderId") REFERENCES task_order(id);
-    
     `;
     await queryRunner.query(sql);
   }
