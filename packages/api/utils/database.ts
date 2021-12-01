@@ -4,7 +4,13 @@ import path from "path";
 import * as fs from "fs";
 import { TlsOptions } from "tls";
 
+let CONNECTION: Connection | undefined;
+
 export async function createConnection(): Promise<Connection> {
+  if (CONNECTION !== undefined && CONNECTION.isConnected) {
+    console.log("Reusing connection");
+    return CONNECTION;
+  }
   // This check is disabled for the following block because per our function infrastructure
   // configuration these values must be set. If they aren't this this won't be recoverable
   // and the function will fail early during the connection establishment.
@@ -44,7 +50,7 @@ export async function createConnection(): Promise<Connection> {
   };
 
   console.info(`Establishing connection to ${databaseWriteHost} and ${databaseReadHost}`);
-  return typeormConnection({
+  CONNECTION = await typeormConnection({
     type: "postgres",
     replication: {
       master: {
@@ -73,4 +79,5 @@ export async function createConnection(): Promise<Connection> {
     logging: "all",
     database: databaseName,
   });
+  return CONNECTION;
 }
