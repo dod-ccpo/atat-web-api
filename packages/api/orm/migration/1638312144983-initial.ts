@@ -2,7 +2,7 @@ import { MigrationInterface, QueryRunner } from "typeorm";
 
 export class initial1638312144983 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    const sql = `    
+    const sql = `
     CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
     
     CREATE TYPE provisioning_status_enum AS ENUM (
@@ -122,5 +122,19 @@ export class initial1638312144983 implements MigrationInterface {
     await queryRunner.query(sql);
   }
 
-  public async down(queryRunner: QueryRunner): Promise<void> {}
+  public async down(queryRunner: QueryRunner): Promise<void> {
+    const sql = `
+    DROP EXTENSION "uuid-ossp";
+    DROP TYPE provisioning_status_enum;
+    DROP TYPE csp_enum;
+    DROP TYPE file_scan_status_enum;
+    DROP TABLE application;
+    DROP TABLE clin;
+    DROP TABLE environment;
+    DROP TABLE portfolio;
+    DROP TABLE task_order;
+    DROP TABLE typeorm_metadata;
+    `;
+    await queryRunner.query(sql);
+  }
 }
