@@ -56,7 +56,10 @@ const stacks: cdk.Stack[] = [
     smtpProps: {
       secretName: "email/smtp",
     },
-    requireAuthorization: process.env.ATAT_REQUIRE_AUTH !== "false",
+    // Require authorization whenever we're deploying a non-temporary environment
+    // or in temporary environments that have "ATAT_REQUIRE_AUTH" unset or set to
+    // any value other than "false"
+    requireAuthorization: !isPossibleTemporaryEnvironment(environmentId) || process.env.ATAT_REQUIRE_AUTH !== "false",
     vpc: netStack.vpc,
   }),
   netStack,
