@@ -34,8 +34,6 @@ export class initial1638312144983 implements MigrationInterface {
         'rejected'
     );
     
-    SET default_table_access_method = heap;
-    
     CREATE TABLE application (
         id uuid DEFAULT uuid_generate_v4() NOT NULL,
         "createdAt" timestamp without time zone DEFAULT now() NOT NULL,
