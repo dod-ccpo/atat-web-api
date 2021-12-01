@@ -17,10 +17,10 @@ export class initial1638312144983 implements MigrationInterface {
     CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
     
     CREATE TYPE provisioning_status_enum AS ENUM (
-        'not_started',
-        'in_progress',
-        'failed',
-        'complete'
+        'PENDING',
+        'IN_PROGRESS',
+        'COMPLETE',
+        'FAILED'
     );
     
     CREATE TYPE csp_enum AS ENUM (
@@ -29,9 +29,9 @@ export class initial1638312144983 implements MigrationInterface {
     );
     
     CREATE TYPE file_scan_status_enum AS ENUM (
-        'pending',
-        'accepted',
-        'rejected'
+        'PENDING',
+        'ACCEPTED',
+        'REJECTED'
     );
     
     CREATE TABLE application (
@@ -39,7 +39,7 @@ export class initial1638312144983 implements MigrationInterface {
         "createdAt" timestamp without time zone DEFAULT now() NOT NULL,
         "updatedAt" timestamp without time zone DEFAULT now() NOT NULL,
         "archivedAt" timestamp without time zone,
-        "provisioningStatus" provisioning_status_enum DEFAULT 'not_started'::provisioning_status_enum NOT NULL,
+        "provisioningStatus" provisioning_status_enum DEFAULT 'PENDING'::provisioning_status_enum NOT NULL,
         administrators character varying[] DEFAULT '{}'::character varying[] NOT NULL,
         contributors character varying[] DEFAULT '{}'::character varying[] NOT NULL,
         "readOnlyOperators" character varying[] DEFAULT '{}'::character varying[] NOT NULL,
@@ -73,7 +73,7 @@ export class initial1638312144983 implements MigrationInterface {
         "createdAt" timestamp without time zone DEFAULT now() NOT NULL,
         "updatedAt" timestamp without time zone DEFAULT now() NOT NULL,
         "archivedAt" timestamp without time zone,
-        "provisioningStatus" provisioning_status_enum DEFAULT 'not_started'::provisioning_status_enum NOT NULL,
+        "provisioningStatus" provisioning_status_enum DEFAULT 'PENDING'::provisioning_status_enum NOT NULL,
         administrators character varying[] DEFAULT '{}'::character varying[] NOT NULL,
         contributors character varying[] DEFAULT '{}'::character varying[] NOT NULL,
         "readOnlyOperators" character varying[] DEFAULT '{}'::character varying[] NOT NULL,
@@ -89,7 +89,7 @@ export class initial1638312144983 implements MigrationInterface {
         "createdAt" timestamp without time zone DEFAULT now() NOT NULL,
         "updatedAt" timestamp without time zone DEFAULT now() NOT NULL,
         "archivedAt" timestamp without time zone,
-        "provisioningStatus" provisioning_status_enum DEFAULT 'not_started'::provisioning_status_enum NOT NULL,
+        "provisioningStatus" provisioning_status_enum DEFAULT 'PENDING'::provisioning_status_enum NOT NULL,
         administrators character varying[] DEFAULT '{}'::character varying[] NOT NULL,
         contributors character varying[] DEFAULT '{}'::character varying[] NOT NULL,
         "readOnlyOperators" character varying[] DEFAULT '{}'::character varying[] NOT NULL,
@@ -112,7 +112,7 @@ export class initial1638312144983 implements MigrationInterface {
         "fileId" uuid NOT NULL,
         "fileName" character varying(256) NOT NULL,
         "fileSize" integer,
-        "fileScanStatus" file_scan_status_enum DEFAULT 'pending'::file_scan_status_enum NOT NULL,
+        "fileScanStatus" file_scan_status_enum DEFAULT 'PENDING'::file_scan_status_enum NOT NULL,
         "portfolioId" uuid,
         CONSTRAINT "fk_task_order_portfolio" FOREIGN KEY ("portfolioId") REFERENCES portfolio(id)
     );
