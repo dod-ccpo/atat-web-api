@@ -16,28 +16,7 @@ export class initial1638312144983 implements MigrationInterface {
     
     CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
     
-    CREATE TYPE application_provisioningstatus_enum AS ENUM (
-        'not_started',
-        'in_progress',
-        'failed',
-        'complete'
-    );
-    
-    CREATE TYPE application_status_enum AS ENUM (
-        'not_started',
-        'in_progress',
-        'failed',
-        'complete'
-    );
-    
-    CREATE TYPE environment_provisioningstatus_enum AS ENUM (
-        'not_started',
-        'in_progress',
-        'failed',
-        'complete'
-    );
-    
-    CREATE TYPE environment_status_enum AS ENUM (
+    CREATE TYPE provisioning_status_enum AS ENUM (
         'not_started',
         'in_progress',
         'failed',
@@ -47,20 +26,6 @@ export class initial1638312144983 implements MigrationInterface {
     CREATE TYPE portfolio_csp_enum AS ENUM (
         'CSP A',
         'CSP B'
-    );
-    
-    CREATE TYPE portfolio_provisioningstatus_enum AS ENUM (
-        'not_started',
-        'in_progress',
-        'failed',
-        'complete'
-    );
-    
-    CREATE TYPE portfolio_status_enum AS ENUM (
-        'not_started',
-        'in_progress',
-        'failed',
-        'complete'
     );
     
     CREATE TYPE task_order_filescanstatus_enum AS ENUM (
@@ -77,7 +42,7 @@ export class initial1638312144983 implements MigrationInterface {
         "createdAt" timestamp without time zone DEFAULT now() NOT NULL,
         "updatedAt" timestamp without time zone DEFAULT now() NOT NULL,
         "archivedAt" timestamp without time zone,
-        "provisioningStatus" application_provisioningstatus_enum DEFAULT 'not_started'::application_provisioningstatus_enum NOT NULL,
+        "provisioningStatus" provisioning_status_enum DEFAULT 'not_started'::provisioning_status_enum NOT NULL,
         administrators character varying[] DEFAULT '{}'::character varying[] NOT NULL,
         contributors character varying[] DEFAULT '{}'::character varying[] NOT NULL,
         "readOnlyOperators" character varying[] DEFAULT '{}'::character varying[] NOT NULL,
@@ -109,7 +74,7 @@ export class initial1638312144983 implements MigrationInterface {
         "createdAt" timestamp without time zone DEFAULT now() NOT NULL,
         "updatedAt" timestamp without time zone DEFAULT now() NOT NULL,
         "archivedAt" timestamp without time zone,
-        "provisioningStatus" environment_provisioningstatus_enum DEFAULT 'not_started'::environment_provisioningstatus_enum NOT NULL,
+        "provisioningStatus" provisioning_status_enum DEFAULT 'not_started'::provisioning_status_enum NOT NULL,
         administrators character varying[] DEFAULT '{}'::character varying[] NOT NULL,
         contributors character varying[] DEFAULT '{}'::character varying[] NOT NULL,
         "readOnlyOperators" character varying[] DEFAULT '{}'::character varying[] NOT NULL,
@@ -124,7 +89,7 @@ export class initial1638312144983 implements MigrationInterface {
         "createdAt" timestamp without time zone DEFAULT now() NOT NULL,
         "updatedAt" timestamp without time zone DEFAULT now() NOT NULL,
         "archivedAt" timestamp without time zone,
-        "provisioningStatus" portfolio_provisioningstatus_enum DEFAULT 'not_started'::portfolio_provisioningstatus_enum NOT NULL,
+        "provisioningStatus" provisioning_status_enum DEFAULT 'not_started'::provisioning_status_enum NOT NULL,
         administrators character varying[] DEFAULT '{}'::character varying[] NOT NULL,
         contributors character varying[] DEFAULT '{}'::character varying[] NOT NULL,
         "readOnlyOperators" character varying[] DEFAULT '{}'::character varying[] NOT NULL,
