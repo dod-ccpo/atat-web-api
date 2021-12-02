@@ -1,9 +1,9 @@
 import { BaseEntity } from "./BaseEntity";
 import { Column, Entity, ManyToOne } from "typeorm";
-import { TaskOrder } from "./TaskOrder";
+import { TaskOrderEntity } from "./TaskOrder";
 
 @Entity()
-export class Clin extends BaseEntity {
+export class ClinEntity extends BaseEntity {
   @Column({
     length: 4,
     comment: "contract line item number from task order, 0001 through 9999",
@@ -33,6 +33,6 @@ export class Clin extends BaseEntity {
   @Column({ type: "date", comment: "end of POP during which funds can be spent" })
   popEndDate: Date;
 
-  @ManyToOne(() => TaskOrder, (taskOrder) => taskOrder.clins)
-  taskOrder: TaskOrder;
+  @ManyToOne(() => TaskOrderEntity, (taskOrder) => taskOrder.clins)
+  taskOrder: TaskOrderEntity;
 }

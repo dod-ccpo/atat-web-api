@@ -1,19 +1,19 @@
 import { Column, Entity, ManyToOne, OneToMany } from "typeorm";
-import { Environment } from "./Environment";
-import { Portfolio } from "./Portfolio";
+import { EnvironmentEntity } from "./Environment";
+import { PortfolioEntity } from "./Portfolio";
 import { ProvisionableEntity } from "./ProvisionableEntity";
 
 @Entity()
-export class Application extends ProvisionableEntity {
+export class ApplicationEntity extends ProvisionableEntity {
   @Column({ length: 100 })
   name: string;
 
   @Column({ nullable: true, length: 300 })
   description: string;
 
-  @ManyToOne(() => Portfolio, (portfolio) => portfolio.applications)
-  portfolio: Portfolio;
+  @ManyToOne(() => PortfolioEntity, (portfolio) => portfolio.applications)
+  portfolio: PortfolioEntity;
 
-  @OneToMany(() => Environment, (environment) => environment.application)
-  environments: Array<Environment>;
+  @OneToMany(() => EnvironmentEntity, (environment) => environment.application)
+  environments: Array<EnvironmentEntity>;
 }

@@ -1,11 +1,11 @@
 import { BaseEntity } from "./BaseEntity";
-import { Clin } from "./Clin";
+import { ClinEntity } from "./Clin";
 import { Column, Entity, ManyToOne, OneToMany } from "typeorm";
 import { FileScanStatus } from "../../models/FileMetadata";
-import { Portfolio } from "./Portfolio";
+import { PortfolioEntity } from "./Portfolio";
 
 @Entity()
-export class TaskOrder extends BaseEntity {
+export class TaskOrderEntity extends BaseEntity {
   @Column({
     length: 17,
     comment: "TO numbers are 13 characters. TO modifications are 17 characters.",
@@ -24,9 +24,9 @@ export class TaskOrder extends BaseEntity {
   @Column({ type: "enum", enum: FileScanStatus, default: FileScanStatus.PENDING })
   fileScanStatus: FileScanStatus;
 
-  @ManyToOne(() => Portfolio, (portfolio) => portfolio.taskOrders)
-  portfolio: Portfolio;
+  @ManyToOne(() => PortfolioEntity, (portfolio) => portfolio.taskOrders)
+  portfolio: PortfolioEntity;
 
-  @OneToMany(() => Clin, (clin) => clin.taskOrder)
-  clins: Array<Clin>;
+  @OneToMany(() => ClinEntity, (clin) => clin.taskOrder)
+  clins: Array<ClinEntity>;
 }
