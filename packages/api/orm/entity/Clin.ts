@@ -2,7 +2,7 @@ import { BaseEntity } from "./BaseEntity";
 import { Column, Entity, ManyToOne } from "typeorm";
 import { TaskOrder } from "./TaskOrder";
 
-@Entity()
+@Entity("clin")
 export class Clin extends BaseEntity {
   @Column({
     length: 4,

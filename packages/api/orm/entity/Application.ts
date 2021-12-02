@@ -3,7 +3,7 @@ import { Environment } from "./Environment";
 import { Portfolio } from "./Portfolio";
 import { ProvisionableEntity } from "./ProvisionableEntity";
 
-@Entity()
+@Entity("application")
 export class Application extends ProvisionableEntity {
   @Column({ length: 100 })
   name: string;

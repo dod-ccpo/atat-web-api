@@ -5,7 +5,7 @@ import { DodComponent } from "../../models/DodComponent";
 import { ProvisionableEntity } from "./ProvisionableEntity";
 import { TaskOrder } from "./TaskOrder";
 
-@Entity()
+@Entity("portfolio")
 export class Portfolio extends ProvisionableEntity {
   @Column({ length: 100 })
   name: string;

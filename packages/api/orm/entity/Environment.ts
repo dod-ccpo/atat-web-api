@@ -2,7 +2,7 @@ import { Application } from "./Application";
 import { Column, Entity, ManyToOne } from "typeorm";
 import { ProvisionableEntity } from "./ProvisionableEntity";
 
-@Entity()
+@Entity("environment")
 export class Environment extends ProvisionableEntity {
   @Column({ length: 100 })
   name: string;
