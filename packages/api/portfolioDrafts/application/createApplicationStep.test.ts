@@ -17,8 +17,8 @@ import {
 } from "./commonApplicationMockData";
 import { mockClient } from "aws-sdk-client-mock";
 import { v4 as uuidv4 } from "uuid";
-import { ApplicationStep } from "../../models/ApplicationStep";
-import { Application } from "../../models/Application";
+import { ApplicationStepModel } from "../../models/ApplicationStep";
+import { ApplicationModel } from "../../models/Application";
 import {
   ApiSuccessResponse,
   ErrorStatusCode,
@@ -36,7 +36,7 @@ beforeEach(() => {
   ddbMock.reset();
 });
 
-const validRequest: ApiGatewayEventParsed<ApplicationStep> = {
+const validRequest: ApiGatewayEventParsed<ApplicationStepModel> = {
   body: mockApplicationStep,
   pathParameters: { portfolioDraftId: uuidv4() },
 } as any;
@@ -54,7 +54,7 @@ describe("Handle service level error", () => {
 
 describe("Path parameter tests", () => {
   it("should require path param", async () => {
-    const emptyRequest: ApiGatewayEventParsed<ApplicationStep> = {
+    const emptyRequest: ApiGatewayEventParsed<ApplicationStepModel> = {
       body: mockApplicationStep,
       // pathParameters { portfolioDraftId: uuidv4() }  // no pathParameters
     } as any;
@@ -64,7 +64,7 @@ describe("Path parameter tests", () => {
     expect(result?.statusCode).toEqual(ErrorStatusCode.NOT_FOUND);
   });
   it("should return error when path param not UUIDv4 (to avoid attempting update)", async () => {
-    const invalidRequest: ApiGatewayEventParsed<ApplicationStep> = {
+    const invalidRequest: ApiGatewayEventParsed<ApplicationStepModel> = {
       body: mockApplicationStep,
       pathParameters: { portfolioDraftId: "invalid" }, // not UUIDv4
     } as any;
@@ -87,7 +87,7 @@ describe("Request body shape validations", () => {
       pathParameters: { portfolioDraftId: uuidv4() },
     },
   ])("should return an error when the request body is empty or invalid json", async (badRequest) => {
-    const invalidRequest: ApiGatewayEventParsed<ApplicationStep> = badRequest as any;
+    const invalidRequest: ApiGatewayEventParsed<ApplicationStepModel> = badRequest as any;
     const result = await handler(invalidRequest, {} as Context, () => null);
     const responseBody = JSON.parse(result?.body ?? "");
     expect(result?.statusCode).toEqual(ErrorStatusCode.BAD_REQUEST);
@@ -104,7 +104,7 @@ describe("Request body shape validations", () => {
     });
   });
   it("should return error when request body is not a application step", async () => {
-    const emptyRequest: ApiGatewayEventParsed<ApplicationStep> = {
+    const emptyRequest: ApiGatewayEventParsed<ApplicationStepModel> = {
       body: { foo: "bar" }, // valid json, but not ApplicationStep
       pathParameters: { portfolioDraftId: uuidv4() },
     } as any;
@@ -123,7 +123,7 @@ describe("Request body shape validations", () => {
     });
   });
   it("should return an error when incorrect or missing application properties", async () => {
-    const invalidShapeRequest: ApiGatewayEventParsed<ApplicationStep> = {
+    const invalidShapeRequest: ApiGatewayEventParsed<ApplicationStepModel> = {
       body: { applications: mockApplicationsMissingFields, operators: [] },
       pathParameters: { portfolioDraftId: uuidv4() },
     } as any;
@@ -139,7 +139,7 @@ describe("Request body shape validations", () => {
     expect(result?.body).toMatch(/"must NOT have additional properties"/);
   });
   it("should return an error when application description is too long (max 300) or invalid special chars", async () => {
-    const badApplicationDescriptionsRequest: ApiGatewayEventParsed<ApplicationStep> = {
+    const badApplicationDescriptionsRequest: ApiGatewayEventParsed<ApplicationStepModel> = {
       body: mockBadApplicationDescriptions,
       pathParameters: { portfolioDraftId: uuidv4() },
     } as any;
@@ -155,7 +155,7 @@ describe("Request body shape validations", () => {
     expect(responseBody.error_map[1].instancePath).toEqual("/body/applications/2/description");
   });
   it("should return an error when incorrect or missing environment properties", async () => {
-    const badEnvironmentRequest: ApiGatewayEventParsed<ApplicationStep> = {
+    const badEnvironmentRequest: ApiGatewayEventParsed<ApplicationStepModel> = {
       body: { applications: badEnvironmentInApplication, operators: [] },
       pathParameters: { portfolioDraftId: uuidv4() },
     } as any;
@@ -173,7 +173,7 @@ describe("Request body shape validations", () => {
     expect(result?.body).toMatch(/"must NOT have additional properties"/);
   });
   it("should return an error when the incorrect or missing operators properties", async () => {
-    const badPortfolioOperatorRequest: ApiGatewayEventParsed<ApplicationStep> = {
+    const badPortfolioOperatorRequest: ApiGatewayEventParsed<ApplicationStepModel> = {
       body: {
         applications: mockApplicationStep.applications,
         operators: [{ noName: "the dark side", noAcess: "take over the universe" }],
@@ -196,7 +196,7 @@ describe("Request body shape validations", () => {
   it.each(mockOperatorMissingDisplayNameFields)(
     "should return an error when an operator is missing a display_name (all levels of ApplicationStep)",
     async (operatorMissingDisplayNameApplicationStep) => {
-      const badPortfolioOperatorRequest: ApiGatewayEventParsed<ApplicationStep> = {
+      const badPortfolioOperatorRequest: ApiGatewayEventParsed<ApplicationStepModel> = {
         body: operatorMissingDisplayNameApplicationStep,
         pathParameters: { portfolioDraftId: uuidv4() },
       } as any;
@@ -213,7 +213,7 @@ describe("Request body shape validations", () => {
   it.each(mockOperatorMissingEmailFields)(
     "should return an error when an operator is missing an email (all levels of ApplicationStep)",
     async (operatorMissingEmailApplicationStep) => {
-      const badPortfolioOperatorRequest: ApiGatewayEventParsed<ApplicationStep> = {
+      const badPortfolioOperatorRequest: ApiGatewayEventParsed<ApplicationStepModel> = {
         body: operatorMissingEmailApplicationStep,
         pathParameters: { portfolioDraftId: uuidv4() },
       } as any;
@@ -230,7 +230,7 @@ describe("Request body shape validations", () => {
   it.each(mockOperatorMissingAccessFields)(
     "should return an error when an operator is missing an access role (all levels of ApplicationStep)",
     async (operatorMissingEmailApplicationStep) => {
-      const badPortfolioOperatorRequest: ApiGatewayEventParsed<ApplicationStep> = {
+      const badPortfolioOperatorRequest: ApiGatewayEventParsed<ApplicationStepModel> = {
         body: operatorMissingEmailApplicationStep,
         pathParameters: { portfolioDraftId: uuidv4() },
       } as any;
@@ -264,7 +264,7 @@ describe("Successful operation tests", () => {
     const result = await handler(validRequest, {} as Context, () => null);
     const responseBody = JSON.parse(result?.body ?? "");
     expect(responseBody.applications).toHaveLength(mockResponseGoodPortfolioSummary.num_applications);
-    expect(responseBody.applications.flatMap((app: Application) => app.environments)).toHaveLength(
+    expect(responseBody.applications.flatMap((app: ApplicationModel) => app.environments)).toHaveLength(
       mockResponseGoodPortfolioSummary.num_environments
     );
   });
@@ -279,7 +279,7 @@ describe("Incorrect number of applications and environments", () => {
     const result = await handler(validRequest, {} as Context, () => null);
     const responseBody = JSON.parse(result?.body ?? "");
     expect(responseBody.applications).not.toHaveLength(mockBadPortfolioSummary.num_applications);
-    expect(responseBody.applications.flatMap((app: Application) => app.environments)).not.toHaveLength(
+    expect(responseBody.applications.flatMap((app: ApplicationModel) => app.environments)).not.toHaveLength(
       mockBadPortfolioSummary.num_environments
     );
   });
@@ -287,7 +287,7 @@ describe("Incorrect number of applications and environments", () => {
 
 describe("Business rules validation tests", () => {
   it("should return a validation error when application name is too short or too long", async () => {
-    const badApplicationNameRequest: ApiGatewayEventParsed<ApplicationStep> = {
+    const badApplicationNameRequest: ApiGatewayEventParsed<ApplicationStepModel> = {
       body: { ...mockApplicationStepsBadData[0] },
       pathParameters: { portfolioDraftId: uuidv4() },
     } as any;
@@ -306,7 +306,7 @@ describe("Business rules validation tests", () => {
     });
   });
   it("should return a validation error when an environment name is too short or too long", async () => {
-    const badEnvironmentNameRequest: ApiGatewayEventParsed<ApplicationStep> = {
+    const badEnvironmentNameRequest: ApiGatewayEventParsed<ApplicationStepModel> = {
       body: { ...mockApplicationStepsBadData[1] },
       pathParameters: { portfolioDraftId: uuidv4() },
     } as any;
@@ -322,7 +322,7 @@ describe("Business rules validation tests", () => {
     expect(result?.body).toMatch(/"\/body\/applications\/0\/environments\/[0|1]\/name"/);
   });
   it("should return a validation error when an operator has a name that is too short or too long", async () => {
-    const badOperatorDisplayNameRequest: ApiGatewayEventParsed<ApplicationStep> = {
+    const badOperatorDisplayNameRequest: ApiGatewayEventParsed<ApplicationStepModel> = {
       body: { ...mockApplicationStepsBadData[2] },
       pathParameters: { portfolioDraftId: uuidv4() },
     } as any;
@@ -339,7 +339,7 @@ describe("Business rules validation tests", () => {
     expect(result?.body).toMatch(/"\/body\/applications\/0\/operators\/0\/display_name"/);
   });
   it("should return a validation error when there is not at least 1 application", async () => {
-    const badOperatorDisplayNameRequest: ApiGatewayEventParsed<ApplicationStep> = {
+    const badOperatorDisplayNameRequest: ApiGatewayEventParsed<ApplicationStepModel> = {
       body: { ...mockApplicationStep, applications: [] },
       pathParameters: { portfolioDraftId: uuidv4() },
     } as any;
@@ -354,7 +354,7 @@ describe("Business rules validation tests", () => {
     expect(result?.body).toMatch(/\/body\/applications"/);
   });
   it("should return a validation error when there is not at least 1 environment", async () => {
-    const badOperatorDisplayNameRequest: ApiGatewayEventParsed<ApplicationStep> = {
+    const badOperatorDisplayNameRequest: ApiGatewayEventParsed<ApplicationStepModel> = {
       body: { ...mockApplicationStep, applications: [{ ...mockApplicationStep.applications[0], environments: [] }] },
       pathParameters: { portfolioDraftId: uuidv4() },
     } as any;
@@ -371,7 +371,7 @@ describe("Business rules validation tests", () => {
   });
   // TODO(AT-?): move to new operation that is implemented for Step 4 with adding operators
   it.skip("should return a validation error when admin roles are not acceptable", async () => {
-    const badAdminRolesRequest: ApiGatewayEventParsed<ApplicationStep> = {
+    const badAdminRolesRequest: ApiGatewayEventParsed<ApplicationStepModel> = {
       body: mockApplicationsStepWithBadAdminRoles[0],
       pathParameters: { portfolioDraftId: uuidv4() },
     } as any;

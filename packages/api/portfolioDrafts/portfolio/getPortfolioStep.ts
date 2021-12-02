@@ -4,7 +4,7 @@ import { dynamodbDocumentClient as client } from "../../utils/aws-sdk/dynamodb";
 import { GetCommand } from "@aws-sdk/lib-dynamodb";
 import { isPathParameterPresent, isValidUuidV4 } from "../../utils/validation";
 import { PORTFOLIO_STEP } from "../../models/PortfolioDraft";
-import { PortfolioStep } from "../../models/PortfolioStep";
+import { PortfolioStepModel } from "../../models/PortfolioStep";
 import {
   DATABASE_ERROR,
   NO_SUCH_PORTFOLIO_DRAFT_404,
@@ -42,7 +42,10 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
     if (!result.Item?.portfolio_step) {
       return NO_SUCH_PORTFOLIO_STEP;
     }
-    return new ApiSuccessResponse<PortfolioStep>(result.Item.portfolio_step as PortfolioStep, SuccessStatusCode.OK);
+    return new ApiSuccessResponse<PortfolioStepModel>(
+      result.Item.portfolio_step as PortfolioStepModel,
+      SuccessStatusCode.OK
+    );
   } catch (error) {
     console.error("Database error: " + error);
     return DATABASE_ERROR;

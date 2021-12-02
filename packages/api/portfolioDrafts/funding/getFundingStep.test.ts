@@ -2,7 +2,7 @@ import { Context } from "aws-lambda";
 import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusCode } from "../../utils/response";
 import { handler } from "./getFundingStep";
 import { DynamoDBDocumentClient, GetCommand, GetCommandOutput } from "@aws-sdk/lib-dynamodb";
-import { FundingStep, ValidationMessage } from "../../models/FundingStep";
+import { FundingStepModel, ValidationMessage } from "../../models/FundingStep";
 import { mockClient } from "aws-sdk-client-mock";
 import { v4 as uuidv4 } from "uuid";
 import { DATABASE_ERROR, NO_SUCH_FUNDING_STEP, NO_SUCH_PORTFOLIO_DRAFT_404 } from "../../utils/errors";
@@ -13,8 +13,8 @@ beforeEach(() => {
   ddbMock.reset();
 });
 
-const emptyRequest: ApiGatewayEventParsed<FundingStep> = {} as any;
-const mockFundingStep: FundingStep = {
+const emptyRequest: ApiGatewayEventParsed<FundingStepModel> = {} as any;
+const mockFundingStep: FundingStepModel = {
   task_orders: [
     {
       task_order_file: {
@@ -35,7 +35,7 @@ const mockFundingStep: FundingStep = {
     },
   ],
 };
-const validRequest: ApiGatewayEventParsed<FundingStep> = {
+const validRequest: ApiGatewayEventParsed<FundingStepModel> = {
   pathParameters: { portfolioDraftId: uuidv4() },
   body: "",
 } as any;

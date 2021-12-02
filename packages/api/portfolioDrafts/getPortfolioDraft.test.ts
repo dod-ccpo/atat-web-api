@@ -1,5 +1,5 @@
 import { APIGatewayProxyEvent } from "aws-lambda";
-import { Application } from "../models/Application";
+import { ApplicationModel } from "../models/Application";
 import { DATABASE_ERROR } from "../utils/errors";
 import { DynamoDBDocumentClient, GetCommand, GetCommandOutput } from "@aws-sdk/lib-dynamodb";
 import { handler, NO_PORTFOLIO_PATH_PARAM, NO_SUCH_PORTFOLIO } from "./getPortfolioDraft";
@@ -69,7 +69,7 @@ describe("Successful operation tests", () => {
     const result = await handler(validRequest);
     const responseBody = JSON.parse(result.body);
     expect(mockPortfolioDraft.num_environments).toBe(
-      responseBody.application_step.applications.flatMap((app: Application) => app.environments).length
+      responseBody.application_step.applications.flatMap((app: ApplicationModel) => app.environments).length
     );
   });
 });

@@ -12,14 +12,14 @@ import { mockClient } from "aws-sdk-client-mock";
 import { handler } from "./getApplicationStep";
 import { v4 as uuidv4 } from "uuid";
 import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
-import { ApplicationStep } from "../../models/ApplicationStep";
+import { ApplicationStepModel } from "../../models/ApplicationStep";
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 beforeEach(() => {
   ddbMock.reset();
 });
 
-const validRequest: ApiGatewayEventParsed<ApplicationStep> = {
+const validRequest: ApiGatewayEventParsed<ApplicationStepModel> = {
   body: {},
   pathParameters: { portfolioDraftId: uuidv4() },
 } as any;
@@ -33,14 +33,14 @@ it("should return generic Error if exception caught", async () => {
   expect(result?.statusCode).toEqual(ErrorStatusCode.INTERNAL_SERVER_ERROR);
 });
 it("should require path param", async () => {
-  const emptyRequest: ApiGatewayEventParsed<ApplicationStep> = {} as any;
+  const emptyRequest: ApiGatewayEventParsed<ApplicationStepModel> = {} as any;
   const result = await handler(emptyRequest, {} as Context, () => null);
   expect(result).toBeInstanceOf(OtherErrorResponse);
   expect(result).toEqual(NO_SUCH_PORTFOLIO_DRAFT_404);
   expect(result?.statusCode).toEqual(ErrorStatusCode.NOT_FOUND);
 });
 it("should return error when path param not UUIDv4 (to avoid performing query)", async () => {
-  const invalidRequest: ApiGatewayEventParsed<ApplicationStep> = {
+  const invalidRequest: ApiGatewayEventParsed<ApplicationStepModel> = {
     pathParameters: { portfolioDraftId: "invalid" },
   } as any;
   const result = await handler(invalidRequest, {} as Context, () => null);

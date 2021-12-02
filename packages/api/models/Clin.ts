@@ -1,4 +1,4 @@
-export interface Clin {
+export interface ClinModel {
   clin_number: string;
   idiq_clin: string;
   total_clin_value: number;

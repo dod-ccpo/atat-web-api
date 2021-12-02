@@ -1,4 +1,4 @@
-import { PortfolioStep } from "../models/PortfolioStep";
+import { PortfolioStepModel } from "../models/PortfolioStep";
 import { validate as uuidValidate, version as uuidVersion } from "uuid";
 
 /**
@@ -30,7 +30,7 @@ function isValidObject(object: unknown): object is any {
  * @param object - The object to check
  * @returns true if the object has all the attributes of a {@link PortfolioStep}
  */
-export function isPortfolioStep(object: unknown): object is PortfolioStep {
+export function isPortfolioStep(object: unknown): object is PortfolioStepModel {
   // Ensure that the given item is a valid object prior to checks its members
   if (!isValidObject(object)) {
     return false;

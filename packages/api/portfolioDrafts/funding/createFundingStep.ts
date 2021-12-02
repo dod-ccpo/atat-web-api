@@ -2,7 +2,7 @@ import { APIGatewayProxyResult, Context } from "aws-lambda";
 import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
 import { dynamodbDocumentClient as client } from "../../utils/aws-sdk/dynamodb";
 import { FUNDING_STEP } from "../../models/PortfolioDraft";
-import { FundingStep } from "../../models/FundingStep";
+import { FundingStepModel } from "../../models/FundingStep";
 import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { DATABASE_ERROR, NO_SUCH_PORTFOLIO_DRAFT_404 } from "../../utils/errors";
 import schema = require("../../models/schema.json");
@@ -24,10 +24,10 @@ import { wrapSchema } from "../../utils/schemaWrapper";
  * @param event - The POST request from API Gateway
  */
 export async function baseHandler(
-  event: ApiGatewayEventParsed<FundingStep>,
+  event: ApiGatewayEventParsed<FundingStepModel>,
   context?: Context
 ): Promise<APIGatewayProxyResult> {
-  validateRequestShape<FundingStep>(event);
+  validateRequestShape<FundingStepModel>(event);
   const portfolioDraftId = event.pathParameters?.portfolioDraftId as string;
   const fundingStep = event.body;
   validateBusinessRulesForFundingStep(fundingStep);
@@ -60,7 +60,7 @@ export async function baseHandler(
     console.error("Database error: " + error);
     return DATABASE_ERROR;
   }
-  return new ApiSuccessResponse<FundingStep>(fundingStep, SuccessStatusCode.CREATED);
+  return new ApiSuccessResponse<FundingStepModel>(fundingStep, SuccessStatusCode.CREATED);
 }
 export const handler = middy(baseHandler)
   .use(xssSanitizer())

@@ -1,7 +1,7 @@
 import { PutCommand } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { v4 as uuidv4 } from "uuid";
-import { PortfolioDraftSummary } from "../models/PortfolioDraftSummary";
+import { PortfolioDraftSummaryModel } from "../models/PortfolioDraftSummary";
 import { ProvisioningStatus } from "../models/ProvisioningStatus";
 import { dynamodbDocumentClient as client } from "../utils/aws-sdk/dynamodb";
 import { DATABASE_ERROR, REQUEST_BODY_NOT_EMPTY } from "../utils/errors";
@@ -23,7 +23,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
   console.log(await databaseConnection.query("SELECT * FROM pg_catalog.pg_tables;"));
 
   const now = new Date().toISOString();
-  const item: PortfolioDraftSummary = {
+  const item: PortfolioDraftSummaryModel = {
     id: uuidv4(),
     created_at: now,
     updated_at: now,
@@ -43,7 +43,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
         Item: item,
       })
     );
-    return new ApiSuccessResponse<PortfolioDraftSummary>(item, SuccessStatusCode.CREATED);
+    return new ApiSuccessResponse<PortfolioDraftSummaryModel>(item, SuccessStatusCode.CREATED);
   } catch (error) {
     console.error("Database error: " + error);
     return DATABASE_ERROR;

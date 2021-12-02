@@ -6,16 +6,16 @@ import {
   SuccessStatusCode,
   ValidationErrorResponse,
 } from "../../utils/response";
-import { Clin } from "../../models/Clin";
+import { ClinModel } from "../../models/Clin";
 import { handler } from "./createFundingStep";
 import { DynamoDBDocumentClient, UpdateCommand, UpdateCommandOutput } from "@aws-sdk/lib-dynamodb";
-import { FundingStep, ValidationMessage } from "../../models/FundingStep";
+import { FundingStepModel, ValidationMessage } from "../../models/FundingStep";
 import { mockClient } from "aws-sdk-client-mock";
 import { ProvisioningStatus } from "../../models/ProvisioningStatus";
 import { v4 as uuidv4 } from "uuid";
 import { DATABASE_ERROR, NO_SUCH_PORTFOLIO_DRAFT_404 } from "../../utils/errors";
 import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
-import { FileMetadataSummary } from "../../models/FileMetadataSummary";
+import { FileMetadataSummaryModel } from "../../models/FileMetadataSummary";
 import {
   createBusinessRulesValidationErrorResponse,
   validateClin,
@@ -51,17 +51,17 @@ beforeEach(() => {
   ddbMock.reset();
 });
 
-const validRequest: ApiGatewayEventParsed<FundingStep> = {
+const validRequest: ApiGatewayEventParsed<FundingStepModel> = {
   body: mockFundingStep,
   pathParameters: { portfolioDraftId: uuidv4() },
 } as any;
 
-const validRequestBadData: ApiGatewayEventParsed<FundingStep> = {
+const validRequestBadData: ApiGatewayEventParsed<FundingStepModel> = {
   body: mockFundingStepBadData,
   pathParameters: { portfolioDraftId: uuidv4() },
 } as any;
 
-const validRequestBadBusinessRulesData: ApiGatewayEventParsed<FundingStep> = {
+const validRequestBadBusinessRulesData: ApiGatewayEventParsed<FundingStepModel> = {
   body: mockFundingStepBadBusinessRulesData,
   pathParameters: { portfolioDraftId: uuidv4() },
 } as any;
@@ -93,7 +93,7 @@ describe("Handle service level error", () => {
 
 describe("Path parameter tests", () => {
   it("should require path param", async () => {
-    const emptyRequest: ApiGatewayEventParsed<FundingStep> = {
+    const emptyRequest: ApiGatewayEventParsed<FundingStepModel> = {
       body: mockFundingStep,
     } as any;
     const result = await handler(emptyRequest, {} as Context, () => null);
@@ -103,7 +103,7 @@ describe("Path parameter tests", () => {
   });
 
   it("should return error when path param not UUIDv4 (to avoid attempting update)", async () => {
-    const invalidRequest: ApiGatewayEventParsed<FundingStep> = {
+    const invalidRequest: ApiGatewayEventParsed<FundingStepModel> = {
       body: mockFundingStep,
       pathParameters: { portfolioDraftId: "invalid" },
     } as any;
@@ -117,7 +117,7 @@ describe("Path parameter tests", () => {
 
 describe("Request body tests", () => {
   it("should return error when request body is empty", async () => {
-    const invalidRequest: ApiGatewayEventParsed<FundingStep> = {
+    const invalidRequest: ApiGatewayEventParsed<FundingStepModel> = {
       pathParameters: { portfolioDraftId: uuidv4() },
       body: undefined, // invalid JSON
     } as any;
@@ -131,7 +131,7 @@ describe("Request body tests", () => {
   });
 
   it("should return error when request body is not a funding step", async () => {
-    const notFundingStepRequest: ApiGatewayEventParsed<FundingStep> = {
+    const notFundingStepRequest: ApiGatewayEventParsed<FundingStepModel> = {
       body: JSON.stringify({ foo: "bar" }), // valid json
       pathParameters: { portfolioDraftId: uuidv4() },
     } as any;

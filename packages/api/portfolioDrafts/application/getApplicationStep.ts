@@ -1,6 +1,6 @@
 import { GetCommand } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyResult, Context } from "aws-lambda";
-import { ApplicationStep } from "../../models/ApplicationStep";
+import { ApplicationStepModel } from "../../models/ApplicationStep";
 import { APPLICATION_STEP } from "../../models/PortfolioDraft";
 import { dynamodbDocumentClient as client } from "../../utils/aws-sdk/dynamodb";
 import { DATABASE_ERROR, NO_SUCH_APPLICATION_STEP, NO_SUCH_PORTFOLIO_DRAFT_400 } from "../../utils/errors";
@@ -19,10 +19,10 @@ import { errorHandlingMiddleware } from "../../utils/errorHandlingMiddleware";
  * @param event - The GET request from API Gateway
  */
 export async function baseHandler(
-  event: ApiGatewayEventParsed<ApplicationStep>,
+  event: ApiGatewayEventParsed<ApplicationStepModel>,
   context?: Context
 ): Promise<APIGatewayProxyResult> {
-  validateRequestShape<ApplicationStep>(event);
+  validateRequestShape<ApplicationStepModel>(event);
   const portfolioDraftId = event.pathParameters?.portfolioDraftId as string;
 
   try {
@@ -41,8 +41,8 @@ export async function baseHandler(
     if (!result.Item?.application_step) {
       return NO_SUCH_APPLICATION_STEP;
     }
-    return new ApiSuccessResponse<ApplicationStep>(
-      result.Item.application_step as ApplicationStep,
+    return new ApiSuccessResponse<ApplicationStepModel>(
+      result.Item.application_step as ApplicationStepModel,
       SuccessStatusCode.OK
     );
   } catch (error) {

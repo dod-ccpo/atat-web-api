@@ -1,10 +1,10 @@
 import { SetupResult, SetupSuccess, ValidationErrorResponse } from "./response";
 import { isValidUuidV4 } from "./validation";
 import { ApiGatewayEventParsed } from "./eventHandlingTool";
-import { FundingStep, ValidationMessage } from "../models/FundingStep";
-import { Clin } from "../models/Clin";
+import { FundingStepModel, ValidationMessage } from "../models/FundingStep";
+import { ClinModel } from "../models/Clin";
 import createError from "http-errors";
-import { ApplicationStep } from "../models/ApplicationStep";
+import { ApplicationStepModel } from "../models/ApplicationStep";
 import { Operators, isAdministrator } from "../models/Operator";
 
 /**
@@ -52,7 +52,7 @@ export interface ClinValidationError {
  * @returns an ValidationErrorResponse (by throwing an error to the middleware) if there are Clin validation errors
  */
 
-export function validateBusinessRulesForFundingStep(fs: FundingStep): ValidationErrorResponse | undefined {
+export function validateBusinessRulesForFundingStep(fs: FundingStepModel): ValidationErrorResponse | undefined {
   const errors: Array<ClinValidationError> = validateFundingStepClins(fs);
   if (errors.length) {
     return createBusinessRulesValidationErrorResponse({ input_validation_errors: errors });
@@ -60,7 +60,7 @@ export function validateBusinessRulesForFundingStep(fs: FundingStep): Validation
   return undefined;
 }
 
-export function validateFundingStepClins(fs: FundingStep): Array<ClinValidationError> {
+export function validateFundingStepClins(fs: FundingStepModel): Array<ClinValidationError> {
   return fs.task_orders
     .flatMap((taskOrder) => taskOrder.clins)
     .map(validateClin)
@@ -72,7 +72,7 @@ export function validateFundingStepClins(fs: FundingStep): Array<ClinValidationE
  * @returns a collection of clin validation errors
  */
 
-export function validateClin(clin: Clin): Array<ClinValidationError> {
+export function validateClin(clin: ClinModel): Array<ClinValidationError> {
   const errors = Array<ClinValidationError>();
   if (new Date(clin.pop_start_date) >= new Date(clin.pop_end_date)) {
     const obj = {
@@ -164,7 +164,7 @@ export function validateBusinessRulesForApplicationStep(as: ApplicationStep): Va
  * @param applicationStep - the incoming applicationStep request body
  * @returns - an object summarizing the admin roles found or missing
  */
-export function findAdministrators(applicationStep: ApplicationStep): AdministratorsFound {
+export function findAdministrators(applicationStep: ApplicationStepModel): AdministratorsFound {
   const { operators, applications } = applicationStep;
   const hasPortfolioAdminRole = adminRoleFound(operators);
 

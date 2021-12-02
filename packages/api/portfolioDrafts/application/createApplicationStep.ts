@@ -1,7 +1,7 @@
 import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyResult, Context } from "aws-lambda";
-import { Application } from "../../models/Application";
-import { ApplicationStep } from "../../models/ApplicationStep";
+import { ApplicationModel } from "../../models/Application";
+import { ApplicationStepModel } from "../../models/ApplicationStep";
 import { APPLICATION_STEP } from "../../models/PortfolioDraft";
 import { dynamodbDocumentClient as client } from "../../utils/aws-sdk/dynamodb";
 import { DATABASE_ERROR, NO_SUCH_PORTFOLIO_DRAFT_404 } from "../../utils/errors";
@@ -25,10 +25,10 @@ import { errorHandlingMiddleware } from "../../utils/errorHandlingMiddleware";
  * @param event - The POST request from API Gateway
  */
 export async function baseHandler(
-  event: ApiGatewayEventParsed<ApplicationStep>,
+  event: ApiGatewayEventParsed<ApplicationStepModel>,
   context?: Context
 ): Promise<APIGatewayProxyResult> {
-  const setupResult = validateRequestShape<ApplicationStep>(event);
+  const setupResult = validateRequestShape<ApplicationStepModel>(event);
   if (setupResult instanceof SetupError) {
     return setupResult.errorResponse;
   }
@@ -69,7 +69,8 @@ export async function baseHandler(
           ":application": applicationStep,
           ":now": new Date().toISOString(),
           ":numOfApplications": applicationStep.applications.length,
-          ":numOfEnvironments": applicationStep.applications.flatMap((app: Application) => app.environments).length,
+          ":numOfEnvironments": applicationStep.applications.flatMap((app: ApplicationModel) => app.environments)
+            .length,
         },
         ConditionExpression: "attribute_exists(created_at)",
         ReturnValues: "ALL_NEW",
@@ -82,7 +83,7 @@ export async function baseHandler(
     console.error("Database error: " + error);
     return DATABASE_ERROR;
   }
-  return new ApiSuccessResponse<ApplicationStep>(applicationStep, SuccessStatusCode.CREATED);
+  return new ApiSuccessResponse<ApplicationStepModel>(applicationStep, SuccessStatusCode.CREATED);
 }
 export const handler = middy(baseHandler)
   .use(xssSanitizer())

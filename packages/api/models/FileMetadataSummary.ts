@@ -1,4 +1,4 @@
-export interface FileMetadataSummary {
+export interface FileMetadataSummaryModel {
   id: string;
   name: string;
 }

@@ -1,6 +1,6 @@
 import { DeleteCommandOutput, GetCommandOutput, UpdateCommandOutput } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyResult } from "aws-lambda";
-import { Error, ErrorCode, ValidationError } from "../models/Error";
+import { ErrorModel, ErrorCode, ValidationErrorModel } from "../models/Error";
 
 type Headers = { [header: string]: string | number | boolean } | undefined;
 type MultiValueHeaders = { [header: string]: (string | number | boolean)[] } | undefined;
@@ -138,7 +138,12 @@ export abstract class ErrorResponse extends Response {
    * @param headers - HTTP response headers
    * @param multiValueHeaders - HTTP response headers, allowing multiple values for a header
    */
-  constructor(error: Error, statusCode: ErrorStatusCode, headers?: Headers, multiValueHeaders?: MultiValueHeaders) {
+  constructor(
+    error: ErrorModel,
+    statusCode: ErrorStatusCode,
+    headers?: Headers,
+    multiValueHeaders?: MultiValueHeaders
+  ) {
     super(JSON.stringify(error), statusCode, headers, multiValueHeaders, false);
   }
 }
@@ -156,7 +161,7 @@ export class OtherErrorResponse extends ErrorResponse {
    * @param multiValueHeaders - HTTP response headers, allowing multiple values for a header
    */
   constructor(message: string, statusCode: ErrorStatusCode, headers?: Headers, multiValueHeaders?: MultiValueHeaders) {
-    const error: Error = {
+    const error: ErrorModel = {
       code: ErrorCode.OTHER,
       message,
     };
@@ -182,7 +187,7 @@ export class ValidationErrorResponse extends ErrorResponse {
     headers?: Headers,
     multiValueHeaders?: MultiValueHeaders
   ) {
-    const error: ValidationError = {
+    const error: ValidationErrorModel = {
       code: ErrorCode.INVALID_INPUT,
       message,
       error_map: errorMap,

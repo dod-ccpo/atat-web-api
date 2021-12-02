@@ -1,9 +1,9 @@
-import { Application } from "./Application";
-import { PortfolioOperator } from "./Operator";
+import { ApplicationModel } from "./Application";
+import { PortfolioOperatorModel } from "./Operator";
 
-export interface ApplicationStep {
-  applications: Array<Application>;
-  operators: Array<PortfolioOperator>;
+export interface ApplicationStepModel {
+  applications: Array<ApplicationModel>;
+  operators: Array<PortfolioOperatorModel>;
 }
 
 export enum ValidationMessage {

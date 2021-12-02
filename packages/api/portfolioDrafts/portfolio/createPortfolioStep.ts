@@ -1,7 +1,7 @@
 import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyResult, Context } from "aws-lambda";
 import { PORTFOLIO_STEP } from "../../models/PortfolioDraft";
-import { PortfolioStep } from "../../models/PortfolioStep";
+import { PortfolioStepModel } from "../../models/PortfolioStep";
 import { dynamodbDocumentClient as client } from "../../utils/aws-sdk/dynamodb";
 import { NO_SUCH_PORTFOLIO_DRAFT_404 } from "../../utils/errors";
 import { ApiSuccessResponse, SuccessStatusCode, DynamoDBException, DatabaseResult } from "../../utils/response";
@@ -24,10 +24,10 @@ import { errorHandlingMiddleware } from "../../utils/errorHandlingMiddleware";
  */
 
 export async function baseHandler(
-  event: ApiGatewayEventParsed<PortfolioStep>,
+  event: ApiGatewayEventParsed<PortfolioStepModel>,
   context?: Context
 ): Promise<APIGatewayProxyResult> {
-  validateRequestShape<PortfolioStep>(event);
+  validateRequestShape<PortfolioStepModel>(event);
   const portfolioDraftId = event.pathParameters?.portfolioDraftId as string;
   const portfolioStep = event.body;
   // Perform database call
@@ -35,7 +35,7 @@ export async function baseHandler(
   if (databaseResult instanceof DynamoDBException) {
     return databaseResult.errorResponse;
   }
-  return new ApiSuccessResponse<PortfolioStep>(portfolioStep, SuccessStatusCode.CREATED);
+  return new ApiSuccessResponse<PortfolioStepModel>(portfolioStep, SuccessStatusCode.CREATED);
 }
 
 export const handler = middy(baseHandler)
@@ -52,7 +52,7 @@ export const handler = middy(baseHandler)
 
 export async function createPortfolioStepCommand(
   portfolioDraftId: string,
-  portfolioStep: PortfolioStep
+  portfolioStep: PortfolioStepModel
 ): Promise<DatabaseResult> {
   const now = new Date().toISOString();
   try {

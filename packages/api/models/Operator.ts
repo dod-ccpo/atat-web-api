@@ -10,20 +10,20 @@ export enum AppEnvAccess {
   READ_ONLY = "read_only",
 }
 
-export interface Operator {
+export interface OperatorModel {
   display_name: string;
   email: string;
 }
 
-export interface PortfolioOperator extends Operator {
+export interface PortfolioOperatorModel extends OperatorModel {
   access: PortfolioAccess;
 }
 
-export interface AppEnvOperator extends Operator {
+export interface AppEnvOperatorModel extends OperatorModel {
   access: AppEnvAccess;
 }
 
-export type Operators = PortfolioOperator | AppEnvOperator;
+export type Operators = PortfolioOperatorModel | AppEnvOperatorModel;
 export const operatorFields: ExhaustivePropertyMap<Operators> = {
   display_name: null,
   email: null,

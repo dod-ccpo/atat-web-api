@@ -4,7 +4,7 @@ import { DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { handler } from "./createPortfolioStep";
 import { mockClient } from "aws-sdk-client-mock";
 import { NO_SUCH_PORTFOLIO_DRAFT_404 } from "../../utils/errors";
-import { PortfolioStep } from "../../models/PortfolioStep";
+import { PortfolioStepModel } from "../../models/PortfolioStep";
 import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
 import { mockPortfolioStep, mockValidPortfolioSteps } from "./commonPortfolioMockData";
 import { validRequest } from "../commonPortfolioDraftMockData";
@@ -18,7 +18,7 @@ describe("Successful operations test", () => {
   it.each(mockValidPortfolioSteps)(
     "should return portfolio step and http status code 201",
     async (mockPortfolioStep) => {
-      const request: ApiGatewayEventParsed<PortfolioStep> = {
+      const request: ApiGatewayEventParsed<PortfolioStepModel> = {
         ...validRequest,
         body: mockPortfolioStep,
       } as any;
@@ -34,14 +34,14 @@ describe("Validation of handler", () => {
     const request = {
       body: mockPortfolioStep,
       // no pathParameter portfolioDraftId
-    } as ApiGatewayEventParsed<PortfolioStep>;
+    } as ApiGatewayEventParsed<PortfolioStepModel>;
     const response = await handler(request, {} as Context, null as unknown as Callback)!;
     expect(response).toEqual(NO_SUCH_PORTFOLIO_DRAFT_404);
   });
 });
 
 describe.each(mockValidPortfolioSteps)("Handler response with mock dynamodb", (mockPortfolioStep) => {
-  const request: ApiGatewayEventParsed<PortfolioStep> = {
+  const request: ApiGatewayEventParsed<PortfolioStepModel> = {
     ...validRequest,
     body: mockPortfolioStep,
   } as any;
@@ -57,12 +57,12 @@ describe("Cross-Site Scripting (XSS) tests", () => {
   // example attacks from ASD STIG: V-222602 text
   const attacks = ["<script>alert('attack!')</script>", "<img src=x onerror='alert(document.cookie);'"];
   it.each(attacks)("should sanitize input for XSS attacks", async (attackCode) => {
-    const mockPortfolioStep: PortfolioStep = {
+    const mockPortfolioStep: PortfolioStepModel = {
       ...mockValidPortfolioSteps[0],
       description: attackCode,
       name: attackCode,
     };
-    const request: ApiGatewayEventParsed<PortfolioStep> = {
+    const request: ApiGatewayEventParsed<PortfolioStepModel> = {
       ...validRequest,
       body: mockPortfolioStep,
     } as any;

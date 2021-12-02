@@ -1,4 +1,4 @@
-import { TaskOrder } from "./TaskOrder";
+import { TaskOrderModel } from "./TaskOrder";
 
 export enum ValidationMessage {
   START_VALID = "start date must be a valid date",
@@ -10,6 +10,6 @@ export enum ValidationMessage {
   INVALID_CLIN_NUMBER = "clin number must be four numbers and in range 0001 through 9999",
 }
 
-export interface FundingStep {
-  task_orders: Array<TaskOrder>;
+export interface FundingStepModel {
+  task_orders: Array<TaskOrderModel>;
 }

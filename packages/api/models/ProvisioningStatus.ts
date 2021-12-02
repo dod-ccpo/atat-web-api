@@ -1,6 +1,6 @@
-import { PortfolioDraft } from "./PortfolioDraft";
-import { ApplicationStep } from "./ApplicationStep";
-import { FundingStep } from "./FundingStep";
+import { PortfolioDraftModel } from "./PortfolioDraft";
+import { ApplicationStepModel } from "./ApplicationStep";
+import { FundingStepModel } from "./FundingStep";
 import { Operators } from "./Operator";
 import { CloudServiceProvider } from "./CloudServiceProvider";
 
@@ -19,8 +19,8 @@ export enum ProvisioningRequestType {
   OPERATORS = "operators",
 }
 
-type ProvisioningBody = PortfolioDraft | ApplicationStep | FundingStep | Operators;
-export interface ProvisioningTaskInput {
+type ProvisioningBody = PortfolioDraftModel | ApplicationStepModel | FundingStepModel | Operators;
+export interface ProvisioningTaskInputModel {
   body: ProvisioningBody;
   type: ProvisioningRequestType;
   csp: CloudServiceProvider;

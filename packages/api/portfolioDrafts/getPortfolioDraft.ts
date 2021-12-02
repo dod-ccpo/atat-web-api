@@ -1,6 +1,6 @@
 import { GetCommand } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { PortfolioDraft } from "../models/PortfolioDraft";
+import { PortfolioDraftModel } from "../models/PortfolioDraft";
 import { dynamodbDocumentClient as client } from "../utils/aws-sdk/dynamodb";
 import { DATABASE_ERROR } from "../utils/errors";
 import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusCode } from "../utils/response";
@@ -41,7 +41,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
     if (!result.Item) {
       return NO_SUCH_PORTFOLIO;
     }
-    return new ApiSuccessResponse<PortfolioDraft>(result.Item as PortfolioDraft, SuccessStatusCode.OK);
+    return new ApiSuccessResponse<PortfolioDraftModel>(result.Item as PortfolioDraftModel, SuccessStatusCode.OK);
   } catch (err) {
     console.log("Database error: " + err);
     return DATABASE_ERROR;

@@ -1,8 +1,8 @@
-import { AppEnvOperator } from "./Operator";
-import { Environment } from "./Environment";
-export interface Application {
+import { AppEnvOperatorModel } from "./Operator";
+import { EnvironmentModel } from "./Environment";
+export interface ApplicationModel {
   name: string;
   description?: string;
-  environments: Array<Environment>;
-  operators: Array<AppEnvOperator>;
+  environments: Array<EnvironmentModel>;
+  operators: Array<AppEnvOperatorModel>;
 }

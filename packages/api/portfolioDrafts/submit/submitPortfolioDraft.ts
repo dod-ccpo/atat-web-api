@@ -9,7 +9,7 @@ import {
   PORTFOLIO_ALREADY_SUBMITTED,
   PATH_PARAMETER_REQUIRED_BUT_MISSING,
 } from "../../utils/errors";
-import { PortfolioDraft, PORTFOLIO_STEP } from "../../models/PortfolioDraft";
+import { PortfolioDraftModel, PORTFOLIO_STEP } from "../../models/PortfolioDraft";
 import { v4 as uuidv4 } from "uuid";
 import { ProvisioningStatus, ProvisioningRequestType } from "../../models/ProvisioningStatus";
 import { dynamodbDocumentClient as client } from "../../utils/aws-sdk/dynamodb";
@@ -38,9 +38,9 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
   try {
     const result = await submitPortfolioDraftCommand(TABLE_NAME, portfolioDraftId);
-    const portfolioDraft = result.Attributes as PortfolioDraft;
+    const portfolioDraft = result.Attributes as PortfolioDraftModel;
     // structure message body for provisioning state machine
-    const portfolioDraftToProvision = new ProvisioningJob<PortfolioDraft>(
+    const portfolioDraftToProvision = new ProvisioningJob<PortfolioDraftModel>(
       portfolioDraft,
       ProvisioningRequestType.FULL_PORTFOLIO,
       portfolioDraft[PORTFOLIO_STEP].csp

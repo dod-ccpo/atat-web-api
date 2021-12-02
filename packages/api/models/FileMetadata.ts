@@ -1,5 +1,5 @@
-import { BaseDocument } from "./BaseDocument";
-import { FileMetadataSummary } from "./FileMetadataSummary";
+import { BaseDocumentModel } from "./BaseDocument";
+import { FileMetadataSummaryModel } from "./FileMetadataSummary";
 
 export enum FileScanStatus {
   PENDING = "pending",
@@ -7,7 +7,7 @@ export enum FileScanStatus {
   REJECTED = "rejected",
 }
 
-export interface FileMetadata extends BaseDocument, FileMetadataSummary {
+export interface FileMetadataModel extends BaseDocumentModel, FileMetadataSummaryModel {
   size: number;
   status: FileScanStatus;
 }

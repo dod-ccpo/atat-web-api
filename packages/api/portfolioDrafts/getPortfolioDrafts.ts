@@ -1,6 +1,6 @@
 import { ScanCommand, ScanCommandInput } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { portfolioDraftSummaryProperties, PortfolioDraftSummary } from "../models/PortfolioDraftSummary";
+import { portfolioDraftSummaryProperties, PortfolioDraftSummaryModel } from "../models/PortfolioDraftSummary";
 import { exhaustivePick } from "../models/TypeFields";
 import { dynamodbDocumentClient as client } from "../utils/aws-sdk/dynamodb";
 import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusCode } from "../utils/response";
@@ -55,9 +55,9 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
   try {
     const data = await client.send(command);
-    const items = (data.Items ?? []) as PortfolioDraftSummary[];
+    const items = (data.Items ?? []) as PortfolioDraftSummaryModel[];
     const summaries = items.map((draft) => exhaustivePick(draft, portfolioDraftSummaryProperties));
-    return new ApiSuccessResponse<PortfolioDraftSummary[]>(summaries, SuccessStatusCode.OK);
+    return new ApiSuccessResponse<PortfolioDraftSummaryModel[]>(summaries, SuccessStatusCode.OK);
   } catch (error) {
     console.log("Database error (" + error.name + "): " + error);
     return new OtherErrorResponse("Database error", ErrorStatusCode.INTERNAL_SERVER_ERROR);

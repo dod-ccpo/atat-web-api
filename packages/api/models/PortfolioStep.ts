@@ -1,5 +1,5 @@
 import { CloudServiceProvider } from "./CloudServiceProvider";
-export interface PortfolioStep {
+export interface PortfolioStepModel {
   name: string;
   csp: CloudServiceProvider;
   description?: string;

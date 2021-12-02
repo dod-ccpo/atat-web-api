@@ -1,8 +1,8 @@
 import { CloudServiceProvider } from "../../models/CloudServiceProvider";
-import { PortfolioStep } from "../../models/PortfolioStep";
+import { PortfolioStepModel } from "../../models/PortfolioStep";
 
 // The example PortfolioStepEx from the API Specification
-export const mockPortfolioStep: PortfolioStep = {
+export const mockPortfolioStep: PortfolioStepModel = {
   name: "Mock Portfolio",
   csp: CloudServiceProvider.CSP_A,
   description: "Mock portfolio description",
@@ -10,7 +10,7 @@ export const mockPortfolioStep: PortfolioStep = {
   portfolio_managers: ["joe.manager@example.com", "jane.manager@example.com"],
 };
 
-export const mockValidPortfolioSteps: PortfolioStep[] = [
+export const mockValidPortfolioSteps: PortfolioStepModel[] = [
   mockPortfolioStep,
   // This checks that we don't regress and error on a body that we worked to debug.
   // The issue at the time seemed to be due to a missing `description` field in the

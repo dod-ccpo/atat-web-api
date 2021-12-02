@@ -2,14 +2,14 @@ import { APIGatewayProxyEvent } from "aws-lambda";
 import { mockApplicationStep } from "./application/commonApplicationMockData";
 import { mockFundingStep } from "./funding/commonFundingMockData";
 import { mockPortfolioStep } from "./portfolio/commonPortfolioMockData";
-import { PortfolioDraft } from "../models/PortfolioDraft";
-import { PortfolioDraftSummary } from "../models/PortfolioDraftSummary";
+import { PortfolioDraftModel } from "../models/PortfolioDraft";
+import { PortfolioDraftSummaryModel } from "../models/PortfolioDraftSummary";
 import { ProvisioningStatus } from "../models/ProvisioningStatus";
 import { v4 as uuidv4 } from "uuid";
 
 const now = new Date().toISOString();
 
-export const mockPortfolioDraftSummary: PortfolioDraftSummary = {
+export const mockPortfolioDraftSummary: PortfolioDraftSummaryModel = {
   id: uuidv4(),
   status: ProvisioningStatus.NOT_STARTED,
   updated_at: now,
@@ -22,7 +22,7 @@ export const mockPortfolioDraftSummary: PortfolioDraftSummary = {
   num_environments: 0,
 };
 
-export const mockPortfolioDraft: PortfolioDraft = {
+export const mockPortfolioDraft: PortfolioDraftModel = {
   ...mockPortfolioDraftSummary,
   portfolio_step: mockPortfolioStep,
   funding_step: mockFundingStep,

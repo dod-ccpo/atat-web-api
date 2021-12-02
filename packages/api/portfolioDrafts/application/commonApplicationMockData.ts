@@ -1,57 +1,57 @@
-import { AppEnvAccess, PortfolioAccess, PortfolioOperator, AppEnvOperator } from "../../models/Operator";
-import { Application } from "../../models/Application";
-import { ApplicationStep } from "../../models/ApplicationStep";
-import { Environment } from "../../models/Environment";
+import { AppEnvAccess, PortfolioAccess, PortfolioOperatorModel, AppEnvOperatorModel } from "../../models/Operator";
+import { ApplicationModel } from "../../models/Application";
+import { ApplicationStepModel } from "../../models/ApplicationStep";
+import { EnvironmentModel } from "../../models/Environment";
 import { ProvisioningStatus } from "../../models/ProvisioningStatus";
 import { v4 as uuidv4 } from "uuid";
-import { PortfolioDraftSummary } from "../../models/PortfolioDraftSummary";
-import { PortfolioDraft } from "../../models/PortfolioDraft";
+import { PortfolioDraftSummaryModel } from "../../models/PortfolioDraftSummary";
+import { PortfolioDraftModel } from "../../models/PortfolioDraft";
 
-const mockPortoflioOperatorYoda: PortfolioOperator = {
+const mockPortoflioOperatorYoda: PortfolioOperatorModel = {
   display_name: "Yoda",
   email: "yoda@iam.mil",
   access: PortfolioAccess.PORTFOLIO_ADMINISTRATOR,
 };
-const mockAppEnvOperatorDarthVader: AppEnvOperator = {
+const mockAppEnvOperatorDarthVader: AppEnvOperatorModel = {
   display_name: "Darth Vader",
   email: "iam@yourfather.mil",
   access: AppEnvAccess.ADMINISTRATOR,
 };
-const mockAppEnvOperatorLandonisCalrissian: AppEnvOperator = {
+const mockAppEnvOperatorLandonisCalrissian: AppEnvOperatorModel = {
   display_name: "Landonis Calrissian",
   email: "thegambler@cloudcity.mil",
   access: AppEnvAccess.READ_ONLY,
 };
-const mockAppEnvOperatorLukeSkywalker: AppEnvOperator = {
+const mockAppEnvOperatorLukeSkywalker: AppEnvOperatorModel = {
   display_name: "Luke Skywalker",
   email: "lostmy@hand.mil",
   access: AppEnvAccess.READ_ONLY,
 };
-const mockAppEnvOperatorSalaciousCrumb: AppEnvOperator = {
+const mockAppEnvOperatorSalaciousCrumb: AppEnvOperatorModel = {
   display_name: "Salacious Crumb",
   email: "monkey@lizard.mil",
   access: AppEnvAccess.ADMINISTRATOR,
 };
-const mockAppEnvOperatorHanSolo: AppEnvOperator = {
+const mockAppEnvOperatorHanSolo: AppEnvOperatorModel = {
   display_name: "Han Solo",
   email: "frozen@carbonite.mil",
   access: AppEnvAccess.READ_ONLY,
 };
-const mockAppEnvOperatorBobaFett: AppEnvOperator = {
+const mockAppEnvOperatorBobaFett: AppEnvOperatorModel = {
   display_name: "Boba Fett",
   email: "original@mandalorian.mil",
   access: AppEnvAccess.READ_ONLY,
 };
 
-const mockEnvironmentCcepProd: Environment = {
+const mockEnvironmentCcepProd: EnvironmentModel = {
   name: "production",
   operators: [mockAppEnvOperatorDarthVader, mockAppEnvOperatorLandonisCalrissian, mockAppEnvOperatorLukeSkywalker],
 };
-const mockEnvironmentJpeaStage: Environment = {
+const mockEnvironmentJpeaStage: EnvironmentModel = {
   name: "stage",
   operators: [mockAppEnvOperatorSalaciousCrumb, mockAppEnvOperatorHanSolo, mockAppEnvOperatorBobaFett],
 };
-const mockEnvironmentJpeaDev: Environment = {
+const mockEnvironmentJpeaDev: EnvironmentModel = {
   name: "development",
   operators: [mockAppEnvOperatorSalaciousCrumb, mockAppEnvOperatorHanSolo, mockAppEnvOperatorBobaFett],
 };
@@ -59,7 +59,7 @@ const mockEnvironmentJpeaDev: Environment = {
 /**
  * "Cloud City Evac Planner" from API spec
  */
-export const mockApplicationCloudCityEvacPlanner: Application = {
+export const mockApplicationCloudCityEvacPlanner: ApplicationModel = {
   name: "Cloud City Evac Planner",
   description: "Application for planning an emergency evacuation",
   environments: [mockEnvironmentCcepProd],
@@ -69,7 +69,7 @@ export const mockApplicationCloudCityEvacPlanner: Application = {
 /**
  * "Jabba's Palace Expansion App" from API spec
  */
-export const mockApplicationJabbasPalaceExpansionApp: Application = {
+export const mockApplicationJabbasPalaceExpansionApp: ApplicationModel = {
   name: "Jabba Palace Expansion App",
   description: "Planning application for palace expansion",
   environments: [mockEnvironmentJpeaDev, mockEnvironmentJpeaStage],
@@ -80,7 +80,7 @@ export const mockApplicationJabbasPalaceExpansionApp: Application = {
  * ApplicationStepEx from API spec
  * @returns a complete ApplicationStep with good data
  */
-export const mockApplicationStep: ApplicationStep = {
+export const mockApplicationStep: ApplicationStepModel = {
   applications: [mockApplicationCloudCityEvacPlanner, mockApplicationJabbasPalaceExpansionApp],
   operators: [mockPortoflioOperatorYoda],
 };
@@ -90,7 +90,7 @@ const now = new Date().toISOString();
  * A base Portfolio Draft Summary
  * @returns a base portfolio summary with good data
  */
-export const mockBasePortfolioSummary: PortfolioDraftSummary = {
+export const mockBasePortfolioSummary: PortfolioDraftSummaryModel = {
   id: uuidv4(),
   status: ProvisioningStatus.NOT_STARTED,
   updated_at: now,
@@ -108,19 +108,19 @@ export const mockBasePortfolioSummary: PortfolioDraftSummary = {
  * after a successful DynamoDB update
  * @returns a Portfolio Draft Summary with good data
  */
-export const mockPortfolioDraftSummary: PortfolioDraft = {
+export const mockPortfolioDraftSummary: PortfolioDraftModel = {
   ...mockBasePortfolioSummary,
   application_step: mockApplicationStep,
   num_applications: mockApplicationStep.applications.length,
   num_environments: mockApplicationStep.applications.flatMap((app) => app.environments).length,
-} as PortfolioDraft;
+} as PortfolioDraftModel;
 
 /**
  * An array of good application step items with acceptable admin roles
  * to match business rules
  * @returns an array of good application steps
  */
-export const mockApplicationsStepWithGoodAdminRoles: ApplicationStep[] = [
+export const mockApplicationsStepWithGoodAdminRoles: ApplicationStepModel[] = [
   { ...mockApplicationStep },
   { ...mockApplicationStep, operators: [] },
   {
@@ -253,7 +253,7 @@ export const mockApplicationStepsMissingFields = [
  * An array of ApplicationStep objects with bad data
  * that should cause input validation errors
  */
-export const mockApplicationStepsBadData: Array<ApplicationStep> = [
+export const mockApplicationStepsBadData: Array<ApplicationStepModel> = [
   {
     ...mockApplicationStep,
     applications: [
@@ -474,19 +474,19 @@ export const mockOperatorMissingAccessFields = [
  * A bad Portfolio Draft Summary item with the application step completed
  * @returns a Portfolio Draft Summary with incorrect # of apps and envs
  */
-export const mockBadPortfolioDraftSummary: PortfolioDraft = {
+export const mockBadPortfolioDraftSummary: PortfolioDraftModel = {
   ...mockBasePortfolioSummary,
   application_step: mockApplicationStep,
   num_applications: 77,
   num_environments: 99,
-} as PortfolioDraft;
+} as PortfolioDraftModel;
 
 /**
  * An array of bad application step items with admin roles
  * that do not follow the business rules
  * @returns an array of bad application steps
  */
-export const mockApplicationsStepWithBadAdminRoles: ApplicationStep[] = [
+export const mockApplicationsStepWithBadAdminRoles: ApplicationStepModel[] = [
   {
     ...mockApplicationStep,
     operators: [],

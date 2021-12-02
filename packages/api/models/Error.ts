@@ -3,12 +3,12 @@ export enum ErrorCode {
   OTHER = "OTHER",
 }
 
-export interface Error {
+export interface ErrorModel {
   code: ErrorCode;
   message: string;
 }
 
-export interface ValidationError extends Error {
+export interface ValidationErrorModel extends ErrorModel {
   code: ErrorCode.INVALID_INPUT;
   error_map: Record<string, unknown>;
 }

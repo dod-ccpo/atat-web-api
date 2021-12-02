@@ -1,20 +1,20 @@
-import { ApplicationStep } from "./ApplicationStep";
+import { ApplicationStepModel } from "./ApplicationStep";
 import { ExhaustivePropertyMap } from "./TypeFields";
-import { FundingStep } from "./FundingStep";
-import { PortfolioDraftSummary } from "./PortfolioDraftSummary";
-import { PortfolioStep } from "./PortfolioStep";
+import { FundingStepModel } from "./FundingStep";
+import { PortfolioDraftSummaryModel } from "./PortfolioDraftSummary";
+import { PortfolioStepModel } from "./PortfolioStep";
 
 export const PORTFOLIO_STEP = "portfolio_step";
 export const FUNDING_STEP = "funding_step";
 export const APPLICATION_STEP = "application_step";
 
-export interface PortfolioDraft extends PortfolioDraftSummary {
-  [PORTFOLIO_STEP]: PortfolioStep;
-  [FUNDING_STEP]: FundingStep;
-  [APPLICATION_STEP]: ApplicationStep;
+export interface PortfolioDraftModel extends PortfolioDraftSummaryModel {
+  [PORTFOLIO_STEP]: PortfolioStepModel;
+  [FUNDING_STEP]: FundingStepModel;
+  [APPLICATION_STEP]: ApplicationStepModel;
 }
 
-export const portfolioDraftProperties: ExhaustivePropertyMap<PortfolioDraft> = {
+export const portfolioDraftProperties: ExhaustivePropertyMap<PortfolioDraftModel> = {
   // BaseDocument properties
   id: null,
   created_at: null,

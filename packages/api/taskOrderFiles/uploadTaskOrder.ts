@@ -2,7 +2,7 @@ import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import * as parser from "lambda-multipart-parser";
 import { v4 as uuidv4 } from "uuid";
-import { FileMetadata, FileScanStatus } from "../models/FileMetadata";
+import { FileMetadataModel, FileScanStatus } from "../models/FileMetadata";
 import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusCode } from "../utils/response";
 import { s3Client } from "../utils/aws-sdk/s3";
 
@@ -43,7 +43,7 @@ async function uploadFile(file: parser.MultipartFile): Promise<APIGatewayProxyRe
   });
   await s3Client.send(command);
   const now = new Date().toISOString();
-  const metadata: FileMetadata = {
+  const metadata: FileMetadataModel = {
     id: key,
     created_at: now,
     updated_at: now,
@@ -51,5 +51,5 @@ async function uploadFile(file: parser.MultipartFile): Promise<APIGatewayProxyRe
     size: file.content.length,
     name: file.filename,
   };
-  return new ApiSuccessResponse<FileMetadata>(metadata, SuccessStatusCode.CREATED);
+  return new ApiSuccessResponse<FileMetadataModel>(metadata, SuccessStatusCode.CREATED);
 }
