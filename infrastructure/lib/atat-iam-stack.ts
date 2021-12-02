@@ -76,31 +76,29 @@ export class AtatIamStack extends cdk.Stack {
     });
 
     const developerRwAccess = new iam.ManagedPolicy(this, "DeveloperReadWriteAccess", {
-      description: "Grants read/write access to developer-specific actions and resources",
+      description: "Grants developers read/write access to necessary resources for deployments and maintenance",
       statements: [
-        // During a deployment, outside of CloudFormation (where the role will be used),
-        // the CDK needs to read from and write to the S3 buckets for the CDK.
+        // Allow assuming the deployment role which will automatically be assumed by the CDK CLI during a
+        // diff or deployment. This role is created/managed by the CDK Bootstrap stacks
         new iam.PolicyStatement({
-          sid: "AllowModifyingCdkToolBuckets",
+          sid: "AllowCdkDeploymentRole",
           effect: iam.Effect.ALLOW,
-          actions: ["s3:*"],
-          resources: [
-            `arn:${cdk.Aws.PARTITION}:s3:::cdk-*-assets-${cdk.Aws.ACCOUNT_ID}-*`,
-            `arn:${cdk.Aws.PARTITION}:s3:::cdktoolkit-stagingbucket-*`,
-          ],
-        }),
-        // DevSecOps team members need access to restore tables from PITR
-        // backups and to export to S3.
-        new iam.PolicyStatement({
-          sid: "AllowDynamoDbBackupRestore",
-          effect: iam.Effect.ALLOW,
-          actions: [
-            "dynamodb:RestoreTable*",
-            "dynamodb:ExportTableToPointInTime",
-            "dynamodb:ListBackups",
-            "dynamodb:Describe*Backup*",
-          ],
-          resources: ["*"],
+          actions: ["sts:AssumeRole"],
+          resources: ["deployment", "file-publishing"].map((roleName) =>
+            cdk.Stack.of(this).formatArn({
+              arnFormat: cdk.ArnFormat.SLASH_RESOURCE_NAME,
+              service: "iam",
+              resource: "role",
+              // IAM resources are global
+              region: "",
+              // hnb659fds is the default CDK Bootstrap "qualifier" and is a hardcoded, well-known
+              // value. If we change the qualifier during bootstrapping, we will need to modify it here.
+              // But querying for it adds additional complexities so using the hardcoded value is easiest
+              // in this context.
+              // See "Changing the Qualifier": https://docs.aws.amazon.com/cdk/latest/guide/bootstrapping.html#bootstrapping-synthesizers
+              resourceName: `cdk-hnb659fds-${roleName}-role-${cdk.Aws.ACCOUNT_ID}-${cdk.Aws.REGION}`,
+            })
+          ),
         }),
       ],
     });
