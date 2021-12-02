@@ -82,6 +82,10 @@ export const NO_SUCH_APPLICATION_STEP = new OtherErrorResponse(
   "Application Step not found for this Portfolio Draft",
   ErrorStatusCode.NOT_FOUND
 );
+/**
+ * To be used when an Application is not found
+ */
+export const NO_SUCH_APPLICATION = new OtherErrorResponse("Application not found", ErrorStatusCode.NOT_FOUND);
 
 /**
  * To be used when a function has not been implemented
