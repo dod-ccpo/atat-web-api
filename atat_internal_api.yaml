@@ -47,7 +47,7 @@ paths:
           - IsAuthorizationRequired
           -
             - cognitoAuthorizer: []
-          - Ref: AWS::NoValue                  
+          - Ref: AWS::NoValue
     post:
       operationId: createPortfolio
       requestBody:
@@ -403,7 +403,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApplicationDetail'
+                $ref: '#/components/schemas/Application'
         '404':
           description: Portfolio or Application with the given ID does not exist
       x-amazon-apigateway-request-validator: "request-params-validator"
@@ -528,7 +528,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApplicationDetail'
+                $ref: '#/components/schemas/Application'
         '400':
           description: Invalid input
           content:
@@ -708,7 +708,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EnvironmentDetail'
+                $ref: '#/components/schemas/Environment'
         '404':
           description: Portfolio, Application or Environment with the given ID does not exist
       x-amazon-apigateway-request-validator: "request-params-validator"
@@ -853,7 +853,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EnvironmentDetail'
+                $ref: '#/components/schemas/Environment'
         '400':
           description: Invalid input
           content:
@@ -1811,6 +1811,7 @@ components:
         - portfolioManagers
       allOf:
         - $ref: "#/components/schemas/PortfolioBase"
+        - $ref: "#/components/schemas/PortfolioAccess"
       properties:
         portfolioManagers:
           type: array
@@ -1820,7 +1821,10 @@ components:
         description:
           type: string
         owner:
-          $ref: '#/components/schemas/User'
+          # This will be a string for now until the ATAT User design is further fleshed out
+          #$ref: '#/components/schemas/User'
+          type: string
+          readOnly: true
         applications:
           type: array
           readOnly: true
@@ -1882,15 +1886,14 @@ components:
       allOf:
         - $ref: "#/components/schemas/Portfolio"
         - $ref: '#/components/schemas/PortfolioSummary'
-        - $ref: '#/components/schemas/PortfolioAccess'
     Application:
       required:
         - environments
         - name
-        - operators
       type: object
       allOf:
         - $ref: "#/components/schemas/BaseObject"
+        - $ref: '#/components/schemas/AppEnvAccess'
       properties:
         environments:
           minItems: 1
@@ -1905,27 +1908,19 @@ components:
           type: string
       additionalProperties: false
       description: "Represents an Application in a Portfolio"
-    ApplicationDetail:
-      allOf:
-        - $ref: '#/components/schemas/Application'
-        - $ref: '#/components/schemas/AppEnvAccess'
     Environment:
       required:
         - name
-        - operators
       type: object
       allOf:
         - $ref: "#/components/schemas/BaseObject"
+        - $ref: '#/components/schemas/AppEnvAccess'
       properties:
         name:
           pattern: "^[a-zA-Z\\d _-]{1,100}$"
           type: string
       additionalProperties: false
       description: "Represents an Environment for a specific Application"
-    EnvironmentDetail:
-      allOf:
-        - $ref: '#/components/schemas/Environment'
-        - $ref: '#/components/schemas/AppEnvAccess'
     Clin:
       required:
         - clin_number
@@ -2030,19 +2025,19 @@ components:
           items:
             type: string
             format: email
-    User:
-      required:
-      - email
-      - firstName
-      - lastName
-      properties:
-        email:
-          type: string
-          format: email
-        firstName:
-          type: string
-        lastName:
-          type: string
+  #    User:
+  #      required:
+  #      - email
+  #      - firstName
+  #      - lastName
+  #      properties:
+  #        email:
+  #          type: string
+  #          format: email
+  #        firstName:
+  #          type: string
+  #        lastName:
+  #          type: string
   examples:
     PortfolioSummaries:
       value:
@@ -2208,3 +2203,7 @@ x-amazon-apigateway-gateway-responses:
         }
   # UNSUPPORTED_MEDIA_TYPE is handled by DEFAULT_4XX
   # WAF_FILTERED is handled by DEFAULT_4XX
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/CCPO-ATAT/atat/1.0.0
