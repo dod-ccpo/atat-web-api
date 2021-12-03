@@ -46,6 +46,8 @@ async function connect(connectConfig: Config, useDatabase = true): Promise<Conne
     username: dbAuth.username,
     password: dbAuth.password,
     logging: "all",
+    migrations: ["/opt/orm/migrations/**.js"],
+    entities: ["/opt/orm/entities/**.js"],
     ssl: {
       minVersion: "TLSv1.2",
       ca: fs.readFileSync(path.join(__dirname, connectConfig.caBundleFile)),
@@ -84,6 +86,7 @@ async function handleCreate(connectConfig: Config): Promise<void> {
       `ALTER DEFAULT PRIVILEGES GRANT ${user.tablePrivileges.join(", ")} ON TABLES TO ${user.name}`
     );
   }
+  await connection.close();
 }
 
 async function handleDelete(connectConfig: Config): Promise<void> {
@@ -93,6 +96,13 @@ async function handleDelete(connectConfig: Config): Promise<void> {
     await connection.query(`DROP ROLE IF EXISTS ${user.name}`);
   }
   await connection.query(`DROP DATABASE IF EXISTS ${connectConfig.databaseName} WITH FORCE`);
+}
+
+async function migrate(connectConfig: Config): Promise<void> {
+  const connection = await connect(connectConfig);
+  const migrations = await connection.runMigrations({ transaction: "none" });
+  await connection.close();
+  migrations.forEach((migration) => console.log(migration));
 }
 
 async function sendResponse(
@@ -145,6 +155,7 @@ export async function handler(event: CloudFormationCustomResourceEvent): Promise
       case "Create":
       case "Update":
         await handleCreate(connectConfig);
+        await migrate(connectConfig);
         break;
       case "Delete":
         await handleDelete(connectConfig);

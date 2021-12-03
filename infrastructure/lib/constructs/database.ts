@@ -36,12 +36,25 @@ class DatabaseBootstrapper extends cdk.Construct {
   public readonly backingLambda: lambda.IFunction;
   constructor(scope: cdk.Construct, id: string, props: BootstrapProps) {
     super(scope, id);
+
+    const layer = new lambda.LayerVersion(this, "DatabaseSupportLayer", {
+      compatibleRuntimes: [lambda.Runtime.NODEJS_14_X],
+      code: lambda.Code.fromAsset(util.packageRoot() + "/../", {
+        bundling: {
+          image: lambda.Runtime.NODEJS_14_X.bundlingImage,
+          user: "root",
+          command: ["bash", "scripts/prepare-db-layer.sh"],
+        },
+      }),
+    });
+
     const handler = new ApiFlexFunction(this, "Function", {
       handlerPath: util.packageRoot() + "/rds/initial-bootstrap.ts",
       lambdaVpc: props.vpc,
       functionPropsOverride: {
         memorySize: 1024,
         timeout: cdk.Duration.minutes(5),
+        layers: [layer],
       },
     });
 
@@ -51,6 +64,7 @@ class DatabaseBootstrapper extends cdk.Construct {
         DatabaseName: props.databaseName,
         DatabaseHost: props.cluster.clusterEndpoint.hostname,
         DatabaseSecretName: props.secretName,
+        ForceReload: layer.layerVersionArn,
       },
     });
     this.backingLambda = handler.fn;

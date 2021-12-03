@@ -2,6 +2,8 @@
   "name": "root",
   "private": true,
   "scripts": {
+    "lerna": "lerna",
+    "tsc": "tsc",
     "bootstrap": "lerna bootstrap",
     "build": "lerna run build",
     "watch": "lerna run watch",
