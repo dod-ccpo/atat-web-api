@@ -1,8 +1,10 @@
 import { GetCommand } from "@aws-sdk/lib-dynamodb";
+import middy from "@middy/core";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { PortfolioDraft } from "../models/PortfolioDraft";
 import { dynamodbDocumentClient as client } from "../utils/aws-sdk/dynamodb";
 import { DATABASE_ERROR } from "../utils/errors";
+import { IpCheckerMiddleware } from "../utils/ipLogging";
 import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusCode } from "../utils/response";
 import { isPathParameterPresent } from "../utils/validation";
 
@@ -20,7 +22,7 @@ export const NO_SUCH_PORTFOLIO = new OtherErrorResponse(
  *
  * @param event - The GET request from API Gateway
  */
-export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+export async function baseHandler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   const portfolioDraftId = event.pathParameters?.portfolioDraftId;
 
   // TODO: validate that we get a valid ATAT_TABLE_NAME env variable
@@ -47,3 +49,5 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
     return DATABASE_ERROR;
   }
 }
+
+export const handler = middy(baseHandler).use(IpCheckerMiddleware());

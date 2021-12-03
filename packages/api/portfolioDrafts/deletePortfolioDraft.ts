@@ -1,6 +1,8 @@
 import { DeleteCommand, DeleteCommandInput } from "@aws-sdk/lib-dynamodb";
+import middy from "@middy/core";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { dynamodbClient as client } from "../utils/aws-sdk/dynamodb";
+import { IpCheckerMiddleware } from "../utils/ipLogging";
 import { ErrorStatusCode, NoContentResponse, OtherErrorResponse } from "../utils/response";
 
 const TABLE_NAME = process.env.ATAT_TABLE_NAME;
@@ -10,7 +12,7 @@ const TABLE_NAME = process.env.ATAT_TABLE_NAME;
  *
  * @param event - The DELETE request from API Gateway
  */
-export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+export async function baseHandler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   const portfolioDraftId = event.pathParameters?.portfolioDraftId;
 
   if (!portfolioDraftId) {
@@ -38,3 +40,6 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
     return new OtherErrorResponse("Database error", ErrorStatusCode.INTERNAL_SERVER_ERROR);
   }
 }
+
+// IP logging middy
+export const handler = middy(baseHandler).use(IpCheckerMiddleware());

@@ -39,6 +39,7 @@ beforeEach(() => {
 const validRequest: ApiGatewayEventParsed<ApplicationStep> = {
   body: mockApplicationStep,
   pathParameters: { portfolioDraftId: uuidv4() },
+  requestContext: { identity: { sourceIp: "10.2.2.2" } },
 } as any;
 
 describe("Handle service level error", () => {
@@ -56,6 +57,7 @@ describe("Path parameter tests", () => {
   it("should require path param", async () => {
     const emptyRequest: ApiGatewayEventParsed<ApplicationStep> = {
       body: mockApplicationStep,
+      requestContext: { identity: { sourceIp: "10.2.2.2" } },
       // pathParameters { portfolioDraftId: uuidv4() }  // no pathParameters
     } as any;
     const result = await handler(emptyRequest, {} as Context, () => null);
@@ -67,6 +69,7 @@ describe("Path parameter tests", () => {
     const invalidRequest: ApiGatewayEventParsed<ApplicationStep> = {
       body: mockApplicationStep,
       pathParameters: { portfolioDraftId: "invalid" }, // not UUIDv4
+      requestContext: { identity: { sourceIp: "10.2.2.2" } },
     } as any;
     const result = await handler(invalidRequest, {} as Context, () => null);
     expect(result).toBeInstanceOf(OtherErrorResponse);
@@ -81,10 +84,12 @@ describe("Request body shape validations", () => {
     {
       body: "", // empty body
       pathParameters: { portfolioDraftId: uuidv4() },
+      requestContext: { identity: { sourceIp: "10.2.2.2" } },
     },
     {
       body: JSON.stringify({ foo: "bar" }) + "}", // invalid json
       pathParameters: { portfolioDraftId: uuidv4() },
+      requestContext: { identity: { sourceIp: "10.2.2.2" } },
     },
   ])("should return an error when the request body is empty or invalid json", async (badRequest) => {
     const invalidRequest: ApiGatewayEventParsed<ApplicationStep> = badRequest as any;
@@ -107,6 +112,7 @@ describe("Request body shape validations", () => {
     const emptyRequest: ApiGatewayEventParsed<ApplicationStep> = {
       body: { foo: "bar" }, // valid json, but not ApplicationStep
       pathParameters: { portfolioDraftId: uuidv4() },
+      requestContext: { identity: { sourceIp: "10.2.2.2" } },
     } as any;
     const result = await handler(emptyRequest, {} as Context, () => null);
     const responseBody = JSON.parse(result?.body ?? "");
@@ -126,6 +132,7 @@ describe("Request body shape validations", () => {
     const invalidShapeRequest: ApiGatewayEventParsed<ApplicationStep> = {
       body: { applications: mockApplicationsMissingFields, operators: [] },
       pathParameters: { portfolioDraftId: uuidv4() },
+      requestContext: { identity: { sourceIp: "10.2.2.2" } },
     } as any;
     const result = await handler(invalidShapeRequest, {} as Context, () => null);
     const responseBody = JSON.parse(result?.body ?? "");
@@ -142,6 +149,7 @@ describe("Request body shape validations", () => {
     const badApplicationDescriptionsRequest: ApiGatewayEventParsed<ApplicationStep> = {
       body: mockBadApplicationDescriptions,
       pathParameters: { portfolioDraftId: uuidv4() },
+      requestContext: { identity: { sourceIp: "10.2.2.2" } },
     } as any;
     const result = await handler(badApplicationDescriptionsRequest, {} as Context, () => null);
     const responseBody = JSON.parse(result?.body ?? "");
@@ -158,6 +166,7 @@ describe("Request body shape validations", () => {
     const badEnvironmentRequest: ApiGatewayEventParsed<ApplicationStep> = {
       body: { applications: badEnvironmentInApplication, operators: [] },
       pathParameters: { portfolioDraftId: uuidv4() },
+      requestContext: { identity: { sourceIp: "10.2.2.2" } },
     } as any;
     const result = await handler(badEnvironmentRequest, {} as Context, () => null);
     const responseBody = JSON.parse(result?.body ?? "");
@@ -179,6 +188,7 @@ describe("Request body shape validations", () => {
         operators: [{ noName: "the dark side", noAcess: "take over the universe" }],
       },
       pathParameters: { portfolioDraftId: uuidv4() },
+      requestContext: { identity: { sourceIp: "10.2.2.2" } },
     } as any;
     const result = await handler(badPortfolioOperatorRequest, {} as Context, () => null);
     const responseBody = JSON.parse(result?.body ?? "");
@@ -199,6 +209,7 @@ describe("Request body shape validations", () => {
       const badPortfolioOperatorRequest: ApiGatewayEventParsed<ApplicationStep> = {
         body: operatorMissingDisplayNameApplicationStep,
         pathParameters: { portfolioDraftId: uuidv4() },
+        requestContext: { identity: { sourceIp: "10.2.2.2" } },
       } as any;
       const result = await handler(badPortfolioOperatorRequest, {} as Context, () => null);
       const responseBody = JSON.parse(result?.body ?? "");
@@ -216,6 +227,7 @@ describe("Request body shape validations", () => {
       const badPortfolioOperatorRequest: ApiGatewayEventParsed<ApplicationStep> = {
         body: operatorMissingEmailApplicationStep,
         pathParameters: { portfolioDraftId: uuidv4() },
+        requestContext: { identity: { sourceIp: "10.2.2.2" } },
       } as any;
       const result = await handler(badPortfolioOperatorRequest, {} as Context, () => null);
       const responseBody = JSON.parse(result?.body ?? "");
@@ -233,6 +245,7 @@ describe("Request body shape validations", () => {
       const badPortfolioOperatorRequest: ApiGatewayEventParsed<ApplicationStep> = {
         body: operatorMissingEmailApplicationStep,
         pathParameters: { portfolioDraftId: uuidv4() },
+        requestContext: { identity: { sourceIp: "10.2.2.2" } },
       } as any;
       const result = await handler(badPortfolioOperatorRequest, {} as Context, () => null);
       const responseBody = JSON.parse(result?.body ?? "");
@@ -290,6 +303,7 @@ describe("Business rules validation tests", () => {
     const badApplicationNameRequest: ApiGatewayEventParsed<ApplicationStep> = {
       body: { ...mockApplicationStepsBadData[0] },
       pathParameters: { portfolioDraftId: uuidv4() },
+      requestContext: { identity: { sourceIp: "10.2.2.2" } },
     } as any;
     const result = await handler(badApplicationNameRequest, {} as Context, () => null);
     const responseBody = JSON.parse(result?.body ?? "");
@@ -309,6 +323,7 @@ describe("Business rules validation tests", () => {
     const badEnvironmentNameRequest: ApiGatewayEventParsed<ApplicationStep> = {
       body: { ...mockApplicationStepsBadData[1] },
       pathParameters: { portfolioDraftId: uuidv4() },
+      requestContext: { identity: { sourceIp: "10.2.2.2" } },
     } as any;
     const result = await handler(badEnvironmentNameRequest, {} as Context, () => null);
     const responseBody = JSON.parse(result?.body ?? "");
@@ -325,6 +340,7 @@ describe("Business rules validation tests", () => {
     const badOperatorDisplayNameRequest: ApiGatewayEventParsed<ApplicationStep> = {
       body: { ...mockApplicationStepsBadData[2] },
       pathParameters: { portfolioDraftId: uuidv4() },
+      requestContext: { identity: { sourceIp: "10.2.2.2" } },
     } as any;
     const result = await handler(badOperatorDisplayNameRequest, {} as Context, () => null);
     const responseBody = JSON.parse(result?.body ?? "");
@@ -342,6 +358,7 @@ describe("Business rules validation tests", () => {
     const badOperatorDisplayNameRequest: ApiGatewayEventParsed<ApplicationStep> = {
       body: { ...mockApplicationStep, applications: [] },
       pathParameters: { portfolioDraftId: uuidv4() },
+      requestContext: { identity: { sourceIp: "10.2.2.2" } },
     } as any;
     const result = await handler(badOperatorDisplayNameRequest, {} as Context, () => null);
     const responseBody = JSON.parse(result?.body ?? "");
@@ -357,6 +374,7 @@ describe("Business rules validation tests", () => {
     const badOperatorDisplayNameRequest: ApiGatewayEventParsed<ApplicationStep> = {
       body: { ...mockApplicationStep, applications: [{ ...mockApplicationStep.applications[0], environments: [] }] },
       pathParameters: { portfolioDraftId: uuidv4() },
+      requestContext: { identity: { sourceIp: "10.2.2.2" } },
     } as any;
     const result = await handler(badOperatorDisplayNameRequest, {} as Context, () => null);
     const responseBody = JSON.parse(result?.body ?? "");

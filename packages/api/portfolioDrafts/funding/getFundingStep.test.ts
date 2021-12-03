@@ -13,7 +13,9 @@ beforeEach(() => {
   ddbMock.reset();
 });
 
-const emptyRequest: ApiGatewayEventParsed<FundingStep> = {} as any;
+const emptyRequest: ApiGatewayEventParsed<FundingStep> = {
+  requestContext: { identity: { sourceIp: "10.2.2.2" } },
+} as any;
 const mockFundingStep: FundingStep = {
   task_orders: [
     {
@@ -38,6 +40,7 @@ const mockFundingStep: FundingStep = {
 const validRequest: ApiGatewayEventParsed<FundingStep> = {
   pathParameters: { portfolioDraftId: uuidv4() },
   body: "",
+  requestContext: { identity: { sourceIp: "10.2.2.2" } },
 } as any;
 it("should return generic Error if exception caught", async () => {
   jest.spyOn(console, "error").mockImplementation(() => jest.fn()); // suppress output

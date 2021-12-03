@@ -16,7 +16,8 @@ import { dynamodbDocumentClient as client } from "../../utils/aws-sdk/dynamodb";
 import { SendMessageCommand } from "@aws-sdk/client-sqs";
 import { sqsClient } from "../../utils/aws-sdk/sqs";
 import { ProvisioningJob } from "../../utils/provisioningJob";
-
+import middy from "@middy/core";
+import { IpCheckerMiddleware } from "../../utils/ipLogging";
 const TABLE_NAME = process.env.ATAT_TABLE_NAME ?? "";
 const QUEUE_URL = process.env.ATAT_QUEUE_URL ?? "";
 
@@ -25,7 +26,7 @@ const QUEUE_URL = process.env.ATAT_QUEUE_URL ?? "";
  *
  * @param event - The POST request from API Gateway
  */
-export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+export async function baseHandler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   if (isBodyPresent(event.body)) {
     return REQUEST_BODY_NOT_EMPTY;
   }
@@ -110,3 +111,5 @@ export async function doesPortfolioDraftExistCommand(
     })
   );
 }
+
+export const handler = middy(baseHandler).use(IpCheckerMiddleware());

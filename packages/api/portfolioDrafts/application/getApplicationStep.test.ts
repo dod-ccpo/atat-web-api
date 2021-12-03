@@ -22,6 +22,7 @@ beforeEach(() => {
 const validRequest: ApiGatewayEventParsed<ApplicationStep> = {
   body: {},
   pathParameters: { portfolioDraftId: uuidv4() },
+  requestContext: { identity: { sourceIp: "10.2.2.2" } },
 } as any;
 
 it("should return generic Error if exception caught", async () => {
@@ -33,7 +34,9 @@ it("should return generic Error if exception caught", async () => {
   expect(result?.statusCode).toEqual(ErrorStatusCode.INTERNAL_SERVER_ERROR);
 });
 it("should require path param", async () => {
-  const emptyRequest: ApiGatewayEventParsed<ApplicationStep> = {} as any;
+  const emptyRequest: ApiGatewayEventParsed<ApplicationStep> = {
+    requestContext: { identity: { sourceIp: "10.2.2.2" } },
+  } as any;
   const result = await handler(emptyRequest, {} as Context, () => null);
   expect(result).toBeInstanceOf(OtherErrorResponse);
   expect(result).toEqual(NO_SUCH_PORTFOLIO_DRAFT_404);
@@ -42,6 +45,7 @@ it("should require path param", async () => {
 it("should return error when path param not UUIDv4 (to avoid performing query)", async () => {
   const invalidRequest: ApiGatewayEventParsed<ApplicationStep> = {
     pathParameters: { portfolioDraftId: "invalid" },
+    requestContext: { identity: { sourceIp: "10.2.2.2" } },
   } as any;
   const result = await handler(invalidRequest, {} as Context, () => null);
   expect(result).toBeInstanceOf(OtherErrorResponse);

@@ -12,6 +12,8 @@ import cors from "@middy/http-cors";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import { CORS_CONFIGURATION } from "../../utils/corsConfig";
 import { errorHandlingMiddleware } from "../../utils/errorHandlingMiddleware";
+import { IpCheckerMiddleware } from "../../utils/ipLogging";
+
 /**
  * Gets the Funding Step of the specified Portfolio Draft if it exists
  *
@@ -46,6 +48,7 @@ export async function baseHandler(
   }
 }
 export const handler = middy(baseHandler)
+  .use(IpCheckerMiddleware())
   .use(errorHandlingMiddleware())
   .use(JSONErrorHandlerMiddleware())
   .use(cors(CORS_CONFIGURATION));

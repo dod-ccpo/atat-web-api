@@ -54,16 +54,19 @@ beforeEach(() => {
 const validRequest: ApiGatewayEventParsed<FundingStep> = {
   body: mockFundingStep,
   pathParameters: { portfolioDraftId: uuidv4() },
+  requestContext: { identity: { sourceIp: "10.2.2.2" } },
 } as any;
 
 const validRequestBadData: ApiGatewayEventParsed<FundingStep> = {
   body: mockFundingStepBadData,
   pathParameters: { portfolioDraftId: uuidv4() },
+  requestContext: { identity: { sourceIp: "10.2.2.2" } },
 } as any;
 
 const validRequestBadBusinessRulesData: ApiGatewayEventParsed<FundingStep> = {
   body: mockFundingStepBadBusinessRulesData,
   pathParameters: { portfolioDraftId: uuidv4() },
+  requestContext: { identity: { sourceIp: "10.2.2.2" } },
 } as any;
 
 it("sanity check; relative dates used for tests should make sense", () => {
@@ -95,6 +98,7 @@ describe("Path parameter tests", () => {
   it("should require path param", async () => {
     const emptyRequest: ApiGatewayEventParsed<FundingStep> = {
       body: mockFundingStep,
+      requestContext: { identity: { sourceIp: "10.2.2.2" } },
     } as any;
     const result = await handler(emptyRequest, {} as Context, () => null);
     expect(result).toBeInstanceOf(OtherErrorResponse);
@@ -106,6 +110,7 @@ describe("Path parameter tests", () => {
     const invalidRequest: ApiGatewayEventParsed<FundingStep> = {
       body: mockFundingStep,
       pathParameters: { portfolioDraftId: "invalid" },
+      requestContext: { identity: { sourceIp: "10.2.2.2" } },
     } as any;
     const result = await handler(invalidRequest, {} as Context, () => null);
     expect(result).toBeInstanceOf(OtherErrorResponse);
@@ -120,6 +125,7 @@ describe("Request body tests", () => {
     const invalidRequest: ApiGatewayEventParsed<FundingStep> = {
       pathParameters: { portfolioDraftId: uuidv4() },
       body: undefined, // invalid JSON
+      requestContext: { identity: { sourceIp: "10.2.2.2" } },
     } as any;
     const result = await handler(invalidRequest, {} as Context, () => null);
     console.log(JSON.stringify(result));
@@ -134,6 +140,7 @@ describe("Request body tests", () => {
     const notFundingStepRequest: ApiGatewayEventParsed<FundingStep> = {
       body: JSON.stringify({ foo: "bar" }), // valid json
       pathParameters: { portfolioDraftId: uuidv4() },
+      requestContext: { identity: { sourceIp: "10.2.2.2" } },
     } as any;
     const result = await handler(notFundingStepRequest, {} as Context, () => null);
     const responseBody = JSON.parse(result?.body ?? "");
