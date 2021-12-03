@@ -4,7 +4,7 @@ import * as cdk from "@aws-cdk/core";
 import * as custom from "@aws-cdk/custom-resources";
 
 export interface AtatNetStackProps extends cdk.StackProps {
-  vpcCidr?: string;
+  vpcCidr: string;
 }
 
 export class AtatNetStack extends cdk.Stack {

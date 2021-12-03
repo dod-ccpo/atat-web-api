@@ -10,6 +10,9 @@ build/
 .cdk.staging
 cdk.out
 
+# Potentially sensitive CDK files
+cdk.context.json
+
 # Private tag data
 tags-private.json
 

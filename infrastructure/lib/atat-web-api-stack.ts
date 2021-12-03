@@ -49,7 +49,7 @@ export interface AtatWebApiStackProps extends cdk.StackProps {
   cognitoGroups?: CognitoGroupConfig;
   requireAuthorization?: boolean;
   smtpProps: AtatSmtpProps;
-  vpc: ec2.IVpc;
+  vpcName: string;
 }
 
 export class AtatWebApiStack extends cdk.Stack {
@@ -72,6 +72,11 @@ export class AtatWebApiStack extends cdk.Stack {
 
   constructor(scope: cdk.Construct, id: string, props: AtatWebApiStackProps) {
     super(scope, id, props);
+
+    const vpc = ec2.Vpc.fromLookup(this, "Vpc", {
+      isDefault: false,
+      vpcName: props.vpcName,
+    });
 
     this.templateOptions.description = "Resources to support the ATAT application API";
     this.environmentId = props.environmentId;
@@ -104,7 +109,7 @@ export class AtatWebApiStack extends cdk.Stack {
     });
 
     this.database = new Database(this, "AtatDatabase", {
-      vpc: props.vpc,
+      vpc: vpc,
       databaseName: this.environmentId + "atat",
       ormLambdaLayer: this.ormLayer,
     });
@@ -149,37 +154,27 @@ export class AtatWebApiStack extends cdk.Stack {
     );
 
     // PortfolioDraft Operations
-    this.addDatabaseApiFunction("getPortfolioDrafts", "portfolioDrafts/", props.vpc, TablePermissions.READ);
-    this.addDatabaseApiFunction("getPortfolioDraft", "portfolioDrafts/", props.vpc, TablePermissions.READ);
-    this.addDatabaseApiFunction("createPortfolioDraft", "portfolioDrafts/", props.vpc, TablePermissions.READ_WRITE);
-    this.addDatabaseApiFunction("deletePortfolioDraft", "portfolioDrafts/", props.vpc, TablePermissions.READ_WRITE);
+    this.addDatabaseApiFunction("getPortfolioDrafts", "portfolioDrafts/", vpc, TablePermissions.READ);
+    this.addDatabaseApiFunction("getPortfolioDraft", "portfolioDrafts/", vpc, TablePermissions.READ);
+    this.addDatabaseApiFunction("createPortfolioDraft", "portfolioDrafts/", vpc, TablePermissions.READ_WRITE);
+    this.addDatabaseApiFunction("deletePortfolioDraft", "portfolioDrafts/", vpc, TablePermissions.READ_WRITE);
     // NotImplemented is the "default" method for unimplemented operations
-    this.addDatabaseApiFunction("notImplemented", "portfolioDrafts/", props.vpc, TablePermissions.READ);
+    this.addDatabaseApiFunction("notImplemented", "portfolioDrafts/", vpc, TablePermissions.READ);
 
     // PortfolioStep Operations (all files in the portfolio/ folder)
-    this.addDatabaseApiFunction("getPortfolioStep", "portfolioDrafts/portfolio/", props.vpc, TablePermissions.READ);
-    this.addDatabaseApiFunction(
-      "createPortfolioStep",
-      "portfolioDrafts/portfolio/",
-      props.vpc,
-      TablePermissions.READ_WRITE
-    );
+    this.addDatabaseApiFunction("getPortfolioStep", "portfolioDrafts/portfolio/", vpc, TablePermissions.READ);
+    this.addDatabaseApiFunction("createPortfolioStep", "portfolioDrafts/portfolio/", vpc, TablePermissions.READ_WRITE);
 
     // FundingStep Operations (all files live in the funding/ folder)
-    this.addDatabaseApiFunction("getFundingStep", "portfolioDrafts/funding/", props.vpc, TablePermissions.READ);
-    this.addDatabaseApiFunction(
-      "createFundingStep",
-      "portfolioDrafts/funding/",
-      props.vpc,
-      TablePermissions.READ_WRITE
-    );
+    this.addDatabaseApiFunction("getFundingStep", "portfolioDrafts/funding/", vpc, TablePermissions.READ);
+    this.addDatabaseApiFunction("createFundingStep", "portfolioDrafts/funding/", vpc, TablePermissions.READ_WRITE);
 
     // ApplicationStep Operations (all files live in the application/ folder)
-    this.addDatabaseApiFunction("getApplicationStep", "portfolioDrafts/application/", props.vpc, TablePermissions.READ);
+    this.addDatabaseApiFunction("getApplicationStep", "portfolioDrafts/application/", vpc, TablePermissions.READ);
     this.addDatabaseApiFunction(
       "createApplicationStep",
       "portfolioDrafts/application/",
-      props.vpc,
+      vpc,
       TablePermissions.READ_WRITE
     );
 
@@ -187,7 +182,7 @@ export class AtatWebApiStack extends cdk.Stack {
     this.addQueueDatabaseApiFunction(
       "submitPortfolioDraft",
       "portfolioDrafts/submit/",
-      props.vpc,
+      vpc,
       TablePermissions.READ_WRITE,
       QueuePermissions.SEND
     );
@@ -235,7 +230,7 @@ export class AtatWebApiStack extends cdk.Stack {
       "GET",
       new apigw.LambdaIntegration(
         new ApiFlexFunction(this, "DbTest", {
-          lambdaVpc: props.vpc,
+          lambdaVpc: vpc,
           ormLayer: this.ormLayer,
           database: this.database,
           tablePermissions: TablePermissions.READ_WRITE,
@@ -261,21 +256,18 @@ export class AtatWebApiStack extends cdk.Stack {
       utils.apiSpecOperationFunctionName("provisioningRequest"),
       {
         entry: utils.packageRoot() + "/api/provision/provisioningRequest.ts",
-        vpc: props.vpc,
-        bundling: {
-          forceDockerBundling: true,
-        },
+        vpc: vpc,
       }
     );
     const persistCspResponse = new ApiFlexFunction(this, utils.apiSpecOperationFunctionName("persistPortfolioDraft"), {
       table: this.table,
-      lambdaVpc: props.vpc,
+      lambdaVpc: vpc,
       method: HttpMethod.POST,
       handlerPath: this.determineApiHandlerPath("persistPortfolioDraft", "provision/"),
     });
     const rejectPortfolio = new ApiFlexFunction(this, utils.apiSpecOperationFunctionName("rejectPortfolioDraft"), {
       table: this.table,
-      lambdaVpc: props.vpc,
+      lambdaVpc: vpc,
       method: HttpMethod.POST,
       handlerPath: this.determineApiHandlerPath("rejectPortfolioDraft", "provision/"),
     });
@@ -410,7 +402,7 @@ export class AtatWebApiStack extends cdk.Stack {
       new ApiFlexFunction(this, utils.apiSpecOperationFunctionName("consumePortfolioDraftSubmitQueue"), {
         queue: this.submitQueue,
         stateMachine: this.provisioningStateMachine,
-        lambdaVpc: props.vpc,
+        lambdaVpc: vpc,
         // Limiting to a batch of 1 to prevent portfolios from failing in batches.
         // If one fails in a batch, all of the messages in that batch will also fail,
         // which may cause portfolio drafts to be processed twice or cause other
@@ -426,7 +418,7 @@ export class AtatWebApiStack extends cdk.Stack {
     this.draftApi = draftApiGateway;
     this.internalApi = internalApiGateway;
     this.addEmailRoutes(props);
-    this.addTaskOrderRoutes(props);
+    this.addTaskOrderRoutes(vpc);
     this.ssmParams.push(
       new ssm.StringParameter(this, "DraftApiGatewayUrl", {
         description: "URL for the Draft API Gateway instance",
@@ -450,7 +442,7 @@ export class AtatWebApiStack extends cdk.Stack {
     const sendEmailFn = new ApiFlexFunction(this, "SendEmails", {
       queue: this.emailQueue,
       // TODO(AT-6764): revert to deploy in the vpc, after networking issue resolved (temporary only)
-      // lambdaVpc: props.vpc,
+      // lambdaVpc: vpc,
       method: HttpMethod.GET,
       handlerPath: processEmailsPath,
       createEventSource: true,
@@ -486,7 +478,7 @@ export class AtatWebApiStack extends cdk.Stack {
     this.functions.push(sendEmailFn);
   }
 
-  private addTaskOrderRoutes(props: AtatWebApiStackProps) {
+  private addTaskOrderRoutes(vpc: ec2.IVpc) {
     // Creates a server access log target bucket shared amongst the Task Order Lifecycle buckets
     // server access logs enabled on target bucket
     const taskOrdersAccessLogsBucket = new SecureBucket(this, "taskOrdersLogBucket", {
@@ -500,7 +492,7 @@ export class AtatWebApiStack extends cdk.Stack {
     });
     this.functions.push(
       new ApiFlexFunction(this, "UploadTaskOrder", {
-        lambdaVpc: props.vpc,
+        lambdaVpc: vpc,
         bucket: taskOrderManagement.pendingBucket,
         method: HttpMethod.POST,
         handlerPath: this.determineApiHandlerPath("uploadTaskOrder", "taskOrderFiles/"),
@@ -509,7 +501,7 @@ export class AtatWebApiStack extends cdk.Stack {
         },
       }).fn,
       new ApiFlexFunction(this, "DeleteTaskOrder", {
-        lambdaVpc: props.vpc,
+        lambdaVpc: vpc,
         bucket: taskOrderManagement.acceptedBucket,
         method: HttpMethod.DELETE,
         handlerPath: this.determineApiHandlerPath("deleteTaskOrder", "taskOrderFiles/"),
