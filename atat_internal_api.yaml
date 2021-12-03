@@ -220,7 +220,7 @@ paths:
             - cognitoAuthorizer: []
           - Ref: AWS::NoValue
     patch:
-      description: Used to update operators
+      description: Used to update operators for this Portfolio
       operationId: patchPortfolio
       parameters:
         - name: portfolioId
@@ -502,7 +502,7 @@ paths:
             - cognitoAuthorizer: []
           - Ref: AWS::NoValue
     patch:
-      description: Used to update operators
+      description: Used to update operators for this Application
       operationId: patchApplication
       parameters:
         - name: portfolioId
@@ -745,7 +745,7 @@ paths:
           schema:
             type: string
       requestBody:
-        description: Update an existing Portfolio
+        description: Update an existing Environment
         content:
           application/json:
             schema:
@@ -807,7 +807,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Environment'
         '404':
-          description: Portfolio, Application ot Environment with the given ID does not exist
+          description: Portfolio, Application or Environment with the given ID does not exist
       x-amazon-apigateway-request-validator: "request-params-validator"
       x-amazon-apigateway-integration:
         httpMethod: "POST"
@@ -821,7 +821,7 @@ paths:
             - cognitoAuthorizer: []
           - Ref: AWS::NoValue
     patch:
-      description: Used to update operators
+      description: Used to update operators for this Environment
       operationId: patchEnvironment
       parameters:
         - name: portfolioId
@@ -994,7 +994,7 @@ paths:
               application/json: "{}"
   /portfolios/{portfolioId}/taskOrders/{taskOrderId}:
     get:
-      description: Gets a detailed view of an Application within a Portfolio
+      description: Gets a detailed view of a Task Order within a Portfolio
       operationId: getTaskOrder
       parameters:
         - name: portfolioId
@@ -1046,7 +1046,7 @@ paths:
           schema:
             type: string
       requestBody:
-        description: Update an existing Portfolio
+        description: Update an existing Task Order
         content:
           application/json:
             schema:
@@ -1253,7 +1253,7 @@ paths:
               application/json: "{}"
   /portfolios/{portfolioId}/taskOrders/{taskOrderId}/clins/{clin}:
     get:
-      description: Gets a detailed view of an Application within a Portfolio
+      description: Gets a detailed view of a CLIN within a Task Order
       operationId: getClin
       parameters:
         - name: portfolioId
@@ -1317,7 +1317,7 @@ paths:
           schema:
             type: string
       requestBody:
-        description: Update an existing Portfolio
+        description: Update an existing CLIN
         content:
           application/json:
             schema:
