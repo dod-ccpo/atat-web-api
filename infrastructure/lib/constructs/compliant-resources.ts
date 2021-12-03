@@ -86,6 +86,7 @@ export class SecureRestApi extends cdk.Construct {
 
   constructor(scope: cdk.Construct, id: string, props: SecureRestApiProps) {
     super(scope, id);
+    const accessLogGroup = new logs.LogGroup(this, "AccessLogs");
     const baseProps = {
       // This is slightly repetitive between endpointTypes and parameters.endpointConfigurationTypes; however, due
       // to underlying CloudFormation behaviors, endpointTypes is not evaluated entirely correctly when a
@@ -103,6 +104,28 @@ export class SecureRestApi extends cdk.Construct {
         cacheDataEncrypted: true,
         cacheTtl: cdk.Duration.minutes(0),
         loggingLevel: apigw.MethodLoggingLevel.INFO, // execution logging
+        accessLogDestination: new apigw.LogGroupLogDestination(accessLogGroup),
+        accessLogFormat: apigw.AccessLogFormat.custom(
+          JSON.stringify({
+            requestId: apigw.AccessLogField.contextRequestId(),
+            extendedRequestId: apigw.AccessLogField.contextExtendedRequestId(),
+            xrayTraceId: apigw.AccessLogField.contextXrayTraceId(),
+            // This field is in the Apache Common Log Format
+            requestTime: apigw.AccessLogField.contextRequestTime(),
+            httpMethod: apigw.AccessLogField.contextHttpMethod(),
+            protocol: apigw.AccessLogField.contextProtocol(),
+            responseLength: apigw.AccessLogField.contextResponseLength(),
+            status: apigw.AccessLogField.contextStatus(),
+            resourcePath: apigw.AccessLogField.contextResourcePath(),
+            path: apigw.AccessLogField.contextPath(),
+            ip: apigw.AccessLogField.contextIdentitySourceIp(),
+            user: apigw.AccessLogField.contextIdentityCognitoIdentityId(),
+            userAgent: apigw.AccessLogField.contextIdentityUserAgent(),
+            // The Request ID for the integration (Lambda)
+            integrationRequestId: "$context.integration.requestId",
+            integrationLatency: apigw.AccessLogField.contextIntegrationLatency(),
+          })
+        ),
       },
     };
 
