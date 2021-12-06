@@ -32,8 +32,8 @@ export async function baseHandler(
   event: ApiGatewayEventParsed<any>,
   context?: Context
 ): Promise<APIGatewayProxyResult> {
-  // const portfolioId = event.pathParameters?.portfolioDraftId;
-  const portfolioId = "6558c17d-5ebe-4dc3-a15a-3c3b0dd7b0d2";
+  const portfolioId = event.pathParameters?.portfolioDraftId;
+  // const portfolioId = "6558c17d-5ebe-4dc3-a15a-3c3b0dd7b0d2";
   const applicationStep = event.body;
   try {
     // Set up DB connection locally
