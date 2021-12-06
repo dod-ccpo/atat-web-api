@@ -1,0 +1,23 @@
+{
+  "name": "atat-web-api-orm",
+  "version": "0.1.0",
+  "description": "Base models and entities for ATAT objects",
+  "scripts": {
+    "test": "jest --config=jest.config.js --passWithNoTests",
+    "lint": "eslint --ext .js,.ts,.json -c ../../.eslintrc.json .",
+    "lint:fix": "npm run lint -- --fix"
+  },
+  "dependencies": {
+    "axios": "^0.24.0",
+    "pg": "^8.7.1",
+    "reflect-metadata": "^0.1.13",
+    "typeorm": "^0.2.40"
+  },
+  "devDependencies": {
+    "@types/jest": "^27.0.2",
+    "eslint": "^7.31.0",
+    "jest": "^27.0.6",
+    "ts-jest": "^27.0.4",
+    "typescript": "^4.4.3"
+  }
+}

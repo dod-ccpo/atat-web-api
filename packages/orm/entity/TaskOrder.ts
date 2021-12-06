@@ -1,8 +1,13 @@
 import { BaseEntity } from "./BaseEntity";
 import { Clin } from "./Clin";
 import { Column, Entity, ManyToOne, OneToMany } from "typeorm";
-import { FileScanStatus } from "../../models/FileMetadata";
 import { Portfolio } from "./Portfolio";
+
+export enum FileScanStatus {
+  PENDING = "pending",
+  ACCEPTED = "accepted",
+  REJECTED = "rejected",
+}
 
 @Entity("task_order")
 export class TaskOrder extends BaseEntity {

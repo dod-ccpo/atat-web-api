@@ -80,6 +80,8 @@ export async function createConnection(): Promise<Connection> {
     },
     logging: "all",
     database: databaseName,
+    entities: ["/opt/nodejs/orm/entity/**.js"],
+    migrations: ["/opt/nodejs/orm/migration/**.js"],
   });
   return CONNECTION;
 }
