@@ -2,10 +2,10 @@ import { BaseEntity } from "./BaseEntity";
 import { Column } from "typeorm";
 
 export enum ProvisioningStatus {
-  PENDING = "pending",
-  IN_PROGRESS = "in_progress",
-  FAILED = "failed",
-  COMPLETE = "complete",
+  PENDING = "PENDING",
+  IN_PROGRESS = "IN_PROGRESS",
+  COMPLETE = "COMPLETE",
+  FAILED = "FAILED",
 }
 
 export abstract class ProvisionableEntity extends BaseEntity {
