@@ -15,10 +15,13 @@ prepare-orm-files() (
     npm ci \
         && npm run lerna bootstrap -- --ci \
         && npm run build \
-        && cd "$ASSET_INPUT_DIR/build/packages/api" \
-        && cp --parents -aur orm/**/**.js "$ASSET_OUTPUT_DIR" \
-        && cd "$ASSET_INPUT_DIR/packages/api/" \
-        && cp --parents -aur orm/**/**.sql "$ASSET_OUTPUT_DIR"
+        && mkdir -p "$ASSET_OUTPUT_DIR/nodejs" \
+        && cp -r "$ASSET_INPUT_DIR/packages/api/node_modules" "$ASSET_OUTPUT_DIR/nodejs/node_modules" \
+        && unlink "$ASSET_OUTPUT_DIR/nodejs/node_modules/atat-web-api-rds" \
+        && cd "$ASSET_INPUT_DIR/build/packages/" \
+        && cp --parents -aur orm/* "$ASSET_OUTPUT_DIR/nodejs" \
+        && cd "$ASSET_INPUT_DIR/packages/" \
+        && cp --parents -aur orm/migration/**.sql "$ASSET_OUTPUT_DIR/nodejs" \
 )
 
 ## Download the RDS CA Bundle

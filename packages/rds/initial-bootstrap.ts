@@ -57,8 +57,8 @@ async function connect(connectConfig: Config, useDatabase = true): Promise<Conne
     username: dbAuth.username,
     password: dbAuth.password,
     logging: "all",
-    migrations: ["/opt/orm/migrations/**.js"],
-    entities: ["/opt/orm/entities/**.js"],
+    entities: ["/opt/nodejs/orm/entity/**.js"],
+    migrations: ["/opt/nodejs/orm/migration/**.js"],
     ssl: {
       minVersion: "TLSv1.2",
       ca: fs.readFileSync(caBundlePath(connectConfig.caBundleFile)),

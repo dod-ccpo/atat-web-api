@@ -1,9 +1,25 @@
 import { Application } from "./Application";
-import { CloudServiceProvider } from "../../models/CloudServiceProvider";
 import { Column, Entity, OneToMany } from "typeorm";
-import { DodComponent } from "../../models/DodComponent";
 import { ProvisionableEntity } from "./ProvisionableEntity";
 import { TaskOrder } from "./TaskOrder";
+
+export enum CloudServiceProvider {
+  CSP_A = "CSP A",
+  CSP_B = "CSP B",
+}
+
+export enum DodComponent {
+  AIR_FORCE = "AIR_FORCE",
+  ARMY = "ARMY",
+  MARINE_CORPS = "MARINE_CORPS",
+  NAVY = "NAVY",
+  SPACE_FORCE = "SPACE_FORCE",
+  COMBATANT_COMMAND = "COMBATANT_COMMAND",
+  JOINT_STAFF = "JOINT_STAFF",
+  DAFA = "DAFA",
+  OSD_PSAS = "OSD_PSAS",
+  NSA = "NSA",
+}
 
 @Entity("portfolio")
 export class Portfolio extends ProvisionableEntity {
