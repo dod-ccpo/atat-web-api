@@ -37,6 +37,17 @@ const USERS: User[] = [
   },
 ];
 
+/**
+ * Handle fetching the bundle path for both absolute and relative paths.
+ * This will always return an absolute path to the file.
+ */
+function caBundlePath(caBundleFile: string): string {
+  if (caBundleFile.startsWith("/")) {
+    return caBundleFile;
+  }
+  return path.join(__dirname, caBundleFile);
+}
+
 async function connect(connectConfig: Config, useDatabase = true): Promise<Connection> {
   const dbAuth = await getDatabaseCredentials(connectConfig.secretName);
   return createConnection({
@@ -50,7 +61,7 @@ async function connect(connectConfig: Config, useDatabase = true): Promise<Conne
     entities: ["/opt/orm/entities/**.js"],
     ssl: {
       minVersion: "TLSv1.2",
-      ca: fs.readFileSync(path.join(__dirname, connectConfig.caBundleFile)),
+      ca: fs.readFileSync(caBundlePath(connectConfig.caBundleFile)),
     },
     database: useDatabase ? connectConfig.databaseName : "postgres",
   });

@@ -172,6 +172,9 @@ export class Database extends cdk.Construct {
     const instancesReady = new cdk.ConcreteDependable();
     instances.forEach((dbInstance) => instancesReady.add(dbInstance));
     bootstrapper.bootstrapResource.node.addDependency(instancesReady);
+    // If the resource does not depend on the cluster, then there may be failures during
+    // stack deletion as the cluster may be deleted before the custom resource.
+    bootstrapper.bootstrapResource.node.addDependency(cluster);
 
     // Provide a resource to determine whether the database has been created.
     this.databaseReady = new cdk.ConcreteDependable();

@@ -23,7 +23,7 @@ prepare-orm-files() (
 
 ## Download the RDS CA Bundle
 download-ca-bundle() (
-    curl -sL -o "${ASSET_OUTPUT_DIR}/rds-ca-2017.pem" https://truststore.pki.us-gov-west-1.rds.amazonaws.com/global/global-bundle.pem
+    curl -sL -o "${ASSET_OUTPUT_DIR}/rds-gov-ca-bundle-2017.pem" https://truststore.pki.us-gov-west-1.rds.amazonaws.com/global/global-bundle.pem
 )
 
 prepare-orm-files && download-ca-bundle

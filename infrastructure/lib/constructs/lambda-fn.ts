@@ -17,7 +17,7 @@ import { TablePermissions } from "../table-permissions";
 /**
  * The path within the Lambda function where the RDS CA Bundle is stored.
  */
-const RDS_CA_BUNDLE_NAME = "rds-gov-ca-bundle-2017.pem";
+const RDS_CA_BUNDLE_NAME = "/opt/rds-gov-ca-bundle-2017.pem";
 
 /**
  * An IAM service principal for the API Gateway service, used to grant Lambda
