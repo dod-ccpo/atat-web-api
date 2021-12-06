@@ -129,7 +129,7 @@ async function sendResponse(
   console.log("Response: " + cfnResponse.data);
 }
 
-export async function handler(event: CloudFormationCustomResourceEvent): Promise<void> {
+export async function baseHandler(event: CloudFormationCustomResourceEvent): Promise<void> {
   console.log(JSON.stringify(event));
   const databaseName = event.ResourceProperties.DatabaseName;
   const secretName = event.ResourceProperties.DatabaseSecretName;
@@ -189,4 +189,22 @@ export async function handler(event: CloudFormationCustomResourceEvent): Promise
     await sendResponse(event, result);
   }
   console.log("End of handler for request: " + event.RequestId);
+}
+
+export async function handler(event: CloudFormationCustomResourceEvent): Promise<void> {
+  const result: CloudFormationCustomResourceResponse = {
+    Status: "FAILED",
+    RequestId: event.RequestId,
+    StackId: event.StackId,
+    LogicalResourceId: event.LogicalResourceId,
+    PhysicalResourceId: "Unknown",
+    Reason: "Unknown",
+  };
+
+  try {
+    await baseHandler(event);
+  } catch (err: unknown) {
+    result.Reason = JSON.stringify(err) ?? "Unknown Error";
+    await sendResponse(event, result);
+  }
 }

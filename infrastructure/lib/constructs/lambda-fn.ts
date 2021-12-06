@@ -45,6 +45,12 @@ export interface ApiFunctionPropstest {
   readonly functionPropsOverride?: lambdaNodeJs.NodejsFunctionProps;
 
   /**
+   * A Lambda Layer that bundles necessary support resources for an ORM and interactions
+   * with the database.
+   */
+  readonly ormLayer?: lambda.ILayerVersion;
+
+  /**
    * The VPC where resources should be created
    */
   readonly lambdaVpc?: ec2.IVpc;
@@ -148,7 +154,7 @@ export class ApiFlexFunction extends cdk.Construct {
       ...props.functionPropsOverride,
       bundling: {
         // forceDockerBundling: true,
-        externalModules: ["pg-native"],
+        externalModules: ["pg-native", "atat-web-api-orm"],
       },
     });
     this.fn.addEnvironment("ATAT_RDS_CA_BUNDLE_NAME", RDS_CA_BUNDLE_NAME);
@@ -161,6 +167,10 @@ export class ApiFlexFunction extends cdk.Construct {
     }
 
     if (props.database && props.tablePermissions) {
+      if (!props.ormLayer) {
+        cdk.Annotations.of(this).addError("An ORM layer must be added for a function working with the database");
+      }
+
       switch (props.tablePermissions) {
         case TablePermissions.READ:
           props.database.grantRead(this.fn);
@@ -171,6 +181,7 @@ export class ApiFlexFunction extends cdk.Construct {
           this.fn.addEnvironment("ATAT_DATABASE_USER", "atat_api_write");
           break;
       }
+
       // Note: Always pass the cluster endpoints, never endpoints for a particular instance. The roles of an
       // instance can change over time.
       this.fn.addEnvironment("ATAT_DATABASE_WRITE_HOST", props.database.cluster.clusterEndpoint.hostname);
@@ -183,6 +194,8 @@ export class ApiFlexFunction extends cdk.Construct {
         cdk.Stack.of(this).resolve(props.database.cluster.clusterEndpoint.port)
       );
       this.fn.addEnvironment("ATAT_DATABASE_NAME", props.database.databaseName);
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      this.fn.addLayers(props.ormLayer!);
     }
 
     // Optional - create DynamoDB connection and grant permissions

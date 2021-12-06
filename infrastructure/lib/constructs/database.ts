@@ -11,6 +11,7 @@ import { ApiFlexFunction } from "./lambda-fn";
 export interface DatabaseProps {
   vpc: ec2.IVpc;
   databaseName: string;
+  ormLambdaLayer: lambda.ILayerVersion;
 }
 
 interface BootstrapProps extends DatabaseProps {
@@ -37,24 +38,13 @@ class DatabaseBootstrapper extends cdk.Construct {
   constructor(scope: cdk.Construct, id: string, props: BootstrapProps) {
     super(scope, id);
 
-    const layer = new lambda.LayerVersion(this, "DatabaseSupportLayer", {
-      compatibleRuntimes: [lambda.Runtime.NODEJS_14_X],
-      code: lambda.Code.fromAsset(util.packageRoot() + "/../", {
-        bundling: {
-          image: lambda.Runtime.NODEJS_14_X.bundlingImage,
-          user: "root",
-          command: ["bash", "scripts/prepare-db-layer.sh"],
-        },
-      }),
-    });
-
     const handler = new ApiFlexFunction(this, "Function", {
       handlerPath: util.packageRoot() + "/rds/initial-bootstrap.ts",
       lambdaVpc: props.vpc,
       functionPropsOverride: {
         memorySize: 1024,
         timeout: cdk.Duration.minutes(5),
-        layers: [layer],
+        layers: [props.ormLambdaLayer],
       },
     });
 
@@ -64,9 +54,10 @@ class DatabaseBootstrapper extends cdk.Construct {
         DatabaseName: props.databaseName,
         DatabaseHost: props.cluster.clusterEndpoint.hostname,
         DatabaseSecretName: props.secretName,
-        ForceReload: layer.layerVersionArn,
+        ForceReload: props.ormLambdaLayer.layerVersionArn,
       },
     });
+    this.bootstrapResource.node.addDependency(handler);
     this.backingLambda = handler.fn;
   }
 }
