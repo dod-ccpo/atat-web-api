@@ -4,9 +4,9 @@ import { Column, Entity, ManyToOne, OneToMany } from "typeorm";
 import { Portfolio } from "./Portfolio";
 
 export enum FileScanStatus {
-  PENDING = "pending",
-  ACCEPTED = "accepted",
-  REJECTED = "rejected",
+  PENDING = "PENDING",
+  ACCEPTED = "ACCEPTED",
+  REJECTED = "REJECTED",
 }
 
 @Entity("task_order")
