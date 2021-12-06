@@ -30,7 +30,7 @@ import { HttpMethod } from "./http";
 import { TablePermissions } from "./table-permissions";
 import { QueuePermissions } from "./queue-permissions";
 import * as utils from "./util";
-import { ApiFlexFunction } from "./constructs/lambda-fn";
+import { ApiFlexFunction, ApiFunctionPropstest } from "./constructs/lambda-fn";
 import { Database } from "./constructs/database";
 
 interface AtatIdpProps {
@@ -65,6 +65,7 @@ export class AtatWebApiStack extends cdk.Stack {
   public readonly provisioningStateMachine: sfn.IStateMachine;
   public readonly table: dynamodb.ITable;
   public readonly database: Database;
+  public readonly ormLayer: lambda.ILayerVersion;
   public readonly functions: lambda.IFunction[] = [];
   public readonly ssmParams: ssm.IParameter[] = [];
   public readonly outputs: cdk.CfnOutput[] = [];
@@ -90,9 +91,21 @@ export class AtatWebApiStack extends cdk.Stack {
       })
     );
 
+    this.ormLayer = new lambda.LayerVersion(this, "DatabaseSupportLayer", {
+      compatibleRuntimes: [lambda.Runtime.NODEJS_14_X],
+      code: lambda.Code.fromAsset(utils.packageRoot() + "/../", {
+        bundling: {
+          image: lambda.Runtime.NODEJS_14_X.bundlingImage,
+          user: "root",
+          command: ["bash", "scripts/prepare-db-layer.sh"],
+        },
+      }),
+    });
+
     this.database = new Database(this, "AtatDatabase", {
       vpc: props.vpc,
       databaseName: this.environmentId + "atat",
+      ormLambdaLayer: this.ormLayer,
     });
 
     // Create a queue for PortfolioDraft submission
@@ -492,13 +505,14 @@ export class AtatWebApiStack extends cdk.Stack {
     vpc: ec2.IVpc,
     permissions: TablePermissions
   ) {
-    const props = {
+    const props: ApiFunctionPropstest = {
       table: this.table,
       tablePermissions: permissions,
       lambdaVpc: vpc,
       method: utils.apiSpecOperationMethod(operationId),
       handlerPath: this.determineApiHandlerPath(operationId, handlerFolder),
       database: this.database,
+      ormLayer: this.ormLayer,
     };
     this.functions.push(new ApiFlexFunction(this, utils.apiSpecOperationFunctionName(operationId), props).fn);
   }
@@ -510,7 +524,7 @@ export class AtatWebApiStack extends cdk.Stack {
     tablePermissions: TablePermissions,
     queuePermissions: QueuePermissions
   ) {
-    const props = {
+    const props: ApiFunctionPropstest = {
       table: this.table,
       tablePermissions: tablePermissions,
       queue: this.submitQueue,
@@ -520,6 +534,7 @@ export class AtatWebApiStack extends cdk.Stack {
       handlerPath: this.determineApiHandlerPath(operationId, handlerFolder),
       createEventSource: operationId.startsWith("consume"),
       database: this.database,
+      ormLayer: this.ormLayer,
     };
     this.functions.push(new ApiFlexFunction(this, utils.apiSpecOperationFunctionName(operationId), props).fn);
   }

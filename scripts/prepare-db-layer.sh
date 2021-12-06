@@ -16,8 +16,7 @@ prepare-orm-files() (
         && npm run lerna bootstrap -- --ci \
         && npm run build \
         && mkdir -p "$ASSET_OUTPUT_DIR/nodejs" \
-        && cp -r "$ASSET_INPUT_DIR/packages/api/node_modules" "$ASSET_OUTPUT_DIR/nodejs/node_modules" \
-        && unlink "$ASSET_OUTPUT_DIR/nodejs/node_modules/atat-web-api-rds" \
+        && cp -rL "$ASSET_INPUT_DIR/packages/orm/node_modules" "$ASSET_OUTPUT_DIR/nodejs/node_modules" \
         && cd "$ASSET_INPUT_DIR/build/packages/" \
         && cp --parents -aur orm/* "$ASSET_OUTPUT_DIR/nodejs" \
         && cd "$ASSET_INPUT_DIR/packages/" \
