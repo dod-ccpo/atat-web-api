@@ -36,6 +36,9 @@ import { Database } from "./constructs/database";
 interface AtatIdpProps {
   secretName: string;
   providerName: string;
+}
+
+interface CognitoGroupConfig {
   adminsGroupName?: string;
   usersGroupName?: string;
 }
@@ -46,7 +49,8 @@ interface AtatSmtpProps {
 
 export interface AtatWebApiStackProps extends cdk.StackProps {
   environmentId: string;
-  idpProps: AtatIdpProps;
+  idpProps: AtatIdpProps[];
+  cognitoGroups?: CognitoGroupConfig;
   requireAuthorization?: boolean;
   smtpProps: AtatSmtpProps;
   vpc: ec2.IVpc;
@@ -75,7 +79,7 @@ export class AtatWebApiStack extends cdk.Stack {
     this.templateOptions.description = "Resources to support the ATAT application API";
     this.environmentId = props.environmentId;
 
-    this.setupCognito(props.idpProps);
+    this.setupCognito(props.idpProps, props.cognitoGroups);
 
     // Create a shared DynamoDB table that will be used by all the functions in the project.
     this.table = new SecureTable(this, "AtatTable", {
@@ -524,22 +528,26 @@ export class AtatWebApiStack extends cdk.Stack {
     this.functions.push(new ApiFlexFunction(this, utils.apiSpecOperationFunctionName(operationId), props).fn);
   }
 
-  private setupCognito(props: AtatIdpProps) {
-    const secret = secretsmanager.Secret.fromSecretNameV2(this, "OidcSecret", props.secretName);
+  private setupCognito(idps: AtatIdpProps[], groupConfig?: CognitoGroupConfig) {
     const cognitoAuthentication = new CognitoAuthentication(this, "Authentication", {
       groupsAttributeName: "groups",
-      adminsGroupName: props.adminsGroupName ?? "atat-admins",
-      usersGroupName: props.usersGroupName ?? "atat-users",
+      adminsGroupName: groupConfig?.adminsGroupName ?? "atat-admins",
+      usersGroupName: groupConfig?.usersGroupName ?? "atat-users",
       cognitoDomain: "atat-api-" + this.environmentId,
-      oidcIdps: [
-        {
-          providerName: props.providerName,
+      oidcIdps: idps.map((idpConfig) => {
+        const secret = secretsmanager.Secret.fromSecretNameV2(
+          this,
+          `OidcSecret${idpConfig.providerName}`,
+          idpConfig.secretName
+        );
+        return {
+          providerName: idpConfig.providerName,
           clientId: secret.secretValueFromJson("clientId"),
           clientSecret: secret.secretValueFromJson("clientSecret"),
           oidcIssuerUrl: secret.secretValueFromJson("oidcIssuerUrl"),
           attributesRequestMethod: HttpMethod.GET,
-        },
-      ],
+        };
+      }),
     });
     // When utilizing a custom domain, the `domainName` property of IUserPoolDomain
     // contains the full domain; however, in other scenarios, it contains only the

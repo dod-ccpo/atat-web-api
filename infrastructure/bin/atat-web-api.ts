@@ -49,10 +49,16 @@ const netStack = new AtatNetStack(app, environmentName + "AtatNetStack", {
 const stacks: cdk.Stack[] = [
   new AtatWebApiStack(app, environmentName + "AtatWebApiStack", {
     environmentId,
-    idpProps: {
-      secretName: "auth/oidc/aad",
-      providerName: "ATATDevAAD",
-    },
+    idpProps: [
+      {
+        secretName: "auth/oidc/aad",
+        providerName: "ATATDevAAD",
+      },
+      {
+        secretName: "auth/oidc/gd",
+        providerName: "GlobalDirectory",
+      },
+    ],
     smtpProps: {
       secretName: "email/smtp",
     },
