@@ -16,9 +16,7 @@ export class ApplicationRepository extends AbstractRepository<Application> {
     // If it exists -> create new application
     // If it doesn't exist -> return an error to user
     try {
-      this.manager.getRepository(Portfolio).findOneOrFail({
-        where: { id: portfolioId },
-      });
+      this.manager.getRepository(Portfolio).findOneOrFail({ id: portfolioId });
       return this.manager.save(app);
     } catch (error) {
       if (error.name === "EntityNotFoundError") {
@@ -32,7 +30,7 @@ export class ApplicationRepository extends AbstractRepository<Application> {
 
   // TODO once validation and model is setup
   /*
-  createAndSaveApplication(portfolioId: id, application: ApplicationStep) {
+  createAndSaveApplication(portfolioId: string, application: ApplicationStep) {
     const app = new Application();
 
     // Setup example app
@@ -45,9 +43,7 @@ export class ApplicationRepository extends AbstractRepository<Application> {
     // If it exists -> create new application
     // If it doesn't exist -> return an error to user
     try {
-      this.manager.getRepository(Portfolio).findOneOrFail({
-        where: { id: portfolioId },
-      });
+      this.manager.getRepository(Portfolio).findOneOrFail({ id: portfolioId });
       return this.manager.save(app);
     } catch (error) {
       if (error.name === "EntityNotFoundError") {
@@ -56,8 +52,8 @@ export class ApplicationRepository extends AbstractRepository<Application> {
         return NO_SUCH_PORTFOLIO_DRAFT_400;
       }
     }
-  }
-  */
+  } */
+
   /*
   findPortfolio(portfolioId: string) {
 
