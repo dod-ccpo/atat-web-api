@@ -6,7 +6,7 @@ import { APPLICATION_STEP } from "../../models/PortfolioDraft";
 import { dynamodbDocumentClient as client } from "../../utils/aws-sdk/dynamodb";
 import { DATABASE_ERROR, NO_SUCH_PORTFOLIO_DRAFT_404 } from "../../utils/errors";
 import { ApiSuccessResponse, SetupError, SuccessStatusCode } from "../../utils/response";
-import schema = require("../../models/schema.json");
+import schema = require("../../models/internalSchema.json");
 import middy from "@middy/core";
 import xssSanitizer from "../../utils/xssSanitizer";
 import jsonBodyParser from "@middy/http-json-body-parser";
@@ -18,6 +18,10 @@ import { validateRequestShape } from "../../utils/requestValidation";
 import { CORS_CONFIGURATION } from "../../utils/corsConfig";
 import { wrapSchema } from "../../utils/schemaWrapper";
 import { errorHandlingMiddleware } from "../../utils/errorHandlingMiddleware";
+import { Connection, createConnection, InsertResult } from "typeorm";
+import { Portfolio as PortfolioEntity } from "../../orm/entity/Portfolio";
+import { ApplicationRepository } from "../../orm/repository/ApplicationRepository";
+import "reflect-metadata";
 
 /**
  * Create an Application
@@ -25,70 +29,70 @@ import { errorHandlingMiddleware } from "../../utils/errorHandlingMiddleware";
  * @param event - The POST request from API Gateway
  */
 export async function baseHandler(
-  event: ApiGatewayEventParsed<ApplicationStep>,
+  event: ApiGatewayEventParsed<any>,
   context?: Context
 ): Promise<APIGatewayProxyResult> {
-  const setupResult = validateRequestShape<ApplicationStep>(event);
-  if (setupResult instanceof SetupError) {
-    return setupResult.errorResponse;
-  }
-  const portfolioDraftId = setupResult.path.portfolioDraftId;
+  // const portfolioId = event.pathParameters?.portfolioDraftId;
+  const portfolioId = "6558c17d-5ebe-4dc3-a15a-3c3b0dd7b0d2";
   const applicationStep = event.body;
-
-  // validateBusinessRulesForApplicationStep(applicationStep);
-  // TODO(AT-6835): add new endpoint for Step 4 that includes this below business rule
-  // This is only a quick fix and is reverting the admin operator role business
-  // rule that was implemented in AT-6723. All other business rules are
-  // are still covered by middy. This will allow the UI team to submit application
-  // in Step 3.
-  // const adminRoles = findAdministrators(applicationStep);
-  // TODO(AT-6734): add uniform validation response for business rules
-  // if (!adminRoles.acceptableAdministratorRoles) {
-  //   return new ValidationErrorResponse(
-  //     `Invalid admin roles. Acceptable admin rules are:
-  //     - one portfolio admin role
-  //     - at least one app admin role for each app when no portfolio admin role
-  //     - at least one env admin role for each env when no app admin role one level up.`,
-  //     { ...adminRoles }
-  //   );
-  // }
-/*
   try {
-    await client.send(
-      new UpdateCommand({
-        TableName: process.env.ATAT_TABLE_NAME ?? "",
-        Key: {
-          id: portfolioDraftId,
-        },
-        UpdateExpression: `set #portfolioVariable = :application, updated_at = :now,
-        num_applications = :numOfApplications, num_environments = :numOfEnvironments`,
-        ExpressionAttributeNames: {
-          "#portfolioVariable": APPLICATION_STEP,
-        },
-        ExpressionAttributeValues: {
-          ":application": applicationStep,
-          ":now": new Date().toISOString(),
-          ":numOfApplications": applicationStep.applications.length,
-          ":numOfEnvironments": applicationStep.applications.flatMap((app: Application) => app.environments).length,
-        },
-        ConditionExpression: "attribute_exists(created_at)",
-        ReturnValues: "ALL_NEW",
-      })
-    );
+    // Set up DB connection locally
+    console.log("Establishing connection");
+    const connection = await createConnection();
+    console.log("Connected");
+    const appRepository = connection.getCustomRepository(ApplicationRepository);
+    // TODO - monday, pass Application as full object after updating Application Model
+    // await appRepository.createAndSaveApplication(portfolioId, applicationStep);
+
+    await appRepository.createAndSave(portfolioId!, "my name", "my description");
+
+    // Find portfolio based on given UUID
+    // If it exists -> create new application
+    // If it doesn't exist -> return an error to user
   } catch (error) {
-    if (error.name === "ConditionalCheckFailedException") {
-      return NO_SUCH_PORTFOLIO_DRAFT_404;
-    }
-    console.error("Database error: " + error);
-    return DATABASE_ERROR;
+    // TODO - catch with error handling middleware
+    console.log(error);
   }
-  return new ApiSuccessResponse<ApplicationStep>(applicationStep, SuccessStatusCode.CREATED);
+
+  return new ApiSuccessResponse<any>(applicationStep, SuccessStatusCode.CREATED);
 }
-*/
+// middy without validation
 export const handler = middy(baseHandler)
   .use(xssSanitizer())
   .use(jsonBodyParser())
-  .use(validator({ inputSchema: wrapSchema(schema.ApplicationStep) }))
   .use(errorHandlingMiddleware())
   .use(JSONErrorHandlerMiddleware())
   .use(cors(CORS_CONFIGURATION));
+/*
+export const handler = middy(baseHandler)
+  .use(xssSanitizer())
+  .use(jsonBodyParser())
+  .use(validator({ inputSchema: wrapSchema(schema.Application) }))
+  .use(errorHandlingMiddleware())
+  .use(JSONErrorHandlerMiddleware())
+  .use(cors(CORS_CONFIGURATION));
+*/
+/*
+Application:
+      required:
+        - environments
+        - name
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/BaseObject"
+        - $ref: '#/components/schemas/AppEnvAccess'
+      properties:
+        environments:
+          minItems: 1
+          type: array
+          items:
+            $ref: "#/components/schemas/Environment"
+        name:
+          pattern: "^[a-zA-Z\\d _-]{4,100}$"
+          type: string
+        description:
+          pattern: "^[\\w\\d !@#$%^&*_|:;,'.-]{0,300}$"
+          type: string
+      additionalProperties: false
+      description: "Represents an Application in a Portfolio"
+*/
