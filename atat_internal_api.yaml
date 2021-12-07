@@ -2066,7 +2066,7 @@ components:
           type: integer
         content:
           type: object
-            additionalProperties: true
+          additionalProperties: true
         request:
           $ref: '#/components/schemas/CspInvocation'
   examples:
