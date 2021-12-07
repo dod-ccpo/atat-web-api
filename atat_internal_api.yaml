@@ -1725,7 +1725,6 @@ components:
         id:
           type: string
           readOnly: true
-      additionalProperties: false
       description: "Base model common to all first-class objects (those with IDs)"
     Error:
       type: object
