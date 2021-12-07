@@ -11,10 +11,6 @@ import * as lambda from "@aws-cdk/aws-lambda";
 import * as lambdaNodeJs from "@aws-cdk/aws-lambda-nodejs";
 import * as sqs from "@aws-cdk/aws-sqs";
 import * as iam from "@aws-cdk/aws-iam";
-import { ApiDynamoDBFunction } from "./constructs/api-dynamodb-function";
-import { ApiS3Function } from "./constructs/api-s3-function";
-import { ApiSQSFunction } from "./constructs/api-sqs-function";
-import { ApiStepFnsSQSFunction } from "./constructs/api-sqs-sfn-function";
 import { SfnLambdaInvokeTask } from "./constructs/sfnLambdaInvokeTask";
 import { SfnPassState } from "./constructs/sfnPass";
 import { CognitoAuthentication } from "./constructs/authentication";
@@ -27,8 +23,7 @@ import {
 } from "./constructs/compliant-resources";
 import { TaskOrderLifecycle } from "./constructs/task-order-lifecycle";
 import { HttpMethod } from "./http";
-import { TablePermissions } from "./table-permissions";
-import { QueuePermissions } from "./queue-permissions";
+import { TablePermissions, QueuePermissions } from "./resource-permissions";
 import * as utils from "./util";
 import { convertSchema } from "./load-schema";
 import { ApiFlexFunction } from "./constructs/lambda-fn";
@@ -232,17 +227,13 @@ export class AtatWebApiStack extends cdk.Stack {
         vpc: props.vpc,
       }
     );
-    const persistCspResponse = new ApiDynamoDBFunction(
-      this,
-      utils.apiSpecOperationFunctionName("persistPortfolioDraft"),
-      {
-        table: this.table,
-        lambdaVpc: props.vpc,
-        method: HttpMethod.POST,
-        handlerPath: this.determineApiHandlerPath("persistPortfolioDraft", "provision/"),
-      }
-    );
-    const rejectPortfolio = new ApiDynamoDBFunction(this, utils.apiSpecOperationFunctionName("rejectPortfolioDraft"), {
+    const persistCspResponse = new ApiFlexFunction(this, utils.apiSpecOperationFunctionName("persistPortfolioDraft"), {
+      table: this.table,
+      lambdaVpc: props.vpc,
+      method: HttpMethod.POST,
+      handlerPath: this.determineApiHandlerPath("persistPortfolioDraft", "provision/"),
+    });
+    const rejectPortfolio = new ApiFlexFunction(this, utils.apiSpecOperationFunctionName("rejectPortfolioDraft"), {
       table: this.table,
       lambdaVpc: props.vpc,
       method: HttpMethod.POST,
@@ -375,7 +366,7 @@ export class AtatWebApiStack extends cdk.Stack {
       // are limited. Therefore the previous subscribePortfolioDraftSubmissions function is being
       // repurposed (name changed) to also invoke the state machine for portfolio provisioning.
       // See https://docs.aws.amazon.com/step-functions/latest/dg/concepts-invoke-sfn.html
-      new ApiStepFnsSQSFunction(this, utils.apiSpecOperationFunctionName("consumePortfolioDraftSubmitQueue"), {
+      new ApiFlexFunction(this, utils.apiSpecOperationFunctionName("consumePortfolioDraftSubmitQueue"), {
         queue: this.submitQueue,
         stateMachine: this.provisioningStateMachine,
         lambdaVpc: props.vpc,
@@ -414,7 +405,7 @@ export class AtatWebApiStack extends cdk.Stack {
     const smtpSecrets = secretsmanager.Secret.fromSecretNameV2(this, "SMTPSecrets", props.smtpProps.secretName);
     const processEmailsPath = utils.packageRoot() + "/email/processingEmails/index.ts";
 
-    const sendEmailFn = new ApiSQSFunction(this, "SendEmails", {
+    const sendEmailFn = new ApiFlexFunction(this, "SendEmails", {
       queue: this.emailQueue,
       // TODO(AT-6764): revert to deploy in the vpc, after networking issue resolved (temporary only)
       // lambdaVpc: props.vpc,
@@ -465,7 +456,7 @@ export class AtatWebApiStack extends cdk.Stack {
       logTargetPrefix: "logs/taskorders/",
     });
     this.functions.push(
-      new ApiS3Function(this, "UploadTaskOrder", {
+      new ApiFlexFunction(this, "UploadTaskOrder", {
         lambdaVpc: props.vpc,
         bucket: taskOrderManagement.pendingBucket,
         method: HttpMethod.POST,
@@ -474,7 +465,7 @@ export class AtatWebApiStack extends cdk.Stack {
           memorySize: 256,
         },
       }).fn,
-      new ApiS3Function(this, "DeleteTaskOrder", {
+      new ApiFlexFunction(this, "DeleteTaskOrder", {
         lambdaVpc: props.vpc,
         bucket: taskOrderManagement.acceptedBucket,
         method: HttpMethod.DELETE,
