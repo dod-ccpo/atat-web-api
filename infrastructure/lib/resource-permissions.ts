@@ -19,8 +19,8 @@ export enum QueuePermissions {
  * Supported Table Permissions for the application.
  */
 export enum TablePermissions {
-  READ = 1 >> 0,
-  WRITE = 1 >> 1,
-  ADMINISTER = 1 >> 2,
+  READ = 1 << 0,
+  WRITE = 1 << 1,
+  ADMINISTER = 1 << 2,
   READ_WRITE = TablePermissions.READ | TablePermissions.WRITE,
 }
