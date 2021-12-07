@@ -11,8 +11,7 @@ import * as lambda from "@aws-cdk/aws-lambda";
 import * as lambdaNodeJs from "@aws-cdk/aws-lambda-nodejs";
 import * as sqs from "@aws-cdk/aws-sqs";
 import * as iam from "@aws-cdk/aws-iam";
-import { SfnLambdaInvokeTask } from "./constructs/sfnLambdaInvokeTask";
-import { SfnPassState } from "./constructs/sfnPass";
+import { SfnLambdaInvokeTask, SfnPassState } from "./constructs/step-functions";
 import { CognitoAuthentication } from "./constructs/authentication";
 import {
   SecureBucket,
