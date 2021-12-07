@@ -22,7 +22,7 @@ export enum DodComponent {
 }
 export interface IPortfolio {
   name: string;
-  description?: string;
+  description: string;
 }
 
 export interface PortfolioUpdate {
