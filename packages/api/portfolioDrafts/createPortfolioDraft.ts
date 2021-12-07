@@ -1,6 +1,6 @@
 import { PutCommand } from "@aws-sdk/lib-dynamodb";
 import middy from "@middy/core";
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
+import { APIGatewayProxyWithCognitoAuthorizerEvent, APIGatewayProxyResult } from "aws-lambda";
 import { v4 as uuidv4 } from "uuid";
 import { PortfolioDraftSummary } from "../models/PortfolioDraftSummary";
 import { ProvisioningStatus } from "../models/ProvisioningStatus";
@@ -14,7 +14,7 @@ import { ApiSuccessResponse, SuccessStatusCode } from "../utils/response";
  *
  * @param event - The POST request from API Gateway
  */
-export async function baseHandler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+export async function baseHandler(event: APIGatewayProxyWithCognitoAuthorizerEvent): Promise<APIGatewayProxyResult> {
   if (event.body && !JSON.parse(event.body)) {
     return REQUEST_BODY_NOT_EMPTY;
   }

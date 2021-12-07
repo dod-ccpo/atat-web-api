@@ -228,6 +228,28 @@ export class AtatWebApiStack extends cdk.Stack {
       },
     }).restApi;
 
+    // Adds a temporary route on the internal gateway that basically does nothing
+    // except internally log some information about connecting to the database.
+    internalApiGateway.root.addResource("db-test").addMethod(
+      "GET",
+      new apigw.LambdaIntegration(
+        new ApiFlexFunction(this, "DbTest", {
+          lambdaVpc: props.vpc,
+          ormLayer: this.ormLayer,
+          database: this.database,
+          tablePermissions: TablePermissions.READ_WRITE,
+          handlerPath: utils.packageRoot() + "/api/dbTest.ts",
+          functionPropsOverride: {
+            // Allow for an unreasonably high timeout so that it's easier
+            // to debug issues; this is not a production route and so allowing
+            // this to take awhile actually will allow for catching logs and
+            // other performance information
+            timeout: cdk.Duration.minutes(1),
+          },
+        }).fn
+      )
+    );
+
     // Provisioning State machine functions
     // All but one function reuse API functions in the state machine. The validatePortfolio
     // function does not require any AWS service so a simple constructor function was used.
