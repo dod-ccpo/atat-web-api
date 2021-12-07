@@ -11,10 +11,9 @@ import { ApiSuccessResponse, SuccessStatusCode } from "../utils/response";
 import { CORS_CONFIGURATION } from "../utils/corsConfig";
 import { createConnection } from "typeorm";
 import { DATABASE_ERROR } from "../utils/errors";
-import { Environment } from "../orm/entity/Environment";
 import { errorHandlingMiddleware } from "../utils/errorHandlingMiddleware";
-import { Portfolio } from "../orm/entity/Portfolio";
-import { PortfolioRepository } from "../orm/repository/PortfolioRepository";
+import { Portfolio } from "../../orm/entity/Portfolio";
+import { PortfolioRepository } from "../../orm/repository/PortfolioRepository";
 import { wrapSchema } from "../utils/schemaWrapper";
 import "reflect-metadata";
 import internalSchema = require("../models/internalSchema.json");
@@ -25,7 +24,7 @@ import internalSchema = require("../models/internalSchema.json");
  * @param event - The POST request from API Gateway
  */
 export async function baseHandler(
-  event: ApiGatewayEventParsed<Environment>,
+  event: ApiGatewayEventParsed<Portfolio>,
   context?: Context
 ): Promise<APIGatewayProxyResult> {
   const parameters = Object.entries(event.pathParameters as APIGatewayProxyEventPathParameters);
