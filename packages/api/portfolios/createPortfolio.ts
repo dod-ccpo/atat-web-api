@@ -37,7 +37,7 @@ export async function baseHandler(
 
   // for local development
   const connection = await createConnection();
-  let response;
+  let response: Portfolio | unknown;
 
   const testData = {
     name: "Cheetah portfolio",
@@ -62,14 +62,13 @@ export async function baseHandler(
     for (const insertId of insertResult.identifiers) {
       console.log("insertId: ", insertId);
     }
-    response = new ApiSuccessResponse<Portfolio>(response as Portfolio, SuccessStatusCode.CREATED);
+    return new ApiSuccessResponse<Portfolio>(response as Portfolio, SuccessStatusCode.CREATED);
   } catch (error) {
     console.error("Database error: " + error);
     return DATABASE_ERROR;
   } finally {
     connection.close();
   }
-  return response;
 }
 
 export const handler = middy(baseHandler)
