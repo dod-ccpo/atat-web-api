@@ -2038,6 +2038,37 @@ components:
   #          type: string
   #        lastName:
   #          type: string
+    CspInvocation:
+      required:
+        - method
+        - endpoint
+        - payload
+      properties:
+        method:
+          type: string
+          enum:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+        headers:
+          type: object
+          additionalProperties:
+            type: string
+        endpoint:
+          type: string
+          format: uri
+        payload:
+          type: object
+    CspResponse:
+      properties:
+        code:
+          type: integer
+        content:
+          type: object
+            additionalProperties: true
+        request:
+          $ref: '#/components/schemas/CspInvocation'
   examples:
     PortfolioSummaries:
       value:
