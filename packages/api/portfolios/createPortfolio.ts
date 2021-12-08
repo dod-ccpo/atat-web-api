@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import cors from "@middy/http-cors";
 import createError from "http-errors";
 import jsonBodyParser from "@middy/http-json-body-parser";
@@ -16,7 +17,6 @@ import { errorHandlingMiddleware } from "../utils/errorHandlingMiddleware";
 import { PortfolioRepository } from "../../orm/repository/PortfolioRepository";
 import { ProvisioningStatus } from "../../orm/entity/ProvisionableEntity";
 import { wrapSchema } from "../utils/schemaWrapper";
-import "reflect-metadata";
 import internalSchema = require("../models/internalSchema.json");
 
 /**
@@ -39,6 +39,9 @@ export async function baseHandler(
   let response: Portfolio | unknown;
 
   const testData = {
+    // id: uuidv4(),
+    // createdAt: now,
+    // updatedAt: now,
     name: "Cheetah portfolio",
     description: "Description of portfolio",
     csp: CloudServiceProvider.CSP_A,
