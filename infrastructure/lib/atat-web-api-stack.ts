@@ -550,7 +550,7 @@ export class AtatWebApiStack extends cdk.Stack {
       database: this.database,
       ormLayer: this.ormLayer,
       functionPropsOverride: {
-        timeout: Duration.seconds(10),
+        timeout: cdk.Duration.seconds(10),
       },
     };
     this.functions.push(new ApiFlexFunction(this, utils.apiSpecOperationFunctionName(operationId), props).fn);
