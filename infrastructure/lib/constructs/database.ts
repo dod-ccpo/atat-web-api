@@ -11,7 +11,6 @@ import { ApiFlexFunction } from "./lambda-fn";
 export interface DatabaseProps {
   vpc: ec2.IVpc;
   databaseName: string;
-  ormLambdaLayer: lambda.ILayerVersion;
 }
 
 interface BootstrapProps extends DatabaseProps {
@@ -44,7 +43,6 @@ class DatabaseBootstrapper extends cdk.Construct {
       functionPropsOverride: {
         memorySize: 1024,
         timeout: cdk.Duration.minutes(5),
-        layers: [props.ormLambdaLayer],
       },
     });
 
@@ -54,7 +52,7 @@ class DatabaseBootstrapper extends cdk.Construct {
         DatabaseName: props.databaseName,
         DatabaseHost: props.cluster.clusterEndpoint.hostname,
         DatabaseSecretName: props.secretName,
-        ForceReload: props.ormLambdaLayer.layerVersionArn,
+        ForceReload: new Date().toUTCString(),
       },
     });
     this.bootstrapResource.node.addDependency(handler);
