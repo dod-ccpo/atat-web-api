@@ -61,15 +61,12 @@ export class EnvironmentRepository extends Repository<Environment> {
   }
 
   // DELETE environment (hard delete)
-  async deleteEnvironment(id: string): Promise<Environment> {
+  async deleteEnvironment(id: string): Promise<void> {
+    await this.findOneOrFail({ id });
     console.log("Deleting: " + id);
-    const environment = await this.findOneOrFail({
-      select: ["name", "id", "createdAt", "updatedAt", "archivedAt"],
-      where: { id },
-    });
+    const environment = await this.getEnvironment(id);
     const deleteResult = await this.delete(id);
-    console.log(`Deleted: ${environment}. Results: ${deleteResult}`);
-
-    return environment;
+    console.log(`Deleted Environment: ${JSON.stringify(environment)}`);
+    console.log(`Delete Results: ${JSON.stringify(deleteResult)}`);
   }
 }
