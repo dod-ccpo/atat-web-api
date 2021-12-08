@@ -2,12 +2,7 @@ import middy from "@middy/core";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { serializeError } from "serialize-error";
 import { ValidationErrorResponse } from "./response";
-import {
-  DATABASE_ERROR,
-  NO_SUCH_PORTFOLIO_DRAFT_404,
-  NO_SUCH_PORTFOLIO_OR_APPLICATION,
-  REQUEST_BODY_INVALID,
-} from "./errors";
+import { DATABASE_ERROR, NO_SUCH_PARAMETERS, NO_SUCH_PORTFOLIO_DRAFT_404, REQUEST_BODY_INVALID } from "./errors";
 
 export const errorHandlingMiddleware = (): middy.MiddlewareObj<APIGatewayProxyEvent, APIGatewayProxyResult> => {
   const onError: middy.MiddlewareFn<APIGatewayProxyEvent, APIGatewayProxyResult> = async (
@@ -18,7 +13,7 @@ export const errorHandlingMiddleware = (): middy.MiddlewareObj<APIGatewayProxyEv
 
     if (error.name && error.name.startsWith("EntityNotFoundError")) {
       console.log("Invalid parameter entered: " + JSON.stringify(error));
-      return NO_SUCH_PORTFOLIO_OR_APPLICATION;
+      return NO_SUCH_PARAMETERS;
     }
     if (error.errorName === "DuplicateName") {
       return new ValidationErrorResponse("Request failed validation (business rules)", {

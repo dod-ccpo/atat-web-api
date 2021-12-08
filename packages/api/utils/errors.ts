@@ -92,6 +92,14 @@ export const NO_SUCH_PORTFOLIO_OR_APPLICATION = new OtherErrorResponse(
 );
 
 /**
+ * To be used when a Portfolio, Application, or Environment is not found when creating a new environment
+ */
+export const NO_SUCH_PARAMETERS = new OtherErrorResponse(
+  "Portfolio, Application, or Environment with the given ID does not exist",
+  ErrorStatusCode.NOT_FOUND
+);
+
+/**
  * To be used when an environment in a specific application already has the same name
  */
 export const DUPLICATE_ENVIRONMENT_NAME = new OtherErrorResponse(

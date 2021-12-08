@@ -149,7 +149,8 @@ export class AtatWebApiStack extends cdk.Stack {
       })
     );
 
-    // Portfolios Operations using the internal API spec
+    // Portfolios operations using the internal API spec
+    this.addDatabaseApiFunction("getEnvironment", "portfolios/environments/", props.vpc, TablePermissions.READ);
     this.addDatabaseApiFunction("createEnvironment", "portfolios/environments/", props.vpc, TablePermissions.WRITE);
     this.addDatabaseApiFunction("updateEnvironment", "portfolios/environments/", props.vpc, TablePermissions.WRITE);
 
