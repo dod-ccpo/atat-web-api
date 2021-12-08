@@ -3,6 +3,8 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { ErrorStatusCode, NoContentResponse, OtherErrorResponse } from "../utils/response";
 import { isPathParameterPresent } from "../utils/validation";
 import { s3Client } from "../utils/aws-sdk/s3";
+import middy from "@middy/core";
+import { IpCheckerMiddleware } from "../utils/ipLogging";
 
 const bucketName = process.env.DATA_BUCKET;
 export const NO_SUCH_TASK_ORDER_FILE = new OtherErrorResponse(
@@ -15,7 +17,7 @@ export const NO_SUCH_TASK_ORDER_FILE = new OtherErrorResponse(
  *
  * @param event - The DELETE request from API Gateway
  */
-export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+export async function baseHandler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   const taskOrderId = event.pathParameters?.taskOrderId;
   if (!isPathParameterPresent(taskOrderId)) {
     return NO_SUCH_TASK_ORDER_FILE;
@@ -38,3 +40,6 @@ async function deleteFile(taskOrderId: string): Promise<DeleteObjectCommandOutpu
     })
   );
 }
+
+// IP logging middy
+export const handler = middy(baseHandler).use(IpCheckerMiddleware());

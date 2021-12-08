@@ -44,9 +44,11 @@ export async function createConnection(): Promise<Connection> {
     username: databaseUser,
   });
 
+  const caBundlePath = caBundleFile.startsWith("/") ? caBundleFile : path.join(__dirname, caBundleFile);
+
   const sslConfig: TlsOptions = {
     minVersion: "TLSv1.2",
-    ca: fs.readFileSync(path.join(__dirname, caBundleFile)),
+    ca: fs.readFileSync(caBundlePath),
   };
 
   console.info(`Establishing connection to ${databaseWriteHost} and ${databaseReadHost}`);
@@ -78,6 +80,8 @@ export async function createConnection(): Promise<Connection> {
     },
     logging: "all",
     database: databaseName,
+    entities: ["/opt/nodejs/orm/entity/**.js"],
+    migrations: ["/opt/nodejs/orm/migration/**.js"],
   });
   return CONNECTION;
 }

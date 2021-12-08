@@ -11,6 +11,7 @@ import { ApiFlexFunction } from "./lambda-fn";
 export interface DatabaseProps {
   vpc: ec2.IVpc;
   databaseName: string;
+  ormLambdaLayer: lambda.ILayerVersion;
 }
 
 interface BootstrapProps extends DatabaseProps {
@@ -36,12 +37,14 @@ class DatabaseBootstrapper extends cdk.Construct {
   public readonly backingLambda: lambda.IFunction;
   constructor(scope: cdk.Construct, id: string, props: BootstrapProps) {
     super(scope, id);
+
     const handler = new ApiFlexFunction(this, "Function", {
       handlerPath: util.packageRoot() + "/rds/initial-bootstrap.ts",
       lambdaVpc: props.vpc,
       functionPropsOverride: {
         memorySize: 1024,
         timeout: cdk.Duration.minutes(5),
+        layers: [props.ormLambdaLayer],
       },
     });
 
@@ -51,8 +54,10 @@ class DatabaseBootstrapper extends cdk.Construct {
         DatabaseName: props.databaseName,
         DatabaseHost: props.cluster.clusterEndpoint.hostname,
         DatabaseSecretName: props.secretName,
+        ForceReload: props.ormLambdaLayer.layerVersionArn,
       },
     });
+    this.bootstrapResource.node.addDependency(handler);
     this.backingLambda = handler.fn;
   }
 }
@@ -158,6 +163,9 @@ export class Database extends cdk.Construct {
     const instancesReady = new cdk.ConcreteDependable();
     instances.forEach((dbInstance) => instancesReady.add(dbInstance));
     bootstrapper.bootstrapResource.node.addDependency(instancesReady);
+    // If the resource does not depend on the cluster, then there may be failures during
+    // stack deletion as the cluster may be deleted before the custom resource.
+    bootstrapper.bootstrapResource.node.addDependency(cluster);
 
     // Provide a resource to determine whether the database has been created.
     this.databaseReady = new cdk.ConcreteDependable();

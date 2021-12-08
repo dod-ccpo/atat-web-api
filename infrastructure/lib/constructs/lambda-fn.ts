@@ -17,7 +17,7 @@ import { TablePermissions } from "../table-permissions";
 /**
  * The path within the Lambda function where the RDS CA Bundle is stored.
  */
-const RDS_CA_BUNDLE_NAME = "rds-gov-ca-bundle-2017.pem";
+const RDS_CA_BUNDLE_NAME = "/opt/rds-gov-ca-bundle-2017.pem";
 
 /**
  * An IAM service principal for the API Gateway service, used to grant Lambda
@@ -43,6 +43,12 @@ export interface ApiFunctionPropstest {
    * the `entry` and `environment` if one is provided in this struct. Be careful.
    */
   readonly functionPropsOverride?: lambdaNodeJs.NodejsFunctionProps;
+
+  /**
+   * A Lambda Layer that bundles necessary support resources for an ORM and interactions
+   * with the database.
+   */
+  readonly ormLayer?: lambda.ILayerVersion;
 
   /**
    * The VPC where resources should be created
@@ -148,21 +154,7 @@ export class ApiFlexFunction extends cdk.Construct {
       ...props.functionPropsOverride,
       bundling: {
         // forceDockerBundling: true,
-        externalModules: ["pg-native"],
-        commandHooks: {
-          beforeBundling() {
-            return [];
-          },
-          afterBundling(inputDir: string, outputDir: string): string[] {
-            return [
-              `curl -sL -o /tmp/rds-ca-2017.pem https://truststore.pki.us-gov-west-1.rds.amazonaws.com/global/global-bundle.pem`,
-              `cp /tmp/rds-ca-2017.pem ${outputDir}/${RDS_CA_BUNDLE_NAME}`,
-            ];
-          },
-          beforeInstall() {
-            return [];
-          },
-        },
+        externalModules: ["pg-native", "atat-web-api-orm"],
       },
     });
     this.fn.addEnvironment("ATAT_RDS_CA_BUNDLE_NAME", RDS_CA_BUNDLE_NAME);
@@ -175,6 +167,10 @@ export class ApiFlexFunction extends cdk.Construct {
     }
 
     if (props.database && props.tablePermissions) {
+      if (!props.ormLayer) {
+        cdk.Annotations.of(this).addError("An ORM layer must be added for a function working with the database");
+      }
+
       switch (props.tablePermissions) {
         case TablePermissions.READ:
           props.database.grantRead(this.fn);
@@ -185,6 +181,7 @@ export class ApiFlexFunction extends cdk.Construct {
           this.fn.addEnvironment("ATAT_DATABASE_USER", "atat_api_write");
           break;
       }
+
       // Note: Always pass the cluster endpoints, never endpoints for a particular instance. The roles of an
       // instance can change over time.
       this.fn.addEnvironment("ATAT_DATABASE_WRITE_HOST", props.database.cluster.clusterEndpoint.hostname);
@@ -197,6 +194,8 @@ export class ApiFlexFunction extends cdk.Construct {
         cdk.Stack.of(this).resolve(props.database.cluster.clusterEndpoint.port)
       );
       this.fn.addEnvironment("ATAT_DATABASE_NAME", props.database.databaseName);
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      this.fn.addLayers(props.ormLayer!);
     }
 
     // Optional - create DynamoDB connection and grant permissions

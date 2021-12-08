@@ -1,10 +1,27 @@
 import { Application } from "./Application";
-import { CloudServiceProvider } from "../../models/CloudServiceProvider";
 import { Column, Entity, OneToMany } from "typeorm";
 import { ProvisionableEntity } from "./ProvisionableEntity";
 import { TaskOrder } from "./TaskOrder";
 
-@Entity()
+export enum CloudServiceProvider {
+  CSP_A = "CSP A",
+  CSP_B = "CSP B",
+}
+
+export enum DodComponent {
+  AIR_FORCE = "AIR_FORCE",
+  ARMY = "ARMY",
+  MARINE_CORPS = "MARINE_CORPS",
+  NAVY = "NAVY",
+  SPACE_FORCE = "SPACE_FORCE",
+  COMBATANT_COMMAND = "COMBATANT_COMMAND",
+  JOINT_STAFF = "JOINT_STAFF",
+  DAFA = "DAFA",
+  OSD_PSAS = "OSD_PSAS",
+  NSA = "NSA",
+}
+
+@Entity("portfolio")
 export class Portfolio extends ProvisionableEntity {
   @Column({ length: 100 })
   name: string;
@@ -18,8 +35,8 @@ export class Portfolio extends ProvisionableEntity {
   @Column({ type: "enum", enum: CloudServiceProvider })
   csp: CloudServiceProvider;
 
-  @Column({ type: "varchar", array: true })
-  dodComponents: Array<string>;
+  @Column({ type: "enum", enum: DodComponent, array: true })
+  dodComponents: Array<DodComponent>;
 
   @Column({ type: "varchar", array: true })
   portfolioManagers: Array<string>;

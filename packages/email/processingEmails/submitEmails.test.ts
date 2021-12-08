@@ -12,6 +12,7 @@ beforeEach(() => {
 describe("Successfully send messages to a queue for sending emails", () => {
   const validRequest: APIGatewayProxyEvent = {
     body: { emails: ["test@email.mil"], emailType: "invitation", missionOwner: "Ms. Mission Owner" },
+    requestContext: { identity: { sourceIp: "10.2.2.2" } },
   } as any;
 
   it("should successfully send message to queue and return 202", async () => {
@@ -34,7 +35,10 @@ describe("Errors when sending messages to the queue for sending emails", () => {
   it.each([{}, null, undefined])(
     "should return a 400 error when the object is empty, null or undefined",
     async (request) => {
-      const badObjectShapeRequest: APIGatewayProxyEvent = { body: request } as any;
+      const badObjectShapeRequest: APIGatewayProxyEvent = {
+        body: request,
+        requestContext: { identity: { sourceIp: "10.2.2.2" } },
+      } as any;
 
       const response = (await handler(badObjectShapeRequest, {} as Context, () => null)) as APIGatewayProxyResult;
       const responseBody = JSON.parse(response.body);
@@ -54,7 +58,10 @@ describe("Errors when sending messages to the queue for sending emails", () => {
     { emails: ["test@email.mil"], /* emailType: "invitation", */ missionOwner: "Ms. Mission Owner" },
     { emails: ["test@email.mil"], emailType: "invitation" /* missionOwner: "Ms. Mission Owner" */ },
   ])("should return a 400 error when a required field is missing", async (request) => {
-    const missingFieldRequest: APIGatewayProxyEvent = { body: request } as any;
+    const missingFieldRequest: APIGatewayProxyEvent = {
+      body: request,
+      requestContext: { identity: { sourceIp: "10.2.2.2" } },
+    } as any;
 
     const response = (await handler(missingFieldRequest, {} as Context, () => null)) as APIGatewayProxyResult;
     const responseBody = JSON.parse(response.body);
@@ -71,7 +78,10 @@ describe("Errors when sending messages to the queue for sending emails", () => {
   it.each(["", "bad", 0, 343, true, false])(
     "should return a 400 error when the request body is not an object",
     async (request) => {
-      const emptyRequest: APIGatewayProxyEvent = { body: request } as any;
+      const emptyRequest: APIGatewayProxyEvent = {
+        body: request,
+        requestContext: { identity: { sourceIp: "10.2.2.2" } },
+      } as any;
 
       const response = (await handler(emptyRequest, {} as Context, () => null)) as APIGatewayProxyResult;
       const responseBody = JSON.parse(response.body);
@@ -82,7 +92,10 @@ describe("Errors when sending messages to the queue for sending emails", () => {
     }
   );
   it("should return a 400 error when the request body contains an unknown property", async () => {
-    const emptyRequest: APIGatewayProxyEvent = { body: { unknown: "property" } } as any;
+    const emptyRequest: APIGatewayProxyEvent = {
+      body: { unknown: "property" },
+      requestContext: { identity: { sourceIp: "10.2.2.2" } },
+    } as any;
 
     const response = (await handler(emptyRequest, {} as Context, () => null)) as APIGatewayProxyResult;
     const responseBody = JSON.parse(response.body);
@@ -92,7 +105,10 @@ describe("Errors when sending messages to the queue for sending emails", () => {
     expect(JSON.stringify(responseBody.details)).toMatch(/must NOT have additional properties/);
   });
   it("should return 5xx error for an internal error", async () => {
-    const emptyRequest: APIGatewayProxyEvent = { body: { unknown: "property" } } as any;
+    const emptyRequest: APIGatewayProxyEvent = {
+      body: { unknown: "property" },
+      requestContext: { identity: { sourceIp: "10.2.2.2" } },
+    } as any;
     sqsMock.on(SendMessageCommand).rejects("Internal queue error.");
 
     const response = await baseHandler(emptyRequest);

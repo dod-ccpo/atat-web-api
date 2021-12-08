@@ -37,6 +37,17 @@ const USERS: User[] = [
   },
 ];
 
+/**
+ * Handle fetching the bundle path for both absolute and relative paths.
+ * This will always return an absolute path to the file.
+ */
+function caBundlePath(caBundleFile: string): string {
+  if (caBundleFile.startsWith("/")) {
+    return caBundleFile;
+  }
+  return path.join(__dirname, caBundleFile);
+}
+
 async function connect(connectConfig: Config, useDatabase = true): Promise<Connection> {
   const dbAuth = await getDatabaseCredentials(connectConfig.secretName);
   return createConnection({
@@ -46,9 +57,11 @@ async function connect(connectConfig: Config, useDatabase = true): Promise<Conne
     username: dbAuth.username,
     password: dbAuth.password,
     logging: "all",
+    entities: ["/opt/nodejs/orm/entity/**.js"],
+    migrations: ["/opt/nodejs/orm/migration/**.js"],
     ssl: {
       minVersion: "TLSv1.2",
-      ca: fs.readFileSync(path.join(__dirname, connectConfig.caBundleFile)),
+      ca: fs.readFileSync(caBundlePath(connectConfig.caBundleFile)),
     },
     database: useDatabase ? connectConfig.databaseName : "postgres",
   });
@@ -84,6 +97,7 @@ async function handleCreate(connectConfig: Config): Promise<void> {
       `ALTER DEFAULT PRIVILEGES GRANT ${user.tablePrivileges.join(", ")} ON TABLES TO ${user.name}`
     );
   }
+  await connection.close();
 }
 
 async function handleDelete(connectConfig: Config): Promise<void> {
@@ -93,6 +107,13 @@ async function handleDelete(connectConfig: Config): Promise<void> {
     await connection.query(`DROP ROLE IF EXISTS ${user.name}`);
   }
   await connection.query(`DROP DATABASE IF EXISTS ${connectConfig.databaseName} WITH FORCE`);
+}
+
+async function migrate(connectConfig: Config): Promise<void> {
+  const connection = await connect(connectConfig);
+  const migrations = await connection.runMigrations({ transaction: "none" });
+  await connection.close();
+  migrations.forEach((migration) => console.log(migration));
 }
 
 async function sendResponse(
@@ -108,7 +129,7 @@ async function sendResponse(
   console.log("Response: " + cfnResponse.data);
 }
 
-export async function handler(event: CloudFormationCustomResourceEvent): Promise<void> {
+export async function baseHandler(event: CloudFormationCustomResourceEvent): Promise<void> {
   console.log(JSON.stringify(event));
   const databaseName = event.ResourceProperties.DatabaseName;
   const secretName = event.ResourceProperties.DatabaseSecretName;
@@ -145,6 +166,7 @@ export async function handler(event: CloudFormationCustomResourceEvent): Promise
       case "Create":
       case "Update":
         await handleCreate(connectConfig);
+        await migrate(connectConfig);
         break;
       case "Delete":
         await handleDelete(connectConfig);
@@ -167,4 +189,22 @@ export async function handler(event: CloudFormationCustomResourceEvent): Promise
     await sendResponse(event, result);
   }
   console.log("End of handler for request: " + event.RequestId);
+}
+
+export async function handler(event: CloudFormationCustomResourceEvent): Promise<void> {
+  const result: CloudFormationCustomResourceResponse = {
+    Status: "FAILED",
+    RequestId: event.RequestId,
+    StackId: event.StackId,
+    LogicalResourceId: event.LogicalResourceId,
+    PhysicalResourceId: "Unknown",
+    Reason: "Unknown",
+  };
+
+  try {
+    await baseHandler(event);
+  } catch (err: unknown) {
+    result.Reason = JSON.stringify(err) ?? "Unknown Error";
+    await sendResponse(event, result);
+  }
 }

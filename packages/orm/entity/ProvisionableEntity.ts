@@ -1,14 +1,20 @@
 import { BaseEntity } from "./BaseEntity";
 import { Column } from "typeorm";
-import { ProvisioningStatus } from "../../models/ProvisioningStatus";
+
+export enum ProvisioningStatus {
+  PENDING = "PENDING",
+  IN_PROGRESS = "IN_PROGRESS",
+  COMPLETE = "COMPLETE",
+  FAILED = "FAILED",
+}
 
 export abstract class ProvisionableEntity extends BaseEntity {
   @Column({
     type: "enum",
     enum: ProvisioningStatus,
-    default: ProvisioningStatus.NOT_STARTED,
+    default: ProvisioningStatus.PENDING,
   })
-  provisioningStatus: string;
+  provisioningStatus: ProvisioningStatus;
 
   @Column({ type: "varchar", array: true, default: "{}" })
   administrators: Array<string>;

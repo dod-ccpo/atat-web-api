@@ -16,6 +16,7 @@ import xssSanitizer from "../../utils/xssSanitizer";
 import schema = require("../../models/schema.json");
 import { wrapSchema } from "../../utils/schemaWrapper";
 import { errorHandlingMiddleware } from "../../utils/errorHandlingMiddleware";
+import { IpCheckerMiddleware } from "../../utils/ipLogging";
 
 /**
  * Submits the Portfolio Step of the Portfolio Draft Wizard
@@ -39,6 +40,7 @@ export async function baseHandler(
 }
 
 export const handler = middy(baseHandler)
+  .use(IpCheckerMiddleware())
   .use(xssSanitizer())
   .use(jsonBodyParser())
   .use(

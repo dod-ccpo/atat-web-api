@@ -30,12 +30,15 @@ import { HttpMethod } from "./http";
 import { TablePermissions } from "./table-permissions";
 import { QueuePermissions } from "./queue-permissions";
 import * as utils from "./util";
-import { ApiFlexFunction } from "./constructs/lambda-fn";
+import { ApiFlexFunction, ApiFunctionPropstest } from "./constructs/lambda-fn";
 import { Database } from "./constructs/database";
 
 interface AtatIdpProps {
   secretName: string;
   providerName: string;
+}
+
+interface CognitoGroupConfig {
   adminsGroupName?: string;
   usersGroupName?: string;
 }
@@ -46,7 +49,8 @@ interface AtatSmtpProps {
 
 export interface AtatWebApiStackProps extends cdk.StackProps {
   environmentId: string;
-  idpProps: AtatIdpProps;
+  idpProps: AtatIdpProps[];
+  cognitoGroups?: CognitoGroupConfig;
   requireAuthorization?: boolean;
   smtpProps: AtatSmtpProps;
   vpc: ec2.IVpc;
@@ -65,6 +69,7 @@ export class AtatWebApiStack extends cdk.Stack {
   public readonly provisioningStateMachine: sfn.IStateMachine;
   public readonly table: dynamodb.ITable;
   public readonly database: Database;
+  public readonly ormLayer: lambda.ILayerVersion;
   public readonly functions: lambda.IFunction[] = [];
   public readonly ssmParams: ssm.IParameter[] = [];
   public readonly outputs: cdk.CfnOutput[] = [];
@@ -75,7 +80,7 @@ export class AtatWebApiStack extends cdk.Stack {
     this.templateOptions.description = "Resources to support the ATAT application API";
     this.environmentId = props.environmentId;
 
-    this.setupCognito(props.idpProps);
+    this.setupCognito(props.idpProps, props.cognitoGroups);
 
     // Create a shared DynamoDB table that will be used by all the functions in the project.
     this.table = new SecureTable(this, "AtatTable", {
@@ -90,9 +95,21 @@ export class AtatWebApiStack extends cdk.Stack {
       })
     );
 
+    this.ormLayer = new lambda.LayerVersion(this, "DatabaseSupportLayer", {
+      compatibleRuntimes: [lambda.Runtime.NODEJS_14_X],
+      code: lambda.Code.fromAsset(utils.packageRoot() + "/../", {
+        bundling: {
+          image: lambda.Runtime.NODEJS_14_X.bundlingImage,
+          user: "root",
+          command: ["bash", "scripts/prepare-db-layer.sh"],
+        },
+      }),
+    });
+
     this.database = new Database(this, "AtatDatabase", {
       vpc: props.vpc,
       databaseName: this.environmentId + "atat",
+      ormLambdaLayer: this.ormLayer,
     });
 
     // Create a queue for PortfolioDraft submission
@@ -217,6 +234,28 @@ export class AtatWebApiStack extends cdk.Stack {
         tracingEnabled: true,
       },
     }).restApi;
+
+    // Adds a temporary route on the internal gateway that basically does nothing
+    // except internally log some information about connecting to the database.
+    internalApiGateway.root.addResource("db-test").addMethod(
+      "GET",
+      new apigw.LambdaIntegration(
+        new ApiFlexFunction(this, "DbTest", {
+          lambdaVpc: props.vpc,
+          ormLayer: this.ormLayer,
+          database: this.database,
+          tablePermissions: TablePermissions.READ_WRITE,
+          handlerPath: utils.packageRoot() + "/api/dbTest.ts",
+          functionPropsOverride: {
+            // Allow for an unreasonably high timeout so that it's easier
+            // to debug issues; this is not a production route and so allowing
+            // this to take awhile actually will allow for catching logs and
+            // other performance information
+            timeout: cdk.Duration.minutes(1),
+          },
+        }).fn
+      )
+    );
 
     // Provisioning State machine functions
     // All but one function reuse API functions in the state machine. The validatePortfolio
@@ -495,13 +534,14 @@ export class AtatWebApiStack extends cdk.Stack {
     vpc: ec2.IVpc,
     permissions: TablePermissions
   ) {
-    const props = {
+    const props: ApiFunctionPropstest = {
       table: this.table,
       tablePermissions: permissions,
       lambdaVpc: vpc,
       method: utils.apiSpecOperationMethod(operationId),
       handlerPath: this.determineApiHandlerPath(operationId, handlerFolder),
       database: this.database,
+      ormLayer: this.ormLayer,
     };
     this.functions.push(new ApiFlexFunction(this, utils.apiSpecOperationFunctionName(operationId), props).fn);
   }
@@ -513,7 +553,7 @@ export class AtatWebApiStack extends cdk.Stack {
     tablePermissions: TablePermissions,
     queuePermissions: QueuePermissions
   ) {
-    const props = {
+    const props: ApiFunctionPropstest = {
       table: this.table,
       tablePermissions: tablePermissions,
       queue: this.submitQueue,
@@ -523,6 +563,7 @@ export class AtatWebApiStack extends cdk.Stack {
       handlerPath: this.determineApiHandlerPath(operationId, handlerFolder),
       createEventSource: operationId.startsWith("consume"),
       database: this.database,
+      ormLayer: this.ormLayer,
     };
     this.functions.push(new ApiFlexFunction(this, utils.apiSpecOperationFunctionName(operationId), props).fn);
   }
@@ -538,22 +579,26 @@ export class AtatWebApiStack extends cdk.Stack {
     this.functions.push(new ApiFlexFunction(this, utils.apiSpecOperationFunctionName(operationId), props).fn);
   }
 
-  private setupCognito(props: AtatIdpProps) {
-    const secret = secretsmanager.Secret.fromSecretNameV2(this, "OidcSecret", props.secretName);
+  private setupCognito(idps: AtatIdpProps[], groupConfig?: CognitoGroupConfig) {
     const cognitoAuthentication = new CognitoAuthentication(this, "Authentication", {
       groupsAttributeName: "groups",
-      adminsGroupName: props.adminsGroupName ?? "atat-admins",
-      usersGroupName: props.usersGroupName ?? "atat-users",
+      adminsGroupName: groupConfig?.adminsGroupName ?? "atat-admins",
+      usersGroupName: groupConfig?.usersGroupName ?? "atat-users",
       cognitoDomain: "atat-api-" + this.environmentId,
-      oidcIdps: [
-        {
-          providerName: props.providerName,
+      oidcIdps: idps.map((idpConfig) => {
+        const secret = secretsmanager.Secret.fromSecretNameV2(
+          this,
+          `OidcSecret${idpConfig.providerName}`,
+          idpConfig.secretName
+        );
+        return {
+          providerName: idpConfig.providerName,
           clientId: secret.secretValueFromJson("clientId"),
           clientSecret: secret.secretValueFromJson("clientSecret"),
           oidcIssuerUrl: secret.secretValueFromJson("oidcIssuerUrl"),
           attributesRequestMethod: HttpMethod.GET,
-        },
-      ],
+        };
+      }),
     });
     // When utilizing a custom domain, the `domainName` property of IUserPoolDomain
     // contains the full domain; however, in other scenarios, it contains only the

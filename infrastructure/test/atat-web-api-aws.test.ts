@@ -9,10 +9,12 @@ test("DynamoDB Resource is present, and Partition Key is set.", () => {
   // WHEN
   const stack = new AtatWebApi.AtatWebApiStack(app, "MyTestStack", {
     environmentId: "testrunner",
-    idpProps: {
-      secretName: "/test/secret",
-      providerName: "TestIdp",
-    },
+    idpProps: [
+      {
+        secretName: "/test/secret",
+        providerName: "TestIdp",
+      },
+    ],
     smtpProps: {
       secretName: "/test/smtp",
     },
