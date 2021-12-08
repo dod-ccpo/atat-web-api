@@ -5,7 +5,7 @@ import { IEnvironment } from "../../../orm/entity/Environment";
 import { SuccessStatusCode } from "../../utils/response";
 
 describe("createEnvironment", () => {
-  it("successful operation testing locally only", async () => {
+  it.skip("successful operation testing locally only", async () => {
     const validRequest: ApiGatewayEventParsed<IEnvironment> = {
       body: { name: "local test" },
       pathParameters: {

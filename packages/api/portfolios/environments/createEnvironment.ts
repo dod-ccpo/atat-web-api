@@ -1,6 +1,6 @@
 import "reflect-metadata";
-import { createConnection } from "typeorm";
-// import { createConnection } from "../../utils/database";
+// import { createConnection } from "typeorm";
+import { createConnection } from "../../utils/database";
 import { Portfolio } from "../../../orm/entity/Portfolio";
 import { Application } from "../../../orm/entity/Application";
 import { IEnvironment } from "../../../orm/entity/Environment";
@@ -50,22 +50,7 @@ export async function baseHandler(
 
   // currently using a regular connect for local development
   // TODO: update to utils/database/createConnection when testing in a deployed stack
-  const connection = await createConnection({
-    type: "postgres",
-    host: "localhost",
-    port: 5432,
-    username: "atat_api_admin",
-    password: "postgres",
-    database: "atatnew",
-    synchronize: false,
-    logging: false,
-    entities: ["../orm/entity/**/*.ts"],
-    migrations: ["../orm/migration/**/*.js"],
-    cli: {
-      entitiesDir: "../orm/entity",
-      migrationsDir: "../orm/migration",
-    },
-  });
+  const connection = await createConnection();
   const insertedEnvironments: IEnvironment[] = [];
 
   try {
