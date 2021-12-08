@@ -8,12 +8,13 @@ import xssSanitizer from "../portfolioDrafts/xssSanitizer";
 import { ApiGatewayEventParsed } from "../utils/eventHandlingTool";
 import { APIGatewayProxyEventPathParameters, APIGatewayProxyResult, Context } from "aws-lambda";
 import { ApiSuccessResponse, SuccessStatusCode } from "../utils/response";
+import { CloudServiceProvider, DodComponent, Portfolio } from "../../orm/entity/Portfolio";
 import { CORS_CONFIGURATION } from "../utils/corsConfig";
 import { createConnection } from "typeorm";
 import { DATABASE_ERROR } from "../utils/errors";
 import { errorHandlingMiddleware } from "../utils/errorHandlingMiddleware";
-import { Portfolio } from "../../orm/entity/Portfolio";
 import { PortfolioRepository } from "../../orm/repository/PortfolioRepository";
+import { ProvisioningStatus } from "../../orm/entity/ProvisionableEntity";
 import { wrapSchema } from "../utils/schemaWrapper";
 import "reflect-metadata";
 import internalSchema = require("../models/internalSchema.json");
@@ -34,23 +35,17 @@ export async function baseHandler(
     throw createError(400, "Shape validation failed, invalid request body");
   }
 
-  // for local development
   const connection = await createConnection();
   let response: Portfolio | unknown;
 
   const testData = {
     name: "Cheetah portfolio",
     description: "Description of portfolio",
-    // csp: CloudServiceProvider.CSP_A,
-    // dodComponents: [DodComponent.ARMY, DodComponent.NAVY],
-    // owner: "powner@dod.mil",
-    // portfolioManagers: ["jane.manager@dod.mil", "john.manager@dod.mil"],
-    // provisioningStatus: ProvisioningStatus.NOT_STARTED,
-    // taskOrders: [],
-    // applications: [],
-    // administrators: [],
-    // constributors: [],
-    // readOnlyOperators: [],
+    csp: CloudServiceProvider.CSP_A,
+    dodComponents: [DodComponent.ARMY, DodComponent.NAVY],
+    owner: "powner@dod.mil",
+    portfolioManagers: ["jane.manager@dod.mil", "john.manager@dod.mil"],
+    provisioningStatus: ProvisioningStatus.PENDING,
   };
 
   try {
@@ -73,7 +68,7 @@ export async function baseHandler(
 export const handler = middy(baseHandler)
   .use(xssSanitizer())
   .use(jsonBodyParser())
-  .use(validator({ inputSchema: wrapSchema(internalSchema.PortfolioBase) }))
+  .use(validator({ inputSchema: wrapSchema(internalSchema.Portfolio) }))
   .use(errorHandlingMiddleware())
   .use(JSONErrorHandlerMiddleware())
   .use(cors(CORS_CONFIGURATION));
