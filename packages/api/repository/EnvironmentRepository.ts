@@ -1,5 +1,5 @@
 import { EntityRepository, Repository, InsertResult, UpdateResult } from "typeorm";
-import { Environment, IEnvironment, EnvironmentUpdate } from "../entity/Environment";
+import { Environment, IEnvironmentCreate, IEnvironmentUpdate } from "../../orm/entity/Environment";
 
 @EntityRepository(Environment)
 export class EnvironmentRepository extends Repository<Environment> {
@@ -47,7 +47,7 @@ export class EnvironmentRepository extends Repository<Environment> {
   }
 
   // DELETE environment (hard delete)
-  async deleteEnvironment(id: string): Promise<IEnvironment> {
+  async deleteEnvironment(id: string): Promise<Environment> {
     console.log("Deleting: " + id);
     const environment = await this.findOneOrFail({
       select: ["name", "id", "createdAt", "updatedAt", "archivedAt"],

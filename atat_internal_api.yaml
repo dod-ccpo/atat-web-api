@@ -602,7 +602,7 @@ paths:
       x-amazon-apigateway-integration:
         httpMethod: "POST"
         uri:
-          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NotImplementedFunction.Arn}/invocations"
+          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CreateEnvironmentFunction.Arn}/invocations"
         type: "aws_proxy"
       security:
         Fn::If:
