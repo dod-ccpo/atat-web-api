@@ -14,6 +14,7 @@ import { CORS_CONFIGURATION } from "../utils/corsConfig";
 import { createConnection } from "typeorm";
 import { DATABASE_ERROR } from "../utils/errors";
 import { errorHandlingMiddleware } from "../utils/errorHandlingMiddleware";
+import { IpCheckerMiddleware } from "../utils/ipLogging";
 import { PortfolioRepository } from "../../orm/repository/PortfolioRepository";
 import { ProvisioningStatus } from "../../orm/entity/ProvisionableEntity";
 import { wrapSchema } from "../utils/schemaWrapper";
@@ -69,6 +70,7 @@ export async function baseHandler(
 }
 
 export const handler = middy(baseHandler)
+  .use(IpCheckerMiddleware())
   .use(xssSanitizer())
   .use(jsonBodyParser())
   .use(validator({ inputSchema: wrapSchema(internalSchema.Portfolio) }))
