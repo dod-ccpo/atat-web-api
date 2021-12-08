@@ -24,7 +24,19 @@ export function parseProviderType(event: PreTokenGenerationTriggerEvent): string
 }
 
 export function parseIdpGroups(event: PreTokenGenerationTriggerEvent): string[] {
-  return JSON.parse(event.request.userAttributes[groupsAttribute()]);
+  try {
+    return JSON.parse(event.request.userAttributes[groupsAttribute()]);
+  } catch (err) {
+    console.error(
+      JSON.stringify({
+        message: "Failed to parse groups",
+        expectedAttribute: groupsAttribute(),
+        availableAttributes: Object.keys(event.request.userAttributes),
+        details: err,
+      })
+    );
+    return [];
+  }
 }
 
 export function translateGroups(event: PreTokenGenerationTriggerEvent): string[] {
@@ -45,7 +57,13 @@ export function translateGroups(event: PreTokenGenerationTriggerEvent): string[]
     default:
       // Throwing an error here would likely cause problems with the groups being set
       // instead, we will just log the issue.
-      console.warn("Not handling groups for " + providerType + ": " + idpGroups);
+      console.warn(
+        JSON.stringify({
+          message: "Unsupported IdP type. Unable to handle groups.",
+          providerType: providerType,
+          groupsValue: idpGroups,
+        })
+      );
       break;
   }
   return [...originalGroups, ...newGroups];

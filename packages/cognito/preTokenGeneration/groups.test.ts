@@ -132,6 +132,15 @@ describe("Testing the handling of mock events", () => {
       const result = translateGroups(event.lambdaEvent);
       expect(result).toEqual(event.groupNames);
     });
+    it("should return an empty list of groups if the event doesn't have them", async () => {
+      const original = console.error;
+      console.error = jest.fn();
+      const event = createBasicSampleEvent({ groupCount: 0, groupAttribute: "notGroups", providerType });
+      const result = translateGroups(event.lambdaEvent);
+      expect(result).toEqual([]);
+      expect(console.error).toHaveBeenCalled();
+      console.error = original;
+    });
   });
   describe("For unsupported provider", () => {
     beforeEach(() => {
