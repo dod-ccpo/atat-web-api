@@ -24,6 +24,8 @@ export function parseProviderType(event: PreTokenGenerationTriggerEvent): string
 }
 
 export function parseIdpGroups(event: PreTokenGenerationTriggerEvent): string[] {
+  // TODO: remove this log once GD integration is successful
+  console.log(JSON.stringify(event));
   try {
     return JSON.parse(event.request.userAttributes[groupsAttribute()]);
   } catch (err) {
