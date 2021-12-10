@@ -16,7 +16,7 @@ async function baseHandler(
       console.log(
         JSON.stringify({
           query: query,
-          result: connection.query(query),
+          result: await connection.query(query),
         })
       );
     }
