@@ -133,20 +133,12 @@ export class Database extends cdk.Construct {
     });
     this.cluster = cluster;
 
-    // Automatic secrets rotation is not yet supported via the CDK in GovCloud even
-    // though the underlying resources do exist. There is a PR open against the CDK
-    // upstream in order to add this functionality:
-    //    https://github.com/aws/aws-cdk/pull/17673
-    // cluster.addRotationSingleUser({
-    //   // Default value is 30 days, so this makes the secret much shorter-lived.
-    //   // The primary means for access will be via IAM; however, we will use this
-    //   // for initial bootstrapping and rare maintenance.
-    //   automaticallyAfter: cdk.Duration.days(7),
-    // });
-    // This secret will be present since we're using the default configuration; however,
-    // it will require additional workarounds (or the feature being added) to rotate
-    // automatically.
-    // TODO(AT-6924): Perform the implementation of automatic secrets rotation
+    cluster.addRotationSingleUser({
+      // Default value is 30 days, so this makes the secret much shorter-lived.
+      // The primary means for access will be via IAM; however, we will use this
+      // for initial bootstrapping and rare maintenance.
+      automaticallyAfter: cdk.Duration.days(7),
+    });
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.adminSecret = cluster.secret!;
 
