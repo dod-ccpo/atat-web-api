@@ -3,11 +3,7 @@ import { HttpMethod } from "./http";
 // This is a suboptimal solution to finding the relative directory to the
 // git repo.
 export function packageRoot(): string {
-  const cwd = process.cwd();
-  if (cwd.endsWith("infrastructure")) {
-    return `${cwd}/../packages`;
-  }
-  return `${cwd}/packages`;
+  return "packages";
 }
 
 const normalizationRejectionRegex = /[\W_]/g;
