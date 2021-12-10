@@ -13,6 +13,8 @@ export ASSET_OUTPUT_DIR="/asset-output"
 ## Transpile entities and migrations for TypeORM 
 prepare-orm-files() (
     npm ci \
+        && export NODE_ENV="production" \
+        && rm -rf packages/orm/node_modules \
         && npm run lerna bootstrap -- --ci \
         && npm run build \
         && mkdir -p "$ASSET_OUTPUT_DIR/nodejs" \
@@ -21,6 +23,9 @@ prepare-orm-files() (
         && cp --parents -aur orm/* "$ASSET_OUTPUT_DIR/nodejs" \
         && cd "$ASSET_INPUT_DIR/packages/" \
         && cp --parents -aur orm/migration/**.sql "$ASSET_OUTPUT_DIR/nodejs" \
+        && unset NODE_ENV \
+        && rm -rf packages/orm/node_modules \
+        && npm run lerna bootstrap --ci
 )
 
 ## Download the RDS CA Bundle
