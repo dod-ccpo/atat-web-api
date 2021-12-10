@@ -3,6 +3,7 @@ import * as ec2 from "@aws-cdk/aws-ec2";
 import * as cdk from "@aws-cdk/core";
 import { NIST80053R4Checks } from "cdk-nag";
 import "source-map-support/register";
+import { GovCloudCompatibilityAspect } from "../lib/aspects/govcloud-compat";
 import { RemovalPolicySetter } from "../lib/aspects/removal-policy";
 import { AtatIamStack } from "../lib/atat-iam-stack";
 import { AtatNetStack } from "../lib/atat-net-stack";
@@ -96,3 +97,7 @@ for (const stack of stacks) {
     }
   }
 }
+
+// This needs to be applied basically last to ensure no breaking properties
+// get applied after the aspect.
+cdk.Aspects.of(app).add(new GovCloudCompatibilityAspect());
