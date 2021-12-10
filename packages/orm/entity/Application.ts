@@ -10,10 +10,10 @@ export class Application extends ProvisionableEntity {
 
   @Column({ nullable: true, length: 300 })
   description: string;
-
-  @ManyToOne(() => Portfolio, (portfolio) => portfolio.applications)
+  // eslint-disable-next-line
+  @ManyToOne(() => Portfolio, portfolio => portfolio.applications, { cascade: true })
   portfolio: Portfolio;
 
-  @OneToMany(() => Environment, (environment) => environment.application)
+  @OneToMany(() => Environment, (environment) => environment.application, { cascade: true })
   environments: Array<Environment>;
 }

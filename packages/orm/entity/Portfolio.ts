@@ -43,7 +43,7 @@ export class Portfolio extends ProvisionableEntity {
 
   @OneToMany(() => TaskOrder, (taskOrder) => taskOrder.portfolio)
   taskOrders: Array<TaskOrder>;
-
-  @OneToMany(() => Application, (application) => application.portfolio)
-  applications: Array<Application>;
+  // eslint-disable-next-line
+  @OneToMany(() => Application, application => application.portfolio)
+  applications: Application[];
 }
