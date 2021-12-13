@@ -5,12 +5,14 @@ import { TaskOrder } from "./TaskOrder";
 @Entity("clin")
 export class Clin extends BaseEntity {
   @Column({
+    type: "varchar",
     length: 4,
     comment: "contract line item number from task order, 0001 through 9999",
   })
   clinNumber: string;
 
   @Column({
+    type: "varchar",
     comment: "indefinite-delivery, indefinite-quantity CLIN specific to JWCC",
   })
   idiqClin: string;
