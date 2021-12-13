@@ -1,9 +1,7 @@
+import "reflect-metadata";
 import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { APIGatewayProxyResult, Context } from "aws-lambda";
 // import { Application } from "../../models/Application";
-import { ApplicationStep } from "../../models/ApplicationStep";
-import { APPLICATION_STEP } from "../../models/PortfolioDraft";
-import { dynamodbDocumentClient as client } from "../../utils/aws-sdk/dynamodb";
 import { DATABASE_ERROR, NO_SUCH_PORTFOLIO_DRAFT_404 } from "../../utils/errors";
 import { ApiSuccessResponse, OtherErrorResponse, SetupError, SuccessStatusCode } from "../../utils/response";
 import schema = require("../../models/internalSchema.json");
@@ -19,12 +17,12 @@ import { CORS_CONFIGURATION } from "../../utils/corsConfig";
 import { wrapSchema } from "../../utils/schemaWrapper";
 import { errorHandlingMiddleware } from "../../utils/errorHandlingMiddleware";
 import { Connection, createConnection, InsertResult } from "typeorm";
-import { Portfolio } from "../../../Portfolio";
-import "reflect-metadata";
+// import { Portfolio } from "../../../Portfolio";
+
 import { Application } from "../../../orm/entity/Application";
-import { ApplicationRepository } from "../../repository/ApplicationRepository";
+// import { ApplicationRepository } from "../../repository/ApplicationRepository";
 import { ProvisioningStatus } from "../../../orm/entity/ProvisionableEntity";
-import { CloudServiceProvider, DodComponent } from "../../../orm/entity/Portfolio";
+import { CloudServiceProvider, DodComponent, Portfolio } from "../../../orm/entity/Portfolio";
 
 /**
  * Create an Application
@@ -35,47 +33,53 @@ export async function baseHandler(
   event: ApiGatewayEventParsed<any>,
   context?: Context
 ): Promise<APIGatewayProxyResult> {
-  // const portfolioId = event.pathParameters?.portfolioId;
-  // const portfolioId = "b148645b-7c71-4d05-af76-dc1f1505506a";
-  // const application = event.body;
-  // console.log(application);
+  const portfolioId = event.pathParameters?.portfolioId;
+  console.log(portfolioId);
+  let response;
   try {
-    // Set up DB connection
+    // Local Database set up /////////////////////////////////////////////////////////////////////////////////////////////
     console.log("Establishing connection");
-    const connection = await createConnection();
-    //
-    //
-    // Set up portfolio
-    //
-    const pd = new Portfolio();
-    pd.provisioningStatus = ProvisioningStatus.PENDING;
-    pd.owner = "portfolio.owner@dod.mil";
-    pd.name = "Cheetah portfolio";
-    pd.description = "Description of portfolio";
-    pd.csp = CloudServiceProvider.CSP_A;
-    pd.dodComponents = [DodComponent.ARMY, DodComponent.NAVY];
-    pd.portfolioManagers = ["jane.manager@dod.mil", "john.manager@dod.mil"];
-    await connection.manager.save(pd);
-
-    console.log("Saved a new portfolio with id: " + pd.id);
-    const pfs = await connection.manager.find(Portfolio);
-    console.log("Loaded portfolios: ", pfs);
+    const connection = await createConnection({
+      type: "postgres",
+      host: "localhost",
+      port: 5432,
+      username: "postgres",
+      password: "postgres",
+      database: "atat",
+      synchronize: false,
+      logging: false,
+      entities: ["../orm/entity/**/*.ts"],
+      migrations: ["../orm/migration/**/*.js"],
+      cli: {
+        entitiesDir: "../orm/entity",
+        migrationsDir: "../orm/migration",
+      },
+    });
+    console.log("Connected");
+    console.log("Set up repository");
+    /// ///////////////////////////////////////////////////////////////////////////////////////////////// Delete this when fn is done
     // Application
-
+    // Create a new application
     const app1 = new Application();
     app1.name = event.body.name;
     app1.description = event.body.description;
     // For each environment, we need to create a new Environment
     // event.body.evironments is passed in as an array, we can pass it in and cascade it so we only save once..
     app1.environments = event.body.environments;
-    const portfolio = await connection
-      .getRepository(Portfolio)
-      .findOneOrFail({ id: event.pathParameters?.portfolioId });
+    // Set the portfolio relation up
+    const portfolioRepository = connection.getRepository(Portfolio);
+    const portfolio = await portfolioRepository.findOneOrFail({ id: portfolioId });
+    console.log(portfolio);
+    console.log("The Portfolio should appear above this message");
     app1.portfolio = portfolio as Portfolio;
     console.log(app1.environments);
     const appRepository = connection.getRepository(Application);
-    await appRepository.save(app1);
+    response = await appRepository.save(app1);
     // Now we need to update portfolio to add the new application to it?
+    // Let's find our new application
+    const insertedApp = await connection.manager.find(Application);
+    console.log(insertedApp);
+    console.log("All insertedApps above");
 
     // await connection.manager.save(app1);
   } catch (error) {
@@ -85,45 +89,14 @@ export async function baseHandler(
     }
   }
 
-  /*
-  // TODO rename these
-  let response;
-  let response2;
-  const environments = event.body.environments;
-  try {
-    console.log("the environements");
-    console.log(event.body.environments);
-    // Set up DB connection
-    console.log("Establishing connection");
-    const connection = await createConnection();
-    console.log("Connected");
-
-    // Initialize custom repository for Application
-    const theportfolio = await connection.getRepository(Portfolio).findOneOrFail({ id: portfolioId });
-    const appRepository = connection.getCustomRepository(ApplicationRepository);
-    response = await appRepository.createAndSaveApplication(theportfolio, application);
-
-    console.log(response);
-  } catch (error) {
-    if (error.name === "EntityNotFoundError") {
-      console.log("Invalid parameter entered: " + error);
-      return NO_SUCH_PORTFOLIO_DRAFT_404;
-    }
-    // TODO - catch with error handling middleware
-    console.error("Database error: " + error);
-    return DATABASE_ERROR;
-  }
-  */
-
   const theResponse = new ApiSuccessResponse<any>(response, SuccessStatusCode.CREATED);
-  console.log(theResponse);
+  // console.log(theResponse);
   return theResponse;
 }
 // middy without validation
 export const handler = middy(baseHandler)
   .use(xssSanitizer())
   .use(jsonBodyParser())
-  .use(validator({ inputSchema: wrapSchema(schema.Application) }))
   .use(errorHandlingMiddleware())
   .use(JSONErrorHandlerMiddleware())
   .use(cors(CORS_CONFIGURATION));
