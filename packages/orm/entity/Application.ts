@@ -5,10 +5,10 @@ import { ProvisionableEntity } from "./ProvisionableEntity";
 
 @Entity("application")
 export class Application extends ProvisionableEntity {
-  @Column({ length: 100 })
+  @Column({ type: "varchar", length: 100 })
   name: string;
 
-  @Column({ nullable: true, length: 300 })
+  @Column({ type: "varchar", nullable: true, length: 300 })
   description: string;
 
   @ManyToOne(() => Portfolio, (portfolio) => portfolio.applications)

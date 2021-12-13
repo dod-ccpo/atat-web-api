@@ -23,13 +23,13 @@ export enum DodComponent {
 
 @Entity("portfolio")
 export class Portfolio extends ProvisionableEntity {
-  @Column({ length: 100 })
+  @Column({ type: "varchar", length: 100 })
   name: string;
 
-  @Column({ nullable: true, length: 300 })
+  @Column({ type: "varchar", nullable: true, length: 300 })
   description: string;
 
-  @Column()
+  @Column({ type: "varchar" })
   owner: string;
 
   @Column({ type: "enum", enum: CloudServiceProvider })

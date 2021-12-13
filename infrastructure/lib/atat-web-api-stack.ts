@@ -387,6 +387,7 @@ export class AtatWebApiStack extends cdk.Stack {
       .next(httpResponseChoices);
     const stateMachineLogGroup = new logs.LogGroup(this, "StepFunctionsLogs", {
       retention: logs.RetentionDays.ONE_WEEK,
+      logGroupName: `/aws/vendedlogs/states/StepFunctionsLogs${this.environmentId}`,
     });
     this.provisioningStateMachine = new SecureStateMachine(this, "ProvisioningStateMachine", {
       stateMachineProps: {
