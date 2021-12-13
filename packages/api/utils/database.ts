@@ -3,6 +3,11 @@ import * as rdsIam from "atat-web-api-rds/auth/iam";
 import path from "path";
 import * as fs from "fs";
 import { TlsOptions } from "tls";
+import { Portfolio } from "../../orm/entity/Portfolio";
+import { Application } from "../../orm/entity/Application";
+import { Environment } from "../../orm/entity/Environment";
+import { TaskOrder } from "../../orm/entity/TaskOrder";
+import { Clin } from "../../orm/entity/Clin";
 
 let CONNECTION: Connection | undefined;
 
@@ -80,7 +85,7 @@ export async function createConnection(): Promise<Connection> {
     },
     logging: "all",
     database: databaseName,
-    entities: ["/opt/nodejs/orm/entity/**.js"],
+    entities: [Portfolio, Application, Environment, TaskOrder, Clin, "/opt/nodejs/orm/entity/**.js"],
     migrations: ["/opt/nodejs/orm/migration/**.js"],
   });
   return CONNECTION;
