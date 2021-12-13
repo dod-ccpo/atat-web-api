@@ -1,13 +1,12 @@
 import "reflect-metadata";
-// import { createConnection } from "typeorm";
 import { createConnection } from "../../utils/database";
 import { Portfolio } from "../../../orm/entity/Portfolio";
 import { Application } from "../../../orm/entity/Application";
-import { IEnvironment } from "../../../orm/entity/Environment";
+import { Environment, IEnvironmentCreate } from "../../../orm/entity/Environment";
 import { EnvironmentRepository } from "../../repository/EnvironmentRepository";
 import { APIGatewayProxyEventPathParameters, APIGatewayProxyResult, Context } from "aws-lambda";
-import { DATABASE_ERROR } from "../../utils/errors";
-import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusCode } from "../../utils/response";
+import { DATABASE_ERROR, DUPLICATE_ENVIRONMENT_NAME, NO_SUCH_PORTFOLIO_OR_APPLICATION } from "../../utils/errors";
+import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
 import internalSchema = require("../../models/internalSchema.json");
 import middy from "@middy/core";
 import xssSanitizer from "../../portfolioDrafts/xssSanitizer";
@@ -29,7 +28,7 @@ import { IpCheckerMiddleware } from "../../utils/ipLogging";
  * @param event - The POST request from API Gateway
  */
 export async function baseHandler(
-  event: ApiGatewayEventParsed<IEnvironment>,
+  event: ApiGatewayEventParsed<IEnvironmentCreate>,
   context?: Context
 ): Promise<APIGatewayProxyResult> {
   const parameters = Object.entries(event.pathParameters as APIGatewayProxyEventPathParameters);
@@ -46,25 +45,39 @@ export async function baseHandler(
   if (event.body === undefined) {
     throw createError(400, "Shape validation failed, invalid request body");
   }
-  const environmentName = event.body.name;
+  const environmentBody = event.body as IEnvironmentCreate;
 
-  // currently using a regular connect for local development
-  // TODO: update to utils/database/createConnection when testing in a deployed stack
   const connection = await createConnection();
-  const insertedEnvironments: IEnvironment[] = [];
+  const insertedEnvironments: IEnvironmentCreate[] = [];
 
   try {
     // ensures both the portfolio and application exists
-    const portfolio = await connection.getRepository(Portfolio).findOneOrFail({
+    await connection.getRepository(Portfolio).findOneOrFail({
       id: portfolioId,
     });
     const application = await connection.getRepository(Application).findOneOrFail({
       id: applicationId,
     });
 
+    // get all environment names for application
+    const environments = await connection
+      .getRepository(Environment)
+      .createQueryBuilder("environment")
+      .select(["environment.name"])
+      .where("environment.applicationId = :applicationId", { applicationId: application.id })
+      .getMany();
+
+    // ensure the environment name is unique for the application
+    // according to business rule 3.3
+    for (const environment of environments) {
+      if (environment.name === environmentBody.name) {
+        throw createError(400, "Duplicate name");
+      }
+    }
+
     const insertResult = await connection
       .getCustomRepository(EnvironmentRepository)
-      .createEnvironment([{ name: environmentName, application }]);
+      .createEnvironment([{ ...environmentBody, application }]);
 
     for (const environment of insertResult.identifiers) {
       // the result from the insert method does not have the name property
@@ -72,7 +85,16 @@ export async function baseHandler(
       // to be returned to the client. This assumes that only one environment will be
       // added at the moment but can be updated to handle more than one environment
       const queryInsertedEnvironment = await connection.getCustomRepository(EnvironmentRepository).findOneOrFail({
-        select: ["name", "id", "createdAt", "updatedAt", "archivedAt"],
+        select: [
+          "name",
+          "id",
+          "createdAt",
+          "updatedAt",
+          "archivedAt",
+          "administrators",
+          "contributors",
+          "readOnlyOperators",
+        ],
         where: { id: environment.id },
       });
 
@@ -80,9 +102,12 @@ export async function baseHandler(
       console.log("Inserted Environment: " + JSON.stringify(queryInsertedEnvironment));
     }
   } catch (error) {
-    if (error.name === "EntityNotFoundError") {
+    if (error.name === "EntityNotFoundError" || error.name === "EntityNotFoundError2") {
       console.log("Invalid parameter entered: " + JSON.stringify(error));
-      return new OtherErrorResponse("Portfolio or Application is not found", ErrorStatusCode.NOT_FOUND);
+      return NO_SUCH_PORTFOLIO_OR_APPLICATION;
+    }
+    if (error.message === "Duplicate name") {
+      return DUPLICATE_ENVIRONMENT_NAME;
     }
     console.error("Database error: " + JSON.stringify(error));
     return DATABASE_ERROR;
@@ -90,10 +115,12 @@ export async function baseHandler(
     connection.close();
   }
 
-  return new ApiSuccessResponse<Array<IEnvironment>>(insertedEnvironments, SuccessStatusCode.CREATED);
+  return new ApiSuccessResponse<Array<IEnvironmentCreate>>(insertedEnvironments, SuccessStatusCode.CREATED);
 }
 
-// an alternative to removing additionalProperties from BaseObject
+// temporary work around for providing validation shape that does not fail
+// due to the 'allOf' and 'additionalProperties' conflict when composing schemas
+// see https://json-schema.org/understanding-json-schema/reference/combining.html#properties-of-schema-composition
 const environmentSchema = {
   description: internalSchema.Environment.description,
   type: internalSchema.Environment.type,

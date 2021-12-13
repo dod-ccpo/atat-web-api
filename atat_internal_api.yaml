@@ -644,6 +644,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
+        '404':
+          description: Portfolio or Application with the given ID does not exist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
       x-amazon-apigateway-request-validator: "request-params-validator"
       x-amazon-apigateway-integration:
         httpMethod: "POST"
