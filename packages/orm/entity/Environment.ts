@@ -4,7 +4,7 @@ import { ProvisionableEntity } from "./ProvisionableEntity";
 
 @Entity("environment")
 export class Environment extends ProvisionableEntity {
-  @Column({ length: 100 })
+  @Column({ type: "varchar", length: 100 })
   name: string;
 
   @ManyToOne(() => Application, (application) => application.environments)

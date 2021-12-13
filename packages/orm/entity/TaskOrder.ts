@@ -12,6 +12,7 @@ export enum FileScanStatus {
 @Entity("task_order")
 export class TaskOrder extends BaseEntity {
   @Column({
+    type: "varchar",
     length: 17,
     comment: "TO numbers are 13 characters. TO modifications are 17 characters.",
   })
@@ -20,10 +21,10 @@ export class TaskOrder extends BaseEntity {
   @Column({ type: "uuid", comment: "S3 object key of task order pdf" })
   fileId: string;
 
-  @Column({ length: 256, comment: "name of pdf file when uploaded" })
+  @Column({ type: "varchar", length: 256, comment: "name of pdf file when uploaded" })
   fileName: string;
 
-  @Column({ nullable: true, comment: "pdf file size in bytes" })
+  @Column({ type: "integer", nullable: true, comment: "pdf file size in bytes" })
   fileSize: number;
 
   @Column({ type: "enum", enum: FileScanStatus, default: FileScanStatus.PENDING })
