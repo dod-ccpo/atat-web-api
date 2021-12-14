@@ -21,7 +21,7 @@ export class EnvironmentRepository extends Repository<Environment> {
   }
 
   // GET all environments in an application
-  getEnvironmentsByApplicationId(applicationId: string): Promise<[Array<Environment>, number]> {
+  getEnvironmentsByApplicationId(applicationId: string): Promise<Array<Environment>> {
     return this.createQueryBuilder("environment")
       .select([
         "environment.name",
@@ -29,11 +29,14 @@ export class EnvironmentRepository extends Repository<Environment> {
         "environment.createdAt",
         "environment.updatedAt",
         "environment.archivedAt",
+        "environment.administrators",
+        "environment.contributors",
+        "environment.readOnlyOperators",
       ])
       .where("environment.applicationId = :applicationId", {
         applicationId,
       })
-      .getManyAndCount();
+      .getMany();
   }
 
   async getAllEnvironmentNames(applicationId: string): Promise<Array<string>> {
