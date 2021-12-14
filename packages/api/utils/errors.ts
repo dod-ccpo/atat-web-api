@@ -100,11 +100,6 @@ export const DUPLICATE_ENVIRONMENT_NAME = new OtherErrorResponse(
 );
 
 /**
- * To be used when an Application is not found
- */
-export const NO_SUCH_APPLICATION = new OtherErrorResponse("Application not found", ErrorStatusCode.NOT_FOUND);
-
-/**
  * To be used when a function has not been implemented
  */
 export const NOT_IMPLEMENTED = new OtherErrorResponse("Not implemented", ErrorStatusCode.NOT_FOUND);

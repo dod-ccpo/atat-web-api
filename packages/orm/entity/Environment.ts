@@ -6,16 +6,13 @@ export interface IEnvironment {
   name: string;
 }
 
-export interface IEnvironmentCreate extends IEnvironment {
-  application: Application;
-  administrators?: Array<string>;
-  contributors?: Array<string>;
-  readOnlyOperators?: Array<string>;
-}
 export interface IEnvironmentUpdate extends IEnvironment {
   administrators?: Array<string>;
   contributors?: Array<string>;
   readOnlyOperators?: Array<string>;
+}
+export interface IEnvironmentCreate extends IEnvironmentUpdate {
+  application: Application;
 }
 
 @Entity("environment")

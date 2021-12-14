@@ -27,7 +27,6 @@ async function baseHandler(
     pd.dodComponents = [DodComponent.ARMY, DodComponent.NAVY];
     pd.owner = "Lucky";
     pd.portfolioManagers = ["jane.manager@dod.mil", "john.manager@dod.mil"];
-    // pd.operators = "";
     await connection.manager.save(pd);
     console.log("Saved a new portfolio with id: " + pd.id);
 
@@ -39,7 +38,6 @@ async function baseHandler(
     app.portfolio = pd;
     app.name = "Cheetah application";
     app.description = "Description of application";
-    // app.operators = "";
     await connection.manager.save(app);
     console.log("Saved a application with id: " + app.id);
 
@@ -50,7 +48,6 @@ async function baseHandler(
     const env = new Environment();
     env.application = app;
     env.name = "Cheetah environment";
-    // env.operators = "";
     await connection.manager.save(env);
     console.log("Saved a environment with id: " + env.id);
 
