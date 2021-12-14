@@ -57,6 +57,6 @@ export class Portfolio extends ProvisionableEntity {
   @OneToMany(() => TaskOrder, (taskOrder) => taskOrder.portfolio)
   taskOrders: Array<TaskOrder>;
 
-  @OneToMany(() => Application, (application) => application.portfolio)
+  @OneToMany(() => Application, (application) => application.portfolio, { cascade: true })
   applications: Array<Application>;
 }

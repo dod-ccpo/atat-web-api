@@ -66,7 +66,6 @@ export async function baseHandler(
     // For each environment, we need to create a new Environment
     // event.body.evironments is passed in as an array, we can pass it in and cascade it so we only save once..
     app1.environments = event.body.environments;
-    // Set the portfolio relation up
     const portfolioRepository = connection.getRepository(Portfolio);
     const portfolio = await portfolioRepository.findOneOrFail({ id: portfolioId });
     console.log(portfolio);
