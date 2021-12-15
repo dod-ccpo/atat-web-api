@@ -19,7 +19,7 @@ import { wrapSchema } from "../../utils/schemaWrapper";
 import { errorHandlingMiddleware } from "../../utils/errorHandlingMiddleware";
 import createError from "http-errors";
 import { IpCheckerMiddleware } from "../../utils/ipLogging";
-import { validatingRequestShape } from "../../utils/requestValidation";
+import { validateRequestShape } from "../../utils/shapeValidator";
 
 /**
  * Submits the environment of an application
@@ -30,7 +30,7 @@ export async function baseHandler(
   event: ApiGatewayEventParsed<IEnvironment>,
   context?: Context
 ): Promise<APIGatewayProxyResult> {
-  const setupResult = validatingRequestShape<IEnvironment>(event);
+  const setupResult = validateRequestShape<IEnvironment>(event);
   const { portfolioId, applicationId } = setupResult.path;
   const environmentBody = setupResult.bodyObject;
 
