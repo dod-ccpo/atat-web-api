@@ -1,7 +1,8 @@
-import { validateRequestShape } from "../utils/validateRequestShape";
+import { validateRequestShape } from "../utils/shapeValidator";
 import { ApiGatewayEventParsed } from "./eventHandlingTool";
 import { v4 as uuidv4 } from "uuid";
 import { Environment } from "../../orm/entity/Environment";
+import { SetupSuccess } from "./response";
 
 describe("Shape validation tests", () => {
   jest.spyOn(console, "error").mockImplementation(() => jest.fn()); // suppress output
@@ -19,7 +20,9 @@ describe("Shape validation tests", () => {
   } as any;
 
   it("should return a SetupSuccess object", async () => {
-    expect(validateRequestShape<Environment>(validEventRequest)).toEqual({
+    const result = validateRequestShape<Environment>(validEventRequest);
+    expect(result).toBeInstanceOf(SetupSuccess);
+    expect(result).toEqual({
       bodyObject: validEventRequest.body,
       path: validEventRequest.pathParameters,
     });
@@ -32,6 +35,6 @@ describe("Shape validation tests", () => {
   it("should throw error if invalid UUIDv4", async () => {
     expect(() => {
       validateRequestShape<Environment>(invalidUuidv4);
-    }).toThrow(Error("Shape validation failed, invalid UUIDv4"));
+    }).toThrow(Error("Invalid path parameter"));
   });
 });

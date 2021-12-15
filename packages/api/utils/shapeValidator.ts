@@ -19,10 +19,10 @@ export function validateRequestShape<T>(
   ...extraValidators: Array<(obj: unknown) => obj is T>
 ): SetupSuccess<T> {
   if (!Object.values(event.pathParameters as APIGatewayProxyEventPathParameters).every(isValidUuidV4)) {
-    throw createError(404, "Shape validation failed, invalid UUIDv4");
+    throw createError(404, "Invalid path parameter");
   }
-  const bodyResult = event.body;
-  if (bodyResult === undefined) {
+  const requestBody = event.body;
+  if (requestBody === undefined) {
     throw createError(400, "Shape validation failed, invalid request body");
   }
   for (const validator of extraValidators) {
@@ -31,5 +31,5 @@ export function validateRequestShape<T>(
     }
   }
 
-  return new SetupSuccess<T>({ ...event.pathParameters } as { [key: string]: string }, bodyResult as unknown as T);
+  return new SetupSuccess<T>({ ...event.pathParameters } as { [key: string]: string }, requestBody as unknown as T);
 }
