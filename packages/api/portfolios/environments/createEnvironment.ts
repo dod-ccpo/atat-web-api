@@ -2,9 +2,9 @@ import "reflect-metadata";
 import { createConnection } from "../../utils/database";
 import { Portfolio } from "../../../orm/entity/Portfolio";
 import { Application } from "../../../orm/entity/Application";
-import { Environment, IEnvironmentCreate } from "../../../orm/entity/Environment";
+import { Environment, IEnvironment, IEnvironmentCreate } from "../../../orm/entity/Environment";
 import { EnvironmentRepository } from "../../repository/EnvironmentRepository";
-import { APIGatewayProxyEventPathParameters, APIGatewayProxyResult, Context } from "aws-lambda";
+import { APIGatewayProxyResult, Context } from "aws-lambda";
 import { DATABASE_ERROR, DUPLICATE_ENVIRONMENT_NAME, NO_SUCH_PORTFOLIO_OR_APPLICATION } from "../../utils/errors";
 import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
 import internalSchema = require("../../models/internalSchema.json");
@@ -18,9 +18,9 @@ import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
 import { CORS_CONFIGURATION } from "../../utils/corsConfig";
 import { wrapSchema } from "../../utils/schemaWrapper";
 import { errorHandlingMiddleware } from "../../utils/errorHandlingMiddleware";
-import { isValidUuidV4 } from "../../utils/validation";
 import createError from "http-errors";
 import { IpCheckerMiddleware } from "../../utils/ipLogging";
+import { validatingRequestShape } from "../../utils/requestValidation";
 
 /**
  * Submits the environment of an application
@@ -28,25 +28,14 @@ import { IpCheckerMiddleware } from "../../utils/ipLogging";
  * @param event - The POST request from API Gateway
  */
 export async function baseHandler(
-  event: ApiGatewayEventParsed<IEnvironmentCreate>,
+  event: ApiGatewayEventParsed<IEnvironment>,
   context?: Context
 ): Promise<APIGatewayProxyResult> {
-  const parameters = Object.entries(event.pathParameters as APIGatewayProxyEventPathParameters);
-  if (
-    !parameters.every(
-      ([param, paramValue]) => ["portfolioId", "applicationId"].includes(param) && isValidUuidV4(paramValue)
-    )
-  ) {
-    throw createError(404, "Shape validation failed, invalid UUIDv4");
-  }
-  const portfolioId = event.pathParameters!.portfolioId;
-  const applicationId = event.pathParameters!.applicationId;
+  const setupResult = validatingRequestShape<IEnvironment>(event);
+  const { portfolioId, applicationId } = setupResult.path;
+  const environmentBody = setupResult.bodyObject;
 
-  if (event.body === undefined) {
-    throw createError(400, "Shape validation failed, invalid request body");
-  }
-  const environmentBody = event.body as IEnvironmentCreate;
-
+  // set up database connection
   const connection = await createConnection();
   const insertedEnvironments: IEnvironmentCreate[] = [];
 

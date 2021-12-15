@@ -6,6 +6,7 @@ import { Clin } from "../models/Clin";
 import createError from "http-errors";
 import { ApplicationStep } from "../models/ApplicationStep";
 import { Operators, isAdministrator } from "../models/Operator";
+import { APIGatewayProxyEventPathParameters } from "aws-lambda";
 
 /**
  * Check if incoming POST Request passes basic shape validation
@@ -14,6 +15,7 @@ import { Operators, isAdministrator } from "../models/Operator";
  * a valid UUIDv4.
  * That is how we are able to cast portfolioDraftId as a string in the main handler function.
  *
+ * @deprecated
  * @param event - The incoming API Gateway Request proxied to Lambda
  * @param extraValidators - Additional validators that check whether the body is a valid object of Type T
  * @returns SetUpSuccess object if event passes validation, otherwise it throws an error
@@ -37,6 +39,36 @@ export function validateRequestShape<T>(
   }
 
   return new SetupSuccess<T>({ portfolioDraftId }, bodyResult as unknown as T);
+}
+
+/**
+ * Check if incoming POST Request passes basic shape validation
+ *
+ * This shape validation checks the pathParameter to ensure it is not null, undefined, or empty, and that is
+ * a valid UUIDv4.
+ *
+ * @param event - The incoming API Gateway Request proxied to Lambda
+ * @param extraValidators - Additional validators that check whether the body is a valid object of Type T
+ * @returns SetUpSuccess object if event passes validation, otherwise it throws an error
+ */
+export function validatingRequestShape<T>(
+  event: ApiGatewayEventParsed<T>,
+  ...extraValidators: Array<(obj: unknown) => obj is T>
+): SetupSuccess<T> {
+  if (!Object.values(event.pathParameters as APIGatewayProxyEventPathParameters).every(isValidUuidV4)) {
+    throw createError(404, "Shape validation failed, invalid UUIDv4");
+  }
+  const bodyResult = event.body;
+  if (bodyResult === undefined) {
+    throw createError(400, "Shape validation failed, invalid request body");
+  }
+  for (const validator of extraValidators) {
+    if (!validator(event.body)) {
+      throw createError(400, "Shape validation failed, invalid request body");
+    }
+  }
+
+  return new SetupSuccess<T>({ ...event.pathParameters } as { [key: string]: string }, bodyResult as unknown as T);
 }
 export interface ClinValidationError {
   clinNumber: string;
