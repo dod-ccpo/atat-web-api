@@ -61,7 +61,7 @@ export interface SAMLIdentityProviderProps extends IdentityProviderProps {
   /**
    * The URL where the SAML Metadata file can be fetched from.
    */
-  metadataURL: string;
+  metadataURL: cdk.SecretValue | string;
 }
 
 /**
