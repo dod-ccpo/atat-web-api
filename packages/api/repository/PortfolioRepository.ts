@@ -1,5 +1,5 @@
 import { EntityRepository, Repository, InsertResult, UpdateResult } from "typeorm";
-import { IPortfolioCreate, IPortfolioUpdate, Portfolio } from "../../orm/entity/Portfolio";
+import { IPortfolio, IPortfolioCreate, Portfolio } from "../../orm/entity/Portfolio";
 
 @EntityRepository(Portfolio)
 export class PortfolioRepository extends Repository<Portfolio> {
@@ -31,12 +31,12 @@ export class PortfolioRepository extends Repository<Portfolio> {
   }
 
   // POST create new portfolio
-  createPortfolio(portfolio: IPortfolioCreate): Promise<InsertResult> {
+  createPortfolio(portfolio: IPortfolio): Promise<InsertResult> {
     return this.insert(portfolio);
   }
 
   // PUT update portfolio
-  updatePortfolio(id: string, changes: IPortfolioUpdate): Promise<UpdateResult> {
+  updatePortfolio(id: string, changes: IPortfolioCreate): Promise<UpdateResult> {
     return this.update(id, { ...changes });
   }
 

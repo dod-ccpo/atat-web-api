@@ -20,13 +20,13 @@ export enum DodComponent {
   OSD_PSAS = "OSD_PSAS",
   NSA = "NSA",
 }
+
 export interface IPortfolio {
   name: string;
-  description: string;
+  administrators?: Array<string>;
 }
 
-export interface PortfolioUpdate {
-  name: string;
+export interface IPortfolioCreate extends IPortfolio {
   description: string;
   owner: string;
   csp: CloudServiceProvider;
