@@ -99,26 +99,11 @@ export async function baseHandler(
   return new ApiSuccessResponse<Array<IEnvironmentCreate>>(insertedEnvironments, SuccessStatusCode.CREATED);
 }
 
-// temporary work around for providing validation shape that does not fail
-// due to the 'allOf' and 'additionalProperties' conflict when composing schemas
-// see https://json-schema.org/understanding-json-schema/reference/combining.html#properties-of-schema-composition
-const environmentSchema = {
-  description: internalSchema.Environment.description,
-  type: internalSchema.Environment.type,
-  additionalProperties: internalSchema.Environment.additionalProperties,
-  required: internalSchema.Environment.required,
-  properties: {
-    ...internalSchema.Environment.properties,
-    ...internalSchema.Environment.allOf[0].properties,
-    ...internalSchema.Environment.allOf[1].properties,
-  },
-};
-
 export const handler = middy(baseHandler)
   .use(IpCheckerMiddleware())
   .use(xssSanitizer())
   .use(jsonBodyParser())
-  .use(validator({ inputSchema: wrapSchema(environmentSchema) }))
+  .use(validator({ inputSchema: wrapSchema(internalSchema.Environment) }))
   .use(errorHandlingMiddleware())
   .use(JSONErrorHandlerMiddleware())
   .use(cors(CORS_CONFIGURATION));

@@ -1918,13 +1918,43 @@ components:
       required:
         - name
       type: object
-      allOf:
-        - $ref: "#/components/schemas/BaseObject"
-        - $ref: '#/components/schemas/AppEnvAccess'
       properties:
         name:
           pattern: "^[a-zA-Z\\d _-]{1,100}$"
           type: string
+      # Remove the addition of 'allOf' while still using 'additionalProperties'
+      # which adds duplication to the spec and is not ideal, but allows for
+      # validation to occur for the middy validator
+        updatedAt:
+          type: string
+          format: "date-time"
+          readOnly: true
+        createdAt:
+          type: string
+          format: "date-time"
+          readOnly: true
+        archivedAt:
+          type: string
+          format: "date-time"
+          readOnly: true
+        id:
+          type: string
+          readOnly: true
+        administrators:
+          type: array
+          items:
+            type: string
+            format: email
+        contributors:
+          type: array
+          items:
+            type: string
+            format: email
+        readOnlyOperators:
+          type: array
+          items:
+            type: string
+            format: email
       additionalProperties: false
       description: "Represents an Environment for a specific Application"
     Clin:
