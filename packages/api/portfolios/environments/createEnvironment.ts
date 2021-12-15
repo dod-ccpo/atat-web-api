@@ -5,7 +5,6 @@ import { Application } from "../../../orm/entity/Application";
 import { Environment, IEnvironment, IEnvironmentCreate } from "../../../orm/entity/Environment";
 import { EnvironmentRepository } from "../../repository/EnvironmentRepository";
 import { APIGatewayProxyResult, Context } from "aws-lambda";
-import { DATABASE_ERROR, DUPLICATE_ENVIRONMENT_NAME, NO_SUCH_PORTFOLIO_OR_APPLICATION } from "../../utils/errors";
 import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
 import internalSchema = require("../../models/internalSchema.json");
 import middy from "@middy/core";
@@ -60,7 +59,10 @@ export async function baseHandler(
     // according to business rule 3.3
     for (const environment of environments) {
       if (environment.name === environmentBody.name) {
-        throw createError(400, "Duplicate name");
+        throw createError(400, "Duplicate Environment name in application", {
+          errorName: "DuplicateEnvironmentName",
+          environmentName: environmentBody.name,
+        });
       }
     }
 
@@ -90,16 +92,6 @@ export async function baseHandler(
       insertedEnvironments.push(queryInsertedEnvironment);
       console.log("Inserted Environment: " + JSON.stringify(queryInsertedEnvironment));
     }
-  } catch (error) {
-    if (error.name === "EntityNotFoundError" || error.name === "EntityNotFoundError2") {
-      console.log("Invalid parameter entered: " + JSON.stringify(error));
-      return NO_SUCH_PORTFOLIO_OR_APPLICATION;
-    }
-    if (error.message === "Duplicate name") {
-      return DUPLICATE_ENVIRONMENT_NAME;
-    }
-    console.error("Database error: " + JSON.stringify(error));
-    return DATABASE_ERROR;
   } finally {
     connection.close();
   }

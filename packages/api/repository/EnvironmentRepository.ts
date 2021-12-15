@@ -1,5 +1,5 @@
 import { EntityRepository, Repository, InsertResult, UpdateResult } from "typeorm";
-import { Environment, IEnvironmentCreate, IEnvironmentUpdate } from "../../orm/entity/Environment";
+import { Environment, IEnvironmentCreate, IEnvironment } from "../../orm/entity/Environment";
 
 @EntityRepository(Environment)
 export class EnvironmentRepository extends Repository<Environment> {
@@ -42,7 +42,7 @@ export class EnvironmentRepository extends Repository<Environment> {
   }
 
   // PUT update environment
-  updateEnvironment(id: string, changes: IEnvironmentUpdate): Promise<UpdateResult> {
+  updateEnvironment(id: string, changes: IEnvironment): Promise<UpdateResult> {
     return this.update(id, { ...changes });
   }
 
