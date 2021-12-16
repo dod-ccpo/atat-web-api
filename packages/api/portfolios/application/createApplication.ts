@@ -16,16 +16,11 @@ import { validateRequestShape } from "../../utils/shapeValidator";
 import { CORS_CONFIGURATION } from "../../utils/corsConfig";
 import { wrapSchema } from "../../utils/schemaWrapper";
 import { errorHandlingMiddleware } from "../../utils/errorHandlingMiddleware";
-import { createConnection } from "typeorm";
-// import { Portfolio } from "../../../Portfolio";
+// import { createConnection } from "typeorm";
 
-import { Application, IApplication, IApplicationCreate, IApplicationUpdate } from "../../../orm/entity/Application";
-// import { ApplicationRepository } from "../../repository/ApplicationRepository";
-import { ProvisioningStatus } from "../../../orm/entity/ProvisionableEntity";
+import { Application, IApplicationCreate } from "../../../orm/entity/Application";
 import { Portfolio } from "../../../orm/entity/Portfolio";
-import { ApplicationRepository } from "../../repository/ApplicationRepository";
-import { EnvironmentRepository } from "../../repository/EnvironmentRepository";
-import { IEnvironmentCreate } from "../../../orm/entity/Environment";
+import { createConnection } from "../../utils/database";
 
 /**
  * Create an Application
@@ -40,135 +35,47 @@ export async function baseHandler(
   const portfolioId = event.pathParameters?.portfolioId as string;
   console.log(portfolioId);
   let response;
+  const thebody = event.body as Application;
+  // set up database connection
+  const connection = await createConnection();
   try {
-    // Local Database set up /////////////////////////////////////////////////////////////////////////////////////////////
-    console.log("Establishing connection");
-    const connection = await createConnection({
-      type: "postgres",
-      host: "localhost",
-      port: 5432,
-      username: "postgres",
-      password: "postgres",
-      database: "atat",
-      synchronize: false,
-      logging: false,
-      entities: ["../orm/entity/**/*.ts"],
-      migrations: ["../orm/migration/**/*.js"],
-      cli: {
-        entitiesDir: "../orm/entity",
-        migrationsDir: "../orm/migration",
-      },
-    });
-    console.log("Connected");
-    console.log("Set up repository");
-    /// ///////////////////////////////////////////////////////////////////////////////////////////////// Delete this when fn is done
-
-    // Create a new application
-
-    const app1 = new Application();
-    app1.name = event.body.name;
-    app1.description = event.body.description;
-
-    app1.environments = event.body.environments;
-    const newResult = await connection.getRepository(Application).save(app1);
-    console.log(newResult);
-    console.log("app save result above");
-
-    console.log("ID of just created App:");
-    console.log(newResult.id);
-
-    // ensure the portfolio exists
+    // Ensure portfolio exists
     const portfolioRepository = connection.getRepository(Portfolio);
     const portfolio = await portfolioRepository.findOneOrFail({ id: portfolioId });
     console.log(portfolio);
     console.log("The Portfolio should appear above this message");
+    thebody.portfolio = portfolio;
 
-    // The insert way
-    /*
-    const response = await connection
-      .getCustomRepository(ApplicationRepository)
-      .createApplication({ ...app2, portfolio });
-    console.log("Below is the ID to delete");
-    console.log(response.identifiers[0].id);
-    console.log(response); */
+    // Create a new application
+    const newApp = await connection.getRepository(Application).save(thebody);
+    console.log("Successfully created new application" + JSON.stringify(newApp));
 
-    // Find the stuff we just created
-    const application = await connection.getRepository(Application).findOneOrFail({ id: newResult.id });
-    console.log("Heres the app we just created");
-    console.log(application);
+    console.log("ID of just created App:" + JSON.stringify(newApp.id));
 
-    /**
-     *
-     *
-     *
-     *
-     *
-     *
-     */
+    // Formatting response (remove the portfolio)
+    response = newApp as IApplicationCreate;
+    if (response.portfolio) {
+      delete response.portfolio;
+      console.log("Deleted the portfolio form the");
+    }
+    console.log(JSON.stringify(response));
 
     /*
-    const applicationRepository = await connection.getRepository(Application).findOneOrFail({
-      id: response.raw[0].id,
-    }); */
+    // Don't need to do this query because .save returns the full object with relations
+    response = await connection.getCustomRepository(ApplicationRepository).getApplication(newApp.id);
 
-    // Application
-    /*
-    app1.portfolio = portfolio as Portfolio;
-    console.log(app1.environments);
-    const appRepository = connection.getRepository(Application);
-    response = await appRepository.save(app1); */
-    /**
-     *
-     *
-     *
-     *
-     *
-     *
-     */
-
-    // Let's find our new application
-    // const insertedApp = await connection.manager.find(Application);
-    /*
-    const insertedApp = await connection
-      .getCustomRepository(ApplicationRepository)
-      .getApplicationsByPortfolioId(portfolioId);
-    console.log(insertedApp);
-    console.log("All insertedApps above"); */
-    /*
-    console.log("Delete the app");
-    const deleteApp = await connection
-      .getCustomRepository(ApplicationRepository)
-      .deleteApplication(response.identifiers[0].id);
-*/
-    // const application = await connection.getRepository(Application).findOneOrFail({ id: response.identifiers[0].id });
-    /*
-    const environmentBody = app2.environments as unknown as IEnvironmentCreate;
-    const insertResult = await connection
-      .getCustomRepository(EnvironmentRepository)
-      .createEnvironment([{ ...environmentBody, application }]);
-
-    console.log(insertResult);
-    console.log("environment inserted above");
-*/
-    /**
-     *
-     *
-     *
-     *
-     *
-     *
-     */
+    console.log("Inserted new application " + JSON.stringify(response)); */
   } catch (error) {
     console.log(error);
     if (error.name === "EntityNotFoundError") {
       console.log("Invalid parameter entered: " + error);
       return NO_SUCH_PORTFOLIO_DRAFT_404;
     }
+  } finally {
+    connection.close();
   }
 
-  const theResponse = new ApiSuccessResponse<any>(response, SuccessStatusCode.CREATED);
-  // console.log(theResponse);
-  return theResponse;
+  return new ApiSuccessResponse<any>(response, SuccessStatusCode.CREATED);
 }
 // middy without validation
 export const handler = middy(baseHandler)
