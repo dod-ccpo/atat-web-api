@@ -2,7 +2,7 @@ import "reflect-metadata";
 import { createConnection } from "../../utils/database";
 import { Portfolio } from "../../../orm/entity/Portfolio";
 import { Application } from "../../../orm/entity/Application";
-import { Environment, IEnvironment, IEnvironmentCreate } from "../../../orm/entity/Environment";
+import { IEnvironment, IEnvironmentCreate } from "../../../orm/entity/Environment";
 import { EnvironmentRepository } from "../../repository/EnvironmentRepository";
 import { APIGatewayProxyResult, Context } from "aws-lambda";
 import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
@@ -49,17 +49,14 @@ export async function baseHandler(
 
     // get all environment names for application
     const environments = await connection
-      .getRepository(Environment)
-      .createQueryBuilder("environment")
-      .select(["environment.name"])
-      .where("environment.applicationId = :applicationId", { applicationId: application.id })
-      .getMany();
+      .getCustomRepository(EnvironmentRepository)
+      .getAllEnvironmentNames(application.id);
 
     // ensure the environment name is unique for the application
     // according to business rule 3.3
     for (const environment of environments) {
       if (environment.name === environmentBody.name) {
-        throw createError(400, "Duplicate Environment name in application", {
+        throw createError(400, "Duplicate environment name in application", {
           errorName: "DuplicateEnvironmentName",
           environmentName: environmentBody.name,
         });

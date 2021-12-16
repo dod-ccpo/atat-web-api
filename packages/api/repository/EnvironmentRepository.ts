@@ -36,6 +36,13 @@ export class EnvironmentRepository extends Repository<Environment> {
       .getManyAndCount();
   }
 
+  getAllEnvironmentNames(applicationId: string): Promise<Array<Environment>> {
+    return this.createQueryBuilder("environment")
+      .select(["environment.name"])
+      .where("environment.applicationId = :applicationId", { applicationId })
+      .getMany();
+  }
+
   // POST create new environment
   createEnvironment(environments: Array<IEnvironmentCreate>): Promise<InsertResult> {
     return this.insert(environments);
