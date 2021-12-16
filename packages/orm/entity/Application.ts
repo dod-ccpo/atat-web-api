@@ -14,8 +14,8 @@ export interface IApplicationUpdate extends IApplication {
 }
 
 export interface IApplicationCreate extends IApplicationUpdate {
-  portfolio: Portfolio;
   environments: Array<Environment>;
+  portfolio?: Portfolio;
 }
 @Entity("application")
 export class Application extends ProvisionableEntity {

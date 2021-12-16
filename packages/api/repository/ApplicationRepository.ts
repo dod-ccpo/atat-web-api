@@ -38,24 +38,32 @@ export class ApplicationRepository extends Repository<Application> {
       .getManyAndCount();
   }
   */
-  // GET all applications in a Portfolio by PortfolioId
-  getApplicationsByPortfolioId(portfolioId: string): Promise<Array<Application>> {
-    /*
 
-    return this.createQueryBuilder("application")
-      .select([
-        "application.name",
-        "application.id",
-        "application.createdAt",
-        "application.updatedAt",
-        "application.archivedAt",
-      ])
-      .where("application.portfolioId = :portfolioId", {
-        applicationId,
-      }); */
-    return this.find({ where: { portfolio: portfolioId } });
+  // GET an application by applicationId
+  getApplication(applicationId: string): Promise<Application> {
+    return this.findOneOrFail({
+      select: [
+        "id",
+        "name",
+        "description",
+        "createdAt",
+        "updatedAt",
+        "archivedAt",
+        "administrators",
+        "contributors",
+        "readOnlyOperators",
+        "provisioningStatus",
+      ],
+      where: { id: applicationId },
+      relations: ["environments"],
+    });
   }
 
+  // POST create a new Application
+  /*
+  createApplication(application: IApplicationCreate): Promise<InsertResult> {
+    return this.insert(application);
+  } */
   // POST create a new Application
   createApplication(application: IApplicationCreate): Promise<InsertResult> {
     return this.insert(application);
@@ -85,5 +93,10 @@ export class ApplicationRepository extends Repository<Application> {
     const deleteResult = await this.softDelete(applicationId);
     console.log(deleteResult);
     return appToDelete;
+  }
+
+  // GET all applications in a Portfolio by PortfolioId
+  getApplicationsByPortfolioId(portfolioId: string): Promise<Array<Application>> {
+    return this.find({ where: { portfolio: portfolioId } });
   }
 }
