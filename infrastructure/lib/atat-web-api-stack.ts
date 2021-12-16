@@ -28,6 +28,7 @@ import { QueuePermissions } from "./queue-permissions";
 import * as utils from "./util";
 import { ApiFlexFunction, ApiFunctionPropstest } from "./constructs/lambda-fn";
 import { Database } from "./constructs/database";
+import { Duration } from "@aws-cdk/core";
 
 interface AtatIdpProps {
   secretName: string;
@@ -147,6 +148,9 @@ export class AtatWebApiStack extends cdk.Stack {
         value: this.resolve(cdk.Fn.conditionIf(forceAuth.logicalId, "true", "false")),
       })
     );
+
+    // Portfolios Operations using the internal API spec
+    this.addDatabaseApiFunction("createEnvironment", "portfolios/environments/", props.vpc, TablePermissions.WRITE);
 
     // PortfolioDraft Operations
     this.addDatabaseApiFunction("getPortfolioDrafts", "portfolioDrafts/", props.vpc, TablePermissions.READ);
@@ -538,6 +542,9 @@ export class AtatWebApiStack extends cdk.Stack {
       handlerPath: this.determineApiHandlerPath(operationId, handlerFolder),
       database: this.database,
       ormLayer: this.ormLayer,
+      functionPropsOverride: {
+        timeout: Duration.seconds(10),
+      },
     };
     this.functions.push(new ApiFlexFunction(this, utils.apiSpecOperationFunctionName(operationId), props).fn);
   }

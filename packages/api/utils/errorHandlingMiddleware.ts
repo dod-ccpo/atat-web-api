@@ -2,7 +2,12 @@ import middy from "@middy/core";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { serializeError } from "serialize-error";
 import { ValidationErrorResponse } from "./response";
-import { NO_SUCH_PORTFOLIO_DRAFT_404, REQUEST_BODY_INVALID } from "./errors";
+import {
+  DATABASE_ERROR,
+  NO_SUCH_PORTFOLIO_DRAFT_404,
+  NO_SUCH_PORTFOLIO_OR_APPLICATION,
+  REQUEST_BODY_INVALID,
+} from "./errors";
 
 export const errorHandlingMiddleware = (): middy.MiddlewareObj<APIGatewayProxyEvent, APIGatewayProxyResult> => {
   const onError: middy.MiddlewareFn<APIGatewayProxyEvent, APIGatewayProxyResult> = async (
@@ -10,6 +15,18 @@ export const errorHandlingMiddleware = (): middy.MiddlewareObj<APIGatewayProxyEv
   ): Promise<ValidationErrorResponse | void> => {
     const error = serializeError(request.error)!;
     const errorMessage = error?.message as string;
+
+    if (error.name && error.name.startsWith("EntityNotFoundError")) {
+      console.log("Invalid parameter entered: " + JSON.stringify(error));
+      return NO_SUCH_PORTFOLIO_OR_APPLICATION;
+    }
+    if (error.errorName === "DuplicateEnvironmentName") {
+      return new ValidationErrorResponse("Request failed validation (business rules)", {
+        issue: "Environment name already exists in this application",
+        name: error?.environmentName,
+      });
+    }
+
     switch (errorMessage) {
       case "Event object failed validation":
         return new ValidationErrorResponse("Request failed validation", error.details as Record<string, unknown>);
@@ -24,6 +41,9 @@ export const errorHandlingMiddleware = (): middy.MiddlewareObj<APIGatewayProxyEv
         return REQUEST_BODY_INVALID;
       case "Content type defined as JSON but an invalid JSON was provided":
         return REQUEST_BODY_INVALID;
+      default:
+        console.error("Database error: " + JSON.stringify(error));
+        return DATABASE_ERROR;
     }
   };
   return {

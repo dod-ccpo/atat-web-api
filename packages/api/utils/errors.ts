@@ -84,6 +84,22 @@ export const NO_SUCH_APPLICATION_STEP = new OtherErrorResponse(
 );
 
 /**
+ * To be used when a Portfolio or Application is not found when creating a new environment
+ */
+export const NO_SUCH_PORTFOLIO_OR_APPLICATION = new OtherErrorResponse(
+  "Portfolio or Application with the given ID does not exist",
+  ErrorStatusCode.NOT_FOUND
+);
+
+/**
+ * To be used when an environment in a specific application already has the same name
+ */
+export const DUPLICATE_ENVIRONMENT_NAME = new OtherErrorResponse(
+  "Environment name already exists in this application",
+  ErrorStatusCode.BAD_REQUEST
+);
+
+/**
  * To be used when a function has not been implemented
  */
 export const NOT_IMPLEMENTED = new OtherErrorResponse("Not implemented", ErrorStatusCode.NOT_FOUND);
