@@ -4,8 +4,12 @@ import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
 import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
 
 const validRequest: ApiGatewayEventParsed<any> = {
-  body: { name: "1740test", description: "1740test", environments: [{ name: "Scrimblo Environment" }] },
-  pathParameters: { portfolioId: "49626f72-2220-42b3-84f0-d921b31b79a7" },
+  body: {
+    name: "Invalid fake application",
+    description: "This application does not exist",
+    environments: [{ name: "Cat environment" }, { name: "Fish environment" }, { name: "Dog environment" }],
+  },
+  pathParameters: { portfolioId: "88fc1582-896e-471f-9189-c1ce1d45e4c7" },
 } as any;
 // 49626f72-2220-42b3-84f0-d921b31b79a7
 describe("Successful operation tests", () => {

@@ -38,9 +38,25 @@ export class ApplicationRepository extends Repository<Application> {
       .getManyAndCount();
   }
   */
+  // GET all applications in a Portfolio by PortfolioId
+  getApplicationsByPortfolioId(portfolioId: string): Promise<Array<Application>> {
+    /*
+
+    return this.createQueryBuilder("application")
+      .select([
+        "application.name",
+        "application.id",
+        "application.createdAt",
+        "application.updatedAt",
+        "application.archivedAt",
+      ])
+      .where("application.portfolioId = :portfolioId", {
+        applicationId,
+      }); */
+    return this.find({ where: { portfolio: portfolioId } });
+  }
 
   // POST create a new Application
-
   createApplication(application: IApplicationCreate): Promise<InsertResult> {
     return this.insert(application);
   }
@@ -51,18 +67,23 @@ export class ApplicationRepository extends Repository<Application> {
     return this.update(id, { ...changes });
   } */
 
-  // DELETE environment (hard delete)
-  /*
-  async deleteEnvironment(id: string): Promise<Environment> {
-    console.log("Deleting: " + id);
-    const environment = await this.findOneOrFail({
-      select: ["name", "id", "createdAt", "updatedAt", "archivedAt"],
-      where: { id },
-    });
-    const deleteResult = await this.delete(id);
-    console.log(`Deleted: ${environment}. Results: ${deleteResult}`);
-
-    return environment;
+  // DELETE application (hard delete)
+  async deleteApplication(applicationId: string): Promise<Application> {
+    console.log("Deleting: " + applicationId);
+    const appToDelete = await this.findOneOrFail({ id: applicationId });
+    // const deleteResult = await this.delete(applicationId);
+    const deleteResult = await this.delete(applicationId);
+    console.log(deleteResult);
+    return appToDelete;
   }
-  */
+
+  // DELETE application (soft delete)
+  async softDeleteApplication(applicationId: string): Promise<Application> {
+    console.log("Deleting: " + applicationId);
+    const appToDelete = await this.findOneOrFail({ id: applicationId });
+    // const deleteResult = await this.delete(applicationId);
+    const deleteResult = await this.softDelete(applicationId);
+    console.log(deleteResult);
+    return appToDelete;
+  }
 }

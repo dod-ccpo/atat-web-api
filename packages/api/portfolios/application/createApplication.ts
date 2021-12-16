@@ -12,17 +12,20 @@ import validator from "@middy/validator";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import cors from "@middy/http-cors";
 import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
-import { validateRequestShape } from "../../utils/requestValidation";
+import { validateRequestShape } from "../../utils/requestShapeValidation";
 import { CORS_CONFIGURATION } from "../../utils/corsConfig";
 import { wrapSchema } from "../../utils/schemaWrapper";
 import { errorHandlingMiddleware } from "../../utils/errorHandlingMiddleware";
-import { Connection, createConnection, InsertResult } from "typeorm";
+import { createConnection } from "typeorm";
 // import { Portfolio } from "../../../Portfolio";
 
-import { Application } from "../../../orm/entity/Application";
+import { Application, IApplication, IApplicationCreate, IApplicationUpdate } from "../../../orm/entity/Application";
 // import { ApplicationRepository } from "../../repository/ApplicationRepository";
 import { ProvisioningStatus } from "../../../orm/entity/ProvisionableEntity";
-import { CloudServiceProvider, DodComponent, Portfolio } from "../../../orm/entity/Portfolio";
+import { Portfolio } from "../../../orm/entity/Portfolio";
+import { ApplicationRepository } from "../../repository/ApplicationRepository";
+import { EnvironmentRepository } from "../../repository/EnvironmentRepository";
+import { IEnvironmentCreate } from "../../../orm/entity/Environment";
 
 /**
  * Create an Application
@@ -30,10 +33,11 @@ import { CloudServiceProvider, DodComponent, Portfolio } from "../../../orm/enti
  * @param event - The POST request from API Gateway
  */
 export async function baseHandler(
-  event: ApiGatewayEventParsed<any>,
+  event: ApiGatewayEventParsed<Application>,
   context?: Context
 ): Promise<APIGatewayProxyResult> {
-  const portfolioId = event.pathParameters?.portfolioId;
+  validateRequestShape<Application>(event);
+  const portfolioId = event.pathParameters?.portfolioId as string;
   console.log(portfolioId);
   let response;
   try {
@@ -58,30 +62,104 @@ export async function baseHandler(
     console.log("Connected");
     console.log("Set up repository");
     /// ///////////////////////////////////////////////////////////////////////////////////////////////// Delete this when fn is done
-    // Application
+
     // Create a new application
+
     const app1 = new Application();
     app1.name = event.body.name;
     app1.description = event.body.description;
-    // For each environment, we need to create a new Environment
-    // event.body.evironments is passed in as an array, we can pass it in and cascade it so we only save once..
+
     app1.environments = event.body.environments;
+    const newResult = await connection.getRepository(Application).save(app1);
+    console.log(newResult);
+    console.log("app save result above");
+
+    console.log("ID of just created App:");
+    console.log(newResult.id);
+
+    // ensure the portfolio exists
     const portfolioRepository = connection.getRepository(Portfolio);
     const portfolio = await portfolioRepository.findOneOrFail({ id: portfolioId });
     console.log(portfolio);
     console.log("The Portfolio should appear above this message");
+
+    // The insert way
+    /*
+    const response = await connection
+      .getCustomRepository(ApplicationRepository)
+      .createApplication({ ...app2, portfolio });
+    console.log("Below is the ID to delete");
+    console.log(response.identifiers[0].id);
+    console.log(response); */
+
+    // Find the stuff we just created
+    const application = await connection.getRepository(Application).findOneOrFail({ id: newResult.id });
+    console.log("Heres the app we just created");
+    console.log(application);
+
+    /**
+     *
+     *
+     *
+     *
+     *
+     *
+     */
+
+    /*
+    const applicationRepository = await connection.getRepository(Application).findOneOrFail({
+      id: response.raw[0].id,
+    }); */
+
+    // Application
+    /*
     app1.portfolio = portfolio as Portfolio;
     console.log(app1.environments);
     const appRepository = connection.getRepository(Application);
-    response = await appRepository.save(app1);
-    // Now we need to update portfolio to add the new application to it?
-    // Let's find our new application
-    const insertedApp = await connection.manager.find(Application);
-    console.log(insertedApp);
-    console.log("All insertedApps above");
+    response = await appRepository.save(app1); */
+    /**
+     *
+     *
+     *
+     *
+     *
+     *
+     */
 
-    // await connection.manager.save(app1);
+    // Let's find our new application
+    // const insertedApp = await connection.manager.find(Application);
+    /*
+    const insertedApp = await connection
+      .getCustomRepository(ApplicationRepository)
+      .getApplicationsByPortfolioId(portfolioId);
+    console.log(insertedApp);
+    console.log("All insertedApps above"); */
+    /*
+    console.log("Delete the app");
+    const deleteApp = await connection
+      .getCustomRepository(ApplicationRepository)
+      .deleteApplication(response.identifiers[0].id);
+*/
+    // const application = await connection.getRepository(Application).findOneOrFail({ id: response.identifiers[0].id });
+    /*
+    const environmentBody = app2.environments as unknown as IEnvironmentCreate;
+    const insertResult = await connection
+      .getCustomRepository(EnvironmentRepository)
+      .createEnvironment([{ ...environmentBody, application }]);
+
+    console.log(insertResult);
+    console.log("environment inserted above");
+*/
+    /**
+     *
+     *
+     *
+     *
+     *
+     *
+     */
   } catch (error) {
+    console.log(error);
     if (error.name === "EntityNotFoundError") {
       console.log("Invalid parameter entered: " + error);
       return NO_SUCH_PORTFOLIO_DRAFT_404;
@@ -96,6 +174,7 @@ export async function baseHandler(
 export const handler = middy(baseHandler)
   .use(xssSanitizer())
   .use(jsonBodyParser())
+  .use(validator({ inputSchema: wrapSchema(schema.Application) }))
   .use(errorHandlingMiddleware())
   .use(JSONErrorHandlerMiddleware())
   .use(cors(CORS_CONFIGURATION));
