@@ -866,11 +866,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
+        '404':
+          description: Portfolio, Application or Environment with the given ID does not exist
       x-amazon-apigateway-request-validator: "request-params-validator"
       x-amazon-apigateway-integration:
         httpMethod: "POST"
         uri:
-          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NotImplementedFunction.Arn}/invocations"
+          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PatchEnvironmentFunction.Arn}/invocations"
         type: "aws_proxy"
       security:
         Fn::If:
@@ -2015,6 +2017,7 @@ components:
         Represents a set of Operators who should be granted access to
         an Application or Environment at a specific access level. The same access
         levels are available for both Applications & Environments.
+      type: object
       properties:
         administrators:
           type: array

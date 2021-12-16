@@ -2,11 +2,13 @@ import { Application } from "./Application";
 import { Column, Entity, ManyToOne } from "typeorm";
 import { ProvisionableEntity } from "./ProvisionableEntity";
 
-export interface IEnvironment {
-  name: string;
+export interface IEnvironmentOperators {
   administrators?: Array<string>;
   contributors?: Array<string>;
   readOnlyOperators?: Array<string>;
+}
+export interface IEnvironment extends IEnvironmentOperators {
+  name: string;
 }
 export interface IEnvironmentCreate extends IEnvironment {
   application: Application;

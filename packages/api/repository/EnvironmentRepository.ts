@@ -1,5 +1,5 @@
 import { EntityRepository, Repository, InsertResult } from "typeorm";
-import { Environment, IEnvironmentCreate, IEnvironment } from "../../orm/entity/Environment";
+import { Environment, IEnvironmentCreate, IEnvironment, IEnvironmentOperators } from "../../orm/entity/Environment";
 
 @EntityRepository(Environment)
 export class EnvironmentRepository extends Repository<Environment> {
@@ -58,6 +58,12 @@ export class EnvironmentRepository extends Repository<Environment> {
       ...overwrites,
     });
     return await this.getEnvironment(id);
+  }
+
+  // PATCH update environment operators only
+  async patchEnvironment(id: string, operators: IEnvironmentOperators): Promise<Environment> {
+    await this.update(id, { ...operators });
+    return this.getEnvironment(id);
   }
 
   // DELETE environment (hard delete)
