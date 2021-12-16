@@ -1,10 +1,10 @@
 import * as cognito from "@aws-cdk/aws-cognito";
 import { CfnUserPool } from "@aws-cdk/aws-cognito";
 import * as lambda from "@aws-cdk/aws-lambda";
-import * as lambdaNodeJs from "@aws-cdk/aws-lambda-nodejs";
 import * as cdk from "@aws-cdk/core";
 import { HttpMethod } from "../http";
 import { packageRoot } from "../util";
+import { ApiFlexFunction } from "./lambda-fn";
 
 /**
  * The protocol that should be used when authenticating to the upstream
@@ -173,15 +173,19 @@ export class CognitoAuthentication extends cdk.Construct {
     // The Pre-Token Generation Function is responsible for setting attributes on the User resource
     // prior to the token being generated. This is used here for setting the groups based on the
     // groups specified in the SAML Response or OIDC Claim.
-    this.preTokenGenerationFunction = new lambdaNodeJs.NodejsFunction(this, "PreTokenGeneration", {
-      entry: packageRoot() + "/cognito/preTokenGeneration/index.ts",
-      environment: {
-        GROUPS_ATTRIBUTE_CLAIM_NAME: `custom:${props.groupsAttributeName ?? "groups"}`,
-      },
-    });
-    this.postAuthenticationFunction = new lambdaNodeJs.NodejsFunction(this, "PostAuthentication", {
-      entry: packageRoot() + "/cognito/postAuthentication/index.ts",
-    });
+    const preTokenGenerationFunction = new ApiFlexFunction(this, "PreTokenGeneration", {
+      handlerPath: packageRoot() + "/cognito/preTokenGeneration/index.ts",
+    }).fn;
+    preTokenGenerationFunction.addEnvironment(
+      "GROUPS_ATTRIBUTE_CLAIM_NAME",
+      `custom:${props.groupsAttributeName ?? "groups"}`
+    );
+    this.preTokenGenerationFunction = preTokenGenerationFunction;
+
+    const postAuthenticationFunction = new ApiFlexFunction(this, "PostAuthentication", {
+      handlerPath: packageRoot() + "/cognito/postAuthentication/index.ts",
+    }).fn;
+    this.postAuthenticationFunction = postAuthenticationFunction;
 
     this.userPool = new cognito.UserPool(this, "Pool", {
       ...(props?.userPoolProps ?? {}),

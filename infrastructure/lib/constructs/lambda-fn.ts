@@ -153,8 +153,11 @@ export class ApiFlexFunction extends cdk.Construct {
       timeout: cdk.Duration.seconds(5),
       ...props.functionPropsOverride,
       bundling: {
-        // forceDockerBundling: true,
+        forceDockerBundling: true,
         externalModules: ["pg-native", "atat-web-api-orm"],
+        environment: {
+          NODE_ENV: "production",
+        },
       },
     });
     this.fn.addEnvironment("ATAT_RDS_CA_BUNDLE_NAME", RDS_CA_BUNDLE_NAME);
