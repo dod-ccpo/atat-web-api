@@ -10,11 +10,12 @@ import { AtatNetStack } from "../lib/atat-net-stack";
 import { AtatWebApiStack } from "../lib/atat-web-api-stack";
 import { getTags } from "../lib/load-tags";
 import {
+  isPossibleTemporaryEnvironment,
   isString,
   lowerCaseEnvironmentId,
   normalizeEnvironmentName,
-  isPossibleTemporaryEnvironment,
 } from "../lib/util";
+import { AuthenticationProtocol } from "../lib/constructs/authentication";
 
 const app = new cdk.App();
 if (process.env.CDK_NAG_ENABLED === "1") {
@@ -54,10 +55,17 @@ const stacks: cdk.Stack[] = [
       {
         secretName: "auth/oidc/aad",
         providerName: "ATATDevAAD",
+        providerType: AuthenticationProtocol.OIDC,
       },
       {
         secretName: "auth/oidc/gd",
-        providerName: "GlobalDirectory",
+        providerName: "GlobalDirectoryOIDC",
+        providerType: AuthenticationProtocol.OIDC,
+      },
+      {
+        secretName: "auth/saml/gd",
+        providerName: "GlobalDirectorySAML",
+        providerType: AuthenticationProtocol.SAML,
       },
     ],
     smtpProps: {

@@ -13,13 +13,13 @@ import * as sqs from "@aws-cdk/aws-sqs";
 import * as iam from "@aws-cdk/aws-iam";
 import { SfnLambdaInvokeTask } from "./constructs/sfnLambdaInvokeTask";
 import { SfnPassState } from "./constructs/sfnPass";
-import { CognitoAuthentication } from "./constructs/authentication";
+import { AuthenticationProtocol, CognitoAuthentication } from "./constructs/authentication";
 import {
   SecureBucket,
   SecureQueue,
   SecureRestApi,
-  SecureTable,
   SecureStateMachine,
+  SecureTable,
 } from "./constructs/compliant-resources";
 import { TaskOrderLifecycle } from "./constructs/task-order-lifecycle";
 import { HttpMethod } from "./http";
@@ -33,6 +33,7 @@ import { Duration } from "@aws-cdk/core";
 interface AtatIdpProps {
   secretName: string;
   providerName: string;
+  providerType: AuthenticationProtocol;
 }
 
 interface CognitoGroupConfig {
@@ -577,20 +578,35 @@ export class AtatWebApiStack extends cdk.Stack {
       adminsGroupName: groupConfig?.adminsGroupName ?? "atat-admins",
       usersGroupName: groupConfig?.usersGroupName ?? "atat-users",
       cognitoDomain: "atat-api-" + this.environmentId,
-      oidcIdps: idps.map((idpConfig) => {
-        const secret = secretsmanager.Secret.fromSecretNameV2(
-          this,
-          `OidcSecret${idpConfig.providerName}`,
-          idpConfig.secretName
-        );
-        return {
-          providerName: idpConfig.providerName,
-          clientId: secret.secretValueFromJson("clientId"),
-          clientSecret: secret.secretValueFromJson("clientSecret"),
-          oidcIssuerUrl: secret.secretValueFromJson("oidcIssuerUrl"),
-          attributesRequestMethod: HttpMethod.GET,
-        };
-      }),
+      samlIdps: idps
+        .filter((idpConfig) => idpConfig.providerType === AuthenticationProtocol.SAML)
+        .map((idpConfig) => {
+          const secret = secretsmanager.Secret.fromSecretNameV2(
+            this,
+            `SamlSecret${idpConfig.providerName}`,
+            idpConfig.secretName
+          );
+          return {
+            providerName: idpConfig.providerName,
+            metadataURL: secret.secretValueFromJson("metadataUrl"),
+          };
+        }),
+      oidcIdps: idps
+        .filter((idpConfig) => idpConfig.providerType === AuthenticationProtocol.OIDC)
+        .map((idpConfig) => {
+          const secret = secretsmanager.Secret.fromSecretNameV2(
+            this,
+            `OidcSecret${idpConfig.providerName}`,
+            idpConfig.secretName
+          );
+          return {
+            providerName: idpConfig.providerName,
+            clientId: secret.secretValueFromJson("clientId"),
+            clientSecret: secret.secretValueFromJson("clientSecret"),
+            oidcIssuerUrl: secret.secretValueFromJson("oidcIssuerUrl"),
+            attributesRequestMethod: HttpMethod.GET,
+          };
+        }),
     });
     // When utilizing a custom domain, the `domainName` property of IUserPoolDomain
     // contains the full domain; however, in other scenarios, it contains only the
