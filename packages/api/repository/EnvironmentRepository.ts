@@ -49,8 +49,13 @@ export class EnvironmentRepository extends Repository<Environment> {
   }
 
   // PUT update environment
-  updateEnvironment(id: string, changes: IEnvironment): Promise<UpdateResult> {
-    return this.update(id, { ...changes });
+  updateEnvironment(id: string, overwrites: IEnvironment): Promise<UpdateResult> {
+    return this.update(id, {
+      administrators: [],
+      contributors: [],
+      readOnlyOperators: [],
+      ...overwrites,
+    });
   }
 
   // DELETE environment (hard delete)
