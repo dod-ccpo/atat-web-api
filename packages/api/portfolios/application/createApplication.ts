@@ -12,7 +12,7 @@ import validator from "@middy/validator";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import cors from "@middy/http-cors";
 import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
-import { validateRequestShape } from "../../utils/requestShapeValidation";
+import { validateRequestShape } from "../../utils/shapeValidator";
 import { CORS_CONFIGURATION } from "../../utils/corsConfig";
 import { wrapSchema } from "../../utils/schemaWrapper";
 import { errorHandlingMiddleware } from "../../utils/errorHandlingMiddleware";
