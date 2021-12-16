@@ -28,6 +28,7 @@ import { QueuePermissions } from "./queue-permissions";
 import * as utils from "./util";
 import { ApiFlexFunction, ApiFunctionPropstest } from "./constructs/lambda-fn";
 import { Database } from "./constructs/database";
+import { Duration } from "@aws-cdk/core";
 
 interface AtatIdpProps {
   secretName: string;
@@ -193,7 +194,7 @@ export class AtatWebApiStack extends cdk.Stack {
     );
 
     // Internal API Operations
-    this.addInternalApiFunction("createApplication", "portfolios/application", props.vpc);
+    this.addDatabaseApiFunction("createApplication", "portfolios/application/", props.vpc, TablePermissions.WRITE);
 
     // The API spec, which just so happens to be a valid CloudFormation snippet (with some actual CloudFormation
     // in it) gets uploaded to S3. The Asset resource reuses the same bucket that the CDK does, so this does not
@@ -541,6 +542,9 @@ export class AtatWebApiStack extends cdk.Stack {
       handlerPath: this.determineApiHandlerPath(operationId, handlerFolder),
       database: this.database,
       ormLayer: this.ormLayer,
+      functionPropsOverride: {
+        timeout: Duration.seconds(10),
+      },
     };
     this.functions.push(new ApiFlexFunction(this, utils.apiSpecOperationFunctionName(operationId), props).fn);
   }
@@ -563,17 +567,6 @@ export class AtatWebApiStack extends cdk.Stack {
       createEventSource: operationId.startsWith("consume"),
       database: this.database,
       ormLayer: this.ormLayer,
-    };
-    this.functions.push(new ApiFlexFunction(this, utils.apiSpecOperationFunctionName(operationId), props).fn);
-  }
-
-  private addInternalApiFunction(operationId: string, handlerFolder: string, vpc: ec2.IVpc) {
-    const props = {
-      table: this.table,
-      lambdaVpc: vpc,
-      method: utils.apiSpecOperationMethod(operationId),
-      handlerPath: this.determineApiHandlerPath(operationId, handlerFolder),
-      database: this.database,
     };
     this.functions.push(new ApiFlexFunction(this, utils.apiSpecOperationFunctionName(operationId), props).fn);
   }
