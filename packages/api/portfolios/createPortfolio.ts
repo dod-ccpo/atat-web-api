@@ -10,7 +10,6 @@ import { APIGatewayProxyResult, Context } from "aws-lambda";
 import { ApiSuccessResponse, SuccessStatusCode } from "../utils/response";
 import { CORS_CONFIGURATION } from "../utils/corsConfig";
 import { createConnection } from "../utils/database";
-import { DATABASE_ERROR } from "../utils/errors";
 import { errorHandlingMiddleware } from "../utils/errorHandlingMiddleware";
 import { IpCheckerMiddleware } from "../utils/ipLogging";
 import { IPortfolio, IPortfolioCreate } from "../../orm/entity/Portfolio";
@@ -60,9 +59,6 @@ export async function baseHandler(
     });
 
     console.log("Inserted Portfolio: " + JSON.stringify(insertedPortfolio));
-  } catch (error) {
-    console.error("Database error: " + error);
-    return DATABASE_ERROR;
   } finally {
     connection.close();
   }
