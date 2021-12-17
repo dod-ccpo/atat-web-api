@@ -24,10 +24,10 @@ export class PortfolioRepository extends Repository<Portfolio> {
   }
 
   // GET all portfolios
-  getPortfolios(): Promise<[Array<Portfolio>, number]> {
+  getPortfolios(): Promise<Array<Portfolio>> {
     return this.createQueryBuilder("portfolio")
       .select(["portfolio.name", "portfolio.id", "portfolio.createdAt", "portfolio.updatedAt", "portfolio.archivedAt"])
-      .getManyAndCount();
+      .getMany();
   }
 
   // POST create new portfolio
