@@ -3,6 +3,7 @@ import * as cdk from "@aws-cdk/core";
 import * as AtatWebApi from "../lib/atat-web-api-stack";
 import * as AtatNetStack from "../lib/atat-net-stack";
 import path from "path";
+import { AuthenticationProtocol } from "../lib/constructs/authentication";
 
 test("DynamoDB Resource is present, and Partition Key is set.", () => {
   // This is a workaround for some issues that result comes up during
@@ -29,6 +30,7 @@ test("DynamoDB Resource is present, and Partition Key is set.", () => {
       {
         secretName: "/test/secret",
         providerName: "TestIdp",
+        providerType: AuthenticationProtocol.OIDC,
       },
     ],
     smtpProps: {

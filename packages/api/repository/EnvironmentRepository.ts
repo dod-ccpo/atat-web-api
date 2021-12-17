@@ -1,5 +1,5 @@
 import { EntityRepository, Repository, InsertResult, UpdateResult } from "typeorm";
-import { Environment, IEnvironmentCreate, IEnvironmentUpdate } from "../../orm/entity/Environment";
+import { Environment, IEnvironmentCreate, IEnvironment } from "../../orm/entity/Environment";
 
 @EntityRepository(Environment)
 export class EnvironmentRepository extends Repository<Environment> {
@@ -36,13 +36,20 @@ export class EnvironmentRepository extends Repository<Environment> {
       .getManyAndCount();
   }
 
+  getAllEnvironmentNames(applicationId: string): Promise<Array<Environment>> {
+    return this.createQueryBuilder("environment")
+      .select(["environment.name"])
+      .where("environment.applicationId = :applicationId", { applicationId })
+      .getMany();
+  }
+
   // POST create new environment
   createEnvironment(environments: Array<IEnvironmentCreate>): Promise<InsertResult> {
     return this.insert(environments);
   }
 
   // PUT update environment
-  updateEnvironment(id: string, changes: IEnvironmentUpdate): Promise<UpdateResult> {
+  updateEnvironment(id: string, changes: IEnvironment): Promise<UpdateResult> {
     return this.update(id, { ...changes });
   }
 

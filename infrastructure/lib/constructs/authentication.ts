@@ -61,7 +61,7 @@ export interface SAMLIdentityProviderProps extends IdentityProviderProps {
   /**
    * The URL where the SAML Metadata file can be fetched from.
    */
-  metadataURL: string;
+  metadataURL: cdk.SecretValue | string;
 }
 
 /**
@@ -108,9 +108,14 @@ export interface CognitoAuthenticationProps {
 
 function samlAttributeMapping(props: CognitoAuthenticationProps): { [key: string]: string } {
   return {
-    email: "email",
-    family_name: "lastName",
-    given_name: "firstName",
+    email: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
+    family_name: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname",
+    given_name: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname",
+    phone_number: "telephone",
+    "custom:dod_id": "employeeID",
+    "custom:rank": "rank",
+    "custom:citizenship": "citizenship",
+    "custom:branch": "branch",
     [`custom:${props.groupsAttributeName}`]: "groups",
   };
 }
@@ -215,22 +220,17 @@ export class CognitoAuthentication extends cdk.Construct {
         requireDigits: true,
         requireLowercase: true,
         requireSymbols: true,
-        requireUppercase: true,
+      },
+      customAttributes: {
+        groups: new cognito.StringAttribute({ mutable: true, maxLen: 2000 }),
+        dod_id: new cognito.StringAttribute({ mutable: true }),
+        rank: new cognito.StringAttribute({ mutable: true }),
+        citizenship: new cognito.StringAttribute({ mutable: true }),
+        branch: new cognito.StringAttribute({ mutable: true }),
       },
     });
     const cfnPool = this.userPool.node.defaultChild as CfnUserPool;
     cfnPool.overrideLogicalId("AtatUserPool");
-    cfnPool.schema = [
-      {
-        name: props.groupsAttributeName ?? "groups",
-        attributeDataType: "String",
-        mutable: true,
-        required: false,
-        stringAttributeConstraints: {
-          maxLength: "2000",
-        },
-      },
-    ];
 
     this.adminsGroup = new cognito.CfnUserPoolGroup(this, "AdminsGroup", {
       groupName: props.adminsGroupName,
