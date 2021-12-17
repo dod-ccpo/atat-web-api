@@ -27,7 +27,6 @@ import { TablePermissions, QueuePermissions, BucketPermissions } from "./resourc
 import * as utils from "./util";
 import { ApiFlexFunction, ApiFunctionPropstest } from "./constructs/lambda-fn";
 import { Database } from "./constructs/database";
-import { Duration } from "@aws-cdk/core";
 
 interface AtatIdpProps {
   secretName: string;
