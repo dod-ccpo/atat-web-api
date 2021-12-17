@@ -15,7 +15,6 @@ export class AtatIamStack extends cdk.Stack {
     const awsManagedViewOnlyPolicy = iam.ManagedPolicy.fromAwsManagedPolicyName("job-function/ViewOnlyAccess");
     const awsManagedLogsReadPolicy = iam.ManagedPolicy.fromAwsManagedPolicyName("CloudWatchLogsReadOnlyAccess");
     const awsManagedAuditorPolicy = iam.ManagedPolicy.fromAwsManagedPolicyName("SecurityAudit");
-    const awsManagedAdminAccessPolicy = iam.ManagedPolicy.fromAwsManagedPolicyName("AdministratorAccess");
     const awsManagedCfnFullAccessPolicy = iam.ManagedPolicy.fromAwsManagedPolicyName("AWSCloudFormationFullAccess");
 
     // In the future, we may want to consider moving to a mechanism where the various
@@ -89,19 +88,6 @@ export class AtatIamStack extends cdk.Stack {
             `arn:${cdk.Aws.PARTITION}:s3:::cdktoolkit-stagingbucket-*`,
           ],
         }),
-        // DevSecOps team members need access to restore tables from PITR
-        // backups and to export to S3.
-        new iam.PolicyStatement({
-          sid: "AllowDynamoDbBackupRestore",
-          effect: iam.Effect.ALLOW,
-          actions: [
-            "dynamodb:RestoreTable*",
-            "dynamodb:ExportTableToPointInTime",
-            "dynamodb:ListBackups",
-            "dynamodb:Describe*Backup*",
-          ],
-          resources: ["*"],
-        }),
       ],
     });
 
@@ -112,6 +98,99 @@ export class AtatIamStack extends cdk.Stack {
           effect: iam.Effect.DENY,
           actions: ["organizations:*"],
           resources: ["*"],
+        }),
+        new iam.PolicyStatement({
+          sid: "ForbidInsecureTraffic",
+          effect: iam.Effect.DENY,
+          actions: ["*"],
+          resources: ["*"],
+          conditions: {
+            Bool: { "aws:SecureTransport": "false" },
+          },
+        }),
+      ],
+    });
+
+    const cloudformationManagedPolicy = new iam.ManagedPolicy(this, "CloudFormationPolicies", {
+      statements: [
+        new iam.PolicyStatement({
+          sid: "ForbidCertainActions",
+          effect: iam.Effect.DENY,
+          actions: [
+            "iam:*User*",
+            "iam:CreateAccessKey",
+            "iam:*LoginProfile*",
+            "iam:*MFA*",
+            "iam:*AccountAlias",
+            "iam:*SSHPublicKey",
+            "iam:*ServerCertificate",
+            "iam:*ServiceSpecificCredential",
+            "iam:Generate*",
+            "iam:GetAccountAuthorizationDetails",
+            "iam:GetCredentialReport",
+            "logs:*LogEvents",
+            "logs:*QueryResults",
+            "logs:*LogRecord",
+            "logs:*LogGroupFields",
+            "rds-data:*",
+            "rds-db:*",
+            "rds:CrossRegionCommunication",
+            "rds:Download*DbLogFile*",
+            "s3:BypassGovernanceRetention",
+            "secretsmanager:CancelRotateSecret",
+            "sqs:*Message",
+          ],
+          resources: ["*"],
+        }),
+        new iam.PolicyStatement({
+          sid: "DeprecatedDynamoDbAllows",
+          effect: iam.Effect.ALLOW,
+          actions: ["dynamodb:*"],
+          resources: ["*"],
+        }),
+        new iam.PolicyStatement({
+          sid: "AllowManagingResources",
+          effect: iam.Effect.ALLOW,
+          actions: [
+            "apigateway:*",
+            "cloudformation:*",
+            "cognito-idp:AddCustomAttributes",
+            "cognito-idp:Create*",
+            "cognito-idp:DeleteGroup",
+            "cognito-idp:DeleteIdentityProvider",
+            "cognito-idp:DeleteResourceServer",
+            "cognito-idp:Describe*",
+            "cognito-idp:GetUICustomization",
+            "cognito-idp:SetUICustomization",
+            "cognito-idp:SetUserPoolMfaConfig",
+            "cognito-idp:*TagResource",
+            "cognito-idp:UpdateGroup",
+            "cognito-idp:UpdateIdentityProvider",
+            "cognito-idp:UpdateResourceServer",
+            "cognito-idp:UpdateUserAttributes",
+            "cognito-idp:UpdateUserPool",
+            "cognito-idp:UpdateUserPoolClient",
+            "cognito-idp:UpdateUserPoolDomain",
+            "ec2:*",
+            "iam:*",
+            "lambda:*",
+            "logs:*",
+            "rds:*",
+            "s3:*Bucket*",
+            "s3:List*",
+            "secretsmanager:*",
+            "sqs:*",
+            "ssm:*Parameter*",
+            "states:*",
+          ],
+          resources: ["*"],
+          // Ensure that attaching this policy to other identities has no effect
+          conditions: {
+            StringEquals: {
+              "aws:calledVia": "cloudformation.amazonaws.com",
+              "aws:SourceAccount": cdk.Aws.ACCOUNT_ID,
+            },
+          },
         }),
       ],
     });
@@ -124,7 +203,7 @@ export class AtatIamStack extends cdk.Stack {
       roleName: "AtatCloudFormation",
       description: "Role for deploying ATAT using CloudFormation",
       assumedBy: new iam.ServicePrincipal("cloudformation.amazonaws.com"),
-      managedPolicies: [awsManagedAdminAccessPolicy, baseDenies],
+      managedPolicies: [cloudformationManagedPolicy, baseDenies],
     });
 
     const managementAccountId = this.findOrganizationManagementAccount();

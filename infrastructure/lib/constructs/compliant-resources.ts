@@ -29,6 +29,7 @@ export class SecureBucket extends cdk.Construct {
       // secure defaults that cannot be overridden
       publicReadAccess: false,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      enforceSSL: true,
       // TODO: Prevent auto-delete when we properly handle differences between dev and
       // higher environments
       // autoDeleteObjects: false,
