@@ -29,43 +29,37 @@ export async function baseHandler(
   event: ApiGatewayEventParsed<IPortfolio>,
   context?: Context
 ): Promise<APIGatewayProxyResult> {
-  validateRequestShape<IPortfolio>(event);
+  const setupResult = validateRequestShape<IPortfolio>(event);
+  const portfolioBody = setupResult.bodyObject;
 
   // set up database connection
   const connection = await createConnection();
-  const insertedPortfolios: IPortfolioCreate[] = [];
+  const portfolioRepository = connection.getCustomRepository(PortfolioRepository);
+  let insertedPortfolio: IPortfolioCreate;
 
   try {
-    const setupResult = validateRequestShape<IPortfolio>(event);
-    const portfolioBody = setupResult.bodyObject;
+    const insertResult = await portfolioRepository.createPortfolio(portfolioBody);
+    const portfolioId = insertResult.identifiers[0].id;
+    // query for the newly inserted portfolio
+    insertedPortfolio = await portfolioRepository.findOneOrFail({
+      select: [
+        "id",
+        "name",
+        "csp",
+        "description",
+        "dodComponents",
+        "owner",
+        "portfolioManagers",
+        "createdAt",
+        "updatedAt",
+        "archivedAt",
+        "administrators",
+        "provisioningStatus",
+      ],
+      where: { id: portfolioId },
+    });
 
-    const insertResult = await connection.getCustomRepository(PortfolioRepository).createPortfolio(portfolioBody);
-
-    for (const portfolio of insertResult.identifiers) {
-      // the result from the insert method does not have the name property
-      // and an additional query after the insert is done to provide the correct shape
-      // to be returned to the client
-      const queryInsertedPortfolio = await connection.getCustomRepository(PortfolioRepository).findOneOrFail({
-        select: [
-          "id",
-          "name",
-          "csp",
-          "description",
-          "dodComponents",
-          "owner",
-          "portfolioManagers",
-          "createdAt",
-          "updatedAt",
-          "archivedAt",
-          "administrators",
-          "provisioningStatus",
-        ],
-        where: { id: portfolio.id },
-      });
-
-      insertedPortfolios.push(queryInsertedPortfolio);
-      console.log("Inserted Portfolio: " + JSON.stringify(queryInsertedPortfolio));
-    }
+    console.log("Inserted Portfolio: " + JSON.stringify(insertedPortfolio));
   } catch (error) {
     console.error("Database error: " + error);
     return DATABASE_ERROR;
@@ -73,7 +67,7 @@ export async function baseHandler(
     connection.close();
   }
 
-  return new ApiSuccessResponse<IPortfolioCreate>(insertedPortfolios[0], SuccessStatusCode.CREATED);
+  return new ApiSuccessResponse<IPortfolioCreate>(insertedPortfolio, SuccessStatusCode.CREATED);
 }
 
 export const handler = middy(baseHandler)
