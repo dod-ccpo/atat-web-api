@@ -57,7 +57,7 @@ export class EnvironmentRepository extends Repository<Environment> {
       readOnlyOperators: [],
       ...overwrites,
     });
-    return this.getEnvironment(id);
+    return await this.getEnvironment(id);
   }
 
   // DELETE environment (hard delete)
