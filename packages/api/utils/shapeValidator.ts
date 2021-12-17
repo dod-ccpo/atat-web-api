@@ -7,7 +7,7 @@ import { isValidUuidV4 } from "./validation";
 /**
  * Check if incoming POST Request passes basic shape validation
  *
- * This shape validation checks the pathParameter to ensure it is not null or undefined, and that is
+ * This shape validation checks the pathParameter, if present, to ensure it is not null or undefined, and that is
  * a valid UUIDv4.
  *
  * @param event - The incoming API Gateway Request proxied to Lambda
@@ -18,7 +18,10 @@ export function validateRequestShape<T>(
   event: ApiGatewayEventParsed<T>,
   ...extraValidators: Array<(obj: unknown) => obj is T>
 ): SetupSuccess<T> {
-  if (!Object.values(event.pathParameters as APIGatewayProxyEventPathParameters).every(isValidUuidV4)) {
+  if (
+    event.pathParameters &&
+    !Object.values(event.pathParameters as APIGatewayProxyEventPathParameters).every(isValidUuidV4)
+  ) {
     throw createError(404, "Shape validation failed, invalid UUIDv4");
   }
   const requestBody = event.body;
