@@ -16,7 +16,7 @@ import { IPortfolio, IPortfolioCreate } from "../../orm/entity/Portfolio";
 import { PortfolioRepository } from "../repository/PortfolioRepository";
 import { validateRequestShape } from "../utils/shapeValidator";
 import { wrapSchema } from "../utils/schemaWrapper";
-import internalSchema = require("../models/internalSchema.json");
+import schema = require("../models/internalSchema.json");
 
 /**
  * Creates a new Portfolio
@@ -66,11 +66,23 @@ export async function baseHandler(
   return new ApiSuccessResponse<IPortfolioCreate>(insertedPortfolio, SuccessStatusCode.CREATED);
 }
 
+const portfolioSchema = {
+  additionalProperties: schema.Portfolio.additionalProperties,
+  type: schema.Portfolio.type,
+  required: schema.Portfolio.required,
+  properties: {
+    ...schema.PortfolioBase.properties,
+    ...schema.Portfolio.properties,
+    ...schema.PortfolioSummary.properties,
+    ...schema.PortfolioAccess.properties,
+  },
+};
+
 export const handler = middy(baseHandler)
   .use(IpCheckerMiddleware())
   .use(xssSanitizer())
   .use(jsonBodyParser())
-  .use(validator({ inputSchema: wrapSchema(internalSchema.Portfolio) }))
+  .use(validator({ inputSchema: wrapSchema(portfolioSchema) }))
   .use(errorHandlingMiddleware())
   .use(JSONErrorHandlerMiddleware())
   .use(cors(CORS_CONFIGURATION));
