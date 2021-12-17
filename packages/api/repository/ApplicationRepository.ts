@@ -3,41 +3,14 @@ import { Application, IApplicationCreate, IApplicationUpdate } from "../../orm/e
 
 @EntityRepository(Application)
 export class ApplicationRepository extends Repository<Application> {
-  // GET environments/:id
-  /*
-  getEnvironment(id: string): Promise<Application> {
-    return this.findOneOrFail({
-      select: [
-        "name",
-        "id",
-        "createdAt",
-        "updatedAt",
-        "archivedAt",
-        "administrators",
-        "contributors",
-        "readOnlyOperators",
-      ],
-      where: { id },
-    });
-  } */
-
-  // GET all environments in an application
-  /*
-  getEnvironmentsByApplicationId(applicationId: string): Promise<[Array<Environment>, number]> {
-    return this.createQueryBuilder("environment")
-      .select([
-        "environment.name",
-        "environment.id",
-        "environment.createdAt",
-        "environment.updatedAt",
-        "environment.archivedAt",
-      ])
-      .where("environment.applicationId = :applicationId", {
-        applicationId,
-      })
-      .getManyAndCount();
+  // GET all application names that match the provided name
+  getAllMatchingApplicationNames(portfolioId: string, appName: string): Promise<Array<Application>> {
+    return this.createQueryBuilder("application")
+      .select(["application.name"])
+      .where("application.portfolioId = :portfolioId", { portfolioId })
+      .andWhere("application.name = :appName", { appName })
+      .getMany();
   }
-  */
 
   // GET an application by applicationId
   getApplication(applicationId: string): Promise<Application> {
@@ -60,20 +33,9 @@ export class ApplicationRepository extends Repository<Application> {
   }
 
   // POST create a new Application
-  /*
-  createApplication(application: IApplicationCreate): Promise<InsertResult> {
-    return this.insert(application);
-  } */
-  // POST create a new Application
   createApplication(application: IApplicationCreate): Promise<InsertResult> {
     return this.insert(application);
   }
-
-  // PUT update environment
-  /*
-  updateEnvironment(id: string, changes: IEnvironmentUpdate): Promise<UpdateResult> {
-    return this.update(id, { ...changes });
-  } */
 
   // DELETE application (hard delete)
   async deleteApplication(applicationId: string): Promise<Application> {
