@@ -12,7 +12,7 @@ import * as sqs from "@aws-cdk/aws-sqs";
 import { SqsEventSource } from "@aws-cdk/aws-lambda-event-sources";
 import * as sfn from "@aws-cdk/aws-stepfunctions";
 import { Database } from "./database";
-import { TablePermissions } from "../table-permissions";
+import { TablePermissions, QueuePermissions, BucketPermissions } from "../resource-permissions";
 
 /**
  * The path within the Lambda function where the RDS CA Bundle is stored.
@@ -90,7 +90,7 @@ export interface ApiFunctionPropstest {
    *
    * @default - Read access is given to the Lambda function if no value is specified.
    */
-  readonly bucketPermissions?: string;
+  readonly bucketPermissions?: BucketPermissions;
 
   /**
    * The SQS queue where messages are sent
@@ -103,7 +103,7 @@ export interface ApiFunctionPropstest {
    *
    * @default - Read access is given to the Lambda function if no value is specified.
    */
-  readonly queuePermissions?: string;
+  readonly queuePermissions?: QueuePermissions;
 
   /**
    * Optional param to create an SQS event source to receive queue messages
@@ -239,39 +239,39 @@ export class ApiFlexFunction extends cdk.Construct {
     }
   }
 
-  private grantTablePermissions(tablePermissions: string | undefined): iam.Grant | undefined {
+  private grantTablePermissions(tablePermissions?: TablePermissions): iam.Grant | undefined {
     switch (tablePermissions) {
-      case "ALL":
+      case TablePermissions.ALL:
         return this.table.grantFullAccess(this.fn);
-      case "READ":
+      case TablePermissions.READ:
         return this.table.grantReadData(this.fn);
-      case "READ_WRITE":
+      case TablePermissions.READ_WRITE:
         return this.table.grantReadWriteData(this.fn);
-      case "WRITE":
+      case TablePermissions.WRITE:
         return this.table.grantWriteData(this.fn);
       default:
         return this.table.grantReadWriteData(this.fn);
     }
   }
 
-  private grantBucketPermissions(bucketPermissions: string | undefined): iam.Grant | undefined {
+  private grantBucketPermissions(bucketPermissions?: BucketPermissions): iam.Grant | undefined {
     switch (bucketPermissions) {
-      case "READ":
+      case BucketPermissions.READ:
         return this.bucket.grantRead(this.fn);
-      case "PUT":
+      case BucketPermissions.PUT:
         return this.bucket.grantPut(this.fn);
-      case "DELETE":
+      case BucketPermissions.DELETE:
         return this.bucket.grantDelete(this.fn);
       default:
         return this.bucket.grantRead(this.fn);
     }
   }
 
-  private grantSQSPermissions(queuePermissions: string | undefined): iam.Grant | undefined {
+  private grantSQSPermissions(queuePermissions?: QueuePermissions): iam.Grant | undefined {
     switch (queuePermissions) {
-      case "SEND":
+      case QueuePermissions.SEND:
         return this.queue.grantSendMessages(this.fn);
-      case "CONSUME":
+      case QueuePermissions.CONSUME:
         return this.queue.grantConsumeMessages(this.fn);
       default:
         return this.queue.grantSendMessages(this.fn);
