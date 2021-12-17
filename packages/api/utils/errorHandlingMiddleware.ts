@@ -20,10 +20,10 @@ export const errorHandlingMiddleware = (): middy.MiddlewareObj<APIGatewayProxyEv
       console.log("Invalid parameter entered: " + JSON.stringify(error));
       return NO_SUCH_PORTFOLIO_OR_APPLICATION;
     }
-    if (error.errorName === "DuplicateEnvironmentName") {
+    if (error.errorName === "DuplicateName") {
       return new ValidationErrorResponse("Request failed validation (business rules)", {
-        issue: "Environment name already exists in this application",
-        name: error?.environmentName,
+        issue: "This name already exists",
+        name: error?.duplicateName,
       });
     }
 

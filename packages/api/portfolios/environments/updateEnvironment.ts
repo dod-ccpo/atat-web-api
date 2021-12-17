@@ -19,6 +19,7 @@ import { wrapSchema } from "../../utils/schemaWrapper";
 import { errorHandlingMiddleware } from "../../utils/errorHandlingMiddleware";
 import { IpCheckerMiddleware } from "../../utils/ipLogging";
 import { validateRequestShape } from "../../utils/shapeValidator";
+import { uniqueNameValidator } from "../../utils/businessRulesValidation";
 
 /**
  * Submits an update to an environment of an application
@@ -42,16 +43,23 @@ export async function baseHandler(
     await connection.getRepository(Portfolio).findOneOrFail({
       id: portfolioId,
     });
-    await connection.getRepository(Application).findOneOrFail({
+    const application = await connection.getRepository(Application).findOneOrFail({
       id: applicationId,
     });
     const environment = await connection
       .getCustomRepository(EnvironmentRepository)
       .findOneOrFail({ id: environmentId });
 
-    await connection.getCustomRepository(EnvironmentRepository).updateEnvironment(environment.id, requestBody);
+    const environmentNames = await connection
+      .getCustomRepository(EnvironmentRepository)
+      .getAllEnvironmentNames(application.id);
 
-    response = await connection.getCustomRepository(EnvironmentRepository).getEnvironment(environment.id);
+    // Throws error if duplicate name found
+    uniqueNameValidator(requestBody.name, environmentNames);
+
+    response = await connection
+      .getCustomRepository(EnvironmentRepository)
+      .updateEnvironment(environment.id, requestBody);
     console.log("Updated Environment: " + JSON.stringify(response));
   } finally {
     connection.close();

@@ -17,9 +17,9 @@ import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
 import { CORS_CONFIGURATION } from "../../utils/corsConfig";
 import { wrapSchema } from "../../utils/schemaWrapper";
 import { errorHandlingMiddleware } from "../../utils/errorHandlingMiddleware";
-import createError from "http-errors";
 import { IpCheckerMiddleware } from "../../utils/ipLogging";
 import { validateRequestShape } from "../../utils/shapeValidator";
+import { uniqueNameValidator } from "../../utils/businessRulesValidation";
 
 /**
  * Submits the environment of an application
@@ -48,20 +48,13 @@ export async function baseHandler(
     });
 
     // get all environment names for application
-    const environments = await connection
+    const environmentNames = await connection
       .getCustomRepository(EnvironmentRepository)
       .getAllEnvironmentNames(application.id);
 
     // ensure the environment name is unique for the application
     // according to business rule 3.3
-    for (const environment of environments) {
-      if (environment.name === environmentBody.name) {
-        throw createError(400, "Duplicate environment name in application", {
-          errorName: "DuplicateEnvironmentName",
-          environmentName: environmentBody.name,
-        });
-      }
-    }
+    uniqueNameValidator(environmentBody.name, environmentNames);
 
     const insertResult = await connection
       .getCustomRepository(EnvironmentRepository)

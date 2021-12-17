@@ -36,11 +36,12 @@ export class EnvironmentRepository extends Repository<Environment> {
       .getManyAndCount();
   }
 
-  getAllEnvironmentNames(applicationId: string): Promise<Array<Environment>> {
-    return this.createQueryBuilder("environment")
+  async getAllEnvironmentNames(applicationId: string): Promise<Array<string>> {
+    const environments = await this.createQueryBuilder("environment")
       .select(["environment.name"])
       .where("environment.applicationId = :applicationId", { applicationId })
       .getMany();
+    return environments.map((env) => env.name);
   }
 
   // POST create new environment
@@ -49,13 +50,14 @@ export class EnvironmentRepository extends Repository<Environment> {
   }
 
   // PUT update environment
-  updateEnvironment(id: string, overwrites: IEnvironment): Promise<UpdateResult> {
-    return this.update(id, {
+  async updateEnvironment(id: string, overwrites: IEnvironment): Promise<Environment> {
+    await this.update(id, {
       administrators: [],
       contributors: [],
       readOnlyOperators: [],
       ...overwrites,
     });
+    return this.getEnvironment(id);
   }
 
   // DELETE environment (hard delete)
