@@ -30,10 +30,9 @@ export async function baseHandler(
 ): Promise<APIGatewayProxyResult> {
   validateRequestShape<Application>(event);
   const portfolioId = event.pathParameters?.portfolioId as string;
-  console.log(portfolioId);
   let response;
   const applicationBody = event.body as Application;
-  // set up database connection
+  // Establish databse connection
   const connection = await createConnection();
   try {
     // Ensure portfolio exists
@@ -62,6 +61,7 @@ export async function baseHandler(
     }
 
     // 3.3 unique environment name
+    // if the incomming request has duplicate environment names, return an error
     const uniqueValues = new Set(applicationBody.environments.map((v) => v.name));
     if (uniqueValues.size < applicationBody.environments.length) {
       console.log("Duplicates found");
@@ -85,16 +85,50 @@ export async function baseHandler(
     console.log("Response:" + JSON.stringify(response));
   } finally {
     connection.close();
-    // console.log("finished everything");
   }
 
   return new ApiSuccessResponse<IApplicationCreate>(response, SuccessStatusCode.CREATED);
 }
 
+// Bandaid fix for ajv validation with base object
+// We cannot allow the user to send an id, createdAt, updatedAt, etc metadata fields in a query
+// Since there is a problem with ajv validating read-only fields, we are redeclaring the specific schema
+// WITHOUT those fields (id, createdAt, updatedAt, etc)
+const app = schema.Application;
+const appProps = app.properties;
+const appEnv = app.allOf[1].properties;
+const fixedAppSchema = {
+  additionalProperties: app.additionalProperties,
+  type: app.type,
+  required: app.required,
+  properties: {
+    name: appProps.name,
+    description: appProps.description,
+    readOnlyOperators: appEnv.readOnlyOperators,
+    administrators: appEnv.administrators,
+    contributors: appEnv.contributors,
+    environments: {
+      type: appProps.environments.type,
+      minItems: appProps.environments.minItems,
+      items: {
+        required: appProps.environments.items.required,
+        type: appProps.environments.items.type,
+        properties: {
+          name: appProps.environments.items.properties.name,
+          readOnlyOperators: appEnv.readOnlyOperators,
+          administrators: appEnv.administrators,
+          contributors: appEnv.contributors,
+        },
+        additionalProperties: appProps.environments.items.additionalProperties,
+      },
+    },
+  },
+};
 export const handler = middy(baseHandler)
   .use(xssSanitizer())
   .use(jsonBodyParser())
-  .use(validator({ inputSchema: wrapSchema(schema.Application) }))
+  // .use(validator({ inputSchema: wrapSchema(schema.Application) }))
+  .use(validator({ inputSchema: wrapSchema(fixedAppSchema) }))
   .use(errorHandlingMiddleware())
   .use(JSONErrorHandlerMiddleware())
   .use(cors(CORS_CONFIGURATION));
