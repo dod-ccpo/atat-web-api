@@ -1896,9 +1896,6 @@ components:
         - environments
         - name
       type: object
-      allOf:
-        - $ref: "#/components/schemas/BaseObject"
-        - $ref: '#/components/schemas/AppEnvAccess'
       properties:
         environments:
           minItems: 1
@@ -1911,6 +1908,37 @@ components:
         description:
           pattern: "^[\\w\\d !@#$%^&*_|:;,'.-]{0,300}$"
           type: string
+        # Metadata from baseObject and AppEnvAccess
+        updatedAt:
+          type: string
+          format: "date-time"
+          readOnly: true
+        createdAt:
+          type: string
+          format: "date-time"
+          readOnly: true
+        archivedAt:
+          type: string
+          format: "date-time"
+          readOnly: true
+        id:
+          type: string
+          readOnly: true
+        administrators:
+          type: array
+          items:
+            type: string
+            format: email
+        contributors:
+          type: array
+          items:
+            type: string
+            format: email
+        readOnlyOperators:
+          type: array
+          items:
+            type: string
+            format: email
       additionalProperties: false
       description: "Represents an Application in a Portfolio"
     Environment:
