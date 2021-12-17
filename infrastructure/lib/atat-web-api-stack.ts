@@ -23,8 +23,7 @@ import {
 } from "./constructs/compliant-resources";
 import { TaskOrderLifecycle } from "./constructs/task-order-lifecycle";
 import { HttpMethod } from "./http";
-import { TablePermissions } from "./table-permissions";
-import { QueuePermissions } from "./queue-permissions";
+import { TablePermissions, QueuePermissions, BucketPermissions } from "./resource-permissions";
 import * as utils from "./util";
 import { ApiFlexFunction, ApiFunctionPropstest } from "./constructs/lambda-fn";
 import { Database } from "./constructs/database";
@@ -507,6 +506,7 @@ export class AtatWebApiStack extends cdk.Stack {
       new ApiFlexFunction(this, "UploadTaskOrder", {
         lambdaVpc: props.vpc,
         bucket: taskOrderManagement.pendingBucket,
+        bucketPermissions: BucketPermissions.PUT,
         method: HttpMethod.POST,
         handlerPath: this.determineApiHandlerPath("uploadTaskOrder", "taskOrderFiles/"),
         functionPropsOverride: {
@@ -517,6 +517,7 @@ export class AtatWebApiStack extends cdk.Stack {
         lambdaVpc: props.vpc,
         bucket: taskOrderManagement.acceptedBucket,
         method: HttpMethod.DELETE,
+        bucketPermissions: BucketPermissions.DELETE,
         handlerPath: this.determineApiHandlerPath("deleteTaskOrder", "taskOrderFiles/"),
       }).fn
     );
