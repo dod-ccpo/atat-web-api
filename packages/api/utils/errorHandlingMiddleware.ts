@@ -27,6 +27,13 @@ export const errorHandlingMiddleware = (): middy.MiddlewareObj<APIGatewayProxyEv
       });
     }
 
+    if (error.errorName === "DuplicateApplicationName") {
+      return new ValidationErrorResponse("Request failed validation (business rules)", {
+        issue: "Application name already exists in this application",
+        name: error?.applicationName,
+      });
+    }
+
     switch (errorMessage) {
       case "Event object failed validation":
         return new ValidationErrorResponse("Request failed validation", error.details as Record<string, unknown>);

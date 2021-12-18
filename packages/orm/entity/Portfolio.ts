@@ -20,6 +20,19 @@ export enum DodComponent {
   OSD_PSAS = "OSD_PSAS",
   NSA = "NSA",
 }
+export interface IPortfolio {
+  name: string;
+  description?: string;
+}
+
+export interface PortfolioUpdate {
+  name: string;
+  description: string;
+  owner: string;
+  csp: CloudServiceProvider;
+  portfolioManagers: Array<string>;
+  dodComponents: Array<DodComponent>;
+}
 
 @Entity("portfolio")
 export class Portfolio extends ProvisionableEntity {
@@ -44,6 +57,6 @@ export class Portfolio extends ProvisionableEntity {
   @OneToMany(() => TaskOrder, (taskOrder) => taskOrder.portfolio)
   taskOrders: Array<TaskOrder>;
 
-  @OneToMany(() => Application, (application) => application.portfolio)
+  @OneToMany(() => Application, (application) => application.portfolio, { cascade: true })
   applications: Array<Application>;
 }

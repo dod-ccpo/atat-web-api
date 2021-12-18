@@ -35,6 +35,6 @@ describe("Shape validation tests", () => {
   it("should throw error if invalid UUIDv4", async () => {
     expect(() => {
       validateRequestShape<Environment>(invalidUuidv4);
-    }).toThrow(Error("Invalid path parameter"));
+    }).toThrow(Error("Shape validation failed, invalid UUIDv4"));
   });
 });

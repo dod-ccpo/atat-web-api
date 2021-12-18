@@ -8,7 +8,7 @@ import { APIGatewayProxyResult, Context } from "aws-lambda";
 import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
 import internalSchema = require("../../models/internalSchema.json");
 import middy from "@middy/core";
-import xssSanitizer from "../../portfolioDrafts/xssSanitizer";
+import xssSanitizer from "../../utils/xssSanitizer";
 import jsonBodyParser from "@middy/http-json-body-parser";
 import validator from "@middy/validator";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
