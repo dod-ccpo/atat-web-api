@@ -1,4 +1,4 @@
-import { Column, DeleteDateColumn, Entity, ManyToOne, OneToMany } from "typeorm";
+import { Column, Entity, ManyToOne, OneToMany } from "typeorm";
 import { Environment } from "./Environment";
 import { Portfolio } from "./Portfolio";
 import { ProvisionableEntity } from "./ProvisionableEntity";
