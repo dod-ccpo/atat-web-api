@@ -4,8 +4,8 @@ import { IPortfolio, IPortfolioCreate, Portfolio } from "../../orm/entity/Portfo
 @EntityRepository(Portfolio)
 export class PortfolioRepository extends Repository<Portfolio> {
   // GET portfolios/:id
-  getPortfolio(id: string): Promise<Portfolio> {
-    return this.findOneOrFail({
+  async getPortfolio(id: string): Promise<Portfolio> {
+    return await this.findOneOrFail({
       select: [
         "id",
         "name",
@@ -24,8 +24,8 @@ export class PortfolioRepository extends Repository<Portfolio> {
   }
 
   // GET all portfolios
-  getPortfolios(): Promise<Array<Portfolio>> {
-    return this.createQueryBuilder("portfolio")
+  async getPortfolios(): Promise<Array<Portfolio>> {
+    return await this.createQueryBuilder("portfolio")
       .select(["portfolio.name", "portfolio.id", "portfolio.createdAt", "portfolio.updatedAt", "portfolio.archivedAt"])
       .getMany();
   }
