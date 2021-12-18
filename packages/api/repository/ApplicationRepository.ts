@@ -1,5 +1,5 @@
-import { EntityRepository, Repository, InsertResult, UpdateResult } from "typeorm";
-import { Application, IApplicationCreate, IApplicationUpdate } from "../../orm/entity/Application";
+import { EntityRepository, Repository, InsertResult } from "typeorm";
+import { Application, IApplicationCreate } from "../../orm/entity/Application";
 
 @EntityRepository(Application)
 export class ApplicationRepository extends Repository<Application> {
@@ -41,7 +41,6 @@ export class ApplicationRepository extends Repository<Application> {
   async deleteApplication(applicationId: string): Promise<Application> {
     console.log("Deleting: " + applicationId);
     const appToDelete = await this.findOneOrFail({ id: applicationId });
-    // const deleteResult = await this.delete(applicationId);
     const deleteResult = await this.delete(applicationId);
     console.log(deleteResult);
     return appToDelete;
@@ -51,7 +50,6 @@ export class ApplicationRepository extends Repository<Application> {
   async softDeleteApplication(applicationId: string): Promise<Application> {
     console.log("Deleting: " + applicationId);
     const appToDelete = await this.findOneOrFail({ id: applicationId });
-    // const deleteResult = await this.delete(applicationId);
     const deleteResult = await this.softDelete(applicationId);
     console.log(deleteResult);
     return appToDelete;
