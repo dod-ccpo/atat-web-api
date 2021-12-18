@@ -18,6 +18,21 @@ describe("createEnvironment", () => {
     console.log(result?.body);
     expect(result?.statusCode).toBe(SuccessStatusCode.CREATED);
   });
+  it.skip("requests with properties from BaseObject should cause status code 400", async () => {
+    const validRequest: ApiGatewayEventParsed<IEnvironmentCreate> = {
+      body: {
+        name: "flaw check 1",
+        id: "7bc938ca-4c1c-4740-8ccf-18c940a70865",
+        createdAt: "2020-12-17T18:29:42.769Z",
+        updatedAt: "2020-12-17T18:29:42.769Z",
+        archivedAt: "2099-12-17T18:29:42.769Z",
+      },
+      requestContext: { identity: { sourceIp: "7.7.7.7" } },
+    } as any;
+    const result = await handler(validRequest, {} as Context, () => null);
+    console.log(result?.body);
+    expect(result?.statusCode).toBe(ErrorStatusCode.BAD_REQUEST);
+  });
   it.skip("not a unique env name error, testing locally only", async () => {
     const validRequest: ApiGatewayEventParsed<IEnvironmentCreate> = {
       body: { name: "naming makes a big difference" },

@@ -1,4 +1,4 @@
-import { EntityRepository, Repository, InsertResult, UpdateResult } from "typeorm";
+import { EntityRepository, Repository, InsertResult } from "typeorm";
 import { Environment, IEnvironmentCreate, IEnvironment } from "../../orm/entity/Environment";
 
 @EntityRepository(Environment)

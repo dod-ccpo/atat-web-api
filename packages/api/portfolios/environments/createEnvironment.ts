@@ -89,11 +89,29 @@ export async function baseHandler(
   return new ApiSuccessResponse<Array<IEnvironmentCreate>>(insertedEnvironments, SuccessStatusCode.CREATED);
 }
 
+// a workaround for ensuring validation does not give a false failure due to 'allOf'
+// also a band-aid for ensuring BaseObject properties (e.g., id) are not accepted
+// when sent in the request body
+const { description, type, additionalProperties, required } = internalSchema.Environment;
+const { administrators, contributors, readOnlyOperators } = internalSchema.Environment.allOf[1].properties;
+export const environmentSchema = {
+  description,
+  type,
+  additionalProperties,
+  required,
+  properties: {
+    name: internalSchema.Environment.properties.name,
+    administrators,
+    contributors,
+    readOnlyOperators,
+  },
+};
+
 export const handler = middy(baseHandler)
   .use(IpCheckerMiddleware())
   .use(xssSanitizer())
   .use(jsonBodyParser())
-  .use(validator({ inputSchema: wrapSchema(internalSchema.Environment) }))
+  .use(validator({ inputSchema: wrapSchema(environmentSchema) }))
   .use(errorHandlingMiddleware())
   .use(JSONErrorHandlerMiddleware())
   .use(cors(CORS_CONFIGURATION));
