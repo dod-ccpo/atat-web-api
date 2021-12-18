@@ -31,13 +31,13 @@ export class PortfolioRepository extends Repository<Portfolio> {
   }
 
   // POST create new portfolio
-  createPortfolio(portfolio: IPortfolio): Promise<InsertResult> {
-    return this.insert(portfolio);
+  async createPortfolio(portfolio: IPortfolio): Promise<InsertResult> {
+    return await this.insert(portfolio);
   }
 
   // PUT update portfolio
-  updatePortfolio(id: string, changes: IPortfolioCreate): Promise<UpdateResult> {
-    return this.update(id, { ...changes });
+  async updatePortfolio(id: string, changes: IPortfolioCreate): Promise<UpdateResult> {
+    return await this.update(id, { ...changes });
   }
 
   // DELETE portfolio (hard delete)
