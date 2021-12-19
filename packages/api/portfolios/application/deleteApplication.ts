@@ -15,7 +15,7 @@ import { createConnection } from "../../utils/database";
 import { ApplicationRepository } from "../../repository/ApplicationRepository";
 
 /**
- * Retrieve an Application based on applicationId
+ * Delete an Application based on applicationId
  *
  * @param event - The POST request from API Gateway
  */
