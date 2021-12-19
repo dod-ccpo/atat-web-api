@@ -2015,6 +2015,7 @@ components:
         Represents a set of Operators who should be granted access to
         an Application or Environment at a specific access level. The same access
         levels are available for both Applications & Environments.
+      type: object
       properties:
         administrators:
           type: array
