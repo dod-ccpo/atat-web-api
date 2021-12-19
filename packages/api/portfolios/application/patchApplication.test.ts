@@ -15,7 +15,7 @@ const validRequest: ApiGatewayEventParsed<any> = {
 } as any;
 // These local tests only work the proper local db environment
 describe("Local patchApplication tests", () => {
-  it("should return valid Application with updated operators", async () => {
+  it.skip("should return valid Application with updated operators", async () => {
     const result = await handler(validRequest, {} as Context, () => null);
     console.log(result);
     expect(result).toBeInstanceOf(ApiSuccessResponse);
@@ -24,7 +24,7 @@ describe("Local patchApplication tests", () => {
 });
 // Validation tests
 describe("Validation tests", () => {
-  it.skip("should fail due to having an incorrect path parameter", async () => {
+  it("should fail due to having an incorrect path parameter", async () => {
     const validRequest: ApiGatewayEventParsed<any> = {
       body: {},
       pathParameters: {
