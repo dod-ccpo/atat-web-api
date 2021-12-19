@@ -7,13 +7,13 @@ export interface IApplication {
   name: string;
   description: string;
 }
-export interface IApplicationUpdate extends IApplication {
+export interface IApplicationOperators extends IApplication {
   administrators?: Array<string>;
   contributors?: Array<string>;
   readOnlyOperators?: Array<string>;
 }
 
-export interface IApplicationCreate extends IApplicationUpdate {
+export interface IApplicationCreate extends IApplicationOperators {
   environments: Array<Environment>;
   portfolio?: Portfolio;
 }

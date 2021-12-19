@@ -1,5 +1,5 @@
 import { EntityRepository, Repository, InsertResult } from "typeorm";
-import { Application, IApplicationCreate } from "../../orm/entity/Application";
+import { Application, IApplicationCreate, IApplicationOperators } from "../../orm/entity/Application";
 
 @EntityRepository(Application)
 export class ApplicationRepository extends Repository<Application> {
@@ -58,5 +58,11 @@ export class ApplicationRepository extends Repository<Application> {
   // GET all applications in a Portfolio by PortfolioId
   getApplicationsByPortfolioId(portfolioId: string): Promise<Array<Application>> {
     return this.find({ where: { portfolio: portfolioId } });
+  }
+
+  // PATCH update environment operators only
+  async patchApplication(id: string, operators: IApplicationOperators): Promise<Application> {
+    await this.update(id, { ...operators });
+    return this.getApplication(id);
   }
 }
