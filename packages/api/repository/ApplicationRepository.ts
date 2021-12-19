@@ -39,8 +39,9 @@ export class ApplicationRepository extends Repository<Application> {
 
   // DELETE application (hard delete)
   async deleteApplication(applicationId: string): Promise<Application> {
-    console.log("Deleting: " + applicationId);
+    // Check if the app exists, if it doesn't findOneOrFail will throw 404 to error handling middleware
     const appToDelete = await this.findOneOrFail({ id: applicationId });
+    console.log("Deleting: " + applicationId);
     const deleteResult = await this.delete(applicationId);
     console.log(deleteResult);
     return appToDelete;
@@ -57,6 +58,6 @@ export class ApplicationRepository extends Repository<Application> {
 
   // GET all applications in a Portfolio by PortfolioId
   getApplicationsByPortfolioId(portfolioId: string): Promise<Array<Application>> {
-    return this.find({ where: { portfolio: portfolioId } });
+    return this.find({ where: { portfolio: portfolioId }, relations: ["environments"] });
   }
 }
