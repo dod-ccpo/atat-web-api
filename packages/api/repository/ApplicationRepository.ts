@@ -63,6 +63,6 @@ export class ApplicationRepository extends Repository<Application> {
   // PATCH update environment operators only
   async patchApplication(id: string, operators: IApplicationOperators): Promise<Application> {
     await this.update(id, { ...operators });
-    return this.getApplication(id);
+    return await this.getApplication(id);
   }
 }
