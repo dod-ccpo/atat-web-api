@@ -29,7 +29,7 @@ describe("Validation tests", () => {
       body: {},
       pathParameters: {
         portfolioId: "wrong",
-        applicationId: "also wrong",
+        applicationId: "also wrong", // both are wrong
       },
       requestContext: { identity: { sourceIp: "7.7.7.7" } },
     } as any;

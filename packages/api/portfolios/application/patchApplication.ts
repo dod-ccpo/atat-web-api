@@ -13,67 +13,37 @@ import { validateRequestShape } from "../../utils/shapeValidator";
 import { CORS_CONFIGURATION } from "../../utils/corsConfig";
 import { wrapSchema } from "../../utils/schemaWrapper";
 import { errorHandlingMiddleware } from "../../utils/errorHandlingMiddleware";
-import { Application, IApplicationCreate, IApplicationOperators } from "../../../orm/entity/Application";
-import { Portfolio } from "../../../orm/entity/Portfolio";
-import { createConnection } from "typeorm";
+import { IApplicationCreate, IApplicationOperators } from "../../../orm/entity/Application";
+import { createConnection } from "../../utils/database";
 import { ApplicationRepository } from "../../repository/ApplicationRepository";
-import createError from "http-errors";
-import { Environment } from "../../../orm/entity/Environment";
-import { TaskOrder } from "../../../orm/entity/TaskOrder";
-import { Clin } from "../../../orm/entity/Clin";
 
 /**
- * Create an Application
+ * Update operators in target application, based on applicationId
  *
- * @param event - The POST request from API Gateway
+ * @param event - The PATCH request from API Gateway
  */
 export async function baseHandler(
   event: ApiGatewayEventParsed<IApplicationOperators>,
   context?: Context
 ): Promise<APIGatewayProxyResult> {
   validateRequestShape<IApplicationOperators>(event);
+  // it seems that we don't even need the portfolioId for this operation
+  // we should bring this up to Jeff, and see what he thinks
   const portfolioId = event.pathParameters?.portfolioId as string;
   const applicationId = event.pathParameters?.applicationId as string;
   let response;
   // Establish databse connection
-  // const connection = await createConnection();
+  const connection = await createConnection();
   try {
-    // Ensure portfolio exists
-    // Local Database set up /////////////////////////////////////////////////////////////////////////////////////////////
-    console.log("Establishing connection");
-    const connection = await createConnection({
-      type: "postgres",
-      host: "localhost",
-      port: 5432,
-      username: "postgres",
-      password: "postgres",
-      database: "atat",
-      synchronize: false,
-      logging: false,
-      entities: [Portfolio, Application, Environment, TaskOrder, Clin],
-      migrations: ["../orm/migration/**/*.js"],
-      cli: {
-        entitiesDir: "../../../orm/entity",
-        migrationsDir: "../orm/migration",
-      },
-    });
-    // const portfolioRepository = connection.getRepository(Portfolio);
-    // const portfolio = await portfolioRepository.findOneOrFail({ id: portfolioId });
-
+    // Ensure application exists before updating, throw 404 if it doesn't exist
+    const applicationToPatch = await connection
+      .getCustomRepository(ApplicationRepository)
+      .getApplication(applicationId);
+    console.log("Application before patch:" + JSON.stringify(applicationToPatch));
     response = await connection.getCustomRepository(ApplicationRepository).patchApplication(applicationId, event.body);
     console.log("Response:" + JSON.stringify(response));
-    // Formatting response (remove the portfolio)
-    /*
-    response = newApp as IApplicationCreate;
-    if (response.portfolio) {
-      delete response.portfolio;
-      console.log("Deleted the portfolio from application response");
-    }
-    console.log("Response:" + JSON.stringify(response));
-    */
   } finally {
-    // connection.close();
-    console.log("done");
+    connection.close();
   }
 
   return new ApiSuccessResponse<IApplicationCreate>(response, SuccessStatusCode.CREATED);
