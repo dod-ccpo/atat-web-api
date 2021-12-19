@@ -1,49 +1,32 @@
-import { handler } from "./createEnvironment";
+import { handler } from "./updateEnvironment";
 import { Context } from "aws-lambda";
 import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
-import { IEnvironmentCreate } from "../../../orm/entity/Environment";
+import { IEnvironment } from "../../../orm/entity/Environment";
 import { ErrorStatusCode, SuccessStatusCode } from "../../utils/response";
 
-describe("createEnvironment", () => {
-  const validRequest: ApiGatewayEventParsed<IEnvironmentCreate> = {
-    body: { name: "new local testing after refactor" },
+describe("updateEnvironment", () => {
+  const validRequest: ApiGatewayEventParsed<IEnvironment> = {
+    body: {
+      name: "new name",
+      // an empty array is returned when an operator property is not provided
+      administrators: ["rootAdmin@mail.mil"],
+      contributors: ["dev@mail.mil"],
+      // readOnlyOperators: ["qa@mail.mil"],
+    },
     pathParameters: {
       portfolioId: "91c6bd1f-5ed8-413b-8f85-55a62dd50ad3",
       applicationId: "7bc938ca-4c1c-4740-8ccf-18c940a70862",
+      environmentId: "4097ff2a-7a1e-4e2d-ac30-21e9faa4ae9b",
     },
     requestContext: { identity: { sourceIp: "7.7.7.7" } },
   } as any;
   it.skip("successful operation testing locally only", async () => {
     const result = await handler(validRequest, {} as Context, () => null);
     console.log(result?.body);
-    expect(result?.statusCode).toBe(SuccessStatusCode.CREATED);
-  });
-  it.skip("requests with properties from BaseObject should cause status code 400", async () => {
-    const badPropertiesRequest: ApiGatewayEventParsed<IEnvironmentCreate> = {
-      ...validRequest,
-      body: {
-        name: "flaw check 1",
-        id: "7bc938ca-4c1c-4740-8ccf-18c940a70865",
-        createdAt: "2020-12-17T18:29:42.769Z",
-        updatedAt: "2020-12-17T18:29:42.769Z",
-        archivedAt: "2099-12-17T18:29:42.769Z",
-      },
-    } as any;
-    const result = await handler(badPropertiesRequest, {} as Context, () => null);
-    console.log(result?.body);
-    expect(result?.statusCode).toBe(ErrorStatusCode.BAD_REQUEST);
-  });
-  it.skip("not a unique env name error, testing locally only", async () => {
-    const sameNameRequest: ApiGatewayEventParsed<IEnvironmentCreate> = {
-      ...validRequest,
-      body: { name: "naming makes a big difference" },
-    } as any;
-    const result = await handler(sameNameRequest, {} as Context, () => null);
-    console.log(result?.body);
-    expect(result?.statusCode).toBe(ErrorStatusCode.BAD_REQUEST);
+    expect(result?.statusCode).toBe(SuccessStatusCode.OK);
   });
   it.skip("no body, testing locally only", async () => {
-    const noBodyRequest: ApiGatewayEventParsed<IEnvironmentCreate> = {
+    const noBodyRequest: ApiGatewayEventParsed<IEnvironment> = {
       // body: { name: "coolest env" },
       pathParameters: validRequest.pathParameters,
       requestContext: { identity: { sourceIp: "7.7.7.7" } },
@@ -53,11 +36,11 @@ describe("createEnvironment", () => {
     expect(result?.statusCode).toBe(ErrorStatusCode.BAD_REQUEST);
   });
   it.skip("portfolioId not found error, testing locally only", async () => {
-    const badPortfolioIdRequest: ApiGatewayEventParsed<IEnvironmentCreate> = {
+    const badPortfolioIdRequest: ApiGatewayEventParsed<IEnvironment> = {
       ...validRequest,
       pathParameters: {
+        ...validRequest.pathParameters,
         portfolioId: "91c6bd1f-5ed8-413b-8f85-55a62dd50ad5", // bad portfolio Id
-        applicationId: "7bc938ca-4c1c-4740-8ccf-18c940a70862",
       },
     } as any;
     const result = await handler(badPortfolioIdRequest, {} as Context, () => null);
@@ -65,14 +48,27 @@ describe("createEnvironment", () => {
     expect(result?.statusCode).toBe(ErrorStatusCode.NOT_FOUND);
   });
   it.skip("applicationId not found error, testing locally only", async () => {
-    const badApplicationIdRequest: ApiGatewayEventParsed<IEnvironmentCreate> = {
+    const badApplicationIdRequest: ApiGatewayEventParsed<IEnvironment> = {
       ...validRequest,
       pathParameters: {
-        portfolioId: "91c6bd1f-5ed8-413b-8f85-55a62dd50ad3",
+        ...validRequest.pathParameters,
         applicationId: "7bc938ca-4c1c-4740-8ccf-18c940a70864", // bad application Id
       },
     } as any;
     const result = await handler(badApplicationIdRequest, {} as Context, () => null);
+    console.log(result?.body);
+    expect(result?.statusCode).toBe(ErrorStatusCode.NOT_FOUND);
+  });
+  it.skip("environmentId not found error, testing locally only", async () => {
+    const badEnvironmentIdRequest: ApiGatewayEventParsed<IEnvironment> = {
+      ...validRequest,
+      pathParameters: {
+        ...validRequest.pathParameters,
+        environmentId: "4097ff2a-7a1e-4e2d-ac30-21e9faa4ae98", // bad environment Id
+      },
+      requestContext: { identity: { sourceIp: "7.7.7.7" } },
+    } as any;
+    const result = await handler(badEnvironmentIdRequest, {} as Context, () => null);
     console.log(result?.body);
     expect(result?.statusCode).toBe(ErrorStatusCode.NOT_FOUND);
   });

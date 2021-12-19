@@ -17,9 +17,9 @@ import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
 import { CORS_CONFIGURATION } from "../../utils/corsConfig";
 import { wrapSchema } from "../../utils/schemaWrapper";
 import { errorHandlingMiddleware } from "../../utils/errorHandlingMiddleware";
-import createError from "http-errors";
 import { IpCheckerMiddleware } from "../../utils/ipLogging";
 import { validateRequestShape } from "../../utils/shapeValidator";
+import { uniqueNameValidator } from "../../utils/businessRulesValidation";
 
 /**
  * Submits the environment of an application
@@ -36,6 +36,7 @@ export async function baseHandler(
 
   // set up database connection
   const connection = await createConnection();
+  const environmentRepository = connection.getCustomRepository(EnvironmentRepository);
   const insertedEnvironments: IEnvironmentCreate[] = [];
 
   try {
@@ -48,31 +49,19 @@ export async function baseHandler(
     });
 
     // get all environment names for application
-    const environments = await connection
-      .getCustomRepository(EnvironmentRepository)
-      .getAllEnvironmentNames(application.id);
+    const environmentNames = await environmentRepository.getAllEnvironmentNames(application.id);
 
-    // ensure the environment name is unique for the application
-    // according to business rule 3.3
-    for (const environment of environments) {
-      if (environment.name === environmentBody.name) {
-        throw createError(400, "Duplicate environment name in application", {
-          errorName: "DuplicateEnvironmentName",
-          environmentName: environmentBody.name,
-        });
-      }
-    }
+    // ensure unique environment name for the application (business rule 3.3)
+    uniqueNameValidator(environmentBody.name, environmentNames);
 
-    const insertResult = await connection
-      .getCustomRepository(EnvironmentRepository)
-      .createEnvironment([{ ...environmentBody, application }]);
+    const insertResult = await environmentRepository.createEnvironment([{ ...environmentBody, application }]);
 
     for (const environment of insertResult.identifiers) {
       // the result from the insert method does not have the name property
       // and an additional query after the insert is done to provide the correct shape
       // to be returned to the client. This assumes that only one environment will be
       // added at the moment but can be updated to handle more than one environment
-      const queryInsertedEnvironment = await connection.getCustomRepository(EnvironmentRepository).findOneOrFail({
+      const queryInsertedEnvironment = await environmentRepository.findOneOrFail({
         select: [
           "name",
           "id",
@@ -96,11 +85,29 @@ export async function baseHandler(
   return new ApiSuccessResponse<Array<IEnvironmentCreate>>(insertedEnvironments, SuccessStatusCode.CREATED);
 }
 
+// a workaround for ensuring validation does not give a false failure due to 'allOf'
+// also a band-aid for ensuring BaseObject properties (e.g., id) are not accepted
+// when sent in the request body
+const { description, type, additionalProperties, required } = internalSchema.Environment;
+const { administrators, contributors, readOnlyOperators } = internalSchema.AppEnvAccess.properties;
+export const environmentSchema = {
+  description,
+  type,
+  additionalProperties,
+  required,
+  properties: {
+    name: internalSchema.Environment.properties.name,
+    administrators,
+    contributors,
+    readOnlyOperators,
+  },
+};
+
 export const handler = middy(baseHandler)
   .use(IpCheckerMiddleware())
   .use(xssSanitizer())
   .use(jsonBodyParser())
-  .use(validator({ inputSchema: wrapSchema(internalSchema.Environment) }))
+  .use(validator({ inputSchema: wrapSchema(environmentSchema) }))
   .use(errorHandlingMiddleware())
   .use(JSONErrorHandlerMiddleware())
   .use(cors(CORS_CONFIGURATION));

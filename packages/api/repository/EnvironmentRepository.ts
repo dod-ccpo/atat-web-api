@@ -1,4 +1,4 @@
-import { EntityRepository, Repository, InsertResult, UpdateResult } from "typeorm";
+import { EntityRepository, Repository, InsertResult } from "typeorm";
 import { Environment, IEnvironmentCreate, IEnvironment } from "../../orm/entity/Environment";
 
 @EntityRepository(Environment)
@@ -36,11 +36,12 @@ export class EnvironmentRepository extends Repository<Environment> {
       .getManyAndCount();
   }
 
-  getAllEnvironmentNames(applicationId: string): Promise<Array<Environment>> {
-    return this.createQueryBuilder("environment")
+  async getAllEnvironmentNames(applicationId: string): Promise<Array<string>> {
+    const environments = await this.createQueryBuilder("environment")
       .select(["environment.name"])
       .where("environment.applicationId = :applicationId", { applicationId })
       .getMany();
+    return environments.map((env) => env.name);
   }
 
   // POST create new environment
@@ -49,8 +50,14 @@ export class EnvironmentRepository extends Repository<Environment> {
   }
 
   // PUT update environment
-  updateEnvironment(id: string, changes: IEnvironment): Promise<UpdateResult> {
-    return this.update(id, { ...changes });
+  async updateEnvironment(id: string, overwrites: IEnvironment): Promise<Environment> {
+    await this.update(id, {
+      administrators: [],
+      contributors: [],
+      readOnlyOperators: [],
+      ...overwrites,
+    });
+    return await this.getEnvironment(id);
   }
 
   // DELETE environment (hard delete)
