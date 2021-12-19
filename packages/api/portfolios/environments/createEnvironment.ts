@@ -36,6 +36,7 @@ export async function baseHandler(
 
   // set up database connection
   const connection = await createConnection();
+  const environmentRepository = connection.getCustomRepository(EnvironmentRepository);
   const insertedEnvironments: IEnvironmentCreate[] = [];
 
   try {
@@ -48,24 +49,19 @@ export async function baseHandler(
     });
 
     // get all environment names for application
-    const environmentNames = await connection
-      .getCustomRepository(EnvironmentRepository)
-      .getAllEnvironmentNames(application.id);
+    const environmentNames = await environmentRepository.getAllEnvironmentNames(application.id);
 
-    // ensure the environment name is unique for the application
-    // according to business rule 3.3
+    // ensure unique environment name for the application (business rule 3.3)
     uniqueNameValidator(environmentBody.name, environmentNames);
 
-    const insertResult = await connection
-      .getCustomRepository(EnvironmentRepository)
-      .createEnvironment([{ ...environmentBody, application }]);
+    const insertResult = await environmentRepository.createEnvironment([{ ...environmentBody, application }]);
 
     for (const environment of insertResult.identifiers) {
       // the result from the insert method does not have the name property
       // and an additional query after the insert is done to provide the correct shape
       // to be returned to the client. This assumes that only one environment will be
       // added at the moment but can be updated to handle more than one environment
-      const queryInsertedEnvironment = await connection.getCustomRepository(EnvironmentRepository).findOneOrFail({
+      const queryInsertedEnvironment = await environmentRepository.findOneOrFail({
         select: [
           "name",
           "id",
@@ -93,7 +89,7 @@ export async function baseHandler(
 // also a band-aid for ensuring BaseObject properties (e.g., id) are not accepted
 // when sent in the request body
 const { description, type, additionalProperties, required } = internalSchema.Environment;
-const { administrators, contributors, readOnlyOperators } = internalSchema.Environment.allOf[1].properties;
+const { administrators, contributors, readOnlyOperators } = internalSchema.AppEnvAccess.properties;
 export const environmentSchema = {
   description,
   type,

@@ -36,6 +36,7 @@ export async function baseHandler(
 
   // set up database connection
   const connection = await createConnection();
+  const environmentRepository = connection.getCustomRepository(EnvironmentRepository);
   let response: Environment;
 
   try {
@@ -46,20 +47,14 @@ export async function baseHandler(
     const application = await connection.getRepository(Application).findOneOrFail({
       id: applicationId,
     });
-    const environment = await connection
-      .getCustomRepository(EnvironmentRepository)
-      .findOneOrFail({ id: environmentId });
 
-    const environmentNames = await connection
-      .getCustomRepository(EnvironmentRepository)
-      .getAllEnvironmentNames(application.id);
+    const environment = await environmentRepository.findOneOrFail({ id: environmentId });
+    const environmentNames = await environmentRepository.getAllEnvironmentNames(application.id);
 
     // Throws error if duplicate name found
     uniqueNameValidator(requestBody.name, environmentNames);
 
-    response = await connection
-      .getCustomRepository(EnvironmentRepository)
-      .updateEnvironment(environment.id, requestBody);
+    response = await environmentRepository.updateEnvironment(environment.id, requestBody);
     console.log("Updated Environment: " + JSON.stringify(response));
   } finally {
     connection.close();
