@@ -198,6 +198,7 @@ export class AtatWebApiStack extends cdk.Stack {
 
     // Internal API Operations
     this.addDatabaseApiFunction("createApplication", "portfolios/application/", props.vpc, TablePermissions.WRITE);
+    this.addDatabaseApiFunction("getApplication", "portfolios/application/", props.vpc, TablePermissions.READ);
 
     // The API spec, which just so happens to be a valid CloudFormation snippet (with some actual CloudFormation
     // in it) gets uploaded to S3. The Asset resource reuses the same bucket that the CDK does, so this does not
