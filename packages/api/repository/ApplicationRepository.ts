@@ -25,7 +25,6 @@ export class ApplicationRepository extends Repository<Application> {
         "administrators",
         "contributors",
         "readOnlyOperators",
-        "provisioningStatus",
       ],
       where: { id: applicationId },
       relations: ["environments"],
