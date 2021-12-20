@@ -1,0 +1,60 @@
+---
+name: Deploy ATAT API Infrastructure
+
+on:
+  push:
+    branches:
+      - develop
+
+env:
+  ENVIRONMENT_ID: "Dev"
+
+jobs:
+  deployInfrastructure:
+    name: Test STS
+    runs-on: ubuntu-latest
+    permissions:
+      # Required for the OIDC endpoint
+      id-token: write
+    steps:
+      # - name: Checkout code
+      #   uses: actions/checkout@v2
+      - name: Authenticate to AWS
+        # The repo has not tagged a release with OIDC support so we must follow master
+        uses: aws-actions/configure-aws-credentials@master
+        with:
+          aws-region: us-gov-west-1
+          role-to-assume: arn:aws-us-gov:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/AtatPipelineDeploymentRole
+          role-session-name: Deployment${{ github.run_id }}-${{ github.run_attempt }}
+      - name: Test AWS access
+        run: |
+          aws sts get-caller-identity
+      - name: Checkout the repository
+        uses: actions/checkout@v2
+      - name: Setup NodeJS
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+          cache: npm
+      - name: Install global dependencies
+        run: |
+          npm install -g aws-cdk
+      - name: Install project dependencies
+        run: |
+          npm ci
+          npm run bootstrap
+      - name: Generate schema.json
+        run: |
+          npm run prebuild
+      - name: Check differences in the environment
+        run: cdk diff -c "EnvironmentId=${{ env.ENVIRONMENT_ID }}"
+      - name: Gather CloudFormation artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: cloudformation-assets
+          path: |
+            cdk.out/*.template.json
+            cdk.out/asset.*/index.js
+      - name: Deploy changes
+        run: cdk deploy -c "EnvironmentId=${{ env.ENVIRONMENT_ID }}"
+        
