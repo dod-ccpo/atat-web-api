@@ -7,7 +7,7 @@ import { EnvironmentRepository } from "../../repository/EnvironmentRepository";
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from "aws-lambda";
 import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
 import middy from "@middy/core";
-import xssSanitizer from "../../portfolioDrafts/xssSanitizer";
+import xssSanitizer from "../../utils/xssSanitizer";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import cors from "@middy/http-cors";
 import { CORS_CONFIGURATION } from "../../utils/corsConfig";
