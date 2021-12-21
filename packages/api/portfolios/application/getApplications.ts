@@ -17,7 +17,7 @@ import { ApplicationRepository } from "../../repository/ApplicationRepository";
 /**
  * Retrieve all Applications associated with the provided portfolioId
  *
- * @param event - The POST request from API Gateway
+ * @param event - The GET request from API Gateway
  */
 export async function baseHandler(
   event: ApiGatewayEventParsed<Application>,
