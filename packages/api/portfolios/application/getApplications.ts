@@ -36,7 +36,7 @@ export async function baseHandler(
     connection.close();
   }
 
-  return new ApiSuccessResponse<Array<Application>>(response, SuccessStatusCode.CREATED);
+  return new ApiSuccessResponse<Array<Application>>(response, SuccessStatusCode.OK);
 }
 
 export const handler = middy(baseHandler)
