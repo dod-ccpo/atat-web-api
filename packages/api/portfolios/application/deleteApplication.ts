@@ -17,7 +17,7 @@ import { ApplicationRepository } from "../../repository/ApplicationRepository";
 /**
  * Delete an Application based on applicationId
  *
- * @param event - The POST request from API Gateway
+ * @param event - The DELETE request from API Gateway
  */
 export async function baseHandler(
   event: ApiGatewayEventParsed<Application>,
