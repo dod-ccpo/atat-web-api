@@ -39,7 +39,7 @@ export async function baseHandler(
     connection.close();
   }
 
-  return new ApiSuccessResponse<IApplicationCreate>(response, SuccessStatusCode.CREATED);
+  return new ApiSuccessResponse<IApplicationCreate>(response, SuccessStatusCode.OK);
 }
 
 export const handler = middy(baseHandler)
