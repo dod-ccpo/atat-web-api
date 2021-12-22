@@ -1083,7 +1083,7 @@ paths:
             - cognitoAuthorizer: []
           - Ref: AWS::NoValue
     delete:
-      description: Deletes a TaskOrder (hard delete if not provisioned, soft delete otherwise)
+      description: Deletes a Task Order (hard delete if not provisioned, soft delete otherwise)
       operationId: deleteTaskOrder
       parameters:
         - name: portfolioId
@@ -1482,8 +1482,8 @@ paths:
     post:
       tags:
         - taskOrder
-      description: Uploads a Task Order PDF
-      operationId: uploadTaskOrder
+      description: Uploads a Task Order PDF file
+      operationId: uploadTaskOrderFile
       responses:
         '201':
           description: Successful operation
@@ -1503,7 +1503,7 @@ paths:
       x-amazon-apigateway-integration:
         httpMethod: "POST"
         uri:
-          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${UploadTaskOrderFunction.Arn}/invocations"
+          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${UploadTaskOrderFileFunction.Arn}/invocations"
         type: "aws_proxy"
       security:
         Fn::If:
@@ -1538,8 +1538,8 @@ paths:
     get:
       tags:
         - taskOrder
-      description: Gets File Metadata for a Task Order
-      operationId: getTaskOrderMetadata
+      description: Gets metadata for a Task Order PDF file
+      operationId: getTaskOrderFileMetadata
       parameters:
         - name: taskOrderId
           in: path
@@ -1571,8 +1571,8 @@ paths:
     delete:
       tags:
         - taskOrder
-      description: Deletes a Task Order PDF
-      operationId: deleteTaskOrder
+      description: Deletes a Task Order PDF file
+      operationId: deleteTaskOrderFile
       parameters:
         - name: taskOrderId
           in: path
@@ -1589,7 +1589,7 @@ paths:
       x-amazon-apigateway-integration:
         httpMethod: "POST"
         uri:
-          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DeleteTaskOrderFunction.Arn}/invocations"
+          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DeleteTaskOrderFileFunction.Arn}/invocations"
         type: "aws_proxy"
       security:
         Fn::If:
@@ -1624,8 +1624,8 @@ paths:
     get:
       tags:
         - taskOrder
-      description: Downloads a Task Order PDF
-      operationId: downloadTaskOrder
+      description: Downloads a Task Order PDF file
+      operationId: downloadTaskOrderFile
       parameters:
         - name: taskOrderId
           in: path
