@@ -17,6 +17,7 @@ import { validateRequestShape } from "../utils/shapeValidator";
 import { wrapSchema } from "../utils/schemaWrapper";
 import schema = require("../models/internalSchema.json");
 import xssSanitizer from "../utils/xssSanitizer";
+import { EmptyPortfolioMiddleware } from "../utils/emptyPortfolioMiddleware";
 
 /**
  * Creates a new Portfolio
@@ -82,6 +83,7 @@ export const handler = middy(baseHandler)
   .use(IpCheckerMiddleware())
   .use(xssSanitizer())
   .use(jsonBodyParser())
+  .use(EmptyPortfolioMiddleware())
   .use(validator({ inputSchema: wrapSchema(portfolioSchema) }))
   .use(errorHandlingMiddleware())
   .use(JSONErrorHandlerMiddleware())
