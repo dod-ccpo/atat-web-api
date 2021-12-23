@@ -67,15 +67,27 @@ export async function baseHandler(
   return new ApiSuccessResponse<IPortfolioCreate>(insertedPortfolio, SuccessStatusCode.CREATED);
 }
 
+// a workaround for ensuring validation does not give a false failure due to 'allOf'
+// also a band-aid for ensuring BaseObject properties (e.g., id) are not accepted
+// when sent in the request body
+const { type, additionalProperties, required: portfolioRequired } = schema.Portfolio;
+const { required: baseRequired } = schema.PortfolioBase;
+const { portfolioManagers, description, owner /*, applications */ } = schema.Portfolio.properties;
+const { csp, dodComponents, name } = schema.PortfolioBase.properties;
+const { portfolioAdministrators } = schema.PortfolioAccess.properties;
 const portfolioSchema = {
-  additionalProperties: schema.Portfolio.additionalProperties,
-  type: schema.Portfolio.type,
-  required: schema.Portfolio.required,
+  type,
+  additionalProperties,
+  required: baseRequired.concat(portfolioRequired),
   properties: {
-    ...schema.PortfolioBase.properties,
-    ...schema.Portfolio.properties,
-    ...schema.PortfolioSummary.properties,
-    ...schema.PortfolioAccess.properties,
+    portfolioManagers,
+    description,
+    owner,
+    // applications,
+    csp,
+    dodComponents,
+    name,
+    portfolioAdministrators,
   },
 };
 
