@@ -66,8 +66,13 @@ describe("createPortfolio", () => {
       const body = JSON.parse(result?.body ?? "");
       expect(body.code).toBe(ErrorCode.INVALID_INPUT);
       expect(body.message).toBe("Request failed validation");
-      expect(body.error_map[0].keyword).toBe("additionalProperties");
-      expect(body.error_map[0].message).toBe("must NOT have additional properties");
+      let foundAdditionalPropertiesKeywordFlag = false;
+      body.error_map.forEach((errorItem: any) => {
+        if (errorItem.keyword === "additionalProperties") {
+          foundAdditionalPropertiesKeywordFlag = true;
+        }
+      });
+      expect(foundAdditionalPropertiesKeywordFlag).toBe(true);
     });
   });
 });
