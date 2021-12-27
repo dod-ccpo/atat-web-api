@@ -54,7 +54,6 @@ export async function baseHandler(
         "updatedAt",
         "archivedAt",
         "administrators",
-        "provisioningStatus",
       ],
       where: { id: portfolioId },
     });
