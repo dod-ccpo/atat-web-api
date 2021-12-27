@@ -27,8 +27,8 @@ export interface IPortfolio {
 }
 
 export interface IPortfolioCreate extends IPortfolio {
-  description: string;
-  owner: string;
+  description?: string;
+  owner?: string;
   csp: CloudServiceProvider;
   portfolioManagers: Array<string>;
   dodComponents: Array<DodComponent>;
@@ -42,7 +42,7 @@ export class Portfolio extends ProvisionableEntity {
   @Column({ type: "varchar", nullable: true, length: 300 })
   description: string;
 
-  @Column({ type: "varchar" })
+  @Column({ type: "varchar", nullable: true })
   owner: string;
 
   @Column({ type: "enum", enum: CloudServiceProvider })
