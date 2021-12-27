@@ -5,7 +5,7 @@ import { IPortfolio, IPortfolioCreate, Portfolio } from "../../orm/entity/Portfo
 export class PortfolioRepository extends Repository<Portfolio> {
   // GET portfolios/:id
   async getPortfolio(id: string): Promise<Portfolio> {
-    return await this.findOneOrFail({
+    return this.findOneOrFail({
       select: [
         "id",
         "name",
@@ -25,19 +25,19 @@ export class PortfolioRepository extends Repository<Portfolio> {
 
   // GET all portfolios
   async getPortfolios(): Promise<Array<Portfolio>> {
-    return await this.createQueryBuilder("portfolio")
+    return this.createQueryBuilder("portfolio")
       .select(["portfolio.name", "portfolio.id", "portfolio.createdAt", "portfolio.updatedAt", "portfolio.archivedAt"])
       .getMany();
   }
 
   // POST create new portfolio
   async createPortfolio(portfolio: IPortfolio): Promise<InsertResult> {
-    return await this.insert(portfolio);
+    return this.insert(portfolio);
   }
 
   // PUT update portfolio
   async updatePortfolio(id: string, changes: IPortfolioCreate): Promise<UpdateResult> {
-    return await this.update(id, { ...changes });
+    return this.update(id, { ...changes });
   }
 
   // DELETE portfolio (hard delete)

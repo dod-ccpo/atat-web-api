@@ -18,10 +18,7 @@ export function validateRequestShape<T>(
   event: ApiGatewayEventParsed<T>,
   ...extraValidators: Array<(obj: unknown) => obj is T>
 ): SetupSuccess<T> {
-  if (
-    event.pathParameters &&
-    !Object.values(event.pathParameters as APIGatewayProxyEventPathParameters).every(isValidUuidV4)
-  ) {
+  if (event.pathParameters && !Object.values(event.pathParameters).every(isValidUuidV4)) {
     throw createError(404, "Shape validation failed, invalid UUIDv4");
   }
   const requestBody = event.body;
