@@ -1,0 +1,1 @@
+ALTER TABLE portfolio ALTER COLUMN owner DROP NOT NULL;
