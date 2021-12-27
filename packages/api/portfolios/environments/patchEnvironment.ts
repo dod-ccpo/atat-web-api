@@ -6,24 +6,24 @@ import { Environment, IEnvironmentOperators } from "../../../orm/entity/Environm
 import { EnvironmentRepository } from "../../repository/EnvironmentRepository";
 import { APIGatewayProxyResult, Context } from "aws-lambda";
 import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
-import internalSchema = require("../../models/internalSchema.json");
+import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
+import { validateRequestShape } from "../../utils/shapeValidator";
 import middy from "@middy/core";
-import xssSanitizer from "../../utils/xssSanitizer";
+import internalSchema = require("../../models/internalSchema.json");
+import { wrapSchema } from "../../utils/schemaWrapper";
+import { IpCheckerMiddleware } from "../../utils/ipLogging";
 import jsonBodyParser from "@middy/http-json-body-parser";
+import xssSanitizer from "../../utils/xssSanitizer";
 import validator from "@middy/validator";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
-import cors from "@middy/http-cors";
-import { ApiGatewayEventParsed } from "../../utils/eventHandlingTool";
-import { CORS_CONFIGURATION } from "../../utils/corsConfig";
-import { wrapSchema } from "../../utils/schemaWrapper";
 import { errorHandlingMiddleware } from "../../utils/errorHandlingMiddleware";
-import { IpCheckerMiddleware } from "../../utils/ipLogging";
-import { validateRequestShape } from "../../utils/shapeValidator";
+import cors from "@middy/http-cors";
+import { CORS_CONFIGURATION } from "../../utils/corsConfig";
 
 /**
- * Submits an update to an environment of an application
+ * Submits a request to update the operators of an environment
  *
- * @param event - The PUT request from API Gateway
+ * @param event - The PATCH request from API Gateway
  */
 export async function baseHandler(
   event: ApiGatewayEventParsed<IEnvironmentOperators>,
