@@ -10,8 +10,6 @@ function emptyPortfolioBody() {
   // improve the default values when possible
   const emptyPortfolio = {
     name: `New Portfolio ${new Date().valueOf()}`,
-    // replace with logged in user
-    owner: "portfolio.creator@example.mil",
     // need a better default
     csp: CloudServiceProvider.CSP_A,
     dodComponents: [],
