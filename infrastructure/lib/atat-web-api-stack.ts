@@ -507,27 +507,27 @@ export class AtatWebApiStack extends cdk.Stack {
       logTargetPrefix: "logs/taskorders/",
     });
     this.functions.push(
-      new ApiFlexFunction(this, "UploadTaskOrder", {
+      new ApiFlexFunction(this, "UploadTaskOrderFile", {
         lambdaVpc: props.vpc,
         bucket: taskOrderManagement.pendingBucket,
         bucketPermissions: BucketPermissions.PUT,
         method: HttpMethod.POST,
-        handlerPath: this.determineApiHandlerPath("uploadTaskOrder", "taskOrderFiles/"),
+        handlerPath: this.determineApiHandlerPath("uploadTaskOrderFile", "taskOrderFiles/"),
         functionPropsOverride: {
           memorySize: 256,
         },
       }).fn,
-      new ApiFlexFunction(this, "DeleteTaskOrder", {
+      new ApiFlexFunction(this, "DeleteTaskOrderFile", {
         lambdaVpc: props.vpc,
         bucket: taskOrderManagement.acceptedBucket,
         method: HttpMethod.DELETE,
         bucketPermissions: BucketPermissions.DELETE,
-        handlerPath: this.determineApiHandlerPath("deleteTaskOrder", "taskOrderFiles/"),
+        handlerPath: this.determineApiHandlerPath("deleteTaskOrderFile", "taskOrderFiles/"),
       }).fn
     );
 
-    // TODO: getTaskOrderMetadata
-    // TODO: downloadTaskOrder
+    // TODO: getTaskOrderFileMetadata
+    // TODO: downloadTaskOrderFile
   }
 
   private determineApiHandlerPath(operationId: string, handlerFolder: string): string {
