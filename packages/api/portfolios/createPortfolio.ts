@@ -73,7 +73,7 @@ const { type, additionalProperties, required: portfolioRequired } = schema.Portf
 const { required: baseRequired } = schema.PortfolioBase;
 const { portfolioManagers, description, owner /*, applications */ } = schema.Portfolio.properties;
 const { csp, dodComponents, name } = schema.PortfolioBase.properties;
-const { portfolioAdministrators } = schema.PortfolioAccess.properties;
+const { administrators } = schema.PortfolioAccess.properties;
 const portfolioSchema = {
   type,
   additionalProperties,
@@ -86,7 +86,7 @@ const portfolioSchema = {
     csp,
     dodComponents,
     name,
-    portfolioAdministrators,
+    administrators,
   },
 };
 
