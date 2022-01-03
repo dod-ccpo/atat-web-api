@@ -1,4 +1,3 @@
-import { APIGatewayProxyEventPathParameters } from "aws-lambda";
 import createError from "http-errors";
 import { ApiGatewayEventParsed } from "./eventHandlingTool";
 import { SetupSuccess } from "./response";
