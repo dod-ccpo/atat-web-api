@@ -2005,7 +2005,7 @@ components:
         a Portfolio at a specific access level. Uses an enum construct for forward
         compatibility should other access levels be specified.
       properties:
-        portfolioAdministrators:
+        administrators:
           type: array
           items:
             type: string
