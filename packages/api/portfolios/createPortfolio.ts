@@ -18,6 +18,7 @@ import { wrapSchema } from "../utils/schemaWrapper";
 import schema = require("../models/internalSchema.json");
 import xssSanitizer from "../utils/xssSanitizer";
 import { EmptyPortfolioMiddleware } from "../utils/emptyPortfolioMiddleware";
+import createError from "http-errors";
 
 /**
  * Creates a new Portfolio
@@ -38,6 +39,15 @@ export async function baseHandler(
   let insertedPortfolio: IPortfolioCreate;
 
   try {
+    // Business rule 1.1: unique Portfolio Name
+    const existingPortfoliosWithIdenticalName = await portfolioRepository.getPortfoliosByName(portfolioBody.name);
+    if (existingPortfoliosWithIdenticalName.length > 0) {
+      throw createError(400, "Duplicate portfolio name", {
+        errorName: "DuplicatePortfolioName",
+        portfolioName: portfolioBody.name,
+      });
+    }
+
     const insertResult = await portfolioRepository.createPortfolio(portfolioBody);
     const portfolioId = insertResult.identifiers[0].id;
     // query for the newly inserted portfolio

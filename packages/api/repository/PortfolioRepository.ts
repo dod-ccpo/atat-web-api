@@ -30,6 +30,14 @@ export class PortfolioRepository extends Repository<Portfolio> {
       .getMany();
   }
 
+  // GET all portfolios with the given name
+  getPortfoliosByName(name: string): Promise<Array<Portfolio>> {
+    return this.createQueryBuilder("portfolio")
+      .select(["portfolio.name"])
+      .where("portfolio.name = :name", { name })
+      .getMany();
+  }
+
   // POST create new portfolio
   async createPortfolio(portfolio: IPortfolio): Promise<InsertResult> {
     return this.insert(portfolio);
