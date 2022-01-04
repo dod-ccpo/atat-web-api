@@ -20,15 +20,15 @@ export enum DodComponent {
   OSD_PSAS = "OSD_PSAS",
   NSA = "NSA",
 }
+
 export interface IPortfolio {
   name: string;
-  description?: string;
+  administrators?: Array<string>;
 }
 
-export interface PortfolioUpdate {
-  name: string;
-  description: string;
-  owner: string;
+export interface IPortfolioCreate extends IPortfolio {
+  description?: string;
+  owner?: string;
   csp: CloudServiceProvider;
   portfolioManagers: Array<string>;
   dodComponents: Array<DodComponent>;
@@ -42,7 +42,7 @@ export class Portfolio extends ProvisionableEntity {
   @Column({ type: "varchar", nullable: true, length: 300 })
   description: string;
 
-  @Column({ type: "varchar" })
+  @Column({ type: "varchar", nullable: true })
   owner: string;
 
   @Column({ type: "enum", enum: CloudServiceProvider })

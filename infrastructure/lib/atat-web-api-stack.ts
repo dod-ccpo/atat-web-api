@@ -27,7 +27,6 @@ import { TablePermissions, QueuePermissions, BucketPermissions } from "./resourc
 import * as utils from "./util";
 import { ApiFlexFunction, ApiFunctionPropstest } from "./constructs/lambda-fn";
 import { Database } from "./constructs/database";
-import { Duration } from "@aws-cdk/core";
 
 interface AtatIdpProps {
   secretName: string;
@@ -152,6 +151,7 @@ export class AtatWebApiStack extends cdk.Stack {
     // Portfolios Operations using the internal API spec
     this.addDatabaseApiFunction("createEnvironment", "portfolios/environments/", props.vpc, TablePermissions.WRITE);
     this.addDatabaseApiFunction("updateEnvironment", "portfolios/environments/", props.vpc, TablePermissions.WRITE);
+    this.addDatabaseApiFunction("createPortfolio", "portfolios/", props.vpc, TablePermissions.WRITE);
 
     // PortfolioDraft Operations
     this.addDatabaseApiFunction("getPortfolioDrafts", "portfolioDrafts/", props.vpc, TablePermissions.READ);
@@ -549,7 +549,7 @@ export class AtatWebApiStack extends cdk.Stack {
       database: this.database,
       ormLayer: this.ormLayer,
       functionPropsOverride: {
-        timeout: Duration.seconds(10),
+        timeout: cdk.Duration.seconds(10),
       },
     };
     this.functions.push(new ApiFlexFunction(this, utils.apiSpecOperationFunctionName(operationId), props).fn);

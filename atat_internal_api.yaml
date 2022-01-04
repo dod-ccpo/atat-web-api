@@ -80,7 +80,7 @@ paths:
       x-amazon-apigateway-integration:
         httpMethod: "POST"
         uri:
-          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NotImplementedFunction.Arn}/invocations"
+          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CreatePortfolioFunction.Arn}/invocations"
         type: "aws_proxy"
       security:
         Fn::If:
@@ -2005,7 +2005,7 @@ components:
         a Portfolio at a specific access level. Uses an enum construct for forward
         compatibility should other access levels be specified.
       properties:
-        portfolioAdministrators:
+        administrators:
           type: array
           items:
             type: string
