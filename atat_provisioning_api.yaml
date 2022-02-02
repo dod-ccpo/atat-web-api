@@ -1,0 +1,192 @@
+openapi: 3.0.2
+info:
+  description: >-
+    This is the ATAT Provisioning API, an internal API solely meant for use by the Service Now component of ATAT in
+    order to kick off provisioning jobs.
+  version: '0.1'
+  title: ATAT Internal API - Provisioning
+  contact:
+    email: replaceme@ccpo.mil
+tags:
+  - name: provisioning
+    description: >-
+      Operations related to provisioning jobs
+paths:
+  /provisioning-jobs:
+    post:
+      tags:
+        - provisioning
+      description: Starts a new Provisioning Job
+      operationId: startProvisioningJob
+      responses:
+        '201':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProvisioningRequest'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+      requestBody:
+        description: An empty String or JSON body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProvisioningRequest'
+    options:
+      tags:
+        - cors
+      description: CORS headers
+      responses:
+        '200':
+          $ref: '#/components/responses/CorsHeaders'
+components:
+  responses:
+    CorsHeaders:
+      description: Default response for CORS method
+      headers:
+        Access-Control-Allow-Origin:
+          schema:
+            type: string
+        Access-Control-Allow-Methods:
+          schema:
+            type: string
+        Access-Control-Allow-Headers:
+          schema:
+            type: string
+      content: {}
+  schemas:
+    Error:
+      type: object
+      additionalProperties: false
+      description: Generic error model
+      properties:
+        code:
+          type: string
+          enum: [INVALID_INPUT, OTHER]
+        message:
+          type: string
+      required:
+        - code
+        - message
+    ValidationError:
+      allOf:
+        - $ref: '#/components/schemas/Error'
+        - type: object
+          additionalProperties: false
+          required:
+            - error_map
+          properties:
+            error_map:
+              type: object
+              description: 'Maps form input IDs to validation error messages so that clients can display in-line errors'
+    ProvisioningRequest:
+      description: Represents a generic request for provisioning cloud resources via ATAT
+      type: object
+      additionalProperties: false
+      properties:
+        job_id:
+          type: string
+        user_id:
+          type: string
+        account_id:
+          type: string
+        operation_type:
+          $ref: '#/components/schemas/OperationType'
+        target_cloud:
+          $ref: '#/components/schemas/TargetCloud'
+        target_network:
+          $ref: '#/components/schemas/TargetNetwork'
+        payload:
+          oneOf:
+            - $ref: '#/components/schemas/NewAccountPayload'
+            - $ref: '#/components/schemas/FundingSourcePayload'
+            - $ref: '#/components/schemas/OperatorPayload'
+    OperationType:
+      description: Distinguishes type of operation that a user is performing
+      type: string
+      enum:
+        - NEW_ACCOUNT
+        - ADD_OPERATORS
+        - ADD_FUNDING_SOURCE
+    TargetCloud:
+      description: Distinguishes the cloud where the provisioning operation will occur
+      type: string
+      enum:
+        - CLOUD_A
+        - CLOUD_B
+        - CLOUD_C
+        - CLOUD_D
+    TargetNetwork:
+      description: Distinguishes the network whre the provisioning operation will occur
+      type: string
+      enum:
+        - NETWORK_1
+        - NETWORK_2
+        - NETWORK_3
+    ProvisioningPayload:
+      description: Abstract base model describing the payloads for provisioning operations
+    NewAccountPayload:
+      description: Payload for creation of a new CSP Account
+      allOf:
+        - $ref: '#/components/schemas/ProvisioningPayload'
+      properties:
+        name:
+          type: string
+          description: Name of the Account being created
+        funding_sources:
+          type: array
+          items:
+            $ref: '#/components/schemas/FundingSource'
+        operators:
+          type: array
+          description: Array of operator email addresses
+          items:
+            type: string
+            example: "user@mail.mil"
+        csp_id:
+          type: string
+          readOnly: true
+    FundingSourcePayload:
+      description: Payload for the addition of a Funding Source to an existing CSP Account
+      allOf:
+        - $ref: '#/components/schemas/ProvisioningPayload'
+      properties:
+        funding_sources:
+          type: array
+          items:
+            $ref: '#/components/schemas/FundingSource'
+    OperatorPayload:
+      description: Payload for the addition of an Operator to an existing CSP Account
+      allOf:
+        - $ref: '#/components/schemas/ProvisioningPayload'
+      properties:
+        operators:
+          type: array
+          description: Array of operator email addresses
+          items:
+            type: string
+            example: "user@mail.mil"
+    FundingSource:
+      type: object
+      description: >-
+        A Task Order and CLIN used to pay for provisioned resources and services
+      properties:
+        task_order_number:
+          type: string
+          example: "1234567891234"
+        clin:
+          type: string
+          example: "0001"
+        pop_start_date:
+          type: string
+          format: date
+          example: "2021-07-01"
+        pop_end_date:
+          type: string
+          format: date
+          example: "2022-07-01"
