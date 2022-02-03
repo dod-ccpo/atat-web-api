@@ -151,7 +151,7 @@ components:
         - CLOUD_C
         - CLOUD_D
     TargetNetwork:
-      description: Distinguishes the network whre the provisioning operation will occur
+      description: Distinguishes the network where the provisioning operation will occur
       type: string
       enum:
         - NETWORK_1
