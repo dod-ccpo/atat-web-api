@@ -1,7 +1,7 @@
 openapi: 3.0.2
 info:
   description: >-
-    This is the ATAT Provisioning API, an internal API solely meant for use by the Service Now component of ATAT in
+    This is the ATAT Provisioning API, an internal API solely meant for use by the ServiceNow component of ATAT in
     order to kick off provisioning jobs.
   version: '0.1'
   title: ATAT Internal API - Provisioning
@@ -46,7 +46,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/ValidationError'
       requestBody:
-        description: An empty String or JSON body
         content:
           application/json:
             schema:
@@ -78,15 +77,11 @@ components:
       type: object
       additionalProperties: false
       description: Generic error model
+      required:
+        - message
       properties:
-        code:
-          type: string
-          enum: [INVALID_INPUT, OTHER]
         message:
           type: string
-      required:
-        - code
-        - message
     ValidationError:
       allOf:
         - $ref: '#/components/schemas/Error'
@@ -97,7 +92,7 @@ components:
           properties:
             error_map:
               type: object
-              description: 'Maps form input IDs to validation error messages so that clients can display in-line errors'
+              description: Maps form input IDs to validation error messages so that clients can display in-line errors
     ProvisioningRequest:
       description: Represents a generic request for provisioning cloud resources via ATAT
       type: object
@@ -107,7 +102,7 @@ components:
         - user_id
         - portfolio_id
         - operation_type
-        - target_cloud
+        - target_csp
         - target_network
         - payload
       properties:
@@ -122,8 +117,8 @@ components:
           type: string
         operation_type:
           $ref: '#/components/schemas/OperationType'
-        target_cloud:
-          $ref: '#/components/schemas/TargetCloud'
+        target_csp:
+          $ref: '#/components/schemas/TargetCloudServiceProvider'
         target_network:
           $ref: '#/components/schemas/TargetNetwork'
         payload:
@@ -142,14 +137,14 @@ components:
         - ADD_PORTFOLIO
         - ADD_OPERATORS
         - ADD_FUNDING_SOURCE
-    TargetCloud:
+    TargetCloudServiceProvider:
       description: Distinguishes the cloud where the provisioning operation will occur
       type: string
       enum:
-        - CLOUD_A
-        - CLOUD_B
-        - CLOUD_C
-        - CLOUD_D
+        - CSP_A
+        - CSP_B
+        - CSP_C
+        - CSP_D
     TargetNetwork:
       description: Distinguishes the network where the provisioning operation will occur
       type: string
