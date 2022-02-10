@@ -1,4 +1,4 @@
-# Welcome to your CDK TypeScript project!
+The ATAT Web API repo contains a set of services which enable ATAT Provisioning into vendor environments by way of the [ATAT CSP Specification](https://github.com/dod-ccpo/atat-csp-orchestration/blob/main/provisioning/atat_provisioning.yaml). It is implemented in a stateless fashion, using SQS Queues to pass information back to integrators. Initially, this API is only meant to be accessed by the Service Now component of ATAT, but it may be opened up to other integrators in the future.
 
 This is a blank project for TypeScript development with CDK.
 
