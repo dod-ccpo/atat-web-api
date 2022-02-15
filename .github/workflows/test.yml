@@ -18,7 +18,7 @@ jobs:
         run: |
           file="package-lock.json"
           expectedVersion="2"
-          lockfileVersion="$(jq -r .lockfileVersion "$file")"
+          lockFileVersion="$(jq -r .lockfileVersion "$file")"
           if [ "$lockFileVesion" != "$expectedVersion" ]; then
               echo "$file: lockfileVersion ($lockFileVesion) is invalid (expected: $expectedVersion)"
               exit 1
