@@ -40,7 +40,7 @@ export interface AtatRestApiProps extends apigw.RestApiBaseProps {
 export class AtatRestApi extends Construct {
   readonly restApi: apigw.RestApiBase;
 
-  constructor(scope: Construct, id: string, props: AtatRestApiProps) {
+  constructor(scope: Construct, id: string, props?: AtatRestApiProps) {
     super(scope, id);
     const accessLogs = new logs.LogGroup(this, "AccessLogs");
 
@@ -49,24 +49,24 @@ export class AtatRestApi extends Construct {
     // endpoint. Otherwise, a regional endpoint is used. Edge endpoints are not
     // configured purely for convenience (as they're not available in all
     // regions or partitions). 
-    const isPrivateApi = !!props.vpcConfig;
-    const privateEndpointConfig = {
+    const isPrivateApi = !!props?.vpcConfig;
+    const privateEndpointConfig = () => ({
       endpointTypes: [apigw.EndpointType.PRIVATE],
       endpointConfiguration: {
         types: [apigw.EndpointType.PRIVATE],
-        vpcEndpoints: [props.vpcConfig?.interfaceEndpoint!],
+        vpcEndpoints: [props?.vpcConfig?.interfaceEndpoint!],
       },
-      policy: this.privateEndpointPolicy(props.vpcConfig?.interfaceEndpoint!),
-    };
-    const regionalEndpointConfig = {
+      policy: this.privateEndpointPolicy(props?.vpcConfig?.interfaceEndpoint!),
+    });
+    const regionalEndpointConfig = () => ({
       endpointTypes: [apigw.EndpointType.REGIONAL]
-    }
+    });
 
     const restApi = new apigw.RestApi(this, "Api", {
       ...props,
-      ...(isPrivateApi ? privateEndpointConfig : regionalEndpointConfig),
+      ...(isPrivateApi ? privateEndpointConfig() : regionalEndpointConfig()),
       deployOptions: {
-        ...props.deployOptions,
+        ...props?.deployOptions,
         cachingEnabled: true,
         cacheDataEncrypted: true,
         cacheTtl: cdk.Duration.minutes(0),
