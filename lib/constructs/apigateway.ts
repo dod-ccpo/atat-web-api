@@ -48,18 +48,18 @@ export class AtatRestApi extends Construct {
     // endpoint is configured within the given VPC using a given VPC interface
     // endpoint. Otherwise, a regional endpoint is used. Edge endpoints are not
     // configured purely for convenience (as they're not available in all
-    // regions or partitions). 
+    // regions or partitions).
     const isPrivateApi = !!props?.vpcConfig;
     const privateEndpointConfig = () => ({
       endpointTypes: [apigw.EndpointType.PRIVATE],
       endpointConfiguration: {
         types: [apigw.EndpointType.PRIVATE],
-        vpcEndpoints: [props?.vpcConfig?.interfaceEndpoint!],
+        vpcEndpoints: [props!.vpcConfig!.interfaceEndpoint],
       },
-      policy: this.privateEndpointPolicy(props?.vpcConfig?.interfaceEndpoint!),
+      policy: this.privateEndpointPolicy(props!.vpcConfig!.interfaceEndpoint),
     });
     const regionalEndpointConfig = () => ({
-      endpointTypes: [apigw.EndpointType.REGIONAL]
+      endpointTypes: [apigw.EndpointType.REGIONAL],
     });
 
     const restApi = new apigw.RestApi(this, "Api", {

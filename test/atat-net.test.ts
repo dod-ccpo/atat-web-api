@@ -14,7 +14,7 @@ describe("ATAT network creation", () => {
     template.hasResourceProperties("AWS::EC2::FlowLog", {
       LogDestinationType: "cloud-watch-logs",
       ResourceType: "VPC",
-      TrafficType: "ALL"
+      TrafficType: "ALL",
     });
   });
 });

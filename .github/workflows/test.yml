@@ -27,8 +27,6 @@ jobs:
           npm ci
       - name: Synthesize CDK template
         run: cdk synth
-        env:
-          ATAT_DEPLOY_IAM: 1
       - name: Gather CloudFormation artifacts
         uses: actions/upload-artifact@v2
         with:
