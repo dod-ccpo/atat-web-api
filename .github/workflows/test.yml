@@ -19,9 +19,11 @@ jobs:
           file="package-lock.json"
           expectedVersion="2"
           lockFileVersion="$(jq -r .lockfileVersion "$file")"
-          if [ "$lockFileVesion" != "$expectedVersion" ]; then
-              echo "$file: lockfileVersion ($lockFileVesion) is invalid (expected: $expectedVersion)"
-              exit 1
+          if [ "$lockFileVersion" != "$expectedVersion" ]; then
+            echo "$file: lockfileVersion ($lockFileVersion) is invalid (expected: $expectedVersion)"
+            exit 1
+          else
+            echo "$file: lockfileVersion ($lockFileVersion) is the expected value ($expectedVersion)"
           fi
   cloudFormationSynth:
     name: Run CDK Synthesis
