@@ -2,31 +2,9 @@
 !jest.config.js
 *.d.ts
 node_modules
-lerna-debug.log
-coverage/
-build/
 
 # CDK asset staging directory
 .cdk.staging
 cdk.out
 
-# Private tag data
-tags-private.json
-
-# Editor configuration files
-.vscode/
-.idea
-
-# OSX
-.DS_Store
-
-# Sonar Scanner
-*.ucfg
-.scannerwork
-
-# typeorm local config
-ormconfig.json
-
-# generated json schema
-packages/api/models/schema.json
-packages/api/models/internalSchema.json
+coverage/

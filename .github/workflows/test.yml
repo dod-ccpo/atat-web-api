@@ -16,16 +16,15 @@ jobs:
         uses: actions/checkout@v2
       - name: Check package-lock.json
         run: |
-          errors=0
-          for file in package-lock.json infrastructure/package-lock.json packages/*/package-lock.json; do
-            if [ "$(cat $file | jq -r .lockfileVersion)" != "1" ]; then
-              echo "$file: lockfileVersion is invalid"
-              errors=$(( errors + 1 ))
-            else
-              echo "$file: lockfileVersion is okay"
-            fi
-          done
-          exit $errors
+          file="package-lock.json"
+          expectedVersion="2"
+          lockFileVersion="$(jq -r .lockfileVersion "$file")"
+          if [ "$lockFileVersion" != "$expectedVersion" ]; then
+            echo "$file: lockfileVersion ($lockFileVersion) is invalid (expected: $expectedVersion)"
+            exit 1
+          else
+            echo "$file: lockfileVersion ($lockFileVersion) is the expected value ($expectedVersion)"
+          fi
   cloudFormationSynth:
     name: Run CDK Synthesis
     runs-on: ubuntu-latest
@@ -43,23 +42,8 @@ jobs:
       - name: Install project dependencies
         run: |
           npm ci
-          npm run bootstrap
-      - name: Generate schema.json
-        run: |
-          npm run prebuild
       - name: Synthesize CDK template
-        run: cdk synth -c "EnvironmentId=GITHUBWF"
-        env:
-          ATAT_DEPLOY_IAM: 1
-      - name: Synthesize CDK template with CDK Nag
-        # Errors are allowed here because if there was a true synthesis problem
-        # the previous step would have failed and we would not reach this step.
-        # cdk-nag does not have a "warn-only" mode so this is the best that we
-        # can do.
-        run: cdk synth -c "EnvironmentId=GITHUBWF" || exit 0
-        env:
-          CDK_NAG_ENABLED: 1
-          ATAT_DEPLOY_IAM: 1
+        run: cdk synth
       - name: Gather CloudFormation artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -86,16 +70,14 @@ jobs:
       - name: Install project dependencies
         run: |
           npm ci
-          npm run bootstrap
       - name: Lint the project
         run: npm run lint
       - name: Build the project
         run: npm run build
       - name: Run test suite
         run: npm test
-      - name: Trigger SonarCloud
         # This step will fail for external collaborators
-        if: ${{ github.actor != 'dependabot[bot]' }}
+      - name: Trigger SonarCloud
         uses: SonarSource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

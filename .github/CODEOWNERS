@@ -1,6 +1,0 @@
-# By default, the platform team "owns" the entire repository
-*        @dod-ccpo/platform-team
-
-# The two teams share ownership of the API specification file(s),
-# which are housed in this repository.
-*api.yml @dod-ccpo/platform-team @dod-ccpo/portal-team
