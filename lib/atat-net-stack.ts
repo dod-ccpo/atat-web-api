@@ -12,7 +12,7 @@ export interface AtatNetStackProps extends cdk.StackProps {
    *
    * If this is not provided, the default value from the CDK's VPC construct
    * will be used. VPCs with overlapping ranges may cause routing issues for
-   * the application. This value should almost always
+   * the application. This value should almost always be provided.
    */
   vpcCidr?: string;
 }
