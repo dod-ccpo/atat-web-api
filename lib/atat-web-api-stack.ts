@@ -1,10 +1,25 @@
 import * as cdk from "aws-cdk-lib";
 import * as iam from "aws-cdk-lib/aws-iam";
 import { Construct } from "constructs";
+import * as sfn from "aws-cdk-lib/aws-stepfunctions";
+import * as logs from "aws-cdk-lib/aws-logs";
+import * as lambdaNodeJs from "aws-cdk-lib/aws-lambda-nodejs";
+import {
+  StateMachine,
+  maxRetries,
+  successResponse,
+  clientErrorResponse,
+  internalErrorResponse,
+} from "./constructs/stateMachine";
+import { mapTasks } from "./constructs/sfnLambdaInvokeTask";
 import { AtatRestApi } from "./constructs/apigateway";
 import { UserPermissionBoundary } from "./aspects/user-only-permission-boundary";
+import { ApiSfnFunction } from "./constructs/ApiSfnFunction";
+import { HttpMethod } from "../utils/http";
 
 export class AtatWebApiStack extends cdk.Stack {
+  public readonly provisioningStateMachine: sfn.IStateMachine;
+
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
     const apigw = new AtatRestApi(this, "SampleApi");
