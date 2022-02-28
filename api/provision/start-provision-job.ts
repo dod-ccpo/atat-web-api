@@ -1,19 +1,19 @@
-import { sfnClient } from "../../utils/aws-sdk/stepFunctions";
+import { sfnClient } from "../../utils/aws-sdk/step-functions";
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from "aws-lambda";
 import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusCode } from "../../utils/response";
-import { ProvisionRequest, provisionRequestSchema, ProvisionRequestType } from "../../models/Provisioning";
-import { wrapSchema } from "../../utils/middleware/schemaWrapper";
-import { errorHandlingMiddleware } from "../../utils/middleware/errorHandlingMiddleware";
+import { ProvisionRequest, provisionRequestSchema, ProvisionRequestType } from "../../models/provisioning";
+import { wrapSchema } from "../../utils/middleware/schema-wrapper";
+import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
 import middy from "@middy/core";
 import validator from "@middy/validator";
 import jsonBodyParser from "@middy/http-json-body-parser";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import cors from "@middy/http-cors";
-import xssSanitizer from "../../utils/middleware/xssSanitizer";
-import { IpCheckerMiddleware } from "../../utils/middleware/ipLogging";
-import { CSP_URI } from "../../models/CloudServiceProviders";
+import xssSanitizer from "../../utils/middleware/xss-sanitizer";
+import { IpCheckerMiddleware } from "../../utils/middleware/ip-logging";
+import { CSP_URI } from "../../models/cloud-service-providers";
 import { HttpMethod } from "../../utils/http";
-import { CORS_CONFIGURATION, MIDDY_CORS_CONFIGURATION } from "../../utils/corsConfig";
+import { CORS_CONFIGURATION, MIDDY_CORS_CONFIGURATION } from "../../utils/cors-config";
 import { REQUEST_BODY_INVALID } from "../../utils/errors";
 
 const SFN_ARN = process.env.SFN_ARN ?? "";

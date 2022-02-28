@@ -1,5 +1,5 @@
 import { APIGatewayProxyResult } from "aws-lambda";
-import { CORS_CONFIGURATION } from "./corsConfig";
+import { CORS_CONFIGURATION } from "./cors-config";
 
 type Headers = { [header: string]: string | number | boolean } | undefined;
 type MultiValueHeaders = { [header: string]: (string | number | boolean)[] } | undefined;

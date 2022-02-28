@@ -1,4 +1,4 @@
-import { CloudServiceProvider, Network } from "./CloudServiceProviders";
+import { CloudServiceProvider, Network } from "./cloud-service-providers";
 
 export enum ProvisionRequestType {
   ADD_PORTFOLIO = "ADD_PORTFOLIO",

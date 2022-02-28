@@ -1,8 +1,16 @@
-import { Error, ErrorCode } from "./response";
-import * as response from "./response";
+import {
+  Error,
+  ErrorCode,
+  OtherErrorResponse,
+  ErrorStatusCode,
+  NoContentResponse,
+  ApiSuccessResponse,
+  SuccessStatusCode,
+} from "../utils/response";
+// import * as response from "../utils/response";
 
 describe("Validation for No Content responses", () => {
-  const exampleResponse = new response.NoContentResponse();
+  const exampleResponse = new NoContentResponse();
   // The value 204 is specified by the HTTP specification
   it("should have a status code of 204", async () => {
     expect(exampleResponse.statusCode).toEqual(204);
@@ -17,10 +25,7 @@ describe("Validation for No Content responses", () => {
 describe("Validate parsing results in the same object", () => {
   it("should result in the same error after parsing", async () => {
     const sampleError: Error = { code: ErrorCode.OTHER, message: "Test Error" };
-    const errorResponse = new response.OtherErrorResponse(
-      sampleError.message,
-      response.ErrorStatusCode.INTERNAL_SERVER_ERROR
-    );
+    const errorResponse = new OtherErrorResponse(sampleError.message, ErrorStatusCode.INTERNAL_SERVER_ERROR);
     expect(JSON.parse(errorResponse.body)).toEqual(sampleError);
   });
 
@@ -36,9 +41,9 @@ describe("Validate parsing results in the same object", () => {
         baz: false,
       },
     };
-    const okResponse = new response.ApiSuccessResponse(object);
+    const okResponse = new ApiSuccessResponse(object);
     expect(JSON.parse(okResponse.body)).toEqual(object);
-    const acceptedResponse = new response.ApiSuccessResponse(object, response.SuccessStatusCode.ACCEPTED);
+    const acceptedResponse = new ApiSuccessResponse(object, SuccessStatusCode.ACCEPTED);
     expect(JSON.parse(acceptedResponse.body)).toEqual(object);
   });
 });
@@ -50,7 +55,7 @@ describe("Validate header handling", () => {
       "Content-Type": "application/json",
       "X-Test-Header": "testing code",
     };
-    const successResponse = new response.ApiSuccessResponse(successObject, response.SuccessStatusCode.OK, headers);
+    const successResponse = new ApiSuccessResponse(successObject, SuccessStatusCode.OK, headers);
     expect(successResponse.headers).not.toEqual(undefined);
     expect(successResponse.headers).not.toEqual(null);
     // This assertion is safe because we've already asserted through the previous

@@ -1,8 +1,8 @@
 import { Context } from "aws-lambda";
-import { handler } from "./startProvisionJob";
-import { CloudServiceProvider, Network } from "../../models/CloudServiceProviders";
-import { ProvisionRequestType } from "../../models/Provisioning";
-import { ApiSuccessResponse, ValidationErrorResponse } from "../../utils/response";
+import { handler } from "../api/provision/start-provision-job";
+import { CloudServiceProvider, Network } from "../models/cloud-service-providers";
+import { ProvisionRequestType } from "../models/provisioning";
+import { ApiSuccessResponse, ValidationErrorResponse } from "../utils/response";
 
 const fundingSources = [
   {
