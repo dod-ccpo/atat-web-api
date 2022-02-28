@@ -1,0 +1,5 @@
+# The Code Maintainers team owns the secret-scanning relating files
+# within the repository. Any change to these files will require
+# review from a member of the team.
+.secrets.baseline       @dod-ccpo/atat-code-maintainers
+.pre-commit-config.yaml @dod-ccpo/atat-code-maintainers
