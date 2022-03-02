@@ -36,7 +36,8 @@ export interface ProvisionRequest {
   userId: string;
   portfolioId: string;
   operationType: ProvisionRequestType;
-  targetCsp: CloudServiceProvider;
+  // could not use the CloudServiceProviders static properties so used strings
+  targetCsp: "CSP_A" | "CSP_B" | "CSP_C" | "CSP_D";
   targetNetwork: Network;
   payload: ProvisionPayloads;
 }
@@ -57,10 +58,10 @@ export const provisionRequestSchema = {
     },
     targetCsp: {
       enum: [
-        CloudServiceProvider.CSP_A,
-        CloudServiceProvider.CSP_B,
-        CloudServiceProvider.CSP_C,
-        CloudServiceProvider.CSP_D,
+        CloudServiceProvider.CSP_A.name,
+        CloudServiceProvider.CSP_B.name,
+        CloudServiceProvider.CSP_C.name,
+        CloudServiceProvider.CSP_D.name,
       ],
     },
     targetNetwork: {

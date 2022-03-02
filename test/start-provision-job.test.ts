@@ -18,7 +18,7 @@ const provisioningBodyNoPayload = {
   userId: "21d18790-bf3e-4529-a361-460ee6d16e0b",
   portfolioId: "b02e77d1-234d-4e3d-bc85-b57ca5a93952",
   operationType: ProvisionRequestType.ADD_PORTFOLIO,
-  targetCsp: CloudServiceProvider.CSP_A,
+  targetCsp: CloudServiceProvider.CSP_A.name,
   targetNetwork: Network.NETWORK_1,
 };
 

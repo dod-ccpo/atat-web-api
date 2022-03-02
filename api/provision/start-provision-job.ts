@@ -11,7 +11,7 @@ import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import cors from "@middy/http-cors";
 import xssSanitizer from "../../utils/middleware/xss-sanitizer";
 import { IpCheckerMiddleware } from "../../utils/middleware/ip-logging";
-import { CSP_URI } from "../../models/cloud-service-providers";
+import { CloudServiceProvider } from "../../models/cloud-service-providers";
 import { HttpMethod } from "../../utils/http";
 import { CORS_CONFIGURATION, MIDDY_CORS_CONFIGURATION } from "../../utils/cors-config";
 import { REQUEST_BODY_INVALID } from "../../utils/errors";
@@ -60,22 +60,21 @@ function transformProvisionJob(request: ProvisionRequest) {
       return {
         method: HttpMethod.POST,
         headers,
-        endpoint: `${CSP_URI[targetCsp]}/portfolios`,
+        endpoint: `${CloudServiceProvider[targetCsp].uri}/portfolios`,
         payload,
       };
     case ProvisionRequestType.ADD_FUNDING_SOURCE:
       return {
         method: HttpMethod.POST,
         headers,
-        // ! which portfolioId should this be, SNOW or CSP provided portfolioId?
-        endpoint: `${CSP_URI[targetCsp]}/portfolios/${portfolioId}/task-orders`,
+        endpoint: `${CloudServiceProvider[targetCsp].uri}/portfolios/${portfolioId}/task-orders`,
         payload,
       };
     case ProvisionRequestType.ADD_OPERATORS:
       return {
         method: HttpMethod.PATCH,
         headers,
-        endpoint: `${CSP_URI[targetCsp]}/portfolios/${portfolioId}`,
+        endpoint: `${CloudServiceProvider[targetCsp].uri}/portfolios/${portfolioId}`,
         payload,
       };
     default:
