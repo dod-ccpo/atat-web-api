@@ -34,7 +34,7 @@ type TaskProps = {
   id: string;
   props: sfnTasks.LambdaInvokeProps;
 };
-type TasksMap = { [name: string]: SfnLambdaInvokeTask };
+export type TasksMap = { [name: string]: SfnLambdaInvokeTask };
 
 /**
  * Creates a mapping from an array of tasks, where each task is used for

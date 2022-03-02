@@ -3,7 +3,7 @@ import * as sfn from "aws-cdk-lib/aws-stepfunctions";
 import * as logs from "aws-cdk-lib/aws-logs";
 import { Construct } from "constructs";
 
-interface StateMachineProps {
+export interface StateMachineProps {
   /**
    * Props to define a State Machine
    */
@@ -39,30 +39,3 @@ export class StateMachine extends Construct {
     this.stateMachine = stateMachine;
   }
 }
-
-/**
- * Successful condition check used when status code is 200
- */
-export const successResponse = sfn.Condition.numberEquals("$.cspResponse.statusCode", 200);
-
-/**
- * Client error condition check used when the status code is 400, 402, or 404
- */
-export const clientErrorResponse = sfn.Condition.or(
-  sfn.Condition.numberEquals("$.cspResponse.statusCode", 400),
-  sfn.Condition.numberEquals("$.cspResponse.statusCode", 402),
-  sfn.Condition.numberEquals("$.cspResponse.statusCode", 404)
-);
-
-/**
- * Internal error condition check used when the status code is 500
- */
-export const internalErrorResponse = sfn.Condition.numberGreaterThanEquals("$.cspResponse.statusCode", 500);
-
-/**
- * Retry condition check when the status code is 500, with a max retry of 6
- */
-export const maxRetries = sfn.Condition.and(
-  sfn.Condition.numberGreaterThan("$.cspResponse.retryCount", 6),
-  sfn.Condition.numberGreaterThanEquals("$.cspResponse.statusCode", 500)
-);

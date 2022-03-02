@@ -2,20 +2,12 @@ import * as cdk from "aws-cdk-lib";
 import * as iam from "aws-cdk-lib/aws-iam";
 import { Construct } from "constructs";
 import * as sfn from "aws-cdk-lib/aws-stepfunctions";
-import * as logs from "aws-cdk-lib/aws-logs";
-import * as lambdaNodeJs from "aws-cdk-lib/aws-lambda-nodejs";
-import {
-  StateMachine,
-  maxRetries,
-  successResponse,
-  clientErrorResponse,
-  internalErrorResponse,
-} from "./constructs/state-machine";
-import { mapTasks } from "./constructs/sfn-lambda-invoke-task";
+import { StateMachine } from "./constructs/state-machine";
 import { AtatRestApi } from "./constructs/apigateway";
 import { UserPermissionBoundary } from "./aspects/user-only-permission-boundary";
 import { ApiSfnFunction } from "./constructs/api-sfn-function";
 import { HttpMethod } from "../utils/http";
+import { ProvisioningWorkflow } from "./constructs/provisioning-sfn-workflow";
 
 export class AtatWebApiStack extends cdk.Stack {
   public readonly provisioningStateMachine: sfn.IStateMachine;
@@ -57,58 +49,17 @@ export class AtatWebApiStack extends cdk.Stack {
         })
       )
     );
-    // Provisioning State machine functions
-    const sampleFn = new lambdaNodeJs.NodejsFunction(this, "SampleFunction", {
-      entry: "api/provision/sample-fn.ts",
-      // vpc: props.vpc,
-    });
 
-    const tasks = [
-      {
-        id: "InvokeCspApi",
-        props: {
-          lambdaFunction: sampleFn,
-          inputPath: "$",
-          resultSelector: {
-            statusCode: sfn.JsonPath.stringAt("$.Payload.passRequest.response.statusCode"),
-            body: sfn.JsonPath.stringAt("$.Payload.body"),
-            retryCount: sfn.JsonPath.stringAt("$$.State.RetryCount"),
-          },
-          resultPath: "$.cspResponse",
-          outputPath: "$",
-        },
-      },
-      {
-        id: "RejectPortfolioTask",
-        props: {
-          lambdaFunction: sampleFn,
-          inputPath: "$.cspResponse",
-        },
-      },
-    ];
-    const mappedTasks = mapTasks(this, tasks);
-
-    // State machine choices
-    const httpResponseChoices = new sfn.Choice(this, "HttpResponse")
-      .when(successResponse, mappedTasks.InvokeCspApi.sfnTask)
-      .when(clientErrorResponse, mappedTasks.RejectPortfolioTask.sfnTask)
-      .when(maxRetries, mappedTasks.RejectPortfolioTask.sfnTask)
-      .when(internalErrorResponse, mappedTasks.RejectPortfolioTask.sfnTask);
-
-    // Composing state machine
-    const stateMachineWorkflow = mappedTasks.InvokeCspApi.sfnTask.next(httpResponseChoices);
-    const stateMachineLogGroup = new logs.LogGroup(this, "StepFunctionsLogs", {
-      retention: logs.RetentionDays.ONE_WEEK,
-      logGroupName: `/aws/vendedlogs/states/StepFunctionsLogs${"AT-7050"}`,
-    });
+    // State Machine
+    const provisioningSfn = new ProvisioningWorkflow(this);
     this.provisioningStateMachine = new StateMachine(this, "ProvisioningStateMachine", {
       stateMachineProps: {
-        definition: stateMachineWorkflow,
+        definition: provisioningSfn.workflow,
       },
-      logGroup: stateMachineLogGroup,
+      logGroup: provisioningSfn.logGroup,
     }).stateMachine;
 
-    // the provisioning lambda that translate and invokes the state machine
+    // Provisioning lambda that translate and invokes the state machine
     const provisioningJobFn = new ApiSfnFunction(this, "ProvisioningJobRequest", {
       method: HttpMethod.POST,
       handlerPath: "api/provision/start-provision-job.ts",
