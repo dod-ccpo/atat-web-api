@@ -4,6 +4,8 @@ import * as custom from "aws-cdk-lib/custom-resources";
 
 import { Construct } from "constructs";
 
+const DEFAULT_BOOSTRAP_QUALIFIER = "hnb659fds";
+
 export class AtatIamStack extends cdk.Stack {
   private readonly outputs: cdk.CfnOutput[] = [];
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -29,12 +31,6 @@ export class AtatIamStack extends cdk.Stack {
     const generalReadAccess = new iam.ManagedPolicy(this, "GeneralReadAccess", {
       description: "Grants read access to specific resources not in ViewOnlyAccess",
       statements: [
-        new iam.PolicyStatement({
-          sid: "DynamoDBItemAccess",
-          effect: iam.Effect.ALLOW,
-          actions: ["dynamodb:*GetItem", "dynamodb:PartiQLSelect", "dynamodb:Scan", "dynamodb:Query"],
-          resources: [`arn:${cdk.Aws.PARTITION}:dynamodb:*:${cdk.Aws.ACCOUNT_ID}:table/*`],
-        }),
         new iam.PolicyStatement({
           sid: "APIGatewayRestApiReadAccess",
           effect: iam.Effect.ALLOW,
@@ -91,18 +87,30 @@ export class AtatIamStack extends cdk.Stack {
             `arn:${cdk.Aws.PARTITION}:s3:::cdktoolkit-stagingbucket-*`,
           ],
         }),
-        // DevSecOps team members need access to restore tables from PITR
-        // backups and to export to S3.
         new iam.PolicyStatement({
-          sid: "AllowDynamoDbBackupRestore",
+          sid: "AllowAssumingCdkRoles",
           effect: iam.Effect.ALLOW,
-          actions: [
-            "dynamodb:RestoreTable*",
-            "dynamodb:ExportTableToPointInTime",
-            "dynamodb:ListBackups",
-            "dynamodb:Describe*Backup*",
+          actions: ["sts:AssumeRole"],
+          resources: [
+            this.formatArn({
+              service: "iam",
+              region: "",
+              resource: "role",
+              resourceName: `cdk-${DEFAULT_BOOSTRAP_QUALIFIER}-*-role-${cdk.Aws.ACCOUNT_ID}-${cdk.Aws.REGION}`,
+            }),
           ],
-          resources: ["*"],
+        }),
+        new iam.PolicyStatement({
+          sid: "AllowReadingCdkParameters",
+          effect: iam.Effect.ALLOW,
+          actions: ["ssm:GetParameter"],
+          resources: [
+            this.formatArn({
+              service: "ssm",
+              resource: "parameter",
+              resourceName: `cdk-bootstrap/${DEFAULT_BOOSTRAP_QUALIFIER}/*`,
+            }),
+          ],
         }),
       ],
     });
@@ -187,7 +195,7 @@ export class AtatIamStack extends cdk.Stack {
       url: "https://token.actions.githubusercontent.com",
       // This thumbprint is a well-known value, documented in the
       // aws-actions/configure-aws-credentials README file
-      thumbprints: ["a031c46782e6e6c662c2c87c76da9aa62ccabd8e"],
+      thumbprints: ["6938fd4d98bab03faadb97b34396831e3780aea1"],
       // This client ID is specified/hardcoded into the official AWS action
       clientIds: ["sts.amazonaws.com"],
     });
