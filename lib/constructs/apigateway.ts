@@ -5,6 +5,9 @@ import * as logs from "aws-cdk-lib/aws-logs";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 
 import { Construct } from "constructs";
+import { HttpMethod } from "aws-cdk-lib/aws-events";
+import { Stack } from "aws-cdk-lib";
+import { IPrincipal } from "aws-cdk-lib/aws-iam";
 
 const API_ACCESS_LOG_FORMAT = apigw.AccessLogFormat.custom(
   JSON.stringify({
@@ -51,12 +54,11 @@ export class AtatRestApi extends Construct {
     // regions or partitions).
     const isPrivateApi = !!props?.vpcConfig;
     const privateEndpointConfig = () => ({
-      endpointTypes: [apigw.EndpointType.PRIVATE],
       endpointConfiguration: {
         types: [apigw.EndpointType.PRIVATE],
         vpcEndpoints: [props!.vpcConfig!.interfaceEndpoint],
       },
-      policy: this.privateEndpointPolicy(props!.vpcConfig!.interfaceEndpoint),
+      policy: this.permitAccessOnlyFromEndpoint(props!.vpcConfig!.interfaceEndpoint),
     });
     const regionalEndpointConfig = () => ({
       endpointTypes: [apigw.EndpointType.REGIONAL],
@@ -78,7 +80,26 @@ export class AtatRestApi extends Construct {
     this.restApi = restApi;
   }
 
-  private privateEndpointPolicy(endpoint: ec2.InterfaceVpcEndpoint): iam.PolicyDocument {
+  /**
+   * Grant a given user access to a specific path for a specific HTTP method.
+   *
+   * This grants access only to this REST API for the current deployment stage.
+   *
+   * @param user The IAM user to grant access to
+   * @param method The HTTP method to grant access for (or "*")
+   * @param path The path to grant access to
+   */
+  public grantOnRoute(user: iam.IUser, method: HttpMethod | "*", path = "/") {
+    user.addToPrincipalPolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ["execute-api:Invoke"],
+        resources: [this.restApi.arnForExecuteApi(method, path, this.restApi.deploymentStage.stageName)],
+      })
+    );
+  }
+
+  private permitAccessOnlyFromEndpoint(endpoint: ec2.InterfaceVpcEndpoint): iam.PolicyDocument {
     // Creates a relatively secure resource policy for the API Gateway resource. Only users within
     // the current account are permitted to invoke the API and all access must occur via the defined
     // VPC Interface Endpoint. The default is to allow access to the API via _any_ API Gateway
