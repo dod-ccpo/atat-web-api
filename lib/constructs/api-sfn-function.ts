@@ -67,10 +67,6 @@ export class ApiSfnFunction extends Construct {
       ...props.functionPropsOverride,
     });
 
-    // APIGW service
-    this.fn.addPermission("AllowApiGatewayInvoke", { principal: APIGW_SERVICE_PRINCIPAL });
-    // editing name from API spec
-    (this.fn.node.defaultChild as lambda.CfnFunction).overrideLogicalId(id + "Function");
 
     // State Machine service
     this.stateMachine = props.stateMachine;

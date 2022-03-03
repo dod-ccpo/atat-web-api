@@ -1,5 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import * as iam from "aws-cdk-lib/aws-iam";
+import { LambdaIntegration } from "aws-cdk-lib/aws-apigateway";
 import { Construct } from "constructs";
 import * as sfn from "aws-cdk-lib/aws-stepfunctions";
 import { StateMachine } from "./constructs/state-machine";
@@ -65,5 +66,9 @@ export class AtatWebApiStack extends cdk.Stack {
       handlerPath: "api/provision/start-provision-job.ts",
       stateMachine: this.provisioningStateMachine,
     }).fn;
+
+    // APIGW Provisioning Job Resource
+    const provisioningJobsResource = apigw.restApi.root.addResource("provisioning-job");
+    provisioningJobsResource.addMethod("POST", new LambdaIntegration(provisioningJobFn));
   }
 }
