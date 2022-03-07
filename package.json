@@ -30,12 +30,12 @@
     "prettier": "^2.5.1",
     "ts-jest": "^27.1.1",
     "ts-node": "^10.4.0",
-    "typescript": "~4.5.4"
+    "typescript": "~4.6.2"
   },
   "dependencies": {
     "aws-cdk-lib": "2.15.0",
     "cdk-nag": "^2.7.9",
-    "constructs": "^10.0.76",
+    "constructs": "^10.0.81",
     "source-map-support": "^0.5.21"
   }
 }
