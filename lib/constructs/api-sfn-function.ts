@@ -2,16 +2,8 @@ import { Duration } from "aws-cdk-lib";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as lambdaNodeJs from "aws-cdk-lib/aws-lambda-nodejs";
 import * as sfn from "aws-cdk-lib/aws-stepfunctions";
-import * as iam from "aws-cdk-lib/aws-iam";
 import { HttpMethod } from "../../utils/http";
 import { Construct } from "constructs";
-
-/**
- * An IAM service principal for the API Gateway service, used to grant Lambda
- * invocation permissions.
- */
-const APIGW_SERVICE_PRINCIPAL = new iam.ServicePrincipal("apigateway.amazonaws.com");
-
 export interface ApiSfnFunctionProps {
   /**
    * The HTTP method this route applies to.
@@ -66,7 +58,6 @@ export class ApiSfnFunction extends Construct {
       timeout: Duration.seconds(5),
       ...props.functionPropsOverride,
     });
-
 
     // State Machine service
     this.stateMachine = props.stateMachine;
