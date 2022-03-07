@@ -17,7 +17,7 @@ const provisioningBodyNoPayload = {
   jobId: "81b31a89-e3e5-46ee-acfe-75436bd14577",
   userId: "21d18790-bf3e-4529-a361-460ee6d16e0b",
   portfolioId: "b02e77d1-234d-4e3d-bc85-b57ca5a93952",
-  operationType: ProvisionRequestType.ADD_PORTFOLIO,
+  operationType: ProvisionRequestType.ADD_OPERATORS,
   targetCsp: CloudServiceProvider.CSP_A.name,
   targetNetwork: Network.NETWORK_1,
 };
@@ -80,7 +80,7 @@ describe("Successful provisioning operations", () => {
 });
 
 describe("Failed provision operations", () => {
-  it("should return a 400 due to validation error", async () => {
+  it("should return a 400 due to unknown operationType (validation error)", async () => {
     const request = {
       body: {
         ...provisioningBodyNoPayload,
@@ -93,5 +93,21 @@ describe("Failed provision operations", () => {
     } as any;
     const response = await handler(request, {} as Context, () => null);
     expect(response).toBeInstanceOf(ValidationErrorResponse);
+  });
+  it("should return a 400 when no portfolioId for ADD FUNDS/OPERATOR operationType (validation error)", async () => {
+    const request = {
+      body: {
+        ...provisioningBodyNoPayload,
+        portfolioId: null,
+        payload: {
+          operators,
+        },
+      },
+      requestContext: { identity: { sourceIp: "9.9.9.9" } },
+    } as any;
+    const response = await handler(request, {} as Context, () => null);
+    const responseBody = JSON.parse(response?.body ?? "");
+    expect(response).toBeInstanceOf(ValidationErrorResponse);
+    expect(responseBody.errorMap.issue).toBe("CSP portfolio ID required.");
   });
 });

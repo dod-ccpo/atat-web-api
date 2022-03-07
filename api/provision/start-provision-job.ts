@@ -15,6 +15,7 @@ import { CloudServiceProvider } from "../../models/cloud-service-providers";
 import { HttpMethod } from "../../utils/http";
 import { CORS_CONFIGURATION, MIDDY_CORS_CONFIGURATION } from "../../utils/cors-config";
 import { REQUEST_BODY_INVALID } from "../../utils/errors";
+import cspPortfolioIdChecker from "../../utils/middleware/check-csp-portfolio-id";
 
 const SFN_ARN = process.env.SFN_ARN ?? "";
 
@@ -27,12 +28,12 @@ export async function baseHandler(event: APIGatewayProxyEvent, context: Context)
   try {
     const cspInvocationJob = transformProvisionJob(event.body as any);
     console.log("SentToSfn: " + JSON.stringify(cspInvocationJob));
-    // TODO: test execution once sfn infrastructure is up
     // starting the execution
     // const result = await sfnClient.startExecution({
     //   input: JSON.stringify(cspInvocationJob),
     //   stateMachineArn: SFN_ARN,
     // });
+    // console.log("SFN invoked response: " + JSON.stringify(result));
     return new ApiSuccessResponse(event.body, SuccessStatusCode.CREATED);
   } catch (error) {
     console.log("ERROR: " + JSON.stringify(error));
@@ -86,6 +87,7 @@ export const handler = middy(baseHandler)
   .use(IpCheckerMiddleware())
   .use(xssSanitizer())
   .use(jsonBodyParser())
+  .use(cspPortfolioIdChecker())
   .use(validator({ inputSchema: wrapSchema(provisionRequestSchema) }))
   .use(errorHandlingMiddleware())
   .use(JSONErrorHandlerMiddleware())
