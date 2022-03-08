@@ -28,7 +28,6 @@ describe("ATAT apigateway construct creation", () => {
     testApigw.grantOnRoute(testUser, "*", "/");
     // THEN
     const template = Template.fromStack(stack);
-    // template.hasResourceProperties("AWS::IAM::Policy", {});
     template.hasResourceProperties(
       "AWS::IAM::Policy",
       Match.objectLike({
