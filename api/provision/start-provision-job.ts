@@ -28,12 +28,14 @@ export async function baseHandler(event: APIGatewayProxyEvent, context: Context)
   try {
     const cspInvocationJob = transformProvisionJob(event.body as any);
     console.log("SentToSfn: " + JSON.stringify(cspInvocationJob));
+
     // starting the execution
-    // const result = await sfnClient.startExecution({
-    //   input: JSON.stringify(cspInvocationJob),
-    //   stateMachineArn: SFN_ARN,
-    // });
-    // console.log("SFN invoked response: " + JSON.stringify(result));
+    const result = await sfnClient.startExecution({
+      input: JSON.stringify(cspInvocationJob),
+      stateMachineArn: SFN_ARN,
+    });
+    console.log("SFN invoked response: " + JSON.stringify(result));
+
     return new ApiSuccessResponse(event.body, SuccessStatusCode.CREATED);
   } catch (error) {
     console.log("ERROR: " + JSON.stringify(error));

@@ -8,6 +8,7 @@ import { Context } from "aws-lambda";
 export async function handler(stateInput: any, context?: Context): Promise<unknown> {
   console.log("STATE INPUT: " + JSON.stringify(stateInput));
 
-  // A mock function that is used as a placeholder for each state and returns the input.
-  return stateInput;
+  // A mock function that is used as a placeholder for each state and returns the input
+  // and a status code.
+  return { ...stateInput, statusCodeFn: 200 };
 }

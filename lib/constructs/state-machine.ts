@@ -25,7 +25,7 @@ export class StateMachine extends Construct {
     super(scope, id);
     const stateMachine = new sfn.StateMachine(this, id, {
       // defaults that can be overridden
-      timeout: Duration.minutes(3),
+      timeout: Duration.seconds(10),
       stateMachineType: sfn.StateMachineType.STANDARD,
       // configuration passed in
       ...props.stateMachineProps,

@@ -7,7 +7,7 @@ import { mapTasks, TasksMap } from "./sfn-lambda-invoke-task";
 /**
  * Successful condition check used when status code is 200
  */
-export const successResponse = sfn.Condition.numberEquals("$.cspResponse.statusCode", 200);
+export const successResponse = sfn.Condition.numberEquals("$.cspResponse.Payload.statusCodeFn", 200);
 
 /**
  * Client error condition check used when the status code is 400, 402, or 404
@@ -27,10 +27,13 @@ export const internalErrorResponse = sfn.Condition.numberGreaterThanEquals("$.cs
  * Retry condition check when the status code is 500, with a max retry of 6
  */
 export const maxRetries = sfn.Condition.and(
-  sfn.Condition.numberGreaterThan("$.cspResponse.retryCount", 6),
+  sfn.Condition.numberGreaterThan("$.cspResponsePass.retryCount", 6),
   sfn.Condition.numberGreaterThanEquals("$.cspResponse.statusCode", 500)
 );
 
+export interface ProvisioningWorkflowProps {
+  environmentName: string;
+}
 export interface IProvisioningWorkflow {
   mappedTasks: TasksMap;
   workflow: sfn.IChainable;
@@ -47,7 +50,8 @@ export class ProvisioningWorkflow implements IProvisioningWorkflow {
   readonly workflow: sfn.IChainable;
   readonly logGroup: logs.ILogGroup;
 
-  constructor(scope: Construct) {
+  constructor(scope: Construct, props: ProvisioningWorkflowProps) {
+    const { environmentName } = props;
     // Provisioning State machine functions
     const sampleFn = new lambdaNodeJs.NodejsFunction(scope, "SampleFunction", {
       entry: "api/provision/sample-fn.ts",
@@ -59,40 +63,51 @@ export class ProvisioningWorkflow implements IProvisioningWorkflow {
       {
         id: "InvokeCspApi",
         props: {
-          lambdaFunction: sampleFn,
+          lambdaFunction: sampleFn, // replace w/ mock CSP ATAT API lambda
           inputPath: "$",
-          resultSelector: {
-            statusCode: sfn.JsonPath.stringAt("$.Payload.passRequest.response.statusCode"),
-            body: sfn.JsonPath.stringAt("$.Payload.body"),
-            retryCount: sfn.JsonPath.stringAt("$$.State.RetryCount"),
-          },
           resultPath: "$.cspResponse",
           outputPath: "$",
         },
       },
       {
-        id: "RejectPortfolioTask",
+        id: "Results",
+        props: {
+          lambdaFunction: sampleFn, // replace w/ result lambda (success/reject)
+          inputPath: "$",
+          resultPath: "$.resultResponse",
+          outputPath: "$",
+        },
+      },
+      {
+        id: "Demo",
         props: {
           lambdaFunction: sampleFn,
-          inputPath: "$.cspResponse",
+          inputPath: "$",
+          resultSelector: {
+            statusCode: 200,
+            retryCount: 7,
+          },
+          resultPath: "$.cspResponseDemo",
+          outputPath: "$",
         },
       },
     ];
     this.mappedTasks = mapTasks(scope, tasks);
-    const { InvokeCspApi, RejectPortfolioTask } = this.mappedTasks;
+    const { InvokeCspApi, Results, Demo } = this.mappedTasks;
 
     // State machine choices based on the tasks output
     const httpResponseChoices = new sfn.Choice(scope, "HttpResponse")
-      .when(successResponse, InvokeCspApi.sfnTask)
-      .when(clientErrorResponse, RejectPortfolioTask.sfnTask)
-      .when(maxRetries, InvokeCspApi.sfnTask)
-      .when(internalErrorResponse, RejectPortfolioTask.sfnTask);
+      .when(successResponse, Results.sfnTask)
+      .when(clientErrorResponse, Results.sfnTask)
+      .when(maxRetries, Results.sfnTask)
+      .when(internalErrorResponse, InvokeCspApi.sfnTask);
 
     // Composing state machine
-    this.workflow = InvokeCspApi.sfnTask.next(httpResponseChoices);
+    this.workflow = InvokeCspApi.sfnTask.next(Demo.sfnTask).next(httpResponseChoices);
+
     this.logGroup = new logs.LogGroup(scope, "StepFunctionsLogs", {
       retention: logs.RetentionDays.ONE_WEEK,
-      logGroupName: `/aws/vendedlogs/states/StepFunctionsLogs${"AT-7050"}`,
+      logGroupName: `/aws/vendedlogs/states/StepFunctionsLogs${environmentName}`,
     });
   }
 }
