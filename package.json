@@ -35,17 +35,18 @@
     "typescript": "~4.6.2"
   },
   "dependencies": {
-    "aws-cdk-lib": "2.15.0",
-    "cdk-nag": "^2.7.9",
-    "constructs": "^10.0.76",
-    "source-map-support": "^0.5.21",
     "@aws-sdk/client-sfn": "^3.52.0",
     "@middy/core": "^2.5.7",
     "@middy/http-cors": "^2.5.7",
     "@middy/http-json-body-parser": "^2.5.7",
     "@middy/validator": "^2.5.7",
+    "aws-cdk-lib": "2.15.0",
+    "aws-sdk-client-mock": "^0.6.2",
+    "cdk-nag": "^2.7.9",
+    "constructs": "^10.0.76",
     "http-errors": "^2.0.0",
     "middy-middleware-json-error-handler": "^3.0.0",
+    "source-map-support": "^0.5.21",
     "xss": "^1.0.10"
   }
 }
