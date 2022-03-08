@@ -42,27 +42,6 @@ describe("ATAT IAM Policy creation", () => {
         PolicyDocument: {
           Statement: [
             {
-              Action: ["dynamodb:*GetItem", "dynamodb:PartiQLSelect", "dynamodb:Scan", "dynamodb:Query"],
-              Effect: "Allow",
-              Resource: {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:",
-                    {
-                      Ref: "AWS::Partition",
-                    },
-                    ":dynamodb:*:",
-                    {
-                      Ref: "AWS::AccountId",
-                    },
-                    ":table/*",
-                  ],
-                ],
-              },
-              Sid: "DynamoDBItemAccess",
-            },
-            {
               Action: "apigateway:GET",
               Effect: "Allow",
               Resource: {
@@ -193,15 +172,57 @@ describe("ATAT IAM Policy creation", () => {
               Sid: "AllowModifyingCdkToolBuckets",
             },
             {
-              Action: [
-                "dynamodb:RestoreTable*",
-                "dynamodb:ExportTableToPointInTime",
-                "dynamodb:ListBackups",
-                "dynamodb:Describe*Backup*",
-              ],
+              Action: "sts:AssumeRole",
               Effect: "Allow",
-              Resource: "*",
-              Sid: "AllowDynamoDbBackupRestore",
+              Resource: {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      Ref: "AWS::Partition",
+                    },
+                    ":iam::",
+                    {
+                      Ref: "AWS::AccountId",
+                    },
+                    ":role/cdk-hnb659fds-*-role-",
+                    {
+                      Ref: "AWS::AccountId",
+                    },
+                    "-",
+                    {
+                      Ref: "AWS::Region",
+                    },
+                  ],
+                ],
+              },
+              Sid: "AllowAssumingCdkRoles",
+            },
+            {
+              Action: "ssm:GetParameter",
+              Effect: "Allow",
+              Resource: {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      Ref: "AWS::Partition",
+                    },
+                    ":ssm:",
+                    {
+                      Ref: "AWS::Region",
+                    },
+                    ":",
+                    {
+                      Ref: "AWS::AccountId",
+                    },
+                    ":parameter/cdk-bootstrap/hnb659fds/*",
+                  ],
+                ],
+              },
+              Sid: "AllowReadingCdkParameters",
             },
           ],
           Version: "2012-10-17",
