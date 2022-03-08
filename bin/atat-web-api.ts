@@ -31,4 +31,4 @@ if (utils.isPossibleTemporaryEnvironment(environmentId)) {
 // cdk.Aspects.of(app).add(new NIST80053R5Checks({ verbose: true }));
 cdk.Aspects.of(app).add(new GovCloudCompatibilityAspect());
 
-const apiStack = new AtatWebApiStack(app, `${environmentName}AtatWebApiStack`, {});
+const apiStack = new AtatWebApiStack(app, `${environmentName}AtatWebApiStack`, { environmentName });

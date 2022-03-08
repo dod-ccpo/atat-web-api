@@ -6,7 +6,7 @@ test("Rest API is created", () => {
   // GIVEN
   const app = new cdk.App();
   // WHEN
-  const stack = new AtatWebApi.AtatWebApiStack(app, "TestStack");
+  const stack = new AtatWebApi.AtatWebApiStack(app, "TestStack", { environmentName: "At0000" });
   // THEN
   const template = Template.fromStack(stack);
   template.hasResourceProperties("AWS::ApiGateway::RestApi", {});

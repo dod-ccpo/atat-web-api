@@ -10,11 +10,17 @@ import { ApiSfnFunction } from "./constructs/api-sfn-function";
 import { HttpMethod } from "../utils/http";
 import { ProvisioningWorkflow } from "./constructs/provisioning-sfn-workflow";
 
+export interface AtatWebApiStackProps extends cdk.StackProps {
+  environmentName: string;
+}
+
 export class AtatWebApiStack extends cdk.Stack {
   public readonly provisioningStateMachine: sfn.IStateMachine;
 
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props: AtatWebApiStackProps) {
     super(scope, id, props);
+    const { environmentName } = props;
+
     const apigw = new AtatRestApi(this, "SampleApi");
     apigw.restApi.root.addMethod("ANY");
 
@@ -52,7 +58,7 @@ export class AtatWebApiStack extends cdk.Stack {
     );
 
     // State Machine
-    const provisioningSfn = new ProvisioningWorkflow(this);
+    const provisioningSfn = new ProvisioningWorkflow(this, { environmentName });
     this.provisioningStateMachine = new StateMachine(this, "ProvisioningStateMachine", {
       stateMachineProps: {
         definition: provisioningSfn.workflow,
