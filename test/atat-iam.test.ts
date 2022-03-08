@@ -247,7 +247,7 @@ describe("ATAT IAM Policy creation", () => {
           ],
           Version: "2012-10-17",
         },
-        Description: "",
+        Description: "Denies access to all resources not explicitly granted in other IAM policies",
         Path: "/",
       })
     );
