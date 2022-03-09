@@ -1,6 +1,6 @@
 import middy from "@middy/core";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { ProvisionRequestType } from "../../models/provisioning";
+import { ProvisionRequestType } from "../../models/provisioning-jobs";
 import createError from "http-errors";
 
 const cspPortfolioIdChecker = (): middy.MiddlewareObj<APIGatewayProxyEvent, APIGatewayProxyResult> => {

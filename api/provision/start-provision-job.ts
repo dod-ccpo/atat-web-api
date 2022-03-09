@@ -1,7 +1,7 @@
 import { sfnClient } from "../../utils/aws-sdk/step-functions";
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from "aws-lambda";
 import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusCode } from "../../utils/response";
-import { ProvisionRequest, provisionRequestSchema, ProvisionRequestType } from "../../models/provisioning";
+import { ProvisionRequest, provisionRequestSchema, ProvisionRequestType } from "../../models/provisioning-jobs";
 import { wrapSchema } from "../../utils/middleware/schema-wrapper";
 import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
 import middy from "@middy/core";
