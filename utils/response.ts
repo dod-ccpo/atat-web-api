@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import { APIGatewayProxyResult } from "aws-lambda";
 import { CORS_CONFIGURATION } from "./cors-config";
 
