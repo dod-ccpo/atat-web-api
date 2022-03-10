@@ -130,7 +130,7 @@ describe("ATAT IAM Policy creation", () => {
       })
     );
   });
-  test("Fully assert developerRwAccess IAM managed policy with matchers", async () => {
+  test("Ensure developers can access CDK-related resources", async () => {
     template.hasResourceProperties(
       "AWS::IAM::ManagedPolicy",
       Match.objectEquals({
