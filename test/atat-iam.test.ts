@@ -56,18 +56,18 @@ describe("ATAT IAM Policy creation", () => {
                   ],
                 ],
               },
-              Sid: "AllowArtifactReportPackageAccess",
+              Sid: Match.anyValue(),
             },
             {
               Action: "artifact:DownloadAgreement",
               Effect: "Allow",
               Resource: "*",
-              Sid: "AllowArtifactAgreementDownload",
+              Sid: Match.anyValue(),
             },
           ],
           Version: "2012-10-17",
         },
-        Description: "Grants additional security auditor access beyond SecurityAudit",
+        Description: Match.anyValue(),
         Path: "/",
       })
     );
@@ -111,7 +111,7 @@ describe("ATAT IAM Policy creation", () => {
                   ],
                 },
               ],
-              Sid: "AllowModifyingCdkToolBuckets",
+              Sid: Match.anyValue(),
             },
             {
               Action: "sts:AssumeRole",
@@ -139,7 +139,7 @@ describe("ATAT IAM Policy creation", () => {
                   ],
                 ],
               },
-              Sid: "AllowAssumingCdkRoles",
+              Sid: Match.anyValue(),
             },
             {
               Action: "ssm:GetParameter",
@@ -164,12 +164,12 @@ describe("ATAT IAM Policy creation", () => {
                   ],
                 ],
               },
-              Sid: "AllowReadingCdkParameters",
+              Sid: Match.anyValue(),
             },
           ],
           Version: "2012-10-17",
         },
-        Description: "Grants read/write access to developer-specific actions and resources",
+        Description: Match.anyValue(),
         Path: "/",
       })
     );
@@ -184,12 +184,12 @@ describe("ATAT IAM Policy creation", () => {
               Action: "organizations:*",
               Effect: "Deny",
               Resource: "*",
-              Sid: "DenyAllOrganizations",
+              Sid: Match.anyValue(),
             },
           ],
           Version: "2012-10-17",
         },
-        Description: "Denies access to all resources not explicitly granted in other IAM policies",
+        Description: Match.anyValue(),
         Path: "/",
       })
     );
