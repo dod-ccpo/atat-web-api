@@ -99,8 +99,8 @@ describe("ATAT apigateway construct creation", () => {
     const app = new cdk.App();
     const stack = new cdk.Stack(app, "TestStack");
     // WHEN
-    const vpc = new cdk.aws_ec2.Vpc(stack, "TestVpc", {});
-    const interfaceEndpoint = new cdk.aws_ec2.InterfaceVpcEndpoint(stack, "Test VPC Endpoint", {
+    const vpc = new ec2.Vpc(stack, "TestVpc", {});
+    const interfaceEndpoint = new ec2.InterfaceVpcEndpoint(stack, "Test VPC Endpoint", {
       vpc,
       service: new ec2.InterfaceVpcEndpointService("test service", 443),
     });
