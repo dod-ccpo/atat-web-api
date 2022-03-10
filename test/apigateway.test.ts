@@ -90,7 +90,7 @@ describe("ATAT apigateway construct creation", () => {
         ],
         Version: "2012-10-17",
       },
-      Users: ["testUser"],
+      Users: [testUser.userName],
     });
   });
 
