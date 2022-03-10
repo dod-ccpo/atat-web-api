@@ -28,20 +28,17 @@ describe("ATAT apigateway construct creation", () => {
     testApigw.grantOnRoute(testUser, "*", "/");
     // THEN
     const template = Template.fromStack(stack);
-    template.hasResourceProperties(
-      "AWS::IAM::Policy",
-      Match.objectLike({
-        PolicyDocument: {
-          Statement: [
-            {
-              Action: "execute-api:Invoke",
-              Effect: "Allow",
-            },
-          ],
-          Version: "2012-10-17",
-        },
-      })
-    );
+    template.hasResourceProperties("AWS::IAM::Policy", {
+      PolicyDocument: {
+        Statement: [
+          {
+            Action: "execute-api:Invoke",
+            Effect: "Allow",
+          },
+        ],
+        Version: "2012-10-17",
+      },
+    });
   });
 
   test("Ensure grantOnRoute method properly attaches User to policy document", async () => {
