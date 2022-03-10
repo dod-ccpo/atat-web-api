@@ -116,7 +116,7 @@ export class AtatIamStack extends cdk.Stack {
     });
 
     const baseDenies = new iam.ManagedPolicy(this, "AtatUserDenyPolicy", {
-      description: "Denies access to all resources not explicitly granted in other IAM policies",
+      description: "Denies access to sensitive resources and actions",
       statements: [
         new iam.PolicyStatement({
           sid: "DenyAllOrganizations",
