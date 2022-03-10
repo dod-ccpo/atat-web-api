@@ -24,7 +24,7 @@ describe("ATAT apigateway construct creation", () => {
     // WHEN
     const testApigw = new AtatRestApi(stack, "SampleApi");
     testApigw.restApi.root.addMethod("ANY");
-    const testUser = new User(stack, "testUser");
+    const testUser = new iam.User(stack, "testUser");
     testApigw.grantOnRoute(testUser, "*", "/");
     // THEN
     const template = Template.fromStack(stack);
@@ -51,7 +51,7 @@ describe("ATAT apigateway construct creation", () => {
     // WHEN
     const testApigw = new AtatRestApi(stack, "SampleApi");
     testApigw.restApi.root.addMethod("ANY");
-    const testUser = User.fromUserName(stack, "sampleApiUser", "testUser");
+    const testUser = iam.User.fromUserName(stack, "sampleApiUser", "testUser");
     const routeName = "/testEndpoint";
     testApigw.grantOnRoute(testUser, "*", routeName);
     // THEN
