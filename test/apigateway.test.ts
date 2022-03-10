@@ -44,6 +44,56 @@ describe("ATAT apigateway construct creation", () => {
     );
   });
 
+  test("Ensure grantOnRoute method properly attaches User to policy document", async () => {
+    // GIVEN
+    const app = new cdk.App();
+    const stack = new cdk.Stack(app, "TestStack");
+    // WHEN
+    const testApigw = new AtatRestApi(stack, "SampleApi");
+    testApigw.restApi.root.addMethod("ANY");
+    const testUser = User.fromUserName(stack, "sampleApiUser", "testUser");
+    const routeName = "/testEndpoint";
+    testApigw.grantOnRoute(testUser, "*", routeName);
+    // THEN
+    const template = Template.fromStack(stack);
+    template.hasResourceProperties("AWS::IAM::Policy", {
+      PolicyDocument: {
+        Statement: [
+          {
+            Action: "execute-api:Invoke",
+            Effect: "Allow",
+            Resource: {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:",
+                  {
+                    Ref: "AWS::Partition",
+                  },
+                  ":execute-api:",
+                  {
+                    Ref: "AWS::Region",
+                  },
+                  ":",
+                  {
+                    Ref: "AWS::AccountId",
+                  },
+                  ":",
+                  stack.resolve((testApigw.restApi.node.defaultChild as cdk.CfnResource).ref),
+                  "/",
+                  stack.resolve((testApigw.restApi.deploymentStage.node.defaultChild as cdk.CfnResource).ref),
+                  `/*${routeName}`,
+                ],
+              ],
+            },
+          },
+        ],
+        Version: "2012-10-17",
+      },
+      Users: ["testUser"],
+    });
+  });
+
   test("Ensures AtatRestApi with vpcConfig in props properly sets EndpointConfiguration to PRIVATE", async () => {
     // GIVEN
     const app = new cdk.App();
@@ -59,49 +109,10 @@ describe("ATAT apigateway construct creation", () => {
     testApigw.restApi.root.addMethod("ANY");
     // THEN
     const template = Template.fromStack(stack);
-    template.hasResourceProperties(
-      "AWS::ApiGateway::RestApi",
-      Match.objectLike({
-        EndpointConfiguration: {
-          Types: ["PRIVATE"],
-        },
-        Policy: {
-          Statement: [
-            {
-              Action: "execute-api:Invoke",
-              Effect: "Allow",
-              Principal: {
-                AWS: {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        Ref: "AWS::Partition",
-                      },
-                      ":iam::",
-                      {
-                        Ref: "AWS::AccountId",
-                      },
-                      ":root",
-                    ],
-                  ],
-                },
-              },
-              Resource: "execute-api:/*",
-            },
-            {
-              Action: "execute-api:Invoke",
-              Effect: "Deny",
-              Principal: {
-                AWS: "*",
-              },
-              Resource: "execute-api:/*",
-            },
-          ],
-          Version: "2012-10-17",
-        },
-      })
-    );
+    template.hasResourceProperties("AWS::ApiGateway::RestApi", {
+      EndpointConfiguration: {
+        Types: ["PRIVATE"],
+      },
+    });
   });
 });
