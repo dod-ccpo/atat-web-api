@@ -35,64 +35,6 @@ describe("ATAT IAM Policy creation", () => {
     template = Template.fromStack(stack);
   });
 
-  test("Fully assert generalReadAccess IAM managed policy with matchers", async () => {
-    template.hasResourceProperties(
-      "AWS::IAM::ManagedPolicy",
-      Match.objectEquals({
-        PolicyDocument: {
-          Statement: [
-            {
-              Action: "apigateway:GET",
-              Effect: "Allow",
-              Resource: {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:",
-                    {
-                      Ref: "AWS::Partition",
-                    },
-                    ":apigateway:*::/restapis*",
-                  ],
-                ],
-              },
-              Sid: "APIGatewayRestApiReadAccess",
-            },
-            {
-              Action: ["states:List*", "states:Describe*", "states:GetExecutionHistory"],
-              Effect: "Allow",
-              Resource: {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:",
-                    {
-                      Ref: "AWS::Partition",
-                    },
-                    ":states:*:",
-                    {
-                      Ref: "AWS::AccountId",
-                    },
-                    ":stateMachine:*",
-                  ],
-                ],
-              },
-              Sid: "StepFunctionsReadAccess",
-            },
-            {
-              Action: ["xray:BatchGetTraces", "xray:Get*", "xray:List*"],
-              Effect: "Allow",
-              Resource: "*",
-              Sid: "XRayReadAccess",
-            },
-          ],
-          Version: "2012-10-17",
-        },
-        Description: "Grants read access to specific resources not in ViewOnlyAccess",
-        Path: "/",
-      })
-    );
-  });
   test("Fully assert auditorAccess IAM managed policy with matchers", async () => {
     template.hasResourceProperties(
       "AWS::IAM::ManagedPolicy",
