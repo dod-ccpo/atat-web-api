@@ -1,8 +1,8 @@
 import * as cdk from "aws-cdk-lib";
-import { Match, Template } from "aws-cdk-lib/assertions";
-import { User } from "aws-cdk-lib/aws-iam";
-import { AtatRestApi, RestApiVpcConfiguration } from "../lib/constructs/apigateway";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
+import * as iam from "aws-cdk-lib/aws-iam";
+import { Match, Template } from "aws-cdk-lib/assertions";
+import { AtatRestApi, RestApiVpcConfiguration } from "../lib/constructs/apigateway";
 
 describe("ATAT apigateway construct creation", () => {
   test("Ensure AtatRestApi is created", async () => {
