@@ -3,7 +3,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { ProvisionRequestType } from "../../models/provisioning-jobs";
 import createError from "http-errors";
 
-const cspPortfolioIdChecker = (): middy.MiddlewareObj<APIGatewayProxyEvent, APIGatewayProxyResult> => {
+export const cspPortfolioIdChecker = (): middy.MiddlewareObj<APIGatewayProxyEvent, APIGatewayProxyResult> => {
   const before: middy.MiddlewareFn<APIGatewayProxyEvent, APIGatewayProxyResult> = async (request): Promise<void> => {
     const { portfolioId, operationType } = request.event.body as any;
 
@@ -20,5 +20,3 @@ const cspPortfolioIdChecker = (): middy.MiddlewareObj<APIGatewayProxyEvent, APIG
     before,
   };
 };
-
-export default cspPortfolioIdChecker;

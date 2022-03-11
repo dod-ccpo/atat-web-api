@@ -45,9 +45,9 @@ export type TasksMap = { [name: string]: SfnLambdaInvokeTask };
  * @returns - an sfnTasks object with all tasks mapped by the id provided
  */
 export function mapTasks(scope: Construct, tasks: Array<TaskProps>): TasksMap {
-  const sfnTasks: TasksMap = {};
+  const mappedSfnTasks: TasksMap = {};
   for (const task of tasks) {
-    sfnTasks[task.id] = new SfnLambdaInvokeTask(scope, task.id, { sfnTask: task.props });
+    mappedSfnTasks[task.id] = new SfnLambdaInvokeTask(scope, task.id, { sfnTask: task.props });
   }
-  return sfnTasks;
+  return mappedSfnTasks;
 }

@@ -4,11 +4,6 @@ import { CloudServiceProvider, Network } from "../../models/cloud-service-provid
 import { ProvisionRequestType } from "../../models/provisioning-jobs";
 import { ApiSuccessResponse, ValidationErrorResponse } from "../../utils/response";
 import { sfnClient } from "../../utils/aws-sdk/step-functions";
-// ! when this is imported causes errors
-// 1) Cannot find name 'ReadableStream'. -> add 'dom' to tsconfig
-// 2) on github checks fails with
-// Error: node_modules/aws-sdk-client-mock/dist/types/libStorage.d.ts(8,95): error TS2307:
-// Cannot find module '@aws-sdk/client-s3' or its corresponding type declarations.
 import { mockClient } from "aws-sdk-client-mock";
 
 const sfnMock = mockClient(sfnClient);

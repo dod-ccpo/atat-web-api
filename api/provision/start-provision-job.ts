@@ -20,7 +20,7 @@ import { CloudServiceProvider } from "../../models/cloud-service-providers";
 import { HttpMethod } from "../../lib/http";
 import { CORS_CONFIGURATION, MIDDY_CORS_CONFIGURATION } from "../../utils/cors-config";
 import { REQUEST_BODY_INVALID } from "../../utils/errors";
-import cspPortfolioIdChecker from "../../utils/middleware/check-csp-portfolio-id";
+import { cspPortfolioIdChecker } from "../../utils/middleware/check-csp-portfolio-id";
 
 const SFN_ARN = process.env.SFN_ARN ?? "";
 
