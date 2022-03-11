@@ -1,7 +1,12 @@
 import { sfnClient } from "../../utils/aws-sdk/step-functions";
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from "aws-lambda";
 import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusCode } from "../../utils/response";
-import { ProvisionRequest, provisionRequestSchema, ProvisionRequestType } from "../../models/provisioning-jobs";
+import {
+  CspInvocation,
+  ProvisionRequest,
+  provisionRequestSchema,
+  ProvisionRequestType,
+} from "../../models/provisioning-jobs";
 import { wrapSchema } from "../../utils/middleware/schema-wrapper";
 import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
 import middy from "@middy/core";
@@ -12,7 +17,7 @@ import cors from "@middy/http-cors";
 import xssSanitizer from "../../utils/middleware/xss-sanitizer";
 import { IpCheckerMiddleware } from "../../utils/middleware/ip-logging";
 import { CloudServiceProvider } from "../../models/cloud-service-providers";
-import { HttpMethod } from "../../utils/http";
+import { HttpMethod } from "../../lib/http";
 import { CORS_CONFIGURATION, MIDDY_CORS_CONFIGURATION } from "../../utils/cors-config";
 import { REQUEST_BODY_INVALID } from "../../utils/errors";
 import cspPortfolioIdChecker from "../../utils/middleware/check-csp-portfolio-id";
@@ -50,7 +55,7 @@ export async function baseHandler(event: APIGatewayProxyEvent, context: Context)
  * @param request - provisioning request from SNOW
  * @returns - transformed request to send to the targeted CSP
  */
-function transformProvisionJob(request: ProvisionRequest) {
+function transformProvisionJob(request: ProvisionRequest): CspInvocation {
   const { operationType, portfolioId, payload, targetCsp } = request;
 
   const headers = {

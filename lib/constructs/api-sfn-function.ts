@@ -2,7 +2,7 @@ import { Duration } from "aws-cdk-lib";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as lambdaNodeJs from "aws-cdk-lib/aws-lambda-nodejs";
 import * as sfn from "aws-cdk-lib/aws-stepfunctions";
-import { HttpMethod } from "../../utils/http";
+import { HttpMethod } from "../http";
 import { Construct } from "constructs";
 export interface ApiSfnFunctionProps {
   /**

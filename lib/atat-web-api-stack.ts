@@ -7,7 +7,7 @@ import { StateMachine } from "./constructs/state-machine";
 import { AtatRestApi } from "./constructs/apigateway";
 import { UserPermissionBoundary } from "./aspects/user-only-permission-boundary";
 import { ApiSfnFunction } from "./constructs/api-sfn-function";
-import { HttpMethod } from "../utils/http";
+import { HttpMethod } from "./http";
 import { ProvisioningWorkflow } from "./constructs/provisioning-sfn-workflow";
 
 export interface AtatWebApiStackProps extends cdk.StackProps {

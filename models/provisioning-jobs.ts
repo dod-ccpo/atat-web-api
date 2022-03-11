@@ -1,3 +1,4 @@
+import { HttpMethod } from "../lib/http";
 import { CloudServiceProvider, Network } from "./cloud-service-providers";
 
 export enum ProvisionRequestType {
@@ -42,6 +43,13 @@ export interface ProvisionRequest {
   payload: ProvisionPayloads;
 }
 
+export interface CspInvocation {
+  method: HttpMethod;
+  headers: Record<string, string>;
+  endpoint: string;
+  payload: ProvisionPayloads;
+}
+
 // temporary schema to use for validating /provision-job request
 export const provisionRequestSchema = {
   type: "object",
@@ -69,6 +77,13 @@ export const provisionRequestSchema = {
     },
     payload: {
       type: "object",
+      properties: {
+        name: { type: "string" },
+        fundingSources: { type: "array" },
+        operators: { type: "array", items: { type: "string" } },
+      },
+      additionalProperties: false,
+      minProperties: 1,
     },
   },
 };
