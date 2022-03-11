@@ -6,8 +6,7 @@ import {
   NoContentResponse,
   ApiSuccessResponse,
   SuccessStatusCode,
-} from "../utils/response";
-// import * as response from "../utils/response";
+} from "./response";
 
 describe("Validation for No Content responses", () => {
   const exampleResponse = new NoContentResponse();

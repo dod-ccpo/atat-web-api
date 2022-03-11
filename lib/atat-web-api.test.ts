@@ -1,6 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import { Template } from "aws-cdk-lib/assertions";
-import * as AtatWebApi from "../lib/atat-web-api-stack";
+import * as AtatWebApi from "./atat-web-api-stack";
 
 test("Rest API is created", () => {
   // GIVEN

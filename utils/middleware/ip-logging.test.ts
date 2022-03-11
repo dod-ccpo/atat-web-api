@@ -1,6 +1,6 @@
 import middy from "@middy/core";
 import { Context } from "aws-lambda";
-import { IpCheckerMiddleware } from "../utils/middleware/ip-logging";
+import { IpCheckerMiddleware } from "./ip-logging";
 
 describe("Test console logging", function () {
   it("should console log the event", async () => {

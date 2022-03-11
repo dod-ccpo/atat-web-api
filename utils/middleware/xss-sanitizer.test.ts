@@ -1,5 +1,5 @@
 import middy from "@middy/core";
-import xssSanitizer from "../utils/middleware/xss-sanitizer";
+import xssSanitizer from "./xss-sanitizer";
 
 describe("Useable with middy", () => {
   it("custom 'before' middleware can be attached with middys 'use'", async () => {
