@@ -3,13 +3,18 @@ import { handler } from "./start-provision-job";
 import { CloudServiceProvider, Network } from "../../models/cloud-service-providers";
 import { ProvisionRequestType } from "../../models/provisioning-jobs";
 import { ApiSuccessResponse, ValidationErrorResponse } from "../../utils/response";
-// import { sfnClient } from "../../utils/aws-sdk/step-functions";
-// import { mockClient } from "aws-sdk-client-mock";
+import { sfnClient } from "../../utils/aws-sdk/step-functions";
+// ! when this is imported causes errors
+// 1) Cannot find name 'ReadableStream'. -> add 'dom' to tsconfig
+// 2) on github checks fails with
+// Error: node_modules/aws-sdk-client-mock/dist/types/libStorage.d.ts(8,95): error TS2307:
+// Cannot find module '@aws-sdk/client-s3' or its corresponding type declarations.
+import { mockClient } from "aws-sdk-client-mock";
 
-// const sfnMock = mockClient(sfnClient);
-// beforeEach(() => {
-//   sfnMock.reset();
-// });
+const sfnMock = mockClient(sfnClient);
+beforeEach(() => {
+  sfnMock.reset();
+});
 
 const fundingSources = [
   {
@@ -30,7 +35,7 @@ const provisioningBodyNoPayload = {
 };
 
 describe("Successful provisioning operations", () => {
-  it.skip("should add a new portfolio", async () => {
+  it("should add a new portfolio", async () => {
     const request = {
       body: {
         ...provisioningBodyNoPayload,
@@ -46,7 +51,7 @@ describe("Successful provisioning operations", () => {
     console.log(response);
     expect(response).toBeInstanceOf(ApiSuccessResponse);
   });
-  it.skip("should add a funding source to existing portfolio", async () => {
+  it("should add a funding source to existing portfolio", async () => {
     const request = {
       body: {
         ...provisioningBodyNoPayload,
@@ -69,7 +74,7 @@ describe("Successful provisioning operations", () => {
     console.log(response);
     expect(response).toBeInstanceOf(ApiSuccessResponse);
   });
-  it.skip("should add operators to existing portfolio", async () => {
+  it("should add operators to existing portfolio", async () => {
     const request = {
       body: {
         ...provisioningBodyNoPayload,
