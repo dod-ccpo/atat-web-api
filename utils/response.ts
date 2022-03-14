@@ -1,6 +1,5 @@
 /* eslint-disable max-len */
 import { APIGatewayProxyResult } from "aws-lambda";
-import { CORS_CONFIGURATION } from "./cors-config";
 
 type Headers = { [header: string]: string | number | boolean } | undefined;
 type MultiValueHeaders = { [header: string]: (string | number | boolean)[] } | undefined;
@@ -86,7 +85,7 @@ abstract class Response implements APIGatewayProxyResult {
     multiValueHeaders?: MultiValueHeaders,
     isBase64Encoded?: boolean
   ) {
-    headers = { ...headers, ...CORS_CONFIGURATION };
+    headers = { ...headers };
 
     this.body = body;
     this.statusCode = statusCode;

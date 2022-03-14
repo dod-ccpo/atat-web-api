@@ -1,17 +1,13 @@
 import middy from "@middy/core";
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { ProvisionRequestType } from "../../models/provisioning-jobs";
+import { APIGatewayProxyResult } from "aws-lambda";
+import { ILambdaEvent, ProvisionRequestType } from "../../models/provisioning-jobs";
 import createError from "http-errors";
 
-export const cspPortfolioIdChecker = (): middy.MiddlewareObj<APIGatewayProxyEvent, APIGatewayProxyResult> => {
-  const before: middy.MiddlewareFn<APIGatewayProxyEvent, APIGatewayProxyResult> = async (request): Promise<void> => {
-    const { portfolioId, operationType } = request.event.body as any;
-
-    if (
-      (operationType === ProvisionRequestType.ADD_FUNDING_SOURCE ||
-        operationType === ProvisionRequestType.ADD_OPERATORS) &&
-      !portfolioId
-    ) {
+export const cspPortfolioIdChecker = (): middy.MiddlewareObj<ILambdaEvent, APIGatewayProxyResult> => {
+  const before: middy.MiddlewareFn<ILambdaEvent, APIGatewayProxyResult> = async (request): Promise<void> => {
+    const { portfolioId, operationType } = request.event.body;
+    const requiresPortfolioId = [ProvisionRequestType.ADD_FUNDING_SOURCE, ProvisionRequestType.ADD_OPERATORS];
+    if (requiresPortfolioId.includes(operationType) && !portfolioId) {
       throw createError(400, "CSP portfolio ID required.");
     }
   };

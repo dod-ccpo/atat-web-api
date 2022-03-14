@@ -4,9 +4,9 @@ export enum Network {
   NETWORK_3 = "NETWORK_3",
 }
 export interface ICloudServiceProvider {
-  name: string;
-  uri: string;
-  networks: Array<Network>;
+  readonly name: string;
+  readonly uri: string;
+  readonly networks: Array<Network>;
 }
 export class CloudServiceProvider implements ICloudServiceProvider {
   readonly name: string;

@@ -5,12 +5,12 @@ import { Construct } from "constructs";
 import { mapTasks, TasksMap } from "./sfn-lambda-invoke-task";
 
 /**
- * Successful condition check used when status code is 200
+ * Successful condition check
  */
 export const successResponse = sfn.Condition.numberEquals("$.cspResponse.Payload.statusCodeFn", 200);
 
 /**
- * Client error condition check used when the status code is 400, 402, or 404
+ * Client error condition check∂
  */
 export const clientErrorResponse = sfn.Condition.or(
   sfn.Condition.numberEquals("$.cspResponse.statusCode", 400),
@@ -19,12 +19,12 @@ export const clientErrorResponse = sfn.Condition.or(
 );
 
 /**
- * Internal error condition check used when the status code is 500
+ * Internal error condition check
  */
 export const internalErrorResponse = sfn.Condition.numberGreaterThanEquals("$.cspResponse.statusCode", 500);
 
 /**
- * Retry condition check when the status code is 500, with a max retry of 6
+ * Retry condition check
  */
 export const maxRetries = sfn.Condition.and(
   sfn.Condition.numberGreaterThan("$.cspResponsePass.retryCount", 6),

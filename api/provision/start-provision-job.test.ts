@@ -29,6 +29,8 @@ const provisioningBodyNoPayload = {
   targetNetwork: Network.NETWORK_1,
 };
 
+export const requestContext = { identity: { sourceIp: "9.9.9.9" } };
+
 describe("Successful provisioning operations", () => {
   it("should add a new portfolio", async () => {
     const request = {
@@ -40,10 +42,10 @@ describe("Successful provisioning operations", () => {
           operators,
         },
       },
-      requestContext: { identity: { sourceIp: "9.9.9.9" } },
+      requestContext,
     } as any;
     const response = await handler(request, {} as Context, () => null);
-    console.log(response);
+    console.log("TROUBLESHOOTING: ", response);
     expect(response).toBeInstanceOf(ApiSuccessResponse);
   });
   it("should add a funding source to existing portfolio", async () => {
@@ -63,10 +65,9 @@ describe("Successful provisioning operations", () => {
           ],
         },
       },
-      requestContext: { identity: { sourceIp: "9.9.9.9" } },
+      requestContext,
     } as any;
     const response = await handler(request, {} as Context, () => null);
-    console.log(response);
     expect(response).toBeInstanceOf(ApiSuccessResponse);
   });
   it("should add operators to existing portfolio", async () => {
@@ -78,10 +79,9 @@ describe("Successful provisioning operations", () => {
           operators: [...operators, "root.admin@mail.mil"],
         },
       },
-      requestContext: { identity: { sourceIp: "9.9.9.9" } },
+      requestContext,
     } as any;
     const response = await handler(request, {} as Context, () => null);
-    console.log(response);
     expect(response).toBeInstanceOf(ApiSuccessResponse);
   });
 });
@@ -96,7 +96,7 @@ describe("Failed provision operations", () => {
           operators,
         },
       },
-      requestContext: { identity: { sourceIp: "9.9.9.9" } },
+      requestContext,
     } as any;
     const response = await handler(request, {} as Context, () => null);
     expect(response).toBeInstanceOf(ValidationErrorResponse);
@@ -110,7 +110,7 @@ describe("Failed provision operations", () => {
           operators,
         },
       },
-      requestContext: { identity: { sourceIp: "9.9.9.9" } },
+      requestContext,
     } as any;
     const response = await handler(request, {} as Context, () => null);
     const responseBody = JSON.parse(response?.body ?? "");

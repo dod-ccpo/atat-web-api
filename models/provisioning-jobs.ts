@@ -45,6 +45,10 @@ export interface CspInvocation {
   endpoint: string;
   payload: NewPortfolioPayload | FundingSourcePayload | OperatorPayload;
 }
+export interface ILambdaEvent {
+  body: ProvisionRequest;
+  requestContext: { identity: { sourceIp: string } };
+}
 
 // temporary schema to use for validating /provision-job request
 export const provisionRequestSchema = {

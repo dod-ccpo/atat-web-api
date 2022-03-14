@@ -8,9 +8,10 @@ export const INTERNAL_SERVER_ERROR = new OtherErrorResponse("Server error", Erro
 /**
  * To be used when a request body exists but is invalid
  * Could be invalid because:
- *  - request body is not of the expected Content-Type (for example, application/json, or application/pdf)
- *  - is not valid JSON / PDF
- *  - when JSON, is not of the expected type (for example, doesn't look like PortfolioStep/FundingStep/ApplicationStep)
+ *  - request body is not of the expected Content-Type (for example, application/json)
+ *  - is not valid JSON
+ *  - when JSON, is not of the expected type (for example, doesn't look like Portfolio
+ * provisioning request)
  */
 export const REQUEST_BODY_INVALID = new OtherErrorResponse(
   "A valid request body must be provided",

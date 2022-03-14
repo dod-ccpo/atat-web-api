@@ -1,24 +1,23 @@
 import middy from "@middy/core";
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
+import { APIGatewayProxyResult } from "aws-lambda";
 import { serializeError } from "serialize-error";
 import { ValidationErrorResponse } from "../response";
 import { INTERNAL_SERVER_ERROR, REQUEST_BODY_INVALID } from "../errors";
+import { ILambdaEvent } from "../../models/provisioning-jobs";
 
-export const errorHandlingMiddleware = (): middy.MiddlewareObj<APIGatewayProxyEvent, APIGatewayProxyResult> => {
-  const onError: middy.MiddlewareFn<APIGatewayProxyEvent, APIGatewayProxyResult> = async (
+export const errorHandlingMiddleware = (): middy.MiddlewareObj<ILambdaEvent, APIGatewayProxyResult> => {
+  const onError: middy.MiddlewareFn<ILambdaEvent, APIGatewayProxyResult> = async (
     request
   ): Promise<ValidationErrorResponse | void> => {
     const error = serializeError(request.error)!;
-    const errorMessage = error?.message as string;
-
-    if (errorMessage === "CSP portfolio ID required.") {
-      return new ValidationErrorResponse("Request failed validation", {
-        issue: errorMessage,
-        name: error.name,
-      });
-    }
+    const errorMessage = error.message;
 
     switch (errorMessage) {
+      case "CSP portfolio ID required.":
+        return new ValidationErrorResponse("Request failed validation", {
+          issue: errorMessage,
+          name: error.name,
+        });
       case "Event object failed validation":
         return new ValidationErrorResponse("Request failed validation", error.details as Record<string, unknown>);
       case "Business rules validation failed":

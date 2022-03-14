@@ -1,8 +1,9 @@
 import { sfnClient } from "../../utils/aws-sdk/step-functions";
-import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from "aws-lambda";
+import { APIGatewayProxyResult } from "aws-lambda";
 import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusCode } from "../../utils/response";
 import {
   CspInvocation,
+  ILambdaEvent,
   ProvisionRequest,
   provisionRequestSchema,
   ProvisionRequestType,
@@ -13,12 +14,10 @@ import middy from "@middy/core";
 import validator from "@middy/validator";
 import jsonBodyParser from "@middy/http-json-body-parser";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
-import cors from "@middy/http-cors";
 import xssSanitizer from "../../utils/middleware/xss-sanitizer";
 import { IpCheckerMiddleware } from "../../utils/middleware/ip-logging";
 import { CloudServiceProvider } from "../../models/cloud-service-providers";
 import { HttpMethod } from "../../lib/http";
-import { CORS_CONFIGURATION, MIDDY_CORS_CONFIGURATION } from "../../utils/cors-config";
 import { REQUEST_BODY_INVALID } from "../../utils/errors";
 import { cspPortfolioIdChecker } from "../../utils/middleware/check-csp-portfolio-id";
 
@@ -29,9 +28,9 @@ const SFN_ARN = process.env.SFN_ARN ?? "";
  *
  * @param event - POST request from API Gateway with provisioning job properties
  */
-export async function baseHandler(event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> {
+export async function baseHandler(event: ILambdaEvent): Promise<APIGatewayProxyResult> {
   try {
-    const cspInvocationJob = transformProvisionJob(event.body as any);
+    const cspInvocationJob = transformProvisionJob(event.body);
     console.log("SentToSfn: " + JSON.stringify(cspInvocationJob));
 
     // starting the execution
@@ -60,7 +59,6 @@ function transformProvisionJob(request: ProvisionRequest): CspInvocation {
 
   const headers = {
     "Content-Type": "application/json",
-    ...CORS_CONFIGURATION,
   };
 
   switch (operationType) {
@@ -97,5 +95,4 @@ export const handler = middy(baseHandler)
   .use(cspPortfolioIdChecker())
   .use(validator({ inputSchema: wrapSchema(provisionRequestSchema) }))
   .use(errorHandlingMiddleware())
-  .use(JSONErrorHandlerMiddleware())
-  .use(cors(MIDDY_CORS_CONFIGURATION));
+  .use(JSONErrorHandlerMiddleware());

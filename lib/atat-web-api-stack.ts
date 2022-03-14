@@ -66,7 +66,7 @@ export class AtatWebApiStack extends cdk.Stack {
       logGroup: provisioningSfn.logGroup,
     }).stateMachine;
 
-    // Provisioning lambda that translate and invokes the state machine
+    // Provisioning lambda that translates and invokes the state machine
     const provisioningJob = new ApiSfnFunction(this, "ProvisioningJobRequest", {
       method: HttpMethod.POST,
       handlerPath: "api/provision/start-provision-job.ts",
@@ -74,7 +74,7 @@ export class AtatWebApiStack extends cdk.Stack {
     });
 
     // APIGW Provisioning Job Resource
-    const provisioningJobsResource = apigw.restApi.root.addResource("provisioning-job");
-    provisioningJobsResource.addMethod(provisioningJob.method, new LambdaIntegration(provisioningJob.fn));
+    const provisioningJobResource = apigw.restApi.root.addResource("provisioning-job");
+    provisioningJobResource.addMethod(provisioningJob.method, new LambdaIntegration(provisioningJob.fn));
   }
 }
