@@ -14,7 +14,7 @@ beforeEach(() => {
 const fundingSources = [
   {
     taskOrderNumber: "1234567890123",
-    clinNumber: "9999",
+    clin: "9999",
     popStartDate: "2021-07-01",
     popEndDate: "2022-07-01",
   },
@@ -56,7 +56,7 @@ describe("Successful provisioning operations", () => {
             ...fundingSources,
             {
               taskOrderNumber: "1234567890123",
-              clinNumber: "0001",
+              clin: "0001",
               popStartDate: "2021-10-01",
               popEndDate: "2022-12-31",
             },
