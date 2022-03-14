@@ -22,7 +22,7 @@ export class SfnLambdaInvokeTask extends Construct {
   constructor(scope: Construct, id: string, props: SfnTasksProps) {
     super(scope, id);
     const sfnTask = new sfnTasks.LambdaInvoke(this, id, {
-      timeout: Duration.seconds(60),
+      timeout: Duration.seconds(20),
       ...props.sfnTask,
     });
 

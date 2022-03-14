@@ -9,7 +9,7 @@ export const errorHandlingMiddleware = (): middy.MiddlewareObj<ILambdaEvent, API
   const onError: middy.MiddlewareFn<ILambdaEvent, APIGatewayProxyResult> = async (
     request
   ): Promise<ValidationErrorResponse | void> => {
-    const error = serializeError(request.error)!;
+    const error = serializeError(request.error!);
     const errorMessage = error.message;
 
     if (error.name === "MockCspApiError") {
