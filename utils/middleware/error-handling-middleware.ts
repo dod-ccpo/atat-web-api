@@ -12,6 +12,10 @@ export const errorHandlingMiddleware = (): middy.MiddlewareObj<ILambdaEvent, API
     const error = serializeError(request.error)!;
     const errorMessage = error.message;
 
+    if (error.name === "MockCspApiError") {
+      throw request.error;
+    }
+
     switch (errorMessage) {
       case "CSP portfolio ID required.":
         return new ValidationErrorResponse("Request failed validation", {

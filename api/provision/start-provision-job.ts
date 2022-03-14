@@ -54,7 +54,7 @@ export async function baseHandler(event: ILambdaEvent): Promise<APIGatewayProxyR
  * @param request - provisioning request from SNOW
  * @returns - transformed request to send to the targeted CSP
  */
-function transformProvisionJob(request: ProvisionRequest): CspInvocation {
+export function transformProvisionJob(request: ProvisionRequest): CspInvocation {
   const { operationType, portfolioId, payload, targetCsp } = request;
 
   const headers = {

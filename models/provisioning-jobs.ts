@@ -50,6 +50,11 @@ export interface ILambdaEvent {
   requestContext: { identity: { sourceIp: string } };
 }
 
+export interface CspResponse {
+  code: number;
+  content: unknown;
+  request: CspInvocation;
+}
 // temporary schema to use for validating /provision-job request
 export const provisionRequestSchema = {
   type: "object",
@@ -100,4 +105,16 @@ export const provisionRequestSchema = {
   },
   required: ["jobId", "userId", "portfolioId", "operationType", "targetCsp", "targetNetwork", "payload"],
   additionalProperties: false,
+};
+
+export const cspInvocationSchema = {
+  type: "object",
+  properties: {
+    method: { enum: [HttpMethod.PATCH, HttpMethod.POST, HttpMethod.GET] },
+    headers: {
+      type: "object",
+    },
+    endpoint: { type: "string" },
+    payload: provisionRequestSchema.properties.payload,
+  },
 };
