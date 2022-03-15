@@ -1,6 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import { Template } from "aws-cdk-lib/assertions";
-import * as AtatNet from "../lib/atat-net-stack";
+import * as AtatNet from "./atat-net-stack";
 
 describe("ATAT network creation", () => {
   test("Flow Logs enabled", async () => {

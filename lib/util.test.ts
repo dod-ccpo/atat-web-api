@@ -1,4 +1,4 @@
-import * as utils from "../lib/util";
+import * as utils from "./util";
 
 const testEnvironmentIds = [
   // Jira ticket ID-looking strings should be valid regardless of how they

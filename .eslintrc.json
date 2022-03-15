@@ -22,6 +22,13 @@
     "prettier",
     "json"
   ],
+  "settings": {
+    "import/resolver": {
+      "typescript": {
+        "alwaysTryTypes": true
+      }
+    }
+  },
   "rules": {
     "max-len": [
       2,

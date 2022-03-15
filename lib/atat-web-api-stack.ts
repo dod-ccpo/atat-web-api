@@ -1,12 +1,26 @@
 import * as cdk from "aws-cdk-lib";
 import * as iam from "aws-cdk-lib/aws-iam";
+import { LambdaIntegration } from "aws-cdk-lib/aws-apigateway";
 import { Construct } from "constructs";
+import * as sfn from "aws-cdk-lib/aws-stepfunctions";
+import { StateMachine } from "./constructs/state-machine";
 import { AtatRestApi } from "./constructs/apigateway";
 import { UserPermissionBoundary } from "./aspects/user-only-permission-boundary";
+import { ApiSfnFunction } from "./constructs/api-sfn-function";
+import { HttpMethod } from "./http";
+import { ProvisioningWorkflow } from "./constructs/provisioning-sfn-workflow";
+
+export interface AtatWebApiStackProps extends cdk.StackProps {
+  environmentName: string;
+}
 
 export class AtatWebApiStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+  public readonly provisioningStateMachine: sfn.IStateMachine;
+
+  constructor(scope: Construct, id: string, props: AtatWebApiStackProps) {
     super(scope, id, props);
+    const { environmentName } = props;
+
     const apigw = new AtatRestApi(this, "SampleApi");
     apigw.restApi.root.addMethod("ANY");
 
@@ -42,5 +56,25 @@ export class AtatWebApiStack extends cdk.Stack {
         })
       )
     );
+
+    // State Machine
+    const provisioningSfn = new ProvisioningWorkflow(this, { environmentName });
+    this.provisioningStateMachine = new StateMachine(this, "ProvisioningStateMachine", {
+      stateMachineProps: {
+        definition: provisioningSfn.workflow,
+      },
+      logGroup: provisioningSfn.logGroup,
+    }).stateMachine;
+
+    // Provisioning lambda that translates and invokes the state machine
+    const provisioningJob = new ApiSfnFunction(this, "ProvisioningJobRequest", {
+      method: HttpMethod.POST,
+      handlerPath: "api/provision/start-provision-job.ts",
+      stateMachine: this.provisioningStateMachine,
+    });
+
+    // APIGW Provisioning Job Resource
+    const provisioningJobResource = apigw.restApi.root.addResource("provisioning-job");
+    provisioningJobResource.addMethod(provisioningJob.method, new LambdaIntegration(provisioningJob.fn));
   }
 }

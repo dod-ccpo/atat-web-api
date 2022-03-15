@@ -1,6 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import { Match, Template } from "aws-cdk-lib/assertions";
-import * as AtatIam from "../lib/atat-iam-stack";
+import * as AtatIam from "./atat-iam-stack";
 
 describe("ATAT network creation", () => {
   test("Ensure expected outputs are present", async () => {
