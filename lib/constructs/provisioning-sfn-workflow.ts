@@ -55,6 +55,7 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
       entry: "api/provision/sample-fn.ts",
     });
     this.resultFn = new lambdaNodeJs.NodejsFunction(scope, "ResultFunction", {
+      functionName: "ResultFunction",
       environment: {
         PROVISIONING_QUEUE_URL: this.provisioningJobsQueue.queueUrl,
       },

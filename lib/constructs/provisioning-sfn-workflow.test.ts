@@ -54,6 +54,7 @@ describe("Provisioning Workflow Tests", () => {
     template.hasResourceProperties(
       "AWS::Lambda::Function",
       Match.objectLike({
+        FunctionName: "ResultFunction",
         Environment: {
           Variables: {
             PROVISIONING_QUEUE_URL: Match.anyValue(),
