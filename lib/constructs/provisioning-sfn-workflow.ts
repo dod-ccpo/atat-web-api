@@ -10,7 +10,7 @@ import { mapTasks, TasksMap } from "./sfn-lambda-invoke-task";
 export const successResponse = sfn.Condition.numberEquals("$.cspResponse.Payload.statusCodeFn", 200);
 
 /**
- * Client error condition check∂
+ * Client error condition check
  */
 export const clientErrorResponse = sfn.Condition.or(
   sfn.Condition.numberEquals("$.cspResponse.statusCode", 400),

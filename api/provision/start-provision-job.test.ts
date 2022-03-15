@@ -29,7 +29,7 @@ const provisioningBodyNoPayload = {
   targetNetwork: Network.NETWORK_1,
 };
 
-export const requestContext = { identity: { sourceIp: "9.9.9.9" } };
+export const requestContext = { identity: { sourceIp: "203.0.113.0" } };
 
 describe("Successful provisioning operations", () => {
   it("should add a new portfolio", async () => {
