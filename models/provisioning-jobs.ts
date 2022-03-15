@@ -119,3 +119,23 @@ export const cspInvocationSchema = {
     payload: provisionRequestSchema.properties.payload,
   },
 };
+
+export const provisioningResponseSchema = {
+  type: "object",
+  required: ["cspResponse"],
+  additionalProperties: false,
+  properties: {
+    ...provisionRequestSchema.properties,
+    cspResponse: {
+      type: "object",
+      properties: {
+        code: {
+          type: "number",
+        },
+        content: {
+          type: "object",
+        },
+      },
+    },
+  },
+};

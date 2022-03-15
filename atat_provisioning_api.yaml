@@ -260,5 +260,3 @@ components:
         content:
           type: object
           additionalProperties: true
-        request:
-          $ref: '#/components/schemas/CspInvocation'
