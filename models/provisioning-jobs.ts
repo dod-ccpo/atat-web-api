@@ -1,4 +1,5 @@
 import { HttpMethod } from "../lib/http";
+import { APIGatewayEventRequestContext } from "aws-lambda";
 import { CloudServiceProvider, Network } from "./cloud-service-providers";
 
 export enum ProvisionRequestType {
@@ -45,10 +46,11 @@ export interface CspInvocation {
   endpoint: string;
   payload: NewPortfolioPayload | FundingSourcePayload | OperatorPayload;
 }
-export interface ILambdaEvent {
-  body: ProvisionRequest;
-  requestContext: { identity: { sourceIp: string } };
+export interface StepFunctionRequestEvent<T> {
+  body: T;
+  requestContext: APIGatewayEventRequestContext;
 }
+export type RequestBodyType = ProvisionRequest;
 
 export interface CspResponse {
   code: number;

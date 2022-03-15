@@ -3,7 +3,7 @@ import { APIGatewayProxyResult } from "aws-lambda";
 import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusCode } from "../../utils/response";
 import {
   CspInvocation,
-  ILambdaEvent,
+  StepFunctionRequestEvent,
   ProvisionRequest,
   provisionRequestSchema,
   ProvisionRequestType,
@@ -28,7 +28,7 @@ const SFN_ARN = process.env.SFN_ARN ?? "";
  *
  * @param event - POST request from API Gateway with provisioning job properties
  */
-export async function baseHandler(event: ILambdaEvent): Promise<APIGatewayProxyResult> {
+export async function baseHandler(event: StepFunctionRequestEvent<ProvisionRequest>): Promise<APIGatewayProxyResult> {
   try {
     const cspInvocationJob = transformProvisionJob(event.body);
     console.log("SentToSfn: " + JSON.stringify(cspInvocationJob));

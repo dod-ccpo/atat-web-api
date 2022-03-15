@@ -3,12 +3,16 @@ import { APIGatewayProxyResult } from "aws-lambda";
 import { serializeError } from "serialize-error";
 import { ValidationErrorResponse } from "../response";
 import { INTERNAL_SERVER_ERROR, REQUEST_BODY_INVALID } from "../errors";
-import { ILambdaEvent } from "../../models/provisioning-jobs";
+import { StepFunctionRequestEvent, RequestBodyType, CspInvocation, CspResponse } from "../../models/provisioning-jobs";
 
-export const errorHandlingMiddleware = (): middy.MiddlewareObj<ILambdaEvent, APIGatewayProxyResult> => {
-  const onError: middy.MiddlewareFn<ILambdaEvent, APIGatewayProxyResult> = async (
-    request
-  ): Promise<ValidationErrorResponse | void> => {
+export const errorHandlingMiddleware = (): middy.MiddlewareObj<
+  StepFunctionRequestEvent<RequestBodyType> | CspInvocation,
+  APIGatewayProxyResult | CspResponse | ValidationErrorResponse
+> => {
+  const onError: middy.MiddlewareFn<
+    StepFunctionRequestEvent<RequestBodyType> | CspInvocation,
+    APIGatewayProxyResult | CspResponse | ValidationErrorResponse
+  > = async (request): Promise<ValidationErrorResponse | void> => {
     const error = serializeError(request.error!);
     const errorMessage = error.message;
 
