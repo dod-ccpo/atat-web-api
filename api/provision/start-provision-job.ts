@@ -3,7 +3,7 @@ import { APIGatewayProxyResult } from "aws-lambda";
 import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusCode } from "../../utils/response";
 import {
   CspInvocation,
-  ILambdaEvent,
+  StepFunctionRequestEvent,
   ProvisionRequest,
   provisionRequestSchema,
   ProvisionRequestType,
@@ -28,9 +28,9 @@ const SFN_ARN = process.env.SFN_ARN ?? "";
  *
  * @param event - POST request from API Gateway with provisioning job properties
  */
-export async function baseHandler(event: ILambdaEvent): Promise<APIGatewayProxyResult> {
+export async function baseHandler(event: StepFunctionRequestEvent<ProvisionRequest>): Promise<APIGatewayProxyResult> {
   try {
-    const cspInvocationJob = transformProvisionJob(event.body);
+    const cspInvocationJob = transformProvisionRequest(event.body);
     console.log("SentToSfn: " + JSON.stringify(cspInvocationJob));
 
     // starting the execution
@@ -54,7 +54,7 @@ export async function baseHandler(event: ILambdaEvent): Promise<APIGatewayProxyR
  * @param request - provisioning request from SNOW
  * @returns - transformed request to send to the targeted CSP
  */
-function transformProvisionJob(request: ProvisionRequest): CspInvocation {
+export function transformProvisionRequest(request: ProvisionRequest): CspInvocation {
   const { operationType, portfolioId, payload, targetCsp } = request;
 
   const headers = {

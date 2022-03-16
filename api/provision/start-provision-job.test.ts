@@ -45,7 +45,6 @@ describe("Successful provisioning operations", () => {
       requestContext,
     } as any;
     const response = await handler(request, {} as Context, () => null);
-    console.log("TROUBLESHOOTING: ", response);
     expect(response).toBeInstanceOf(ApiSuccessResponse);
   });
   it("should add a funding source to existing portfolio", async () => {

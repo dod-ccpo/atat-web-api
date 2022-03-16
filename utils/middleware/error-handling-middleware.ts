@@ -3,14 +3,22 @@ import { APIGatewayProxyResult } from "aws-lambda";
 import { serializeError } from "serialize-error";
 import { ValidationErrorResponse } from "../response";
 import { INTERNAL_SERVER_ERROR, REQUEST_BODY_INVALID } from "../errors";
-import { ILambdaEvent } from "../../models/provisioning-jobs";
+import { StepFunctionRequestEvent, RequestBodyType, CspInvocation, CspResponse } from "../../models/provisioning-jobs";
 
-export const errorHandlingMiddleware = (): middy.MiddlewareObj<ILambdaEvent, APIGatewayProxyResult> => {
-  const onError: middy.MiddlewareFn<ILambdaEvent, APIGatewayProxyResult> = async (
+export type MiddlewareInputs = StepFunctionRequestEvent<RequestBodyType> | CspInvocation;
+export type MiddlewareOutputs = APIGatewayProxyResult | CspResponse | ValidationErrorResponse;
+
+export const errorHandlingMiddleware = (): middy.MiddlewareObj<MiddlewareInputs, MiddlewareOutputs> => {
+  const onError: middy.MiddlewareFn<MiddlewareInputs, MiddlewareOutputs> = async (
     request
   ): Promise<ValidationErrorResponse | void> => {
-    const error = serializeError(request.error)!;
+    const error = serializeError(request.error!);
     const errorMessage = error.message;
+
+    if (error.name === "MockCspApiError") {
+      // force state machine task to retry
+      throw request.error;
+    }
 
     switch (errorMessage) {
       case "CSP portfolio ID required.":

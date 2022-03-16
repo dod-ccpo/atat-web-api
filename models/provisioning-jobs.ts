@@ -1,4 +1,5 @@
 import { HttpMethod } from "../lib/http";
+import { APIGatewayEventRequestContext } from "aws-lambda";
 import { CloudServiceProvider, Network } from "./cloud-service-providers";
 
 export enum ProvisionRequestType {
@@ -45,11 +46,16 @@ export interface CspInvocation {
   endpoint: string;
   payload: NewPortfolioPayload | FundingSourcePayload | OperatorPayload;
 }
-export interface ILambdaEvent {
-  body: ProvisionRequest;
-  requestContext: { identity: { sourceIp: string } };
+export interface StepFunctionRequestEvent<T> {
+  body: T;
+  requestContext: APIGatewayEventRequestContext;
 }
+export type RequestBodyType = ProvisionRequest;
 
+export interface CspResponse {
+  code: number;
+  content: unknown;
+}
 // temporary schema to use for validating /provision-job request
 export const provisionRequestSchema = {
   type: "object",
@@ -100,4 +106,16 @@ export const provisionRequestSchema = {
   },
   required: ["jobId", "userId", "portfolioId", "operationType", "targetCsp", "targetNetwork", "payload"],
   additionalProperties: false,
+};
+
+export const cspInvocationSchema = {
+  type: "object",
+  properties: {
+    method: { enum: [HttpMethod.PATCH, HttpMethod.POST, HttpMethod.GET] },
+    headers: {
+      type: "object",
+    },
+    endpoint: { type: "string" },
+    payload: provisionRequestSchema.properties.payload,
+  },
 };

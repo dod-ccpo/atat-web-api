@@ -1,10 +1,17 @@
 import middy from "@middy/core";
-import { APIGatewayProxyResult } from "aws-lambda";
-import { ILambdaEvent, ProvisionRequestType } from "../../models/provisioning-jobs";
+import { StepFunctionRequestEvent, ProvisionRequestType, RequestBodyType } from "../../models/provisioning-jobs";
 import createError from "http-errors";
+import { MiddlewareOutputs } from "./error-handling-middleware";
 
-export const cspPortfolioIdChecker = (): middy.MiddlewareObj<ILambdaEvent, APIGatewayProxyResult> => {
-  const before: middy.MiddlewareFn<ILambdaEvent, APIGatewayProxyResult> = async (request): Promise<void> => {
+// Ensures a CSP portfolio id is present when submitting a request
+// that updates an already existing portfolio
+export const cspPortfolioIdChecker = (): middy.MiddlewareObj<
+  StepFunctionRequestEvent<RequestBodyType>,
+  MiddlewareOutputs
+> => {
+  const before: middy.MiddlewareFn<StepFunctionRequestEvent<RequestBodyType>, MiddlewareOutputs> = async (
+    request
+  ): Promise<void> => {
     const { portfolioId, operationType } = request.event.body;
     const requiresPortfolioId = [ProvisionRequestType.ADD_FUNDING_SOURCE, ProvisionRequestType.ADD_OPERATORS];
     if (requiresPortfolioId.includes(operationType) && !portfolioId) {
