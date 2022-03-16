@@ -24,7 +24,7 @@ export async function baseHandler(stateInput: CspInvocation): Promise<CspRespons
 
   const cspResponse = createCspResponse(stateInput);
 
-  // Throws a custom error identified by the state machine and the function retires 2
+  // Throws a custom error identified by the state machine and the function retries 2
   // times before failing continuing through the remaining states
   if (cspResponse.code >= 500) {
     const error = new Error(JSON.stringify(cspResponse));
@@ -47,7 +47,6 @@ export function createCspResponse(request: CspInvocation): CspResponse {
         content: {
           some: "good content",
         },
-        request,
       };
       console.log("Success response : " + JSON.stringify(response));
       return response;
@@ -57,7 +56,6 @@ export function createCspResponse(request: CspInvocation): CspResponse {
         content: {
           some: "bad content",
         },
-        request,
       };
       console.log("Failed response : " + JSON.stringify(response));
       return response;
@@ -67,7 +65,6 @@ export function createCspResponse(request: CspInvocation): CspResponse {
         content: {
           some: "internal error",
         },
-        request,
       };
       console.log("Internal error response : " + JSON.stringify(response));
       return response;

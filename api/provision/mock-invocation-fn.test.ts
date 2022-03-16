@@ -1,9 +1,10 @@
 import { Context } from "aws-lambda";
-import { handler } from "./mock-invocation-lambda";
+import { handler } from "./mock-invocation-fn";
 import { CloudServiceProvider, Network } from "../../models/cloud-service-providers";
 import { ProvisionRequestType } from "../../models/provisioning-jobs";
-import { OtherErrorResponse, ValidationErrorResponse } from "../../utils/response";
-import { transformProvisionJob } from "./start-provision-job";
+import { ErrorStatusCode, OtherErrorResponse, SuccessStatusCode, ValidationErrorResponse } from "../../utils/response";
+import { transformProvisionRequest } from "./start-provision-job";
+import { STATUS_CODES } from "http";
 
 const fundingSources = [
   {
@@ -25,7 +26,7 @@ const provisioningBodyNoPayload = {
 
 describe("Successful invocation of mock CSP function", () => {
   it("should return 200 when CSP A provided in the request", async () => {
-    const stateInput = transformProvisionJob({
+    const stateInput = transformProvisionRequest({
       ...provisioningBodyNoPayload,
       targetCsp: "CSP_A",
       payload: {
@@ -35,13 +36,13 @@ describe("Successful invocation of mock CSP function", () => {
       },
     });
     const response: any = await handler(stateInput, {} as Context);
-    expect(response?.code).toBe(200);
+    expect(response?.code).toBe(SuccessStatusCode.OK);
   });
 });
 
 describe("Failed invocation operations", () => {
   it("should return a 400 when CSP_B is provided in the request", async () => {
-    const stateInput = transformProvisionJob({
+    const stateInput = transformProvisionRequest({
       ...provisioningBodyNoPayload,
       targetCsp: "CSP_B",
       payload: {
@@ -51,10 +52,10 @@ describe("Failed invocation operations", () => {
       },
     });
     const response: any = await handler(stateInput, {} as Context);
-    expect(response?.code).toBe(400);
+    expect(response?.code).toBe(ErrorStatusCode.BAD_REQUEST);
   });
   it("should return a 400 when additional payload property due to validation error", async () => {
-    const stateInput = transformProvisionJob({
+    const stateInput = transformProvisionRequest({
       ...provisioningBodyNoPayload,
       targetCsp: "CSP_A",
       payload: {
@@ -65,10 +66,10 @@ describe("Failed invocation operations", () => {
     } as any);
     const response: any = await handler(stateInput, {} as Context);
     expect(response).toBeInstanceOf(ValidationErrorResponse);
-    expect(response.statusCode).toBe(400);
+    expect(response.statusCode).toBe(ErrorStatusCode.BAD_REQUEST);
   });
   it("should throw a 500 error when a CSP internal error occurs", async () => {
-    const stateInput = transformProvisionJob({
+    const stateInput = transformProvisionRequest({
       ...provisioningBodyNoPayload,
       targetCsp: "CSP_C",
       payload: {
@@ -78,12 +79,16 @@ describe("Failed invocation operations", () => {
       },
     });
     expect(async () => await handler(stateInput, {} as Context)).rejects.toThrow(
-      JSON.stringify({ code: 500, content: { some: "internal error" }, payload: stateInput })
+      JSON.stringify({
+        code: ErrorStatusCode.INTERNAL_SERVER_ERROR,
+        content: { some: "internal error" },
+        payload: stateInput,
+      })
     );
   });
   it("should return a 400 when null", async () => {
     const response: any = await handler(undefined as any, {} as Context, () => null);
     expect(response).toBeInstanceOf(OtherErrorResponse);
-    expect(response.statusCode).toBe(400);
+    expect(response.statusCode).toBe(ErrorStatusCode.BAD_REQUEST);
   });
 });

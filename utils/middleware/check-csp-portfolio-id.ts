@@ -3,6 +3,8 @@ import { StepFunctionRequestEvent, ProvisionRequestType, RequestBodyType } from 
 import createError from "http-errors";
 import { MiddlewareOutputs } from "./error-handling-middleware";
 
+// Ensures a CSP portfolio id is present when submitting a request
+// that updates an already existing portfolio
 export const cspPortfolioIdChecker = (): middy.MiddlewareObj<
   StepFunctionRequestEvent<RequestBodyType>,
   MiddlewareOutputs

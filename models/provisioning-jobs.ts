@@ -55,7 +55,6 @@ export type RequestBodyType = ProvisionRequest;
 export interface CspResponse {
   code: number;
   content: unknown;
-  request: CspInvocation;
 }
 // temporary schema to use for validating /provision-job request
 export const provisionRequestSchema = {

@@ -16,6 +16,7 @@ export const errorHandlingMiddleware = (): middy.MiddlewareObj<MiddlewareInputs,
     const errorMessage = error.message;
 
     if (error.name === "MockCspApiError") {
+      // force state machine task to retry
       throw request.error;
     }
 

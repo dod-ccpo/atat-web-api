@@ -40,7 +40,7 @@ export class ProvisioningWorkflow implements IProvisioningWorkflow {
     const { environmentName } = props;
     // Provisioning State machine functions
     const mockInvocationFn = new lambdaNodeJs.NodejsFunction(scope, "MockInvocationFunction", {
-      entry: "api/provision/mock-invocation-lambda.ts",
+      entry: "api/provision/mock-invocation-fn.ts",
     });
     const sampleFn = new lambdaNodeJs.NodejsFunction(scope, "SampleFunction", {
       entry: "api/provision/sample-fn.ts",

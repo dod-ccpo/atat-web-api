@@ -30,7 +30,7 @@ const SFN_ARN = process.env.SFN_ARN ?? "";
  */
 export async function baseHandler(event: StepFunctionRequestEvent<ProvisionRequest>): Promise<APIGatewayProxyResult> {
   try {
-    const cspInvocationJob = transformProvisionJob(event.body);
+    const cspInvocationJob = transformProvisionRequest(event.body);
     console.log("SentToSfn: " + JSON.stringify(cspInvocationJob));
 
     // starting the execution
@@ -54,7 +54,7 @@ export async function baseHandler(event: StepFunctionRequestEvent<ProvisionReque
  * @param request - provisioning request from SNOW
  * @returns - transformed request to send to the targeted CSP
  */
-export function transformProvisionJob(request: ProvisionRequest): CspInvocation {
+export function transformProvisionRequest(request: ProvisionRequest): CspInvocation {
   const { operationType, portfolioId, payload, targetCsp } = request;
 
   const headers = {
