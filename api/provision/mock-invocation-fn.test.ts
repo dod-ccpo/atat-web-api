@@ -4,7 +4,6 @@ import { CloudServiceProvider, Network } from "../../models/cloud-service-provid
 import { ProvisionRequestType } from "../../models/provisioning-jobs";
 import { ErrorStatusCode, OtherErrorResponse, SuccessStatusCode, ValidationErrorResponse } from "../../utils/response";
 import { transformProvisionRequest } from "./start-provision-job";
-import { STATUS_CODES } from "http";
 
 const fundingSources = [
   {
@@ -35,8 +34,10 @@ describe("Successful invocation of mock CSP function", () => {
         operators,
       },
     });
-    const response: any = await handler(stateInput, {} as Context);
-    expect(response?.code).toBe(SuccessStatusCode.OK);
+    const response = await handler(stateInput, {} as Context);
+    if (!(response instanceof ValidationErrorResponse)) {
+      expect(response.code).toBe(SuccessStatusCode.OK);
+    }
   });
 });
 
@@ -51,8 +52,10 @@ describe("Failed invocation operations", () => {
         operators,
       },
     });
-    const response: any = await handler(stateInput, {} as Context);
-    expect(response?.code).toBe(ErrorStatusCode.BAD_REQUEST);
+    const response = await handler(stateInput, {} as Context);
+    if (!(response instanceof ValidationErrorResponse)) {
+      expect(response?.code).toBe(ErrorStatusCode.BAD_REQUEST);
+    }
   });
   it("should return a 400 when additional payload property due to validation error", async () => {
     const stateInput = transformProvisionRequest({
@@ -64,9 +67,11 @@ describe("Failed invocation operations", () => {
         operators,
       },
     } as any);
-    const response: any = await handler(stateInput, {} as Context);
+    const response = await handler(stateInput, {} as Context);
     expect(response).toBeInstanceOf(ValidationErrorResponse);
-    expect(response.statusCode).toBe(ErrorStatusCode.BAD_REQUEST);
+    if (response instanceof ValidationErrorResponse) {
+      expect(response.statusCode).toBe(ErrorStatusCode.BAD_REQUEST);
+    }
   });
   it("should throw a 500 error when a CSP internal error occurs", async () => {
     const stateInput = transformProvisionRequest({
@@ -87,8 +92,10 @@ describe("Failed invocation operations", () => {
     );
   });
   it("should return a 400 when null", async () => {
-    const response: any = await handler(undefined as any, {} as Context, () => null);
+    const response = await handler(undefined as any, {} as Context, () => null);
     expect(response).toBeInstanceOf(OtherErrorResponse);
-    expect(response.statusCode).toBe(ErrorStatusCode.BAD_REQUEST);
+    if (response instanceof OtherErrorResponse) {
+      expect(response.statusCode).toBe(ErrorStatusCode.BAD_REQUEST);
+    }
   });
 });
