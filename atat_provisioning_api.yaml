@@ -253,7 +253,6 @@ components:
       required:
         - code
         - content
-        - request
       properties:
         code:
           type: integer

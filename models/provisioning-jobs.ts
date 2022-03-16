@@ -29,6 +29,11 @@ export interface OperatorPayload {
   operators: Array<string>;
 }
 
+export interface CspResponse {
+  code: bigint;
+  content: object;
+}
+
 export interface ProvisionRequest {
   jobId: string;
   userId: string;
@@ -38,6 +43,7 @@ export interface ProvisionRequest {
   targetCsp: "CSP_A" | "CSP_B" | "CSP_C" | "CSP_D";
   targetNetwork: Network;
   payload: NewPortfolioPayload | FundingSourcePayload | OperatorPayload;
+  cspResponse: CspResponse;
 }
 
 export interface CspInvocation {

@@ -55,7 +55,6 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
       entry: "api/provision/sample-fn.ts",
     });
     this.resultFn = new lambdaNodeJs.NodejsFunction(scope, "ResultFunction", {
-      functionName: "ResultFunction",
       environment: {
         PROVISIONING_QUEUE_URL: this.provisioningJobsQueue.queueUrl,
       },
@@ -63,7 +62,6 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
       // vpc: props.vpc,
     });
     this.provisioningJobsQueue.grantSendMessages(this.resultFn);
-    this.resultFn.addEnvironment("PROVISIONING_QUEUE_URL", this.provisioningJobsQueue.queueUrl);
 
     // Tasks for the Provisioning State Machine
     const tasks = [

@@ -2,6 +2,7 @@ import * as cdk from "aws-cdk-lib";
 import { Match, Template } from "aws-cdk-lib/assertions";
 import { ProvisioningWorkflow } from "./provisioning-sfn-workflow";
 import { CfnRole } from "aws-cdk-lib/aws-iam";
+import { CfnQueue } from "aws-cdk-lib/aws-sqs";
 
 describe("Provisioning Workflow Tests", () => {
   let stack: cdk.Stack;
@@ -25,12 +26,7 @@ describe("Provisioning Workflow Tests", () => {
         {
           Action: ["sqs:SendMessage", "sqs:GetQueueAttributes", "sqs:GetQueueUrl"],
           Effect: "Allow",
-          Resource: {
-            "Fn::GetAtt": [
-              stack.resolve((provisioningSfn.provisioningJobsQueue.node.defaultChild as cdk.CfnResource).logicalId),
-              "Arn",
-            ],
-          },
+          Resource: stack.resolve((provisioningSfn.provisioningJobsQueue.node.defaultChild as CfnQueue).attrArn),
         },
       ],
       Version: "2012-10-17",
@@ -54,12 +50,12 @@ describe("Provisioning Workflow Tests", () => {
     template.hasResourceProperties(
       "AWS::Lambda::Function",
       Match.objectLike({
-        FunctionName: "ResultFunction",
         Environment: {
           Variables: {
             PROVISIONING_QUEUE_URL: Match.anyValue(),
           },
         },
+        Role: stack.resolve((provisioningSfn.resultFn.role?.node.defaultChild as CfnRole).attrArn),
       })
     );
   });

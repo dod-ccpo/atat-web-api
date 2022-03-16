@@ -2,7 +2,7 @@ import { sqsClient } from "../../utils/aws-sdk/sqs";
 import { SendMessageCommand } from "@aws-sdk/client-sqs";
 import middy from "@middy/core";
 import validator from "@middy/validator";
-import { provisioningResponseSchema } from "../../models/provisioning-jobs";
+import { ILambdaEvent, provisioningResponseSchema, ProvisionRequest } from "../../models/provisioning-jobs";
 import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
 
 /**
@@ -12,7 +12,7 @@ import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-m
  * @param stateInput - input to the state task that is processed
  */
 
-export async function baseHandler(stateInput: Record<string, unknown>): Promise<unknown> {
+export async function baseHandler(stateInput: ILambdaEvent): Promise<ProvisionRequest> {
   const QUEUE_URL = process.env.PROVISIONING_QUEUE_URL ?? "";
   console.log("Sending result message to " + QUEUE_URL);
   await sqsClient.send(
@@ -22,7 +22,7 @@ export async function baseHandler(stateInput: Record<string, unknown>): Promise<
     })
   );
 
-  return { ...stateInput, statusCode: 200 };
+  return stateInput.body;
 }
 
 export const handler = middy(baseHandler)

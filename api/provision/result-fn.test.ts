@@ -1,10 +1,9 @@
 import { Context } from "aws-lambda";
 import { handler } from "./result-fn";
 import { mockClient } from "aws-sdk-client-mock";
-import { sqsClient } from "../../utils/aws-sdk/sqs";
 import { ValidationErrorResponse } from "../../utils/response";
-import { match } from "sinon";
 import { SendMessageCommand } from "@aws-sdk/client-sqs";
+import { sqsClient } from "../../utils/aws-sdk/sqs";
 
 const sqsMock = mockClient(sqsClient);
 
@@ -45,13 +44,11 @@ describe("Validate input", () => {
   it("should reject input without cspResponse", async () => {
     const response = await handler(initialState, {} as Context);
     expect(response).toBeInstanceOf(ValidationErrorResponse);
-    expect((response as ValidationErrorResponse).statusCode).toBe(400);
   });
 
   it("should accept input with cspResponse", async () => {
     const response = await handler(withResponse, {} as Context);
     expect(response).not.toBeInstanceOf(ValidationErrorResponse);
-    expect((response as ValidationErrorResponse).statusCode).toBe(200);
   });
 });
 
@@ -61,7 +58,6 @@ describe("Validate behavior", () => {
     expect(response).toEqual(
       expect.objectContaining({
         ...withResponse,
-        statusCode: 200,
       })
     );
   });
