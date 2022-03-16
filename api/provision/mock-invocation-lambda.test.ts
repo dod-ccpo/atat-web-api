@@ -33,9 +33,8 @@ describe("Successful invocation of mock CSP function", () => {
         fundingSources,
         operators,
       },
-    }) as any;
+    });
     const response: any = await handler(stateInput, {} as Context);
-    console.log(response);
     expect(response?.code).toBe(200);
   });
 });
@@ -50,9 +49,8 @@ describe("Failed invocation operations", () => {
         fundingSources,
         operators,
       },
-    }) as any;
+    });
     const response: any = await handler(stateInput, {} as Context);
-    console.log(response);
     expect(response?.code).toBe(400);
   });
   it("should return a 400 when additional payload property due to validation error", async () => {
@@ -60,13 +58,12 @@ describe("Failed invocation operations", () => {
       ...provisioningBodyNoPayload,
       targetCsp: "CSP_A",
       payload: {
-        random: "property",
+        random: "property", // wrong property
         fundingSources,
         operators,
       },
     } as any);
     const response: any = await handler(stateInput, {} as Context);
-    console.log(response);
     expect(response).toBeInstanceOf(ValidationErrorResponse);
     expect(response.statusCode).toBe(400);
   });
@@ -79,14 +76,13 @@ describe("Failed invocation operations", () => {
         fundingSources,
         operators,
       },
-    }) as any;
+    });
     expect(async () => await handler(stateInput, {} as Context)).rejects.toThrow(
       JSON.stringify({ code: 500, content: { some: "internal error" }, payload: stateInput })
     );
   });
   it("should return a 400 when null", async () => {
     const response: any = await handler(undefined as any, {} as Context, () => null);
-    console.log(response);
     expect(response).toBeInstanceOf(OtherErrorResponse);
     expect(response.statusCode).toBe(400);
   });
