@@ -4,34 +4,14 @@ import { mockClient } from "aws-sdk-client-mock";
 import { ValidationErrorResponse } from "../../utils/response";
 import { SendMessageCommand } from "@aws-sdk/client-sqs";
 import { sqsClient } from "../../utils/aws-sdk/sqs";
+import { provisioningBodyWithPayload } from "./start-provision-job.test";
 
 const sqsMock = mockClient(sqsClient);
 
-const initialState = {
-  jobId: "81b31a89-e3e5-46ee-acfe-75436bd14577",
-  userId: "21d18790-bf3e-4529-a361-460ee6d16e0b",
-  portfolioId: "b02e77d1-234d-4e3d-bc85-b57ca5a93952",
-  operationType: "ADD_PORTFOLIO",
-  targetCsp: "CSP_A",
-  targetNetwork: "NETWORK_1",
-  payload: {
-    name: "About to change to full PR",
-    operators: ["admin1@mail.mil", "superAdmin@mail.mil"],
-    fundingSources: [
-      {
-        taskOrderNumber: "1234567890123",
-        clinNumber: "9999",
-        popStartDate: "2021-07-01",
-        popEndDate: "2022-07-01",
-      },
-    ],
-  },
-} as any;
-
 const withResponse = {
-  ...initialState,
+  ...provisioningBodyWithPayload,
   cspResponse: {
-    code: 200,
+    code: "200",
     content: {},
   },
 };
@@ -41,13 +21,9 @@ beforeEach(() => {
 });
 
 describe("Validate input", () => {
-  it("should reject input without cspResponse", async () => {
-    const response = await handler(initialState, {} as Context);
-    expect(response).toBeInstanceOf(ValidationErrorResponse);
-  });
-
   it("should accept input with cspResponse", async () => {
     const response = await handler(withResponse, {} as Context);
+    console.log(response);
     expect(response).not.toBeInstanceOf(ValidationErrorResponse);
   });
 });

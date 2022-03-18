@@ -66,21 +66,21 @@ export function transformProvisionRequest(request: ProvisionRequest): CspInvocat
       return {
         method: HttpMethod.POST,
         headers,
-        endpoint: `${CloudServiceProvider[targetCsp].uri}/portfolios`,
+        endpoint: `${targetCsp.uri}/portfolios`,
         payload,
       };
     case ProvisionRequestType.ADD_FUNDING_SOURCE:
       return {
         method: HttpMethod.POST,
         headers,
-        endpoint: `${CloudServiceProvider[targetCsp].uri}/portfolios/${portfolioId}/task-orders`,
+        endpoint: `${targetCsp.uri}/portfolios/${portfolioId}/task-orders`,
         payload,
       };
     case ProvisionRequestType.ADD_OPERATORS:
       return {
         method: HttpMethod.PATCH,
         headers,
-        endpoint: `${CloudServiceProvider[targetCsp].uri}/portfolios/${portfolioId}`,
+        endpoint: `${targetCsp.uri}/portfolios/${portfolioId}`,
         payload,
       };
     default:

@@ -30,7 +30,7 @@ export interface OperatorPayload {
 }
 
 export interface CspResponse {
-  code: bigint;
+  code: string;
   content: object;
 }
 
@@ -40,8 +40,7 @@ export interface ProvisionRequest {
   portfolioId: string;
   operationType: ProvisionRequestType;
   // could not use the CloudServiceProviders static properties so used strings
-  targetCsp: "CSP_A" | "CSP_B" | "CSP_C" | "CSP_D";
-  targetNetwork: Network;
+  targetCsp: CloudServiceProvider;
   payload: NewPortfolioPayload | FundingSourcePayload | OperatorPayload;
   cspResponse: CspResponse;
 }
@@ -77,15 +76,13 @@ export const provisionRequestSchema = {
       ],
     },
     targetCsp: {
-      enum: [
-        CloudServiceProvider.CSP_A.name,
-        CloudServiceProvider.CSP_B.name,
-        CloudServiceProvider.CSP_C.name,
-        CloudServiceProvider.CSP_D.name,
-      ],
-    },
-    targetNetwork: {
-      enum: [Network.NETWORK_1, Network.NETWORK_2, Network.NETWORK_3],
+      type: "object",
+      required: ["name", "uri", "network"],
+      properties: {
+        name: { type: "string" },
+        uri: { type: "string" },
+        network: { enum: [Network.NETWORK_1, Network.NETWORK_2, Network.NETWORK_3] },
+      },
     },
     payload: {
       type: "object",
@@ -110,7 +107,7 @@ export const provisionRequestSchema = {
       minProperties: 1,
     },
   },
-  required: ["jobId", "userId", "portfolioId", "operationType", "targetCsp", "targetNetwork", "payload"],
+  required: ["jobId", "userId", "portfolioId", "operationType", "targetCsp", "payload"],
   additionalProperties: false,
 };
 
@@ -128,7 +125,7 @@ export const cspInvocationSchema = {
 
 export const provisioningResponseSchema = {
   type: "object",
-  required: ["cspResponse"],
+  required: [...provisionRequestSchema.required, "cspResponse"],
   additionalProperties: false,
   properties: {
     ...provisionRequestSchema.properties,
@@ -136,7 +133,7 @@ export const provisioningResponseSchema = {
       type: "object",
       properties: {
         code: {
-          type: "number",
+          type: "string",
         },
         content: {
           type: "object",

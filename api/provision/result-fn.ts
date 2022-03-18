@@ -12,7 +12,7 @@ import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-m
  * @param stateInput - input to the state task that is processed
  */
 
-export async function baseHandler(stateInput: ILambdaEvent): Promise<ProvisionRequest> {
+export async function baseHandler(stateInput: ProvisionRequest): Promise<ProvisionRequest> {
   const QUEUE_URL = process.env.PROVISIONING_QUEUE_URL ?? "";
   console.log("Sending result message to " + QUEUE_URL);
   await sqsClient.send(
@@ -22,7 +22,7 @@ export async function baseHandler(stateInput: ILambdaEvent): Promise<ProvisionRe
     })
   );
 
-  return stateInput.body;
+  return stateInput;
 }
 
 export const handler = middy(baseHandler)
