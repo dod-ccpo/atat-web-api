@@ -46,7 +46,7 @@
     "@types/aws-sdk": "^2.7.0",
     "aws-cdk-lib": "2.15.0",
     "cdk-nag": "^2.7.9",
-    "constructs": "^10.0.76",
+    "constructs": "^10.0.91",
     "http-errors": "^2.0.0",
     "middy-middleware-json-error-handler": "^3.0.0",
     "source-map-support": "^0.5.21",
