@@ -263,7 +263,7 @@ components:
         - content
       properties:
         code:
-          type: string
+          type: integer
         content:
           type: object
           additionalProperties: true

@@ -44,7 +44,7 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
     const { environmentName } = props;
 
     this.provisioningJobsQueue = new sqs.Queue(scope, "ProvisioningJobsQueue", {
-      queueName: "ProvisioningJobsQueue",
+      queueName: `ProvisioningJobsQueue${environmentName}`,
     });
 
     // Provisioning State machine functions

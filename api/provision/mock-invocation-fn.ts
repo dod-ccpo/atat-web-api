@@ -21,7 +21,7 @@ export async function baseHandler(stateInput: ProvisionRequest): Promise<CspResp
     return REQUEST_BODY_INVALID;
   }
   const cspInvocation = stateInput.cspInvocation;
-  if (cspInvocation === undefined || !cspInvocation.endpoint) {
+  if (!cspInvocation?.endpoint) {
     return REQUEST_BODY_INVALID;
   }
 

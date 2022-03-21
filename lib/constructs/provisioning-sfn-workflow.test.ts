@@ -41,7 +41,7 @@ describe("Provisioning Workflow Tests", () => {
     template.hasResourceProperties(
       "AWS::SQS::Queue",
       Match.objectEquals({
-        QueueName: "ProvisioningJobsQueue",
+        QueueName: Match.stringLikeRegexp("ProvisioningJobsQueue.*"),
       })
     );
   });
