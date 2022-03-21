@@ -11,7 +11,7 @@ const sqsMock = mockClient(sqsClient);
 const withResponse = {
   ...provisioningBodyWithPayload,
   cspResponse: {
-    code: "200",
+    code: 200,
     content: {},
   },
 };
@@ -22,6 +22,7 @@ beforeEach(() => {
 
 describe("Validate input", () => {
   it("should accept input with cspResponse", async () => {
+    console.log(JSON.stringify(withResponse));
     const response = await handler(withResponse, {} as Context);
     console.log(response);
     expect(response).not.toBeInstanceOf(ValidationErrorResponse);

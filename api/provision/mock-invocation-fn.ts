@@ -1,9 +1,8 @@
-import { CspInvocation, cspInvocationSchema, CspResponse } from "../../models/provisioning-jobs";
+import { provisionRequestSchema, CspResponse, ProvisionRequest } from "../../models/provisioning-jobs";
 import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
 import middy from "@middy/core";
 import validator from "@middy/validator";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
-import { CloudServiceProvider } from "../../models/cloud-service-providers";
 import { REQUEST_BODY_INVALID } from "../../utils/errors";
 import { ValidationErrorResponse } from "../../utils/response";
 
@@ -16,9 +15,13 @@ import { ValidationErrorResponse } from "../../utils/response";
  * @param stateInput - Csp Invocation request
  * @return - CspResponse or throw error for 500 or above
  */
-export async function baseHandler(stateInput: CspInvocation): Promise<CspResponse | ValidationErrorResponse> {
+export async function baseHandler(stateInput: ProvisionRequest): Promise<CspResponse | ValidationErrorResponse> {
   console.log("STATE INPUT: ", JSON.stringify(stateInput));
-  if (!stateInput || !stateInput.endpoint) {
+  if (!stateInput) {
+    return REQUEST_BODY_INVALID;
+  }
+  const cspInvocation = stateInput.cspInvocation;
+  if (cspInvocation === undefined || !cspInvocation.endpoint) {
     return REQUEST_BODY_INVALID;
   }
 
@@ -37,11 +40,10 @@ export async function baseHandler(stateInput: CspInvocation): Promise<CspRespons
   return cspResponse;
 }
 
-export function createCspResponse(request: CspInvocation): CspResponse {
-  const { endpoint } = request;
+export function createCspResponse(request: ProvisionRequest): CspResponse {
   let response: CspResponse;
-  switch (endpoint.slice(0, 23)) {
-    case CloudServiceProvider.CSP_A.uri:
+  switch (request.targetCsp.name) {
+    case "CSP_A":
       response = {
         code: 200,
         content: {
@@ -50,7 +52,7 @@ export function createCspResponse(request: CspInvocation): CspResponse {
       };
       console.log("Success response : " + JSON.stringify(response));
       return response;
-    case CloudServiceProvider.CSP_B.uri:
+    case "CSP_B":
       response = {
         code: 400,
         content: {
@@ -72,6 +74,6 @@ export function createCspResponse(request: CspInvocation): CspResponse {
 }
 
 export const handler = middy(baseHandler)
-  .use(validator({ inputSchema: cspInvocationSchema }))
+  .use(validator({ inputSchema: provisionRequestSchema }))
   .use(errorHandlingMiddleware())
   .use(JSONErrorHandlerMiddleware());

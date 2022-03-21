@@ -25,6 +25,7 @@ export const provisioningBodyNoPayload = {
     uri: "http://www.somecspvendor.com/api/atat",
     network: Network.NETWORK_1,
   },
+  cspInvocation: undefined,
   cspResponse: undefined,
 };
 
@@ -51,7 +52,6 @@ beforeEach(() => {
 describe("Successful provisioning operations", () => {
   it("should add a new portfolio", async () => {
     const response = await handler(validRequest, {} as Context, () => null);
-    console.log("TROUBLESHOOTING: ", response);
     expect(response).toBeInstanceOf(ApiSuccessResponse);
   });
   it("should add a funding source to existing portfolio", async () => {

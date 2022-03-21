@@ -2,7 +2,7 @@ import { sqsClient } from "../../utils/aws-sdk/sqs";
 import { SendMessageCommand } from "@aws-sdk/client-sqs";
 import middy from "@middy/core";
 import validator from "@middy/validator";
-import { ILambdaEvent, provisioningResponseSchema, ProvisionRequest } from "../../models/provisioning-jobs";
+import { provisionRequestSchema, ProvisionRequest } from "../../models/provisioning-jobs";
 import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
 
 /**
@@ -26,5 +26,5 @@ export async function baseHandler(stateInput: ProvisionRequest): Promise<Provisi
 }
 
 export const handler = middy(baseHandler)
-  .use(validator({ ajvOptions: { verbose: true }, inputSchema: provisioningResponseSchema }))
+  .use(validator({ ajvOptions: { verbose: true }, inputSchema: provisionRequestSchema }))
   .use(errorHandlingMiddleware());
