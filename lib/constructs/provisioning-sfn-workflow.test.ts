@@ -38,12 +38,8 @@ describe("Provisioning Workflow Tests", () => {
   });
 
   test("Ensure SQS Queue is created", async () => {
-    template.hasResourceProperties(
-      "AWS::SQS::Queue",
-      Match.objectEquals({
-        QueueName: Match.stringLikeRegexp("ProvisioningJobsQueue.*"),
-      })
-    );
+    template.hasResource("AWS::SQS::Queue", {});
+    expect(provisioningSfn.provisioningJobsQueue).not.toEqual(undefined);
   });
 
   test("Ensure Result Lambda is created & has queue URL", async () => {

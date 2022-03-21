@@ -43,9 +43,7 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
     super(scope, id);
     const { environmentName } = props;
 
-    this.provisioningJobsQueue = new sqs.Queue(scope, "ProvisioningJobsQueue", {
-      queueName: `ProvisioningJobsQueue${environmentName}`,
-    });
+    this.provisioningJobsQueue = new sqs.Queue(scope, "ProvisioningJobsQueue", {});
 
     // Provisioning State machine functions
     const mockInvocationFn = new lambdaNodeJs.NodejsFunction(scope, "MockInvocationFunction", {
