@@ -119,8 +119,6 @@ components:
           $ref: '#/components/schemas/OperationType'
         target_csp:
           $ref: '#/components/schemas/TargetCloudServiceProvider'
-        target_network:
-          $ref: '#/components/schemas/TargetNetwork'
         payload:
           oneOf:
             - $ref: '#/components/schemas/NewPortfolioPayload'
@@ -139,6 +137,16 @@ components:
         - ADD_FUNDING_SOURCE
     TargetCloudServiceProvider:
       description: Distinguishes the cloud where the provisioning operation will occur
+      properties:
+        name:
+          $ref: '#/components/schemas/TargetCloudServiceProviderName'
+        uri:
+          type: string
+          description: Base URI of Target CSP's ATAT implementation
+        network:
+          $ref: '#/components/schemas/TargetNetwork'
+    TargetCloudServiceProviderName:
+      description: List of available CSPs by name
       type: string
       enum:
         - CSP_A
@@ -253,12 +261,9 @@ components:
       required:
         - code
         - content
-        - request
       properties:
         code:
           type: integer
         content:
           type: object
           additionalProperties: true
-        request:
-          $ref: '#/components/schemas/CspInvocation'

@@ -1,4 +1,5 @@
 import * as sfn from "aws-cdk-lib/aws-stepfunctions";
+import * as sqs from "aws-cdk-lib/aws-sqs";
 import * as lambdaNodeJs from "aws-cdk-lib/aws-lambda-nodejs";
 import * as logs from "aws-cdk-lib/aws-logs";
 import { Construct } from "constructs";
@@ -31,13 +32,19 @@ export interface IProvisioningWorkflow {
  * composed to form a workflow for provisioning jobs from SNOW to the CSPs.
  *
  */
-export class ProvisioningWorkflow implements IProvisioningWorkflow {
+export class ProvisioningWorkflow extends Construct implements IProvisioningWorkflow {
   readonly mappedTasks: TasksMap = {};
   readonly workflow: sfn.IChainable;
   readonly logGroup: logs.ILogGroup;
+  readonly provisioningJobsQueue: sqs.IQueue;
+  readonly resultFn: lambdaNodeJs.NodejsFunction;
 
-  constructor(scope: Construct, props: ProvisioningWorkflowProps) {
+  constructor(scope: Construct, id: string, props: ProvisioningWorkflowProps) {
+    super(scope, id);
     const { environmentName } = props;
+
+    this.provisioningJobsQueue = new sqs.Queue(scope, "ProvisioningJobsQueue", {});
+
     // Provisioning State machine functions
     const mockInvocationFn = new lambdaNodeJs.NodejsFunction(scope, "MockInvocationFunction", {
       entry: "api/provision/mock-invocation-fn.ts",
@@ -45,6 +52,14 @@ export class ProvisioningWorkflow implements IProvisioningWorkflow {
     const sampleFn = new lambdaNodeJs.NodejsFunction(scope, "SampleFunction", {
       entry: "api/provision/sample-fn.ts",
     });
+    this.resultFn = new lambdaNodeJs.NodejsFunction(scope, "ResultFunction", {
+      environment: {
+        PROVISIONING_QUEUE_URL: this.provisioningJobsQueue.queueUrl,
+      },
+      entry: "api/provision/result-fn.ts",
+      // vpc: props.vpc,
+    });
+    this.provisioningJobsQueue.grantSendMessages(this.resultFn);
 
     // Tasks for the Provisioning State Machine
     const tasks = [
@@ -60,7 +75,7 @@ export class ProvisioningWorkflow implements IProvisioningWorkflow {
       {
         id: "Results",
         props: {
-          lambdaFunction: sampleFn, // replace w/ result lambda (success/reject)
+          lambdaFunction: this.resultFn,
           inputPath: "$",
           resultPath: "$.resultResponse",
           outputPath: "$",

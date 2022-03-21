@@ -1,17 +1,12 @@
 import { Context } from "aws-lambda";
 import { handler } from "./start-provision-job";
-import { CloudServiceProvider, Network } from "../../models/cloud-service-providers";
 import { ProvisionRequestType } from "../../models/provisioning-jobs";
 import { ApiSuccessResponse, ValidationErrorResponse } from "../../utils/response";
 import { sfnClient } from "../../utils/aws-sdk/step-functions";
 import { mockClient } from "aws-sdk-client-mock";
+import { Network } from "../../models/cloud-service-providers";
 
-const sfnMock = mockClient(sfnClient);
-beforeEach(() => {
-  sfnMock.reset();
-});
-
-const fundingSources = [
+export const fundingSources = [
   {
     taskOrderNumber: "1234567890123",
     clin: "9999",
@@ -19,32 +14,44 @@ const fundingSources = [
     popEndDate: "2022-07-01",
   },
 ];
-const operators = ["admin1@mail.mil", "superAdmin@mail.mil"];
-const provisioningBodyNoPayload = {
+export const operators = ["admin1@mail.mil", "superAdmin@mail.mil"];
+export const provisioningBodyNoPayload = {
   jobId: "81b31a89-e3e5-46ee-acfe-75436bd14577",
   userId: "21d18790-bf3e-4529-a361-460ee6d16e0b",
   portfolioId: "b02e77d1-234d-4e3d-bc85-b57ca5a93952",
   operationType: ProvisionRequestType.ADD_OPERATORS,
-  targetCsp: CloudServiceProvider.CSP_A.name,
-  targetNetwork: Network.NETWORK_1,
+  targetCsp: {
+    name: "CSP_A",
+    uri: "http://www.somecspvendor.com/api/atat",
+    network: Network.NETWORK_1,
+  },
+  cspInvocation: undefined,
+  cspResponse: undefined,
 };
 
+export const provisioningBodyWithPayload = {
+  ...provisioningBodyNoPayload,
+  payload: {
+    name: "Sample Portfolio",
+    fundingSources,
+    operators,
+  },
+};
 export const requestContext = { identity: { sourceIp: "203.0.113.0" } };
+
+export const validRequest = {
+  body: provisioningBodyWithPayload,
+  requestContext,
+} as any;
+
+const sfnMock = mockClient(sfnClient);
+beforeEach(() => {
+  sfnMock.reset();
+});
 
 describe("Successful provisioning operations", () => {
   it("should add a new portfolio", async () => {
-    const request = {
-      body: {
-        ...provisioningBodyNoPayload,
-        payload: {
-          name: "Sample Portfolio",
-          fundingSources,
-          operators,
-        },
-      },
-      requestContext,
-    } as any;
-    const response = await handler(request, {} as Context, () => null);
+    const response = await handler(validRequest, {} as Context, () => null);
     expect(response).toBeInstanceOf(ApiSuccessResponse);
   });
   it("should add a funding source to existing portfolio", async () => {

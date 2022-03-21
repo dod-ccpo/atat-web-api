@@ -3,10 +3,10 @@ import { APIGatewayProxyResult } from "aws-lambda";
 import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusCode } from "../../utils/response";
 import {
   CspInvocation,
-  StepFunctionRequestEvent,
   ProvisionRequest,
   provisionRequestSchema,
   ProvisionRequestType,
+  StepFunctionRequestEvent,
 } from "../../models/provisioning-jobs";
 import { wrapSchema } from "../../utils/middleware/schema-wrapper";
 import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
@@ -16,7 +16,6 @@ import jsonBodyParser from "@middy/http-json-body-parser";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import xssSanitizer from "../../utils/middleware/xss-sanitizer";
 import { IpCheckerMiddleware } from "../../utils/middleware/ip-logging";
-import { CloudServiceProvider } from "../../models/cloud-service-providers";
 import { HttpMethod } from "../../lib/http";
 import { REQUEST_BODY_INVALID } from "../../utils/errors";
 import { cspPortfolioIdChecker } from "../../utils/middleware/check-csp-portfolio-id";
@@ -34,13 +33,16 @@ export async function baseHandler(event: StepFunctionRequestEvent<ProvisionReque
     console.log("SentToSfn: " + JSON.stringify(cspInvocationJob));
 
     // starting the execution
+    const sfnInput = {
+      ...event.body,
+      cspInvocation: cspInvocationJob,
+    };
     const result = await sfnClient.startExecution({
-      input: JSON.stringify(cspInvocationJob),
+      input: JSON.stringify(sfnInput),
       stateMachineArn: SFN_ARN,
     });
-    console.log("SFN invoked response: " + JSON.stringify(result));
 
-    return new ApiSuccessResponse(event.body, SuccessStatusCode.CREATED);
+    return new ApiSuccessResponse(sfnInput, SuccessStatusCode.CREATED);
   } catch (error) {
     console.log("ERROR: " + JSON.stringify(error));
     return REQUEST_BODY_INVALID;
@@ -66,21 +68,21 @@ export function transformProvisionRequest(request: ProvisionRequest): CspInvocat
       return {
         method: HttpMethod.POST,
         headers,
-        endpoint: `${CloudServiceProvider[targetCsp].uri}/portfolios`,
+        endpoint: `${targetCsp.uri}/portfolios`,
         payload,
       };
     case ProvisionRequestType.ADD_FUNDING_SOURCE:
       return {
         method: HttpMethod.POST,
         headers,
-        endpoint: `${CloudServiceProvider[targetCsp].uri}/portfolios/${portfolioId}/task-orders`,
+        endpoint: `${targetCsp.uri}/portfolios/${portfolioId}/task-orders`,
         payload,
       };
     case ProvisionRequestType.ADD_OPERATORS:
       return {
         method: HttpMethod.PATCH,
         headers,
-        endpoint: `${CloudServiceProvider[targetCsp].uri}/portfolios/${portfolioId}`,
+        endpoint: `${targetCsp.uri}/portfolios/${portfolioId}`,
         payload,
       };
     default:

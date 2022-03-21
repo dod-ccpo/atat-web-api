@@ -1,9 +1,16 @@
 import { Context } from "aws-lambda";
 import { handler } from "./mock-invocation-fn";
-import { CloudServiceProvider, Network } from "../../models/cloud-service-providers";
-import { ProvisionRequestType } from "../../models/provisioning-jobs";
-import { ErrorStatusCode, OtherErrorResponse, SuccessStatusCode, ValidationErrorResponse } from "../../utils/response";
+import { Network } from "../../models/cloud-service-providers";
+import { ProvisionRequest } from "../../models/provisioning-jobs";
+import {
+  ErrorResponse,
+  ErrorStatusCode,
+  OtherErrorResponse,
+  SuccessStatusCode,
+  ValidationErrorResponse,
+} from "../../utils/response";
 import { transformProvisionRequest } from "./start-provision-job";
+import { provisioningBodyNoPayload, provisioningBodyWithPayload } from "./start-provision-job.test";
 
 const fundingSources = [
   {
@@ -14,27 +21,10 @@ const fundingSources = [
   },
 ];
 const operators = ["admin1@mail.mil", "superAdmin@mail.mil"];
-const provisioningBodyNoPayload = {
-  jobId: "81b31a89-e3e5-46ee-acfe-75436bd14577",
-  userId: "21d18790-bf3e-4529-a361-460ee6d16e0b",
-  portfolioId: "b02e77d1-234d-4e3d-bc85-b57ca5a93952",
-  operationType: ProvisionRequestType.ADD_OPERATORS,
-  targetCsp: CloudServiceProvider.CSP_A.name,
-  targetNetwork: Network.NETWORK_1,
-};
 
 describe("Successful invocation of mock CSP function", () => {
   it("should return 200 when CSP A provided in the request", async () => {
-    const stateInput = transformProvisionRequest({
-      ...provisioningBodyNoPayload,
-      targetCsp: "CSP_A",
-      payload: {
-        name: "Mock A Invocation Portfolio",
-        fundingSources,
-        operators,
-      },
-    });
-    const response = await handler(stateInput, {} as Context);
+    const response = await handler(constructProvisionRequestForCsp("CSP_A"), {} as Context);
     if (!(response instanceof ValidationErrorResponse)) {
       expect(response.code).toBe(SuccessStatusCode.OK);
     }
@@ -43,59 +33,67 @@ describe("Successful invocation of mock CSP function", () => {
 
 describe("Failed invocation operations", () => {
   it("should return a 400 when CSP_B is provided in the request", async () => {
-    const stateInput = transformProvisionRequest({
-      ...provisioningBodyNoPayload,
-      targetCsp: "CSP_B",
-      payload: {
-        name: "Mock B Invocation Portfolio",
-        fundingSources,
-        operators,
-      },
-    });
-    const response = await handler(stateInput, {} as Context);
+    const response = await handler(constructProvisionRequestForCsp("CSP_B"), {} as Context);
     if (!(response instanceof ValidationErrorResponse)) {
       expect(response?.code).toBe(ErrorStatusCode.BAD_REQUEST);
     }
   });
   it("should return a 400 when additional payload property due to validation error", async () => {
-    const stateInput = transformProvisionRequest({
+    const cspABody = {
       ...provisioningBodyNoPayload,
-      targetCsp: "CSP_A",
       payload: {
         random: "property", // wrong property
         fundingSources,
         operators,
       },
-    } as any);
-    const response = await handler(stateInput, {} as Context);
+      targetCsp: {
+        name: "CSP_A",
+        uri: "http://www.somecspvendor.com/api/atat",
+        network: Network.NETWORK_1,
+      },
+    };
+    const response = await handler(
+      {
+        ...cspABody,
+        cspInvocation: transformProvisionRequest(cspABody),
+      },
+      {} as Context
+    );
     expect(response).toBeInstanceOf(ValidationErrorResponse);
     if (response instanceof ValidationErrorResponse) {
       expect(response.statusCode).toBe(ErrorStatusCode.BAD_REQUEST);
     }
   });
   it("should throw a 500 error when a CSP internal error occurs", async () => {
-    const stateInput = transformProvisionRequest({
-      ...provisioningBodyNoPayload,
-      targetCsp: "CSP_C",
-      payload: {
-        name: "Mock C Invocation Portfolio",
-        fundingSources,
-        operators,
-      },
-    });
-    expect(async () => await handler(stateInput, {} as Context)).rejects.toThrow(
+    const request = constructProvisionRequestForCsp("CSP_C");
+    expect(async () => await handler(request, {} as Context)).rejects.toThrow(
       JSON.stringify({
         code: ErrorStatusCode.INTERNAL_SERVER_ERROR,
         content: { some: "internal error" },
-        payload: stateInput,
+        payload: request,
       })
     );
   });
   it("should return a 400 when null", async () => {
     const response = await handler(undefined as any, {} as Context, () => null);
-    expect(response).toBeInstanceOf(OtherErrorResponse);
+    expect(response).toBeInstanceOf(ErrorResponse);
     if (response instanceof OtherErrorResponse) {
       expect(response.statusCode).toBe(ErrorStatusCode.BAD_REQUEST);
     }
   });
 });
+
+function constructProvisionRequestForCsp(csp: string): ProvisionRequest {
+  const body = {
+    ...provisioningBodyWithPayload,
+    targetCsp: {
+      name: csp,
+      uri: "http://www.somecspvendor.com/api/atat",
+      network: Network.NETWORK_1,
+    },
+  };
+  return {
+    ...body,
+    cspInvocation: transformProvisionRequest(body),
+  };
+}

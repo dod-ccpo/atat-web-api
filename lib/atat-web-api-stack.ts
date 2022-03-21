@@ -58,7 +58,7 @@ export class AtatWebApiStack extends cdk.Stack {
     );
 
     // State Machine
-    const provisioningSfn = new ProvisioningWorkflow(this, { environmentName });
+    const provisioningSfn = new ProvisioningWorkflow(this, "ProvisioningWorkflow", { environmentName });
     this.provisioningStateMachine = new StateMachine(this, "ProvisioningStateMachine", {
       stateMachineProps: {
         definition: provisioningSfn.workflow,
