@@ -5,8 +5,8 @@ import { StepFunctionRequestEvent, RequestBodyType } from "../../models/provisio
 
 // keep plain text only
 const xssOptions = {
-  whiteList: {}, // empty means remove all tags
-  stripIgnoreTag: true, // remove all tags not in whitelist
+  allowList: {}, // empty means remove all tags
+  stripIgnoreTag: true, // remove all tags not in allow list
   stripIgnoreTagBody: ["script"], // remove script tag content
 };
 const xssSanitizer = (): middy.MiddlewareObj<StepFunctionRequestEvent<RequestBodyType>, APIGatewayProxyResult> => {

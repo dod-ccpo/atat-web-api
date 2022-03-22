@@ -50,6 +50,6 @@
     "http-errors": "^2.0.0",
     "middy-middleware-json-error-handler": "^3.0.0",
     "source-map-support": "^0.5.21",
-    "xss": "^1.0.10"
+    "xss": "^1.0.11"
   }
 }
