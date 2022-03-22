@@ -112,6 +112,15 @@ export class AtatIamStack extends cdk.Stack {
             }),
           ],
         }),
+        // Developers should be able to _read_ from queues within the account (but not modify
+        // the contents). Specific queues and further restrict this access by modifiying the
+        // Queue permissions/policy.
+        new iam.PolicyStatement({
+          sid: "AllowReadingQueues",
+          effect: iam.Effect.ALLOW,
+          actions: ["sqs:Get*", "sqs:List*", "sqs:ReceiveMessage"],
+          resources: ["*"],
+        }),
       ],
     });
 
