@@ -41,7 +41,7 @@ export class AtatIamStack extends cdk.Stack {
           sid: "StepFunctionsReadAccess",
           effect: iam.Effect.ALLOW,
           actions: ["states:List*", "states:Describe*", "states:GetExecutionHistory"],
-          resources: [`arn:${cdk.Aws.PARTITION}:states:*:${cdk.Aws.ACCOUNT_ID}:stateMachine:*`],
+          resources: [`arn:${cdk.Aws.PARTITION}:states:*:${cdk.Aws.ACCOUNT_ID}:*:*`],
         }),
         new iam.PolicyStatement({
           sid: "XRayReadAccess",
