@@ -73,106 +73,106 @@ describe("ATAT IAM Policy creation", () => {
     );
   });
   test("Ensure developers can access CDK-related resources", async () => {
-    template.hasResourceProperties(
-      "AWS::IAM::ManagedPolicy",
-      Match.objectEquals({
-        PolicyDocument: {
-          Statement: [
-            {
-              Action: "s3:*",
-              Effect: "Allow",
-              Resource: [
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        Ref: "AWS::Partition",
-                      },
-                      ":s3:::cdk-*-assets-",
-                      {
-                        Ref: "AWS::AccountId",
-                      },
-                      "-*",
-                    ],
+    template.hasResourceProperties("AWS::IAM::ManagedPolicy", {
+      // We only assert the existence of certain CDK-related permissions, which have broken
+      // in the past. Other permissions _may_ exist on this policy as required.
+      PolicyDocument: {
+        Statement: [
+          {
+            Action: "s3:*",
+            Effect: "Allow",
+            Resource: [
+              {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      Ref: "AWS::Partition",
+                    },
+                    ":s3:::cdk-*-assets-",
+                    {
+                      Ref: "AWS::AccountId",
+                    },
+                    "-*",
                   ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        Ref: "AWS::Partition",
-                      },
-                      ":s3:::cdktoolkit-stagingbucket-*",
-                    ],
+                ],
+              },
+              {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      Ref: "AWS::Partition",
+                    },
+                    ":s3:::cdktoolkit-stagingbucket-*",
                   ],
-                },
+                ],
+              },
+            ],
+            Sid: Match.anyValue(),
+          },
+          {
+            Action: "sts:AssumeRole",
+            Effect: "Allow",
+            Resource: {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:",
+                  {
+                    Ref: "AWS::Partition",
+                  },
+                  ":iam::",
+                  {
+                    Ref: "AWS::AccountId",
+                  },
+                  ":role/cdk-hnb659fds-*-role-",
+                  {
+                    Ref: "AWS::AccountId",
+                  },
+                  "-",
+                  {
+                    Ref: "AWS::Region",
+                  },
+                ],
               ],
-              Sid: Match.anyValue(),
             },
-            {
-              Action: "sts:AssumeRole",
-              Effect: "Allow",
-              Resource: {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:",
-                    {
-                      Ref: "AWS::Partition",
-                    },
-                    ":iam::",
-                    {
-                      Ref: "AWS::AccountId",
-                    },
-                    ":role/cdk-hnb659fds-*-role-",
-                    {
-                      Ref: "AWS::AccountId",
-                    },
-                    "-",
-                    {
-                      Ref: "AWS::Region",
-                    },
-                  ],
+            Sid: Match.anyValue(),
+          },
+          {
+            Action: "ssm:GetParameter",
+            Effect: "Allow",
+            Resource: {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:",
+                  {
+                    Ref: "AWS::Partition",
+                  },
+                  ":ssm:",
+                  {
+                    Ref: "AWS::Region",
+                  },
+                  ":",
+                  {
+                    Ref: "AWS::AccountId",
+                  },
+                  ":parameter/cdk-bootstrap/hnb659fds/*",
                 ],
-              },
-              Sid: Match.anyValue(),
+              ],
             },
-            {
-              Action: "ssm:GetParameter",
-              Effect: "Allow",
-              Resource: {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:",
-                    {
-                      Ref: "AWS::Partition",
-                    },
-                    ":ssm:",
-                    {
-                      Ref: "AWS::Region",
-                    },
-                    ":",
-                    {
-                      Ref: "AWS::AccountId",
-                    },
-                    ":parameter/cdk-bootstrap/hnb659fds/*",
-                  ],
-                ],
-              },
-              Sid: Match.anyValue(),
-            },
-          ],
-          Version: "2012-10-17",
-        },
-        Description: Match.anyValue(),
-        Path: "/",
-      })
-    );
+            Sid: Match.anyValue(),
+          },
+          Match.anyValue(),
+        ],
+        Version: "2012-10-17",
+      },
+      Description: Match.anyValue(),
+      Path: "/",
+    });
   });
   test("Fully assert baseDenies IAM managed policy with matchers", async () => {
     template.hasResourceProperties(

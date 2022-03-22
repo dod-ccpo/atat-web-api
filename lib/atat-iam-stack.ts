@@ -41,7 +41,7 @@ export class AtatIamStack extends cdk.Stack {
           sid: "StepFunctionsReadAccess",
           effect: iam.Effect.ALLOW,
           actions: ["states:List*", "states:Describe*", "states:GetExecutionHistory"],
-          resources: [`arn:${cdk.Aws.PARTITION}:states:*:${cdk.Aws.ACCOUNT_ID}:stateMachine:*`],
+          resources: [`arn:${cdk.Aws.PARTITION}:states:*:${cdk.Aws.ACCOUNT_ID}:*:*`],
         }),
         new iam.PolicyStatement({
           sid: "XRayReadAccess",
@@ -111,6 +111,15 @@ export class AtatIamStack extends cdk.Stack {
               resourceName: `cdk-bootstrap/${DEFAULT_BOOSTRAP_QUALIFIER}/*`,
             }),
           ],
+        }),
+        // Developers should be able to _read_ from queues within the account (but not modify
+        // the contents). Specific queues and further restrict this access by modifiying the
+        // Queue permissions/policy.
+        new iam.PolicyStatement({
+          sid: "AllowReadingQueues",
+          effect: iam.Effect.ALLOW,
+          actions: ["sqs:Get*", "sqs:List*", "sqs:ReceiveMessage"],
+          resources: ["*"],
         }),
       ],
     });
