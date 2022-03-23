@@ -46,7 +46,7 @@
     "@middy/validator": "^2.5.7",
     "aws-cdk-lib": "2.17.0",
     "cdk-nag": "^2.11.4",
-    "constructs": "^10.0.91",
+    "constructs": "^10.0.92",
     "http-errors": "^2.0.0",
     "middy-middleware-json-error-handler": "^3.0.0",
     "source-map-support": "^0.5.21",
