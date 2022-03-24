@@ -143,11 +143,7 @@ describe("ATAT IAM Policy creation", () => {
                   {
                     Ref: "AWS::Partition",
                   },
-                  ":ssm:",
-                  {
-                    Ref: "AWS::Region",
-                  },
-                  ":",
+                  ":ssm:*:",
                   {
                     Ref: "AWS::AccountId",
                   },
