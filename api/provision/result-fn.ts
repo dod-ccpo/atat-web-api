@@ -19,6 +19,7 @@ export async function baseHandler(stateInput: ProvisionRequest): Promise<Provisi
     new SendMessageCommand({
       QueueUrl: QUEUE_URL,
       MessageBody: JSON.stringify(stateInput),
+      MessageGroupId: "provisioning-queue-message-group",
     })
   );
 

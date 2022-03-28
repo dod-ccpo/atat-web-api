@@ -103,7 +103,6 @@ components:
         - portfolio_id
         - operation_type
         - target_csp
-        - target_network
         - payload
       properties:
         job_id:

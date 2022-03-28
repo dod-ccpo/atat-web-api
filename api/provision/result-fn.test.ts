@@ -44,7 +44,15 @@ describe("Validate behavior", () => {
     await handler(withResponse, {} as Context);
     expect(sqsMock.commandCalls(SendMessageCommand)).toHaveLength(1);
     expect(
-      sqsMock.commandCalls(SendMessageCommand, { QueueUrl: "my url", MessageBody: JSON.stringify(withResponse) }, true)
+      sqsMock.commandCalls(
+        SendMessageCommand,
+        {
+          QueueUrl: "my url",
+          MessageBody: JSON.stringify(withResponse),
+          MessageGroupId: "provisioning-queue-message-group",
+        },
+        true
+      )
     ).toHaveLength(1);
   });
 });

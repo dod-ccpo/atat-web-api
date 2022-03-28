@@ -71,8 +71,22 @@ export class AtatWebApiStack extends cdk.Stack {
       stateMachine: this.provisioningStateMachine,
     });
 
+    const consumeProvisioningJob = new ApiSfnFunction(this, "ConsumeProvisioningJobRequest", {
+      method: HttpMethod.GET,
+      handlerPath: "api/provision/consume-provisioning-job.ts",
+      functionPropsOverride: {
+        timeout: cdk.Duration.seconds(20),
+      },
+    });
+    consumeProvisioningJob.fn.addEnvironment("SQS_URL", provisioningSfn.provisioningJobsQueue.queueUrl);
+    provisioningSfn.provisioningJobsQueue.grantConsumeMessages(consumeProvisioningJob.fn);
+
     // APIGW Provisioning Job Resource
     const provisioningJobResource = api.restApi.root.addResource("provisioning-job");
     provisioningJobResource.addMethod(provisioningJob.method, new apigw.LambdaIntegration(provisioningJob.fn));
+    provisioningJobResource.addMethod(
+      consumeProvisioningJob.method,
+      new apigw.LambdaIntegration(consumeProvisioningJob.fn)
+    );
   }
 }
