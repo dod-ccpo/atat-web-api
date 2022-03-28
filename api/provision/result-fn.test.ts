@@ -4,7 +4,7 @@ import { mockClient } from "aws-sdk-client-mock";
 import { ValidationErrorResponse } from "../../utils/response";
 import { SendMessageCommand } from "@aws-sdk/client-sqs";
 import { sqsClient } from "../../utils/aws-sdk/sqs";
-import { provisioningBodyWithPayload } from "./start-provision-job.test";
+import { provisioningBodyWithPayload } from "./start-provisioning-job.test";
 
 const sqsMock = mockClient(sqsClient);
 

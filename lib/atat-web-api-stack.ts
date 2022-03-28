@@ -67,7 +67,7 @@ export class AtatWebApiStack extends cdk.Stack {
     // Provisioning lambda that translates and invokes the state machine
     const provisioningJob = new ApiSfnFunction(this, "ProvisioningJobRequest", {
       method: HttpMethod.POST,
-      handlerPath: "api/provision/start-provision-job.ts",
+      handlerPath: "api/provision/start-provisioning-job.ts",
       stateMachine: this.provisioningStateMachine,
     });
 
