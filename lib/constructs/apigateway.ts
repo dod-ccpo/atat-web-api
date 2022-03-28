@@ -4,6 +4,8 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import * as logs from "aws-cdk-lib/aws-logs";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 
+import * as statement from "cdk-iam-floyd";
+
 import { Construct } from "constructs";
 import { HttpMethod } from "aws-cdk-lib/aws-events";
 import { Stack } from "aws-cdk-lib";
@@ -91,11 +93,9 @@ export class AtatRestApi extends Construct {
    */
   public grantOnRoute(user: iam.IUser, method: HttpMethod | "*", path = "/") {
     user.addToPrincipalPolicy(
-      new iam.PolicyStatement({
-        effect: iam.Effect.ALLOW,
-        actions: ["execute-api:Invoke"],
-        resources: [this.restApi.arnForExecuteApi(method, path, this.restApi.deploymentStage.stageName)],
-      })
+      new statement.ExecuteApi()
+        .toInvoke()
+        .on(this.restApi.arnForExecuteApi(method, path, this.restApi.deploymentStage.stageName))
     );
   }
 
@@ -108,23 +108,13 @@ export class AtatRestApi extends Construct {
     // https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-private-apis.html
     return new iam.PolicyDocument({
       statements: [
-        new iam.PolicyStatement({
-          effect: iam.Effect.ALLOW,
-          principals: [new iam.AccountPrincipal(cdk.Aws.ACCOUNT_ID)],
-          actions: ["execute-api:Invoke"],
-          resources: ["execute-api:/*"],
-        }),
-        new iam.PolicyStatement({
-          effect: iam.Effect.DENY,
-          principals: [new iam.AnyPrincipal()],
-          actions: ["execute-api:Invoke"],
-          resources: ["execute-api:/*"],
-          conditions: {
-            StringNotEquals: {
-              "aws:SourceVpce": endpoint.vpcEndpointId,
-            },
-          },
-        }),
+        new statement.ExecuteApi().toInvoke().onAllResources().forAccount(cdk.Aws.ACCOUNT_ID),
+        new statement.ExecuteApi()
+          .deny()
+          .toInvoke()
+          .onAllResources()
+          .forPublic()
+          .ifAwsSourceVpce(endpoint.vpcEndpointId, new statement.Operator().stringNotEquals()),
       ],
     });
   }

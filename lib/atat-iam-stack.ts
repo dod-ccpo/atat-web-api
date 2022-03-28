@@ -1,6 +1,7 @@
 import * as cdk from "aws-cdk-lib";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as custom from "aws-cdk-lib/custom-resources";
+import * as statement from "cdk-iam-floyd";
 
 import { Construct } from "constructs";
 
@@ -31,24 +32,9 @@ export class AtatIamStack extends cdk.Stack {
     const generalReadAccess = new iam.ManagedPolicy(this, "GeneralReadAccess", {
       description: "Grants read access to specific resources not in ViewOnlyAccess",
       statements: [
-        new iam.PolicyStatement({
-          sid: "APIGatewayRestApiReadAccess",
-          effect: iam.Effect.ALLOW,
-          actions: ["apigateway:GET"],
-          resources: [`arn:${cdk.Aws.PARTITION}:apigateway:*::/restapis*`],
-        }),
-        new iam.PolicyStatement({
-          sid: "StepFunctionsReadAccess",
-          effect: iam.Effect.ALLOW,
-          actions: ["states:List*", "states:Describe*", "states:GetExecutionHistory"],
-          resources: [`arn:${cdk.Aws.PARTITION}:states:*:${cdk.Aws.ACCOUNT_ID}:*:*`],
-        }),
-        new iam.PolicyStatement({
-          sid: "XRayReadAccess",
-          effect: iam.Effect.ALLOW,
-          actions: ["xray:BatchGetTraces", "xray:Get*", "xray:List*"],
-          resources: ["*"],
-        }),
+        new statement.Apigateway().toGET().onRestApis(undefined, cdk.Aws.PARTITION),
+        new statement.States().allReadActions(),
+        new statement.Xray().allListActions().allReadActions(),
       ],
     });
 
@@ -58,18 +44,8 @@ export class AtatIamStack extends cdk.Stack {
         // Artifact access policies generally based on those from the Artifact
         // User Guide documentation at
         // https://docs.aws.amazon.com/artifact/latest/ug/security-iam.html#example-iam-policies
-        new iam.PolicyStatement({
-          sid: "AllowArtifactReportPackageAccess",
-          effect: iam.Effect.ALLOW,
-          actions: ["artifact:Get"],
-          resources: [`arn:${cdk.Aws.PARTITION}:artifact:::report-package/*`],
-        }),
-        new iam.PolicyStatement({
-          sid: "AllowArtifactAgreementDownload",
-          effect: iam.Effect.ALLOW,
-          actions: ["artifact:DownloadAgreement"],
-          resources: ["*"],
-        }),
+        new statement.Artifact().toGet().onReportPackage("*", cdk.Aws.PARTITION),
+        new statement.Artifact().toDownloadAgreement().onAllResources(),
       ],
     });
 
@@ -78,62 +54,38 @@ export class AtatIamStack extends cdk.Stack {
       statements: [
         // During a deployment, outside of CloudFormation (where the role will be used),
         // the CDK needs to read from and write to the S3 buckets for the CDK.
-        new iam.PolicyStatement({
-          sid: "AllowModifyingCdkToolBuckets",
-          effect: iam.Effect.ALLOW,
-          actions: ["s3:*"],
-          resources: [
-            `arn:${cdk.Aws.PARTITION}:s3:::cdk-*-assets-${cdk.Aws.ACCOUNT_ID}-*`,
-            `arn:${cdk.Aws.PARTITION}:s3:::cdktoolkit-stagingbucket-*`,
-          ],
-        }),
-        new iam.PolicyStatement({
-          sid: "AllowAssumingCdkRoles",
-          effect: iam.Effect.ALLOW,
-          actions: ["sts:AssumeRole"],
-          resources: [
-            this.formatArn({
-              service: "iam",
-              region: "",
-              resource: "role",
-              resourceName: `cdk-${DEFAULT_BOOSTRAP_QUALIFIER}-*-role-${cdk.Aws.ACCOUNT_ID}-${cdk.Aws.REGION}`,
-            }),
-          ],
-        }),
-        new iam.PolicyStatement({
-          sid: "AllowReadingCdkParameters",
-          effect: iam.Effect.ALLOW,
-          actions: ["ssm:GetParameter"],
-          resources: [
-            this.formatArn({
-              service: "ssm",
-              resource: "parameter",
-              resourceName: `cdk-bootstrap/${DEFAULT_BOOSTRAP_QUALIFIER}/*`,
-            }),
-          ],
-        }),
-        // Developers should be able to _read_ from queues within the account (but not modify
-        // the contents). Specific queues and further restrict this access by modifiying the
-        // Queue permissions/policy.
-        new iam.PolicyStatement({
-          sid: "AllowReadingQueues",
-          effect: iam.Effect.ALLOW,
-          actions: ["sqs:Get*", "sqs:List*", "sqs:ReceiveMessage"],
-          resources: ["*"],
-        }),
+        new statement.S3()
+          .allActions()
+          .onBucket(`cdk-*-assets-${cdk.Aws.ACCOUNT_ID}-*`, cdk.Aws.PARTITION)
+          .onBucket("cdktoolkit-stagingbucket-*", cdk.Aws.PARTITION),
+        // The Lookup, Deploy, and other roles will be used by the CDK and use a particular naming
+        // convention
+        new statement.Sts()
+          .toAssumeRole()
+          .onRole(
+            `cdk-${DEFAULT_BOOSTRAP_QUALIFIER}-*-role-${cdk.Aws.ACCOUNT_ID}-${cdk.Aws.REGION}`,
+            cdk.Aws.ACCOUNT_ID,
+            cdk.Aws.PARTITION
+          ),
+        // Additionally, values under the `cdk-bootstrap/` namespace for the qualifier may be necessary
+        // for the CDK to understand the environment and do a deployment
+        new statement.Ssm()
+          .toGetParameter()
+          .onParameter(
+            `cdk-bootstrap/${DEFAULT_BOOSTRAP_QUALIFIER}/*`,
+            cdk.Aws.ACCOUNT_ID,
+            undefined,
+            cdk.Aws.PARTITION
+          ),
+        // Within ATAT, developers may need to read from various queues in order to debug or
+        // troubleshoot
+        new statement.Sqs().allReadActions().onAllResources(),
       ],
     });
 
     const baseDenies = new iam.ManagedPolicy(this, "AtatUserDenyPolicy", {
       description: "Denies access to sensitive resources and actions",
-      statements: [
-        new iam.PolicyStatement({
-          sid: "DenyAllOrganizations",
-          effect: iam.Effect.DENY,
-          actions: ["organizations:*"],
-          resources: ["*"],
-        }),
-      ],
+      statements: [new statement.Organizations().deny().allActions().onAllResources()],
     });
 
     // Eventually, this should be restricted to the specific services in use for the application

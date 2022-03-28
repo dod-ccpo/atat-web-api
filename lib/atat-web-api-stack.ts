@@ -1,8 +1,9 @@
 import * as cdk from "aws-cdk-lib";
+import * as apigw from "aws-cdk-lib/aws-apigateway";
 import * as iam from "aws-cdk-lib/aws-iam";
-import { LambdaIntegration } from "aws-cdk-lib/aws-apigateway";
-import { Construct } from "constructs";
 import * as sfn from "aws-cdk-lib/aws-stepfunctions";
+import * as statement from "cdk-iam-floyd";
+import { Construct } from "constructs";
 import { StateMachine } from "./constructs/state-machine";
 import { AtatRestApi } from "./constructs/apigateway";
 import { UserPermissionBoundary } from "./aspects/user-only-permission-boundary";
@@ -21,8 +22,8 @@ export class AtatWebApiStack extends cdk.Stack {
     super(scope, id, props);
     const { environmentName } = props;
 
-    const apigw = new AtatRestApi(this, "SampleApi");
-    apigw.restApi.root.addMethod("ANY");
+    const api = new AtatRestApi(this, "SampleApi");
+    api.restApi.root.addMethod("ANY");
 
     // Ensure that no IAM users in this Stack can ever do anything
     // except for invoke the created API Gateway.
@@ -34,11 +35,7 @@ export class AtatWebApiStack extends cdk.Stack {
         new iam.ManagedPolicy(this, "ApiUserBoundary", {
           document: new iam.PolicyDocument({
             statements: [
-              new iam.PolicyStatement({
-                effect: iam.Effect.ALLOW,
-                actions: ["execute-api:Invoke"],
-                resources: [apigw.restApi.arnForExecuteApi()],
-              }),
+              new statement.ExecuteApi().allow().toInvoke().on(api.restApi.arnForExecuteApi()),
               // This may seem a little redundant; however, implicit denies
               // in permissions boundaries do not limit resource-based policies.
               // So we need an _explicit_ deny for any action other than
@@ -46,11 +43,12 @@ export class AtatWebApiStack extends cdk.Stack {
               // given an identity-based policy that grants something like
               // s3:GetObject on * while an S3 bucket allows the user to read
               // from that bucket.
-              new iam.PolicyStatement({
-                effect: iam.Effect.DENY,
-                notActions: ["execute-api:Invoke"],
-                notResources: [apigw.restApi.arnForExecuteApi()],
-              }),
+              new statement.ExecuteApi()
+                .deny()
+                .notActions()
+                .toInvoke()
+                .notResources()
+                .on(api.restApi.arnForExecuteApi()),
             ],
           }),
         })
@@ -74,7 +72,7 @@ export class AtatWebApiStack extends cdk.Stack {
     });
 
     // APIGW Provisioning Job Resource
-    const provisioningJobResource = apigw.restApi.root.addResource("provisioning-job");
-    provisioningJobResource.addMethod(provisioningJob.method, new LambdaIntegration(provisioningJob.fn));
+    const provisioningJobResource = api.restApi.root.addResource("provisioning-job");
+    provisioningJobResource.addMethod(provisioningJob.method, new apigw.LambdaIntegration(provisioningJob.fn));
   }
 }

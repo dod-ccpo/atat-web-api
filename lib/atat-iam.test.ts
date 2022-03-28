@@ -36,41 +36,34 @@ describe("ATAT IAM Policy creation", () => {
   });
 
   test("Fully assert auditorAccess IAM managed policy with matchers", async () => {
-    template.hasResourceProperties(
-      "AWS::IAM::ManagedPolicy",
-      Match.objectEquals({
-        PolicyDocument: {
-          Statement: [
-            {
-              Action: "artifact:Get",
-              Effect: "Allow",
-              Resource: {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:",
-                    {
-                      Ref: "AWS::Partition",
-                    },
-                    ":artifact:::report-package/*",
-                  ],
+    template.hasResourceProperties("AWS::IAM::ManagedPolicy", {
+      PolicyDocument: {
+        Statement: [
+          {
+            Action: "artifact:Get",
+            Effect: "Allow",
+            Resource: {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:",
+                  {
+                    Ref: "AWS::Partition",
+                  },
+                  ":artifact:::report-package/*",
                 ],
-              },
-              Sid: Match.anyValue(),
+              ],
             },
-            {
-              Action: "artifact:DownloadAgreement",
-              Effect: "Allow",
-              Resource: "*",
-              Sid: Match.anyValue(),
-            },
-          ],
-          Version: "2012-10-17",
-        },
-        Description: Match.anyValue(),
-        Path: "/",
-      })
-    );
+          },
+          {
+            Action: "artifact:DownloadAgreement",
+            Effect: "Allow",
+            Resource: "*",
+          },
+        ],
+        Version: "2012-10-17",
+      },
+    });
   });
   test("Ensure developers can access CDK-related resources", async () => {
     template.hasResourceProperties("AWS::IAM::ManagedPolicy", {
@@ -111,7 +104,6 @@ describe("ATAT IAM Policy creation", () => {
                 ],
               },
             ],
-            Sid: Match.anyValue(),
           },
           {
             Action: "sts:AssumeRole",
@@ -139,7 +131,6 @@ describe("ATAT IAM Policy creation", () => {
                 ],
               ],
             },
-            Sid: Match.anyValue(),
           },
           {
             Action: "ssm:GetParameter",
@@ -152,11 +143,7 @@ describe("ATAT IAM Policy creation", () => {
                   {
                     Ref: "AWS::Partition",
                   },
-                  ":ssm:",
-                  {
-                    Ref: "AWS::Region",
-                  },
-                  ":",
+                  ":ssm:*:",
                   {
                     Ref: "AWS::AccountId",
                   },
@@ -164,7 +151,6 @@ describe("ATAT IAM Policy creation", () => {
                 ],
               ],
             },
-            Sid: Match.anyValue(),
           },
           Match.anyValue(),
         ],
@@ -175,23 +161,17 @@ describe("ATAT IAM Policy creation", () => {
     });
   });
   test("Fully assert baseDenies IAM managed policy with matchers", async () => {
-    template.hasResourceProperties(
-      "AWS::IAM::ManagedPolicy",
-      Match.objectEquals({
-        PolicyDocument: {
-          Statement: [
-            {
-              Action: "organizations:*",
-              Effect: "Deny",
-              Resource: "*",
-              Sid: Match.anyValue(),
-            },
-          ],
-          Version: "2012-10-17",
-        },
-        Description: Match.anyValue(),
-        Path: "/",
-      })
-    );
+    template.hasResourceProperties("AWS::IAM::ManagedPolicy", {
+      PolicyDocument: {
+        Statement: [
+          {
+            Action: "organizations:*",
+            Effect: "Deny",
+            Resource: "*",
+          },
+        ],
+        Version: "2012-10-17",
+      },
+    });
   });
 });
