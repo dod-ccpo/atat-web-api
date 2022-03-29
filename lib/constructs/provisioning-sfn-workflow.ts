@@ -2,8 +2,12 @@ import * as sfn from "aws-cdk-lib/aws-stepfunctions";
 import * as sqs from "aws-cdk-lib/aws-sqs";
 import * as lambdaNodeJs from "aws-cdk-lib/aws-lambda-nodejs";
 import * as logs from "aws-cdk-lib/aws-logs";
+import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { mapTasks, TasksMap } from "./sfn-lambda-invoke-task";
+import { ApiSfnFunction } from "./api-sfn-function";
+import { HttpMethod } from "../http";
+import { StateMachine } from "./state-machine";
 
 /**
  * Successful condition check
@@ -38,6 +42,8 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
   readonly logGroup: logs.ILogGroup;
   readonly provisioningJobsQueue: sqs.IQueue;
   readonly resultFn: lambdaNodeJs.NodejsFunction;
+  readonly provisioningQueueConsumer: ApiSfnFunction;
+  readonly stateMachine: sfn.IStateMachine;
 
   constructor(scope: Construct, id: string, props: ProvisioningWorkflowProps) {
     super(scope, id);
@@ -58,7 +64,18 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
       },
       entry: "api/provision/result-fn.ts",
     });
+    this.provisioningQueueConsumer = new ApiSfnFunction(this, "ConsumeProvisioningJobRequest", {
+      method: HttpMethod.GET,
+      handlerPath: "api/provision/consume-provisioning-job.ts",
+      functionPropsOverride: {
+        timeout: cdk.Duration.seconds(20),
+        environment: {
+          PROVISIONING_QUEUE_URL: this.provisioningJobsQueue.queueUrl,
+        },
+      },
+    });
     this.provisioningJobsQueue.grantSendMessages(this.resultFn);
+    this.provisioningJobsQueue.grantConsumeMessages(this.provisioningQueueConsumer.fn);
 
     // Tasks for the Provisioning State Machine
     const tasks = [
@@ -95,10 +112,15 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
 
     // Composing state machine
     this.workflow = InvokeCspApi.sfnTask.next(httpResponseChoices);
-
     this.logGroup = new logs.LogGroup(scope, "StepFunctionsLogs", {
       retention: logs.RetentionDays.ONE_WEEK,
       logGroupName: `/aws/vendedlogs/states/StepFunctionsLogs${environmentName}`,
     });
+    this.stateMachine = new StateMachine(this, "ProvisioningStateMachine", {
+      stateMachineProps: {
+        definition: this.workflow,
+      },
+      logGroup: this.logGroup,
+    }).stateMachine;
   }
 }

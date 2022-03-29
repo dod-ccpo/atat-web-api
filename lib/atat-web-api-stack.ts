@@ -4,7 +4,6 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import * as sfn from "aws-cdk-lib/aws-stepfunctions";
 import * as statement from "cdk-iam-floyd";
 import { Construct } from "constructs";
-import { StateMachine } from "./constructs/state-machine";
 import { AtatRestApi } from "./constructs/apigateway";
 import { UserPermissionBoundary } from "./aspects/user-only-permission-boundary";
 import { ApiSfnFunction } from "./constructs/api-sfn-function";
@@ -55,38 +54,22 @@ export class AtatWebApiStack extends cdk.Stack {
       )
     );
 
-    // State Machine
+    // State Machine and workflow
     const provisioningSfn = new ProvisioningWorkflow(this, "ProvisioningWorkflow", { environmentName });
-    this.provisioningStateMachine = new StateMachine(this, "ProvisioningStateMachine", {
-      stateMachineProps: {
-        definition: provisioningSfn.workflow,
-      },
-      logGroup: provisioningSfn.logGroup,
-    }).stateMachine;
 
     // Provisioning lambda that translates and invokes the state machine
     const provisioningJob = new ApiSfnFunction(this, "ProvisioningJobRequest", {
       method: HttpMethod.POST,
       handlerPath: "api/provision/start-provisioning-job.ts",
-      stateMachine: this.provisioningStateMachine,
+      stateMachine: provisioningSfn.stateMachine,
     });
-
-    const consumeProvisioningJob = new ApiSfnFunction(this, "ConsumeProvisioningJobRequest", {
-      method: HttpMethod.GET,
-      handlerPath: "api/provision/consume-provisioning-job.ts",
-      functionPropsOverride: {
-        timeout: cdk.Duration.seconds(20),
-      },
-    });
-    consumeProvisioningJob.fn.addEnvironment("SQS_URL", provisioningSfn.provisioningJobsQueue.queueUrl);
-    provisioningSfn.provisioningJobsQueue.grantConsumeMessages(consumeProvisioningJob.fn);
 
     // APIGW Provisioning Job Resource
     const provisioningJobResource = api.restApi.root.addResource("provisioning-job");
     provisioningJobResource.addMethod(provisioningJob.method, new apigw.LambdaIntegration(provisioningJob.fn));
     provisioningJobResource.addMethod(
-      consumeProvisioningJob.method,
-      new apigw.LambdaIntegration(consumeProvisioningJob.fn)
+      provisioningSfn.provisioningQueueConsumer.method,
+      new apigw.LambdaIntegration(provisioningSfn.provisioningQueueConsumer.fn)
     );
   }
 }
