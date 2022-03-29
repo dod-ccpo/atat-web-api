@@ -1,7 +1,6 @@
 import { handler } from "./consume-provisioning-job";
-import { SQSEvent, Context, APIGatewayProxyEvent } from "aws-lambda";
+import { Context, APIGatewayProxyEvent } from "aws-lambda";
 import { mockClient } from "aws-sdk-client-mock";
-import * as crypto from "crypto";
 import { sqsClient } from "../../utils/aws-sdk/sqs";
 import { DeleteMessageCommand, ReceiveMessageCommand } from "@aws-sdk/client-sqs";
 import { requestContext } from "./start-provisioning-job.test";
