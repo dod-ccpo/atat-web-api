@@ -3,6 +3,7 @@ import "source-map-support/register";
 import * as cdk from "aws-cdk-lib";
 // import { NIST80053R4Checks, NIST80053R5Checks } from "cdk-nag";
 import { AtatWebApiStack } from "../lib/atat-web-api-stack";
+import { AtatPipelineStack } from "../lib/atat-pipeline-stack";
 import { GovCloudCompatibilityAspect } from "../lib/aspects/govcloud-compatibility";
 import { RemovalPolicySetter } from "../lib/aspects/removal-policy";
 import * as utils from "../lib/util";
@@ -31,4 +32,8 @@ if (utils.isPossibleTemporaryEnvironment(environmentId)) {
 // cdk.Aspects.of(app).add(new NIST80053R5Checks({ verbose: true }));
 cdk.Aspects.of(app).add(new GovCloudCompatibilityAspect());
 
-const apiStack = new AtatWebApiStack(app, `${environmentName}AtatWebApiStack`, { environmentName });
+const apiStack = new AtatPipelineStack(app, `Pipeline`, {
+  environmentName,
+  branch: "feature/cdk-pipelines",
+  githubPatSecretPath: "auth/github/pat-7176", // pragma: allowlist secret
+});
