@@ -1,4 +1,5 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
+import { Logger } from "@aws-lambda-powertools/logger";
 import { ProvisionRequest } from "../../models/provisioning-jobs";
 import { sqsClient } from "../../utils/aws-sdk/sqs";
 import middy from "@middy/core";
@@ -8,12 +9,14 @@ import { IpCheckerMiddleware } from "../../utils/middleware/ip-logging";
 import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 
-const SQS_URL = process.env.SQS_URL ?? "";
+const PROVISIONING_QUEUE_URL = process.env.PROVISIONING_QUEUE_URL ?? "";
+const logger = new Logger({ serviceName: "provisioningWorkflow" });
 
 export async function baseHandler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+  logger.info("General lambda info", { isAColdStart: logger.isColdStart() });
   // poll messages from the queue
   const receiveMessageInput: ReceiveMessageCommandInput = {
-    QueueUrl: SQS_URL,
+    QueueUrl: PROVISIONING_QUEUE_URL,
     MaxNumberOfMessages: 10,
   };
   const receiveMessageCommand = new ReceiveMessageCommand(receiveMessageInput);
@@ -23,7 +26,7 @@ export async function baseHandler(event: APIGatewayProxyEvent): Promise<APIGatew
   if (!consumedMessages.Messages) {
     return new ApiSuccessResponse([], SuccessStatusCode.OK);
   }
-  console.log("Number of Messages: ", consumedMessages.Messages?.length);
+  logger.info(`Number of Messages to process ${consumedMessages.Messages?.length}`);
 
   // transform (remove unnecessary data) and gather messages
   const messages: ProvisionRequest[] = [];
@@ -46,13 +49,13 @@ export async function baseHandler(event: APIGatewayProxyEvent): Promise<APIGatew
     messages.push(provisioningRequest);
 
     // deleting message after processing
-    const deleteInput = { QueueUrl: SQS_URL, ReceiptHandle: record.ReceiptHandle };
+    const deleteInput = { QueueUrl: PROVISIONING_QUEUE_URL, ReceiptHandle: record.ReceiptHandle };
     const deleteMessageCommand = new DeleteMessageCommand(deleteInput);
-    const deletedMessage = await sqsClient.send(deleteMessageCommand);
-    console.log("Message Deleted: ", deletedMessage);
+    const deletedMessageResponse = await sqsClient.send(deleteMessageCommand);
+    logger.info("Message Deleted", { deletedMessageResponse } as any);
   }
 
-  console.log("Number of Messages: ", messages.length);
+  logger.info(`Number of Messages processed ${messages.length}`);
   return new ApiSuccessResponse(messages, SuccessStatusCode.OK);
 }
 
