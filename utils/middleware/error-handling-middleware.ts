@@ -1,5 +1,5 @@
 import middy from "@middy/core";
-import { APIGatewayProxyResult } from "aws-lambda";
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { serializeError } from "serialize-error";
 import { ValidationErrorResponse } from "../response";
 import { INTERNAL_SERVER_ERROR, REQUEST_BODY_INVALID } from "../errors";
@@ -11,9 +11,15 @@ import {
   ProvisionRequest,
 } from "../../models/provisioning-jobs";
 
-export type MiddlewareInputs = StepFunctionRequestEvent<RequestBodyType> | CspInvocation | ProvisionRequest;
+export type MiddlewareInputs =
+  | StepFunctionRequestEvent<RequestBodyType>
+  | CspInvocation
+  | ProvisionRequest
+  | APIGatewayProxyEvent;
 export type MiddlewareOutputs = APIGatewayProxyResult | CspResponse | ValidationErrorResponse | ProvisionRequest;
 
+// A central place to catch and handle errors that occur before,
+// during, and after the execution of the lambda
 export const errorHandlingMiddleware = (): middy.MiddlewareObj<MiddlewareInputs, MiddlewareOutputs> => {
   const onError: middy.MiddlewareFn<MiddlewareInputs, MiddlewareOutputs> = async (
     request

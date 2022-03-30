@@ -27,7 +27,7 @@ export interface ApiSfnFunctionProps {
    * The State Machine that will start execution when this function
    * is called.
    */
-  readonly stateMachine: sfn.IStateMachine;
+  readonly stateMachine?: sfn.IStateMachine;
 }
 
 export class ApiSfnFunction extends Construct {
@@ -45,7 +45,7 @@ export class ApiSfnFunction extends Construct {
   /**
    * The State Machine resource that gets created.
    */
-  public readonly stateMachine: sfn.IStateMachine;
+  public readonly stateMachine?: sfn.IStateMachine;
 
   constructor(scope: Construct, id: string, props: ApiSfnFunctionProps) {
     super(scope, id);
@@ -59,9 +59,11 @@ export class ApiSfnFunction extends Construct {
       ...props.functionPropsOverride,
     });
 
-    // State Machine service
-    this.stateMachine = props.stateMachine;
-    this.fn.addEnvironment("SFN_ARN", props.stateMachine.stateMachineArn);
-    this.stateMachine.grantStartExecution(this.fn);
+    if (props.stateMachine) {
+      // State Machine service
+      this.stateMachine = props.stateMachine;
+      this.fn.addEnvironment("SFN_ARN", props.stateMachine.stateMachineArn);
+      this.stateMachine.grantStartExecution(this.fn);
+    }
   }
 }

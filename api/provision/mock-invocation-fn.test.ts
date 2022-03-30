@@ -9,8 +9,8 @@ import {
   SuccessStatusCode,
   ValidationErrorResponse,
 } from "../../utils/response";
-import { transformProvisionRequest } from "./start-provision-job";
-import { provisioningBodyNoPayload, provisioningBodyWithPayload } from "./start-provision-job.test";
+import { transformProvisionRequest } from "./start-provisioning-job";
+import { provisioningBodyNoPayload, provisioningBodyWithPayload } from "./start-provisioning-job.test";
 
 const fundingSources = [
   {

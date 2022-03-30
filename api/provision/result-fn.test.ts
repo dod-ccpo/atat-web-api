@@ -4,7 +4,7 @@ import { mockClient } from "aws-sdk-client-mock";
 import { ValidationErrorResponse } from "../../utils/response";
 import { SendMessageCommand } from "@aws-sdk/client-sqs";
 import { sqsClient } from "../../utils/aws-sdk/sqs";
-import { provisioningBodyWithPayload } from "./start-provision-job.test";
+import { provisioningBodyWithPayload } from "./start-provisioning-job.test";
 
 const sqsMock = mockClient(sqsClient);
 
@@ -44,7 +44,15 @@ describe("Validate behavior", () => {
     await handler(withResponse, {} as Context);
     expect(sqsMock.commandCalls(SendMessageCommand)).toHaveLength(1);
     expect(
-      sqsMock.commandCalls(SendMessageCommand, { QueueUrl: "my url", MessageBody: JSON.stringify(withResponse) }, true)
+      sqsMock.commandCalls(
+        SendMessageCommand,
+        {
+          QueueUrl: "my url",
+          MessageBody: JSON.stringify(withResponse),
+          MessageGroupId: "provisioning-queue-message-group",
+        },
+        true
+      )
     ).toHaveLength(1);
   });
 });

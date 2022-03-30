@@ -37,7 +37,7 @@ export async function baseHandler(event: StepFunctionRequestEvent<ProvisionReque
       ...event.body,
       cspInvocation: cspInvocationJob,
     };
-    const result = await sfnClient.startExecution({
+    await sfnClient.startExecution({
       input: JSON.stringify(sfnInput),
       stateMachineArn: SFN_ARN,
     });
