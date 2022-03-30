@@ -1,7 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import * as apigw from "aws-cdk-lib/aws-apigateway";
 import * as iam from "aws-cdk-lib/aws-iam";
-import * as sfn from "aws-cdk-lib/aws-stepfunctions";
 import * as statement from "cdk-iam-floyd";
 import { Construct } from "constructs";
 import { AtatRestApi } from "./constructs/apigateway";
@@ -15,8 +14,6 @@ export interface AtatWebApiStackProps extends cdk.StackProps {
 }
 
 export class AtatWebApiStack extends cdk.Stack {
-  public readonly provisioningStateMachine: sfn.IStateMachine;
-
   constructor(scope: Construct, id: string, props: AtatWebApiStackProps) {
     super(scope, id, props);
     const { environmentName } = props;
