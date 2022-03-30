@@ -18,7 +18,7 @@ export type MiddlewareInputs =
   | APIGatewayProxyEvent;
 export type MiddlewareOutputs = APIGatewayProxyResult | CspResponse | ValidationErrorResponse | ProvisionRequest;
 
-// A central place to catch an handle errors that occur before,
+// A central place to catch and handle errors that occur before,
 // during, and after the execution of the lambda
 export const errorHandlingMiddleware = (): middy.MiddlewareObj<MiddlewareInputs, MiddlewareOutputs> => {
   const onError: middy.MiddlewareFn<MiddlewareInputs, MiddlewareOutputs> = async (
