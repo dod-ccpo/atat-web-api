@@ -35,7 +35,7 @@ const API_ACCESS_LOG_FORMAT = apigw.AccessLogFormat.custom(
 
 export interface RestApiVpcConfiguration {
   vpc: ec2.IVpc;
-  interfaceEndpoint: ec2.InterfaceVpcEndpoint;
+  interfaceEndpoint: ec2.IVpcEndpoint;
 }
 
 export interface AtatRestApiProps extends apigw.RestApiBaseProps {
@@ -99,7 +99,7 @@ export class AtatRestApi extends Construct {
     );
   }
 
-  private permitAccessOnlyFromEndpoint(endpoint: ec2.InterfaceVpcEndpoint): iam.PolicyDocument {
+  private permitAccessOnlyFromEndpoint(endpoint: ec2.IVpcEndpoint): iam.PolicyDocument {
     // Creates a relatively secure resource policy for the API Gateway resource. Only users within
     // the current account are permitted to invoke the API and all access must occur via the defined
     // VPC Interface Endpoint. The default is to allow access to the API via _any_ API Gateway
