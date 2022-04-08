@@ -45,7 +45,7 @@ jobs:
       - name: Synthesize CDK template
         run: cdk synth -c "atat:EnvironmentId=CiTest"
       - name: Gather CloudFormation artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: cloudformation-assets
           path: |
