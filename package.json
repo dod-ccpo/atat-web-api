@@ -41,7 +41,7 @@
     "@aws-lambda-powertools/logger": "^0.7.2",
     "@aws-sdk/client-s3": "^3.58.0",
     "@aws-sdk/client-sfn": "^3.58.0",
-    "@aws-sdk/client-sqs": "^3.58.0",
+    "@aws-sdk/client-sqs": "^3.67.0",
     "@middy/core": "^2.5.7",
     "@middy/http-json-body-parser": "^2.5.7",
     "@middy/validator": "^2.5.7",
