@@ -62,7 +62,7 @@ export class AtatWebApiStack extends cdk.Stack {
     });
 
     // APIGW Provisioning Job Resource
-    const provisioningJobResource = api.restApi.root.addResource("provisioning-job");
+    const provisioningJobResource = api.restApi.root.addResource("provisioning-jobs");
     provisioningJobResource.addMethod(provisioningJob.method, new apigw.LambdaIntegration(provisioningJob.fn));
     provisioningJobResource.addMethod(
       provisioningSfn.provisioningQueueConsumer.method,
