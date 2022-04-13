@@ -3,7 +3,8 @@ import * as apigw from "aws-cdk-lib/aws-apigateway";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as statement from "cdk-iam-floyd";
 import { Construct } from "constructs";
-import { AtatRestApi } from "./constructs/apigateway";
+import { AtatNetStack } from "./atat-net-stack";
+import { AtatRestApi, AtatRestApiProps } from "./constructs/apigateway";
 import { UserPermissionBoundary } from "./aspects/user-only-permission-boundary";
 import { ApiSfnFunction } from "./constructs/api-sfn-function";
 import { HttpMethod } from "./http";
@@ -11,14 +12,26 @@ import { ProvisioningWorkflow } from "./constructs/provisioning-sfn-workflow";
 
 export interface AtatWebApiStackProps extends cdk.StackProps {
   environmentName: string;
+  network?: AtatNetStack;
 }
 
 export class AtatWebApiStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: AtatWebApiStackProps) {
     super(scope, id, props);
-    const { environmentName } = props;
+    const { environmentName, network } = props;
 
-    const api = new AtatRestApi(this, "SampleApi");
+    const apiProps: AtatRestApiProps = {
+      restApiName: `${environmentName}HothApi`,
+    };
+    if (network) {
+      apiProps.vpcConfig = {
+        vpc: network.vpc,
+        interfaceEndpoint: network.endpoints.apigateway,
+        tempDontUseVpcEndpoint: true,
+      };
+    }
+
+    const api = new AtatRestApi(this, "HothApi", apiProps);
     api.restApi.root.addMethod("ANY");
 
     // Ensure that no IAM users in this Stack can ever do anything

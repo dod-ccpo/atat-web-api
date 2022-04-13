@@ -8,8 +8,6 @@ import * as statement from "cdk-iam-floyd";
 
 import { Construct } from "constructs";
 import { HttpMethod } from "aws-cdk-lib/aws-events";
-import { Stack } from "aws-cdk-lib";
-import { IPrincipal } from "aws-cdk-lib/aws-iam";
 
 const API_ACCESS_LOG_FORMAT = apigw.AccessLogFormat.custom(
   JSON.stringify({
@@ -35,7 +33,12 @@ const API_ACCESS_LOG_FORMAT = apigw.AccessLogFormat.custom(
 
 export interface RestApiVpcConfiguration {
   vpc: ec2.IVpc;
-  interfaceEndpoint: ec2.InterfaceVpcEndpoint;
+  interfaceEndpoint: ec2.IVpcEndpoint;
+  // TODO: REMOVE THIS ATTRIBUTE. This is a temporary workaround to resolve issues
+  // with networking. At the moment, the rest of the networking infrastructure
+  // (across accounts) does not fully and properly support ingress traffic. This
+  // must be removed once those fixes are in-place.
+  tempDontUseVpcEndpoint?: boolean;
 }
 
 export interface AtatRestApiProps extends apigw.RestApiBaseProps {
@@ -54,7 +57,7 @@ export class AtatRestApi extends Construct {
     // endpoint. Otherwise, a regional endpoint is used. Edge endpoints are not
     // configured purely for convenience (as they're not available in all
     // regions or partitions).
-    const isPrivateApi = !!props?.vpcConfig;
+    const isPrivateApi = !!props?.vpcConfig && !props.vpcConfig.tempDontUseVpcEndpoint;
     const privateEndpointConfig = () => ({
       endpointConfiguration: {
         types: [apigw.EndpointType.PRIVATE],
@@ -67,6 +70,7 @@ export class AtatRestApi extends Construct {
     });
 
     const restApi = new apigw.RestApi(this, "Api", {
+      description: "The REST API between ATAT in ServiceNow and in the Cloud",
       ...props,
       ...(isPrivateApi ? privateEndpointConfig() : regionalEndpointConfig()),
       deployOptions: {
@@ -99,7 +103,7 @@ export class AtatRestApi extends Construct {
     );
   }
 
-  private permitAccessOnlyFromEndpoint(endpoint: ec2.InterfaceVpcEndpoint): iam.PolicyDocument {
+  private permitAccessOnlyFromEndpoint(endpoint: ec2.IVpcEndpoint): iam.PolicyDocument {
     // Creates a relatively secure resource policy for the API Gateway resource. Only users within
     // the current account are permitted to invoke the API and all access must occur via the defined
     // VPC Interface Endpoint. The default is to allow access to the API via _any_ API Gateway
@@ -108,7 +112,7 @@ export class AtatRestApi extends Construct {
     // https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-private-apis.html
     return new iam.PolicyDocument({
       statements: [
-        new statement.ExecuteApi().toInvoke().onAllResources().forAccount(cdk.Aws.ACCOUNT_ID),
+        new statement.ExecuteApi().toInvoke().onAllResources().forCdkPrincipal(new iam.AccountRootPrincipal()),
         new statement.ExecuteApi()
           .deny()
           .toInvoke()

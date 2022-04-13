@@ -20,7 +20,6 @@ export class AtatIamStack extends cdk.Stack {
     const awsManagedViewOnlyPolicy = iam.ManagedPolicy.fromAwsManagedPolicyName("job-function/ViewOnlyAccess");
     const awsManagedLogsReadPolicy = iam.ManagedPolicy.fromAwsManagedPolicyName("CloudWatchLogsReadOnlyAccess");
     const awsManagedAuditorPolicy = iam.ManagedPolicy.fromAwsManagedPolicyName("SecurityAudit");
-    const awsManagedAdminAccessPolicy = iam.ManagedPolicy.fromAwsManagedPolicyName("AdministratorAccess");
     const awsManagedCfnFullAccessPolicy = iam.ManagedPolicy.fromAwsManagedPolicyName("AWSCloudFormationFullAccess");
 
     // In the future, we may want to consider moving to a mechanism where the various
@@ -80,23 +79,15 @@ export class AtatIamStack extends cdk.Stack {
         // Within ATAT, developers may need to read from various queues in order to debug or
         // troubleshoot
         new statement.Sqs().allReadActions().onAllResources(),
+        // Grant access to read the pipeline state
+        new statement.Codepipeline().allReadActions(),
+        new statement.Codebuild().allReadActions(),
       ],
     });
 
     const baseDenies = new iam.ManagedPolicy(this, "AtatUserDenyPolicy", {
       description: "Denies access to sensitive resources and actions",
       statements: [new statement.Organizations().deny().allActions().onAllResources()],
-    });
-
-    // Eventually, this should be restricted to the specific services in use for the application
-    // rather than allowing all IAM actions. This still theoretically will give anyone who can pass
-    // the role permission to do almost anything in the account; however, it at least requires that
-    // it happen via CloudFormation.
-    const cloudFormationExecutionRole = new iam.Role(this, "CloudFormationExecutionRole", {
-      roleName: "AtatCloudFormation",
-      description: "Role for deploying ATAT using CloudFormation",
-      assumedBy: new iam.ServicePrincipal("cloudformation.amazonaws.com"),
-      managedPolicies: [awsManagedAdminAccessPolicy, baseDenies],
     });
 
     const managementAccountId = this.findOrganizationManagementAccount();
@@ -151,30 +142,6 @@ export class AtatIamStack extends cdk.Stack {
         baseDenies,
       ],
     });
-    cloudFormationExecutionRole.grantPassRole(developerRole);
-
-    const githubOidcProvider = new iam.OpenIdConnectProvider(this, "GithubOidc", {
-      url: "https://token.actions.githubusercontent.com",
-      // This thumbprint is a well-known value, documented in the
-      // aws-actions/configure-aws-credentials README file
-      thumbprints: ["6938fd4d98bab03faadb97b34396831e3780aea1"],
-      // This client ID is specified/hardcoded into the official AWS action
-      clientIds: ["sts.amazonaws.com"],
-    });
-
-    const pipelineDeploymentRole = new iam.Role(this, "DeploymentRole", {
-      roleName: "AtatPipelineDeploymentRole",
-      description: "Role to perform deployments from a CI/CD pipeline",
-      // This provides a reasonable base set of policies but none are actually required
-      // for the initial implementation which just invokes an sts:GetCallerIdentity
-      // managedPolicies: [awsManagedCfnFullAccessPolicy, baseDenies],
-      assumedBy: new iam.OpenIdConnectPrincipal(githubOidcProvider).withConditions({
-        StringLike: {
-          // Allow deployments only from the develop branch of ATAT repos under the dod-ccpo org
-          "token.actions.githubusercontent.com:sub": "repo:dod-ccpo/atat-*:ref:refs/heads/develop",
-        },
-      }),
-    });
 
     this.outputs.push(
       new cdk.CfnOutput(this, "QaTestRoleArnOutput", {
@@ -188,18 +155,6 @@ export class AtatIamStack extends cdk.Stack {
       new cdk.CfnOutput(this, "AuditorRoleArnOutput", {
         exportName: "AtatAuditorRoleArn",
         value: auditorRole.roleArn,
-      }),
-      new cdk.CfnOutput(this, "CloudFormationRoleArn", {
-        exportName: "AtatCloudFormationExecutionRoleArn",
-        value: cloudFormationExecutionRole.roleArn,
-      }),
-      new cdk.CfnOutput(this, "DeploymentRoleArnOutput", {
-        exportName: "AtatDeploymentRoleArn",
-        value: pipelineDeploymentRole.roleArn,
-      }),
-      new cdk.CfnOutput(this, "GitHubOidcProvider", {
-        exportName: "AtatGitHubOidcProvider",
-        value: githubOidcProvider.openIdConnectProviderArn,
       })
     );
   }

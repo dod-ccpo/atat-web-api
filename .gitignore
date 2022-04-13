@@ -8,6 +8,8 @@ node_modules
 cdk.out
 cdk.context.json
 
+# Build artifacts
+build/
 coverage/
 
 .idea
