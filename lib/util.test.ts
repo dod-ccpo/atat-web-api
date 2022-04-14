@@ -76,15 +76,3 @@ describe("Validate string type guards", () => {
     expect(utils.isString(item)).toEqual(true);
   });
 });
-
-describe("Validate temporary environment", () => {
-  it.each(["dev", "sandbox", "staging", "prod", "development", "production"])(
-    "should return false for real-looking envs",
-    async (env) => {
-      expect(utils.isPossibleTemporaryEnvironment(env)).toBe(false);
-    }
-  );
-  it.each(["at1234", "usertestenv", "username20211108"])("should return true for generic names", async (env) => {
-    expect(utils.isPossibleTemporaryEnvironment(env)).toBe(true);
-  });
-});

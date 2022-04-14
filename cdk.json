@@ -27,6 +27,9 @@
     "@aws-cdk/core:target-partitions": [
       "aws",
       "aws-us-gov"
-    ]
+    ],
+    "atat:GitHubPatName": "auth/github/pat",
+    "atat:VersionControlBranch": "feature/AT-7204",
+    "atat:VersionControlRepo": "dod-ccpo/atat-web-api"
   }
 }

@@ -27,7 +27,7 @@ export interface AtatNetStackProps extends cdk.StackProps {
  */
 export class AtatNetStack extends cdk.Stack {
   public readonly vpc: ec2.IVpc;
-  public readonly endpoints: ec2.IVpcEndpoint[] = [];
+  public readonly endpoints: { [key: string]: ec2.IVpcEndpoint };
   public readonly outputs: cdk.CfnOutput[] = [];
 
   constructor(scope: Construct, id: string, props: AtatNetStackProps) {
@@ -87,16 +87,17 @@ export class AtatNetStack extends cdk.Stack {
     const stepFunctionsEndpoint = vpc.addInterfaceEndpoint("StepFunctions", {
       service: ec2.InterfaceVpcEndpointAwsService.STEP_FUNCTIONS,
     });
-    this.endpoints.push(
-      s3Endpoint,
-      apiGatewayEndpoint,
-      lambdaEndpoint,
-      logsEndpoint,
-      sqsEndpoint,
-      xrayEndpoint,
-      secretsManagerEndpoint,
-      stepFunctionsEndpoint
-    );
+    this.endpoints = {
+      ...this.endpoints,
+      s3: s3Endpoint,
+      apigateway: apiGatewayEndpoint,
+      lambda: lambdaEndpoint,
+      logs: logsEndpoint,
+      sqs: sqsEndpoint,
+      xray: xrayEndpoint,
+      ssecrets: secretsManagerEndpoint,
+      sfn: stepFunctionsEndpoint,
+    };
   }
 
   private addDefaultTransitGatewayRoute(transitGatewayAttachment: ec2.CfnTransitGatewayAttachment) {

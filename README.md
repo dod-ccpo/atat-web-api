@@ -1,40 +1,79 @@
-The ATAT Web API repo contains a set of services which enable ATAT Provisioning into vendor environments by way of the [ATAT CSP Specification](https://github.com/dod-ccpo/atat-csp-orchestration/blob/main/provisioning/atat_provisioning.yaml). It is implemented in a stateless fashion, using SQS Queues to pass information back to integrators. Initially, this API is only meant to be accessed by the Service Now component of ATAT, but it may be opened up to other integrators in the future.
+# ATAT Web API
 
-## Useful commands
+This repository contains two components that together act as a bridge between the internal front-end of the ATAT
+application and vendor implementations of the
+[ATAT CSP Orchestration API](https://github.com/dod-ccpo/atat-csp-orchestration). Any such implementors should
+consider this repository to contain purely "private" implementation details; however, it does serve as a sample
+client of the ATAT CSP Orchestration API and may be interesting to review for that purpose.
 
- * `npm run build`   compile typescript to js
- * `npm run watch`   watch for changes and compile
- * `npm run test`    perform the jest unit tests
- * `cdk deploy`      deploy this stack to your default AWS account/region
- * `cdk diff`        compare deployed stack with current state
- * `cdk synth`       emits the synthesized CloudFormation template
+Generally, the application is implemented to operate in a stateless fashion (with some transient state) leveraging
+SQS Queues, Step Functions State Machines, and a REST API. The private internal-facing API, the
+Hyperscaler Orchestration and Tracking Helper (HOTH), serves as a helpful API for other internal implementation
+details of the ATAT client application. Currently, HOTH is intended purely to be consumed the the
+[ServiceNow component of ATAT](https://github.com/dod-ccpo/atat-snow); however, it may be opened up to other
+integrators in the future.
 
-## Building an Application Environment
+## Deploying
 
-The default deployment configuration in `cdk.json` is built for deploying an application
-environment, leveraging shared base infrastructure within an account. To deploy the
-application, run:
+`atat-web-api` is built as an [AWS CDK application](https://docs.aws.amazon.com/cdk/v2/guide/home.html). The
+development and deployment process therefore heavily use the `aws-cdk` CLI.
+
+There are two main deployment paths for `atat-web-api`. These are:
+ - A minimal sandbox environment for developers to have a "live" environment in which to test changes
+ - A full environment managed by a CI/CD pipeline
+
+In general, the steps to deploy each are approximately the same, following the typical `cdk diff`/`cdk deploy`
+workflow. Which path is chosen is determined based on the values of a CDK Context variable value.
+
+### Deploying a Sandbox environment
+
+An environment is a Sandbox environment if the `atat:Sandbox` context key has a value of `"yes"`, `"1"`,
+or `"true"` after it has been converted to a string. All Sandbox environments must also have the
+`atat:EnvironmentId` string set to a unique value. To deploy a sandbox environment, configure your AWS
+credentials appropriately and deploy by first checking the changes that will be made within the AWS account.
+
+```bash
+cdk diff -c atat:EnvironmentId=<ENVIRONMENT_ID> -c atat:Sandbox=true
+```
+
+After validating that the changes look correct, deploy the sandbox environment by running:
+
+```bash
+cdk deploy -c atat:EnvironmentId=<ENVIRONMENT_ID> -c atat:Sandbox=true
+```
+
+In each of the above commands, replace `<ENVIRONMENT_ID>` with the unique name you'd like to use for the
+sandbox environment.
+
+### Deploying a "full" environment
+
+Because a full environment deployment requires the usage of a full CI/CD pipeline, it also needs additional
+configuration values to understand which `git` repository to watch and what credentials should be used to do
+so. Like a Sandbox environment, the `atat:EnvironmentId` context value must also be set. Additionally, a
+Secret must be created within Secrets Manager to store a GitHub Personal Access Token.
+
+The required context values are:
+ - `atat:EnvironmentId`, which should be the unique name used to identify the environment
+ - `atat:GitHubPatName`, which should be the name of the Secret that contains the GitHub PAT
+ - `atat:VersionControlRepo`, which should be name of the GitHub repository where the code is stored,
+    including the organization name (for example, `dod-ccpo/atat-web-api`)
+ - `atat:VersionControlBranch`, which should be the branch within the repository to watch for changes
+
+These values can, of course, be set either through the CLI or via the `cdk.json` file. The last three have
+reasonable defaults set within the `cdk.json` file. Therefore, once you have confirmed those values look
+correct, deploying follows similar steps to the sandbox environment!
+
+Start off by ensuring the changes to make look reasonable:
 
 ```bash
 cdk diff -c atat:EnvironmentId=<ENVIRONMENT_ID>
-cdk deploy -c atat:EnvironmentId=<ENVIRONMENT_ID>
 ```
 
-Replace `<ENVIRONMENT_ID>` with the name you want to use for your environment. This will
-show a diff and then actually deploy the applicaiton.
-
-## Building Base Infrastructure
-
-This is a more rare deployment that only needs to be performed when initially setting
-up a new AWS account or when changes have been made to one of the stacks deployed as
-part of this configuration. The base infrastructure is executed as a separate "app" and
-can be run by executing:
+And then once you've confirmed that they do, deploy:
 
 ```bash
-cdk diff -a 'npx ts-node --prefer-ts-exts bin/atat-base-infra.ts' -c atat:EnvironmentId=<ENVIRONMENT_ID>
-cdk deploy -a 'npx ts-node --prefer-ts-exts bin/atat-base-infra.ts' -c atat:EnvironmentId=<ENVIRONMENT_ID>
+cdk deploy -c atat:EnvironmentId=<ENVIRONMENT_ID> -c atat:Sandbox=true
 ```
 
-Because the base infrastructure app and stacks use named IAM that does not take the
-Environment ID into account, care must be taken to not deploy two instances of this
-into a single account.
+The deployed pipeline will be self-mutating so further manual deployments should be rarely (if ever) be
+needed.

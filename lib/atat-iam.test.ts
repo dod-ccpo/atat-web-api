@@ -6,14 +6,7 @@ describe("ATAT network creation", () => {
   test("Ensure expected outputs are present", async () => {
     // GIVEN
     const app = new cdk.App();
-    const expectedOutputNames = [
-      "AtatQaTestRoleArn",
-      "AtatDeveloperRoleArn",
-      "AtatAuditorRoleArn",
-      "AtatCloudFormationExecutionRoleArn",
-      "AtatDeploymentRoleArn",
-      "AtatGitHubOidcProvider",
-    ];
+    const expectedOutputNames = ["AtatQaTestRoleArn", "AtatDeveloperRoleArn", "AtatAuditorRoleArn"];
     // WHEN
     const stack = new AtatIam.AtatIamStack(app, "TestIamStack", {});
     const template = Template.fromStack(stack);
@@ -70,7 +63,7 @@ describe("ATAT IAM Policy creation", () => {
       // We only assert the existence of certain CDK-related permissions, which have broken
       // in the past. Other permissions _may_ exist on this policy as required.
       PolicyDocument: {
-        Statement: [
+        Statement: Match.arrayWith([
           {
             Action: "s3:*",
             Effect: "Allow",
@@ -152,8 +145,7 @@ describe("ATAT IAM Policy creation", () => {
               ],
             },
           },
-          Match.anyValue(),
-        ],
+        ]),
         Version: "2012-10-17",
       },
       Description: Match.anyValue(),
