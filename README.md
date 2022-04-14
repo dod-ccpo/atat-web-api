@@ -7,10 +7,11 @@ consider this repository to contain purely "private" implementation details; how
 client of the ATAT CSP Orchestration API and may be interesting to review for that purpose.
 
 Generally, the application is implemented to operate in a stateless fashion (with some transient state) leveraging
-SQS Queues, Step Functions State Machines, and a REST API. The private, internal-facing API is referred to as HOTH
-and serves a helpful API for other internal implementation details of the ATAT client application. Currently, HOTH
-is intended purely to be consumed the the [ServiceNow component of ATAT](https://github.com/dod-ccpo/atat-snow);
-however, it may be opened up to other integrators in the future.
+SQS Queues, Step Functions State Machines, and a REST API. The private internal-facing API, the
+Hyperscaler Orchestration and Tracking Helper (HOTH), serves as a helpful API for other internal implementation
+details of the ATAT client application. Currently, HOTH is intended purely to be consumed the the
+[ServiceNow component of ATAT](https://github.com/dod-ccpo/atat-snow); however, it may be opened up to other
+integrators in the future.
 
 ## Deploying
 
