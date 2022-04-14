@@ -29,7 +29,7 @@
       "aws-us-gov"
     ],
     "atat:GitHubPatName": "auth/github/pat",
-    "atat:VersionControlBranch": "feature/AT-7204",
+    "atat:VersionControlBranch": "develop",
     "atat:VersionControlRepo": "dod-ccpo/atat-web-api"
   }
 }
