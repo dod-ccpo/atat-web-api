@@ -7,7 +7,7 @@ import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as statement from "cdk-iam-floyd";
 
 import { Construct } from "constructs";
-import { HttpMethod } from "aws-cdk-lib/aws-events";
+type HttpMethod = "GET" | "HEAD" | "POST" | "PUT" | "DELETE" | "OPTIONS";
 
 const API_ACCESS_LOG_FORMAT = apigw.AccessLogFormat.custom(
   JSON.stringify({
@@ -83,21 +83,24 @@ export class AtatRestApi extends Construct {
         accessLogFormat: API_ACCESS_LOG_FORMAT,
         tracingEnabled: true,
       },
+      defaultMethodOptions: {
+        authorizationType: apigw.AuthorizationType.IAM,
+      },
     });
     this.restApi = restApi;
   }
 
   /**
-   * Grant a given user access to a specific path for a specific HTTP method.
+   * Grant a given principal access to a specific path for a specific HTTP method.
    *
    * This grants access only to this REST API for the current deployment stage.
    *
-   * @param user The IAM user to grant access to
+   * @param principal The IAM principal to grant access to
    * @param method The HTTP method to grant access for (or "*")
    * @param path The path to grant access to
    */
-  public grantOnRoute(user: iam.IUser, method: HttpMethod | "*", path = "/") {
-    user.addToPrincipalPolicy(
+  public grantOnRoute(principal: iam.IPrincipal, method: HttpMethod | "*", path = "/") {
+    principal.addToPrincipalPolicy(
       new statement.ExecuteApi()
         .toInvoke()
         .on(this.restApi.arnForExecuteApi(method, path, this.restApi.deploymentStage.stageName))
