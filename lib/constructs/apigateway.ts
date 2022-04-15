@@ -81,6 +81,7 @@ export class AtatRestApi extends Construct {
         loggingLevel: apigw.MethodLoggingLevel.INFO,
         accessLogDestination: new apigw.LogGroupLogDestination(accessLogs),
         accessLogFormat: API_ACCESS_LOG_FORMAT,
+        tracingEnabled: true,
       },
     });
     this.restApi = restApi;
