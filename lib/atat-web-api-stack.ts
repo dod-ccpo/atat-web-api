@@ -32,7 +32,6 @@ export class AtatWebApiStack extends cdk.Stack {
     }
 
     const api = new AtatRestApi(this, "HothApi", apiProps);
-    api.restApi.root.addMethod("ANY");
 
     // Ensure that no IAM users in this Stack can ever do anything
     // except for invoke the created API Gateway.
