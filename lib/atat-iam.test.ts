@@ -28,6 +28,13 @@ describe("ATAT IAM Policy creation", () => {
     template = Template.fromStack(stack);
   });
 
+  test("No policies' resources reference a partition directly", async () => {
+    // If the string `arn:aws` appears then it is almost certainly part of a hardcoded
+    // ARN which we forbid (mostly because we need to ensure multi-partition
+    // compatibility, including aws-us-gov, and aws-iso*).
+    expect(JSON.stringify(template)).toEqual(expect.not.stringContaining("arn:aws"));
+  });
+
   test("Fully assert auditorAccess IAM managed policy with matchers", async () => {
     template.hasResourceProperties("AWS::IAM::ManagedPolicy", {
       PolicyDocument: {
