@@ -31,7 +31,7 @@ export class AtatIamStack extends cdk.Stack {
     const generalReadAccess = new iam.ManagedPolicy(this, "GeneralReadAccess", {
       description: "Grants read access to specific resources not in ViewOnlyAccess",
       statements: [
-        new statement.Apigateway().toGET().onRestApis(undefined, cdk.Aws.PARTITION),
+        new statement.Apigateway().toGET().onRestApis(),
         new statement.States().allReadActions(),
         new statement.Xray().allListActions().allReadActions(),
       ],
@@ -43,7 +43,7 @@ export class AtatIamStack extends cdk.Stack {
         // Artifact access policies generally based on those from the Artifact
         // User Guide documentation at
         // https://docs.aws.amazon.com/artifact/latest/ug/security-iam.html#example-iam-policies
-        new statement.Artifact().toGet().onReportPackage("*", cdk.Aws.PARTITION),
+        new statement.Artifact().toGet().onReportPackage("*"),
         new statement.Artifact().toDownloadAgreement().onAllResources(),
       ],
     });
@@ -55,27 +55,21 @@ export class AtatIamStack extends cdk.Stack {
         // the CDK needs to read from and write to the S3 buckets for the CDK.
         new statement.S3()
           .allActions()
-          .onBucket(`cdk-*-assets-${cdk.Aws.ACCOUNT_ID}-*`, cdk.Aws.PARTITION)
-          .onBucket("cdktoolkit-stagingbucket-*", cdk.Aws.PARTITION),
+          .onBucket(`cdk-*-assets-${cdk.Aws.ACCOUNT_ID}-*`)
+          .onBucket("cdktoolkit-stagingbucket-*"),
         // The Lookup, Deploy, and other roles will be used by the CDK and use a particular naming
         // convention
         new statement.Sts()
           .toAssumeRole()
           .onRole(
             `cdk-${DEFAULT_BOOSTRAP_QUALIFIER}-*-role-${cdk.Aws.ACCOUNT_ID}-${cdk.Aws.REGION}`,
-            cdk.Aws.ACCOUNT_ID,
-            cdk.Aws.PARTITION
+            cdk.Aws.ACCOUNT_ID
           ),
         // Additionally, values under the `cdk-bootstrap/` namespace for the qualifier may be necessary
         // for the CDK to understand the environment and do a deployment
         new statement.Ssm()
           .toGetParameter()
-          .onParameter(
-            `cdk-bootstrap/${DEFAULT_BOOSTRAP_QUALIFIER}/*`,
-            cdk.Aws.ACCOUNT_ID,
-            undefined,
-            cdk.Aws.PARTITION
-          ),
+          .onParameter(`cdk-bootstrap/${DEFAULT_BOOSTRAP_QUALIFIER}/*`, cdk.Aws.ACCOUNT_ID),
         // Within ATAT, developers may need to read from various queues in order to debug or
         // troubleshoot
         new statement.Sqs().allReadActions().onAllResources(),
