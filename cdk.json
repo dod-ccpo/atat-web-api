@@ -28,6 +28,7 @@
       "aws",
       "aws-us-gov"
     ],
+    "@aws-cdk/core:checkSecretUsage": true,
     "atat:GitHubPatName": "auth/github/pat",
     "atat:VersionControlBranch": "develop",
     "atat:VersionControlRepo": "dod-ccpo/atat-web-api"
