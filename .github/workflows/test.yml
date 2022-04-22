@@ -7,6 +7,9 @@ on:
       - develop
       - main
 
+permissions:
+  contents: read
+
 jobs:
   assertPackageLockVersion:
     name: Ensure package-lock lockfileVersion has not changed
