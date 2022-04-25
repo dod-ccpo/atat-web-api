@@ -45,7 +45,7 @@
     "@middy/core": "^2.5.7",
     "@middy/http-json-body-parser": "^2.5.7",
     "@middy/validator": "^2.5.7",
-    "cdk-nag": "^2.12.31",
+    "cdk-nag": "^2.12.36",
     "aws-cdk-lib": "2.21.0",
     "constructs": "^10.0.120",
     "cdk-iam-floyd": "0.358.0",
