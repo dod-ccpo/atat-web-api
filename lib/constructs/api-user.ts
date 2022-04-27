@@ -32,7 +32,7 @@ export class ApiUser extends Construct {
   constructor(scope: Construct, id: string, props: ApiUserProps) {
     super(scope, id);
 
-    const user = new iam.User(this, `ApiUser${props.username}`, { path: "api-user" });
+    const user = new iam.User(this, `ApiUser${props.username}`, { path: "/api/" });
     const accessKey = new iam.AccessKey(this, `ApiUser${props.username}Key`, {
       user,
     });
