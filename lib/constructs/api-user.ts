@@ -37,13 +37,8 @@ export class ApiUser extends Construct {
       user,
     });
     const secret = new secrets.Secret(this, `ApiUser${props.username}KeySecret`, {
-      secretName: `${props.secretPrefix}/${props.username}`,
-      secretStringValue: cdk.SecretValue.resourceAttribute(
-        JSON.stringify({
-          accessKeyId: accessKey.accessKeyId,
-          secretAccessKey: accessKey.secretAccessKey.toString(),
-        } as AccessKeySecret)
-      ),
+      secretName: `${props.secretPrefix}/${props.username}/${accessKey.accessKeyId}`,
+      secretStringValue: accessKey.secretAccessKey,
     });
 
     this.user = user;
