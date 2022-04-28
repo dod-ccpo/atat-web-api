@@ -1,4 +1,5 @@
 import * as cdk from "aws-cdk-lib";
+import * as cognito from "aws-cdk-lib/aws-cognito";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as logs from "aws-cdk-lib/aws-logs";
 import { IConstruct } from "constructs";
@@ -9,7 +10,9 @@ import { IConstruct } from "constructs";
  * the AWS GovCloud (US) regions.
  *
  * This **will** make modifications to the resources in the stack as
- * necessary.
+ * necessary. If a modifications cannot be made, then an Error annotation
+ * will be added to the node; this may result in synthesis failures, but
+ * that is better than a deployment-time failure in nearly all cases.
  */
 export class GovCloudCompatibilityAspect implements cdk.IAspect {
   visit(node: IConstruct): void {
@@ -30,6 +33,26 @@ export class GovCloudCompatibilityAspect implements cdk.IAspect {
       if (node.tracingConfig) {
         cdk.Annotations.of(node).addWarning("Lambda X-Ray integration is not supported in GovCloud");
         node.addPropertyDeletionOverride("TracingConfig");
+      }
+    }
+
+    if (node instanceof cognito.CfnUserPool) {
+      // Advanced Security is the only Cognito User Pool Add On and if the field is present
+      // at all, regardless of its value, it will fail during deployment.
+      // https://docs.aws.amazon.com/govcloud-us/latest/UserGuide/govcloud-cog.html
+      if (node.userPoolAddOns) {
+        cdk.Annotations.of(node).addWarning("Cognito Advanced Security is not supported in GovCloud");
+        node.addPropertyDeletionOverride("UserPoolAddOns");
+      }
+    }
+
+    if (node instanceof cognito.CfnUserPoolDomain) {
+      // The `customDomainConfig` is the configuration object for a custom domain,
+      // which is not supported in GovCloud. There is no easy remediation here and we
+      // should error.
+      // https://docs.aws.amazon.com/govcloud-us/latest/UserGuide/govcloud-cog.html
+      if (node.customDomainConfig) {
+        cdk.Annotations.of(node).addError("Custom domains are not supported in GovCloud. Use a Cognito domain prefix");
       }
     }
   }
