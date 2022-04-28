@@ -39,9 +39,9 @@
   },
   "dependencies": {
     "@aws-lambda-powertools/logger": "^0.8.0",
-    "@aws-sdk/client-s3": "^3.76.0",
-    "@aws-sdk/client-sfn": "^3.76.0",
-    "@aws-sdk/client-sqs": "^3.76.0",
+    "@aws-sdk/client-s3": "^3.79.0",
+    "@aws-sdk/client-sfn": "^3.79.0",
+    "@aws-sdk/client-sqs": "^3.79.0",
     "@middy/core": "^2.5.7",
     "@middy/http-json-body-parser": "^2.5.7",
     "@middy/validator": "^2.5.7",
