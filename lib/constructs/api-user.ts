@@ -3,11 +3,6 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import * as secrets from "aws-cdk-lib/aws-secretsmanager";
 import { Construct } from "constructs";
 
-export interface AccessKeySecret {
-  accessKeyId: string;
-  secretAccessKey: string;
-}
-
 export interface ApiUserProps {
   /**
    * The path to use in Secrets Manager for the secrets. This will create a
