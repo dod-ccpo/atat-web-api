@@ -7,7 +7,7 @@ import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as statement from "cdk-iam-floyd";
 
 import { Construct } from "constructs";
-type HttpMethod = "GET" | "HEAD" | "POST" | "PUT" | "DELETE" | "OPTIONS";
+import { HttpMethod } from "../http";
 
 const API_ACCESS_LOG_FORMAT = apigw.AccessLogFormat.custom(
   JSON.stringify({

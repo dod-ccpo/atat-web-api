@@ -35,7 +35,7 @@ export class AtatWebApiStack extends cdk.Stack {
     const api = new AtatRestApi(this, "HothApi", apiProps);
     const readUser = new ApiUser(this, "ReadUser", { secretPrefix: "api/user/snow", username: "ReadUser" });
     const writeUser = new ApiUser(this, "WriteUser", { secretPrefix: "api/user/snow", username: "WriteUser" });
-    api.grantOnRoute(readUser.user, "GET");
+    api.grantOnRoute(readUser.user, HttpMethod.GET);
     api.grantOnRoute(writeUser.user, "*");
 
     // Ensure that no IAM users in this Stack can ever do anything
