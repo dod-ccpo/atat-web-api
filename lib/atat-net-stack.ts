@@ -59,7 +59,7 @@ export class AtatNetStack extends cdk.Stack {
     const tgwAttachment = new ec2.CfnTransitGatewayAttachment(this, "VpcTgwAttachment", {
       vpcId: vpc.vpcId,
       subnetIds: vpc.isolatedSubnets.map((subnet) => (subnet as ec2.Subnet).subnetId),
-      transitGatewayId: transitGatewayId,
+      transitGatewayId,
     });
     this.addDefaultTransitGatewayRoute(tgwAttachment);
 

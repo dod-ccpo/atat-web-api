@@ -76,6 +76,10 @@ export class AtatIamStack extends cdk.Stack {
         // Grant access to read the pipeline state
         new statement.Codepipeline().allReadActions(),
         new statement.Codebuild().allReadActions(),
+        // This allows listing/viewing functions in the AWS console
+        new statement.Lambda().allListActions().toGetAccountSettings().toGetFunction(),
+        // Allow developers to describe APIs
+        new statement.Apigateway().toGET().onAccount().onRestApis().onRestApi("*"),
       ],
     });
 
