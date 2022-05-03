@@ -89,7 +89,7 @@ export interface IdentityProviderClientOptions {
  */
 export interface CognitoIdentityProviderClientProps extends IdentityProviderClientOptions {
   /**
-   * The identity provider to create a client for.
+   * The identity provider for which to create a client.
    */
   userPool: cognito.IUserPool;
 }
@@ -201,13 +201,10 @@ export class CognitoIdentityProvider extends Construct implements IIdentityProvi
       clientApplication: app,
       scopes,
     });
-    // We can pretty safely perform this because custom domains are not support in GovCloud
-    // so we can be pretty sure that we don't have a full custom domain here, just a prefix.
-    // Ideally, we'd have some way to detect that and provide a slightly better method to
-    // build this URL than knowing about the internals of how Cogntio URLs are generated,
-    // honestly ideally that information would just come from the CDK itself.
-    // TODO: Make this work in multiple partitions (standard, ISO) and regions or with
-    // custom domains.
+    // The UserPoolDomain object provides a `baseUrl()` function; however, the URL it creates
+    // does not work in us-gov-west-1. Instead, we build the URL manually. We can assume that
+    // `domainName` is not a full domain as they are not supported in `us-gov-west-1`.
+    // See: aws/aws-cdk#20182
     const fullDomain = `${this.domain.domainName}.auth-fips.${cdk.Aws.REGION}.amazoncognito.com`;
     app.configure(client.clientId, client.secret, fullDomain);
     return client;
@@ -225,7 +222,7 @@ interface UserPoolClientDetailsProps {
  * This AWS::Cognito::UserPoolClient resource type exposes depressingly few attributes
  * about the Client itself (like, not even the ID). This custom resource performs
  * a cognito-idp:DescribeUserPoolClient API call to fetch all the attributes. This
- * may not be a totally-ideal use of a custom resource but it means that we don't have
+ * may not be a totally ideal use of a custom resource but it means that we don't have
  * to do weird things and grant a ton of permissions in resources created later.
  */
 class UserPoolClientDetails extends cr.AwsCustomResource {

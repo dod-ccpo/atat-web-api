@@ -11,8 +11,9 @@ const IDP_CLIENT_SECRET_NAME = process.env.IDP_CLIENT_SECRET_NAME!;
 const IDP_DOMAIN = process.env.IDP_DOMAIN!;
 
 // We use the ScheduledEvent here but in actuality, we don't care about the type
-// of the event. This function is only ever going to invoked via the CLI or console
-// to prove out the credential flow.
+// of the event. This function is only ever going to be invoked via the CLI or console
+// to prove out the credential flow. We will replace this (or convert it to a library)
+// in a future ticket (AT-7337?).
 export async function handler(event: ScheduledEvent, context: Context): Promise<void> {
   logger.addContext(context);
   logger.info("Retriving client secret from Secrets Manager", { secretId: IDP_CLIENT_SECRET_NAME });
