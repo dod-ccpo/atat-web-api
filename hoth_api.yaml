@@ -297,10 +297,6 @@ components:
     GenerateDocumentRequest:
       oneOf:
         - $ref: "#/components/schemas/DescriptionOfWork"
-        - $ref: "#/components/schemas/SomeFutureDocument"
     DescriptionOfWork:
       description: "TODO: AT-7341, define DescriptionOfWork schema"
-      type: object
-    SomeFutureDocument:
-      description: "TODO: Define schema for other document integrations"
       type: object
