@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "@aws-lambda-powertools/logger": "^0.8.1",
-    "@aws-sdk/client-s3": "^3.82.0",
+    "@aws-sdk/client-s3": "^3.83.0",
     "@aws-sdk/client-secrets-manager": "^3.82.0",
     "@aws-sdk/client-sfn": "^3.82.0",
     "@aws-sdk/client-sqs": "^3.82.0",
