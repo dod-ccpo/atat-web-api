@@ -41,7 +41,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ResponseTooLargeError"
-
       requestBody:
         content:
           application/json:
