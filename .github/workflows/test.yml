@@ -103,5 +103,4 @@ jobs:
       - name: Scan for new (not-yet-allowed) secrets
         run: >-
           git ls-files -z |
-          xargs -0 detect-secrets-hook --baseline .secrets.baseline --exclude-files
-          'package-lock.json'
+          xargs -0 detect-secrets-hook --baseline .secrets.baseline
