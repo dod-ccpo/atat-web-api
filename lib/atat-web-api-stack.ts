@@ -1,7 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import * as apigw from "aws-cdk-lib/aws-apigateway";
 import * as iam from "aws-cdk-lib/aws-iam";
-import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as nodejs from "aws-cdk-lib/aws-lambda-nodejs";
 import * as statement from "cdk-iam-floyd";
 import { Construct } from "constructs";
@@ -91,7 +90,7 @@ export class AtatWebApiStack extends cdk.Stack {
 
     const atatIdp = new idp.CognitoIdentityProvider(this, "AtatIdp", {
       domainPrefix: `atat${environmentName.toLowerCase()}`,
-      scopes: [
+      scopeConfig: [
         {
           resourceServerName: "atat",
           scopes: [

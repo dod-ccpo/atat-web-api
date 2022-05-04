@@ -15,7 +15,7 @@ export interface IIdentityProviderClientApplication {
   /**
    * The name of the client application
    */
-  name: string;
+  readonly name: string;
 
   /**
    * Properly configure the client application with information about the IdP client.
@@ -80,8 +80,8 @@ export interface IdentityProviderClientOptions {
   /**
    * The application that will function as the client.
    */
-  clientApplication: IIdentityProviderClientApplication;
-  scopes: string[];
+  readonly clientApplication: IIdentityProviderClientApplication;
+  readonly scopes: string[];
 }
 
 /**
@@ -91,7 +91,7 @@ export interface CognitoIdentityProviderClientProps extends IdentityProviderClie
   /**
    * The identity provider for which to create a client.
    */
-  userPool: cognito.IUserPool;
+  readonly userPool: cognito.IUserPool;
 }
 
 /**
@@ -132,18 +132,46 @@ export class CognitoIdentityProviderClient extends Construct {
   }
 }
 
-export interface ScopeOption {
-  name: string;
-  description: string;
+/**
+ * Configuration information for a single scope
+ */
+export interface ScopeOptions {
+  /**
+   * The name that will be used to uniquely identify the scope
+   */
+  readonly name: string;
+  /**
+   * A human-readable description of the scope
+   */
+  readonly description: string;
 }
 
+/**
+ * Configuration for scopes
+ */
 export interface ScopeConfiguration {
-  resourceServerName?: string;
-  scopes: ScopeOption[];
+  /**
+   * A name for the resource server the scopes belong to
+   *
+   * @default the scopes do not have a resource server
+   */
+  readonly resourceServerName?: string;
+  /**
+   * The actual scopes associated with the resource
+   */
+  readonly scopes: ScopeOptions[];
 }
 
+/**
+ * Base configuration options for any identity provider
+ */
 export interface IdentityProviderProps {
-  scopes?: ScopeConfiguration[];
+  /**
+   * Configuration for the scopes associated with this identity provider.
+   *
+   * @default No scopes will be configured
+   */
+  readonly scopeConfig?: ScopeConfiguration[];
 }
 
 /**
@@ -158,7 +186,12 @@ export interface IIdentityProvider {
  * Required properties for creating an Identity Provider.
  */
 export interface CognitoIdentityProviderProps extends IdentityProviderProps {
-  domainPrefix?: string;
+  /**
+   * The custom domain prefix to use for Cognito.
+   *
+   * @default try to automatically generate a name (that may change or may not be unique)
+   */
+  readonly domainPrefix?: string;
 }
 
 /**
@@ -180,9 +213,11 @@ export class CognitoIdentityProvider extends Construct implements IIdentityProvi
       },
     });
     this.domainName = this.domain.domainName;
-    if (props?.scopes) {
-      for (const scopeConfig of props.scopes) {
-        if (!scopeConfig.resourceServerName) throw new Error("Cognito requires a resource server");
+    if (props?.scopeConfig) {
+      for (const scopeConfig of props.scopeConfig) {
+        if (!scopeConfig.resourceServerName) {
+          throw new Error("Cognito requires a resource server");
+        }
         this.resourceServers.push(
           this.userPool.addResourceServer(scopeConfig.resourceServerName, {
             identifier: scopeConfig.resourceServerName,
@@ -211,9 +246,21 @@ export class CognitoIdentityProvider extends Construct implements IIdentityProvi
   }
 }
 
+/**
+ * Configuration options for creating a UserPoolClientDetails
+ */
 interface UserPoolClientDetailsProps {
-  client: cognito.IUserPoolClient;
-  userPool: cognito.IUserPool;
+  /**
+   * The User Pool Client to describe
+   */
+  readonly client: cognito.IUserPoolClient;
+  /**
+   * The User Pool that the client is associated with.
+   *
+   * This is unfortunately required by the API called and not exposed as an
+   * attribute of the UserPoolClient
+   */
+  readonly userPool: cognito.IUserPool;
 }
 
 /**

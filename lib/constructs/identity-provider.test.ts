@@ -49,7 +49,7 @@ describe("Cognito Identity Provider Creation", () => {
     const stack = new cdk.Stack(app, "TestStack");
     // WHEN
     const testIdp = new idp.CognitoIdentityProvider(stack, "TestIdp", {
-      scopes: sampleScopes,
+      scopeConfig: sampleScopes,
     });
     // THEN
     const template = Template.fromStack(stack);
