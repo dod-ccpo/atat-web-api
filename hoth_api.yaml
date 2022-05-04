@@ -35,6 +35,13 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ValidationError"
+        "422":
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResponseTooLargeError"
+
       requestBody:
         content:
           application/json:
@@ -121,6 +128,21 @@ components:
             error_map:
               type: object
               description: Maps form input IDs to validation error messages so that clients can display in-line errors
+    ResponseTooLargeError:
+      description: If the response exceeds 6MB response limit, this is returned as an error response
+      allOf:
+        - $ref: "#/components/schemas/Error"
+      type: object
+      required:
+        - responseSize
+        - maxAllowed
+      properties:
+        responseSize:
+          type: number
+          description: Represents the size of the PDF to send back to the user
+        maxAllowed:
+          type: number
+          description: Represents the maximum allowed size to return
     ProvisioningRequest:
       description: Represents a generic request for provisioning cloud resources via ATAT
       type: object
