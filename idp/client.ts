@@ -116,7 +116,7 @@ export async function handler(_event: Record<string, never>, context: Context): 
   try {
     const response = await getToken(
       IDP_CLIENT_ID,
-      IDP_CLIENT_SECRET,
+      await IDP_CLIENT_SECRET,
       `https://${IDP_DOMAIN}`,
       context.getRemainingTimeInMillis() - 500,
       ["atat/read-cost"]
