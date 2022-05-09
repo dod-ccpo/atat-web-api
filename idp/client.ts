@@ -9,6 +9,7 @@ const logger = new Logger({ serviceName: "TestIdp" });
 const IDP_CLIENT_ID = process.env.IDP_CLIENT_ID!;
 const IDP_CLIENT_SECRET_NAME = process.env.IDP_CLIENT_SECRET_NAME!;
 const IDP_DOMAIN = process.env.IDP_DOMAIN!;
+const IDP_CLIENT_SECRET = fetchClientSecret(IDP_CLIENT_SECRET_NAME);
 
 /**
  * Very basic encoding of the Cognito TOKEN endpoint response objects.
@@ -115,7 +116,7 @@ export async function handler(_event: Record<string, never>, context: Context): 
   try {
     const response = await getToken(
       IDP_CLIENT_ID,
-      await fetchClientSecret(IDP_CLIENT_SECRET_NAME),
+      await IDP_CLIENT_SECRET,
       `https://${IDP_DOMAIN}`,
       context.getRemainingTimeInMillis() - 500,
       ["atat/read-cost"]
