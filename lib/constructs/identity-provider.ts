@@ -22,9 +22,9 @@ export interface IIdentityProviderClientApplication {
    *
    * @param clientId The ID of the client
    * @param clientSecretId The name in AWS Secrets Manager of the secret that stores the Client Secret
-   * @param idpDomain The domain at which the IdP is available for a client credentials grant flow
+   * @param idpBaseUrl The domain at which the IdP is available for a client credentials grant flow
    */
-  configure(clientId: string, clientSecretId: secrets.ISecret, idpDomain: string): void;
+  configure(clientId: string, clientSecretId: secrets.ISecret, idpBaseUrl: string): void;
 }
 
 /**
@@ -36,7 +36,7 @@ export interface IIdentityProviderClientApplication {
  * The Client ID will be stored in the `IDP_CLIENT_ID` environment variable.
  * The name of the Secrets Manager secret that stores the Client Secret will stored in the
  * `IDP_CLIENT_SECRET_NAME` environment variable.
- * The domain the IdP is accessible at will be stored in the `IDP_DOMAIN` environment variable.
+ * The base URL of the IdP will be stored in the `IDP_BASE_URL` environment variable.
  */
 export class IdentityProviderLambdaClient implements IIdentityProviderClientApplication {
   public readonly name: string;
@@ -47,11 +47,11 @@ export class IdentityProviderLambdaClient implements IIdentityProviderClientAppl
     this.fn = fn;
   }
 
-  configure(clientId: string, clientSecretId: secrets.ISecret, idpDomain: string): void {
+  configure(clientId: string, clientSecretId: secrets.ISecret, idpBaseUrl: string): void {
     clientSecretId.grantRead(this.fn);
     this.fn.addEnvironment("IDP_CLIENT_ID", clientId);
     this.fn.addEnvironment("IDP_CLIENT_SECRET_NAME", clientSecretId.secretName);
-    this.fn.addEnvironment("IDP_DOMAIN", idpDomain);
+    this.fn.addEnvironment("IDP_BASE_URL", idpBaseUrl);
   }
 }
 
@@ -201,7 +201,7 @@ export class CognitoIdentityProvider extends Construct implements IIdentityProvi
   public readonly domainName: string;
 
   public readonly userPool: cognito.IUserPool;
-  public readonly domain: cognito.IUserPoolDomain;
+  public readonly domain: cognito.UserPoolDomain;
 
   private readonly resourceServers: cognito.UserPoolResourceServer[] = [];
   constructor(scope: Construct, id: string, props?: CognitoIdentityProviderProps) {
@@ -236,12 +236,8 @@ export class CognitoIdentityProvider extends Construct implements IIdentityProvi
       clientApplication: app,
       scopes,
     });
-    // The UserPoolDomain object provides a `baseUrl()` function; however, the URL it creates
-    // does not work in us-gov-west-1. Instead, we build the URL manually. We can assume that
-    // `domainName` is not a full domain as they are not supported in `us-gov-west-1`.
-    // See: aws/aws-cdk#20182
-    const fullDomain = `${this.domain.domainName}.auth-fips.${cdk.Aws.REGION}.amazoncognito.com`;
-    app.configure(client.clientId, client.secret, fullDomain);
+    // Amazon Cognito requires the usage of the FIPS endpoints in us-gov-west-1
+    app.configure(client.clientId, client.secret, this.domain.baseUrl({ fips: true }));
     return client;
   }
 }

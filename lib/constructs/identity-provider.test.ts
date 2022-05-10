@@ -82,7 +82,7 @@ describe("Lambda OAuth client application creation", () => {
       Variables: Match.objectLike({
         IDP_CLIENT_ID: "TESTCLIENT",
         IDP_CLIENT_SECRET_NAME: stack.resolve(secret.secretName),
-        IDP_DOMAIN: "TESTDOMAIN",
+        IDP_BASE_URL: "TESTDOMAIN",
       }),
     },
   });

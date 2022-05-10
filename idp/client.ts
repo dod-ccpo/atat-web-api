@@ -8,7 +8,7 @@ const logger = new Logger({ serviceName: "TestIdp" });
 
 const IDP_CLIENT_ID = process.env.IDP_CLIENT_ID!;
 const IDP_CLIENT_SECRET_NAME = process.env.IDP_CLIENT_SECRET_NAME!;
-const IDP_DOMAIN = process.env.IDP_DOMAIN!;
+const IDP_BASE_URL = process.env.IDP_BASE_URL!;
 const IDP_CLIENT_SECRET = fetchClientSecret(IDP_CLIENT_SECRET_NAME);
 
 /**
@@ -117,7 +117,7 @@ export async function handler(_event: Record<string, never>, context: Context): 
     const response = await getToken(
       IDP_CLIENT_ID,
       await IDP_CLIENT_SECRET,
-      `https://${IDP_DOMAIN}`,
+      IDP_BASE_URL,
       context.getRemainingTimeInMillis() - 500,
       ["atat/read-cost"]
     );
