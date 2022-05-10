@@ -27,7 +27,7 @@ describe("Ensure the GovCloudCompatibilityAspect makes necessary changes for Gov
     const app = new cdk.App();
     const stack = new cdk.Stack(app, "TestStack");
     const fn = new lambda.Function(stack, "TestFn", {
-      runtime: lambda.Runtime.NODEJS_14_X,
+      runtime: lambda.Runtime.NODEJS_16_X,
       code: lambda.Code.fromInline("foo"),
       handler: "foo",
       tracing: lambda.Tracing.ACTIVE,

@@ -1,5 +1,6 @@
 import * as sfn from "aws-cdk-lib/aws-stepfunctions";
 import * as sqs from "aws-cdk-lib/aws-sqs";
+import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as lambdaNodeJs from "aws-cdk-lib/aws-lambda-nodejs";
 import * as logs from "aws-cdk-lib/aws-logs";
 import * as cdk from "aws-cdk-lib";
@@ -57,12 +58,14 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
     // Provisioning State machine functions
     const mockInvocationFn = new lambdaNodeJs.NodejsFunction(scope, "MockInvocationFunction", {
       entry: "api/provision/mock-invocation-fn.ts",
+      runtime: lambda.Runtime.NODEJS_16_X,
     });
     this.resultFn = new lambdaNodeJs.NodejsFunction(scope, "ResultFunction", {
+      entry: "api/provision/result-fn.ts",
+      runtime: lambda.Runtime.NODEJS_16_X,
       environment: {
         PROVISIONING_QUEUE_URL: this.provisioningJobsQueue.queueUrl,
       },
-      entry: "api/provision/result-fn.ts",
     });
     this.provisioningQueueConsumer = new ApiSfnFunction(this, "ConsumeProvisioningJobRequest", {
       method: HttpMethod.GET,
