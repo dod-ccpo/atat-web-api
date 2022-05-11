@@ -35,8 +35,7 @@ export async function baseHandler(
     return REQUEST_BODY_INVALID;
   }
 
-  const oauthToken = await getToken();
-  const cspResponse = await createCspResponse(stateInput, oauthToken.access_token);
+  const cspResponse = await createCspResponse(stateInput);
 
   // Throws a custom error identified by the state machine and the function retries 2
   // times before failing continuing through the remaining states
@@ -51,10 +50,36 @@ export async function baseHandler(
   return cspResponse;
 }
 
-export async function createCspResponse(request: ProvisionRequest, bearerToken: string): Promise<CspResponse> {
+async function makeARealRequest(request: ProvisionRequest): Promise<CspResponse> {
+  const token = (await getToken()).access_token;
   const cspConfig = JSON.parse(
     (await secretsClient.getSecretValue({ SecretId: process.env.CSP_DATA_SECRET! })).SecretString!
   );
+
+  const url = `${cspConfig[request.targetCsp.name].uri}/portfolios`;
+  const response = await axios.post(url, request.payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "User-Agent": "ATAT v0.2.0 client",
+    },
+  });
+  if (response.status !== 200 && response.status !== 202) {
+    logger.error("Request to CSP failed", {
+      csp: request.targetCsp.name,
+      request: {
+        csp: request.targetCsp.name,
+        url,
+      },
+      response: { statusCode: response.status, body: response.data },
+    });
+  }
+  return {
+    code: response.status,
+    content: response.data,
+  };
+}
+
+export async function createCspResponse(request: ProvisionRequest): Promise<CspResponse> {
   let response: CspResponse;
   switch (request.targetCsp.name) {
     case "CSP_A":
@@ -86,14 +111,7 @@ export async function createCspResponse(request: ProvisionRequest, bearerToken: 
       console.log("Internal error response : " + JSON.stringify(response));
       return response;
     default:
-      response = (
-        await axios.post(`${cspConfig[request.targetCsp.name].uri}/portfolio`, request.payload, {
-          headers: {
-            Authorization: `Bearer ${bearerToken}`,
-            "User-Agent": "ATAT v0.2.0 client",
-          },
-        })
-      ).data;
+      response = await makeARealRequest(request);
       logger.info("Mock response", { response: response as any });
       return response;
   }
