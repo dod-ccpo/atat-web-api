@@ -93,11 +93,12 @@ function buildTokenRequest(clientId: string, scopes?: string[]): URLSearchParams
 /**
  * Decode a JWT without performing any verification of the token.
  *
- * @param payload The raw reponse from the TOKEN endpoint
+ * This ensures that the output strips the signature component so that it can't
+ * be captured from the logs and re-used.
  *
- * @deprecated Don't use this
+ * @param payload The raw reponse from the TOKEN endpoint
  */
-function unsafelyDecodeJwt(payload: string): { [key: string]: any } {
+function decodeJwtForLoggingWithoutVerifying(payload: string): { [key: string]: any } {
   const base64Data = payload.split(".")[1];
   const decoded = Buffer.from(base64Data, "base64");
   return JSON.parse(decoded.toString());
@@ -153,6 +154,7 @@ export async function getToken(input?: GetTokenInput): Promise<TokenResponse> {
     logger.info("Received a non-success response", { response: response.data });
     throw new Error(response.data.error);
   }
+  logger.info("Received a token", { token: decodeJwtForLoggingWithoutVerifying(response.data.access_token) });
   return response.data;
 }
 
@@ -190,7 +192,7 @@ export async function handler(_event: Record<string, never>, context: Context): 
     logger.info("Received token from client credentials", {
       response: { body },
     });
-    logger.info("Decoded the received token", { token: unsafelyDecodeJwt(response.access_token) });
+    logger.info("Decoded the received token", { token: decodeJwtForLoggingWithoutVerifying(response.access_token) });
   } catch (error) {
     if (axios.isAxiosError(error)) {
       logger.error("The request to get an OAUTH 2.0 token failed", error as Error);
