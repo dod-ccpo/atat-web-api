@@ -1,10 +1,8 @@
 import { Context } from "aws-lambda";
 import { GetSecretValueCommandInput } from "@aws-sdk/client-secrets-manager";
 import axios from "axios";
-import { Logger } from "@aws-lambda-powertools/logger";
 import { secretsClient } from "../utils/aws-sdk/secrets-manager";
-
-const logger = new Logger({ serviceName: "IdpClient" });
+import { logger } from "../utils/logging";
 
 const IDP_CLIENT_ID = process.env.IDP_CLIENT_ID!;
 const IDP_CLIENT_SECRET_NAME = process.env.IDP_CLIENT_SECRET_NAME!;

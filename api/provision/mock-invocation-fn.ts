@@ -10,8 +10,7 @@ import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-m
 import { ValidationErrorResponse } from "../../utils/response";
 import { getToken } from "../../idp/client";
 import { secretsClient } from "../../utils/aws-sdk/secrets-manager";
-
-const logger = new Logger({ serviceName: "MockInvocation" });
+import { logger } from "../../utils/logging";
 
 /**
  * Mock invocation of CSP and returns a CSP Response based on CSP
@@ -27,6 +26,7 @@ export async function baseHandler(
   context: Context
 ): Promise<CspResponse | ValidationErrorResponse> {
   logger.addContext(context);
+  logger.info("Event", { event: stateInput as any });
   if (!stateInput) {
     return REQUEST_BODY_INVALID;
   }
@@ -34,6 +34,8 @@ export async function baseHandler(
   if (!cspInvocation?.endpoint) {
     return REQUEST_BODY_INVALID;
   }
+
+  logger.addPersistentLogAttributes({ correlationIds: { jobId: stateInput.jobId } });
 
   const cspResponse = await createCspResponse(stateInput);
 
@@ -50,16 +52,41 @@ export async function baseHandler(
   return cspResponse;
 }
 
+/**
+ * Make a request to an actual CSP implementation of the ATAT API
+ *
+ * @param request The input provisioning request
+ * @returns the response from the CSP
+ */
 async function makeARealRequest(request: ProvisionRequest): Promise<CspResponse> {
-  const token = (await getToken()).access_token;
   const cspConfig = JSON.parse(
     (await secretsClient.getSecretValue({ SecretId: process.env.CSP_DATA_SECRET! })).SecretString!
   );
 
-  const url = `${cspConfig[request.targetCsp.name].uri}/portfolios`;
+  const baseUrl = cspConfig?.[request.targetCsp.name]?.uri;
+  const url = `${baseUrl}/portfolios`;
+  if (!baseUrl || !baseUrl.startsWith("https://")) {
+    logger.error("Invalid CSP configuration", {
+      jobId: request.jobId,
+      input: {
+        csp: request.targetCsp.name,
+      },
+      configSecretPath: process.env.CSP_DATA_SECRET,
+      retrievedConfig: {
+        cspConfig,
+      },
+    });
+    return {
+      code: 400,
+      content: {
+        details: "Invalid CSP provided",
+      },
+    };
+  }
+
   const response = await axios.post(url, request.payload, {
     headers: {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${(await getToken()).access_token}`,
       "User-Agent": "ATAT v0.2.0 client",
     },
     // Don't throw an error on non-2xx/3xx status code (let us handle it)
@@ -77,6 +104,7 @@ async function makeARealRequest(request: ProvisionRequest): Promise<CspResponse>
       response: { statusCode: response.status, body: response.data },
     });
   }
+
   return {
     code: response.status,
     content: response.data,
@@ -102,7 +130,7 @@ export async function createCspResponse(request: ProvisionRequest): Promise<CspR
           some: "bad content",
         },
       };
-      console.log("Failed response : " + JSON.stringify(response));
+      logger.error("Failed response", { response: response as any });
       return response;
     case "CSP_C":
     case "CSP_D":
@@ -112,7 +140,7 @@ export async function createCspResponse(request: ProvisionRequest): Promise<CspR
           some: "internal error",
         },
       };
-      console.log("Internal error response : " + JSON.stringify(response));
+      logger.error("Internal error response", { response: response as any });
       return response;
     default:
       response = await makeARealRequest(request);
