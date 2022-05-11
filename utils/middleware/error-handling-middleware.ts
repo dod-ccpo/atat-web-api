@@ -50,7 +50,7 @@ export const errorHandlingMiddleware = (): middy.MiddlewareObj<MiddlewareInputs,
       case "Content type defined as JSON but an invalid JSON was provided":
         return REQUEST_BODY_INVALID;
       default:
-        console.error("Database error: " + JSON.stringify(error));
+        console.error("Unhandled error: " + JSON.stringify(error));
         return INTERNAL_SERVER_ERROR;
     }
   };

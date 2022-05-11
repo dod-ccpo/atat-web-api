@@ -71,24 +71,6 @@ export class AtatWebApiStack extends cdk.Stack {
       )
     );
 
-    // State Machine and workflow
-    const provisioningSfn = new ProvisioningWorkflow(this, "ProvisioningWorkflow", { environmentName });
-
-    // Provisioning lambda that translates and invokes the state machine
-    const provisioningJob = new ApiSfnFunction(this, "ProvisioningJobRequest", {
-      method: HttpMethod.POST,
-      handlerPath: "api/provision/start-provisioning-job.ts",
-      stateMachine: provisioningSfn.stateMachine,
-    });
-
-    // APIGW Provisioning Job Resource
-    const provisioningJobResource = api.restApi.root.addResource("provisioning-jobs");
-    provisioningJobResource.addMethod(provisioningJob.method, new apigw.LambdaIntegration(provisioningJob.fn));
-    provisioningJobResource.addMethod(
-      provisioningSfn.provisioningQueueConsumer.method,
-      new apigw.LambdaIntegration(provisioningSfn.provisioningQueueConsumer.fn)
-    );
-
     const atatIdp = new idp.CognitoIdentityProvider(this, "AtatIdp", {
       domainPrefix: `atat${environmentName.toLowerCase()}`,
       scopeConfig: [
@@ -108,6 +90,27 @@ export class AtatWebApiStack extends cdk.Stack {
         new nodejs.NodejsFunction(this, "SampleFn", { entry: "idp/client.ts", runtime: lambda.Runtime.NODEJS_16_X })
       ),
       ["atat/read-cost"]
+    );
+    const urlOutput = new cdk.CfnOutput(this, "IdpDiscoveryUrl", {
+      value: atatIdp.discoveryUrl(),
+    });
+
+    // State Machine and workflow
+    const provisioningSfn = new ProvisioningWorkflow(this, "ProvisioningWorkflow", { environmentName, idp: atatIdp });
+
+    // Provisioning lambda that translates and invokes the state machine
+    const provisioningJob = new ApiSfnFunction(this, "ProvisioningJobRequest", {
+      method: HttpMethod.POST,
+      handlerPath: "api/provision/start-provisioning-job.ts",
+      stateMachine: provisioningSfn.stateMachine,
+    });
+
+    // APIGW Provisioning Job Resource
+    const provisioningJobResource = api.restApi.root.addResource("provisioning-jobs");
+    provisioningJobResource.addMethod(provisioningJob.method, new apigw.LambdaIntegration(provisioningJob.fn));
+    provisioningJobResource.addMethod(
+      provisioningSfn.provisioningQueueConsumer.method,
+      new apigw.LambdaIntegration(provisioningSfn.provisioningQueueConsumer.fn)
     );
   }
 }

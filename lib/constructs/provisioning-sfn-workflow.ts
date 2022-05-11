@@ -1,13 +1,15 @@
-import * as sfn from "aws-cdk-lib/aws-stepfunctions";
-import * as sqs from "aws-cdk-lib/aws-sqs";
+import * as cdk from "aws-cdk-lib";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as lambdaNodeJs from "aws-cdk-lib/aws-lambda-nodejs";
 import * as logs from "aws-cdk-lib/aws-logs";
-import * as cdk from "aws-cdk-lib";
+import * as secrets from "aws-cdk-lib/aws-secretsmanager";
+import * as sqs from "aws-cdk-lib/aws-sqs";
+import * as sfn from "aws-cdk-lib/aws-stepfunctions";
 import { Construct } from "constructs";
-import { mapTasks, TasksMap } from "./sfn-lambda-invoke-task";
-import { ApiSfnFunction } from "./api-sfn-function";
 import { HttpMethod } from "../http";
+import { ApiSfnFunction } from "./api-sfn-function";
+import { IdentityProviderLambdaClient, IIdentityProvider } from "./identity-provider";
+import { mapTasks, TasksMap } from "./sfn-lambda-invoke-task";
 import { StateMachine } from "./state-machine";
 
 /**
@@ -23,9 +25,12 @@ export const clientErrorResponse = sfn.Condition.or(
   sfn.Condition.numberEquals("$.cspResponse.Payload.code", 402),
   sfn.Condition.numberEquals("$.cspResponse.Payload.code", 404)
 );
+
 export interface ProvisioningWorkflowProps {
   environmentName: string;
+  idp: IIdentityProvider;
 }
+
 export interface IProvisioningWorkflow {
   mappedTasks: TasksMap;
   workflow: sfn.IChainable;
@@ -56,10 +61,19 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
     });
 
     // Provisioning State machine functions
+    const cspConfig = secrets.Secret.fromSecretNameV2(
+      this,
+      "CspConfiguration",
+      this.node.tryGetContext("atat:CspConfigurationPath")
+    );
     const mockInvocationFn = new lambdaNodeJs.NodejsFunction(scope, "MockInvocationFunction", {
       entry: "api/provision/mock-invocation-fn.ts",
       runtime: lambda.Runtime.NODEJS_16_X,
+      environment: { CSP_DATA_SECRET: cspConfig.secretArn },
     });
+    props.idp.addClient(new IdentityProviderLambdaClient("MockInvocation", mockInvocationFn), ["atat/write-portfolio"]);
+    cspConfig.grantRead(mockInvocationFn);
+
     this.resultFn = new lambdaNodeJs.NodejsFunction(scope, "ResultFunction", {
       entry: "api/provision/result-fn.ts",
       runtime: lambda.Runtime.NODEJS_16_X,
