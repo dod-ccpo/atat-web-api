@@ -4,7 +4,7 @@ import axios from "axios";
 import { Logger } from "@aws-lambda-powertools/logger";
 import { secretsClient } from "../utils/aws-sdk/secrets-manager";
 
-const logger = new Logger({ serviceName: "TestIdp" });
+const logger = new Logger({ serviceName: "IdpClient" });
 
 const IDP_CLIENT_ID = process.env.IDP_CLIENT_ID!;
 const IDP_CLIENT_SECRET_NAME = process.env.IDP_CLIENT_SECRET_NAME!;
@@ -12,14 +12,64 @@ const IDP_BASE_URL = process.env.IDP_BASE_URL!;
 const IDP_CLIENT_SECRET = fetchClientSecret(IDP_CLIENT_SECRET_NAME);
 
 /**
- * Very basic encoding of the Cognito TOKEN endpoint response objects.
+ * A very basic encoding of a TOKEN endpoint response object.
+ *
+ * This does not include all the possible responses for all IdPs but includes some really
+ * common values.
  */
-interface TokenResponse {
+export interface TokenResponse {
   access_token: string;
   id_token?: string;
   refresh_token?: string;
   expires_in: number;
   token_type: "Bearer";
+}
+
+/**
+ * Get the actual client secret value from AWS Systems Manager
+ *
+ * @param secretId the name/ARN of the Secrets Manager secret
+ */
+async function fetchClientSecret(secretId: string): Promise<string> {
+  const request: GetSecretValueCommandInput = { SecretId: secretId };
+  logger.info("Retriving client secret from Secrets Manager", { request: { ...request } });
+  return (await secretsClient.getSecretValue(request)).SecretString!;
+}
+
+/**
+ * Basic configuration parameters for interacting with an identity provider.
+ */
+export interface ClientConfiguration {
+  /**
+   * The client_id value to use in requests
+   */
+  readonly clientId: string;
+  /**
+   * The client secret to use when making requests to the IdP
+   */
+  readonly clientSecret: string;
+  /**
+   * The base HTTPS url for the IdP.
+   *
+   * This should likely start with `https://` and not include a path segment, `oauth2/token`
+   * and other necessary paths will be appended to the provided URL.
+   */
+  readonly idpBaseUrl: string;
+}
+
+/**
+ * Fetches the configuration for this IdP client from the application's environment (and
+ * from AWS Secrets Manager where necessary).
+ * The Client ID is fetched from `IDP_CLIENT_ID`, the IdP base URL is fetched from
+ * `IDP_BASE_URL`, and the Secret to lookup in Secrets Manager is fetched from
+ * `IDP_CLIENT_SECRET_NAME`.
+ */
+export async function getConfigurationFromEnvironment(): Promise<ClientConfiguration> {
+  return {
+    clientId: process.env.IDP_CLIENT_ID!,
+    clientSecret: await fetchClientSecret(process.env.IDP_CLIENT_SECRET_NAME!),
+    idpBaseUrl: process.env.IDP_BASE_URL!,
+  };
 }
 
 /**
@@ -41,20 +91,11 @@ function buildTokenRequest(clientId: string, scopes?: string[]): URLSearchParams
 }
 
 /**
- * Get the actual client secret value from AWS Systems Manager
- *
- * @param secretId the name/ARN of the Secrets Manager secret
- */
-async function fetchClientSecret(secretId: string): Promise<string> {
-  const request: GetSecretValueCommandInput = { SecretId: secretId };
-  logger.info("Retriving client secret from Secrets Manager", { request: { ...request } });
-  return (await secretsClient.getSecretValue(request)).SecretString!;
-}
-
-/**
  * Decode a JWT without performing any verification of the token.
  *
  * @param payload The raw reponse from the TOKEN endpoint
+ *
+ * @deprecated Don't use this
  */
 function unsafelyDecodeJwt(payload: string): { [key: string]: any } {
   const base64Data = payload.split(".")[1];
@@ -63,26 +104,39 @@ function unsafelyDecodeJwt(payload: string): { [key: string]: any } {
 }
 
 /**
+ * Configuration for fetching a token from the IdP
+ */
+export interface GetTokenInput {
+  /**
+   * The function to use to determine the configuration for the IdP.
+   * @default fetch the information from the environment
+   */
+  clientConfigurationProvider?: () => Promise<ClientConfiguration>;
+  /**
+   * The timeout to use for the HTTP request to the IdP
+   * @default do not use a timeout
+   */
+  timeout?: number;
+  /**
+   * The scopes to request during the client_credentials flow.
+   * @default the IdP default behavior when no scopes are provided (usually equivalent to
+   *  requesting all scopes).
+   */
+  scopes?: string[];
+}
+
+/**
  * Perform the request to get the token from the TOKEN endpoint.
  *
- * Throws an error if the response is not a 200
- *
- * @param clientId The OAuth client ID
- * @param clientSecret The secret to use to authenticate to the server
- * @param baseUrl The base URL of the authentication server
- * @param timeout The timeout to use when making the token request
- * @param scopes The scopes to request in the token
+ * Throws an error if the response is not a 200.
  */
-async function getToken(
-  clientId: string,
-  clientSecret: string,
-  baseUrl: string,
-  timeout?: number,
-  scopes?: string[]
-): Promise<TokenResponse> {
+export async function getToken(input?: GetTokenInput): Promise<TokenResponse> {
+  const { clientId, clientSecret, idpBaseUrl } = await (
+    input?.clientConfigurationProvider ?? getConfigurationFromEnvironment
+  )();
   logger.info("Fetching a token from the TOKEN endpoint", { clientId });
-  const response = await axios.post(`${baseUrl}/oauth2/token`, buildTokenRequest(clientId, scopes), {
-    timeout,
+  const response = await axios.post(`${idpBaseUrl}/oauth2/token`, buildTokenRequest(clientId, input?.scopes), {
+    timeout: input?.timeout,
     headers: {
       "content-type": "application/x-www-form-urlencoded",
     },
@@ -114,6 +168,7 @@ export async function handler(_event: Record<string, never>, context: Context): 
   logger.addContext(context);
 
   try {
+<<<<<<< HEAD
     const response = await getToken(
       IDP_CLIENT_ID,
       await IDP_CLIENT_SECRET,
@@ -121,6 +176,12 @@ export async function handler(_event: Record<string, never>, context: Context): 
       context.getRemainingTimeInMillis() - 500,
       ["atat/read-cost"]
     );
+=======
+    const response = await getToken({
+      timeout: context.getRemainingTimeInMillis() - 500,
+      scopes: ["atat/read-cost"],
+    });
+>>>>>>> 270bea0 (Refactor IdP Client into a library)
     const body = { type: response.token_type, expires_in: response.expires_in };
     logger.info("Received token from client credentials", {
       response: { body },
