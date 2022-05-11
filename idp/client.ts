@@ -144,6 +144,10 @@ export async function getToken(input?: GetTokenInput): Promise<TokenResponse> {
       username: clientId,
       password: clientSecret,
     },
+    // Don't throw an error on non-2xx/3xx status code (let us handle it)
+    validateStatus() {
+      return true;
+    },
   });
   if (response.status !== 200) {
     logger.info("Received a non-success response", { response: response.data });

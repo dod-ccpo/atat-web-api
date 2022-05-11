@@ -62,6 +62,10 @@ async function makeARealRequest(request: ProvisionRequest): Promise<CspResponse>
       Authorization: `Bearer ${token}`,
       "User-Agent": "ATAT v0.2.0 client",
     },
+    // Don't throw an error on non-2xx/3xx status code (let us handle it)
+    validateStatus() {
+      return true;
+    },
   });
   if (response.status !== 200 && response.status !== 202) {
     logger.error("Request to CSP failed", {
