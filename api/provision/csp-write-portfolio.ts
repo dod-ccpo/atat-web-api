@@ -26,16 +26,11 @@ export async function baseHandler(
 ): Promise<CspResponse | ValidationErrorResponse> {
   logger.addContext(context);
   logger.info("Event", { event: stateInput as any });
-  if (!stateInput) {
-    return REQUEST_BODY_INVALID;
-  }
-  const cspInvocation = stateInput.cspInvocation;
-  if (!cspInvocation?.endpoint) {
-    return REQUEST_BODY_INVALID;
-  }
-
   logger.addPersistentLogAttributes({ correlationIds: { jobId: stateInput.jobId } });
 
+  // TODO: Replace `createCspResponse`'s body with the one from `makeARealRequest` when
+  // we no longer need the mock implementations of CSP_<A|B|C|D> and can fully use the
+  // mock (or real) integration endpoints.
   const cspResponse = await createCspResponse(stateInput);
 
   // Throws a custom error identified by the state machine and the function retries 2

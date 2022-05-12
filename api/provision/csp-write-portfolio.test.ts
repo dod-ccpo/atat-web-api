@@ -11,6 +11,12 @@ import {
 } from "../../utils/response";
 import { transformProvisionRequest } from "./start-provisioning-job";
 import { provisioningBodyNoPayload, provisioningBodyWithPayload } from "./start-provisioning-job.test";
+import axios from "axios";
+import { GetSecretValueCommand, SecretsManager } from "@aws-sdk/client-secrets-manager";
+import { mockClient } from "aws-sdk-client-mock";
+
+jest.mock("axios");
+const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 const fundingSources = [
   {
@@ -32,6 +38,15 @@ describe("Successful invocation of mock CSP function", () => {
 });
 
 describe("Failed invocation operations", () => {
+  it.each([
+    { desc: "empty", request: {} },
+    { desc: "undefined", request: undefined },
+    { desc: "missing endpoint", request: { cspInvocation: {} } },
+  ])("should return a 400 when the request body is $desc", async ({ request }) => {
+    const response = (await handler(request as ProvisionRequest, {} as Context)) as ValidationErrorResponse;
+    expect(response.statusCode).toBe(ErrorStatusCode.BAD_REQUEST);
+  });
+
   it("should return a 400 when CSP_B is provided in the request", async () => {
     const response = await handler(constructProvisionRequestForCsp("CSP_B"), {} as Context);
     if (!(response instanceof ValidationErrorResponse)) {
@@ -72,13 +87,6 @@ describe("Failed invocation operations", () => {
         content: { some: "internal error" },
       })
     );
-  });
-  it("should return a 400 when null", async () => {
-    const response = await handler(undefined as any, {} as Context, () => null);
-    expect(response).toBeInstanceOf(ErrorResponse);
-    if (response instanceof OtherErrorResponse) {
-      expect(response.statusCode).toBe(ErrorStatusCode.BAD_REQUEST);
-    }
   });
 });
 
