@@ -66,17 +66,17 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
       "CspConfiguration",
       this.node.tryGetContext("atat:CspConfigurationName")
     );
-    const mockInvocationFn = new lambdaNodeJs.NodejsFunction(scope, "MockInvocationFunction", {
-      entry: "api/provision/mock-invocation-fn.ts",
+    const cspWritePortfolioFn = new lambdaNodeJs.NodejsFunction(scope, "CspWritePortfolioFn", {
+      entry: "api/provision/csp-write-portfolio.ts",
       runtime: lambda.Runtime.NODEJS_16_X,
       environment: { CSP_DATA_SECRET: cspConfig.secretArn },
       timeout: cdk.Duration.minutes(5),
       memorySize: 256,
     });
-    props.idp?.addClient(new IdentityProviderLambdaClient("MockInvocation", mockInvocationFn), [
+    props.idp?.addClient(new IdentityProviderLambdaClient("CspWritePortfolioClient", cspWritePortfolioFn), [
       "atat/write-portfolio",
     ]);
-    cspConfig.grantRead(mockInvocationFn);
+    cspConfig.grantRead(cspWritePortfolioFn);
 
     this.resultFn = new lambdaNodeJs.NodejsFunction(scope, "ResultFunction", {
       entry: "api/provision/result-fn.ts",
@@ -103,7 +103,7 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
       {
         id: "InvokeCspApi",
         props: {
-          lambdaFunction: mockInvocationFn,
+          lambdaFunction: cspWritePortfolioFn,
           inputPath: "$",
           resultPath: "$.cspResponse",
           outputPath: "$",

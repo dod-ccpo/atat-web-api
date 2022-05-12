@@ -1,5 +1,5 @@
 import { Context } from "aws-lambda";
-import { handler } from "./mock-invocation-fn";
+import { handler } from "./csp-write-portfolio";
 import { Network } from "../../models/cloud-service-providers";
 import { ProvisionRequest } from "../../models/provisioning-jobs";
 import {
