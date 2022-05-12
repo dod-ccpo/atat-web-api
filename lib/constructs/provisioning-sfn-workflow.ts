@@ -28,7 +28,7 @@ export const clientErrorResponse = sfn.Condition.or(
 
 export interface ProvisioningWorkflowProps {
   environmentName: string;
-  idp: IIdentityProvider;
+  idp?: IIdentityProvider;
 }
 
 export interface IProvisioningWorkflow {
@@ -73,7 +73,9 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
       timeout: cdk.Duration.seconds(5),
       memorySize: 256,
     });
-    props.idp.addClient(new IdentityProviderLambdaClient("MockInvocation", mockInvocationFn), ["atat/write-portfolio"]);
+    props.idp?.addClient(new IdentityProviderLambdaClient("MockInvocation", mockInvocationFn), [
+      "atat/write-portfolio",
+    ]);
     cspConfig.grantRead(mockInvocationFn);
 
     this.resultFn = new lambdaNodeJs.NodejsFunction(scope, "ResultFunction", {

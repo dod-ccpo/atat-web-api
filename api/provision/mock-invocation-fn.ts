@@ -1,16 +1,15 @@
-import { Logger } from "@aws-lambda-powertools/logger";
 import middy from "@middy/core";
 import validator from "@middy/validator";
 import { Context } from "aws-lambda";
 import axios from "axios";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
+import { getToken } from "../../idp/client";
 import { CspResponse, ProvisionRequest, provisionRequestSchema } from "../../models/provisioning-jobs";
+import { secretsClient } from "../../utils/aws-sdk/secrets-manager";
 import { REQUEST_BODY_INVALID } from "../../utils/errors";
+import { logger } from "../../utils/logging";
 import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
 import { ValidationErrorResponse } from "../../utils/response";
-import { getToken } from "../../idp/client";
-import { secretsClient } from "../../utils/aws-sdk/secrets-manager";
-import { logger } from "../../utils/logging";
 
 /**
  * Mock invocation of CSP and returns a CSP Response based on CSP
