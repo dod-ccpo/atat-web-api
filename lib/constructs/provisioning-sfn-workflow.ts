@@ -69,7 +69,7 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
     const cspWritePortfolioFn = new lambdaNodeJs.NodejsFunction(scope, "CspWritePortfolioFn", {
       entry: "api/provision/csp-write-portfolio.ts",
       runtime: lambda.Runtime.NODEJS_16_X,
-      environment: { CSP_DATA_SECRET: cspConfig.secretArn },
+      environment: { CSP_CONFIG_SECRET_NAME: cspConfig.secretArn },
       timeout: cdk.Duration.minutes(5),
       memorySize: 256,
     });

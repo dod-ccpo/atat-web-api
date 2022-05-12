@@ -5,11 +5,10 @@ import axios from "axios";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import { getToken } from "../../idp/client";
 import { CspResponse, ProvisionRequest, provisionRequestSchema } from "../../models/provisioning-jobs";
-import { secretsClient } from "../../utils/aws-sdk/secrets-manager";
-import { REQUEST_BODY_INVALID } from "../../utils/errors";
 import { logger } from "../../utils/logging";
 import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
 import { ValidationErrorResponse } from "../../utils/response";
+import { getConfiguration } from "./csp-configuration";
 
 /**
  * Mock invocation of CSP and returns a CSP Response based on CSP
@@ -53,22 +52,15 @@ export async function baseHandler(
  * @returns the response from the CSP
  */
 async function makeARealRequest(request: ProvisionRequest): Promise<CspResponse> {
-  const cspConfig = JSON.parse(
-    (await secretsClient.getSecretValue({ SecretId: process.env.CSP_DATA_SECRET! })).SecretString!
-  );
-
-  const baseUrl = cspConfig?.[request.targetCsp.name]?.uri;
+  const baseUrl = (await getConfiguration(request.targetCsp.name))?.uri;
   const url = `${baseUrl}/portfolios`;
   if (!baseUrl || !baseUrl.startsWith("https://")) {
     logger.error("Invalid CSP configuration", {
-      jobId: request.jobId,
       input: {
         csp: request.targetCsp.name,
       },
-      configSecretPath: process.env.CSP_DATA_SECRET,
-      retrievedConfig: {
-        cspConfig,
-      },
+      resolvedUrl: url,
+      configSecretPath: process.env.CSP_CONFIG_SECRET_NAME,
     });
     return {
       code: 400,
@@ -88,6 +80,7 @@ async function makeARealRequest(request: ProvisionRequest): Promise<CspResponse>
       return true;
     },
   });
+
   if (response.status !== 200 && response.status !== 202) {
     logger.error("Request to CSP failed", {
       csp: request.targetCsp.name,

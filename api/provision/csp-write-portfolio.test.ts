@@ -12,11 +12,16 @@ import {
 import { transformProvisionRequest } from "./start-provisioning-job";
 import { provisioningBodyNoPayload, provisioningBodyWithPayload } from "./start-provisioning-job.test";
 import axios from "axios";
+import * as cspConfig from "./csp-configuration";
+import * as idpClient from "../../idp/client";
 import { GetSecretValueCommand, SecretsManager } from "@aws-sdk/client-secrets-manager";
 import { mockClient } from "aws-sdk-client-mock";
-
+jest.mock("./csp-configuration");
+const mockedConfig = cspConfig.getConfiguration as jest.MockedFn<typeof cspConfig.getConfiguration>;
 jest.mock("axios");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
+jest.mock("../../idp/client");
+const mockedGetToken = idpClient.getToken as jest.MockedFn<typeof idpClient.getToken>;
 
 const fundingSources = [
   {
@@ -35,6 +40,31 @@ describe("Successful invocation of mock CSP function", () => {
       expect(response.code).toBe(SuccessStatusCode.OK);
     }
   });
+  it("should basically just return a reformatted CSP response", async () => {
+    // GIVEN
+    const expectedResponse = {
+      totally: "fake",
+      csp: "response",
+    };
+    mockedGetToken.mockResolvedValueOnce({ access_token: "FakeToken", expires_in: 0, token_type: "Bearer" });
+    mockedConfig.mockResolvedValueOnce({ uri: "https://mockcsp.cspa/atat/" });
+    mockedAxios.post.mockResolvedValueOnce({
+      data: expectedResponse,
+      status: 200,
+      statusText: "OK",
+      headers: { "Content-Type": "application/json" },
+      config: {},
+    });
+
+    // WHEN
+    const response = await handler(constructProvisionRequestForCsp("CSP_E"), {} as Context);
+
+    // THEN
+    expect(response).toEqual({
+      code: 200,
+      content: expectedResponse,
+    });
+  });
 });
 
 describe("Failed invocation operations", () => {
@@ -47,12 +77,52 @@ describe("Failed invocation operations", () => {
     expect(response.statusCode).toBe(ErrorStatusCode.BAD_REQUEST);
   });
 
+  it("should return a 400 when the CSP's configuration is unknown", async () => {
+    // GIVEN
+    mockedConfig.mockResolvedValueOnce(undefined);
+    // WHEN
+    const response = await handler(constructProvisionRequestForCsp("CSP_DNE"), {} as Context);
+    // THEN
+    expect(response).toEqual({
+      code: 400,
+      content: {
+        details: "Invalid CSP provided",
+      },
+    });
+  });
+  it("should basically just return a reformatted CSP response", async () => {
+    // GIVEN
+    const expectedResponse = {
+      totally: "fake",
+      csp: "response",
+    };
+    mockedGetToken.mockResolvedValueOnce({ access_token: "FakeToken", expires_in: 0, token_type: "Bearer" });
+    mockedConfig.mockResolvedValueOnce({ uri: "https://mockcsp.cspa/atat/" });
+    mockedAxios.post.mockResolvedValueOnce({
+      data: expectedResponse,
+      status: 400,
+      statusText: "Bad Request",
+      headers: { "Content-Type": "application/json" },
+      config: {},
+    });
+
+    // WHEN
+    const response = await handler(constructProvisionRequestForCsp("CSP_E"), {} as Context);
+
+    // THEN
+    expect(response).toEqual({
+      code: 400,
+      content: expectedResponse,
+    });
+  });
+
   it("should return a 400 when CSP_B is provided in the request", async () => {
     const response = await handler(constructProvisionRequestForCsp("CSP_B"), {} as Context);
     if (!(response instanceof ValidationErrorResponse)) {
       expect(response?.code).toBe(ErrorStatusCode.BAD_REQUEST);
     }
   });
+
   it("should return a 400 when additional payload property due to validation error", async () => {
     const cspABody = {
       ...provisioningBodyNoPayload,
