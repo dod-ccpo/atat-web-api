@@ -1,21 +1,15 @@
 import { Context } from "aws-lambda";
-import { handler } from "./csp-write-portfolio";
+import axios from "axios";
+import * as idpClient from "../../idp/client";
 import { Network } from "../../models/cloud-service-providers";
 import { ProvisionRequest } from "../../models/provisioning-jobs";
-import {
-  ErrorResponse,
-  ErrorStatusCode,
-  OtherErrorResponse,
-  SuccessStatusCode,
-  ValidationErrorResponse,
-} from "../../utils/response";
+import { ErrorStatusCode, SuccessStatusCode, ValidationErrorResponse } from "../../utils/response";
+import * as cspConfig from "./csp-configuration";
+import { handler } from "./csp-write-portfolio";
 import { transformProvisionRequest } from "./start-provisioning-job";
 import { provisioningBodyNoPayload, provisioningBodyWithPayload } from "./start-provisioning-job.test";
-import axios from "axios";
-import * as cspConfig from "./csp-configuration";
-import * as idpClient from "../../idp/client";
-import { GetSecretValueCommand, SecretsManager } from "@aws-sdk/client-secrets-manager";
-import { mockClient } from "aws-sdk-client-mock";
+
+// Reused mocks
 jest.mock("./csp-configuration");
 const mockedConfig = cspConfig.getConfiguration as jest.MockedFn<typeof cspConfig.getConfiguration>;
 jest.mock("axios");

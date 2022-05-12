@@ -1,6 +1,6 @@
-import { logger } from "../../utils/logging";
-import { secretsClient } from "../../utils/aws-sdk/secrets-manager";
 import { GetSecretValueCommandInput } from "@aws-sdk/client-secrets-manager";
+import { secretsClient } from "../../utils/aws-sdk/secrets-manager";
+import { logger } from "../../utils/logging";
 
 export interface CspConfiguration {
   /**

@@ -1,6 +1,6 @@
-import axios from "axios";
 import { GetSecretValueCommand, SecretsManager } from "@aws-sdk/client-secrets-manager";
 import { mockClient } from "aws-sdk-client-mock";
+import axios from "axios";
 import * as idpClient from "./client";
 
 jest.mock("axios");
