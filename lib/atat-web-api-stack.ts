@@ -1,8 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import * as apigw from "aws-cdk-lib/aws-apigateway";
 import * as iam from "aws-cdk-lib/aws-iam";
-import * as lambda from "aws-cdk-lib/aws-lambda";
-import * as nodejs from "aws-cdk-lib/aws-lambda-nodejs";
 import * as statement from "cdk-iam-floyd";
 import { Construct } from "constructs";
 import { AtatNetStack } from "./atat-net-stack";

@@ -1,4 +1,3 @@
-import { Context } from "aws-lambda";
 import { GetSecretValueCommandInput } from "@aws-sdk/client-secrets-manager";
 import axios from "axios";
 import { secretsClient } from "../utils/aws-sdk/secrets-manager";
