@@ -4,11 +4,6 @@ import axios from "axios";
 import { secretsClient } from "../utils/aws-sdk/secrets-manager";
 import { logger } from "../utils/logging";
 
-const IDP_CLIENT_ID = process.env.IDP_CLIENT_ID!;
-const IDP_CLIENT_SECRET_NAME = process.env.IDP_CLIENT_SECRET_NAME!;
-const IDP_BASE_URL = process.env.IDP_BASE_URL!;
-const IDP_CLIENT_SECRET = fetchClientSecret(IDP_CLIENT_SECRET_NAME);
-
 /**
  * A very basic encoding of a TOKEN endpoint response object.
  *
@@ -172,20 +167,10 @@ export async function handler(_event: Record<string, never>, context: Context): 
   logger.addContext(context);
 
   try {
-<<<<<<< HEAD
-    const response = await getToken(
-      IDP_CLIENT_ID,
-      await IDP_CLIENT_SECRET,
-      IDP_BASE_URL,
-      context.getRemainingTimeInMillis() - 500,
-      ["atat/read-cost"]
-    );
-=======
     const response = await getToken({
       timeout: context.getRemainingTimeInMillis() - 500,
       scopes: ["atat/read-cost"],
     });
->>>>>>> 270bea0 (Refactor IdP Client into a library)
     const body = { type: response.token_type, expires_in: response.expires_in };
     logger.info("Received token from client credentials", {
       response: { body },
