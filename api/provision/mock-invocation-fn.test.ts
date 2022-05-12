@@ -70,7 +70,6 @@ describe("Failed invocation operations", () => {
       JSON.stringify({
         code: ErrorStatusCode.INTERNAL_SERVER_ERROR,
         content: { some: "internal error" },
-        payload: request,
       })
     );
   });

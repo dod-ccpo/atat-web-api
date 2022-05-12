@@ -53,6 +53,7 @@ export class ApiSfnFunction extends Construct {
     this.method = props.method;
     this.fn = new lambdaNodeJs.NodejsFunction(this, "PackagedFunction", {
       entry: props.handlerPath,
+      runtime: lambda.Runtime.NODEJS_16_X,
       // vpc: props.lambdaVpc,
       memorySize: 256,
       timeout: Duration.seconds(5),

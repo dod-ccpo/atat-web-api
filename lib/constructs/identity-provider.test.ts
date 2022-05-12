@@ -68,7 +68,7 @@ describe("Lambda OAuth client application creation", () => {
   const stack = new cdk.Stack(app, "TestStack");
   const secret = new secrets.Secret(stack, "TestSecret");
   const fn = new lambda.Function(stack, "TestFn", {
-    runtime: lambda.Runtime.NODEJS_14_X,
+    runtime: lambda.Runtime.NODEJS_16_X,
     code: lambda.Code.fromInline("foo"),
     handler: "foo",
   });
@@ -82,7 +82,7 @@ describe("Lambda OAuth client application creation", () => {
       Variables: Match.objectLike({
         IDP_CLIENT_ID: "TESTCLIENT",
         IDP_CLIENT_SECRET_NAME: stack.resolve(secret.secretName),
-        IDP_DOMAIN: "TESTDOMAIN",
+        IDP_BASE_URL: "TESTDOMAIN",
       }),
     },
   });
