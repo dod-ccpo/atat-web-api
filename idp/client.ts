@@ -154,37 +154,3 @@ export async function getToken(input?: GetTokenInput): Promise<TokenResponse> {
   logger.info("Received a token", { token: decodeJwtForLoggingWithoutVerifying(response.data.access_token) });
   return response.data;
 }
-
-/**
- * This creates a function to get and log an OAuth 2.0 token using a client_credentials flow.
- *
- * This does not return any response object and totally disregards the event body. In general,
- * this function is intended to be invoked purely via the AWS CLI or the AWS Console.
- *
- * It _does not_ log the actual token received; however, it does log metadata about the token,
- * including the `expires_in` and `token_type` attributes.
- *
- * This function really ought to be replaced in the near future. Probably in AT-7337, either
- * replaced by some library that can handle this or converted into such a library.
- */
-export async function handler(_event: Record<string, never>, context: Context): Promise<void> {
-  logger.addContext(context);
-
-  try {
-    const response = await getToken({
-      timeout: context.getRemainingTimeInMillis() - 500,
-      scopes: ["atat/read-cost"],
-    });
-    const body = { type: response.token_type, expires_in: response.expires_in };
-    logger.info("Received token from client credentials", {
-      response: { body },
-    });
-    logger.info("Decoded the received token", { token: decodeJwtForLoggingWithoutVerifying(response.access_token) });
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      logger.error("The request to get an OAUTH 2.0 token failed", error as Error);
-    } else {
-      logger.error("An unexpected error occurred when handling the token", error as Error);
-    }
-  }
-}

@@ -84,13 +84,6 @@ export class AtatWebApiStack extends cdk.Stack {
         },
       ],
     });
-    const demoApp = atatIdp.addClient(
-      new idp.IdentityProviderLambdaClient(
-        "DemoClient",
-        new nodejs.NodejsFunction(this, "SampleFn", { entry: "idp/client.ts", runtime: lambda.Runtime.NODEJS_16_X })
-      ),
-      ["atat/read-cost"]
-    );
     const urlOutput = new cdk.CfnOutput(this, "IdpDiscoveryUrl", {
       value: atatIdp.discoveryUrl(),
     });
