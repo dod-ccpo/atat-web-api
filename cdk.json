@@ -29,7 +29,8 @@
       "aws-us-gov"
     ],
     "@aws-cdk/core:checkSecretUsage": true,
-    "atat:CspConfigurationPath": "config/csp/integration",
+
+    "atat:CspConfigurationName": "config/csp/integration",
     "atat:GitHubPatName": "auth/github/pat",
     "atat:VersionControlBranch": "develop",
     "atat:VersionControlRepo": "dod-ccpo/atat-web-api"

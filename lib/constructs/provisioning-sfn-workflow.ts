@@ -64,7 +64,7 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
     const cspConfig = secrets.Secret.fromSecretNameV2(
       this,
       "CspConfiguration",
-      this.node.tryGetContext("atat:CspConfigurationPath")
+      this.node.tryGetContext("atat:CspConfigurationName")
     );
     const mockInvocationFn = new lambdaNodeJs.NodejsFunction(scope, "MockInvocationFunction", {
       entry: "api/provision/mock-invocation-fn.ts",

@@ -37,10 +37,12 @@ export interface ClientConfiguration {
    * The client_id value to use in requests
    */
   readonly clientId: string;
+
   /**
    * The client secret to use when making requests to the IdP
    */
   readonly clientSecret: string;
+
   /**
    * The base HTTPS url for the IdP.
    *
@@ -106,11 +108,13 @@ export interface GetTokenInput {
    * @default fetch the information from the environment
    */
   clientConfigurationProvider?: () => Promise<ClientConfiguration>;
+
   /**
    * The timeout to use for the HTTP request to the IdP
    * @default do not use a timeout
    */
   timeout?: number;
+
   /**
    * The scopes to request during the client_credentials flow.
    * @default the IdP default behavior when no scopes are provided (usually equivalent to
