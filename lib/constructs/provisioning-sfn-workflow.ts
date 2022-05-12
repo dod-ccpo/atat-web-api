@@ -70,7 +70,7 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
       entry: "api/provision/mock-invocation-fn.ts",
       runtime: lambda.Runtime.NODEJS_16_X,
       environment: { CSP_DATA_SECRET: cspConfig.secretArn },
-      timeout: cdk.Duration.seconds(5),
+      timeout: cdk.Duration.minutes(5),
       memorySize: 256,
     });
     props.idp?.addClient(new IdentityProviderLambdaClient("MockInvocation", mockInvocationFn), [
