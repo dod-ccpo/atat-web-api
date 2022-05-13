@@ -9,6 +9,8 @@ import { logger } from "../../utils/logging";
 import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
 import { IpCheckerMiddleware } from "../../utils/middleware/ip-logging";
 import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
+import errorLogger from "@middy/error-logger";
+import inputOutputLogger from "@middy/input-output-logger";
 
 const PROVISIONING_QUEUE_URL = process.env.PROVISIONING_QUEUE_URL ?? "";
 
@@ -60,6 +62,8 @@ export async function baseHandler(_event: APIGatewayProxyEvent): Promise<APIGate
 
 export const handler = middy(baseHandler)
   .use(injectLambdaContext(logger))
+  .use(inputOutputLogger({ logger: (message) => logger.info("Event/Result", message) }))
+  .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
   .use(IpCheckerMiddleware())
   .use(errorHandlingMiddleware())
   .use(JSONErrorHandlerMiddleware());

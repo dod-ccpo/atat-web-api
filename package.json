@@ -45,6 +45,7 @@
     "@aws-sdk/client-sqs": "^3.87.0",
     "@middy/core": "^3.0.1",
     "@middy/error-logger": "^3.0.2",
+    "@middy/http-json-body-parser": "^3.0.2",
     "@middy/input-output-logger": "^3.0.2",
     "@middy/validator": "^3.0.1",
     "aws-cdk-lib": "2.24.1",

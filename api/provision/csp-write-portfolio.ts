@@ -10,6 +10,8 @@ import { logger } from "../../utils/logging";
 import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
 import { ValidationErrorResponse } from "../../utils/response";
 import { getConfiguration } from "./csp-configuration";
+import errorLogger from "@middy/error-logger";
+import inputOutputLogger from "@middy/input-output-logger";
 
 /**
  * Mock invocation of CSP and returns a CSP Response based on CSP
@@ -138,6 +140,8 @@ export async function createCspResponse(request: ProvisionRequest): Promise<CspR
 
 export const handler = middy(baseHandler)
   .use(injectLambdaContext(logger))
+  .use(inputOutputLogger({ logger: (message) => logger.info("Event/Result", message) }))
+  .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
   .use(validator({ eventSchema: provisionRequestSchema }))
   .use(errorHandlingMiddleware())
   .use(JSONErrorHandlerMiddleware());

@@ -22,6 +22,7 @@ import xssSanitizer from "../../utils/middleware/xss-sanitizer";
 import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusCode } from "../../utils/response";
 import errorLogger from "@middy/error-logger";
 import inputOutputLogger from "@middy/input-output-logger";
+import httpJsonBodyParser from "@middy/http-json-body-parser";
 
 const SFN_ARN = process.env.SFN_ARN ?? "";
 
@@ -101,6 +102,7 @@ export const handler = middy(baseHandler, {})
   .use(IpCheckerMiddleware())
   .use(xssSanitizer())
   .use(cspPortfolioIdChecker())
+  .use(httpJsonBodyParser())
   .use(validator({ eventSchema: wrapSchema(provisionRequestSchema) }))
   .use(errorHandlingMiddleware())
   .use(JSONErrorHandlerMiddleware());
