@@ -1,4 +1,7 @@
+import { injectLambdaContext } from "@aws-lambda-powertools/logger";
 import middy from "@middy/core";
+import errorLogger from "@middy/error-logger";
+import inputOutputLogger from "@middy/input-output-logger";
 import validator from "@middy/validator";
 import { Context } from "aws-lambda";
 import axios from "axios";
@@ -23,7 +26,6 @@ export async function baseHandler(
   stateInput: ProvisionRequest,
   context: Context
 ): Promise<CspResponse | ValidationErrorResponse> {
-  logger.addContext(context);
   logger.info("Event", { event: stateInput as any });
   logger.addPersistentLogAttributes({ correlationIds: { jobId: stateInput.jobId } });
 
@@ -137,6 +139,9 @@ export async function createCspResponse(request: ProvisionRequest): Promise<CspR
 }
 
 export const handler = middy(baseHandler)
-  .use(validator({ inputSchema: provisionRequestSchema }))
+  .use(injectLambdaContext(logger))
+  .use(inputOutputLogger({ logger: (message) => logger.info("Event/Result", message) }))
+  .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
+  .use(validator({ eventSchema: provisionRequestSchema }))
   .use(errorHandlingMiddleware())
   .use(JSONErrorHandlerMiddleware());

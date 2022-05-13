@@ -1,4 +1,3 @@
-import * as cdk from "aws-cdk-lib";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as secrets from "aws-cdk-lib/aws-secretsmanager";
 import { Construct } from "constructs";

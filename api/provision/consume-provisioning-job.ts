@@ -1,19 +1,20 @@
+import { injectLambdaContext } from "@aws-lambda-powertools/logger";
+import { DeleteMessageCommand, ReceiveMessageCommand, ReceiveMessageCommandInput } from "@aws-sdk/client-sqs";
+import middy from "@middy/core";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { Logger } from "@aws-lambda-powertools/logger";
+import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import { ProvisionRequest } from "../../models/provisioning-jobs";
 import { sqsClient } from "../../utils/aws-sdk/sqs";
-import middy from "@middy/core";
-import { DeleteMessageCommand, ReceiveMessageCommand, ReceiveMessageCommandInput } from "@aws-sdk/client-sqs";
-import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
-import { IpCheckerMiddleware } from "../../utils/middleware/ip-logging";
+import { logger } from "../../utils/logging";
 import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
-import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
+import { IpCheckerMiddleware } from "../../utils/middleware/ip-logging";
+import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
+import errorLogger from "@middy/error-logger";
+import inputOutputLogger from "@middy/input-output-logger";
 
 const PROVISIONING_QUEUE_URL = process.env.PROVISIONING_QUEUE_URL ?? "";
-const logger = new Logger({ serviceName: "provisioningWorkflow" });
 
-export async function baseHandler(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
-  logger.info("General lambda info", { isAColdStart: logger.isColdStart() });
+export async function baseHandler(_event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   // poll messages from the queue
   const receiveMessageInput: ReceiveMessageCommandInput = {
     QueueUrl: PROVISIONING_QUEUE_URL,
@@ -60,6 +61,9 @@ export async function baseHandler(event: APIGatewayProxyEvent): Promise<APIGatew
 }
 
 export const handler = middy(baseHandler)
+  .use(injectLambdaContext(logger))
+  .use(inputOutputLogger({ logger: (message) => logger.info("Event/Result", message) }))
+  .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
   .use(IpCheckerMiddleware())
   .use(errorHandlingMiddleware())
   .use(JSONErrorHandlerMiddleware());

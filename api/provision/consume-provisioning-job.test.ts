@@ -1,10 +1,10 @@
-import { handler } from "./consume-provisioning-job";
-import { Context, APIGatewayProxyEvent } from "aws-lambda";
+import { DeleteMessageCommand, ReceiveMessageCommand } from "@aws-sdk/client-sqs";
+import { APIGatewayProxyEvent, Context } from "aws-lambda";
 import { mockClient } from "aws-sdk-client-mock";
 import { sqsClient } from "../../utils/aws-sdk/sqs";
-import { DeleteMessageCommand, ReceiveMessageCommand } from "@aws-sdk/client-sqs";
-import { requestContext } from "./start-provisioning-job.test";
 import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusCode } from "../../utils/response";
+import { handler } from "./consume-provisioning-job";
+import { requestContext } from "./start-provisioning-job.test";
 
 export const mockReceiveMessageResponse = {
   $metadata: {
