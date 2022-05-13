@@ -40,7 +40,10 @@ export const provisioningBodyWithPayload = {
 export const requestContext = { identity: { sourceIp: "203.0.113.0" } };
 
 export const validRequest = {
-  body: provisioningBodyWithPayload,
+  body: JSON.stringify(provisioningBodyWithPayload),
+  headers: {
+    "Content-Type": "application/json",
+  },
   requestContext,
 } as any;
 
@@ -56,7 +59,7 @@ describe("Successful provisioning operations", () => {
   });
   it("should add a funding source to existing portfolio", async () => {
     const request = {
-      body: {
+      body: JSON.stringify({
         ...provisioningBodyNoPayload,
         operationType: ProvisionRequestType.ADD_FUNDING_SOURCE,
         payload: {
@@ -70,6 +73,9 @@ describe("Successful provisioning operations", () => {
             },
           ],
         },
+      }),
+      headers: {
+        "Content-Type": "application/json",
       },
       requestContext,
     } as any;
@@ -78,12 +84,15 @@ describe("Successful provisioning operations", () => {
   });
   it("should add operators to existing portfolio", async () => {
     const request = {
-      body: {
+      body: JSON.stringify({
         ...provisioningBodyNoPayload,
         operationType: ProvisionRequestType.ADD_OPERATORS,
         payload: {
           operators: [...operators, "root.admin@mail.mil"],
         },
+      }),
+      headers: {
+        "Content-Type": "application/json",
       },
       requestContext,
     } as any;
@@ -95,12 +104,15 @@ describe("Successful provisioning operations", () => {
 describe("Failed provision operations", () => {
   it("should return a 400 due to unknown operationType (validation error)", async () => {
     const request = {
-      body: {
+      body: JSON.stringify({
         ...provisioningBodyNoPayload,
         operationType: "unknown",
         payload: {
           operators,
         },
+      }),
+      headers: {
+        "Content-Type": "application/json",
       },
       requestContext,
     } as any;
@@ -109,12 +121,15 @@ describe("Failed provision operations", () => {
   });
   it("should return a 400 when no portfolioId for ADD FUNDS/OPERATOR operationType (validation error)", async () => {
     const request = {
-      body: {
+      body: JSON.stringify({
         ...provisioningBodyNoPayload,
         portfolioId: null,
         payload: {
           operators,
         },
+      }),
+      headers: {
+        "Content-Type": "application/json",
       },
       requestContext,
     } as any;

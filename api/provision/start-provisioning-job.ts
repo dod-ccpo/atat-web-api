@@ -95,14 +95,14 @@ export function transformProvisionRequest(request: ProvisionRequest): CspInvocat
   }
 }
 
-export const handler = middy(baseHandler, {})
+export const handler = middy(baseHandler)
   .use(injectLambdaContext(logger))
   .use(inputOutputLogger({ logger: (message) => logger.info("Event/Result", message) }))
   .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
   .use(IpCheckerMiddleware())
+  .use(httpJsonBodyParser())
   .use(xssSanitizer())
   .use(cspPortfolioIdChecker())
-  .use(httpJsonBodyParser())
   .use(validator({ eventSchema: wrapSchema(provisionRequestSchema) }))
   .use(errorHandlingMiddleware())
   .use(JSONErrorHandlerMiddleware());
