@@ -34,24 +34,33 @@ export const errorHandlingMiddleware = (): middy.MiddlewareObj<MiddlewareInputs,
 
     switch (errorMessage) {
       case "CSP portfolio ID required.":
-        return new ValidationErrorResponse("Request failed validation", {
+        request.response = new ValidationErrorResponse("Request failed validation", {
           issue: errorMessage,
           name: error.name,
         });
+        break;
       case "Event object failed validation":
-        return new ValidationErrorResponse("Request failed validation", error.details as Record<string, unknown>);
+        request.response = new ValidationErrorResponse(
+          "Request failed validation",
+          error.details as Record<string, unknown>
+        );
+        break;
       case "Business rules validation failed":
-        return new ValidationErrorResponse(
+        request.response = new ValidationErrorResponse(
           "Request failed validation (business rules)",
           error.error_map as Record<string, unknown>
         );
+        break;
       case "Shape validation failed, invalid request body":
-        return REQUEST_BODY_INVALID;
+        request.response = REQUEST_BODY_INVALID;
+        break;
       case "Content type defined as JSON but an invalid JSON was provided":
-        return REQUEST_BODY_INVALID;
+        request.response = REQUEST_BODY_INVALID;
+        break;
       default:
         console.error("Unhandled error: " + JSON.stringify(error));
-        return INTERNAL_SERVER_ERROR;
+        request.response = INTERNAL_SERVER_ERROR;
+        break;
     }
   };
   return {

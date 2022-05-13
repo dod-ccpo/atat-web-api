@@ -1,9 +1,13 @@
-import { sqsClient } from "../../utils/aws-sdk/sqs";
+import { injectLambdaContext } from "@aws-lambda-powertools/logger";
 import { SendMessageCommand } from "@aws-sdk/client-sqs";
 import middy from "@middy/core";
 import validator from "@middy/validator";
-import { provisionRequestSchema, ProvisionRequest } from "../../models/provisioning-jobs";
+import { ProvisionRequest, provisionRequestSchema } from "../../models/provisioning-jobs";
+import { sqsClient } from "../../utils/aws-sdk/sqs";
+import { logger } from "../../utils/logging";
 import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
+
+const MESSAGE_GROUP_ID = "provisioning-queue-message-group";
 
 /**
  * Result Lambda - Takes Step Fn input and sends to SQS Queue to be consumed
@@ -14,12 +18,17 @@ import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-m
 
 export async function baseHandler(stateInput: ProvisionRequest): Promise<ProvisionRequest> {
   const QUEUE_URL = process.env.PROVISIONING_QUEUE_URL ?? "";
-  console.log("Sending result message to " + QUEUE_URL);
+  logger.info("Sending result message to queue", {
+    messageData: {
+      queue: QUEUE_URL,
+      messageGroupId: MESSAGE_GROUP_ID,
+    },
+  });
   await sqsClient.send(
     new SendMessageCommand({
       QueueUrl: QUEUE_URL,
       MessageBody: JSON.stringify(stateInput),
-      MessageGroupId: "provisioning-queue-message-group",
+      MessageGroupId: MESSAGE_GROUP_ID,
     })
   );
 
@@ -27,5 +36,6 @@ export async function baseHandler(stateInput: ProvisionRequest): Promise<Provisi
 }
 
 export const handler = middy(baseHandler)
-  .use(validator({ ajvOptions: { verbose: true }, inputSchema: provisionRequestSchema }))
+  .use(injectLambdaContext(logger))
+  .use(validator({ ajvOptions: { verbose: true }, eventSchema: provisionRequestSchema }))
   .use(errorHandlingMiddleware());

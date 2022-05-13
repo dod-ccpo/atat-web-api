@@ -1,6 +1,9 @@
-import { sfnClient } from "../../utils/aws-sdk/step-functions";
+import { injectLambdaContext } from "@aws-lambda-powertools/logger";
+import middy from "@middy/core";
+import validator from "@middy/validator";
 import { APIGatewayProxyResult } from "aws-lambda";
-import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusCode } from "../../utils/response";
+import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
+import { HttpMethod } from "../../lib/http";
 import {
   CspInvocation,
   ProvisionRequest,
@@ -8,17 +11,15 @@ import {
   ProvisionRequestType,
   StepFunctionRequestEvent,
 } from "../../models/provisioning-jobs";
-import { wrapSchema } from "../../utils/middleware/schema-wrapper";
-import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
-import middy from "@middy/core";
-import validator from "@middy/validator";
-import jsonBodyParser from "@middy/http-json-body-parser";
-import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
-import xssSanitizer from "../../utils/middleware/xss-sanitizer";
-import { IpCheckerMiddleware } from "../../utils/middleware/ip-logging";
-import { HttpMethod } from "../../lib/http";
+import { sfnClient } from "../../utils/aws-sdk/step-functions";
 import { REQUEST_BODY_INVALID } from "../../utils/errors";
+import { logger } from "../../utils/logging";
 import { cspPortfolioIdChecker } from "../../utils/middleware/check-csp-portfolio-id";
+import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
+import { IpCheckerMiddleware } from "../../utils/middleware/ip-logging";
+import { wrapSchema } from "../../utils/middleware/schema-wrapper";
+import xssSanitizer from "../../utils/middleware/xss-sanitizer";
+import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusCode } from "../../utils/response";
 
 const SFN_ARN = process.env.SFN_ARN ?? "";
 
@@ -30,7 +31,8 @@ const SFN_ARN = process.env.SFN_ARN ?? "";
 export async function baseHandler(event: StepFunctionRequestEvent<ProvisionRequest>): Promise<APIGatewayProxyResult> {
   try {
     const cspInvocationJob = transformProvisionRequest(event.body);
-    console.log("SentToSfn: " + JSON.stringify(cspInvocationJob));
+
+    logger.info("Sent to Sfn", { request: cspInvocationJob as any });
 
     // starting the execution
     const sfnInput = {
@@ -44,7 +46,7 @@ export async function baseHandler(event: StepFunctionRequestEvent<ProvisionReque
 
     return new ApiSuccessResponse(sfnInput, SuccessStatusCode.CREATED);
   } catch (error) {
-    console.log("ERROR: " + JSON.stringify(error));
+    logger.error("An error occurred processing the event", error as Error);
     return REQUEST_BODY_INVALID;
   }
 }
@@ -91,10 +93,10 @@ export function transformProvisionRequest(request: ProvisionRequest): CspInvocat
 }
 
 export const handler = middy(baseHandler)
+  .use(injectLambdaContext(logger))
   .use(IpCheckerMiddleware())
   .use(xssSanitizer())
-  .use(jsonBodyParser())
   .use(cspPortfolioIdChecker())
-  .use(validator({ inputSchema: wrapSchema(provisionRequestSchema) }))
+  .use(validator({ eventSchema: wrapSchema(provisionRequestSchema) }))
   .use(errorHandlingMiddleware())
   .use(JSONErrorHandlerMiddleware());
