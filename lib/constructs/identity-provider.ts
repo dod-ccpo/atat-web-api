@@ -107,7 +107,7 @@ export class CognitoIdentityProviderClient extends Construct {
 
   constructor(scope: Construct, id: string, props: CognitoIdentityProviderClientProps) {
     super(scope, id);
-    const client = props.userPool.addClient("Client", {
+    const client = props.userPool.addClient(id, {
       oAuth: {
         flows: {
           clientCredentials: true,
@@ -239,6 +239,14 @@ export class CognitoIdentityProvider extends Construct implements IIdentityProvi
     // Amazon Cognito requires the usage of the FIPS endpoints in us-gov-west-1
     app.configure(client.clientId, client.secret, this.domain.baseUrl({ fips: true }));
     return client;
+  }
+
+  public discoveryUrl(): string {
+    // Breaking up the variables is the most readble to make this work without the string being too long
+    const region = cdk.Aws.REGION;
+    const suffix = cdk.Aws.URL_SUFFIX;
+    const userPoolId = this.userPool.userPoolId;
+    return `https://cognito-idp-fips.${region}.${suffix}/${userPoolId}/.well-known/openid-configuration`;
   }
 }
 

@@ -1,8 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import * as apigw from "aws-cdk-lib/aws-apigateway";
 import * as iam from "aws-cdk-lib/aws-iam";
-import * as lambda from "aws-cdk-lib/aws-lambda";
-import * as nodejs from "aws-cdk-lib/aws-lambda-nodejs";
 import * as statement from "cdk-iam-floyd";
 import { Construct } from "constructs";
 import { AtatNetStack } from "./atat-net-stack";
@@ -71,8 +69,25 @@ export class AtatWebApiStack extends cdk.Stack {
       )
     );
 
+    const atatIdp = new idp.CognitoIdentityProvider(this, "AtatIdp", {
+      domainPrefix: `atat${environmentName.toLowerCase()}`,
+      scopeConfig: [
+        {
+          resourceServerName: "atat",
+          scopes: [
+            { name: "read-cost", description: "Allow reading cost information" },
+            { name: "read-portfolio", description: "Allow reading information about portfolios" },
+            { name: "write-portfolio", description: "Allow creating and updating portfolios" },
+          ],
+        },
+      ],
+    });
+    const urlOutput = new cdk.CfnOutput(this, "IdpDiscoveryUrl", {
+      value: atatIdp.discoveryUrl(),
+    });
+
     // State Machine and workflow
-    const provisioningSfn = new ProvisioningWorkflow(this, "ProvisioningWorkflow", { environmentName });
+    const provisioningSfn = new ProvisioningWorkflow(this, "ProvisioningWorkflow", { environmentName, idp: atatIdp });
 
     // Provisioning lambda that translates and invokes the state machine
     const provisioningJob = new ApiSfnFunction(this, "ProvisioningJobRequest", {
@@ -87,27 +102,6 @@ export class AtatWebApiStack extends cdk.Stack {
     provisioningJobResource.addMethod(
       provisioningSfn.provisioningQueueConsumer.method,
       new apigw.LambdaIntegration(provisioningSfn.provisioningQueueConsumer.fn)
-    );
-
-    const atatIdp = new idp.CognitoIdentityProvider(this, "AtatIdp", {
-      domainPrefix: `atat${environmentName.toLowerCase()}`,
-      scopeConfig: [
-        {
-          resourceServerName: "atat",
-          scopes: [
-            { name: "read-cost", description: "Allow reading cost information" },
-            { name: "read-portfolio", description: "Allow reading information about portfolios" },
-            { name: "write-portfolio", description: "Allow creating and updating portfolios" },
-          ],
-        },
-      ],
-    });
-    const demoApp = atatIdp.addClient(
-      new idp.IdentityProviderLambdaClient(
-        "DemoClient",
-        new nodejs.NodejsFunction(this, "SampleFn", { entry: "idp/client.ts", runtime: lambda.Runtime.NODEJS_16_X })
-      ),
-      ["atat/read-cost"]
     );
   }
 }

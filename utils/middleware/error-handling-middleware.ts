@@ -27,7 +27,7 @@ export const errorHandlingMiddleware = (): middy.MiddlewareObj<MiddlewareInputs,
     const error = serializeError(request.error!);
     const errorMessage = error.message;
 
-    if (error.name === "MockCspApiError") {
+    if (error.name === "CspApiError") {
       // force state machine task to retry
       throw request.error;
     }
@@ -50,7 +50,7 @@ export const errorHandlingMiddleware = (): middy.MiddlewareObj<MiddlewareInputs,
       case "Content type defined as JSON but an invalid JSON was provided":
         return REQUEST_BODY_INVALID;
       default:
-        console.error("Database error: " + JSON.stringify(error));
+        console.error("Unhandled error: " + JSON.stringify(error));
         return INTERNAL_SERVER_ERROR;
     }
   };

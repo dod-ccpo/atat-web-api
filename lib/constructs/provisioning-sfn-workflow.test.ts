@@ -1,8 +1,8 @@
 import * as cdk from "aws-cdk-lib";
 import { Match, Template } from "aws-cdk-lib/assertions";
-import { ProvisioningWorkflow } from "./provisioning-sfn-workflow";
 import { CfnRole } from "aws-cdk-lib/aws-iam";
 import { CfnQueue } from "aws-cdk-lib/aws-sqs";
+import { ProvisioningWorkflow } from "./provisioning-sfn-workflow";
 
 describe("Provisioning Workflow Tests", () => {
   let stack: cdk.Stack;
