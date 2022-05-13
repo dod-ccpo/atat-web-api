@@ -3,7 +3,7 @@ import * as cognito from "aws-cdk-lib/aws-cognito";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as secrets from "aws-cdk-lib/aws-secretsmanager";
 import * as cr from "aws-cdk-lib/custom-resources";
-import { Construct } from "constructs";
+import { Construct, DependencyGroup } from "constructs";
 
 /**
  * A generic client application for an identity provider.
@@ -105,9 +105,11 @@ export class CognitoIdentityProviderClient extends Construct {
   public readonly name: string;
   public readonly secret: secrets.ISecret;
 
+  public readonly userPoolClient: cognito.IUserPoolClient;
+
   constructor(scope: Construct, id: string, props: CognitoIdentityProviderClientProps) {
     super(scope, id);
-    const client = props.userPool.addClient(id, {
+    this.userPoolClient = props.userPool.addClient(id, {
       oAuth: {
         flows: {
           clientCredentials: true,
@@ -119,11 +121,11 @@ export class CognitoIdentityProviderClient extends Construct {
       generateSecret: true,
     });
     const clientDetails = new UserPoolClientDetails(this, "ClientDetails", {
-      client,
+      client: this.userPoolClient,
       userPool: props.userPool,
     });
     this.name = clientDetails.getResponseField("UserPoolClient.ClientName");
-    this.clientId = client.userPoolClientId;
+    this.clientId = this.userPoolClient.userPoolClientId;
     this.secret = new secrets.Secret(this, "ClientSecret", {
       secretStringValue: cdk.SecretValue.resourceAttribute(
         clientDetails.getResponseField("UserPoolClient.ClientSecret")
@@ -203,6 +205,10 @@ export class CognitoIdentityProvider extends Construct implements IIdentityProvi
   public readonly userPool: cognito.IUserPool;
   public readonly domain: cognito.UserPoolDomain;
 
+  // Without this, clients may start getting created without the resource servers being
+  // provisioned, resulting in errors about scopes not being available to clients.
+  private readonly readyForClients = new DependencyGroup();
+
   private readonly resourceServers: cognito.UserPoolResourceServer[] = [];
   constructor(scope: Construct, id: string, props?: CognitoIdentityProviderProps) {
     super(scope, id);
@@ -222,10 +228,15 @@ export class CognitoIdentityProvider extends Construct implements IIdentityProvi
           this.userPool.addResourceServer(scopeConfig.resourceServerName, {
             identifier: scopeConfig.resourceServerName,
             scopes: scopeConfig.scopes.map(
-              (scope) => new cognito.ResourceServerScope({ scopeName: scope.name, scopeDescription: scope.description })
+              ({ name, description }) =>
+                new cognito.ResourceServerScope({
+                  scopeName: name,
+                  scopeDescription: description,
+                })
             ),
           })
         );
+        this.resourceServers.forEach((server) => this.readyForClients.add(server));
       }
     }
   }
@@ -236,6 +247,7 @@ export class CognitoIdentityProvider extends Construct implements IIdentityProvi
       clientApplication: app,
       scopes,
     });
+    client.userPoolClient.node.addDependency(this.readyForClients);
     // Amazon Cognito requires the usage of the FIPS endpoints in us-gov-west-1
     app.configure(client.clientId, client.secret, this.domain.baseUrl({ fips: true }));
     return client;
