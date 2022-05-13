@@ -37,7 +37,7 @@ export async function baseHandler(
   if (cspResponse.code >= 500) {
     const error = new Error(JSON.stringify(cspResponse));
     Object.defineProperty(error, "name", {
-      value: "MockCspApiError",
+      value: "CspApiError",
     });
     throw error;
   }
