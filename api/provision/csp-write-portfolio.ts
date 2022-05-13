@@ -1,5 +1,7 @@
 import { injectLambdaContext } from "@aws-lambda-powertools/logger";
 import middy from "@middy/core";
+import errorLogger from "@middy/error-logger";
+import inputOutputLogger from "@middy/input-output-logger";
 import validator from "@middy/validator";
 import { Context } from "aws-lambda";
 import axios from "axios";
@@ -10,8 +12,6 @@ import { logger } from "../../utils/logging";
 import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
 import { ValidationErrorResponse } from "../../utils/response";
 import { getConfiguration } from "./csp-configuration";
-import errorLogger from "@middy/error-logger";
-import inputOutputLogger from "@middy/input-output-logger";
 
 /**
  * Mock invocation of CSP and returns a CSP Response based on CSP

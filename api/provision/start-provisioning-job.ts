@@ -1,5 +1,8 @@
 import { injectLambdaContext } from "@aws-lambda-powertools/logger";
 import middy from "@middy/core";
+import errorLogger from "@middy/error-logger";
+import httpJsonBodyParser from "@middy/http-json-body-parser";
+import inputOutputLogger from "@middy/input-output-logger";
 import validator from "@middy/validator";
 import { APIGatewayProxyResult } from "aws-lambda";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
@@ -20,9 +23,6 @@ import { IpCheckerMiddleware } from "../../utils/middleware/ip-logging";
 import { wrapSchema } from "../../utils/middleware/schema-wrapper";
 import xssSanitizer from "../../utils/middleware/xss-sanitizer";
 import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusCode } from "../../utils/response";
-import errorLogger from "@middy/error-logger";
-import inputOutputLogger from "@middy/input-output-logger";
-import httpJsonBodyParser from "@middy/http-json-body-parser";
 
 const SFN_ARN = process.env.SFN_ARN ?? "";
 

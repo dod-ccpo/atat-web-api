@@ -1,10 +1,10 @@
 import { Context } from "aws-lambda";
-import { handler } from "./start-provisioning-job";
-import { ProvisionRequestType } from "../../models/provisioning-jobs";
-import { ApiSuccessResponse, ValidationErrorResponse } from "../../utils/response";
-import { sfnClient } from "../../utils/aws-sdk/step-functions";
 import { mockClient } from "aws-sdk-client-mock";
 import { Network } from "../../models/cloud-service-providers";
+import { ProvisionRequestType } from "../../models/provisioning-jobs";
+import { sfnClient } from "../../utils/aws-sdk/step-functions";
+import { ApiSuccessResponse, ValidationErrorResponse } from "../../utils/response";
+import { handler } from "./start-provisioning-job";
 
 export const fundingSources = [
   {
