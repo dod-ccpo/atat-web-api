@@ -20,6 +20,8 @@ import { IpCheckerMiddleware } from "../../utils/middleware/ip-logging";
 import { wrapSchema } from "../../utils/middleware/schema-wrapper";
 import xssSanitizer from "../../utils/middleware/xss-sanitizer";
 import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusCode } from "../../utils/response";
+import errorLogger from "@middy/error-logger";
+import inputOutputLogger from "@middy/input-output-logger";
 
 const SFN_ARN = process.env.SFN_ARN ?? "";
 
@@ -92,8 +94,10 @@ export function transformProvisionRequest(request: ProvisionRequest): CspInvocat
   }
 }
 
-export const handler = middy(baseHandler)
+export const handler = middy(baseHandler, {})
   .use(injectLambdaContext(logger))
+  .use(inputOutputLogger({ logger: (message) => logger.info("Event/Result", message) }))
+  .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
   .use(IpCheckerMiddleware())
   .use(xssSanitizer())
   .use(cspPortfolioIdChecker())
