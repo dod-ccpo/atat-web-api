@@ -38,7 +38,7 @@
     "typescript": "~4.6.4"
   },
   "dependencies": {
-    "@aws-lambda-powertools/logger": "^0.8.1",
+    "@aws-lambda-powertools/logger": "^0.9.0",
     "@aws-sdk/client-s3": "^3.88.0",
     "@aws-sdk/client-secrets-manager": "^3.89.0",
     "@aws-sdk/client-sfn": "^3.87.0",
@@ -50,8 +50,8 @@
     "@middy/validator": "^3.0.2",
     "aws-cdk-lib": "2.24.1",
     "axios": "^0.27.2",
-    "cdk-iam-floyd": "0.369.0",
-    "cdk-nag": "^2.14.0",
+    "cdk-iam-floyd": "0.370.0",
+    "cdk-nag": "^2.14.3",
     "constructs": "^10.1.7",
     "http-errors": "^2.0.0",
     "middy-middleware-json-error-handler": "^3.0.0",
