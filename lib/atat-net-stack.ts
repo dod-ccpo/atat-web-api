@@ -1,5 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
+import * as logs from "aws-cdk-lib/aws-logs";
 import * as custom from "aws-cdk-lib/custom-resources";
 
 import { Construct } from "constructs";
@@ -45,8 +46,15 @@ export class AtatNetStack extends cdk.Stack {
         },
       ],
     });
-    // Default is capturing all logs and pushing to CloudWatchLogs
-    vpc.addFlowLog("AllFlowLogs");
+
+    // Capture all VPC flow logs and send to CloudWatch Logs with indefinite retention
+    vpc.addFlowLog("AllFlowLogs", {
+      destination: ec2.FlowLogDestination.toCloudWatchLogs(
+        new logs.LogGroup(this, "AllFlowLogs", {
+          retention: logs.RetentionDays.INFINITE,
+        })
+      ),
+    });
     this.vpc = vpc;
     this.outputs.push(
       new cdk.CfnOutput(this, "VpcId", {

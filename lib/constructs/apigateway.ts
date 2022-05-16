@@ -50,7 +50,9 @@ export class AtatRestApi extends Construct {
 
   constructor(scope: Construct, id: string, props?: AtatRestApiProps) {
     super(scope, id);
-    const accessLogs = new logs.LogGroup(this, "AccessLogs");
+    const accessLogs = new logs.LogGroup(this, "AccessLogs", {
+      retention: logs.RetentionDays.INFINITE,
+    });
 
     // When a VPC is provided (which may not always be the case), a private
     // endpoint is configured within the given VPC using a given VPC interface
