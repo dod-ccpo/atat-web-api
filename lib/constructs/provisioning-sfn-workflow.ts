@@ -134,7 +134,7 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
     // Composing state machine
     this.workflow = InvokeCspApi.sfnTask.next(httpResponseChoices);
     this.logGroup = new logs.LogGroup(scope, "StepFunctionsLogs", {
-      retention: logs.RetentionDays.ONE_WEEK,
+      retention: logs.RetentionDays.INFINITE,
       logGroupName: `/aws/vendedlogs/states/StepFunctionsLogs${environmentName}`,
     });
     this.stateMachine = new StateMachine(this, "ProvisioningStateMachine", {
