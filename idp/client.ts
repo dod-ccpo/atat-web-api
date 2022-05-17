@@ -24,7 +24,7 @@ export interface TokenResponse {
  */
 async function fetchClientSecret(secretId: string): Promise<string> {
   const request: GetSecretValueCommandInput = { SecretId: secretId };
-  logger.info("Retriving client secret from Secrets Manager", { request: { ...request } });
+  logger.info("Retrieving client secret from Secrets Manager", { request: { ...request } });
   return (await secretsClient.getSecretValue(request)).SecretString!;
 }
 
