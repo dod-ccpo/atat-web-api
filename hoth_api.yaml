@@ -321,3 +321,14 @@ components:
     DescriptionOfWork:
       description: "TODO: AT-7341, define DescriptionOfWork schema"
       type: object
+      properties:
+        to_title:
+          type: string
+          maxLength: 60
+          description: "1. TO Title (Provide a short descriptive title of the work to be performed"
+        scope:
+          type: string
+          maxLength: 300
+          description: >
+            2. Scope. The scope of this requirement is (describe what is necessary to achieve mission specific outcome for this particular task: 
+            for example, move DITCO’s contract writing system to a cloud environment).
