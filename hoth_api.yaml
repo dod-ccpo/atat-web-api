@@ -319,16 +319,103 @@ components:
       oneOf:
         - $ref: "#/components/schemas/DescriptionOfWork"
     DescriptionOfWork:
-      description: "TODO: AT-7341, define DescriptionOfWork schema"
+      description: "Schema used to generate DescriptionOfWork document"
       type: object
       properties:
         to_title:
           type: string
           maxLength: 60
-          description: "1. TO Title (Provide a short descriptive title of the work to be performed"
         scope:
           type: string
           maxLength: 300
-          description: >
-            2. Scope. The scope of this requirement is (describe what is necessary to achieve mission specific outcome for this particular task: 
-            for example, move DITCO’s contract writing system to a cloud environment).
+        scope_surge:
+          type: integer
+          maxLength: 50
+    CurrentEnvironment:
+      description: "Part of DOW, encapsulates all data for 3. Background/Current Environment section."
+      properties:
+        current_environment_exists:
+          type: boolean
+        environment_instances:
+          type: array
+          items:
+            $ref: "#/components/schemas/EnvironmentInstance"
+          maxItems: 4000
+        additional_info:
+          type: string
+          maxLength: 1000
+    EnvironmentInstance:
+      description: "Part of DOW, represents a single Environment Instance"
+      properties:
+        instance_name:
+          type: string
+          maxLength: 100
+        classification_level:
+          $ref: "#/components/schemas/ClassificationLevel"
+        instance_location:
+          type: string
+          enum:
+            - CSP
+            - Hybrid
+            - Not in the cloud / On-premise
+        csp_region:
+          $ref: "#/components/schemas/TargetCloudServiceProviderName" #On the SNOW side, this is CSP_REGION a choice field with no options, so using TargetCSPName instead
+        performance_tier: # This is also an empty choice on the SNOW side, set as empty String until we get details
+          type: string
+        pricing_model:
+          type: string
+          enum:
+            - On-demand
+            - Pay-as-you-go
+            - Reserved
+        pricing_model_expiration:
+          type: string
+          format: date
+          example: "2022-07-01"
+        operating_system_licensing:
+          type: string
+          maxLength: 1000
+        number_of_vCPUs:
+          type: integer
+          maxLength: 40
+        storage_type:
+          type: string # Empty choice on SNOW side, set as empty String until we get details
+        storage_amount:
+          type: integer
+          maxLength: 40
+        storage_unit:
+          $ref: "#/components/schemas/StorageUnit"
+        memory_amount:
+          type: integer
+          maxLength: 40
+        memory_unit:
+          $ref: "#/components/schemas/StorageUnit"
+        data_egress_monthly_amount:
+          type: integer
+          maxLength: 40
+        data_egress_monthly_unit:
+          $ref: "#/components/schemas/StorageUnit"
+    ClassificationLevel:
+      description: "Part of DOW, Classification Level table fields"
+      properties:
+        classification:
+          type: string
+          enum:
+            - Unclassified
+            - Top Secret
+            - Secret
+        impact_level:
+          type: string
+          nullable: true
+          enum:
+            - IL2
+            - IL4
+            - IL5
+            - IL6
+            - null
+    StorageUnit:
+      description: "Part of DOW, used in EnvironmentInstance schema"
+      type: string
+      enum:
+        - GB
+        - TB
