@@ -11,9 +11,16 @@ const app = new cdk.App();
 
 const environmentParam = app.node.tryGetContext("atat:EnvironmentId");
 const sandboxParam = app.node.tryGetContext("atat:Sandbox");
+const vpcCidrParam = app.node.tryGetContext("atat:VpcCidr");
 
 if (!utils.isString(environmentParam)) {
   console.error("An EnvironmentId must be provided (use the atat:EnvironmentId context key)");
+  process.exit(1);
+}
+
+const cidrRegex = /^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$/;
+if (!utils.isString(vpcCidrParam) || !cidrRegex.test(vpcCidrParam)) {
+  console.error("A VpcCidr must be provided (use the atat:VpcCidr context key) and it must be a valid CIDR block.");
   process.exit(1);
 }
 
@@ -46,6 +53,7 @@ if (isSandbox) {
   // static value.
   const pipelineStack = new AtatPipelineStack(app, "AtatEnvironmentPipeline", {
     environmentName,
+    vpcCidr: vpcCidrParam,
     repository: app.node.tryGetContext("atat:VersionControlRepo"),
     branch: app.node.tryGetContext("atat:VersionControlBranch"),
     githubPatName: app.node.tryGetContext("atat:GitHubPatName"),
