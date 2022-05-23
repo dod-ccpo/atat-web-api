@@ -333,8 +333,19 @@ components:
           maximum: 50
         current_environment: # DOW section 3
           $ref: "#/components/schemas/CurrentEnvironment"
-        performance_requirements: # DOW section 4
+        performance_requirements: # DOW section 4 (and its subtasks)
           $ref: "#/components/schemas/PerformanceRequirements"
+        # DOW section 5 TBD
+        # DOW section 6 TBD
+        period_of_performance: # DOW section 7
+          $ref: "#/components/schemas/PeriodOfPerformance"
+        # DOW section 8 TBD
+        gfe_overview: # DOW section 9
+          $ref: "#/components/schemas/GFEOverview"
+        contract_considerations: # DOW section 10 (and its subtasks)
+          $ref: "#/components/schemas/ContractConsiderations"
+        section_508_accessibility_standards_for_cloud_computing: # DOW section 11
+          $ref: "#/components/schemas/SensitiveInformation"
     CurrentEnvironment:
       description: "Part of DOW, encapsulates all data for 3. Background/Current Environment section."
       properties:
@@ -424,7 +435,10 @@ components:
         - GB
         - TB
     PerformanceRequirements:
-      description: "Part of DOW, encapsulates all data for 4. Performance Requirements"
+      description: >
+        Part of DOW, encapsulates all data for 4. Performance Requirements and its subtasks. 
+        On the API side, the subtasks will filter through the provided required_services.service_offerings
+        to create the subtasks fields.
       properties:
         required_services:
           type: array
@@ -495,3 +509,161 @@ components:
         name:
           type: string
           maxLength: 100
+    PeriodOfPerformance:
+      description: "Part of DOW, represents a single Period of Performance"
+      properties:
+        base_period:
+          $ref: "#/components/schemas/Period"
+        option_periods:
+          type: array
+          items:
+            $ref: "#/components/schemas/Period"
+          maxItems: 4000
+        pop_start_request:
+          type: string
+          enum:
+            - Unselected
+            - Yes
+            - No
+        requested_pop_start_date:
+          type: string
+          format: date
+          example: "2021-07-01"
+        time_frame:
+          type: string
+          enum:
+            - No later than
+            - No sooner than
+        recurring_requirement:
+          type: string
+          enum:
+            - Unselected
+            - Yes
+            - No
+    GFEOverview:
+      description: "Part of DOW, represents GFE Overview fields"
+      properties:
+        dpas_unit_id:
+          type: string
+          maxLength: 6
+        property_custodian_name:
+          type: string
+          maxLength: 40 # This is another instance of maxLength in SNOW being weird, the person might have a name longer than 40 characters
+        dpas_custodian_number: # DPAS Custodian Number
+          type: string
+          maxLength: 6
+        property_accountable:
+          type: string
+          enum:
+            - Unselected
+            - Yes
+            - No
+        gfe_or_gfp_furnished:
+          type: string
+          enum:
+            - Unselected
+            - Yes
+            - No
+    ContractConsiderations:
+      description: "Part of DOW, represents Contract Considerations Table"
+      properties:
+        packaging_shipping_none_apply:
+          type: boolean
+        packaging_shippping_other:
+          type: boolean
+        packaging_shipping_other_explanation:
+          type: string
+          maxLength: 1000
+        potential_conflict_of_interest:
+          type: string
+          enum:
+            - Unselected
+            - Yes
+            - No
+        conflict_of_interest_explanation:
+          type: string
+          maxLength: 1600
+        contractor_provided_transfer:
+          type: boolean
+        contractor_required_training:
+          type: string
+          enum:
+            - Unselected
+            - Yes
+            - No
+        required_training_services: # This field looks incomplete on the SNOW side
+          $ref: "#/components/schemas/TrainingCourses"
+    TrainingCourses:
+      description: "Part of DOW, part of schema for ContractConsiderations, includes training courses name and value"
+      type: object
+      properties:
+        name:
+          type: string
+        value:
+          type: string
+    SensitiveInformation:
+      description: "Part of DOW, represents Sensitive Information Table fields"
+      properties:
+        pii_present:
+          type: string
+          enum:
+            - Unselected
+            - Yes
+            - No
+        work_to_be_performed:
+          type: string
+          maxLength: 400
+        system_of_record_name:
+          type: string
+          maxLength: 40
+        FOIA_city_apo_fpo:
+          type: string
+          maxLength: 50
+        FOIA_country:
+          type: string
+          maxLength: 50
+        FOIA_street_address_1:
+          type: string
+          maxLength: 40
+        FOIA_street_address_2:
+          type: string
+          maxLength: 40
+        FOIA_address_type:
+          type: string
+          enum:
+            - Foreign
+            - Military
+            - U.S.
+        FOIA_state_province_code:
+          type: string
+          maxLength: 50
+        FOIA_full_name:
+          type: string
+          maxLength: 40
+        FOIA_email:
+          type: string
+          format: email
+        FOIA_zip_postal_code:
+          type: string
+          maxLength: 40
+        BAA_required:
+          type: string
+          enum:
+            - Unselected
+            - Yes
+            - No
+        potential_to_be_harmful:
+          type: string
+          enum:
+            - Unselected
+            - Yes
+            - No
+        section_508_sufficient:
+          type: string
+          enum:
+            - Unselected
+            - Yes
+            - No
+        accessibility_reqs_508:
+          type: string
+          maxLength: 1000
