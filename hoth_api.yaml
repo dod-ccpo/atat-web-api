@@ -330,7 +330,7 @@ components:
           maxLength: 300
         scope_surge:
           type: integer
-          maxLength: 50
+          maximum: 50
         current_environment: # DOW section 3
           $ref: "#/components/schemas/CurrentEnvironment"
         performance_requirements: # DOW section 4
@@ -381,22 +381,22 @@ components:
           maxLength: 1000
         number_of_vCPUs:
           type: integer
-          maxLength: 40
+          maximum: 40
         storage_type:
           type: string # Empty choice on SNOW side, set as empty String until we get details
         storage_amount:
           type: integer
-          maxLength: 40
+          maximum: 40
         storage_unit:
           $ref: "#/components/schemas/StorageUnit"
         memory_amount:
           type: integer
-          maxLength: 40
+          maximum: 40
         memory_unit:
           $ref: "#/components/schemas/StorageUnit"
         data_egress_monthly_amount:
           type: integer
-          maxLength: 40
+          maximum: 40
         data_egress_monthly_unit:
           $ref: "#/components/schemas/StorageUnit"
     ClassificationLevel:
