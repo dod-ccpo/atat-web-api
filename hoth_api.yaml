@@ -331,6 +331,10 @@ components:
         scope_surge:
           type: integer
           maxLength: 50
+        current_environment: # DOW section 3
+          $ref: "#/components/schemas/CurrentEnvironment"
+        performance_requirements: # DOW section 4
+          $ref: "#/components/schemas/PerformanceRequirements"
     CurrentEnvironment:
       description: "Part of DOW, encapsulates all data for 3. Background/Current Environment section."
       properties:
@@ -419,3 +423,75 @@ components:
       enum:
         - GB
         - TB
+    PerformanceRequirements:
+      description: "Part of DOW, encapsulates all data for 4. Performance Requirements"
+      properties:
+        required_services:
+          type: array
+          items:
+            $ref: "#/components/schemas/RequiredService"
+          maxItems: 4000
+    RequiredService:
+      description: "Part of DOW, represents a single required service"
+      properties:
+        applicable_classification_levels:
+          type: array
+          items:
+            $ref: "#/components/schemas/ClassificationLevel"
+          maxItems: 4000 # This is the limit in SNOW, but it doesn't actually make sense to have a 4000 limit because there aren't 4000 classification levels
+        usage_description:
+          type: string
+          maxLength: 1000
+        need_for_entire_TO_duration:
+          type: boolean
+        applicable_periods:
+          type: array
+          items:
+            $ref: "#/components/schemas/Period"
+        service_offerings: # represents the "Select Service Offerings" field
+          type: array
+          items:
+            $ref: "#/components/schemas/ServiceOffering"
+        other_service_offering:
+          type: string
+          maxLength: 100
+    Period:
+      description: "Part of DOW, represents Period Table fields"
+      properties:
+        period_type:
+          type: string
+          enum:
+            - Base
+            - Option
+        period_unit_count:
+          type: integer
+        period_unit:
+          type: string
+          enum:
+            - Day(s)
+            - Week(s)
+            - Month(s)
+            - Year(s)
+        option_order:
+          type: integer
+    ServiceOffering:
+      description: "Part of DOW, represents a single Service Offering (Service Offering table)"
+      properties:
+        service_offering_group:
+          type: string
+          enum:
+            - Advanced Technology and Algorithmic Techniques (Machine Learning)
+            - Advisory and Assistance
+            - Applications
+            - Compute
+            - Database with Storage
+            - Developer Tools and Services
+            - Edge Computing and Tactical Edge (TE)
+            - General IaaS, PaaS, and SaaS
+            - Internet of Things (IoT)
+            - Networking
+            - Security
+            - Training
+        name:
+          type: string
+          maxLength: 100
