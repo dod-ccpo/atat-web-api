@@ -32,7 +32,7 @@
 
     "atat:CspConfigurationName": "config/csp/integration",
     "atat:GitHubPatName": "auth/github/pat",
-    "atat:VersionControlBranch": "feature/AT-7448",
+    "atat:VersionControlBranch": "develop",
     "atat:VersionControlRepo": "dod-ccpo/atat-web-api"
   }
 }
