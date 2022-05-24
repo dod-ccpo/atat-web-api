@@ -39,10 +39,19 @@ export class AtatPipelineStack extends cdk.Stack {
         input: pipelines.CodePipelineSource.gitHub(props.repository, props.branch, {
           authentication: cdk.SecretValue.secretsManager(props.githubPatName),
         }),
-        commands: ["npm ci", "npm run build", `npm run -- cdk synth -c atat:EnvironmentId=${props.environmentName}`],
+        commands: [
+          "npm ci",
+          "npm run build",
+          `npm run -- cdk synth -c atat:EnvironmentId=${props.environmentName} -c atat:VpcCidr=${props.vpcCidr}`,
+        ],
       }),
     });
 
-    pipeline.addStage(new AtatApplication(this, props.environmentName, { environmentName: props.environmentName }));
+    pipeline.addStage(
+      new AtatApplication(this, props.environmentName, {
+        vpcCidr: props.vpcCidr,
+        environmentName: props.environmentName,
+      })
+    );
   }
 }

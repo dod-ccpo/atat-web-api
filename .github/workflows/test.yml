@@ -46,7 +46,7 @@ jobs:
         run: |
           npm ci
       - name: Synthesize CDK template
-        run: cdk synth -c "atat:EnvironmentId=CiTest"
+        run: cdk synth -c "atat:EnvironmentId=CiTest" -c "atat:Sandbox=true"
       - name: Gather CloudFormation artifacts
         uses: actions/upload-artifact@v3
         with:
