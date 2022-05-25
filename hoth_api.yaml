@@ -342,8 +342,10 @@ components:
         current_environment:
           $ref: "#/components/schemas/CurrentEnvironment"
         # DOW section 4 (and its subtasks)
-        performance_requirements:
-          $ref: "#/components/schemas/PerformanceRequirements"
+        required_services:
+          type: array
+          items:
+            $ref: "#/components/schemas/RequiredService"
         # DOW section 5 TBD
         # DOW section 6 TBD
         # DOW section 7
@@ -474,17 +476,6 @@ components:
       enum:
         - GB
         - TB
-    PerformanceRequirements:
-      description: >
-        Part of DOW, encapsulates all data for 4. Performance Requirements and its subtasks. 
-        On the API side, the subtasks will filter through the provided required_services.service_offerings
-        to create the subtasks fields.
-      type: object
-      properties:
-        required_services:
-          type: array
-          items:
-            $ref: "#/components/schemas/RequiredService"
     RequiredService:
       description: "Part of DOW, represents a single required service"
       type: object
