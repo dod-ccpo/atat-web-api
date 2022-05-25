@@ -322,6 +322,14 @@ components:
       description: "Schema used to generate DescriptionOfWork document"
       type: object
       properties:
+        # DOW award history
+        award_history:
+          type: array
+          items:
+            $ref: "#/components/schemas/Award"
+        # DOW contract information table
+        contract_information:
+          $ref: "#/components/schemas/ContractInformation"
         # DOW section 1
         to_title:
           type: string
@@ -351,6 +359,37 @@ components:
           # DOW section 11
         section_508_accessibility_standards:
           $ref: "#/components/schemas/SensitiveInformation"
+    Award:
+      description: "Part of DOW, represents a single Award in the Award History table"
+      type: object
+      properties:
+        contract_award_type:
+          type: string
+          enum:
+            - INITIAL_AWARD
+            - MODIFICATION
+        modification_order:
+          type: integer
+        effective_date:
+          type: string
+          format: date
+    ContractInformation:
+      description: "Part of DOW, represents Current Contract Information table fields"
+      type: object
+      properties:
+        contract_number:
+          type: string
+        current_contract_exists:
+          type: boolean
+        contract_expiration_date:
+          type: string
+          format: date
+        incumbent_contractor_name:
+          type: string
+        task_order_number:
+          type: string
+        previous_task_order_number:
+          type: string
     CurrentEnvironment:
       description: "Part of DOW, encapsulates all data for 3. Background/Current Environment section."
       type: object
@@ -456,7 +495,7 @@ components:
             $ref: "#/components/schemas/ClassificationLevel"
         usage_description:
           type: string
-        need_for_entire_TO_duration:
+        need_for_entire_to_duration:
           type: boolean
         applicable_periods:
           type: array
