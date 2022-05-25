@@ -413,13 +413,11 @@ components:
             - Secret
         impact_level:
           type: string
-          nullable: true
           enum:
             - IL2
             - IL4
             - IL5
             - IL6
-            - null
     StorageUnit:
       description: "Part of DOW, used in EnvironmentInstance schema"
       type: string
