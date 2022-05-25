@@ -536,7 +536,7 @@ components:
       properties:
         packaging_shipping_none_apply:
           type: boolean
-        packaging_shippping_other:
+        packaging_shipping_other:
           type: boolean
         packaging_shipping_other_explanation:
           type: string
