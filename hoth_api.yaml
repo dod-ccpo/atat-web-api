@@ -344,7 +344,7 @@ components:
           $ref: "#/components/schemas/GFEOverview"
         contract_considerations: # DOW section 10 (and its subtasks)
           $ref: "#/components/schemas/ContractConsiderations"
-        section_508_accessibility_standards_for_cloud_computing: # DOW section 11
+        section_508_accessibility: # DOW section 11
           $ref: "#/components/schemas/SensitiveInformation"
     CurrentEnvironment:
       description: "Part of DOW, encapsulates all data for 3. Background/Current Environment section."
@@ -355,16 +355,13 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/EnvironmentInstance"
-          maxItems: 4000
         additional_info:
           type: string
-          maxLength: 1000
     EnvironmentInstance:
       description: "Part of DOW, represents a single Environment Instance"
       properties:
         instance_name:
           type: string
-          maxLength: 100
         classification_level:
           $ref: "#/components/schemas/ClassificationLevel"
         instance_location:
@@ -389,25 +386,20 @@ components:
           example: "2022-07-01"
         operating_system_licensing:
           type: string
-          maxLength: 1000
         number_of_vCPUs:
           type: integer
-          maximum: 40
         storage_type:
           type: string # Empty choice on SNOW side, set as empty String until we get details
         storage_amount:
           type: integer
-          maximum: 40
         storage_unit:
           $ref: "#/components/schemas/StorageUnit"
         memory_amount:
           type: integer
-          maximum: 40
         memory_unit:
           $ref: "#/components/schemas/StorageUnit"
         data_egress_monthly_amount:
           type: integer
-          maximum: 40
         data_egress_monthly_unit:
           $ref: "#/components/schemas/StorageUnit"
     ClassificationLevel:
@@ -444,7 +436,6 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/RequiredService"
-          maxItems: 4000
     RequiredService:
       description: "Part of DOW, represents a single required service"
       properties:
@@ -452,10 +443,8 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ClassificationLevel"
-          maxItems: 4000 # This is the limit in SNOW, but it doesn't actually make sense to have a 4000 limit because there aren't 4000 classification levels
         usage_description:
           type: string
-          maxLength: 1000
         need_for_entire_TO_duration:
           type: boolean
         applicable_periods:
@@ -468,7 +457,6 @@ components:
             $ref: "#/components/schemas/ServiceOffering"
         other_service_offering:
           type: string
-          maxLength: 100
     Period:
       description: "Part of DOW, represents Period Table fields"
       properties:
@@ -508,7 +496,6 @@ components:
             - Training
         name:
           type: string
-          maxLength: 100
     PeriodOfPerformance:
       description: "Part of DOW, represents a single Period of Performance"
       properties:
@@ -518,7 +505,6 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Period"
-          maxItems: 4000
         pop_start_request:
           type: string
           enum:
@@ -548,7 +534,6 @@ components:
           maxLength: 6
         property_custodian_name:
           type: string
-          maxLength: 40 # This is another instance of maxLength in SNOW being weird, the person might have a name longer than 40 characters
         dpas_custodian_number: # DPAS Custodian Number
           type: string
           maxLength: 6
@@ -573,7 +558,6 @@ components:
           type: boolean
         packaging_shipping_other_explanation:
           type: string
-          maxLength: 1000
         potential_conflict_of_interest:
           type: string
           enum:
@@ -582,7 +566,6 @@ components:
             - No
         conflict_of_interest_explanation:
           type: string
-          maxLength: 1600
         contractor_provided_transfer:
           type: boolean
         contractor_required_training:
@@ -612,22 +595,16 @@ components:
             - No
         work_to_be_performed:
           type: string
-          maxLength: 400
         system_of_record_name:
           type: string
-          maxLength: 40
         FOIA_city_apo_fpo:
           type: string
-          maxLength: 50
         FOIA_country:
           type: string
-          maxLength: 50
         FOIA_street_address_1:
           type: string
-          maxLength: 40
         FOIA_street_address_2:
           type: string
-          maxLength: 40
         FOIA_address_type:
           type: string
           enum:
@@ -636,16 +613,13 @@ components:
             - U.S.
         FOIA_state_province_code:
           type: string
-          maxLength: 50
         FOIA_full_name:
           type: string
-          maxLength: 40
         FOIA_email:
           type: string
           format: email
         FOIA_zip_postal_code:
           type: string
-          maxLength: 40
         BAA_required:
           type: string
           enum:
@@ -666,4 +640,3 @@ components:
             - No
         accessibility_reqs_508:
           type: string
-          maxLength: 1000
