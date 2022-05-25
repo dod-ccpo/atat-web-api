@@ -504,11 +504,7 @@ components:
           items:
             $ref: "#/components/schemas/Period"
         pop_start_request:
-          type: string
-          enum:
-            - Unselected
-            - Yes
-            - No
+          type: boolean
         requested_pop_start_date:
           type: string
           format: date
@@ -519,11 +515,7 @@ components:
             - No later than
             - No sooner than
         recurring_requirement:
-          type: string
-          enum:
-            - Unselected
-            - Yes
-            - No
+          type: boolean
     GFEOverview:
       description: "Part of DOW, represents GFE Overview fields"
       properties:
@@ -536,17 +528,9 @@ components:
           type: string
           maxLength: 6
         property_accountable:
-          type: string
-          enum:
-            - Unselected
-            - Yes
-            - No
+          type: boolean
         gfe_or_gfp_furnished:
-          type: string
-          enum:
-            - Unselected
-            - Yes
-            - No
+          type: boolean
     ContractConsiderations:
       description: "Part of DOW, represents Contract Considerations Table"
       properties:
@@ -557,21 +541,13 @@ components:
         packaging_shipping_other_explanation:
           type: string
         potential_conflict_of_interest:
-          type: string
-          enum:
-            - Unselected
-            - Yes
-            - No
+          type: boolean
         conflict_of_interest_explanation:
           type: string
         contractor_provided_transfer:
           type: boolean
         contractor_required_training:
-          type: string
-          enum:
-            - Unselected
-            - Yes
-            - No
+          type: boolean
         required_training_services: # This field looks incomplete on the SNOW side
           $ref: "#/components/schemas/TrainingCourses"
     TrainingCourses:
@@ -586,11 +562,7 @@ components:
       description: "Part of DOW, represents Sensitive Information Table fields"
       properties:
         pii_present:
-          type: string
-          enum:
-            - Unselected
-            - Yes
-            - No
+          type: boolean
         work_to_be_performed:
           type: string
         system_of_record_name:
@@ -619,22 +591,10 @@ components:
         FOIA_zip_postal_code:
           type: string
         BAA_required:
-          type: string
-          enum:
-            - Unselected
-            - Yes
-            - No
+          type: boolean
         potential_to_be_harmful:
-          type: string
-          enum:
-            - Unselected
-            - Yes
-            - No
+          type: boolean
         section_508_sufficient:
-          type: string
-          enum:
-            - Unselected
-            - Yes
-            - No
+          type: boolean
         accessibility_reqs_508:
           type: string
