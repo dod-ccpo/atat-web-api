@@ -322,29 +322,37 @@ components:
       description: "Schema used to generate DescriptionOfWork document"
       type: object
       properties:
+        # DOW section 1
         to_title:
           type: string
           maxLength: 60
+        # DOW section 2
         scope:
           type: string
           maxLength: 300
         scope_surge:
           type: integer
           maximum: 50
-        current_environment: # DOW section 3
+        # DOW section 3
+        current_environment:
           $ref: "#/components/schemas/CurrentEnvironment"
-        performance_requirements: # DOW section 4 (and its subtasks)
+        # DOW section 4 (and its subtasks)
+        performance_requirements:
           $ref: "#/components/schemas/PerformanceRequirements"
         # DOW section 5 TBD
         # DOW section 6 TBD
-        period_of_performance: # DOW section 7
+        # DOW section 7
+        period_of_performance:
           $ref: "#/components/schemas/PeriodOfPerformance"
         # DOW section 8 TBD
-        gfe_overview: # DOW section 9
+        # DOW section 9
+        gfe_overview:
           $ref: "#/components/schemas/GFEOverview"
-        contract_considerations: # DOW section 10 (and its subtasks)
+        # DOW section 10 (and its subtasks)
+        contract_considerations:
           $ref: "#/components/schemas/ContractConsiderations"
-        section_508_accessibility_standards: # DOW section 11
+          # DOW section 11
+        section_508_accessibility_standards:
           $ref: "#/components/schemas/SensitiveInformation"
     CurrentEnvironment:
       description: "Part of DOW, encapsulates all data for 3. Background/Current Environment section."
@@ -371,8 +379,10 @@ components:
             - Hybrid
             - Not in the cloud / On-premise
         csp_region:
-          $ref: "#/components/schemas/TargetCloudServiceProviderName" #On the SNOW side, this is CSP_REGION a choice field with no options, so using TargetCSPName instead
-        performance_tier: # This is also an empty choice on the SNOW side, set as empty String until we get details
+          # On the SNOW side, this is CSP_REGION a choice field with no options, so using TargetCSPName instead
+          $ref: "#/components/schemas/TargetCloudServiceProviderName"
+        performance_tier:
+          # This is also an empty choice on the SNOW side, set as empty String until we get details
           type: string
         pricing_model:
           type: string
@@ -389,7 +399,8 @@ components:
         number_of_vCPUs:
           type: integer
         storage_type:
-          type: string # Empty choice on SNOW side, set as empty String until we get details
+          # Empty choice on SNOW side, set as empty String until we get details
+          type: string
         storage_amount:
           type: integer
         storage_unit:
@@ -449,7 +460,7 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Period"
-        service_offerings: # represents the "Select Service Offerings" field
+        service_offerings:
           type: array
           items:
             $ref: "#/components/schemas/ServiceOffering"
@@ -524,7 +535,7 @@ components:
           maxLength: 6
         property_custodian_name:
           type: string
-        dpas_custodian_number: # DPAS Custodian Number
+        dpas_custodian_number:
           type: string
           maxLength: 6
         property_accountable:
@@ -548,7 +559,7 @@ components:
           type: boolean
         contractor_required_training:
           type: boolean
-        required_training_services: # This field looks incomplete on the SNOW side
+        required_training_services:
           $ref: "#/components/schemas/TrainingCourses"
     TrainingCourses:
       description: "Part of DOW, part of schema for ContractConsiderations, includes training courses name and value"
