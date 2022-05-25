@@ -416,8 +416,8 @@ components:
           type: string
           enum:
             - CSP
-            - Hybrid
-            - Not in the cloud / On-premise
+            - HYBRID
+            - ON_PREMISE
         csp_region:
           # On the SNOW side, this is CSP_REGION a choice field with no options, so using TargetCSPName instead
           $ref: "#/components/schemas/TargetCloudServiceProviderName"
@@ -427,9 +427,9 @@ components:
         pricing_model:
           type: string
           enum:
-            - On-demand
-            - Pay-as-you-go
-            - Reserved
+            - ON_DEMAND
+            - PAY_AS_YOU_GO
+            - RESERVED
         pricing_model_expiration:
           type: string
           format: date
@@ -460,9 +460,9 @@ components:
         classification:
           type: string
           enum:
-            - Unclassified
-            - Top Secret
-            - Secret
+            - U
+            - S
+            - TS
         impact_level:
           type: string
           enum:
@@ -505,17 +505,17 @@ components:
         period_type:
           type: string
           enum:
-            - Base
-            - Option
+            - BASE
+            - OPTION
         period_unit_count:
           type: integer
         period_unit:
           type: string
           enum:
-            - Day(s)
-            - Week(s)
-            - Month(s)
-            - Year(s)
+            - DAY
+            - WEEK
+            - MONTH
+            - YEAR
         option_order:
           type: integer
     ServiceOffering:
@@ -525,18 +525,18 @@ components:
         service_offering_group:
           type: string
           enum:
-            - Advanced Technology and Algorithmic Techniques (Machine Learning)
-            - Advisory and Assistance
-            - Applications
-            - Compute
-            - Database with Storage
-            - Developer Tools and Services
-            - Edge Computing and Tactical Edge (TE)
-            - General IaaS, PaaS, and SaaS
-            - Internet of Things (IoT)
-            - Networking
-            - Security
-            - Training
+            - ADVISORY
+            - APPLICATIONS
+            - COMPUTE
+            - DATABASE
+            - DEVELOPER_TOOLS
+            - EDGE_COMPUTING
+            - GENERAL_XAAS
+            - IOT
+            - MACHINE_LEARNING
+            - NETWORKING
+            - SECURITY
+            - TRAINING
         name:
           type: string
     PeriodOfPerformance:
@@ -558,8 +558,8 @@ components:
         time_frame:
           type: string
           enum:
-            - No later than
-            - No sooner than
+            - NO_LATER_THAN
+            - NO_SOONER_THAN
         recurring_requirement:
           type: boolean
     GFEOverview:
@@ -625,9 +625,9 @@ components:
         FOIA_address_type:
           type: string
           enum:
-            - Foreign
-            - Military
-            - U.S.
+            - FOREGIN
+            - MILITARY
+            - US
         FOIA_state_province_code:
           type: string
         FOIA_full_name:
