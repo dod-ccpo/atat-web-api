@@ -325,14 +325,11 @@ components:
         # DOW section 1
         to_title:
           type: string
-          maxLength: 60
         # DOW section 2
         scope:
           type: string
-          maxLength: 300
         scope_surge:
           type: integer
-          maximum: 50
         # DOW section 3
         current_environment:
           $ref: "#/components/schemas/CurrentEnvironment"
@@ -541,12 +538,10 @@ components:
       properties:
         dpas_unit_id:
           type: string
-          maxLength: 6
         property_custodian_name:
           type: string
         dpas_custodian_number:
           type: string
-          maxLength: 6
         property_accountable:
           type: boolean
         gfe_or_gfp_furnished:
