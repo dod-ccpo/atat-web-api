@@ -356,6 +356,7 @@ components:
           $ref: "#/components/schemas/SensitiveInformation"
     CurrentEnvironment:
       description: "Part of DOW, encapsulates all data for 3. Background/Current Environment section."
+      type: object
       properties:
         current_environment_exists:
           type: boolean
@@ -367,6 +368,7 @@ components:
           type: string
     EnvironmentInstance:
       description: "Part of DOW, represents a single Environment Instance"
+      type: object
       properties:
         instance_name:
           type: string
@@ -415,6 +417,7 @@ components:
           $ref: "#/components/schemas/StorageUnit"
     ClassificationLevel:
       description: "Part of DOW, Classification Level table fields"
+      type: object
       properties:
         classification:
           type: string
@@ -440,6 +443,7 @@ components:
         Part of DOW, encapsulates all data for 4. Performance Requirements and its subtasks. 
         On the API side, the subtasks will filter through the provided required_services.service_offerings
         to create the subtasks fields.
+      type: object
       properties:
         required_services:
           type: array
@@ -447,6 +451,7 @@ components:
             $ref: "#/components/schemas/RequiredService"
     RequiredService:
       description: "Part of DOW, represents a single required service"
+      type: object
       properties:
         applicable_classification_levels:
           type: array
@@ -468,6 +473,7 @@ components:
           type: string
     Period:
       description: "Part of DOW, represents Period Table fields"
+      type: object
       properties:
         period_type:
           type: string
@@ -487,6 +493,7 @@ components:
           type: integer
     ServiceOffering:
       description: "Part of DOW, represents a single Service Offering (Service Offering table)"
+      type: object
       properties:
         service_offering_group:
           type: string
@@ -507,6 +514,7 @@ components:
           type: string
     PeriodOfPerformance:
       description: "Part of DOW, represents a single Period of Performance"
+      type: object
       properties:
         base_period:
           $ref: "#/components/schemas/Period"
@@ -529,6 +537,7 @@ components:
           type: boolean
     GFEOverview:
       description: "Part of DOW, represents GFE Overview fields"
+      type: object
       properties:
         dpas_unit_id:
           type: string
@@ -544,6 +553,7 @@ components:
           type: boolean
     ContractConsiderations:
       description: "Part of DOW, represents Contract Considerations Table"
+      type: object
       properties:
         packaging_shipping_none_apply:
           type: boolean
@@ -571,6 +581,7 @@ components:
           type: string
     SensitiveInformation:
       description: "Part of DOW, represents Sensitive Information Table fields"
+      type: object
       properties:
         pii_present:
           type: boolean
