@@ -344,7 +344,7 @@ components:
           $ref: "#/components/schemas/GFEOverview"
         contract_considerations: # DOW section 10 (and its subtasks)
           $ref: "#/components/schemas/ContractConsiderations"
-        section_508_accessibility: # DOW section 11
+        section_508_accessibility_standards: # DOW section 11
           $ref: "#/components/schemas/SensitiveInformation"
     CurrentEnvironment:
       description: "Part of DOW, encapsulates all data for 3. Background/Current Environment section."
