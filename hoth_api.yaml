@@ -500,7 +500,7 @@ components:
             $ref: "#/components/schemas/Period"
         classification_level:
           $ref: "#/components/schemas/ClassificationLevel"
-        need_for_entire_to_duration:
+        need_for_entire_task_order_duration:
           type: boolean
     Period:
       description: "Part of DOW, represents Period Table fields"
