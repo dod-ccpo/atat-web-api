@@ -388,8 +388,6 @@ components:
           format: date
         incumbent_contractor_name:
           type: string
-        task_order_number:
-          type: string
         previous_task_order_number:
           type: string
     CurrentEnvironment:
@@ -599,7 +597,9 @@ components:
         contractor_required_training:
           type: boolean
         required_training_services:
-          $ref: "#/components/schemas/TrainingCourses"
+          type: array
+          items:
+            $ref: "#/components/schemas/TrainingCourses"
     TrainingCourses:
       description: "Part of DOW, part of schema for ContractConsiderations, includes training courses name and value"
       type: object
