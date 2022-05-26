@@ -629,7 +629,7 @@ components:
         FOIA_address_type:
           type: string
           enum:
-            - FOREGIN
+            - FOREIGN
             - MILITARY
             - US
         FOIA_state_province_code:
