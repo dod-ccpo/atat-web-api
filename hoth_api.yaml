@@ -342,10 +342,10 @@ components:
         current_environment:
           $ref: "#/components/schemas/CurrentEnvironment"
         # DOW section 4 (and its subtasks)
-        required_services:
+        selected_service_offerings:
           type: array
           items:
-            $ref: "#/components/schemas/RequiredService"
+            $ref: "#/components/schemas/SelectedServiceOffering"
         # DOW section 5 TBD
         # DOW section 6 TBD
         # DOW section 7
@@ -476,28 +476,32 @@ components:
       enum:
         - GB
         - TB
-    RequiredService:
-      description: "Part of DOW, represents a single required service"
+    SelectedServiceOffering:
+      description: "Part of DOW, represents a single Selected Service Offering"
       type: object
       properties:
-        applicable_classification_levels:
+        service_offering:
+          $ref: "#/components/schemas/ServiceOffering"
+        classification_instances:
           type: array
           items:
-            $ref: "#/components/schemas/ClassificationLevel"
+            $ref: "#/components/schemas/ClassificationInstance"
+        other_service_offering:
+          type: string
+    ClassificationInstance:
+      description: "Part of DOW, represents a single classification instance"
+      type: object
+      properties:
         usage_description:
           type: string
-        need_for_entire_to_duration:
-          type: boolean
-        applicable_periods:
+        selected_periods:
           type: array
           items:
             $ref: "#/components/schemas/Period"
-        service_offerings:
-          type: array
-          items:
-            $ref: "#/components/schemas/ServiceOffering"
-        other_service_offering:
-          type: string
+        classification_level:
+          $ref: "#/components/schemas/ClassificationLevel"
+        need_for_entire_task_order_duration:
+          type: boolean
     Period:
       description: "Part of DOW, represents Period Table fields"
       type: object
@@ -625,7 +629,7 @@ components:
         FOIA_address_type:
           type: string
           enum:
-            - FOREGIN
+            - FOREIGN
             - MILITARY
             - US
         FOIA_state_province_code:
