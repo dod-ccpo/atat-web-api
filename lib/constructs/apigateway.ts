@@ -85,9 +85,9 @@ export class AtatRestApi extends Construct {
         accessLogFormat: API_ACCESS_LOG_FORMAT,
         tracingEnabled: true,
       },
-      //   defaultMethodOptions: {
-      //   authorizationType: apigw.AuthorizationType.IAM,
-      //  },
+      defaultMethodOptions: {
+        authorizationType: apigw.AuthorizationType.IAM,
+      },
     });
     this.restApi = restApi;
   }
@@ -101,7 +101,7 @@ export class AtatRestApi extends Construct {
    * @param method The HTTP method to grant access for (or "*")
    * @param path The path to grant access to
    */
-  public grantOnRoute(principal: iam.IPrincipal, method: HttpMethod | "*", path = "/") {
+  public grantOnRoute(principal: iam.IPrincipal, method: HttpMethod | "*", path?: string) {
     principal.addToPrincipalPolicy(
       new statement.ExecuteApi()
         .toInvoke()
