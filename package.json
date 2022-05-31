@@ -51,7 +51,7 @@
     "aws-cdk-lib": "2.25.0",
     "axios": "^0.27.2",
     "cdk-iam-floyd": "0.375.0",
-    "cdk-nag": "^2.14.15",
+    "cdk-nag": "^2.14.19",
     "constructs": "^10.1.19",
     "http-errors": "^2.0.0",
     "middy-middleware-json-error-handler": "^3.0.0",
