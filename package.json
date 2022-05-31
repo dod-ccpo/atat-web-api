@@ -52,7 +52,7 @@
     "axios": "^0.27.2",
     "cdk-iam-floyd": "0.375.0",
     "cdk-nag": "^2.14.15",
-    "constructs": "^10.1.19",
+    "constructs": "^10.1.23",
     "http-errors": "^2.0.0",
     "middy-middleware-json-error-handler": "^3.0.0",
     "source-map-support": "^0.5.21",
