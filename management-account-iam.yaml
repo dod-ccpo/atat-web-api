@@ -1,0 +1,200 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: >-
+ Provisions IAM resources within the management account to assume the necessary
+ roles within accounts in a development environment. This provisions IAM policies
+ and groups that users can be placed in.
+
+ Because this does not directly create any users or roles, it does not need to be
+ aware of any Permissions Boundaries.
+
+Parameters:
+  ContractorGroupPrefix:
+    Description: >-
+      The prefix to apply to the IAM user group that will contain contractor users.
+    Type: String
+  GovernmentGroupPrefix:
+    Description: >-
+      The prefix to apply to the IAM user group that will contain Government users.
+    Type: String
+
+Resources:
+  IamSelfAdminPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      Description: Allow users to modify their own IAM configuration
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AllowViewAccountInfo
+            Effect: Allow
+            Action:
+              - iam:GetAccountPasswordPolicy
+              - iam:ListVirtualMFADevices
+            Resource: "*"
+          - Sid: AllowManageOwnPassword
+            Effect: Allow
+            Action:
+              - iam:ChangePassword
+              - iam:GetUser
+            Resource: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:user/${!aws:username}"
+          - Sid: AllowManageOwnAccessKeys
+            Effect: Allow
+            Action:
+              - iam:CreateAccessKey
+              - iam:DeleteAccessKey
+              - iam:ListAccessKeys
+              - iam:UpdateAccessKey
+            Resource: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:user/${!aws:username}"
+          - Sid: AllowManageOwnSigningCertificates
+            Effect: Allow
+            Action:
+              - iam:DeleteSigningCertificate
+              - iam:ListSigningCertificates
+              - iam:UpdateSigningCertificate
+              - iam:UploadSigningCertificate
+            Resource: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:user/${!aws:username}"
+          - Sid: AllowManageOwnSSHPublicKeys
+            Effect: Allow
+            Action:
+              - iam:DeleteSSHPublicKey
+              - iam:GetSSHPublicKey
+              - iam:ListSSHPublicKeys
+              - iam:UpdateSSHPublicKey
+              - iam:UploadSSHPublicKey
+            Resource: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:user/${!aws:username}"
+          - Sid: AllowManageOwnGitCredentials
+            Effect: Allow
+            Action:
+              - iam:CreateServiceSpecificCredential
+              - iam:DeleteServiceSpecificCredential
+              - iam:ListServiceSpecificCredentials
+              - iam:ResetServiceSpecificCredential
+              - iam:UpdateServiceSpecificCredential
+            Resource: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:user/${!aws:username}"
+          - Sid: AllowManageOwnVirtualMFADevice
+            Effect: Allow
+            Action:
+              - iam:CreateVirtualMFADevice
+              - iam:DeleteVirtualMFADevice
+            Resource: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:mfa/${!aws:username}"
+          - Sid: AllowManageOwnUserMFA
+            Effect: Allow
+            Action:
+              - iam:DeactivateMFADevice
+              - iam:EnableMFADevice
+              - iam:ListMFADevices
+              - iam:ResyncMFADevice
+            Resource: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:user/${!aws:username}"
+  AdminAccessPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AllowAllWithMfa
+            Effect: Allow
+            Action: "*"
+            Resource: "*"
+            Condition:
+              Bool:
+                "aws:MultiFactorAuthPresent": true
+
+  GovernmentAuditGroup:
+    Type: AWS::IAM::Group
+    Properties:
+      GroupName: !Sub "${GovernmentGroupPrefix}Audit"
+      ManagedPolicyArns:
+        - !Ref IamSelfAdminPolicy
+
+  ContractorDeveloperGroup:
+    Type: AWS::IAM::Group
+    Properties:
+      GroupName: !Sub "${ContractorGroupPrefix}Developer"
+      ManagedPolicyArns:
+        - !Ref IamSelfAdminPolicy
+  ContractorAuditGroup:
+    Type: AWS::IAM::Group
+    Properties:
+      GroupName: !Sub "${ContractorGroupPrefix}Audit"
+      ManagedPolicyArns:
+        - !Ref IamSelfAdminPolicy
+  ContractorQaGroup:
+    Type: AWS::IAM::Group
+    Properties:
+      GroupName: !Sub "${ContractorGroupPrefix}QA"
+      ManagedPolicyArns:
+        - !Ref IamSelfAdminPolicy
+
+  GovernmentAdminGroup:
+    Type: AWS::IAM::Group
+    Properties:
+      GroupName: !Sub "${GovernmentGroupPrefix}Admin"
+      ManagedPolicyArns:
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AdministratorAccess"
+  ContractorAdminGroup:
+    Type: AWS::IAM::Group
+    Properties:
+      GroupName: !Sub "${ContractorGroupPrefix}Admin"
+      ManagedPolicyArns:
+        - !Ref AdminAccessPolicy
+
+  DeveloperAccessPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: allow-all-dev-roles
+      Groups:
+        - !Ref ContractorDeveloperGroup
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AllowAssumingAllAtatRolesInOrg
+            Effect: Allow
+            Action: sts:AssumeRole
+            Resource: !Sub "arn:${AWS::Partition}:iam::*:role/Atat*"
+            Condition:
+              Bool:
+                "aws:MultiFactorAuthPresent": true
+              StringEquals:
+                "sts:RoleSessionName": "${aws:username}"
+                "aws:ResourceOrgID": "${aws:PrincipalOrgID}"
+  AuditorAccessPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: allow-all-audit-roles
+      Groups:
+        - !Ref ContractorAuditGroup
+        - !Ref GovernmentAuditGroup
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AllowAssumingAllAtatRolesInOrg
+            Effect: Allow
+            Action: sts:AssumeRole
+            Resource: !Sub "arn:${AWS::Partition}:iam::*:role/AtatSecurityAuditor"
+            Condition:
+              Bool:
+                "aws:MultiFactorAuthPresent": true
+              StringEquals:
+                "sts:RoleSessionName": "${aws:username}"
+                "aws:ResourceOrgID": "${aws:PrincipalOrgID}"
+  QaAccessPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: allow-all-qa-roles
+      Groups:
+        - !Ref ContractorQaGroup
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AllowAssumingAllAtatRolesInOrg
+            Effect: Allow
+            Action: sts:AssumeRole
+            Resource: !Sub "arn:${AWS::Partition}:iam::*:role/AtatSecurityAuditor"
+            Condition:
+              Bool:
+                "aws:MultiFactorAuthPresent": true
+              StringEquals:
+                "sts:RoleSessionName": "${aws:username}"
+                "aws:ResourceOrgID": "${aws:PrincipalOrgID}"
