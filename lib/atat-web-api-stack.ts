@@ -57,12 +57,7 @@ export class AtatWebApiStack extends cdk.Stack {
               // given an identity-based policy that grants something like
               // s3:GetObject on * while an S3 bucket allows the user to read
               // from that bucket.
-              new statement.ExecuteApi()
-                .deny()
-                .notActions()
-                .toInvoke()
-                .notResources()
-                .on(api.restApi.arnForExecuteApi()),
+              new statement.ExecuteApi().deny().notAction().toInvoke().notResource().on(api.restApi.arnForExecuteApi()),
             ],
           }),
         })
