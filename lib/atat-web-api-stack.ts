@@ -2,6 +2,7 @@ import * as cdk from "aws-cdk-lib";
 import * as apigw from "aws-cdk-lib/aws-apigateway";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as statement from "cdk-iam-floyd";
+import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as nodejs from "aws-cdk-lib/aws-lambda-nodejs";
 import { Construct } from "constructs";
 import { AtatNetStack } from "./atat-net-stack";
@@ -103,8 +104,20 @@ export class AtatWebApiStack extends cdk.Stack {
 
     // APIGW Document Generation Resource
     const generateDocumentResource = api.restApi.root.addResource("generate-document");
+    const documentGenerationLayer = new lambda.LayerVersion(this, "GenerateDocumentSupportLayer", {
+      compatibleRuntimes: [lambda.Runtime.NODEJS_16_X],
+      code: lambda.Code.fromAsset("document-generation/templates", {}),
+    });
+    // const puppeteerLayer = new lambda.LayerVersion(this, "PuppeteerSupportLayer", {
+    //   compatibleRuntimes: [lambda.Runtime.NODEJS_16_X],
+    //   code: lambda.Code.fromAsset("node_modules/chrome-aws-lambda/build", {}),
+    // });
     const generateDocumentFn = new nodejs.NodejsFunction(this, "GenerateDocumentFunction", {
       entry: "document-generation/generate-document.ts",
+      runtime: lambda.Runtime.NODEJS_16_X,
+      memorySize: 512,
+      layers: [documentGenerationLayer /* , puppeteerLayer */],
+      timeout: cdk.Duration.seconds(120),
     });
     generateDocumentResource.addMethod(HttpMethod.POST, new apigw.LambdaIntegration(generateDocumentFn));
 
