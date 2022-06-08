@@ -11,6 +11,7 @@ import { HttpMethod } from "./http";
 import { ProvisioningWorkflow } from "./constructs/provisioning-sfn-workflow";
 import { ApiUser } from "./constructs/api-user";
 import * as idp from "./constructs/identity-provider";
+import { AtatQueue } from "./constructs/sqs";
 
 export interface AtatWebApiStackProps extends cdk.StackProps {
   environmentName: string;
@@ -98,5 +99,9 @@ export class AtatWebApiStack extends cdk.Stack {
       provisioningSfn.provisioningQueueConsumer.method,
       new apigw.LambdaIntegration(provisioningSfn.provisioningQueueConsumer.fn)
     );
+
+    // Cost Queues
+    const costRequestQueue = new AtatQueue(this, "CostRequest", { environmentName }).sqs;
+    const costResponseQueue = new AtatQueue(this, "CostResponse", { environmentName }).sqs;
   }
 }
