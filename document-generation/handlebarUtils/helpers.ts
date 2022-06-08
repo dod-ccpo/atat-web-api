@@ -1,11 +1,10 @@
 /* eslint-disable camelcase */
-import { convertToLowerCase, capitalize } from "./utils";
+import { capitalize } from "./utils";
 import { AwardType, IPeriod, ISelectedServiceOffering } from "../../models/document-generation";
 import { HelperOptions } from "handlebars";
 export const formatDuration = (periods: IPeriod[]): string => {
   periods = periods.map((period: IPeriod) => {
-    let period_unit = convertToLowerCase(period.period_unit);
-    period_unit = capitalize(period_unit);
+    let period_unit = capitalize(period.period_unit);
     if (period_unit !== "Year") {
       period_unit += "(s)";
     }
@@ -60,7 +59,7 @@ export const formatGroupAndClassification = (serviceOffering: any, classificatio
   }
 
   // structure provided service offerings
-  const offering = serviceOffering.service_offering_group.split("_").map(convertToLowerCase).map(capitalize).join(" ");
+  const offering = serviceOffering.service_offering_group.split("_").map(capitalize).join(" ");
   return `${formattedClassification} — ${offering}`;
 };
 
