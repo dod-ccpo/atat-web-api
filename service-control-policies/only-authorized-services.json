@@ -1,0 +1,53 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "DenyIfNotApprovedService",
+            "Resource": "*",
+            "Effect": "Deny",
+            "NotAction": [
+                "codecommit:*",
+                "apigateway:*",
+                "execute-api:*",
+                "ssm:*",
+                "ssmmessages:*",
+                "codepipeline:*",
+                "sqs:*",
+                "acm:*",
+                "iam:*",
+                "lambda:*",
+                "logs:*",
+                "sfn:*",
+                "codebuild:*",
+                "events:*",
+                "s3:*",
+                "ec2:*",
+                "ec2messages:*",
+                "ebs:*",
+                "organizations:*",
+                "config:*",
+                "congito-identity:*",
+                "congito-idp:*",
+                "cloudformation:*",
+                "kms:*",
+                "cloudwatch:*",
+                "cloudtrail:*",
+                "secretsmanager:*",
+                "xray:*",
+                "sso:*",
+                "sso-directory:*",
+                "waf:*",
+                "support:*",
+                "trustedadvisor:*",
+                "wafv2:*",
+                "sns:*",
+                "sts:*",
+                "securityhub:*",
+                "ram:*",
+                "health:*",
+                "account:*",
+                "guardduty:*"
+            ]
+        }
+    ]
+}
