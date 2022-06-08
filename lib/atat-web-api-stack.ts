@@ -108,16 +108,15 @@ export class AtatWebApiStack extends cdk.Stack {
       compatibleRuntimes: [lambda.Runtime.NODEJS_16_X],
       code: lambda.Code.fromAsset("document-generation/templates", {}),
     });
-    // const puppeteerLayer = new lambda.LayerVersion(this, "PuppeteerSupportLayer", {
-    //   compatibleRuntimes: [lambda.Runtime.NODEJS_16_X],
-    //   code: lambda.Code.fromAsset("node_modules/chrome-aws-lambda/build", {}),
-    // });
     const generateDocumentFn = new nodejs.NodejsFunction(this, "GenerateDocumentFunction", {
       entry: "document-generation/generate-document.ts",
       runtime: lambda.Runtime.NODEJS_16_X,
       memorySize: 512,
-      layers: [documentGenerationLayer /* , puppeteerLayer */],
-      timeout: cdk.Duration.seconds(120),
+      bundling: {
+        nodeModules: ["@sparticuz/chrome-aws-lambda"],
+      },
+      layers: [documentGenerationLayer],
+      timeout: cdk.Duration.seconds(60),
     });
     generateDocumentResource.addMethod(HttpMethod.POST, new apigw.LambdaIntegration(generateDocumentFn));
 

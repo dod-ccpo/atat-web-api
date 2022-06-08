@@ -19,20 +19,13 @@ import {
 } from "../models/document-generation";
 import * as fs from "fs";
 import handlebars from "handlebars";
-// import puppeteer from "puppeteer";
-import * as puppeteer from "puppeteer-core";
-import { PDFOptions } from "puppeteer";
-import chromium from "chrome-aws-lambda";
+import chromium from "@sparticuz/chrome-aws-lambda";
 import juice from "juice";
+import { PDFOptions } from "puppeteer-core";
 
 async function baseHandler(
   event: RequestEvent<GenerateDocumentRequest>
 ): Promise<ApiBase64SuccessResponse<APIGatewayProxyResult>> {
-  const lookingAtFiles = fs.readdirSync("/var/task/", { withFileTypes: true });
-  // logger.debug not work ?
-  console.debug("FILES: " + JSON.stringify(lookingAtFiles));
-
-  // small sample to ensure data populated in template
   const { documentType, templatePayload } = event.body;
 
   // get files to generate documents
@@ -48,42 +41,7 @@ async function baseHandler(
   const templateWithData = template(templatePayload);
 
   // use puppeteer to generate pdf
-  let browser, pdf;
-
-  try {
-    // ! chromium module does not seem to be added, troubleshoot
-    console.debug("PUPPET: " + JSON.stringify(chromium.defaultViewport));
-    console.debug("PUPPET: " + JSON.stringify(chromium.defaultViewport));
-    console.debug("PUPPET: " + JSON.stringify(chromium.executablePath)); // ! empty object
-    console.debug("PUPPET: " + JSON.stringify(chromium.headless)); // true
-    console.debug("PUPPET: " + JSON.stringify(chromium.puppeteer)); // ! undefined
-
-    browser = await chromium.puppeteer.launch({
-      args: chromium.args,
-      defaultViewport: chromium.defaultViewport,
-      executablePath: await chromium.executablePath,
-      headless: chromium.headless,
-      ignoreHTTPSErrors: true,
-    });
-    logger.debug("BROWSER: " + JSON.stringify(browser));
-    const page = await browser.newPage();
-    logger.debug("PAGE: " + JSON.stringify(page));
-
-    const options: any = { format: "A4" }; // PDFOptions still gives typescript error
-
-    await page.setContent(templateWithData);
-    await page.emulateMediaType("screen");
-    pdf = await page.pdf(options);
-
-    logger.info("Document generation complete");
-    logger.debug("PDF: " + pdf);
-  } catch (error) {
-    logger.error(error as any);
-  } finally {
-    if (browser !== null) {
-      await browser?.close();
-    }
-  }
+  const pdf = await generateDocument(templateWithData);
 
   const headers = { "Content-type": "application/pdf" };
   return new ApiBase64SuccessResponse<string | undefined>(pdf?.toString("base64"), SuccessStatusCode.OK, headers);
@@ -98,3 +56,33 @@ export const handler = middy(baseHandler)
 // TODO: fix middleware inputs/outputs
 // .use(IpCheckerMiddleware())
 // .use(errorHandlingMiddleware);
+
+async function generateDocument(templateWithData: string): Promise<Buffer | undefined> {
+  let browser, generatedDocument;
+  try {
+    browser = await chromium.puppeteer.launch({
+      args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath,
+      headless: chromium.headless,
+      ignoreHTTPSErrors: true,
+    });
+
+    const page = await browser.newPage();
+    const options: PDFOptions = { format: "A4" };
+
+    await page.setContent(templateWithData);
+    await page.emulateMediaType("screen");
+    generatedDocument = await page.pdf(options);
+
+    logger.info("Document generation complete");
+  } catch (error) {
+    logger.error(error as any);
+  } finally {
+    if (browser !== null) {
+      await browser?.close();
+    }
+  }
+
+  return generatedDocument;
+}
