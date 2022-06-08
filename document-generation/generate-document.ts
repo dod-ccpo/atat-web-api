@@ -1,4 +1,4 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
+import { APIGatewayProxyResult } from "aws-lambda";
 import { injectLambdaContext } from "@aws-lambda-powertools/logger";
 import middy from "@middy/core";
 import httpJsonBodyParser from "@middy/http-json-body-parser";
@@ -10,6 +10,7 @@ import { IpCheckerMiddleware } from "../utils/middleware/ip-logging";
 import { errorHandlingMiddleware } from "../utils/middleware/error-handling-middleware";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import validator from "@middy/validator";
+import xssSanitizer from "../utils/middleware/xss-sanitizer";
 import { wrapSchema } from "../utils/middleware/schema-wrapper";
 import {
   generateDocumentSchema,
@@ -58,13 +59,14 @@ export const handler = middy(baseHandler)
   .use(injectLambdaContext(logger))
   .use(inputOutputLogger({ logger: (message) => logger.info("Event/Result", message) }))
   .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
+  .use(IpCheckerMiddleware())
   .use(httpJsonBodyParser())
-  .use(validator({ eventSchema: wrapSchema(generateDocumentSchema) }));
-// TODO: fix middleware inputs/outputs
-// .use(IpCheckerMiddleware())
-// .use(errorHandlingMiddleware);
+  .use(xssSanitizer())
+  .use(validator({ eventSchema: wrapSchema(generateDocumentSchema) }))
+  .use(errorHandlingMiddleware())
+  .use(JSONErrorHandlerMiddleware());
 
-async function generateDocument(templateWithData: string): Promise<Buffer | undefined> {
+async function generateDocument(document: string): Promise<Buffer | undefined> {
   let browser, generatedDocument;
   try {
     browser = await chromium.puppeteer.launch({
@@ -78,7 +80,7 @@ async function generateDocument(templateWithData: string): Promise<Buffer | unde
     const page = await browser.newPage();
     const options: PDFOptions = { format: "A4" };
 
-    await page.setContent(templateWithData);
+    await page.setContent(document);
     await page.emulateMediaType("screen");
     generatedDocument = await page.pdf(options);
 

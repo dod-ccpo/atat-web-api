@@ -3,19 +3,15 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { serializeError } from "serialize-error";
 import { ValidationErrorResponse } from "../response";
 import { INTERNAL_SERVER_ERROR, REQUEST_BODY_INVALID } from "../errors";
-import {
-  StepFunctionRequestEvent,
-  RequestBodyType,
-  CspInvocation,
-  CspResponse,
-  ProvisionRequest,
-} from "../../models/provisioning-jobs";
+import { CspInvocation, CspResponse, ProvisionRequest } from "../../models/provisioning-jobs";
+import { GenerateDocumentRequest, RequestEvent } from "../../models/document-generation";
 
 export type MiddlewareInputs =
-  | StepFunctionRequestEvent<RequestBodyType>
+  | RequestEvent<ProvisionRequest>
   | CspInvocation
   | ProvisionRequest
-  | APIGatewayProxyEvent;
+  | APIGatewayProxyEvent
+  | RequestEvent<GenerateDocumentRequest>;
 export type MiddlewareOutputs = APIGatewayProxyResult | CspResponse | ValidationErrorResponse | ProvisionRequest;
 
 // A central place to catch and handle errors that occur before,

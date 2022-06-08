@@ -52,12 +52,6 @@ export interface ProvisionRequest {
   cspResponse: CspResponse | undefined;
 }
 
-export interface StepFunctionRequestEvent<T> {
-  body: T;
-  requestContext: APIGatewayEventRequestContext;
-}
-export type RequestBodyType = ProvisionRequest;
-
 // temporary schema to use for validating /provision-job request
 export const provisionRequestSchema = {
   type: "object",

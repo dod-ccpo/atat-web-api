@@ -1,7 +1,7 @@
 import middy from "@middy/core";
 import xss from "xss";
 import { APIGatewayProxyResult } from "aws-lambda";
-import { StepFunctionRequestEvent, RequestBodyType } from "../../models/provisioning-jobs";
+import { CommonMiddlewareInputs } from "./ip-logging";
 
 // keep plain text only
 const xssOptions = {
@@ -9,10 +9,9 @@ const xssOptions = {
   stripIgnoreTag: true, // remove all tags not in allow list
   stripIgnoreTagBody: ["script"], // remove script tag content
 };
-const xssSanitizer = (): middy.MiddlewareObj<StepFunctionRequestEvent<RequestBodyType>, APIGatewayProxyResult> => {
-  const before: middy.MiddlewareFn<StepFunctionRequestEvent<RequestBodyType>, APIGatewayProxyResult> = async (
-    request
-  ): Promise<void> => {
+
+const xssSanitizer = (): middy.MiddlewareObj<CommonMiddlewareInputs, APIGatewayProxyResult> => {
+  const before: middy.MiddlewareFn<CommonMiddlewareInputs, APIGatewayProxyResult> = async (request): Promise<void> => {
     request.event.body = JSON.parse(xss(JSON.stringify(request.event.body ?? {}), xssOptions));
   };
   return {
