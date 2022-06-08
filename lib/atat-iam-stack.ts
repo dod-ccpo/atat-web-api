@@ -80,6 +80,9 @@ export class AtatIamStack extends cdk.Stack {
         new statement.Lambda().allListActions().toGetAccountSettings().toGetFunction(),
         // Allow developers to describe APIs
         new statement.Apigateway().toGET().onAccount().onRestApis().onRestApi("*"),
+        // Allow developers to manually re-deploy, which may be necessary as a troubleshooting step
+        // as CloudFormation does not always trigger a deployment itself.
+        new statement.Apigateway().toPOST().onDeployments("*"),
       ],
     });
 
