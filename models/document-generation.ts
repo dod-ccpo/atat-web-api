@@ -263,7 +263,6 @@ const environment_instance = {
     instance_name: { type: "string" },
     classification_level,
     instance_location: { enum: [InstanceLocation.CSP, InstanceLocation.HYBRID, InstanceLocation.ON_PREMISE] },
-    // TODO: this probably should not be null
     csp_region: { enum: [TargetCspName.CSP_A, TargetCspName.CSP_B, TargetCspName.CSP_C, TargetCspName.CSP_D] },
     performance_tier: { type: "string" },
     pricing_model: { enum: [PricingModel.ON_DEMAND, PricingModel.PAY_AS_YOU_GO, PricingModel.RESERVED] },
@@ -375,7 +374,6 @@ const contract_considerations = {
     conflict_of_interest_explanation: { type: "string" },
     contractor_provided_transfer: { type: "boolean" },
     contractor_required_training: { type: "boolean" },
-    // TODO: ask this is just an array of courses
     required_training_services: { type: "array", items: { type: "string" } },
   },
 };

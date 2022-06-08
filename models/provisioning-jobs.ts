@@ -1,5 +1,4 @@
 import { HttpMethod } from "../lib/http";
-import { APIGatewayEventRequestContext } from "aws-lambda";
 import { CloudServiceProvider, Network } from "./cloud-service-providers";
 
 export enum ProvisionRequestType {
