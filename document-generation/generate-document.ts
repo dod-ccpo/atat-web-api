@@ -51,7 +51,10 @@ async function baseHandler(
   // use puppeteer to generate pdf
   const pdf = await generateDocument(templateWithData);
 
-  const headers = { "Content-type": "application/pdf" };
+  const headers = {
+    "Content-type": "application/pdf",
+    "content-disposition": "attachment; filename=generatedDocument.pdf",
+  };
   return new ApiBase64SuccessResponse<string | undefined>(pdf?.toString("base64"), SuccessStatusCode.OK, headers);
 }
 
