@@ -10,7 +10,7 @@ import { HttpMethod } from "../http";
 import { ApiSfnFunction } from "./api-sfn-function";
 import { IdentityProviderLambdaClient, IIdentityProvider } from "./identity-provider";
 import { mapTasks, TasksMap } from "./sfn-lambda-invoke-task";
-import { Queue } from "./sqs";
+import { AtatQueue } from "./sqs";
 import { StateMachine } from "./state-machine";
 
 /**
@@ -56,7 +56,7 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
     super(scope, id);
     const { environmentName } = props;
 
-    this.provisioningJobsQueue = new Queue(scope, "ProvisioningJobsQueue", { environmentName }).sqs;
+    this.provisioningJobsQueue = new AtatQueue(scope, "ProvisioningJobsQueue", { environmentName }).sqs;
 
     // Provisioning State machine functions
     const cspConfig = secrets.Secret.fromSecretNameV2(

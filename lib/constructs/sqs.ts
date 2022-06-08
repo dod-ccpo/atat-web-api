@@ -14,10 +14,10 @@ export interface SQSProps extends QueueProps {
 }
 
 /**
- * A basic SQS queue
+ * A basic SQS queue used in ATAT
  * - defaults to an FIFO queue
  */
-export class Queue extends Construct {
+export class AtatQueue extends Construct {
   /**
    * The SQS resource that gets created.
    */
