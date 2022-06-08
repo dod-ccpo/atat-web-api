@@ -22,6 +22,13 @@ import handlebars from "handlebars";
 import chromium from "@sparticuz/chrome-aws-lambda";
 import juice from "juice";
 import { PDFOptions } from "puppeteer-core";
+import {
+  formatDuration,
+  formatGroupAndClassification,
+  counter,
+  countSections,
+  formatAwardType,
+} from "./handlebarUtils/helpers";
 
 async function baseHandler(
   event: RequestEvent<GenerateDocumentRequest>
@@ -86,3 +93,10 @@ async function generateDocument(templateWithData: string): Promise<Buffer | unde
 
   return generatedDocument;
 }
+
+// handlebars helpers
+handlebars.registerHelper("formatDuration", formatDuration);
+handlebars.registerHelper("countSections", countSections);
+handlebars.registerHelper("counter", counter);
+handlebars.registerHelper("formatGroupAndClassification", formatGroupAndClassification);
+handlebars.registerHelper("formatAwardType", formatAwardType);

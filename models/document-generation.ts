@@ -85,11 +85,13 @@ export enum ServiceOfferingGroup {
   TRAINING = "TRAINING",
 }
 
-interface IAward {
+export interface IAward {
   contract_award_type: AwardType;
+  effective_date: string;
+  modification_order: number | undefined;
 }
 
-interface IContractInformation {
+export interface IContractInformation {
   contract_information: string;
   current_contract_exists: boolean;
   contract_expiration_date: string;
@@ -97,19 +99,19 @@ interface IContractInformation {
   previous_task_order_number: string;
 }
 
-interface IPeriod {
+export interface IPeriod {
   period_type: PeriodType;
   period_unit_count: number;
-  period_unit: PeriodUnit;
+  period_unit: PeriodUnit | string;
   option_order: number;
 }
 
-interface IClassificationLevel {
+export interface IClassificationLevel {
   classification_level: Classification;
   impact_level: ImpactLevel;
 }
 
-interface IEnvironmentInstance {
+export interface IEnvironmentInstance {
   instance_name: string;
   classification_level: IClassificationLevel;
   instance_location: InstanceLocation;
@@ -128,31 +130,31 @@ interface IEnvironmentInstance {
   data_egress_monthly_unit: StorageUnit;
 }
 
-interface ICurrentEnvironment {
+export interface ICurrentEnvironment {
   current_environment_exists: boolean;
   environment_instances: IEnvironmentInstance[];
   additional_info: string;
 }
 
-interface IClassificationInstance {
+export interface IClassificationInstance {
   usage_description: string;
   selected_periods: IPeriod[];
   classification_level: IClassificationLevel;
   need_for_entire_task_order_duration: boolean;
 }
 
-interface IServiceOffering {
+export interface IServiceOffering {
   name: string;
   service_offering_group: ServiceOfferingGroup;
 }
 
-interface ISelectedServiceOffering {
+export interface ISelectedServiceOffering {
   service_offering: IServiceOffering;
   classification_instances: IClassificationInstance[];
   other_service_offering: string;
 }
 
-interface IPeriodOfPerformance {
+export interface IPeriodOfPerformance {
   base_period: IPeriod;
   option_periods: IPeriod[];
   pop_start_request: boolean;
@@ -161,7 +163,7 @@ interface IPeriodOfPerformance {
   recurring_requirement: boolean;
 }
 
-interface IGFEOverview {
+export interface IGFEOverview {
   dpas_unit_id: string;
   property_custodian_name: string;
   dpas_custodian_number: string;
@@ -169,7 +171,7 @@ interface IGFEOverview {
   gfe_or_gfp_furnished: boolean;
 }
 
-interface IContractConsiderations {
+export interface IContractConsiderations {
   packaging_shipping_none_apply: boolean;
   packaging_shipping_other: boolean;
   packaging_shipping_other_explanation: string;
@@ -180,7 +182,7 @@ interface IContractConsiderations {
   required_training_services: string[];
 }
 
-interface ISensitiveInformation {
+export interface ISensitiveInformation {
   pii_present: boolean;
   work_to_be_performed: string;
   system_of_record_name: string;
