@@ -183,12 +183,12 @@ export class ApiBase64SuccessResponse<T> extends SuccessBase64Response {
    * @param multiValueHeaders - HTTP response headers, allowing multiple values for a header
    */
   constructor(
-    response: T,
+    response?: string,
     statusCode: SuccessStatusCode = SuccessStatusCode.OK,
     headers?: Headers,
     multiValueHeaders?: MultiValueHeaders
   ) {
-    super(JSON.stringify(response), statusCode, headers, multiValueHeaders);
+    super(response!, statusCode, headers, multiValueHeaders);
   }
 }
 export abstract class ErrorResponse extends Response {

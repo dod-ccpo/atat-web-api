@@ -54,9 +54,9 @@ async function baseHandler(
   const documentName = templatePayload.to_title;
   const headers = {
     "Content-type": "application/pdf",
-    "content-disposition": `attachment; filename=${documentName}.pdf`,
+    "content-disposition": `attachment; filename=AT-7394.pdf`,
   };
-  return new ApiBase64SuccessResponse<string | undefined>(pdf?.toString("base64"), SuccessStatusCode.OK, headers);
+  return new ApiBase64SuccessResponse(pdf?.toString("base64"), SuccessStatusCode.OK, headers);
 }
 
 export const handler = middy(baseHandler)
