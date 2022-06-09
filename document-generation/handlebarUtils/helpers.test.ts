@@ -1,12 +1,5 @@
 import { HelperOptions } from "handlebars";
-import {
-  AwardType,
-  Classification,
-  ImpactLevel,
-  IPeriod,
-  PeriodType,
-  PeriodUnit,
-} from "../../models/document-generation";
+import { AwardType, Classification, ImpactLevel, PeriodType, PeriodUnit } from "../../models/document-generation";
 import { formatDuration, formatGroupAndClassification, formatAwardType, countSections, counter } from "./helpers";
 
 const baseAdnOptionPeriods = [
