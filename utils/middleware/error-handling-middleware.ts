@@ -38,6 +38,8 @@ export const errorHandlingMiddleware = (): middy.MiddlewareObj<MiddlewareInputs,
         break;
       case "Event object failed validation":
         logger.error("Error occured during validation", {
+          // We have to specifically include the `cause` because it's not included the error's `toJSON`
+          // function so that cause details aren't accidentally leaked.
           details: { ...(request.error as any), cause: (request.error as any).cause },
         });
         request.response = new ValidationErrorResponse(
