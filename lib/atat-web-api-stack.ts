@@ -27,7 +27,7 @@ export class AtatWebApiStack extends cdk.Stack {
 
     const apiProps: AtatRestApiProps = {
       restApiName: `${environmentName}HothApi`,
-      binaryMediaTypes: ["*/*"],
+      binaryMediaTypes: ["application/json", "application/pdf"],
     };
     if (network) {
       apiProps.vpcConfig = {
