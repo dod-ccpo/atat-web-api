@@ -173,7 +173,7 @@ export class ApiSuccessResponse<T> extends SuccessResponse {
 /**
  * A base64 encoded success response to an API request
  */
-export class ApiBase64SuccessResponse<T> extends SuccessBase64Response {
+export class ApiBase64SuccessResponse extends SuccessBase64Response {
   /**
    * Create a base64 encoded document response for an API request.
    *
@@ -183,12 +183,12 @@ export class ApiBase64SuccessResponse<T> extends SuccessBase64Response {
    * @param multiValueHeaders - HTTP response headers, allowing multiple values for a header
    */
   constructor(
-    response: T,
+    response: string,
     statusCode: SuccessStatusCode = SuccessStatusCode.OK,
     headers?: Headers,
     multiValueHeaders?: MultiValueHeaders
   ) {
-    super(JSON.stringify(response), statusCode, headers, multiValueHeaders);
+    super(response, statusCode, headers, multiValueHeaders);
   }
 }
 export abstract class ErrorResponse extends Response {

@@ -31,9 +31,7 @@ import {
   formatAwardType,
 } from "./handlebarUtils/helpers";
 
-async function baseHandler(
-  event: RequestEvent<GenerateDocumentRequest>
-): Promise<ApiBase64SuccessResponse<APIGatewayProxyResult>> {
+async function baseHandler(event: RequestEvent<GenerateDocumentRequest>): Promise<ApiBase64SuccessResponse> {
   const { documentType, templatePayload } = event.body;
 
   // get files to generate documents
@@ -53,10 +51,10 @@ async function baseHandler(
 
   const documentName = templatePayload.to_title;
   const headers = {
-    "Content-type": "application/pdf",
-    "content-disposition": `attachment; filename=${documentName}.pdf`,
+    "Content-Type": "application/pdf",
+    "Content-Disposition": `attachment; filename=DescriptionOfWork.pdf`,
   };
-  return new ApiBase64SuccessResponse<string | undefined>(pdf?.toString("base64"), SuccessStatusCode.OK, headers);
+  return new ApiBase64SuccessResponse(pdf?.toString("base64") ?? "", SuccessStatusCode.OK, headers);
 }
 
 export const handler = middy(baseHandler)
