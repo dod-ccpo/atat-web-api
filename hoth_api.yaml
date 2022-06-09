@@ -319,6 +319,7 @@ components:
       description: >-
         Represents a request for Cost data to be fulfilled by the ATAT Orchestrator by invoking the appropriate /costs
         API for a given Cloud Service Provider
+      type: object
       properties:
         request_id:
           description: ID to enable correlating Cost reqeusts with responses
@@ -342,6 +343,7 @@ components:
       description: >-
         Represents a response for Cost data which will have been fulfilled by the ATAT Orchestrator. Will contain the
         results of the invocation of the matching Cloud Service Provider's /costs API.
+      type: object
       allOf:
         - $ref: "#/components/schemas/CspResponse"
     GenerateDocumentRequest:
