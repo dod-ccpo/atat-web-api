@@ -43,10 +43,17 @@ describe("Validate parsing results in the same object", () => {
     };
     const okResponse = new ApiSuccessResponse(object);
     expect(JSON.parse(okResponse.body)).toEqual(object);
-    const okBase64Response = new ApiBase64SuccessResponse(object);
-    expect(JSON.parse(okBase64Response.body)).toEqual(object);
     const acceptedResponse = new ApiSuccessResponse(object, SuccessStatusCode.ACCEPTED);
     expect(JSON.parse(acceptedResponse.body)).toEqual(object);
+  });
+});
+
+describe("Validate base64 encoded response", () => {
+  it("should return a base64 string of the response", async () => {
+    const regularString = "generatedDocument";
+    const base64EncodedString = "Z2VuZXJhdGVkRG9jdW1lbnQ="; // equals "generatedDocument"
+    const okBase64Response = new ApiBase64SuccessResponse(Buffer.from(regularString).toString("base64"));
+    expect(okBase64Response.body).toEqual(base64EncodedString);
   });
 });
 

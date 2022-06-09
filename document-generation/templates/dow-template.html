@@ -26,7 +26,6 @@
             {{/each}}
           </tbody>
         </table>
-
         <table class="contract-details-table">
           <caption>Contract table details</caption>
           <tr>
@@ -52,12 +51,10 @@
               Task Order Number: {{contract_information.previous_task_order_number}}</td>
           </tr>
         </table>
-
         <section class="d-flex">
           <div class="number">1.</div> 
           <div class="content"><u>TO Title.</u> {{to_title}}</div>
         </section>
-
         <section class="d-flex">
           <div class="number">2.</div> 
           <div class="content">
@@ -73,31 +70,26 @@
               base and all option periods, excluding any six-month extension of services pursuant 
               to Federal Acquisition Regulation (FAR) <span style="white-space: nowrap;">52.217-8.</span>
             </p>
-        
           </div>
         </section>
-
         <section class="d-flex">
           <div class="number">4.</div> 
           <div class="content">
             <u>Performance Requirements.</u>        
           </div>
         </section>
-
         <section class="d-flex">
           <div class="number">4.2</div> 
           <div class="content">
             <u>Task 2 &mdash; XaaS</u>
           </div>
         </section>
-
         <section class="d-flex">
           <div class="number">4.2.2</div> 
           <div class="content">
             <p>
               <u>Subtask 2 Developer Tools and Services</u>
             </p>
-
             {{#each selected_service_offerings }}
               {{#each this.classification_instances }}
               <p>
@@ -114,13 +106,10 @@
               </p>
               <p>{{this.usage_description}}</p>
               {{/each }}
-            {{/each }}
-              
+            {{/each }} 
           </div>
         </section>
-
         <hr />
-
         <section class="d-flex">
           <div class="number">11.</div> 
           <div class="content">

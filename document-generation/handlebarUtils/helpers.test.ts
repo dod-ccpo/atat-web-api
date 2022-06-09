@@ -13,7 +13,7 @@ const baseAdnOptionPeriods = [
     period_type: PeriodType.BASE,
     period_unit_count: 1,
     period_unit: PeriodUnit.YEAR,
-    // probably good to make bass periods -1 to keep type consistent
+    // probably good to make base periods -1 to keep type consistent
     option_order: -1,
   },
 ];

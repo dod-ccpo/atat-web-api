@@ -85,10 +85,9 @@ export class AtatRestApi extends Construct {
         accessLogFormat: API_ACCESS_LOG_FORMAT,
         tracingEnabled: true,
       },
-      // TODO: add back in before merging into dev
-      // defaultMethodOptions: {
-      //   authorizationType: apigw.AuthorizationType.IAM,
-      // },
+      defaultMethodOptions: {
+        authorizationType: apigw.AuthorizationType.IAM,
+      },
     });
     this.restApi = restApi;
   }

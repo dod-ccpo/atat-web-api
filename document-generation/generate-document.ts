@@ -1,4 +1,3 @@
-import { APIGatewayProxyResult } from "aws-lambda";
 import { injectLambdaContext } from "@aws-lambda-powertools/logger";
 import middy from "@middy/core";
 import httpJsonBodyParser from "@middy/http-json-body-parser";
@@ -49,7 +48,6 @@ async function baseHandler(event: RequestEvent<GenerateDocumentRequest>): Promis
   // use puppeteer to generate pdf
   const pdf = await generateDocument(templateWithData);
 
-  const documentName = templatePayload.to_title;
   const headers = {
     "Content-Type": "application/pdf",
     "Content-Disposition": `attachment; filename=DescriptionOfWork.pdf`,
