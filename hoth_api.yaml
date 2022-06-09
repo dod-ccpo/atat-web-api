@@ -315,6 +315,37 @@ components:
         content:
           type: object
           additionalProperties: true
+    CostRequest:
+      description: >-
+        Represents a request for Cost data to be fulfilled by the ATAT Orchestrator by invoking the appropriate /costs
+        API for a given Cloud Service Provider
+      type: object
+      properties:
+        request_id:
+          description: ID to enable correlating Cost reqeusts with responses
+          type: string
+          format: uuid
+        portfolio_id:
+          type: string
+        target_csp:
+          $ref: "#/components/schemas/TargetCloudServiceProvider"
+        start_date:
+          description: Start date of Cost query
+          type: string
+          format: date
+          example: "2021-07-01"
+        end_date:
+          description: End date of Cost query
+          type: string
+          format: date
+          example: "2022-07-01"
+    CostResponse:
+      description: >-
+        Represents a response for Cost data which will have been fulfilled by the ATAT Orchestrator. Will contain the
+        results of the invocation of the matching Cloud Service Provider's /costs API.
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/CspResponse"
     GenerateDocumentRequest:
       oneOf:
         - $ref: "#/components/schemas/DescriptionOfWork"
