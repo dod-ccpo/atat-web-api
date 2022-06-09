@@ -3,6 +3,9 @@ import { capitalize } from "./utils";
 import { AwardType, IPeriod, ISelectedServiceOffering } from "../../models/document-generation";
 import { HelperOptions } from "handlebars";
 export const formatDuration = (periods: IPeriod[]): string => {
+  if (periods === null || typeof periods === "string" || typeof periods === "boolean") {
+    return "No periods provided.";
+  }
   periods = periods.map((period: IPeriod) => {
     let period_unit = capitalize(period.period_unit);
     if (period_unit !== "Year") {
@@ -12,6 +15,7 @@ export const formatDuration = (periods: IPeriod[]): string => {
   });
 
   const base = periods.filter((period: IPeriod) => period.period_type === "BASE");
+
   const options = periods
     .filter((period) => period.period_type === "OPTION")
     .sort((a, b) => a.option_order - b.option_order);
@@ -35,7 +39,7 @@ export const formatDuration = (periods: IPeriod[]): string => {
     return `Option(s) - ${optionPeriods}`;
   }
 
-  return "No duration found";
+  return "No periods found.";
 };
 export const formatGroupAndClassification = (serviceOffering: any, classificationLevel: any) => {
   let formattedClassification: string;
@@ -63,13 +67,12 @@ export const formatGroupAndClassification = (serviceOffering: any, classificatio
   return `${formattedClassification} — ${offering}`;
 };
 
-export const formatAwardType = (award: AwardType) => {
-  if (award === "INITIAL_AWARD") {
-    return "Award";
-  }
-  return "Mod";
+export const formatAwardType = (award: AwardType): string => {
+  return award === AwardType.INITIAL_AWARD ? "Award" : award === AwardType.MODIFICATION ? "Mod" : "";
 };
 
+// there has to be a better way to count the subsections
+// this will probably not hold up
 let count = 0;
 export const counter = (options: HelperOptions): string => {
   if (count < options.hash.sectionCount) {

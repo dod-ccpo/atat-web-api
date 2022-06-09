@@ -6,6 +6,7 @@ import {
   NoContentResponse,
   ApiSuccessResponse,
   SuccessStatusCode,
+  ApiBase64SuccessResponse,
 } from "./response";
 
 describe("Validation for No Content responses", () => {
@@ -42,6 +43,8 @@ describe("Validate parsing results in the same object", () => {
     };
     const okResponse = new ApiSuccessResponse(object);
     expect(JSON.parse(okResponse.body)).toEqual(object);
+    const okBase64Response = new ApiBase64SuccessResponse(object);
+    expect(JSON.parse(okBase64Response.body)).toEqual(object);
     const acceptedResponse = new ApiSuccessResponse(object, SuccessStatusCode.ACCEPTED);
     expect(JSON.parse(acceptedResponse.body)).toEqual(object);
   });
