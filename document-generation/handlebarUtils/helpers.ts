@@ -68,11 +68,23 @@ export const formatGroupAndClassification = (serviceOffering: any, classificatio
 };
 
 export const formatAwardType = (award: AwardType): string => {
-  return award === AwardType.INITIAL_AWARD ? "Award" : award === AwardType.MODIFICATION ? "Mod" : "";
+  if (award === AwardType.INITIAL_AWARD) {
+    return "Award";
+  }
+  if (award === AwardType.MODIFICATION) {
+    return "Mod";
+  }
+  return "";
 };
 
-// there has to be a better way to count the subsections
-// this will probably not hold up
+// The counter fn is a helper used with handlebars to count the
+// section number used in 4.2.2.X of the DoW dynamically. Because
+// "count" is set outside of the function it can have unintended
+// side-effects (e.g., if used for a separate section in the document)
+// and will not hold long term since count may not be set to 0 during
+// the next use. The combination of "counter" and "countSections" is
+// used to determine how many sections (all classification_instances)
+// nested inside of the service offerings) and then increase the count
 let count = 0;
 export const counter = (options: HelperOptions): string => {
   if (count < options.hash.sectionCount) {
@@ -86,5 +98,5 @@ export const counter = (options: HelperOptions): string => {
 export const countSections = (serviceOfferings: ISelectedServiceOffering[]): number => {
   return serviceOfferings
     .map((service) => service.classification_instances.length)
-    .reduce((prev, current) => prev + current, 0);
+    .reduce((sum, current) => sum + current, 0);
 };
