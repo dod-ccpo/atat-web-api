@@ -1,15 +1,13 @@
 import middy from "@middy/core";
-import { StepFunctionRequestEvent, ProvisionRequestType, RequestBodyType } from "../../models/provisioning-jobs";
+import { ProvisionRequestType, ProvisionRequest } from "../../models/provisioning-jobs";
 import createError from "http-errors";
 import { MiddlewareOutputs } from "./error-handling-middleware";
+import { RequestEvent } from "../../models/document-generation";
 
 // Ensures a CSP portfolio id is present when submitting a request
 // that updates an already existing portfolio
-export const cspPortfolioIdChecker = (): middy.MiddlewareObj<
-  StepFunctionRequestEvent<RequestBodyType>,
-  MiddlewareOutputs
-> => {
-  const before: middy.MiddlewareFn<StepFunctionRequestEvent<RequestBodyType>, MiddlewareOutputs> = async (
+export const cspPortfolioIdChecker = (): middy.MiddlewareObj<RequestEvent<ProvisionRequest>, MiddlewareOutputs> => {
+  const before: middy.MiddlewareFn<RequestEvent<ProvisionRequest>, MiddlewareOutputs> = async (
     request
   ): Promise<void> => {
     const { portfolioId, operationType } = request.event.body;

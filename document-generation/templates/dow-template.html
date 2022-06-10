@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>ATAT Description of Work</title>
+  </head>
+  <body>
+      <div class="main-wrap">
+        <h1>Description of Work</h1>
+        <table class="award-mod-table">
+          <caption>Award table with effective dates</caption>
+          <thead>
+            <tr>
+              <th>Award/Mod Effective</th>
+              <th>Version Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each award_history}}
+              <tr>
+                <td>{{formatAwardType this.contract_award_type}}</td>
+                <td class="text-right">{{this.effective_date}}</td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+        <table class="contract-details-table">
+          <caption>Contract table details</caption>
+          <tr>
+            <th>Contract Number:</th>
+            <td>TBD by KO</td>
+          </tr>
+          <tr>
+            <th>Task Order (TO) Number:</th>
+            <td>TBD by KO</td>
+          </tr>
+          <tr>
+            <th>Contractor Name:</th>
+            <td>TBD by KO</td>
+          </tr>
+          <tr>
+            <th>Tracking Number:</th>
+            <td>TBD by KO</td>
+          </tr>
+          <tr>
+            <th>Follow-on to Previous Contract and Task Order Number:</th>
+            <td>
+              Contract Number: {{contract_information.contract_number}} <br />
+              Task Order Number: {{contract_information.previous_task_order_number}}</td>
+          </tr>
+        </table>
+        <section class="d-flex">
+          <div class="number">1.</div> 
+          <div class="content"><u>TO Title.</u> {{to_title}}</div>
+        </section>
+        <section class="d-flex">
+          <div class="number">2.</div> 
+          <div class="content">
+            <p>
+              <u>Scope.</u><br />
+              {{scope}}
+            </p>
+            <p style="margin-bottom: 0;">
+              The Government may require surge capabilities during the base or any option period, 
+              and surge modifications will be within the scope of the contract for the defined task 
+              areas of this description of work. Surge capabilities over the life of the task order 
+              will not exceed {{scope_surge}}% of the contractor’s total proposed price for the 
+              base and all option periods, excluding any six-month extension of services pursuant 
+              to Federal Acquisition Regulation (FAR) <span style="white-space: nowrap;">52.217-8.</span>
+            </p>
+          </div>
+        </section>
+        <section class="d-flex">
+          <div class="number">4.</div> 
+          <div class="content">
+            <u>Performance Requirements.</u>        
+          </div>
+        </section>
+        <section class="d-flex">
+          <div class="number">4.2</div> 
+          <div class="content">
+            <u>Task 2 &mdash; XaaS</u>
+          </div>
+        </section>
+        <section class="d-flex">
+          <div class="number">4.2.2</div> 
+          <div class="content">
+            <p>
+              <u>Subtask 2 Developer Tools and Services</u>
+            </p>
+            {{#each selected_service_offerings }}
+              {{#each this.classification_instances }}
+              <p>
+                <strong>4.2.2.{{counter sectionCount=(countSections ../../selected_service_offerings)}}
+                </strong>
+                <u>
+                  {{formatGroupAndClassification ../service_offering this.classification_level}}
+                </u><br/>
+                {{#if this.need_for_entire_task_order_duration}}
+                  Duration: Entire duration of Task Order
+                {{else}}
+                  Duration: {{formatDuration this.selected_periods}}
+                {{/if}}
+              </p>
+              <p>{{this.usage_description}}</p>
+              {{/each }}
+            {{/each }} 
+          </div>
+        </section>
+        <hr />
+        <section class="d-flex">
+          <div class="number">11.</div> 
+          <div class="content">
+            <p>
+              <u>Section 508 Accessibility Standards for Cloud Computing.</u>
+            </p>
+            {{section_508_accessibility_standards.accessibility_reqs_508}}
+          </div>
+        </section>
+      </div>
+  </body>
+</html>

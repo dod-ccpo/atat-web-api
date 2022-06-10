@@ -41,7 +41,7 @@ export interface RestApiVpcConfiguration {
   tempDontUseVpcEndpoint?: boolean;
 }
 
-export interface AtatRestApiProps extends apigw.RestApiBaseProps {
+export interface AtatRestApiProps extends apigw.RestApiProps {
   vpcConfig?: RestApiVpcConfiguration;
 }
 

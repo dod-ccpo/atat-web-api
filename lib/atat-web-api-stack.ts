@@ -2,6 +2,8 @@ import * as cdk from "aws-cdk-lib";
 import * as apigw from "aws-cdk-lib/aws-apigateway";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as statement from "cdk-iam-floyd";
+import * as lambda from "aws-cdk-lib/aws-lambda";
+import * as nodejs from "aws-cdk-lib/aws-lambda-nodejs";
 import { Construct } from "constructs";
 import { AtatNetStack } from "./atat-net-stack";
 import { AtatRestApi, AtatRestApiProps } from "./constructs/apigateway";
@@ -25,6 +27,7 @@ export class AtatWebApiStack extends cdk.Stack {
 
     const apiProps: AtatRestApiProps = {
       restApiName: `${environmentName}HothApi`,
+      binaryMediaTypes: ["application/json", "application/pdf"],
     };
     if (network) {
       apiProps.vpcConfig = {
@@ -99,6 +102,24 @@ export class AtatWebApiStack extends cdk.Stack {
       provisioningSfn.provisioningQueueConsumer.method,
       new apigw.LambdaIntegration(provisioningSfn.provisioningQueueConsumer.fn)
     );
+
+    // APIGW Document Generation Resource
+    const generateDocumentResource = api.restApi.root.addResource("generate-document");
+    const documentGenerationLayer = new lambda.LayerVersion(this, "GenerateDocumentSupportLayer", {
+      compatibleRuntimes: [lambda.Runtime.NODEJS_16_X],
+      code: lambda.Code.fromAsset("document-generation/templates", {}),
+    });
+    const generateDocumentFn = new nodejs.NodejsFunction(this, "GenerateDocumentFunction", {
+      entry: "document-generation/generate-document.ts",
+      runtime: lambda.Runtime.NODEJS_16_X,
+      memorySize: 512,
+      bundling: {
+        nodeModules: ["@sparticuz/chrome-aws-lambda"],
+      },
+      layers: [documentGenerationLayer],
+      timeout: cdk.Duration.seconds(60),
+    });
+    generateDocumentResource.addMethod(HttpMethod.POST, new apigw.LambdaIntegration(generateDocumentFn));
 
     // Cost Queues
     const costRequestQueue = new AtatQueue(this, "CostRequest", { environmentName }).sqs;

@@ -1,5 +1,4 @@
 import { HttpMethod } from "../lib/http";
-import { APIGatewayEventRequestContext } from "aws-lambda";
 import { CloudServiceProvider, Network } from "./cloud-service-providers";
 
 export enum ProvisionRequestType {
@@ -51,12 +50,6 @@ export interface ProvisionRequest {
   cspInvocation: CspInvocation | undefined;
   cspResponse: CspResponse | undefined;
 }
-
-export interface StepFunctionRequestEvent<T> {
-  body: T;
-  requestContext: APIGatewayEventRequestContext;
-}
-export type RequestBodyType = ProvisionRequest;
 
 // temporary schema to use for validating /provision-job request
 export const provisionRequestSchema = {
