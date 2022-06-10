@@ -47,7 +47,7 @@ async function baseHandler(event: RequestEvent<GenerateDocumentRequest>): Promis
 
   // get files to generate documents
   const html = fs.readFileSync(documentTemplatePaths[documentType].html, "utf-8");
-  const css = fs.readFileSync(documentTemplatePaths[documentType].html, "utf-8");
+  const css = fs.readFileSync(documentTemplatePaths[documentType].css, "utf-8");
   const htmlWithCss = juice.inlineContent(html, css);
 
   // use handlebars to populate data into template
