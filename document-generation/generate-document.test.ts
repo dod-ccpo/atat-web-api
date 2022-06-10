@@ -14,7 +14,12 @@ const validRequest = {
   requestContext,
 } as any;
 
-jest.setTimeout(10000); // default of 5000 was too short
+jest.setTimeout(15000); // default of 5000 was too short
+jest.mock("./chromium", () => {
+  return {
+    generateDocument: jest.fn().mockImplementation(() => Buffer.from("generateDocument")),
+  };
+});
 const fnSpy = jest.spyOn(fs, "readFileSync");
 
 describe("Successful generate-document handler", () => {

@@ -4,13 +4,15 @@ import httpJsonBodyParser from "@middy/http-json-body-parser";
 import inputOutputLogger from "@middy/input-output-logger";
 import errorLogger from "@middy/error-logger";
 import { logger } from "../utils/logging";
-import { ApiBase64SuccessResponse, SuccessStatusCode } from "../utils/response";
+import { ApiBase64SuccessResponse, SuccessStatusCode, ValidationErrorResponse } from "../utils/response";
+import { INTERNAL_SERVER_ERROR } from "../utils/errors";
 import { IpCheckerMiddleware } from "../utils/middleware/ip-logging";
 import { errorHandlingMiddleware } from "../utils/middleware/error-handling-middleware";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import validator from "@middy/validator";
 import xssSanitizer from "../utils/middleware/xss-sanitizer";
 import { wrapSchema } from "../utils/middleware/schema-wrapper";
+import { generateDocument } from "./chromium";
 import {
   generateDocumentSchema,
   RequestEvent,
@@ -19,9 +21,7 @@ import {
 } from "../models/document-generation";
 import * as fs from "fs";
 import handlebars from "handlebars";
-import chromium from "@sparticuz/chrome-aws-lambda";
 import juice from "juice";
-import { PDFOptions } from "puppeteer-core";
 import {
   formatDuration,
   formatGroupAndClassification,
@@ -33,13 +33,22 @@ import {
 async function baseHandler(event: RequestEvent<GenerateDocumentRequest>): Promise<ApiBase64SuccessResponse> {
   const { documentType, templatePayload } = event.body;
 
-  // get files to generate documents
-  let html, css, htmlWithCss;
-  if (documentType === DocumentType.DESCRIPTION_OF_WORK) {
-    html = fs.readFileSync("/opt/dow-template.html", "utf-8");
-    css = fs.readFileSync("/opt/dow-style.css", "utf-8");
-    htmlWithCss = juice.inlineContent(html, css);
+  const documentTemplatePaths = {
+    [DocumentType.DESCRIPTION_OF_WORK as string]: {
+      html: "/opt/dow-template.html",
+      css: "/opt/dow-style.css",
+    },
+  };
+  if (!(documentType in documentTemplatePaths)) {
+    return new ValidationErrorResponse(`Invalid document type: "${documentType}"`, {
+      cause: `Invalid document type "${documentType}" provided. Please provide a valid document  type.`,
+    });
   }
+
+  // get files to generate documents
+  const html = fs.readFileSync(documentTemplatePaths[documentType].html, "utf-8");
+  const css = fs.readFileSync(documentTemplatePaths[documentType].html, "utf-8");
+  const htmlWithCss = juice.inlineContent(html, css);
 
   // use handlebars to populate data into template
   const template = handlebars.compile(htmlWithCss);
@@ -47,12 +56,15 @@ async function baseHandler(event: RequestEvent<GenerateDocumentRequest>): Promis
 
   // use puppeteer to generate pdf
   const pdf = await generateDocument(templateWithData);
+  if (!pdf) {
+    return INTERNAL_SERVER_ERROR;
+  }
 
   const headers = {
     "Content-Type": "application/pdf",
     "Content-Disposition": `attachment; filename=DescriptionOfWork.pdf`,
   };
-  return new ApiBase64SuccessResponse(pdf?.toString("base64") ?? "", SuccessStatusCode.OK, headers);
+  return new ApiBase64SuccessResponse(pdf.toString("base64"), SuccessStatusCode.OK, headers);
 }
 
 export const handler = middy(baseHandler)
@@ -66,37 +78,7 @@ export const handler = middy(baseHandler)
   .use(errorHandlingMiddleware())
   .use(JSONErrorHandlerMiddleware());
 
-async function generateDocument(document: string): Promise<Buffer | undefined> {
-  let browser, generatedDocument;
-  try {
-    browser = await chromium.puppeteer.launch({
-      args: chromium.args,
-      defaultViewport: chromium.defaultViewport,
-      executablePath: await chromium.executablePath,
-      headless: chromium.headless,
-      ignoreHTTPSErrors: true,
-    });
-
-    const page = await browser.newPage();
-    const options: PDFOptions = { format: "A4" };
-
-    await page.setContent(document);
-    await page.emulateMediaType("screen");
-    generatedDocument = await page.pdf(options);
-
-    logger.info("Document generation complete");
-  } catch (error) {
-    logger.error(error as any);
-  } finally {
-    if (browser !== null) {
-      await browser?.close();
-    }
-  }
-
-  return generatedDocument;
-}
-
-// handlebars helpers
+// register handlebars helpers for use in template
 handlebars.registerHelper("formatDuration", formatDuration);
 handlebars.registerHelper("countSections", countSections);
 handlebars.registerHelper("counter", counter);
