@@ -1,15 +1,11 @@
 import { Context } from "aws-lambda";
 import { mockClient } from "aws-sdk-client-mock";
-import {
-  ApiSuccessResponse,
-  OtherErrorResponse,
-  SuccessStatusCode,
-  ValidationErrorResponse,
-} from "../../utils/response";
+import { ApiSuccessResponse, SuccessStatusCode, ValidationErrorResponse } from "../../utils/response";
 import { handler } from "./start-cost-job";
 import { sqsClient } from "../../utils/aws-sdk/sqs";
 import { SendMessageCommand } from "@aws-sdk/client-sqs";
 import { CostRequest } from "../../models/cost-jobs";
+import { Network } from "../../models/cloud-service-providers";
 
 const sqsMock = mockClient(sqsClient);
 beforeEach(() => {
@@ -19,6 +15,11 @@ beforeEach(() => {
 const validCostRequest: CostRequest = {
   requestId: "81b31a89-e3e5-46ee-acfe-75436bd14577",
   portfolioId: "b02e77d1-234d-4e3d-bc85-b57ca5a93952",
+  targetCsp: {
+    name: "CSP_A",
+    uri: "http://www.somecspvendor.com/api/atat",
+    network: Network.NETWORK_1,
+  },
   startDate: "2022-01-01",
   endDate: "2022-12-01",
 };
@@ -69,6 +70,11 @@ describe("Cost request operations", () => {
       body: JSON.stringify({
         requestId: "81b31a89-e3e5-46ee-acfe-75436bd14577",
         portfolioId: "b02e77d1-234d-4e3d-bc85-b57ca5a93952",
+        targetCsp: {
+          name: "CSP_A",
+          uri: "http://www.somecspvendor.com/api/atat",
+          network: Network.NETWORK_1,
+        },
         endDate: "2022-12-01",
       }),
     };
@@ -77,15 +83,14 @@ describe("Cost request operations", () => {
   });
 
   it("should throw an error if missing requestId", async () => {
-    const invalidCostRequest = {
-      jobId: "81b31a89-e3e5-46ee-acfe-75436bd14577",
-      portfolioId: "b02e77d1-234d-4e3d-bc85-b57ca5a93952",
-      startDate: "2022-01-01",
-      endDate: "2022-12-01",
-    };
     const request = {
       ...baseApiRequest,
-      body: JSON.stringify(invalidCostRequest),
+      body: JSON.stringify({
+        requestId: "81b31a89-e3e5-46ee-acfe-75436bd14577",
+        portfolioId: "b02e77d1-234d-4e3d-bc85-b57ca5a93952",
+        startDate: "2022-01-01",
+        endDate: "2022-12-01",
+      }),
     };
     const response = await handler(request, {} as Context, () => null);
     expect(response).toBeInstanceOf(ValidationErrorResponse);
