@@ -347,8 +347,17 @@ components:
       allOf:
         - $ref: "#/components/schemas/CspResponse"
     GenerateDocumentRequest:
-      oneOf:
-        - $ref: "#/components/schemas/DescriptionOfWork"
+      description: "Determines which document template the API will generate"
+      type: object
+      properties:
+        documentType:
+          type: string
+          enum:
+            - DESCRIPTION_OF_WORK
+        templatePayload:
+          type: object
+          oneOf:
+            - $ref: "#/components/schemas/DescriptionOfWork"
     DescriptionOfWork:
       description: "Schema used to generate DescriptionOfWork document"
       type: object
