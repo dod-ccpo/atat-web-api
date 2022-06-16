@@ -19,8 +19,8 @@ export interface CostResourcesProps {
 export interface ICostApiImplementation extends IApiRoute {
   readonly costRequestQueue: AtatQueue;
   readonly costResponseQueue: AtatQueue;
-  readonly startCostJobFn: lambdaNodeJs.NodejsFunction;
-  readonly consumeCostResponseFn: lambdaNodeJs.NodejsFunction;
+  readonly startCostJobFn: lambda.IFunction;
+  readonly consumeCostResponseFn: lambda.IFunction;
 }
 
 export class CostApiImplementation extends Construct implements ICostApiImplementation {
@@ -56,7 +56,7 @@ export class CostApiImplementation extends Construct implements ICostApiImplemen
     function constructNodejsFunction(
       id: string,
       entry: string,
-      functionPropsOverride: object
+      environmentOverride: Record<string,string>
     ): lambdaNodeJs.NodejsFunction {
       return new lambdaNodeJs.NodejsFunction(scope, id, {
         entry,
