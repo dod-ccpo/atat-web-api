@@ -15,7 +15,7 @@ export abstract class QueueConsumer<T> {
   readonly handler: (event: APIGatewayProxyEvent) => Promise<APIGatewayProxyResult>;
 
   constructor(queueUrl: string) {
-    this.handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+    this.handler = async (_event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
       // poll messages from the queue
       const receiveMessageInput: ReceiveMessageCommandInput = {
         QueueUrl: queueUrl,

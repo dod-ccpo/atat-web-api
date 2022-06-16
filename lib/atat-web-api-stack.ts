@@ -13,7 +13,6 @@ import { HttpMethod } from "./http";
 import { ProvisioningWorkflow } from "./constructs/provisioning-sfn-workflow";
 import { ApiUser } from "./constructs/api-user";
 import * as idp from "./constructs/identity-provider";
-import { AtatQueue } from "./constructs/sqs";
 import { CostApiImplementation } from "./constructs/cost-api-implementation";
 
 export interface AtatWebApiStackProps extends cdk.StackProps {
