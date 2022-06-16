@@ -22,7 +22,12 @@ describe("Cost API Implementation Tests", () => {
     };
     const api = new AtatRestApi(stack, "HothApi", apiProps);
     // WHEN
-    costApiImplementation = new CostApiImplementation(stack, { environmentName: "testEnv", api, vpc });
+    costApiImplementation = new CostApiImplementation(stack, {
+      environmentName: "testEnv",
+      apiParent: api.restApi.root,
+      vpc,
+    });
+
     template = Template.fromStack(stack);
   });
 

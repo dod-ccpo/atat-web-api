@@ -123,6 +123,10 @@ export class AtatWebApiStack extends cdk.Stack {
     generateDocumentResource.addMethod(HttpMethod.POST, new apigw.LambdaIntegration(generateDocumentFn));
 
     // Build all Cost Resources
-    const costApi = new CostApiImplementation(this, { environmentName, api, vpc: props?.network?.vpc });
+    const costApi = new CostApiImplementation(this, {
+      environmentName,
+      apiParent: api.restApi.root,
+      vpc: props?.network?.vpc,
+    });
   }
 }
