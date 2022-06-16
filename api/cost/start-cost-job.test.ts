@@ -67,8 +67,8 @@ describe("Cost request operations", () => {
         endDate: "2022-12-01",
       }),
     };
-    const response = await handler(baseApiRequest, {} as Context, () => null);
-    expect(response).toBeInstanceOf(OtherErrorResponse);
+    const response = await handler(request, {} as Context, () => null);
+    expect(response).toBeInstanceOf(ValidationErrorResponse);
   });
 
   it("should throw an error if missing requestId", async () => {
@@ -82,7 +82,7 @@ describe("Cost request operations", () => {
       ...baseApiRequest,
       body: JSON.stringify(invalidCostRequest),
     };
-    const response = await handler(baseApiRequest, {} as Context, () => null);
-    expect(response).toBeInstanceOf(OtherErrorResponse);
+    const response = await handler(request, {} as Context, () => null);
+    expect(response).toBeInstanceOf(ValidationErrorResponse);
   });
 });
