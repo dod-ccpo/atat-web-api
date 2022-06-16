@@ -6,13 +6,9 @@ import { INTERNAL_SERVER_ERROR, REQUEST_BODY_INVALID } from "../errors";
 import { CspInvocation, CspResponse, ProvisionRequest } from "../../models/provisioning-jobs";
 import { GenerateDocumentRequest, RequestEvent } from "../../models/document-generation";
 import { logger } from "../logging";
+import { CommonMiddlewareInputs } from "./common";
 
-export type MiddlewareInputs =
-  | RequestEvent<ProvisionRequest>
-  | CspInvocation
-  | ProvisionRequest
-  | APIGatewayProxyEvent
-  | RequestEvent<GenerateDocumentRequest>;
+export type MiddlewareInputs = CommonMiddlewareInputs | CspInvocation | ProvisionRequest;
 export type MiddlewareOutputs = APIGatewayProxyResult | CspResponse | ValidationErrorResponse | ProvisionRequest;
 
 // A central place to catch and handle errors that occur before,

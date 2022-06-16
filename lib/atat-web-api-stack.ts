@@ -14,6 +14,7 @@ import { ProvisioningWorkflow } from "./constructs/provisioning-sfn-workflow";
 import { ApiUser } from "./constructs/api-user";
 import * as idp from "./constructs/identity-provider";
 import { AtatQueue } from "./constructs/sqs";
+import { CostApiImplementation } from "./constructs/cost-api-implementation";
 
 export interface AtatWebApiStackProps extends cdk.StackProps {
   environmentName: string;
@@ -121,8 +122,7 @@ export class AtatWebApiStack extends cdk.Stack {
     });
     generateDocumentResource.addMethod(HttpMethod.POST, new apigw.LambdaIntegration(generateDocumentFn));
 
-    // Cost Queues
-    const costRequestQueue = new AtatQueue(this, "CostRequest", { environmentName }).sqs;
-    const costResponseQueue = new AtatQueue(this, "CostResponse", { environmentName }).sqs;
+    // Build all Cost Resources
+    new CostApiImplementation(this, { environmentName, api, vpc: props?.network?.vpc });
   }
 }

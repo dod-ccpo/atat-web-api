@@ -66,7 +66,7 @@ correct, deploying follows similar steps to the sandbox environment!
 Start off by ensuring the changes to make look reasonable:
 
 ```bash
-cdk diff -c atat:EnvironmentId=<ENVIRONMENT_ID>
+cdk diff -c atat:EnvironmentId=<ENVIRONMENT_ID> -c atat:Sandbox=true
 ```
 
 And then once you've confirmed that they do, deploy:
