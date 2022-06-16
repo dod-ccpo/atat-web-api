@@ -1,8 +1,7 @@
 import middy from "@middy/core";
 import xss from "xss";
 import { APIGatewayProxyResult } from "aws-lambda";
-import { CommonMiddlewareInputs } from "./ip-logging";
-
+import { CommonMiddlewareInputs } from "./common";
 // keep plain text only
 const xssOptions = {
   allowList: {}, // empty means remove all tags

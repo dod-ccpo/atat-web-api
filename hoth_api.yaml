@@ -91,6 +91,51 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/CorsHeaders"
+  /cost-jobs:
+    get:
+      tags:
+        - cost
+      description: Consumes and returns up to ten of the most recently completed Cost Responses from the eponymous Queue
+      operationId: consumeCostResponses
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CostResponse"
+    post:
+      tags:
+        - cost
+      description: Starts a new Cost Request to the specified CSP
+      operationId: startCostJob
+      responses:
+        "201":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CostRequest"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CostRequest"
+    options:
+      tags:
+        - cors
+      description: CORS headers
+      responses:
+        "200":
+          $ref: "#/components/responses/CorsHeaders"
 components:
   responses:
     CorsHeaders:

@@ -1,13 +1,8 @@
 import middy from "@middy/core";
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { GenerateDocumentRequest, RequestEvent } from "../../models/document-generation";
-import { ProvisionRequest } from "../../models/provisioning-jobs";
+import { APIGatewayProxyResult } from "aws-lambda";
+import { CommonMiddlewareInputs } from "./common";
 
 // Create the middleware and export it
-export type CommonMiddlewareInputs =
-  | RequestEvent<ProvisionRequest>
-  | APIGatewayProxyEvent
-  | RequestEvent<GenerateDocumentRequest>;
 export const IpCheckerMiddleware = (): middy.MiddlewareObj<CommonMiddlewareInputs, APIGatewayProxyResult> => {
   // Set up a before check, this will run before the handler
   const before: middy.MiddlewareFn<CommonMiddlewareInputs, APIGatewayProxyResult> = async (request): Promise<void> => {
