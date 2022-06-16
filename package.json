@@ -53,7 +53,7 @@
     "aws-cdk-lib": "2.28.0",
     "axios": "^0.27.2",
     "cdk-iam-floyd": "0.382.0",
-    "cdk-nag": "^2.14.35",
+    "cdk-nag": "^2.14.36",
     "constructs": "^10.1.41",
     "handlebars": "^4.7.7",
     "http-errors": "^2.0.0",
