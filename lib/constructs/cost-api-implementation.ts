@@ -5,7 +5,7 @@ import { Duration } from "aws-cdk-lib";
 import { AtatQueue } from "./sqs";
 import { HttpMethod } from "../http";
 import * as apigw from "aws-cdk-lib/aws-apigateway";
-import { IResource } from "aws-cdk-lib/aws-apigateway";
+import { IResource, Method } from "aws-cdk-lib/aws-apigateway";
 import { ApiRouteProps, IApiRoute } from "./api-route";
 
 export interface ICostApiImplementation extends IApiRoute {
@@ -16,7 +16,7 @@ export interface ICostApiImplementation extends IApiRoute {
 }
 
 export class CostApiImplementation extends Construct implements ICostApiImplementation {
-  // readonly methods: { [key in HttpMethod]: Method };
+  readonly methods: Record<HttpMethod, Method>;
   readonly path: IResource;
   readonly costRequestQueue: AtatQueue;
   readonly costResponseQueue: AtatQueue;
@@ -49,8 +49,9 @@ export class CostApiImplementation extends Construct implements ICostApiImplemen
     this.costResponseQueue.sqs.grantConsumeMessages(this.consumeCostResponseFn);
 
     this.path = props.apiParent.addResource("cost-jobs");
-    this.path.addMethod(HttpMethod.POST, new apigw.LambdaIntegration(this.startCostJobFn));
-    this.path.addMethod(HttpMethod.GET, new apigw.LambdaIntegration(this.consumeCostResponseFn));
+    this.methods = {} as Record<HttpMethod, Method>;
+    this.methods.POST = this.path.addMethod(HttpMethod.POST, new apigw.LambdaIntegration(this.startCostJobFn));
+    this.methods.GET = this.path.addMethod(HttpMethod.GET, new apigw.LambdaIntegration(this.consumeCostResponseFn));
   }
 
   private constructNodejsFunction(

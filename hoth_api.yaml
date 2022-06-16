@@ -96,7 +96,7 @@ paths:
       tags:
         - cost
       description: Consumes and returns up to ten of the most recently completed Cost Responses from the eponymous Queue
-      operationId: consumeCostJobs
+      operationId: consumeCostResponses
       responses:
         "200":
           description: Successful operation

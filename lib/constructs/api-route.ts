@@ -1,5 +1,7 @@
 import * as apigw from "aws-cdk-lib/aws-apigateway";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
+import { HttpMethod } from "../http";
+import { Method } from "aws-cdk-lib/aws-apigateway";
 
 export interface ApiRouteProps {
   readonly environmentName: string;
@@ -9,5 +11,5 @@ export interface ApiRouteProps {
 
 export interface IApiRoute {
   readonly path: apigw.IResource;
-  // readonly methods: { [key in HttpMethod]: apigw.Method };
+  readonly methods: Record<HttpMethod, Method>;
 }
