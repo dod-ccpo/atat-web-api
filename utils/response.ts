@@ -118,6 +118,28 @@ abstract class SuccessResponse extends Response {
 }
 
 /**
+ * A base64 encoded success response to an API request
+ */
+export class SuccessBase64Response extends Response {
+  /**
+   * Create a base64 encoded SuccessResponse.
+   *
+   * @param response - The JSON string for the response
+   * @param statusCode - The HTTP success status code for the response
+   * @param headers - HTTP response headers
+   * @param multiValueHeaders - HTTP response headers, allowing multiple values for a header
+   */
+  constructor(
+    response: string,
+    statusCode: SuccessStatusCode,
+    headers?: Headers,
+    multiValueHeaders?: MultiValueHeaders
+  ) {
+    super(response, statusCode, headers, multiValueHeaders, true);
+  }
+}
+
+/**
  * An API response representing a 204 No Content.
  */
 export class NoContentResponse extends SuccessResponse {
@@ -148,6 +170,27 @@ export class ApiSuccessResponse<T> extends SuccessResponse {
   }
 }
 
+/**
+ * A base64 encoded success response to an API request
+ */
+export class ApiBase64SuccessResponse extends SuccessBase64Response {
+  /**
+   * Create a base64 encoded document response for an API request.
+   *
+   * @param response - The instance of the model to include in the response
+   * @param statusCode - The HTTP success status code for the response
+   * @param headers - HTTP response headers
+   * @param multiValueHeaders - HTTP response headers, allowing multiple values for a header
+   */
+  constructor(
+    response: string,
+    statusCode: SuccessStatusCode = SuccessStatusCode.OK,
+    headers?: Headers,
+    multiValueHeaders?: MultiValueHeaders
+  ) {
+    super(response, statusCode, headers, multiValueHeaders);
+  }
+}
 export abstract class ErrorResponse extends Response {
   /**
    * Create an error response.

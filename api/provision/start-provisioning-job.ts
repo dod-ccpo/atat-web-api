@@ -7,12 +7,12 @@ import validator from "@middy/validator";
 import { APIGatewayProxyResult } from "aws-lambda";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import { HttpMethod } from "../../lib/http";
+import { RequestEvent } from "../../models/document-generation";
 import {
   CspInvocation,
   ProvisionRequest,
   provisionRequestSchema,
   ProvisionRequestType,
-  StepFunctionRequestEvent,
 } from "../../models/provisioning-jobs";
 import { sfnClient } from "../../utils/aws-sdk/step-functions";
 import { REQUEST_BODY_INVALID } from "../../utils/errors";
@@ -31,7 +31,7 @@ const SFN_ARN = process.env.SFN_ARN ?? "";
  *
  * @param event - POST request from API Gateway with provisioning job properties
  */
-export async function baseHandler(event: StepFunctionRequestEvent<ProvisionRequest>): Promise<APIGatewayProxyResult> {
+export async function baseHandler(event: RequestEvent<ProvisionRequest>): Promise<APIGatewayProxyResult> {
   try {
     const cspInvocationJob = transformProvisionRequest(event.body);
 
