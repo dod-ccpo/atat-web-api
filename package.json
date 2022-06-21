@@ -50,7 +50,7 @@
     "@middy/core": "^3.0.4",
     "@middy/error-logger": "^3.0.4",
     "@middy/http-json-body-parser": "^3.0.4",
-    "@middy/input-output-logger": "^3.0.4",
+    "@middy/input-output-logger": "^3.1.0",
     "@middy/validator": "^3.0.4",
     "@sparticuz/chrome-aws-lambda": "^14.4.1",
     "aws-cdk-lib": "2.28.1",
