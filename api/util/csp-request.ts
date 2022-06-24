@@ -1,23 +1,62 @@
 import { CostRequest } from "../../models/cost-jobs";
-import { CspResponse } from "../../models/provisioning-jobs";
+import { CspResponse, ProvisionRequest } from "../../models/provisioning-jobs";
 import { getConfiguration } from "../provision/csp-configuration";
 import { getToken } from "../../idp/client";
 import { logger } from "../../utils/logging";
 import axios from "axios";
 
+export enum CspRequest {
+  PROVISION = "PROVISION",
+  COST = "COST",
+}
+export type ProvisionRequestType = {
+  requestType: CspRequest.PROVISION;
+  body: ProvisionRequest;
+};
+export type CostRequestType = {
+  requestType: CspRequest.COST;
+  body: CostRequest;
+};
+export type CspRequestTypes = ProvisionRequestType | CostRequestType;
+
 /**
  * Make a request to an actual CSP implementation of the ATAT API
  *
- * @param request The input provisioning request
+ * @param request The input request (e.g., provisioning, cost)
  * @returns the response from the CSP
  */
-export async function cspRequest(request: CostRequest): Promise<CspResponse> {
-  const baseUrl = (await getConfiguration(request.targetCsp.name))?.uri;
-  const url = `${baseUrl}/portfolios/${request.portfolioId}/cost`;
+export async function cspRequest(request: CspRequestTypes): Promise<CspResponse> {
+  if (!request.body) {
+    return { code: 400, content: { details: "No request body provided" } };
+  }
+  const { targetCsp, portfolioId } = request.body;
+
+  if (!targetCsp || !portfolioId) {
+    logger.error("Request to CSP failed", { input: { targetCsp, portfolioId } });
+    return {
+      code: 400,
+      content: {
+        details: "No Target CSP or the Portfolio Id is not provided.",
+      },
+    };
+  }
+  const baseUrl = (await getConfiguration(targetCsp.name))?.uri;
+  let url: string;
+  logger.info("URL: ", { baseUrl });
+
+  switch (request.requestType) {
+    case CspRequest.PROVISION:
+      url = `${baseUrl}/portfolios`;
+      break;
+    case CspRequest.COST:
+      url = `${baseUrl}/portfolios/${portfolioId}/cost`;
+      break;
+  }
+
   if (!baseUrl || !baseUrl.startsWith("https://")) {
     logger.error("Invalid CSP configuration (Demo)", {
       input: {
-        csp: request.targetCsp.name,
+        csp: targetCsp.name,
       },
       resolvedUrl: url,
       configSecretPath: process.env.CSP_CONFIG_SECRET_NAME,
@@ -30,7 +69,7 @@ export async function cspRequest(request: CostRequest): Promise<CspResponse> {
     };
   }
 
-  const response = await axios.post(url, request, {
+  const response = await axios.post(url, request.body, {
     headers: {
       Authorization: `Bearer ${(await getToken()).access_token}`,
       "User-Agent": "ATAT v0.2.0 client",
@@ -43,9 +82,9 @@ export async function cspRequest(request: CostRequest): Promise<CspResponse> {
 
   if (response.status !== 200 && response.status !== 202) {
     logger.error("Request to CSP failed", {
-      csp: request.targetCsp.name,
+      csp: targetCsp.name,
       request: {
-        csp: request.targetCsp.name,
+        csp: targetCsp.name,
         url,
       },
       response: { statusCode: response.status, body: response.data },

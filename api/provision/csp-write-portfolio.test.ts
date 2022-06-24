@@ -154,7 +154,7 @@ describe("Failed invocation operations", () => {
   });
 });
 
-function constructProvisionRequestForCsp(csp: string): ProvisionRequest {
+export function constructProvisionRequestForCsp(csp: string): ProvisionRequest {
   const body = {
     ...provisioningBodyWithPayload,
     targetCsp: {
