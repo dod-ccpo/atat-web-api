@@ -7,7 +7,7 @@ import { SendMessageCommand } from "@aws-sdk/client-sqs";
 import { injectLambdaContext } from "@aws-lambda-powertools/logger";
 import inputOutputLogger from "@middy/input-output-logger";
 import errorLogger from "@middy/error-logger";
-import { cspRequest } from "../util/csp-request";
+import { CspRequest, cspRequest } from "../util/csp-request";
 import { IpCheckerMiddleware } from "../../utils/middleware/ip-logging";
 import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
@@ -25,7 +25,8 @@ async function baseHandler(event: SQSEvent): Promise<void> {
 
       // get csp response back (using mock)
       const requestBody: CostRequest = JSON.parse(record ?? "");
-      const cspResponse = await cspRequest(requestBody);
+      const cspResponse = await cspRequest({ requestType: CspRequest.COST, body: requestBody });
+
       logger.info("CSP RESPONSE: ", { cspResponse }); // remove
 
       // sendMessage to response queue with CSP response
