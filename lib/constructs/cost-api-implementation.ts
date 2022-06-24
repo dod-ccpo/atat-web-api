@@ -7,12 +7,15 @@ import { HttpMethod } from "../http";
 import * as apigw from "aws-cdk-lib/aws-apigateway";
 import { IResource, Method } from "aws-cdk-lib/aws-apigateway";
 import { ApiRouteProps, IApiRoute } from "./api-route";
+import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
+import * as secrets from "aws-cdk-lib/aws-secretsmanager";
 
 export interface ICostApiImplementation extends IApiRoute {
   readonly costRequestQueue: AtatQueue;
   readonly costResponseQueue: AtatQueue;
   readonly startCostJobFn: lambda.IFunction;
   readonly consumeCostResponseFn: lambda.IFunction;
+  readonly costRequestFn: lambda.IFunction;
 }
 
 export class CostApiImplementation extends Construct implements ICostApiImplementation {
@@ -20,13 +23,21 @@ export class CostApiImplementation extends Construct implements ICostApiImplemen
   readonly path: IResource;
   readonly costRequestQueue: AtatQueue;
   readonly costResponseQueue: AtatQueue;
-  readonly startCostJobFn: lambdaNodeJs.NodejsFunction;
-  readonly consumeCostResponseFn: lambdaNodeJs.NodejsFunction;
+  readonly startCostJobFn: lambda.IFunction;
+  readonly consumeCostResponseFn: lambda.IFunction;
+  readonly costRequestFn: lambda.IFunction;
   readonly props: ApiRouteProps;
 
   constructor(scope: Construct, props: ApiRouteProps) {
     super(scope, "CostResources");
     this.props = props;
+
+    // CSP config
+    const cspConfig = secrets.Secret.fromSecretNameV2(
+      this,
+      "CspConfiguration",
+      this.node.tryGetContext("atat:CspConfigurationName")
+    );
 
     // Cost Queues
     this.costRequestQueue = new AtatQueue(this, "CostRequest", { environmentName: props.environmentName });
@@ -36,6 +47,11 @@ export class CostApiImplementation extends Construct implements ICostApiImplemen
     this.startCostJobFn = this.constructNodejsFunction(scope, "StartCostRequestJob", "api/cost/start-cost-job.ts", {
       COST_REQUEST_QUEUE_URL: this.costRequestQueue.sqs.queueUrl,
     });
+    this.costRequestFn = this.constructNodejsFunction(scope, "CostRequestFunction", "api/cost/cost-request-fn.ts", {
+      COST_RESPONSE_QUEUE_URL: this.costResponseQueue.sqs.queueUrl,
+      CSP_CONFIG_SECRET_NAME: cspConfig.secretArn,
+    });
+    this.costRequestFn.addEventSource(new SqsEventSource(this.costRequestQueue.sqs, {}));
     this.consumeCostResponseFn = this.constructNodejsFunction(
       scope,
       "ConsumeCostResponse",
@@ -45,8 +61,14 @@ export class CostApiImplementation extends Construct implements ICostApiImplemen
       }
     );
 
+    // queue permissions
     this.costRequestQueue.sqs.grantSendMessages(this.startCostJobFn);
+    this.costRequestQueue.sqs.grantConsumeMessages(this.costRequestFn);
+    this.costResponseQueue.sqs.grantSendMessages(this.costRequestFn);
     this.costResponseQueue.sqs.grantConsumeMessages(this.consumeCostResponseFn);
+
+    // secrets permissions
+    cspConfig.grantRead(this.costRequestFn);
 
     this.path = props.apiParent.addResource("cost-jobs");
     this.methods = {} as Record<HttpMethod, Method>;
