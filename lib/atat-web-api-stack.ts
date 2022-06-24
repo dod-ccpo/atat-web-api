@@ -133,6 +133,7 @@ export class AtatWebApiStack extends cdk.Stack {
       environmentName,
       apiParent: api.restApi.root,
       vpc: props?.network?.vpc,
+      idp: atatIdp,
     });
   }
 }

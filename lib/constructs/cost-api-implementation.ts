@@ -8,6 +8,7 @@ import * as apigw from "aws-cdk-lib/aws-apigateway";
 import { IResource, Method } from "aws-cdk-lib/aws-apigateway";
 import { ApiRouteProps, IApiRoute } from "./api-route";
 import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
+import * as idp from "../constructs/identity-provider";
 import * as secrets from "aws-cdk-lib/aws-secretsmanager";
 
 export interface ICostApiImplementation extends IApiRoute {
@@ -23,9 +24,9 @@ export class CostApiImplementation extends Construct implements ICostApiImplemen
   readonly path: IResource;
   readonly costRequestQueue: AtatQueue;
   readonly costResponseQueue: AtatQueue;
-  readonly startCostJobFn: lambda.IFunction;
-  readonly consumeCostResponseFn: lambda.IFunction;
-  readonly costRequestFn: lambda.IFunction;
+  readonly startCostJobFn: lambda.Function;
+  readonly consumeCostResponseFn: lambda.Function;
+  readonly costRequestFn: lambda.Function;
   readonly props: ApiRouteProps;
 
   constructor(scope: Construct, props: ApiRouteProps) {
@@ -69,6 +70,9 @@ export class CostApiImplementation extends Construct implements ICostApiImplemen
 
     // secrets permissions
     cspConfig.grantRead(this.costRequestFn);
+    props.idp?.addClient(new idp.IdentityProviderLambdaClient("CspWriteCost", this.costRequestFn), [
+      "atat/write-portfolio",
+    ]);
 
     this.path = props.apiParent.addResource("cost-jobs");
     this.methods = {} as Record<HttpMethod, Method>;
