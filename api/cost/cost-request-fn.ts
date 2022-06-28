@@ -2,18 +2,17 @@ import middy from "@middy/core";
 import { sqsClient } from "../../utils/aws-sdk/sqs";
 import { SQSEvent, SQSRecord } from "aws-lambda";
 import { logger } from "../../utils/logging";
-import { CostRequest } from "../../models/cost-jobs";
+import { CostRequest, CspRequest } from "../../models/cost-jobs";
 import { SendMessageCommand } from "@aws-sdk/client-sqs";
 import { injectLambdaContext } from "@aws-lambda-powertools/logger";
 import inputOutputLogger from "@middy/input-output-logger";
 import errorLogger from "@middy/error-logger";
-import { CspRequest, cspRequest } from "../util/csp-request";
-import { IpCheckerMiddleware } from "../../utils/middleware/ip-logging";
+import { cspRequest } from "../util/csp-request";
 import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 
 const COST_RESPONSE_QUEUE_URL = process.env.COST_RESPONSE_QUEUE_URL ?? "";
-const MESSAGE_GROUP_ID = "cost-response-queue-message-group";
+export const MESSAGE_GROUP_ID = "cost-response-queue-message-group";
 
 async function baseHandler(event: SQSEvent): Promise<void> {
   const processedMessages = [];
@@ -47,13 +46,8 @@ async function baseHandler(event: SQSEvent): Promise<void> {
 }
 
 export const handler = middy(baseHandler)
-  .use(injectLambdaContext(logger)) // TODO: add clearState and logEvent
+  .use(injectLambdaContext(logger))
   .use(inputOutputLogger({ logger: (message) => logger.info("Event/Result", message) }))
-  .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }));
-// .use(IpCheckerMiddleware())
-// .use(errorHandlingMiddleware())
-// .use(JSONErrorHandlerMiddleware());
-
-// .use(httpJsonBodyParser())
-// .use(xssSanitizer())
-// .use(validator({ eventSchema: wrapSchema(costRequestSchema) }))
+  .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
+  .use(errorHandlingMiddleware())
+  .use(JSONErrorHandlerMiddleware());

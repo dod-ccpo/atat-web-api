@@ -1,12 +1,13 @@
 import axios from "axios";
 import * as idpClient from "../../idp/client";
+import * as cspConfig from "../provision/csp-configuration";
 import { Network } from "../../models/cloud-service-providers";
-import { CostRequest } from "../../models/cost-jobs";
+import { CostRequest, CspRequest, CspRequestType } from "../../models/cost-jobs";
 import { ErrorStatusCode, SuccessStatusCode } from "../../utils/response";
 import { validRequestBody } from "../cost/cost-request-fn.test";
-import * as cspConfig from "../provision/csp-configuration";
 import { constructProvisionRequestForCsp } from "../provision/csp-write-portfolio.test";
-import { CspRequest, cspRequest, CostRequestType, ProvisionRequestType } from "./csp-request";
+import { cspRequest } from "./csp-request";
+import { ProvisionRequest } from "../../models/provisioning-jobs";
 
 // Reused mocks
 jest.mock("../provision/csp-configuration");
@@ -20,7 +21,7 @@ describe("Successful invocation of mock CSP function", () => {
   const fakeGoodResponse = { fake: "csp response" };
   it("should return 200 when COST csp request", async () => {
     // GIVEN
-    const request: CostRequestType = { requestType: CspRequest.COST, body: validRequestBody };
+    const request: CspRequestType<CostRequest> = { requestType: CspRequest.COST, body: validRequestBody };
     mockedConfig.mockResolvedValueOnce({ uri: "https://mockcsp.cspa/atat/" });
     mockedAxios.post.mockResolvedValueOnce({
       data: fakeGoodResponse,
@@ -39,7 +40,7 @@ describe("Successful invocation of mock CSP function", () => {
   it("should return 200 when PROVISION csp request", async () => {
     // GIVEN
     const provisioningRequest = constructProvisionRequestForCsp("CSP_A");
-    const request: ProvisionRequestType = { requestType: CspRequest.PROVISION, body: provisioningRequest };
+    const request: CspRequestType<ProvisionRequest> = { requestType: CspRequest.PROVISION, body: provisioningRequest };
     mockedGetToken.mockResolvedValueOnce({ access_token: "FakeToken", expires_in: 0, token_type: "Bearer" });
     mockedConfig.mockResolvedValueOnce({ uri: "https://mockcsp.cspa/atat/" });
     mockedAxios.post.mockResolvedValueOnce({
@@ -93,7 +94,7 @@ describe("Failed CSP invocation operations", () => {
     async (requestType) => {
       // GIVEN
       const fakeBadResponse = { bad: "fake csp response" };
-      const request: any = { requestType, body: validRequestBody };
+      const request = { requestType, body: validRequestBody };
       mockedGetToken.mockResolvedValueOnce({ access_token: "FakeToken", expires_in: 0, token_type: "Bearer" });
       mockedConfig.mockResolvedValueOnce({ uri: "https://mockcsp.cspa/atat/" });
       mockedAxios.post.mockResolvedValueOnce({
@@ -116,7 +117,7 @@ describe("Failed CSP invocation operations", () => {
     "should throw a 500 error when a CSP internal error occurs",
     async (requestType) => {
       const internalErrorResponse = { some: "internal error" };
-      const request: any = { requestType, body: validRequestBody };
+      const request = { requestType, body: validRequestBody };
       mockedGetToken.mockResolvedValueOnce({ access_token: "FakeToken", expires_in: 0, token_type: "Bearer" });
       mockedConfig.mockResolvedValueOnce({ uri: "https://mockcsp.cspa/atat/" });
       mockedAxios.post.mockResolvedValueOnce({

@@ -11,6 +11,16 @@ export interface CostRequest {
   endDate: string;
 }
 
+export enum CspRequest {
+  PROVISION = "PROVISION",
+  COST = "COST",
+}
+
+export type CspRequestType<T> = {
+  requestType: CspRequest;
+  body: T;
+};
+
 export const costRequestSchema = {
   type: "object",
   required: ["requestId", "portfolioId", "targetCsp", "startDate", "endDate"],

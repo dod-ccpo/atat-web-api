@@ -1,23 +1,9 @@
-import { CostRequest } from "../../models/cost-jobs";
+import { CostRequest, CspRequestType, CspRequest } from "../../models/cost-jobs";
 import { CspResponse, ProvisionRequest } from "../../models/provisioning-jobs";
 import { getConfiguration } from "../provision/csp-configuration";
 import { getToken } from "../../idp/client";
 import { logger } from "../../utils/logging";
 import axios from "axios";
-
-export enum CspRequest {
-  PROVISION = "PROVISION",
-  COST = "COST",
-}
-export type ProvisionRequestType = {
-  requestType: CspRequest.PROVISION;
-  body: ProvisionRequest;
-};
-export type CostRequestType = {
-  requestType: CspRequest.COST;
-  body: CostRequest;
-};
-export type CspRequestTypes = ProvisionRequestType | CostRequestType;
 
 /**
  * Make a request to an actual CSP implementation of the ATAT API
@@ -25,7 +11,7 @@ export type CspRequestTypes = ProvisionRequestType | CostRequestType;
  * @param request The input request (e.g., provisioning, cost)
  * @returns the response from the CSP
  */
-export async function cspRequest(request: CspRequestTypes): Promise<CspResponse> {
+export async function cspRequest(request: CspRequestType<CostRequest | ProvisionRequest>): Promise<CspResponse> {
   if (!request.body) {
     return { code: 400, content: { details: "No request body provided" } };
   }
@@ -42,7 +28,6 @@ export async function cspRequest(request: CspRequestTypes): Promise<CspResponse>
   }
   const baseUrl = (await getConfiguration(targetCsp.name))?.uri;
   let url: string;
-  logger.info("URL: ", { baseUrl });
 
   switch (request.requestType) {
     case CspRequest.PROVISION:
