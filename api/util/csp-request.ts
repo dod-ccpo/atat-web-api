@@ -23,6 +23,7 @@ export async function cspRequest(request: CspRequestType<CostRequest | Provision
       code: 400,
       content: {
         details: "No Target CSP or the Portfolio Id is not provided.",
+        request: request.body,
       },
     };
   }
@@ -50,6 +51,7 @@ export async function cspRequest(request: CspRequestType<CostRequest | Provision
       code: 400,
       content: {
         details: "Invalid CSP provided",
+        request: request.body,
       },
     };
   }
@@ -78,6 +80,6 @@ export async function cspRequest(request: CspRequestType<CostRequest | Provision
 
   return {
     code: response.status,
-    content: response.data,
+    content: { response: response.data, request: request.body },
   };
 }

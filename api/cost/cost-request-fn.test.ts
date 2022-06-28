@@ -76,9 +76,9 @@ describe("Cost Request Fn", () => {
     const secondSentMessage: any = commandCalls[1].firstArg.input;
 
     // THEN
-    expect(JSON.parse(firstSentMessage.MessageBody).content.requestBody).toEqual(validMessages[0]);
+    expect(JSON.parse(firstSentMessage.MessageBody).content.request).toEqual(validMessages[0]);
     expect(firstSentMessage.MessageGroupId).toEqual(MESSAGE_GROUP_ID);
-    expect(JSON.parse(secondSentMessage.MessageBody).content.requestBody).toEqual(validMessages[1]);
+    expect(JSON.parse(secondSentMessage.MessageBody).content.request).toEqual(validMessages[1]);
     expect(secondSentMessage.MessageGroupId).toEqual(MESSAGE_GROUP_ID);
   });
 });

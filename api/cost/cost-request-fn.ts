@@ -19,23 +19,17 @@ async function baseHandler(event: SQSEvent): Promise<void> {
   if (event.Records) {
     const records = event.Records.map((record: SQSRecord) => record.body);
     for (const record of records) {
-      logger.info("Record Body: ", { record });
       processedMessages.push(record);
 
       // get csp response back (using mock)
       const requestBody: CostRequest = JSON.parse(record ?? "");
       const cspResponse = await cspRequest({ requestType: CspRequest.COST, body: requestBody });
 
-      logger.info("CSP RESPONSE: ", { cspResponse }); // remove
-
       // sendMessage to response queue with CSP response
       const response = await sqsClient.send(
         new SendMessageCommand({
           QueueUrl: COST_RESPONSE_QUEUE_URL,
-          MessageBody: JSON.stringify({
-            code: cspResponse.code,
-            content: { requestBody, response: cspResponse.content },
-          }),
+          MessageBody: JSON.stringify(cspResponse),
           MessageGroupId: MESSAGE_GROUP_ID,
         })
       );

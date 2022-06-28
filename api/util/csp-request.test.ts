@@ -34,7 +34,7 @@ describe("Successful invocation of mock CSP function", () => {
     // WHEN
     const response = await cspRequest(request);
     // THEN
-    expect(response.content).toBe(fakeGoodResponse);
+    expect(response.content).toEqual({ response: fakeGoodResponse, request: request.body });
     expect(response.code).toBe(SuccessStatusCode.OK);
   });
   it("should return 200 when PROVISION csp request", async () => {
@@ -53,7 +53,7 @@ describe("Successful invocation of mock CSP function", () => {
     // WHEN
     const response = await cspRequest(request);
     // THEN
-    expect(response.content).toBe(fakeGoodResponse);
+    expect(response.content).toEqual({ response: fakeGoodResponse, request: provisioningRequest });
     expect(response.code).toBe(SuccessStatusCode.OK);
   });
 });
@@ -71,20 +71,22 @@ describe("Failed CSP invocation operations", () => {
     "should return a 400 when the CSP's configuration is unknown",
     async (requestType) => {
       // GIVEN
-      mockedConfig.mockResolvedValueOnce(undefined);
-      // WHEN
-      const response = await cspRequest({
+      const request = {
         requestType,
         body: {
           ...validRequestBody,
           targetCsp: { name: "CSP_BAD", uri: "https://csp.com", network: Network.NETWORK_1 },
         },
-      } as any);
+      } as any;
+      mockedConfig.mockResolvedValueOnce(undefined);
+      // WHEN
+      const response = await cspRequest(request);
       // THEN
       expect(response).toEqual({
         code: 400,
         content: {
           details: "Invalid CSP provided",
+          request: request.body,
         },
       });
     }
@@ -109,7 +111,7 @@ describe("Failed CSP invocation operations", () => {
       // THEN
       expect(response).toEqual({
         code: 400,
-        content: fakeBadResponse,
+        content: { response: fakeBadResponse, request: request.body },
       });
     }
   );
@@ -130,7 +132,7 @@ describe("Failed CSP invocation operations", () => {
       const response = await cspRequest(request);
       expect(response).toEqual({
         code: ErrorStatusCode.INTERNAL_SERVER_ERROR,
-        content: internalErrorResponse,
+        content: { response: internalErrorResponse, request: request.body },
       });
     }
   );

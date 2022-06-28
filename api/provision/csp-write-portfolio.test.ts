@@ -36,6 +36,7 @@ describe("Successful invocation of mock CSP function", () => {
   });
   it("should basically just return a reformatted CSP response", async () => {
     // GIVEN
+    const request = constructProvisionRequestForCsp("CSP_E");
     const expectedResponse = {
       totally: "fake",
       csp: "response",
@@ -51,12 +52,12 @@ describe("Successful invocation of mock CSP function", () => {
     });
 
     // WHEN
-    const response = await handler(constructProvisionRequestForCsp("CSP_E"), {} as Context);
+    const response = await handler(request, {} as Context);
 
     // THEN
     expect(response).toEqual({
       code: 200,
-      content: expectedResponse,
+      content: { response: expectedResponse, request },
     });
   });
 });
@@ -73,19 +74,22 @@ describe("Failed invocation operations", () => {
 
   it("should return a 400 when the CSP's configuration is unknown", async () => {
     // GIVEN
+    const request = constructProvisionRequestForCsp("CSP_DNE");
     mockedConfig.mockResolvedValueOnce(undefined);
     // WHEN
-    const response = await handler(constructProvisionRequestForCsp("CSP_DNE"), {} as Context);
+    const response = await handler(request, {} as Context);
     // THEN
     expect(response).toEqual({
       code: 400,
       content: {
         details: "Invalid CSP provided",
+        request,
       },
     });
   });
   it("should basically just return a reformatted CSP response", async () => {
     // GIVEN
+    const request = constructProvisionRequestForCsp("CSP_E");
     const expectedResponse = {
       totally: "fake",
       csp: "response",
@@ -101,12 +105,12 @@ describe("Failed invocation operations", () => {
     });
 
     // WHEN
-    const response = await handler(constructProvisionRequestForCsp("CSP_E"), {} as Context);
+    const response = await handler(request, {} as Context);
 
     // THEN
     expect(response).toEqual({
       code: 400,
-      content: expectedResponse,
+      content: { response: expectedResponse, request },
     });
   });
 
