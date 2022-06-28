@@ -40,23 +40,7 @@ describe("ATAT IAM Policy creation", () => {
       PolicyDocument: {
         Statement: [
           {
-            Action: "artifact:Get",
-            Effect: "Allow",
-            Resource: {
-              "Fn::Join": [
-                "",
-                [
-                  "arn:",
-                  {
-                    Ref: "AWS::Partition",
-                  },
-                  ":artifact:::report-package/*",
-                ],
-              ],
-            },
-          },
-          {
-            Action: "artifact:DownloadAgreement",
+            Action: ["artifact:Get", "artifact:DownloadAgreement"],
             Effect: "Allow",
             Resource: "*",
           },

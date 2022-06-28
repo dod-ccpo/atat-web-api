@@ -1,7 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as custom from "aws-cdk-lib/custom-resources";
-import * as statement from "cdk-iam-floyd";
 
 import { Construct } from "constructs";
 
@@ -31,9 +30,29 @@ export class AtatIamStack extends cdk.Stack {
     const generalReadAccess = new iam.ManagedPolicy(this, "GeneralReadAccess", {
       description: "Grants read access to specific resources not in ViewOnlyAccess",
       statements: [
-        new statement.Apigateway().toGET().onRestApis(),
-        new statement.States().allReadActions(),
-        new statement.Xray().allListActions().allReadActions(),
+        new iam.PolicyStatement({
+          effect: iam.Effect.ALLOW,
+          actions: ["apigateway:GET"],
+          resources: [
+            this.formatArn({
+              arnFormat: cdk.ArnFormat.SLASH_RESOURCE_SLASH_RESOURCE_NAME,
+              service: "apigateway",
+              account: "",
+              resource: "restapis",
+              resourceName: "*",
+            }),
+          ],
+        }),
+        new iam.PolicyStatement({
+          effect: iam.Effect.ALLOW,
+          actions: ["xray:Get*", "xray:List*"],
+          resources: ["*"],
+        }),
+        new iam.PolicyStatement({
+          effect: iam.Effect.ALLOW,
+          actions: ["states:Describe*", "states:Get*", "states:List*"],
+          resources: ["*"],
+        }),
       ],
     });
 
@@ -43,8 +62,11 @@ export class AtatIamStack extends cdk.Stack {
         // Artifact access policies generally based on those from the Artifact
         // User Guide documentation at
         // https://docs.aws.amazon.com/artifact/latest/ug/security-iam.html#example-iam-policies
-        new statement.Artifact().toGet().onReportPackage("*"),
-        new statement.Artifact().toDownloadAgreement().onAllResources(),
+        new iam.PolicyStatement({
+          effect: iam.Effect.ALLOW,
+          actions: ["artifact:Get", "artifact:DownloadAgreement"],
+          resources: ["*"],
+        }),
       ],
     });
 
@@ -53,42 +75,119 @@ export class AtatIamStack extends cdk.Stack {
       statements: [
         // During a deployment, outside of CloudFormation (where the role will be used),
         // the CDK needs to read from and write to the S3 buckets for the CDK.
-        new statement.S3()
-          .allActions()
-          .onBucket(`cdk-*-assets-${cdk.Aws.ACCOUNT_ID}-*`)
-          .onBucket("cdktoolkit-stagingbucket-*"),
+        new iam.PolicyStatement({
+          effect: iam.Effect.ALLOW,
+          actions: ["s3:*"],
+          resources: [
+            `arn:${cdk.Aws.PARTITION}:s3:::cdk-*-assets-${cdk.Aws.ACCOUNT_ID}-*`,
+            `arn:${cdk.Aws.PARTITION}:s3:::cdktoolkit-stagingbucket-*`,
+          ],
+        }),
         // The Lookup, Deploy, and other roles will be used by the CDK and use a particular naming
         // convention
-        new statement.Sts()
-          .toAssumeRole()
-          .onRole(
-            `cdk-${DEFAULT_BOOSTRAP_QUALIFIER}-*-role-${cdk.Aws.ACCOUNT_ID}-${cdk.Aws.REGION}`,
-            cdk.Aws.ACCOUNT_ID
-          ),
+        new iam.PolicyStatement({
+          effect: iam.Effect.ALLOW,
+          actions: ["sts:AssumeRole"],
+          resources: [
+            this.formatArn({
+              arnFormat: cdk.ArnFormat.SLASH_RESOURCE_NAME,
+              service: "iam",
+              region: "",
+              resource: "role",
+              resourceName: `cdk-${DEFAULT_BOOSTRAP_QUALIFIER}-*-role-${cdk.Aws.ACCOUNT_ID}-${cdk.Aws.REGION}`,
+            }),
+          ],
+        }),
         // Additionally, values under the `cdk-bootstrap/` namespace for the qualifier may be necessary
         // for the CDK to understand the environment and do a deployment
-        new statement.Ssm()
-          .toGetParameter()
-          .onParameter(`cdk-bootstrap/${DEFAULT_BOOSTRAP_QUALIFIER}/*`, cdk.Aws.ACCOUNT_ID),
+        new iam.PolicyStatement({
+          effect: iam.Effect.ALLOW,
+          actions: ["ssm:GetParameter"],
+          resources: [
+            this.formatArn({
+              arnFormat: cdk.ArnFormat.SLASH_RESOURCE_NAME,
+              service: "ssm",
+              resource: "parameter",
+              region: "*",
+              resourceName: `cdk-bootstrap/${DEFAULT_BOOSTRAP_QUALIFIER}/*`,
+            }),
+          ],
+        }),
         // Within ATAT, developers may need to read from various queues in order to debug or
         // troubleshoot
-        new statement.Sqs().allReadActions().onAllResources(),
+        new iam.PolicyStatement({
+          effect: iam.Effect.ALLOW,
+          actions: ["sqs:Get*", "sqs:List*", "sqs:ReceiveMessage"],
+          resources: ["*"],
+        }),
         // Grant access to read the pipeline state
-        new statement.Codepipeline().allReadActions(),
-        new statement.Codebuild().allReadActions(),
+        new iam.PolicyStatement({
+          effect: iam.Effect.ALLOW,
+          actions: [
+            "codebuild:BatchGet*",
+            "codebuild:Describe*",
+            "codebuild:Get*",
+            "codebuild:List*",
+            "codepipeline:Get*",
+            "codepipeline:List*",
+          ],
+          resources: ["*"],
+        }),
         // This allows listing/viewing functions in the AWS console
-        new statement.Lambda().allListActions().toGetAccountSettings().toGetFunction(),
+        new iam.PolicyStatement({
+          effect: iam.Effect.ALLOW,
+          actions: ["lambda:List*", "lambda:GetAccountSettings", "lambda:GetFunction"],
+          resources: ["*"],
+        }),
         // Allow developers to describe APIs
-        new statement.Apigateway().toGET().onAccount().onRestApis().onRestApi("*"),
+        new iam.PolicyStatement({
+          effect: iam.Effect.ALLOW,
+          actions: ["apigateway:GET"],
+          resources: [
+            ...["account", "restapis"].map((resourceType) =>
+              this.formatArn({
+                arnFormat: cdk.ArnFormat.SLASH_RESOURCE_SLASH_RESOURCE_NAME,
+                service: "apigateway",
+                account: "",
+                resource: resourceType,
+              })
+            ),
+            this.formatArn({
+              arnFormat: cdk.ArnFormat.SLASH_RESOURCE_SLASH_RESOURCE_NAME,
+              service: "apigateway",
+              account: "",
+              resource: "restapis",
+              resourceName: "*",
+            }),
+          ],
+        }),
         // Allow developers to manually re-deploy, which may be necessary as a troubleshooting step
         // as CloudFormation does not always trigger a deployment itself.
-        new statement.Apigateway().toPOST().onDeployments("*"),
+        new iam.PolicyStatement({
+          effect: iam.Effect.ALLOW,
+          actions: ["apigateway:POST"],
+          resources: [
+            this.formatArn({
+              arnFormat: cdk.ArnFormat.SLASH_RESOURCE_SLASH_RESOURCE_NAME,
+              service: "apigateway",
+              account: "",
+              resource: "restapis",
+              resourceName: `*/deployments`,
+            }),
+          ],
+        }),
       ],
     });
 
     const baseDenies = new iam.ManagedPolicy(this, "AtatUserDenyPolicy", {
       description: "Denies access to sensitive resources and actions",
-      statements: [new statement.Organizations().deny().allActions().onAllResources()],
+      statements: [
+        new iam.PolicyStatement({
+          effect: iam.Effect.DENY,
+          actions: ["organizations:*"],
+          resources: ["*"],
+        }),
+      ],
     });
 
     const managementAccountId = this.findOrganizationManagementAccount();
