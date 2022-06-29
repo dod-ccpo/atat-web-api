@@ -6,7 +6,7 @@ import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import { sqsClient } from "../../utils/aws-sdk/sqs";
 import { logger } from "../../utils/logging";
 import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
-import { IpCheckerMiddleware } from "../../utils/middleware/ip-logging";
+import { LoggingContextMiddleware } from "../../utils/middleware/logging-context-middleware";
 import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
 import errorLogger from "@middy/error-logger";
 import inputOutputLogger from "@middy/input-output-logger";
@@ -52,10 +52,10 @@ export abstract class QueueConsumer<T> {
 
   createHandler() {
     return middy(this.handler)
-      .use(injectLambdaContext(logger))
+      .use(injectLambdaContext(logger, { clearState: true }))
+      .use(LoggingContextMiddleware())
       .use(inputOutputLogger({ logger: (message) => logger.info("Event/Result", message) }))
       .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
-      .use(IpCheckerMiddleware())
       .use(errorHandlingMiddleware())
       .use(JSONErrorHandlerMiddleware());
   }

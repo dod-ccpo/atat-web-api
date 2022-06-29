@@ -20,7 +20,6 @@ export async function generateDocument(document: string): Promise<Buffer | undef
     await page.setContent(document);
     await page.emulateMediaType("screen");
     generatedDocument = await page.pdf(options);
-    console.log("DOCU: ", "generateDocument");
     logger.info("Document generation complete");
   } catch (error) {
     logger.error(error as any);

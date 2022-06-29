@@ -1,7 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import * as apigw from "aws-cdk-lib/aws-apigateway";
 import * as iam from "aws-cdk-lib/aws-iam";
-import * as statement from "cdk-iam-floyd";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as nodejs from "aws-cdk-lib/aws-lambda-nodejs";
 import { Construct } from "constructs";
@@ -53,7 +52,11 @@ export class AtatWebApiStack extends cdk.Stack {
         new iam.ManagedPolicy(this, "ApiUserBoundary", {
           document: new iam.PolicyDocument({
             statements: [
-              new statement.ExecuteApi().allow().toInvoke().on(api.restApi.arnForExecuteApi()),
+              new iam.PolicyStatement({
+                effect: iam.Effect.ALLOW,
+                actions: ["execute-api:Invoke"],
+                resources: [api.restApi.arnForExecuteApi()],
+              }),
               // This may seem a little redundant; however, implicit denies
               // in permissions boundaries do not limit resource-based policies.
               // So we need an _explicit_ deny for any action other than
@@ -61,7 +64,11 @@ export class AtatWebApiStack extends cdk.Stack {
               // given an identity-based policy that grants something like
               // s3:GetObject on * while an S3 bucket allows the user to read
               // from that bucket.
-              new statement.ExecuteApi().deny().notAction().toInvoke().notResource().on(api.restApi.arnForExecuteApi()),
+              new iam.PolicyStatement({
+                effect: iam.Effect.ALLOW,
+                notActions: ["execute-api:Invoke"],
+                notResources: [api.restApi.arnForExecuteApi()],
+              }),
             ],
           }),
         })

@@ -55,7 +55,7 @@ export const errorHandlingMiddleware = (): middy.MiddlewareObj<MiddlewareInputs,
         request.response = REQUEST_BODY_INVALID;
         break;
       default:
-        console.error("Unhandled error: " + JSON.stringify(error));
+        logger.error("Unhandled error", error as Error);
         request.response = INTERNAL_SERVER_ERROR;
         break;
     }

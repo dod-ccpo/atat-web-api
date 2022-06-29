@@ -4,8 +4,6 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import * as logs from "aws-cdk-lib/aws-logs";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 
-import * as statement from "cdk-iam-floyd";
-
 import { Construct } from "constructs";
 import { HttpMethod } from "../http";
 
@@ -103,9 +101,11 @@ export class AtatRestApi extends Construct {
    */
   public grantOnRoute(principal: iam.IPrincipal, method: HttpMethod | "*", path?: string) {
     principal.addToPrincipalPolicy(
-      new statement.ExecuteApi()
-        .toInvoke()
-        .on(this.restApi.arnForExecuteApi(method, path, this.restApi.deploymentStage.stageName))
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ["execute-api:Invoke"],
+        resources: [this.restApi.arnForExecuteApi(method, path, this.restApi.deploymentStage.stageName)],
+      })
     );
   }
 
@@ -118,13 +118,21 @@ export class AtatRestApi extends Construct {
     // https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-private-apis.html
     return new iam.PolicyDocument({
       statements: [
-        new statement.ExecuteApi().toInvoke().onAllResources().forCdkPrincipal(new iam.AccountRootPrincipal()),
-        new statement.ExecuteApi()
-          .deny()
-          .toInvoke()
-          .onAllResources()
-          .forPublic()
-          .ifAwsSourceVpce(endpoint.vpcEndpointId, new statement.Operator().stringNotEquals()),
+        new iam.PolicyStatement({
+          effect: iam.Effect.ALLOW,
+          actions: ["execute-api:Invoke"],
+          principals: [new iam.AccountRootPrincipal()],
+        }),
+        new iam.PolicyStatement({
+          effect: iam.Effect.DENY,
+          actions: ["execute-api:Invoke"],
+          principals: [new iam.AnyPrincipal()],
+          conditions: {
+            StringNotEquals: {
+              "aws:SourceVpce": endpoint.vpcEndpointId,
+            },
+          },
+        }),
       ],
     });
   }

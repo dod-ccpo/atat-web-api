@@ -92,7 +92,6 @@ describe("Consumer Provisioning Job invalid behavior", () => {
     const response = await handler({ body: null, requestContext } as APIGatewayProxyEvent, {} as Context);
     const responseBody = JSON.parse(response.body);
 
-    console.log("TEST: ", responseBody);
     expect(sqsMock.commandCalls(ReceiveMessageCommand)).toHaveLength(1);
     expect(sqsMock.commandCalls(DeleteMessageCommand)).toHaveLength(0);
     expect(response).toBeInstanceOf(OtherErrorResponse);
