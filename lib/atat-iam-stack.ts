@@ -202,19 +202,17 @@ export class AtatIamStack extends cdk.Stack {
     // For now, keeping it where any user can assume any of the roles in dev/sandbox
     // makes it easier for any user to see what another user sees. This will need to
     // be totally refactored when we introduce Identity Federation for IAM anyway.
-    const managementAccountPrincipal = new iam.AccountPrincipal(managementAccountId).withConditions([
-      {
-        // Require that the user assuming the role uses their own username as the
-        // RoleSessionName, making it easier to review logs
-        StringLike: {
-          // `${aws:username}` is the literal value that we want to use within the string
-          // therefore, we need to _not_ use a template. This is a false-positive from the
-          // ESLint rule.
-          // eslint-disable-next-line no-template-curly-in-string
-          "sts:RoleSessionName": "${aws:username}",
-        },
+    const managementAccountPrincipal = new iam.AccountPrincipal(managementAccountId).withConditions({
+      // Require that the user assuming the role uses their own username as the
+      // RoleSessionName, making it easier to review logs
+      StringLike: {
+        // `${aws:username}` is the literal value that we want to use within the string
+        // therefore, we need to _not_ use a template. This is a false-positive from the
+        // ESLint rule.
+        // eslint-disable-next-line no-template-curly-in-string
+        "sts:RoleSessionName": "${aws:username}",
       },
-    ]);
+    });
 
     // Allow read access to all "safe" resources from AWS as well as those read-only
     // APIs that we have considered to be safe.
