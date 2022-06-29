@@ -9,7 +9,7 @@ import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import { RequestEvent } from "../../models/document-generation";
 import { logger } from "../../utils/logging";
 import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
-import { IpCheckerMiddleware } from "../../utils/middleware/ip-logging";
+import { LoggingContextMiddleware } from "../../utils/middleware/logging-context-middleware";
 import { wrapSchema } from "../../utils/middleware/schema-wrapper";
 import xssSanitizer from "../../utils/middleware/xss-sanitizer";
 import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
@@ -44,9 +44,9 @@ export async function baseHandler(event: RequestEvent<CostRequest>): Promise<API
 
 export const handler = middy(baseHandler)
   .use(injectLambdaContext(logger, { clearState: true }))
+  .use(LoggingContextMiddleware())
   .use(inputOutputLogger({ logger: (message) => logger.info("Event/Result", message) }))
   .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
-  .use(IpCheckerMiddleware())
   .use(httpJsonBodyParser())
   .use(xssSanitizer())
   .use(validator({ eventSchema: wrapSchema(costRequestSchema) }))

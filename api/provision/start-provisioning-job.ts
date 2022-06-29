@@ -19,7 +19,7 @@ import { REQUEST_BODY_INVALID } from "../../utils/errors";
 import { logger } from "../../utils/logging";
 import { cspPortfolioIdChecker } from "../../utils/middleware/check-csp-portfolio-id";
 import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
-import { IpCheckerMiddleware } from "../../utils/middleware/ip-logging";
+import { LoggingContextMiddleware } from "../../utils/middleware/logging-context-middleware";
 import { wrapSchema } from "../../utils/middleware/schema-wrapper";
 import xssSanitizer from "../../utils/middleware/xss-sanitizer";
 import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusCode } from "../../utils/response";
@@ -97,9 +97,9 @@ export function transformProvisionRequest(request: ProvisionRequest): CspInvocat
 
 export const handler = middy(baseHandler)
   .use(injectLambdaContext(logger, { clearState: true }))
+  .use(LoggingContextMiddleware())
   .use(inputOutputLogger({ logger: (message) => logger.info("Event/Result", message) }))
   .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
-  .use(IpCheckerMiddleware())
   .use(httpJsonBodyParser())
   .use(xssSanitizer())
   .use(cspPortfolioIdChecker())
