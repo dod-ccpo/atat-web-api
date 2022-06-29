@@ -22,9 +22,7 @@ beforeEach(() => {
 
 describe("Validate input", () => {
   it("should accept input with cspResponse", async () => {
-    console.log(JSON.stringify(withResponse));
     const response = await handler(withResponse, {} as Context);
-    console.log(response);
     expect(response).not.toBeInstanceOf(ValidationErrorResponse);
   });
 });
