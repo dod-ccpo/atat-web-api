@@ -1,8 +1,8 @@
+import fs from "fs";
 import { Context } from "aws-lambda";
-import { requestContext } from "../api/provision/start-provisioning-job.test";
+import { requestContext } from "../api/util/common-test-fixtures";
 import { handler } from "./generate-document";
 import { sampleDowRequest } from "./handlebarUtils/sampleTestData";
-import fs from "fs";
 import { SuccessBase64Response, ValidationErrorResponse } from "../utils/response";
 import { DocumentType } from "../models/document-generation";
 
@@ -20,7 +20,8 @@ jest.mock("./chromium", () => {
     generateDocument: jest.fn().mockImplementation(() => Buffer.from("generateDocument")),
   };
 });
-const fnSpy = jest.spyOn(fs, "readFileSync");
+jest.mock("fs");
+const mockedFs = fs as jest.Mocked<typeof fs>;
 
 describe("Successful generate-document handler", () => {
   it("should return successful response", async () => {
@@ -35,9 +36,9 @@ describe("Successful generate-document handler", () => {
     }`;
 
     // WHEN / ACT
-    fnSpy.mockImplementationOnce(() => html);
-    fnSpy.mockImplementationOnce(() => css);
-    const response = await handler(validRequest, {} as Context, () => null);
+    mockedFs.readFileSync.mockImplementationOnce(() => html);
+    mockedFs.readFileSync.mockImplementationOnce(() => css);
+    const response = await handler(validRequest, {} as Context);
 
     // THEN / ASSERT
     expect(response).toBeInstanceOf(SuccessBase64Response);
@@ -55,7 +56,7 @@ describe("Invalid requests for generate-document handler", () => {
       }),
     };
     // WHEN / ACT
-    const response = await handler(invalidRequest, {} as Context, () => null);
+    const response = await handler(invalidRequest, {} as Context);
     const responseBody = JSON.parse(response?.body ?? "");
     // THEN / ASSERT
     expect(response).toBeInstanceOf(ValidationErrorResponse);
@@ -71,7 +72,7 @@ describe("Invalid requests for generate-document handler", () => {
       }),
     };
     // WHEN / ACT
-    const response = await handler(invalidRequest, {} as Context, () => null);
+    const response = await handler(invalidRequest, {} as Context);
     const responseBody = JSON.parse(response?.body ?? "");
     // THEN / ASSERT
     expect(response).toBeInstanceOf(ValidationErrorResponse);

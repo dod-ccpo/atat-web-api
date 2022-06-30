@@ -3,45 +3,20 @@ import { APIGatewayProxyEvent, Context } from "aws-lambda";
 import { mockClient } from "aws-sdk-client-mock";
 import { sqsClient } from "../../utils/aws-sdk/sqs";
 import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusCode } from "../../utils/response";
+import { generateMockMessageResponses, requestContext } from "../util/common-test-fixtures";
 import { handler } from "./consume-provisioning-job";
-import { requestContext } from "./start-provisioning-job.test";
 
-export const mockReceiveMessageResponse = {
-  $metadata: {
-    httpStatusCode: 200,
-    requestId: "74b3f95",
-    extendedRequestId: undefined,
-    cfId: undefined,
-    attempts: 1,
-    totalRetryDelay: 0,
+const messageBodies = [
+  {
+    jobId: "81b31",
+    cspResponse: { ExecutedVersion: "$LATEST", Payload: { code: 200, content: { some: "good content" } } },
   },
-  Messages: [
-    {
-      MessageId: "b5353c",
-      ReceiptHandle: "AQC0e6b=",
-      MD5OfBody: "b03",
-      Body: JSON.stringify({
-        jobId: "81b31",
-        cspResponse: { ExecutedVersion: "$LATEST", Payload: { code: 200, content: { some: "good content" } } },
-      }),
-      Attributes: undefined,
-      MD5OfMessageAttributes: undefined,
-      MessageAttributes: undefined,
-    },
-    {
-      MessageId: "330d3d",
-      ReceiptHandle: "AQECbOFf=",
-      MD5OfBody: "3ae8",
-      Body: JSON.stringify({
-        jobId: "81b317",
-        cspResponse: { ExecutedVersion: "$LATEST", Payload: { code: 400, content: { some: "bad content" } } },
-      }),
-      Attributes: undefined,
-      MD5OfMessageAttributes: undefined,
-      MessageAttributes: undefined,
-    },
-  ],
-};
+  {
+    jobId: "81b317",
+    cspResponse: { ExecutedVersion: "$LATEST", Payload: { code: 400, content: { some: "bad content" } } },
+  },
+];
+const mockReceiveMessageResponse = generateMockMessageResponses(messageBodies);
 
 const sqsMock = mockClient(sqsClient);
 beforeEach(() => {

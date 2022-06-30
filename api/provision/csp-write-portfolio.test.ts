@@ -7,7 +7,12 @@ import { ErrorStatusCode, SuccessStatusCode, ValidationErrorResponse } from "../
 import * as cspConfig from "./csp-configuration";
 import { handler } from "./csp-write-portfolio";
 import { transformProvisionRequest } from "./start-provisioning-job";
-import { provisioningBodyNoPayload, provisioningBodyWithPayload } from "./start-provisioning-job.test";
+import {
+  provisioningBodyNoPayload,
+  provisioningBodyWithPayload,
+  fundingSources,
+  operators,
+} from "../util/common-test-fixtures";
 
 // Reused mocks
 jest.mock("./csp-configuration");
@@ -16,16 +21,6 @@ jest.mock("axios");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 jest.mock("../../idp/client");
 const mockedGetToken = idpClient.getToken as jest.MockedFn<typeof idpClient.getToken>;
-
-const fundingSources = [
-  {
-    taskOrderNumber: "1234567890123",
-    clin: "9999",
-    popStartDate: "2021-07-01",
-    popEndDate: "2022-07-01",
-  },
-];
-const operators = ["admin1@mail.mil", "superAdmin@mail.mil"];
 
 describe("Successful invocation of mock CSP function", () => {
   it("should return 200 when CSP A provided in the request", async () => {
