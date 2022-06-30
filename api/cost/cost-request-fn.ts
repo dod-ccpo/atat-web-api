@@ -40,7 +40,7 @@ async function baseHandler(event: SQSEvent): Promise<void> {
 }
 
 export const handler = middy(baseHandler)
-  .use(injectLambdaContext(logger))
+  .use(injectLambdaContext(logger, { clearState: true }))
   .use(inputOutputLogger({ logger: (message) => logger.info("Event/Result", message) }))
   .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
   .use(errorHandlingMiddleware())
