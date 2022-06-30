@@ -54,7 +54,7 @@ export async function cspRequest(request: CspRequestType<CostRequest | Provision
   }
 
   if (!baseUrl || !baseUrl.startsWith("https://")) {
-    logger.error("Invalid CSP configuration (Demo)", {
+    logger.error("Invalid CSP configuration", {
       input: {
         csp: targetCsp.name,
       },
@@ -81,7 +81,7 @@ export async function cspRequest(request: CspRequestType<CostRequest | Provision
     },
   });
 
-  if (response.status !== 200 && response.status !== 202) {
+  if (![200, 202].includes(response.status)) {
     logger.error("Request to CSP failed", {
       csp: targetCsp.name,
       request: {

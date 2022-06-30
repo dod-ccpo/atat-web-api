@@ -16,7 +16,7 @@ export const MESSAGE_GROUP_ID = "cost-response-queue-message-group";
 
 async function baseHandler(event: SQSEvent): Promise<void> {
   const processedMessages = [];
-  if (event.Records) {
+  if (event.Records && event.Records.length > 0) {
     const records = event.Records.map((record: SQSRecord) => record.body);
     for (const record of records) {
       processedMessages.push(record);
