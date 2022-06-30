@@ -6,11 +6,11 @@ import validator from "@middy/validator";
 import { Context } from "aws-lambda";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import { CspRequest } from "../../models/cost-jobs";
-import { CspResponse, ProvisionRequest, provisionRequestSchema } from "../../models/provisioning-jobs";
+import { ProvisionRequest, provisionRequestSchema } from "../../models/provisioning-jobs";
 import { logger } from "../../utils/logging";
 import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
 import { ValidationErrorResponse } from "../../utils/response";
-import { cspRequest } from "../util/csp-request";
+import { cspRequest, CspResponse } from "../util/csp-request";
 
 /**
  * Mock invocation of CSP and returns a CSP Response based on CSP
@@ -53,7 +53,8 @@ export async function createCspResponse(request: ProvisionRequest): Promise<CspR
       response = {
         code: 200,
         content: {
-          some: "good content",
+          response: { some: "good content" },
+          request,
         },
       };
       logger.info("Success response", { response: response as any });
@@ -62,7 +63,8 @@ export async function createCspResponse(request: ProvisionRequest): Promise<CspR
       response = {
         code: 400,
         content: {
-          some: "bad content",
+          response: { some: "bad content" },
+          request,
         },
       };
       logger.error("Failed response", { response: response as any });
@@ -72,7 +74,8 @@ export async function createCspResponse(request: ProvisionRequest): Promise<CspR
       response = {
         code: 500,
         content: {
-          some: "internal error",
+          response: { some: "internal error" },
+          request,
         },
       };
       logger.error("Internal error response", { response: response as any });

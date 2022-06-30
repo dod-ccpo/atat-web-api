@@ -12,7 +12,10 @@ const withResponse = {
   ...provisioningBodyWithPayload,
   cspResponse: {
     code: 200,
-    content: {},
+    content: {
+      response: { success: "request" },
+      request: provisioningBodyWithPayload,
+    },
   },
 };
 

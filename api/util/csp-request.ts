@@ -1,9 +1,17 @@
 import { CostRequest, CspRequestType, CspRequest } from "../../models/cost-jobs";
-import { CspResponse, ProvisionRequest } from "../../models/provisioning-jobs";
+import { ProvisionRequest } from "../../models/provisioning-jobs";
 import { getConfiguration } from "../provision/csp-configuration";
 import { getToken } from "../../idp/client";
 import { logger } from "../../utils/logging";
 import axios from "axios";
+
+export interface CspResponse {
+  code: number;
+  content: {
+    response: object;
+    request: CostRequest | ProvisionRequest;
+  };
+}
 
 /**
  * Make a request to an actual CSP implementation of the ATAT API
@@ -13,7 +21,13 @@ import axios from "axios";
  */
 export async function cspRequest(request: CspRequestType<CostRequest | ProvisionRequest>): Promise<CspResponse> {
   if (!request.body) {
-    return { code: 400, content: { details: "No request body provided" } };
+    return {
+      code: 400,
+      content: {
+        response: { details: "No request body provided" },
+        request: request.body,
+      },
+    };
   }
   const { targetCsp, portfolioId } = request.body;
 
@@ -22,7 +36,7 @@ export async function cspRequest(request: CspRequestType<CostRequest | Provision
     return {
       code: 400,
       content: {
-        details: "No Target CSP or the Portfolio Id is not provided.",
+        response: { details: "No Target CSP or the Portfolio Id is not provided." },
         request: request.body,
       },
     };
@@ -50,7 +64,7 @@ export async function cspRequest(request: CspRequestType<CostRequest | Provision
     return {
       code: 400,
       content: {
-        details: "Invalid CSP provided",
+        response: { details: "Invalid CSP provided" },
         request: request.body,
       },
     };

@@ -77,7 +77,7 @@ describe("Failed invocation operations", () => {
     expect(response).toEqual({
       code: 400,
       content: {
-        details: "Invalid CSP provided",
+        response: { details: "Invalid CSP provided" },
         request,
       },
     });
@@ -143,7 +143,7 @@ describe("Failed invocation operations", () => {
     expect(async () => await handler(request, {} as Context)).rejects.toThrow(
       JSON.stringify({
         code: ErrorStatusCode.INTERNAL_SERVER_ERROR,
-        content: { some: "internal error" },
+        content: { response: { some: "internal error" }, request },
       })
     );
   });

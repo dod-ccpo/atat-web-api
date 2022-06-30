@@ -1,5 +1,6 @@
-import { CspResponse, provisionRequestSchema } from "./provisioning-jobs";
+import { provisionRequestSchema } from "./provisioning-jobs";
 import { CloudServiceProvider } from "./cloud-service-providers";
+import { CspResponse } from "../api/util/csp-request";
 
 export type CostResponse = CspResponse;
 

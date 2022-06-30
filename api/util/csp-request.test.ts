@@ -85,7 +85,7 @@ describe("Failed CSP invocation operations", () => {
       expect(response).toEqual({
         code: 400,
         content: {
-          details: "Invalid CSP provided",
+          response: { details: "Invalid CSP provided" },
           request: request.body,
         },
       });

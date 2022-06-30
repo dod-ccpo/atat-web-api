@@ -1,5 +1,6 @@
 import { HttpMethod } from "../lib/http";
 import { CloudServiceProvider, Network } from "./cloud-service-providers";
+import { CspResponse } from "../api/util/csp-request";
 
 export enum ProvisionRequestType {
   ADD_PORTFOLIO = "ADD_PORTFOLIO",
@@ -26,11 +27,6 @@ export interface FundingSourcePayload {
 
 export interface OperatorPayload {
   operators: Array<string>;
-}
-
-export interface CspResponse {
-  code: number;
-  content: object;
 }
 
 export interface CspInvocation {
