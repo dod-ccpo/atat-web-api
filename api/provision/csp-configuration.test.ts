@@ -4,13 +4,13 @@ import { mockClient } from "aws-sdk-client-mock";
 
 const fakeCspConfig = {
   CSP_A: {
-    uri: "https://foo.cspa/atat",
+    uri: "https://cspa.example.com/cspa/atat",
   },
   CSP_B: {
-    uri: "https://foo.cspa/atat",
+    uri: "https://cspb.example.com/cspb/atat",
   },
   CSP_C: {
-    uri: "https://foo.cspa/atat",
+    uri: "https://cspc.example.com/cspc/atat",
   },
 };
 

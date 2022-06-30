@@ -1,7 +1,6 @@
 import { Context } from "aws-lambda";
 import axios from "axios";
 import * as idpClient from "../../idp/client";
-import { Network } from "../../models/cloud-service-providers";
 import { ProvisionRequest } from "../../models/provisioning-jobs";
 import { ErrorStatusCode, SuccessStatusCode, ValidationErrorResponse } from "../../utils/response";
 import * as cspConfig from "./csp-configuration";
@@ -12,6 +11,7 @@ import {
   provisioningBodyWithPayload,
   fundingSources,
   operators,
+  cspA,
 } from "../util/common-test-fixtures";
 
 // Reused mocks
@@ -37,7 +37,7 @@ describe("Successful invocation of mock CSP function", () => {
       csp: "response",
     };
     mockedGetToken.mockResolvedValueOnce({ access_token: "FakeToken", expires_in: 0, token_type: "Bearer" });
-    mockedConfig.mockResolvedValueOnce({ uri: "https://mockcsp.cspa/atat/" });
+    mockedConfig.mockResolvedValueOnce({ uri: cspA.uri });
     mockedAxios.post.mockResolvedValueOnce({
       data: expectedResponse,
       status: 200,
@@ -90,7 +90,7 @@ describe("Failed invocation operations", () => {
       csp: "response",
     };
     mockedGetToken.mockResolvedValueOnce({ access_token: "FakeToken", expires_in: 0, token_type: "Bearer" });
-    mockedConfig.mockResolvedValueOnce({ uri: "https://mockcsp.cspa/atat/" });
+    mockedConfig.mockResolvedValueOnce({ uri: cspA.uri });
     mockedAxios.post.mockResolvedValueOnce({
       data: expectedResponse,
       status: 400,
@@ -124,11 +124,7 @@ describe("Failed invocation operations", () => {
         fundingSources,
         operators,
       },
-      targetCsp: {
-        name: "CSP_A",
-        uri: "http://www.somecspvendor.com/api/atat",
-        network: Network.NETWORK_1,
-      },
+      targetCsp: cspA,
     };
     const response = await handler(
       {
@@ -157,9 +153,8 @@ export function constructProvisionRequestForCsp(csp: string): ProvisionRequest {
   const body = {
     ...provisioningBodyWithPayload,
     targetCsp: {
+      ...cspA,
       name: csp,
-      uri: "http://www.somecspvendor.com/api/atat",
-      network: Network.NETWORK_1,
     },
   };
   return {

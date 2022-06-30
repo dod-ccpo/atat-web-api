@@ -7,7 +7,12 @@ import { Network } from "../../models/cloud-service-providers";
 import axios from "axios";
 import * as idpClient from "../../idp/client";
 import * as cspConfig from "../provision/csp-configuration";
-import { validCostRequest, generateMockMessageResponses, generateTestSQSEvent } from "../util/common-test-fixtures";
+import {
+  validCostRequest,
+  generateMockMessageResponses,
+  generateTestSQSEvent,
+  constructCspTarget,
+} from "../util/common-test-fixtures";
 
 // Mocks
 jest.mock("../provision/csp-configuration");
@@ -23,6 +28,7 @@ beforeEach(() => {
   sqsMock.reset();
 });
 
+const cspMock = constructCspTarget("CSP_Mock", Network.NETWORK_1);
 describe("Cost Request Fn", () => {
   it("poll messages from request queue and send to response queue", async () => {
     // GIVEN
@@ -31,16 +37,12 @@ describe("Cost Request Fn", () => {
       {
         ...validCostRequest,
         requestId: "7w1er266-4a04-47ec-a3c9-6775f2a82d28",
-        targetCsp: {
-          uri: "https://cspMock.com/",
-          name: "CSP_Mock",
-          network: Network.NETWORK_1,
-        },
+        targetCsp: cspMock,
       },
     ];
     const queueEvent = generateTestSQSEvent(validMessages);
     const mockResponse = generateMockMessageResponses(validMessages);
-    mockedConfig.mockResolvedValue({ uri: "https://mockcsp.cspa/atat/" });
+    mockedConfig.mockResolvedValue({ uri: cspMock.uri });
     mockedAxios.post.mockResolvedValue({
       data: { code: 200, content: "something" },
       status: 200,

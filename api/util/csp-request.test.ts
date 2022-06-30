@@ -7,7 +7,7 @@ import { ErrorStatusCode, SuccessStatusCode } from "../../utils/response";
 import { constructProvisionRequestForCsp } from "../provision/csp-write-portfolio.test";
 import { cspRequest } from "./csp-request";
 import { ProvisionRequest } from "../../models/provisioning-jobs";
-import { validCostRequest } from "../util/common-test-fixtures";
+import { cspA, validCostRequest } from "../util/common-test-fixtures";
 
 // Reused mocks
 jest.mock("../provision/csp-configuration");
@@ -22,7 +22,7 @@ describe("Successful invocation of mock CSP function", () => {
   it("should return 200 when COST csp request", async () => {
     // GIVEN
     const request: CspRequestType<CostRequest> = { requestType: CspRequest.COST, body: validCostRequest };
-    mockedConfig.mockResolvedValueOnce({ uri: "https://mockcsp.cspa/atat/" });
+    mockedConfig.mockResolvedValueOnce({ uri: cspA.uri });
     mockedAxios.post.mockResolvedValueOnce({
       data: fakeGoodResponse,
       status: 200,
@@ -42,7 +42,7 @@ describe("Successful invocation of mock CSP function", () => {
     const provisioningRequest = constructProvisionRequestForCsp("CSP_A");
     const request: CspRequestType<ProvisionRequest> = { requestType: CspRequest.PROVISION, body: provisioningRequest };
     mockedGetToken.mockResolvedValueOnce({ access_token: "FakeToken", expires_in: 0, token_type: "Bearer" });
-    mockedConfig.mockResolvedValueOnce({ uri: "https://mockcsp.cspa/atat/" });
+    mockedConfig.mockResolvedValueOnce({ uri: cspA.uri });
     mockedAxios.post.mockResolvedValueOnce({
       data: fakeGoodResponse,
       status: 200,
@@ -75,7 +75,7 @@ describe("Failed CSP invocation operations", () => {
         requestType,
         body: {
           ...validCostRequest,
-          targetCsp: { name: "CSP_BAD", uri: "https://csp.com", network: Network.NETWORK_1 },
+          targetCsp: { name: "CSP_BAD", uri: cspA.uri, network: Network.NETWORK_1 },
         },
       } as any;
       mockedConfig.mockResolvedValueOnce(undefined);
@@ -98,7 +98,7 @@ describe("Failed CSP invocation operations", () => {
       const fakeBadResponse = { bad: "fake csp response" };
       const request = { requestType, body: validCostRequest };
       mockedGetToken.mockResolvedValueOnce({ access_token: "FakeToken", expires_in: 0, token_type: "Bearer" });
-      mockedConfig.mockResolvedValueOnce({ uri: "https://mockcsp.cspa/atat/" });
+      mockedConfig.mockResolvedValueOnce({ uri: cspA.uri });
       mockedAxios.post.mockResolvedValueOnce({
         data: fakeBadResponse,
         status: 400,
@@ -121,7 +121,7 @@ describe("Failed CSP invocation operations", () => {
       const internalErrorResponse = { some: "internal error" };
       const request = { requestType, body: validCostRequest };
       mockedGetToken.mockResolvedValueOnce({ access_token: "FakeToken", expires_in: 0, token_type: "Bearer" });
-      mockedConfig.mockResolvedValueOnce({ uri: "https://mockcsp.cspa/atat/" });
+      mockedConfig.mockResolvedValueOnce({ uri: cspA.uri });
       mockedAxios.post.mockResolvedValueOnce({
         data: internalErrorResponse,
         status: 500,

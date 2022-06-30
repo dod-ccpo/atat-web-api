@@ -15,17 +15,26 @@ export const fundingSources = [
 ];
 
 export const operators = ["admin1@mail.mil", "superAdmin@mail.mil"];
+export const cspA = {
+  name: "CSP_A",
+  uri: "https://cspa.example.com/api/atat",
+  network: Network.NETWORK_1,
+};
+
+export function constructCspTarget(csp: string, network: Network) {
+  return {
+    name: csp,
+    uri: `https://${csp.toLocaleLowerCase()}.example/com/api/atat`,
+    network,
+  };
+}
 
 export const provisioningBodyNoPayload = {
   jobId: "81b31a89-e3e5-46ee-acfe-75436bd14577",
   userId: "21d18790-bf3e-4529-a361-460ee6d16e0b",
   portfolioId: "b02e77d1-234d-4e3d-bc85-b57ca5a93952",
   operationType: ProvisionRequestType.ADD_OPERATORS,
-  targetCsp: {
-    name: "CSP_A",
-    uri: "http://www.somecspvendor.com/api/atat",
-    network: Network.NETWORK_1,
-  },
+  targetCsp: cspA,
   cspInvocation: undefined,
   cspResponse: undefined,
 };
@@ -53,11 +62,7 @@ export const validRequest = {
 export const validCostRequest: CostRequest = {
   requestId: "81b31a89-e3e5-46ee-acfe-75436bd14577",
   portfolioId: "b02e77d1-234d-4e3d-bc85-b57ca5a93952",
-  targetCsp: {
-    name: "CSP_A",
-    uri: "http://www.somecspvendor.com/api/atat",
-    network: Network.NETWORK_1,
-  },
+  targetCsp: cspA,
   startDate: "2022-01-01",
   endDate: "2022-12-01",
 };
