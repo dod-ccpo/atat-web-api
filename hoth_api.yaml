@@ -359,6 +359,14 @@ components:
           type: integer
         content:
           type: object
+          required:
+           - response
+           - request
+          properties:
+            response:
+              type: object
+            request:
+              type: object
           additionalProperties: true
     CostRequest:
       description: >-

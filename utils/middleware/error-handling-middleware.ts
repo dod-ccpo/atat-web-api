@@ -1,14 +1,15 @@
 import middy from "@middy/core";
-import { APIGatewayProxyResult } from "aws-lambda";
+import { APIGatewayProxyResult, SQSEvent } from "aws-lambda";
 import { serializeError } from "serialize-error";
 import { ValidationErrorResponse } from "../response";
 import { INTERNAL_SERVER_ERROR, REQUEST_BODY_INVALID } from "../errors";
-import { CspInvocation, CspResponse, ProvisionRequest } from "../../models/provisioning-jobs";
+import { CspInvocation, ProvisionRequest } from "../../models/provisioning-jobs";
+import { CspResponse } from "../../api/util/csp-request";
 import { logger } from "../logging";
 import { CommonMiddlewareInputs } from "./common";
 
-export type MiddlewareInputs = CommonMiddlewareInputs | CspInvocation | ProvisionRequest;
-export type MiddlewareOutputs = APIGatewayProxyResult | CspResponse | ValidationErrorResponse | ProvisionRequest;
+export type MiddlewareInputs = CommonMiddlewareInputs | CspInvocation | ProvisionRequest | SQSEvent;
+export type MiddlewareOutputs = APIGatewayProxyResult | CspResponse | ValidationErrorResponse | ProvisionRequest | void;
 
 // A central place to catch and handle errors that occur before,
 // during, and after the execution of the lambda

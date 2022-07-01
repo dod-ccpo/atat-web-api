@@ -1,13 +1,18 @@
 import { Context } from "aws-lambda";
 import axios from "axios";
 import * as idpClient from "../../idp/client";
-import { Network } from "../../models/cloud-service-providers";
 import { ProvisionRequest } from "../../models/provisioning-jobs";
 import { ErrorStatusCode, SuccessStatusCode, ValidationErrorResponse } from "../../utils/response";
 import * as cspConfig from "./csp-configuration";
 import { handler } from "./csp-write-portfolio";
 import { transformProvisionRequest } from "./start-provisioning-job";
-import { provisioningBodyNoPayload, provisioningBodyWithPayload } from "./start-provisioning-job.test";
+import {
+  provisioningBodyNoPayload,
+  provisioningBodyWithPayload,
+  fundingSources,
+  operators,
+  cspA,
+} from "../util/common-test-fixtures";
 
 // Reused mocks
 jest.mock("./csp-configuration");
@@ -16,16 +21,6 @@ jest.mock("axios");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 jest.mock("../../idp/client");
 const mockedGetToken = idpClient.getToken as jest.MockedFn<typeof idpClient.getToken>;
-
-const fundingSources = [
-  {
-    taskOrderNumber: "1234567890123",
-    clin: "9999",
-    popStartDate: "2021-07-01",
-    popEndDate: "2022-07-01",
-  },
-];
-const operators = ["admin1@mail.mil", "superAdmin@mail.mil"];
 
 describe("Successful invocation of mock CSP function", () => {
   it("should return 200 when CSP A provided in the request", async () => {
@@ -36,12 +31,13 @@ describe("Successful invocation of mock CSP function", () => {
   });
   it("should basically just return a reformatted CSP response", async () => {
     // GIVEN
+    const request = constructProvisionRequestForCsp("CSP_E");
     const expectedResponse = {
       totally: "fake",
       csp: "response",
     };
     mockedGetToken.mockResolvedValueOnce({ access_token: "FakeToken", expires_in: 0, token_type: "Bearer" });
-    mockedConfig.mockResolvedValueOnce({ uri: "https://mockcsp.cspa/atat/" });
+    mockedConfig.mockResolvedValueOnce({ uri: cspA.uri });
     mockedAxios.post.mockResolvedValueOnce({
       data: expectedResponse,
       status: 200,
@@ -51,12 +47,12 @@ describe("Successful invocation of mock CSP function", () => {
     });
 
     // WHEN
-    const response = await handler(constructProvisionRequestForCsp("CSP_E"), {} as Context);
+    const response = await handler(request, {} as Context);
 
     // THEN
     expect(response).toEqual({
       code: 200,
-      content: expectedResponse,
+      content: { response: expectedResponse, request },
     });
   });
 });
@@ -73,25 +69,28 @@ describe("Failed invocation operations", () => {
 
   it("should return a 400 when the CSP's configuration is unknown", async () => {
     // GIVEN
+    const request = constructProvisionRequestForCsp("CSP_DNE");
     mockedConfig.mockResolvedValueOnce(undefined);
     // WHEN
-    const response = await handler(constructProvisionRequestForCsp("CSP_DNE"), {} as Context);
+    const response = await handler(request, {} as Context);
     // THEN
     expect(response).toEqual({
       code: 400,
       content: {
-        details: "Invalid CSP provided",
+        response: { details: "Invalid CSP provided" },
+        request,
       },
     });
   });
   it("should basically just return a reformatted CSP response", async () => {
     // GIVEN
+    const request = constructProvisionRequestForCsp("CSP_E");
     const expectedResponse = {
       totally: "fake",
       csp: "response",
     };
     mockedGetToken.mockResolvedValueOnce({ access_token: "FakeToken", expires_in: 0, token_type: "Bearer" });
-    mockedConfig.mockResolvedValueOnce({ uri: "https://mockcsp.cspa/atat/" });
+    mockedConfig.mockResolvedValueOnce({ uri: cspA.uri });
     mockedAxios.post.mockResolvedValueOnce({
       data: expectedResponse,
       status: 400,
@@ -101,12 +100,12 @@ describe("Failed invocation operations", () => {
     });
 
     // WHEN
-    const response = await handler(constructProvisionRequestForCsp("CSP_E"), {} as Context);
+    const response = await handler(request, {} as Context);
 
     // THEN
     expect(response).toEqual({
       code: 400,
-      content: expectedResponse,
+      content: { response: expectedResponse, request },
     });
   });
 
@@ -125,11 +124,7 @@ describe("Failed invocation operations", () => {
         fundingSources,
         operators,
       },
-      targetCsp: {
-        name: "CSP_A",
-        uri: "http://www.somecspvendor.com/api/atat",
-        network: Network.NETWORK_1,
-      },
+      targetCsp: cspA,
     };
     const response = await handler(
       {
@@ -148,19 +143,18 @@ describe("Failed invocation operations", () => {
     expect(async () => await handler(request, {} as Context)).rejects.toThrow(
       JSON.stringify({
         code: ErrorStatusCode.INTERNAL_SERVER_ERROR,
-        content: { some: "internal error" },
+        content: { response: { some: "internal error" }, request },
       })
     );
   });
 });
 
-function constructProvisionRequestForCsp(csp: string): ProvisionRequest {
+export function constructProvisionRequestForCsp(csp: string): ProvisionRequest {
   const body = {
     ...provisioningBodyWithPayload,
     targetCsp: {
+      ...cspA,
       name: csp,
-      uri: "http://www.somecspvendor.com/api/atat",
-      network: Network.NETWORK_1,
     },
   };
   return {

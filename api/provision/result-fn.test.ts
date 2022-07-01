@@ -4,7 +4,7 @@ import { mockClient } from "aws-sdk-client-mock";
 import { ValidationErrorResponse } from "../../utils/response";
 import { SendMessageCommand } from "@aws-sdk/client-sqs";
 import { sqsClient } from "../../utils/aws-sdk/sqs";
-import { provisioningBodyWithPayload } from "./start-provisioning-job.test";
+import { provisioningBodyWithPayload } from "../util/common-test-fixtures";
 
 const sqsMock = mockClient(sqsClient);
 
@@ -12,7 +12,10 @@ const withResponse = {
   ...provisioningBodyWithPayload,
   cspResponse: {
     code: 200,
-    content: {},
+    content: {
+      response: { success: "request" },
+      request: provisioningBodyWithPayload,
+    },
   },
 };
 

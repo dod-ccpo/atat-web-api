@@ -1,5 +1,6 @@
-import { CspResponse, provisionRequestSchema } from "./provisioning-jobs";
+import { provisionRequestSchema } from "./provisioning-jobs";
 import { CloudServiceProvider } from "./cloud-service-providers";
+import { CspResponse } from "../api/util/csp-request";
 
 export type CostResponse = CspResponse;
 
@@ -10,6 +11,16 @@ export interface CostRequest {
   startDate: string;
   endDate: string;
 }
+
+export enum CspRequest {
+  PROVISION = "PROVISION",
+  COST = "COST",
+}
+
+export type CspRequestType<T> = {
+  requestType: CspRequest;
+  body: T;
+};
 
 export const costRequestSchema = {
   type: "object",
