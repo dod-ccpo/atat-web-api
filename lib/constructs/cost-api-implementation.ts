@@ -2,7 +2,7 @@ import { Construct } from "constructs";
 import * as lambdaNodeJs from "aws-cdk-lib/aws-lambda-nodejs";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import { Duration } from "aws-cdk-lib";
-import { AtatQueue } from "./sqs";
+import { FifoQueue } from "./sqs";
 import { HttpMethod } from "../http";
 import * as apigw from "aws-cdk-lib/aws-apigateway";
 import { IResource, Method } from "aws-cdk-lib/aws-apigateway";
@@ -13,8 +13,8 @@ import * as secrets from "aws-cdk-lib/aws-secretsmanager";
 import { NodejsFunctionProps } from "aws-cdk-lib/aws-lambda-nodejs";
 
 export interface ICostApiImplementation extends IApiRoute {
-  readonly costRequestQueue: AtatQueue;
-  readonly costResponseQueue: AtatQueue;
+  readonly costRequestQueue: FifoQueue;
+  readonly costResponseQueue: FifoQueue;
   readonly startCostJobFn: lambda.IFunction;
   readonly consumeCostResponseFn: lambda.IFunction;
   readonly costRequestFn: lambda.IFunction;
@@ -23,8 +23,8 @@ export interface ICostApiImplementation extends IApiRoute {
 export class CostApiImplementation extends Construct implements ICostApiImplementation {
   readonly methods: Record<HttpMethod, Method>;
   readonly path: IResource;
-  readonly costRequestQueue: AtatQueue;
-  readonly costResponseQueue: AtatQueue;
+  readonly costRequestQueue: FifoQueue;
+  readonly costResponseQueue: FifoQueue;
   readonly startCostJobFn: lambda.Function;
   readonly consumeCostResponseFn: lambda.Function;
   readonly costRequestFn: lambda.Function;
@@ -42,40 +42,40 @@ export class CostApiImplementation extends Construct implements ICostApiImplemen
     );
 
     // Cost Queues
-    this.costRequestQueue = new AtatQueue(this, "CostRequest", { environmentName: props.environmentName });
-    this.costResponseQueue = new AtatQueue(this, "CostResponse", { environmentName: props.environmentName });
+    this.costRequestQueue = new FifoQueue(this, "CostRequest");
+    this.costResponseQueue = new FifoQueue(this, "CostResponse");
 
     // Cost Functions
     this.startCostJobFn = this.constructNodejsFunction(scope, "StartCostRequestJob", "api/cost/start-cost-job.ts", {
       environment: {
-        COST_REQUEST_QUEUE_URL: this.costRequestQueue.sqs.queueUrl,
+        COST_REQUEST_QUEUE_URL: this.costRequestQueue.queueUrl,
       },
     });
     this.costRequestFn = this.constructNodejsFunction(scope, "CostRequestFunction", "api/cost/cost-request-fn.ts", {
       memorySize: 512,
       timeout: Duration.seconds(30),
       environment: {
-        COST_RESPONSE_QUEUE_URL: this.costResponseQueue.sqs.queueUrl,
+        COST_RESPONSE_QUEUE_URL: this.costResponseQueue.queueUrl,
         CSP_CONFIG_SECRET_NAME: cspConfig.secretArn,
       },
     });
-    this.costRequestFn.addEventSource(new SqsEventSource(this.costRequestQueue.sqs, {}));
+    this.costRequestFn.addEventSource(new SqsEventSource(this.costRequestQueue, {}));
     this.consumeCostResponseFn = this.constructNodejsFunction(
       scope,
       "ConsumeCostResponse",
       "api/cost/consume-cost-response.ts",
       {
         environment: {
-          COST_RESPONSE_QUEUE_URL: this.costResponseQueue.sqs.queueUrl,
+          COST_RESPONSE_QUEUE_URL: this.costResponseQueue.queueUrl,
         },
       }
     );
 
     // queue permissions
-    this.costRequestQueue.sqs.grantSendMessages(this.startCostJobFn);
-    this.costRequestQueue.sqs.grantConsumeMessages(this.costRequestFn);
-    this.costResponseQueue.sqs.grantSendMessages(this.costRequestFn);
-    this.costResponseQueue.sqs.grantConsumeMessages(this.consumeCostResponseFn);
+    this.costRequestQueue.grantSendMessages(this.startCostJobFn);
+    this.costRequestQueue.grantConsumeMessages(this.costRequestFn);
+    this.costResponseQueue.grantSendMessages(this.costRequestFn);
+    this.costResponseQueue.grantConsumeMessages(this.consumeCostResponseFn);
 
     // secrets permissions
     cspConfig.grantRead(this.costRequestFn);

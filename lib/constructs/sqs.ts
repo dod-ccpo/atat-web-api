@@ -1,34 +1,24 @@
 import * as sqs from "aws-cdk-lib/aws-sqs";
-import { QueueProps } from "aws-cdk-lib/aws-sqs";
 import { Construct } from "constructs";
 
-export interface SQSProps extends QueueProps {
-  /**
-   * Props to override the default props of the created SQS
-   */
-  overrideSqsProps?: QueueProps;
-  /**
-   * Environment name to help differentiate the queues made
-   */
-  environmentName: string;
-}
-
 /**
- * A basic SQS queue used in ATAT
- * - defaults to an FIFO queue
+ * An SQS Queue configured as a FIFO queue.
+ *
+ * This is appropriate for the general use-case within the ATAT application.
+ * Encryption-at-rest is enabled by default for the queue.
+ *
+ * The following properties will be overriden if set via `props`:
+ *   - `fifo` will be set to `true`,
+ *   - `contentBasedDeduplication` will be set to `true`
+ *   - `encryption` will be set to `KMS_MANAGED`
  */
-export class AtatQueue extends Construct {
-  /**
-   * The SQS resource that gets created.
-   */
-  public readonly sqs: sqs.IQueue;
-
-  constructor(scope: Construct, id: string, props: SQSProps) {
-    super(scope, id);
-    this.sqs = new sqs.Queue(scope, `${props.environmentName}${id}Queue`, {
+export class FifoQueue extends sqs.Queue {
+  constructor(scope: Construct, id: string, props?: sqs.QueueProps) {
+    super(scope, id, {
+      ...props,
       fifo: true,
       contentBasedDeduplication: true,
-      ...props.overrideSqsProps,
+      encryption: sqs.QueueEncryption.KMS_MANAGED,
     });
   }
 }

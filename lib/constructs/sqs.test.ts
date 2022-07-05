@@ -1,13 +1,13 @@
 import * as cdk from "aws-cdk-lib";
 import { Match, Template } from "aws-cdk-lib/assertions";
-import { AtatQueue } from "./sqs";
+import { FifoQueue } from "./sqs";
 
 describe("IFP Cost Queues", () => {
   test("Ensure Cost Request and Response Queues are created", async () => {
     const app = new cdk.App();
     const stack = new cdk.Stack(app, "TestStack");
-    const costRequestQueue = new AtatQueue(stack, "TestRequest", { environmentName: "TestAt-0000" }).sqs;
-    const costResponseQueue = new AtatQueue(stack, "TestResponse", { environmentName: "TestAt-0000" }).sqs;
+    const costRequestQueue = new FifoQueue(stack, "TestRequest");
+    const costResponseQueue = new FifoQueue(stack, "TestResponse");
 
     const template = Template.fromStack(stack);
     template.hasResourceProperties(
