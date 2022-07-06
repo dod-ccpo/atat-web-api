@@ -10,6 +10,7 @@ import { ApiRouteProps, IApiRoute } from "./api-route";
 import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 import * as idp from "../constructs/identity-provider";
 import * as secrets from "aws-cdk-lib/aws-secretsmanager";
+import { NodejsFunctionProps } from "aws-cdk-lib/aws-lambda-nodejs";
 
 export interface ICostApiImplementation extends IApiRoute {
   readonly costRequestQueue: AtatQueue;
@@ -46,11 +47,17 @@ export class CostApiImplementation extends Construct implements ICostApiImplemen
 
     // Cost Functions
     this.startCostJobFn = this.constructNodejsFunction(scope, "StartCostRequestJob", "api/cost/start-cost-job.ts", {
-      COST_REQUEST_QUEUE_URL: this.costRequestQueue.sqs.queueUrl,
+      environment: {
+        COST_REQUEST_QUEUE_URL: this.costRequestQueue.sqs.queueUrl,
+      },
     });
     this.costRequestFn = this.constructNodejsFunction(scope, "CostRequestFunction", "api/cost/cost-request-fn.ts", {
-      COST_RESPONSE_QUEUE_URL: this.costResponseQueue.sqs.queueUrl,
-      CSP_CONFIG_SECRET_NAME: cspConfig.secretArn,
+      memorySize: 512,
+      timeout: Duration.seconds(30),
+      environment: {
+        COST_RESPONSE_QUEUE_URL: this.costResponseQueue.sqs.queueUrl,
+        CSP_CONFIG_SECRET_NAME: cspConfig.secretArn,
+      },
     });
     this.costRequestFn.addEventSource(new SqsEventSource(this.costRequestQueue.sqs, {}));
     this.consumeCostResponseFn = this.constructNodejsFunction(
@@ -58,7 +65,9 @@ export class CostApiImplementation extends Construct implements ICostApiImplemen
       "ConsumeCostResponse",
       "api/cost/consume-cost-response.ts",
       {
-        COST_RESPONSE_QUEUE_URL: this.costResponseQueue.sqs.queueUrl,
+        environment: {
+          COST_RESPONSE_QUEUE_URL: this.costResponseQueue.sqs.queueUrl,
+        },
       }
     );
 
@@ -84,7 +93,7 @@ export class CostApiImplementation extends Construct implements ICostApiImplemen
     scope: Construct,
     id: string,
     entry: string,
-    functionPropsOverride: object
+    functionPropsOverride: NodejsFunctionProps
   ): lambdaNodeJs.NodejsFunction {
     return new lambdaNodeJs.NodejsFunction(scope, id, {
       entry,
@@ -92,9 +101,7 @@ export class CostApiImplementation extends Construct implements ICostApiImplemen
       vpc: this.props.vpc,
       memorySize: 256,
       timeout: Duration.seconds(5),
-      environment: {
-        ...functionPropsOverride,
-      },
+      ...functionPropsOverride,
     });
   }
 }
