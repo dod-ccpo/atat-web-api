@@ -10,8 +10,8 @@ import { HttpMethod } from "../http";
 import { ApiSfnFunction } from "./api-sfn-function";
 import { IdentityProviderLambdaClient, IIdentityProvider } from "./identity-provider";
 import { mapTasks, TasksMap } from "./sfn-lambda-invoke-task";
-import { AtatQueue } from "./sqs";
-import { StateMachine } from "./state-machine";
+import { FifoQueue } from "./sqs";
+import { LoggingStandardStateMachine } from "./state-machine";
 
 /**
  * Successful condition check
@@ -56,7 +56,7 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
     super(scope, id);
     const { environmentName } = props;
 
-    this.provisioningJobsQueue = new AtatQueue(scope, "ProvisioningJobsQueue", { environmentName }).sqs;
+    this.provisioningJobsQueue = new FifoQueue(scope, "ProvisioningJobsQueue");
 
     // Provisioning State machine functions
     const cspConfig = secrets.Secret.fromSecretNameV2(
@@ -120,26 +120,24 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
     this.mappedTasks = mapTasks(scope, tasks);
     const { InvokeCspApi, Results } = this.mappedTasks;
     // update retry for the tasks
-    InvokeCspApi.sfnTask.addRetry({ maxAttempts: 2, errors: ["MockCspApiError"] });
-    InvokeCspApi.sfnTask.addCatch(Results.sfnTask, { errors: ["States.ALL"], resultPath: "$.catchErrorResult" });
+    InvokeCspApi.addRetry({ maxAttempts: 2, errors: ["MockCspApiError"] });
+    InvokeCspApi.addCatch(Results, { errors: ["States.ALL"], resultPath: "$.catchErrorResult" });
 
     // State machine choices based on the tasks output
     const httpResponseChoices = new sfn.Choice(scope, "HttpResponse")
-      .when(successResponse, Results.sfnTask)
-      .when(clientErrorResponse, Results.sfnTask)
+      .when(successResponse, Results)
+      .when(clientErrorResponse, Results)
       .afterwards(); // converge choices and allows for additional tasks to be chained on
 
     // Composing state machine
-    this.workflow = InvokeCspApi.sfnTask.next(httpResponseChoices);
+    this.workflow = InvokeCspApi.next(httpResponseChoices);
     this.logGroup = new logs.LogGroup(scope, "StepFunctionsLogs", {
       retention: logs.RetentionDays.INFINITE,
       logGroupName: `/aws/vendedlogs/states/StepFunctionsLogs${environmentName}`,
     });
-    this.stateMachine = new StateMachine(this, "ProvisioningStateMachine", {
-      stateMachineProps: {
-        definition: this.workflow,
-      },
+    this.stateMachine = new LoggingStandardStateMachine(this, "ProvisioningStateMachine", {
       logGroup: this.logGroup,
-    }).stateMachine;
+      definition: this.workflow,
+    });
   }
 }

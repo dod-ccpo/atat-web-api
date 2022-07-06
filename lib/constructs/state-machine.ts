@@ -3,13 +3,10 @@ import * as sfn from "aws-cdk-lib/aws-stepfunctions";
 import * as logs from "aws-cdk-lib/aws-logs";
 import { Construct } from "constructs";
 
-export interface StateMachineProps {
+export interface StateMachineProps extends sfn.StateMachineProps {
   /**
-   * Props to define a State Machine
-   */
-  readonly stateMachineProps: sfn.StateMachineProps;
-  /**
-   * Props to define the State Machine log group
+   * The CloudWatch Log Group where logs from the State Machine will
+   * be sent.
    */
   readonly logGroup: logs.ILogGroup;
 }
@@ -19,16 +16,15 @@ export interface StateMachineProps {
  * - uses a Standard State Machine Type (default)
  * - 180 seconds timeout (default)
  */
-export class StateMachine extends Construct {
-  readonly stateMachine: sfn.IStateMachine;
+export class LoggingStandardStateMachine extends sfn.StateMachine {
   constructor(scope: Construct, id: string, props: StateMachineProps) {
-    super(scope, id);
-    const stateMachine = new sfn.StateMachine(this, id, {
+    const { logGroup, ...otherProps } = props;
+    super(scope, id, {
       // defaults that can be overridden
       timeout: Duration.seconds(10),
       stateMachineType: sfn.StateMachineType.STANDARD,
       // configuration passed in
-      ...props.stateMachineProps,
+      ...otherProps,
       // defaults that cannot be overridden
       tracingEnabled: true,
       logs: {
@@ -36,6 +32,5 @@ export class StateMachine extends Construct {
         destination: props.logGroup,
       },
     });
-    this.stateMachine = stateMachine;
   }
 }
