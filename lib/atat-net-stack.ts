@@ -2,6 +2,7 @@ import * as cdk from "aws-cdk-lib";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as logs from "aws-cdk-lib/aws-logs";
 import * as custom from "aws-cdk-lib/custom-resources";
+import * as route53Resolver from "aws-cdk-lib/aws-route53resolver";
 
 import { Construct } from "constructs";
 
@@ -46,6 +47,12 @@ export class AtatNetStack extends cdk.Stack {
         },
       ],
     });
+    this.vpc = vpc;
+    this.outputs.push(
+      new cdk.CfnOutput(this, "VpcId", {
+        value: this.vpc.vpcId,
+      })
+    );
 
     // Capture all VPC flow logs and send to CloudWatch Logs with indefinite retention
     vpc.addFlowLog("AllFlowLogs", {
@@ -55,12 +62,17 @@ export class AtatNetStack extends cdk.Stack {
         })
       ),
     });
-    this.vpc = vpc;
-    this.outputs.push(
-      new cdk.CfnOutput(this, "VpcId", {
-        value: this.vpc.vpcId,
-      })
-    );
+    const dnsLogsGroup = new logs.LogGroup(this, "VpcDnsQueryLogs", {
+      retention: logs.RetentionDays.INFINITE,
+    });
+    // Capture all DNS queries made by all hosts in the VPC
+    const dnsLoggingConfig = new route53Resolver.CfnResolverQueryLoggingConfig(this, "DnsLogging", {
+      destinationArn: dnsLogsGroup.logGroupArn,
+    });
+    const vpcDnsLogging = new route53Resolver.CfnResolverQueryLoggingConfigAssociation(this, "VpcDnsLogging", {
+      resolverQueryLogConfigId: dnsLoggingConfig.attrId,
+      resourceId: vpc.vpcId,
+    });
 
     const transitGatewayId = this.findTransitGateway();
 
