@@ -32,6 +32,7 @@ class AtatLogFormatter extends LogFormatter {
 const baseLogger = new Logger({
   serviceName: process.env.POWERTOOLS_SERVICE_NAME ?? "ATAT",
   logFormatter: new AtatLogFormatter(),
+  logLevel: "DEBUG",
 });
 
 export const logger = baseLogger;

@@ -103,7 +103,7 @@ export class AtatNetStack extends cdk.Stack {
       logs: logsEndpoint,
       sqs: sqsEndpoint,
       xray: xrayEndpoint,
-      ssecrets: secretsManagerEndpoint,
+      secrets: secretsManagerEndpoint,
       sfn: stepFunctionsEndpoint,
     };
   }
