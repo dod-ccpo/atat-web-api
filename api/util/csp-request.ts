@@ -69,7 +69,7 @@ export async function cspRequest(request: CspRequestType<CostRequest | Provision
       },
     };
   }
-
+  logger.info("Before post request");
   const response = await axios.post(url, request.body, {
     headers: {
       Authorization: `Bearer ${(await getToken()).access_token}`,
@@ -80,6 +80,7 @@ export async function cspRequest(request: CspRequestType<CostRequest | Provision
       return true;
     },
   });
+  logger.info("After post request");
 
   if (![200, 202].includes(response.status)) {
     logger.error("Request to CSP failed", {
