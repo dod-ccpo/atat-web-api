@@ -5,6 +5,7 @@ import { AtatWebApiStack } from "./atat-web-api-stack";
 import { AtatIamStack } from "./atat-iam-stack";
 import { AtatNetStack } from "./atat-net-stack";
 import { AtatNotificationStack } from "./atat-notification-stack";
+import { AtatMonitoringStack } from "./atat-monitoring-stack";
 import { GovCloudCompatibilityAspect } from "./aspects/govcloud-compatibility";
 
 export interface AtatProps {
@@ -28,11 +29,19 @@ class AtatApplication extends cdk.Stage {
       environmentName: props.environmentName,
       network: net,
     });
+    const monitoredStacks: cdk.Stack[] = [iam, net, atat];
     if (props.notificationEmail) {
-      const notifications = new AtatNotificationStack(this, "AtatNotifications", {
-        notificationEmail: props.notificationEmail,
-      });
+      monitoredStacks.push(
+        new AtatNotificationStack(this, "AtatNotifications", {
+          notificationEmail: props.notificationEmail,
+        })
+      );
     }
+    const monitoring = new AtatMonitoringStack(this, "AtatMonitoring", {
+      monitoredScopes: monitoredStacks,
+      notifiedEmail: props.notificationEmail,
+      environmentName: props.environmentName,
+    });
     cdk.Aspects.of(this).add(new GovCloudCompatibilityAspect());
   }
 }

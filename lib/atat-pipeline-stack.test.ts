@@ -16,6 +16,7 @@ describe("Validate creation of the pipeline stack", () => {
       repository: "test/test",
       branch: TEST_BRANCH_NAME,
       githubPatName: "DOES_NOT_EXIST",
+      notificationEmail: "test@example.com",
     });
     template = Template.fromStack(stack);
   });
