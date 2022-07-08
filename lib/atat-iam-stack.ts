@@ -117,7 +117,7 @@ export class AtatIamStack extends cdk.Stack {
         // troubleshoot
         new iam.PolicyStatement({
           effect: iam.Effect.ALLOW,
-          actions: ["sqs:Get*", "sqs:List*", "sqs:ReceiveMessage", "sqs:PurgeQueue"],
+          actions: ["sqs:Get*", "sqs:List*", "sqs:ReceiveMessage", "sqs:SendMessage", "sqs:PurgeQueue"],
           resources: ["*"],
         }),
         // Grant access to read the pipeline state
