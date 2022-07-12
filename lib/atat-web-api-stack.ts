@@ -17,6 +17,7 @@ import { CostApiImplementation } from "./constructs/cost-api-implementation";
 export interface AtatWebApiStackProps extends cdk.StackProps {
   environmentName: string;
   network?: AtatNetStack;
+  isSandbox?: boolean;
 }
 
 export class AtatWebApiStack extends cdk.Stack {
@@ -41,6 +42,14 @@ export class AtatWebApiStack extends cdk.Stack {
     const writeUser = new ApiUser(this, "WriteUser", { secretPrefix: "api/user/snow", username: "WriteUser" });
     api.grantOnRoute(readUser.user, HttpMethod.GET);
     api.grantOnRoute(writeUser.user, "*");
+
+    if (props?.isSandbox) {
+      const atatDeveloperRole = iam.Role.fromRoleName(this, "AtatDeveloper", "AtatDeveloper", {});
+      readUser.accessKey.grantRead(atatDeveloperRole);
+      writeUser.accessKey.grantRead(atatDeveloperRole);
+      new cdk.CfnOutput(this, "ReadUserAccessKey", { value: readUser.accessKey.secretName });
+      new cdk.CfnOutput(this, "WriteUserAccessKey", { value: writeUser.accessKey.secretName });
+    }
 
     // Ensure that no IAM users in this Stack can ever do anything
     // except for invoke the created API Gateway.

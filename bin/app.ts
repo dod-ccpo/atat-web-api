@@ -40,6 +40,7 @@ export function createApp(props?: cdk.AppProps): cdk.App {
     }
     const apiStack = new AtatWebApiStack(app, `${environmentName}WebApi`, {
       environmentName,
+      isSandbox,
     });
     cdk.Aspects.of(app).add(new RemovalPolicySetter({ globalRemovalPolicy: cdk.RemovalPolicy.DESTROY }));
     cdk.Aspects.of(app).add(new GovCloudCompatibilityAspect());
