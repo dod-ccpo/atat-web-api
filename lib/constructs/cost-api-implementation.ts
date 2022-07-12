@@ -23,8 +23,8 @@ export interface ICostApiImplementation extends IApiRoute {
 export class CostApiImplementation extends Construct implements ICostApiImplementation {
   readonly methods: Record<HttpMethod, Method>;
   readonly path: IResource;
-  readonly costRequestQueue: FifoQueue;
-  readonly costResponseQueue: FifoQueue;
+  public readonly costRequestQueue: FifoQueue;
+  public readonly costResponseQueue: FifoQueue;
   readonly startCostJobFn: lambda.Function;
   readonly consumeCostResponseFn: lambda.Function;
   readonly costRequestFn: lambda.Function;

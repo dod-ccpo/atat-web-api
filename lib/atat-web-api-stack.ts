@@ -21,9 +21,38 @@ export interface AtatWebApiStackProps extends cdk.StackProps {
 }
 
 export class AtatWebApiStack extends cdk.Stack {
+  private readonly atatDeveloperRole?: iam.IRole;
+
+  /**
+   * Allow developers to perform a specific operation on a resource in a sandbox environment.
+   *
+   * This accepts the `.grantX` function from the construct and then invokes it only when
+   * the stack is being built as a sandbox environment. When not a sandbox, this function is
+   * basically a no-op. This will return the resulting `iam.Grant` object.
+   *
+   * For example:
+   *
+   * ```ts
+   * const queue = new sqs.Queue(this, "Queue");
+   * this.grantToDeveloperInSandbox((role) => queue.grantConsumeMessages(role));
+   * ```
+   *
+   * @param grantFn The function from the underlying resource to use to grant the IAM action
+   * @returns the resulting grant (or undefined if not in a sandbox)
+   */
+  private grantToDeveloperInSandbox(grantFn: (grantee: iam.IGrantable) => iam.Grant): iam.Grant | undefined {
+    if (!this.atatDeveloperRole) {
+      return undefined;
+    }
+    return grantFn(this.atatDeveloperRole);
+  }
+
   constructor(scope: Construct, id: string, props: AtatWebApiStackProps) {
     super(scope, id, props);
     const { environmentName, network } = props;
+    if (props?.isSandbox) {
+      this.atatDeveloperRole = iam.Role.fromRoleName(this, "AtatDeveloper", "AtatDeveloper");
+    }
 
     const apiProps: AtatRestApiProps = {
       restApiName: `${environmentName}HothApi`,
@@ -43,13 +72,10 @@ export class AtatWebApiStack extends cdk.Stack {
     api.grantOnRoute(readUser.user, HttpMethod.GET);
     api.grantOnRoute(writeUser.user, "*");
 
-    if (props?.isSandbox) {
-      const atatDeveloperRole = iam.Role.fromRoleName(this, "AtatDeveloper", "AtatDeveloper", {});
-      readUser.accessKey.grantRead(atatDeveloperRole);
-      writeUser.accessKey.grantRead(atatDeveloperRole);
-      new cdk.CfnOutput(this, "ReadUserAccessKey", { value: readUser.accessKey.secretName });
-      new cdk.CfnOutput(this, "WriteUserAccessKey", { value: writeUser.accessKey.secretName });
-    }
+    this.grantToDeveloperInSandbox((role) => readUser.accessKey.grantRead(role));
+    this.grantToDeveloperInSandbox((role) => writeUser.accessKey.grantRead(role));
+    new cdk.CfnOutput(this, "ReadUserAccessKey", { value: readUser.accessKey.secretName });
+    new cdk.CfnOutput(this, "WriteUserAccessKey", { value: writeUser.accessKey.secretName });
 
     // Ensure that no IAM users in this Stack can ever do anything
     // except for invoke the created API Gateway.
@@ -144,5 +170,13 @@ export class AtatWebApiStack extends cdk.Stack {
       vpc: props?.network?.vpc,
       idp: atatIdp,
     });
+
+    this.grantToDeveloperInSandbox((role) => costApi.costRequestQueue.grantSendMessages(role));
+    this.grantToDeveloperInSandbox((role) => costApi.costRequestQueue.grantConsumeMessages(role));
+    this.grantToDeveloperInSandbox((role) => costApi.costRequestQueue.grantPurge(role));
+
+    this.grantToDeveloperInSandbox((role) => costApi.costResponseQueue.grantSendMessages(role));
+    this.grantToDeveloperInSandbox((role) => costApi.costResponseQueue.grantConsumeMessages(role));
+    this.grantToDeveloperInSandbox((role) => costApi.costResponseQueue.grantPurge(role));
   }
 }
