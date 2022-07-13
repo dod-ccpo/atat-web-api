@@ -58,6 +58,7 @@ export class AtatPipelineStack extends cdk.Stack {
       new AtatApplication(this, props.environmentName, {
         vpcCidr: props.vpcCidr,
         environmentName: props.environmentName,
+        notificationEmail: props.notificationEmail,
       })
     );
   }
