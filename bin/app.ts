@@ -67,6 +67,9 @@ export function createApp(props?: cdk.AppProps): cdk.App {
       repository: app.node.tryGetContext("atat:VersionControlRepo"),
       branch: app.node.tryGetContext("atat:VersionControlBranch"),
       githubPatName: app.node.tryGetContext("atat:GitHubPatName"),
+      // Set the notification email address, unless we're building the account where
+      // sandbox environments live because our inboxes would never recover.
+      notificationEmail: environmentName === "Sandbox" ? undefined : app.node.tryGetContext("atat:NotificationEmail"),
     });
   }
   return app;

@@ -4,11 +4,13 @@ import { Construct } from "constructs";
 import { AtatWebApiStack } from "./atat-web-api-stack";
 import { AtatIamStack } from "./atat-iam-stack";
 import { AtatNetStack } from "./atat-net-stack";
+import { AtatNotificationStack } from "./atat-notification-stack";
 import { GovCloudCompatibilityAspect } from "./aspects/govcloud-compatibility";
 
 export interface AtatProps {
   environmentName: string;
   vpcCidr?: string;
+  notificationEmail?: string;
 }
 
 export interface AtatPipelineStackProps extends cdk.StackProps, AtatProps {
@@ -26,6 +28,11 @@ class AtatApplication extends cdk.Stage {
       environmentName: props.environmentName,
       network: net,
     });
+    if (props.notificationEmail) {
+      const notifications = new AtatNotificationStack(this, "AtatNotifications", {
+        notificationEmail: props.notificationEmail,
+      });
+    }
     cdk.Aspects.of(this).add(new GovCloudCompatibilityAspect());
   }
 }
