@@ -45,7 +45,7 @@
     "@aws-sdk/client-s3-control": "^3.127.0",
     "@aws-sdk/client-secrets-manager": "^3.127.0",
     "@aws-sdk/client-sfn": "^3.127.0",
-    "@aws-sdk/client-sqs": "^3.127.0",
+    "@aws-sdk/client-sqs": "^3.128.0",
     "@aws-sdk/client-sts": "^3.127.0",
     "@middy/core": "^3.1.0",
     "@middy/error-logger": "^3.1.0",
