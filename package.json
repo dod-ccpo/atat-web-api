@@ -55,7 +55,7 @@
     "@sparticuz/chrome-aws-lambda": "^14.4.1",
     "aws-cdk-lib": "2.31.1",
     "axios": "^0.27.2",
-    "cdk-nag": "^2.15.10",
+    "cdk-nag": "^2.15.11",
     "constructs": "^10.1.43",
     "handlebars": "^4.7.7",
     "http-errors": "^2.0.0",
