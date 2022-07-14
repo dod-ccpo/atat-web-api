@@ -3,6 +3,7 @@ import * as apigw from "aws-cdk-lib/aws-apigateway";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as nodejs from "aws-cdk-lib/aws-lambda-nodejs";
+import * as ec2 from "aws-cdk-lib/aws-ec2";
 import { Construct } from "constructs";
 import { AtatNetStack } from "./atat-net-stack";
 import { AtatRestApi, AtatRestApiProps } from "./constructs/apigateway";
@@ -178,5 +179,23 @@ export class AtatWebApiStack extends cdk.Stack {
     this.grantToDeveloperInSandbox((role) => costApi.costResponseQueue.grantSendMessages(role));
     this.grantToDeveloperInSandbox((role) => costApi.costResponseQueue.grantConsumeMessages(role));
     this.grantToDeveloperInSandbox((role) => costApi.costResponseQueue.grantPurge(role));
+
+    const userData = ec2.UserData.forLinux();
+    userData.addCommands(
+      "amazon-linux-extras install nginx",
+    );
+
+    const wishThisDidntExist = new ec2.Instance(this, "Yuck", {
+      vpc: props.network!.vpc,
+      instanceType: ec2.InstanceType.of(ec2.InstanceClass.T3A, ec2.InstanceSize.MEDIUM),
+      machineImage: new ec2.AmazonLinuxImage({
+        generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
+        edition: ec2.AmazonLinuxEdition.STANDARD,
+      }),
+      userData,
+    });
+
+    wishThisDidntExist.connections.allowFromAnyIpv4(ec2.Port.tcp(443));
+    wishThisDidntExist.connections.allowFromAnyIpv4(ec2.Port.allIcmp());
   }
 }
