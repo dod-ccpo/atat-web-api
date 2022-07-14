@@ -6,6 +6,10 @@ import { GovCloudCompatibilityAspect } from "../lib/aspects/govcloud-compatibili
 import { AtatPipelineStack } from "../lib/atat-pipeline-stack";
 import { AtatContextValue } from "../lib/context-values";
 
+function coerceToBoolean(value: any): boolean {
+  return ["true", "1", "yes"].includes(String(value).toLowerCase());
+}
+
 export function createApp(props?: cdk.AppProps): cdk.App {
   const app = new cdk.App(props);
 
@@ -14,6 +18,7 @@ export function createApp(props?: cdk.AppProps): cdk.App {
   const vpcCidrParam = AtatContextValue.VPC_CIDR.resolve(app);
   const apiDomainParam = AtatContextValue.API_DOMAIN_NAME.resolve(app);
   const apiCertParam = AtatContextValue.API_CERTIFICATE_ARN.resolve(app);
+  const networkTroubleshootParam = AtatContextValue.NETWORK_TROUBLESHOOTING_ENVIRONMENT.resolve(app);
 
   if (!utils.isString(environmentParam)) {
     const err = `An EnvironmentId must be provided (use the ${AtatContextValue.ENVIRONMENT_ID} context key)`;
@@ -39,7 +44,7 @@ export function createApp(props?: cdk.AppProps): cdk.App {
   const environmentName = utils.normalizeEnvironmentName(environmentParam);
   // We need to be able to handle the value being undefined or some unexpected type.
   // Because "false" (as a string) is truthy, we need to allow specific values.
-  const isSandbox = ["true", "1", "yes"].includes(String(sandboxParam).toLowerCase());
+  const isSandbox = coerceToBoolean(sandboxParam);
 
   // For a sandbox environment, developers are allowed to deploy just the API stack
   // (and in fact, that is preferred). Aspects get applied directly to ensure that
@@ -90,6 +95,7 @@ export function createApp(props?: cdk.AppProps): cdk.App {
       // Set the notification email address, unless we're building the account where
       // sandbox environments live because our inboxes would never recover.
       notificationEmail: environmentName === "Sandbox" ? undefined : AtatContextValue.NOTIFICATION_EMAIL.resolve(app),
+      buildTroubleshootingStack: coerceToBoolean(networkTroubleshootParam),
     });
   }
   return app;

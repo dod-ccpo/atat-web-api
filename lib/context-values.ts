@@ -110,6 +110,21 @@ export class AtatContextValue {
     "config/csp/integration"
   );
 
+  /**
+   * Create an additional stack to support troubleshooting network connectivity issues.
+   *
+   * This parameter must only be used for debugging and troubleshooting purposes. Depending on
+   * the deployment methodology used, if set to true, the stack may need to be manually deleted
+   * via the CloudFormation console once it is changed back to false.
+   *
+   * The stack created when this is set to a truthy value **is not** intended to comply with
+   * best practices or security requirements.
+   */
+  public static readonly NETWORK_TROUBLESHOOTING_ENVIRONMENT = new AtatContextValue(
+    "atat:NetworkTroubleshootingEnvironment",
+    false
+  );
+
   // This eslint-disable is required as it picks up on the constructor shorthand as a
   // "useless" constructor which is not a correct determination.
   // eslint-disable-next-line no-useless-constructor

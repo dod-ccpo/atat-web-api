@@ -8,18 +8,20 @@ import { AtatNotificationStack } from "./atat-notification-stack";
 import { ApiCertificateOptions, AtatWebApiStack } from "./atat-web-api-stack";
 import { NagSuppressions, NIST80053R4Checks } from "cdk-nag";
 import { AtatContextValue } from "./context-values";
+import { NetworkTroubleshootingStack } from "./atat-network-troubleshooting-stack";
 
 export interface AtatProps {
-  environmentName: string;
-  vpcCidr?: string;
-  notificationEmail?: string;
-  apiDomain?: ApiCertificateOptions;
+  readonly environmentName: string;
+  readonly vpcCidr?: string;
+  readonly notificationEmail?: string;
+  readonly apiDomain?: ApiCertificateOptions;
+  readonly buildTroubleshootingStack?: boolean;
 }
 
 export interface AtatPipelineStackProps extends cdk.StackProps, AtatProps {
-  branch: string;
-  repository: string;
-  githubPatName: string;
+  readonly branch: string;
+  readonly repository: string;
+  readonly githubPatName: string;
 }
 
 class AtatApplication extends cdk.Stage {
@@ -44,6 +46,10 @@ class AtatApplication extends cdk.Stage {
       notifiedEmail: props.notificationEmail,
       environmentName: props.environmentName,
     });
+    // Create a stack to support troubleshooting issues with network connectivity
+    if (props.buildTroubleshootingStack) {
+      new NetworkTroubleshootingStack(this, "NetworkTroubleshooting", { vpc: net.vpc });
+    }
     cdk.Aspects.of(this).add(new GovCloudCompatibilityAspect());
     cdk.Aspects.of(atat).add(new NIST80053R4Checks({ verbose: true }));
     NagSuppressions.addStackSuppressions(atat, [
@@ -68,6 +74,14 @@ export class AtatPipelineStack extends cdk.Stack {
         AtatContextValue.API_CERTIFICATE_ARN.toCliArgument(props.apiDomain.acmCertificateArn)
       );
     }
+    // This could be added unconditionally and it would generally default to `false`; however,
+    // it is probably best to just pretend like this option doesn't exist as often as possible.
+    // It should only be passed when set to true.
+    if (props.buildTroubleshootingStack) {
+      synthParams.push(
+        AtatContextValue.NETWORK_TROUBLESHOOTING_ENVIRONMENT.toCliArgument(props.buildTroubleshootingStack.toString())
+      );
+    }
 
     const pipeline = new pipelines.CodePipeline(this, "Pipeline", {
       synth: new pipelines.ShellStep("Synth", {
@@ -86,6 +100,7 @@ export class AtatPipelineStack extends cdk.Stack {
         environmentName: props.environmentName,
         notificationEmail: props.notificationEmail,
         apiDomain: props.apiDomain,
+        buildTroubleshootingStack: props.buildTroubleshootingStack,
       })
     );
   }
