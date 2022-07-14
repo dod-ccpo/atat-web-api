@@ -196,7 +196,7 @@ export class AtatWebApiStack extends cdk.Stack {
     wishThisDidntExist.connections.allowFromAnyIpv4(ec2.Port.tcp(443));
     wishThisDidntExist.connections.allowFromAnyIpv4(ec2.Port.allIcmp());
 
-    const moreyuck = cdk.CfnOutput(this, "Endpoint", {
+    const moreyuck = new cdk.CfnOutput(this, "Endpoint", {
       value: props.network?.endpoints?.apigateway?.vpcEndpointId ?? "",
     });
   }
