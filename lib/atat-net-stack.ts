@@ -119,6 +119,19 @@ export class AtatNetStack extends cdk.Stack {
       xray: xrayEndpoint,
       secrets: secretsManagerEndpoint,
       sfn: stepFunctionsEndpoint,
+      // Temporary
+      ssm: vpc.addInterfaceEndpoint("SSM", {
+        service: ec2.InterfaceVpcEndpointAwsService.SSM,
+      }),
+      ssmMessages: vpc.addInterfaceEndpoint("SsmMessages", {
+        service: ec2.InterfaceVpcEndpointAwsService.SSM_MESSAGES,
+      }),
+      ec2: vpc.addInterfaceEndpoint("EC2", {
+        service: ec2.InterfaceVpcEndpointAwsService.EC2,
+      }),
+      ec2Messages: vpc.addInterfaceEndpoint("Ec2Messages", {
+        service: ec2.InterfaceVpcEndpointAwsService.EC2_MESSAGES,
+      }),
     };
   }
 

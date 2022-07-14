@@ -196,6 +196,10 @@ export class AtatWebApiStack extends cdk.Stack {
     wishThisDidntExist.connections.allowFromAnyIpv4(ec2.Port.tcp(443));
     wishThisDidntExist.connections.allowFromAnyIpv4(ec2.Port.allIcmp());
 
+    wishThisDidntExist.role.addManagedPolicy(
+      iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonSSMManagedInstanceCore")
+    );
+
     const moreyuck = new cdk.CfnOutput(this, "Endpoint", {
       value: props.network?.endpoints?.apigateway?.vpcEndpointId ?? "",
     });
