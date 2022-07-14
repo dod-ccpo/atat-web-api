@@ -64,17 +64,17 @@ export class AtatNetStack extends cdk.Stack {
         })
       ),
     });
-    const dnsLogsGroup = new logs.LogGroup(this, "VpcDnsQueryLogs", {
-      retention: logs.RetentionDays.INFINITE,
-    });
+    // const dnsLogsGroup = new logs.LogGroup(this, "VpcDnsQueryLogs", {
+    //   retention: logs.RetentionDays.INFINITE,
+    // });
     // Capture all DNS queries made by all hosts in the VPC
-    const dnsLoggingConfig = new route53Resolver.CfnResolverQueryLoggingConfig(this, "DnsLogging", {
-      destinationArn: dnsLogsGroup.logGroupArn,
-    });
-    const vpcDnsLogging = new route53Resolver.CfnResolverQueryLoggingConfigAssociation(this, "VpcDnsLogging", {
-      resolverQueryLogConfigId: dnsLoggingConfig.attrId,
-      resourceId: vpc.vpcId,
-    });
+    // const dnsLoggingConfig = new route53Resolver.CfnResolverQueryLoggingConfig(this, "DnsLogging", {
+    //   destinationArn: dnsLogsGroup.logGroupArn,
+    // });
+    // const vpcDnsLogging = new route53Resolver.CfnResolverQueryLoggingConfigAssociation(this, "VpcDnsLogging", {
+    //   resolverQueryLogConfigId: dnsLoggingConfig.attrId,
+    //   resourceId: vpc.vpcId,
+    // });
 
     const transitGatewayId = this.findTransitGateway();
 
