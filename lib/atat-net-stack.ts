@@ -133,6 +133,8 @@ export class AtatNetStack extends cdk.Stack {
         service: ec2.InterfaceVpcEndpointAwsService.EC2_MESSAGES,
       }),
     };
+
+    apiGatewayEndpoint.connections.allowFrom(ec2.Peer.ipv4("10.0.0.0/8"), ec2.Port.tcp(443));
   }
 
   private addDefaultTransitGatewayRoute(transitGatewayAttachment: ec2.CfnTransitGatewayAttachment) {
