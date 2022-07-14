@@ -54,6 +54,8 @@ export class AtatNetStack extends cdk.Stack {
       })
     );
 
+    this.outputs.push(new cdk.CfnOutput(this, "TestOutput", { value: "test" }));
+
     // Capture all VPC flow logs and send to CloudWatch Logs with indefinite retention
     vpc.addFlowLog("AllFlowLogs", {
       destination: ec2.FlowLogDestination.toCloudWatchLogs(
