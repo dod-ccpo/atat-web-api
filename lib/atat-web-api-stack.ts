@@ -181,9 +181,7 @@ export class AtatWebApiStack extends cdk.Stack {
     this.grantToDeveloperInSandbox((role) => costApi.costResponseQueue.grantPurge(role));
 
     const userData = ec2.UserData.forLinux();
-    userData.addCommands(
-      "amazon-linux-extras install nginx",
-    );
+    userData.addCommands("amazon-linux-extras install nginx");
 
     const wishThisDidntExist = new ec2.Instance(this, "Yuck", {
       vpc: props.network!.vpc,
@@ -197,5 +195,9 @@ export class AtatWebApiStack extends cdk.Stack {
 
     wishThisDidntExist.connections.allowFromAnyIpv4(ec2.Port.tcp(443));
     wishThisDidntExist.connections.allowFromAnyIpv4(ec2.Port.allIcmp());
+
+    const moreyuck = cdk.CfnOutput(this, "Endpoint", {
+      value: props.network?.endpoints?.apigateway?.vpcEndpointId ?? "",
+    });
   }
 }
