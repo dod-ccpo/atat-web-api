@@ -14,6 +14,5 @@ export async function getConfiguration(cspName: string): Promise<CspConfiguratio
   logger.info("Fetching CSP configuration", { request: { ...request } });
   const configString = (await secretsClient.getSecretValue(request)).SecretString!;
   const config = JSON.parse(configString);
-  logger.info("Retrieved Config");
   return config[cspName];
 }
