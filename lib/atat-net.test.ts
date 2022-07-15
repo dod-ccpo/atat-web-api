@@ -18,7 +18,7 @@ describe("ATAT network creation", () => {
     });
   });
 
-  test("DNS Query logging enabled", async () => {
+  test.skip("DNS Query logging enabled", async () => {
     // GIVEN
     const app = new cdk.App();
     // WHEN
