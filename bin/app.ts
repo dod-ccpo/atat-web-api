@@ -1,6 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import * as utils from "../lib/util";
-import { AtatWebApiStack } from "../lib/atat-web-api-stack";
+import { AtatWebApiStack, ApiCertificateOptions } from "../lib/atat-web-api-stack";
 import { RemovalPolicySetter } from "../lib/aspects/removal-policy";
 import { GovCloudCompatibilityAspect } from "../lib/aspects/govcloud-compatibility";
 import { AtatPipelineStack } from "../lib/atat-pipeline-stack";
@@ -11,11 +11,26 @@ export function createApp(props?: cdk.AppProps): cdk.App {
   const environmentParam = app.node.tryGetContext("atat:EnvironmentId");
   const sandboxParam = app.node.tryGetContext("atat:Sandbox");
   const vpcCidrParam = app.node.tryGetContext("atat:VpcCidr");
+  const apiDomainParam = app.node.tryGetContext("atat:ApiDomainName");
+  const apiCertParam = app.node.tryGetContext("atat:ApiCertificateArn");
 
   if (!utils.isString(environmentParam)) {
     const err = "An EnvironmentId must be provided (use the atat:EnvironmentId context key)";
     console.error(err);
     throw new Error(err);
+  }
+
+  let apiCertOptions: ApiCertificateOptions | undefined;
+
+  if (utils.isString(apiDomainParam) !== utils.isString(apiCertParam)) {
+    const err = "Both or neither of ApiDomainName and ApiCertificateArn must be specified";
+    console.error(err);
+    throw new Error(err);
+  } else if (apiDomainParam && apiCertParam) {
+    apiCertOptions = {
+      domainName: apiDomainParam,
+      acmCertificateArn: apiCertParam,
+    };
   }
 
   const environmentName = utils.normalizeEnvironmentName(environmentParam);
@@ -41,6 +56,7 @@ export function createApp(props?: cdk.AppProps): cdk.App {
     const apiStack = new AtatWebApiStack(app, `${environmentName}WebApi`, {
       environmentName,
       isSandbox,
+      apiDomain: apiCertOptions,
     });
     cdk.Aspects.of(app).add(new RemovalPolicySetter({ globalRemovalPolicy: cdk.RemovalPolicy.DESTROY }));
     cdk.Aspects.of(app).add(new GovCloudCompatibilityAspect());
@@ -67,6 +83,7 @@ export function createApp(props?: cdk.AppProps): cdk.App {
       repository: app.node.tryGetContext("atat:VersionControlRepo"),
       branch: app.node.tryGetContext("atat:VersionControlBranch"),
       githubPatName: app.node.tryGetContext("atat:GitHubPatName"),
+      apiDomain: apiCertOptions,
       // Set the notification email address, unless we're building the account where
       // sandbox environments live because our inboxes would never recover.
       notificationEmail: environmentName === "Sandbox" ? undefined : app.node.tryGetContext("atat:NotificationEmail"),

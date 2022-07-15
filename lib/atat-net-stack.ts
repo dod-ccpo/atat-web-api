@@ -29,7 +29,7 @@ export interface AtatNetStackProps extends cdk.StackProps {
  */
 export class AtatNetStack extends cdk.Stack {
   public readonly vpc: ec2.IVpc;
-  public readonly endpoints: { [key: string]: ec2.IVpcEndpoint };
+  public readonly endpoints: { [key: string]: ec2.IInterfaceVpcEndpoint };
   public readonly outputs: cdk.CfnOutput[] = [];
 
   constructor(scope: Construct, id: string, props: AtatNetStackProps) {
@@ -109,7 +109,6 @@ export class AtatNetStack extends cdk.Stack {
     });
     this.endpoints = {
       ...this.endpoints,
-      s3: s3Endpoint,
       apigateway: apiGatewayEndpoint,
       lambda: lambdaEndpoint,
       logs: logsEndpoint,

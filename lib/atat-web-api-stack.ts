@@ -1,23 +1,33 @@
 import * as cdk from "aws-cdk-lib";
 import * as apigw from "aws-cdk-lib/aws-apigateway";
+import * as acm from "aws-cdk-lib/aws-certificatemanager";
+import { Port } from "aws-cdk-lib/aws-ec2";
+import * as elbv2 from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as nodejs from "aws-cdk-lib/aws-lambda-nodejs";
 import { Construct } from "constructs";
-import { AtatNetStack } from "./atat-net-stack";
-import { AtatRestApi, AtatRestApiProps } from "./constructs/apigateway";
 import { UserPermissionBoundary } from "./aspects/user-only-permission-boundary";
+import { AtatNetStack } from "./atat-net-stack";
 import { ApiSfnFunction } from "./constructs/api-sfn-function";
-import { HttpMethod } from "./http";
-import { ProvisioningWorkflow } from "./constructs/provisioning-sfn-workflow";
 import { ApiUser } from "./constructs/api-user";
-import * as idp from "./constructs/identity-provider";
+import { AtatRestApi, AtatRestApiProps } from "./constructs/apigateway";
 import { CostApiImplementation } from "./constructs/cost-api-implementation";
+import * as idp from "./constructs/identity-provider";
+import { ProvisioningWorkflow } from "./constructs/provisioning-sfn-workflow";
+import { VpcEndpointApplicationTargetGroup, VpcEndpointNetworkTargetGroup } from "./constructs/vpc-endpoint-lb-target";
+import { HttpMethod } from "./http";
+
+export interface ApiCertificateOptions {
+  domainName: string;
+  acmCertificateArn: string;
+}
 
 export interface AtatWebApiStackProps extends cdk.StackProps {
   environmentName: string;
   network?: AtatNetStack;
   isSandbox?: boolean;
+  apiDomain?: ApiCertificateOptions;
 }
 
 export class AtatWebApiStack extends cdk.Stack {
@@ -62,11 +72,41 @@ export class AtatWebApiStack extends cdk.Stack {
       apiProps.vpcConfig = {
         vpc: network.vpc,
         interfaceEndpoint: network.endpoints.apigateway,
-        tempDontUseVpcEndpoint: true,
       };
     }
 
     const api = new AtatRestApi(this, "HothApi", apiProps);
+    if (props.apiDomain && network) {
+      const certificate = acm.Certificate.fromCertificateArn(this, "ApiCertificate", props.apiDomain.acmCertificateArn);
+      const loadBalancer = new elbv2.ApplicationLoadBalancer(this, "LoadBalancer", {
+        vpc: network.vpc,
+        internetFacing: false,
+      });
+      loadBalancer.addListener("HttpsListener", {
+        port: 443,
+        protocol: elbv2.ApplicationProtocol.HTTPS,
+        sslPolicy: elbv2.SslPolicy.FORWARD_SECRECY_TLS12_RES_GCM,
+        certificates: [certificate],
+        defaultTargetGroups: [
+          new VpcEndpointApplicationTargetGroup(this, "VpcEndpointTarget", {
+            endpoint: network.endpoints.apigateway,
+            port: 443,
+            vpc: network.vpc,
+            protocol: elbv2.ApplicationProtocol.HTTPS,
+            healthCheck: {
+              healthyHttpCodes: "200-299,400-499",
+            },
+          }),
+        ],
+      });
+      // We're behind NAT so we need to allow this
+      loadBalancer.connections.allowFromAnyIpv4(Port.tcp(443));
+      // We manually set the targets so we need to allow this
+      // TODO: Fix that in the TargetGroup config?
+      loadBalancer.connections.allowToAnyIpv4(Port.tcp(443));
+      new cdk.CfnOutput(this, "LoadBalancerDns", { value: loadBalancer.loadBalancerDnsName });
+    }
+
     const readUser = new ApiUser(this, "ReadUser", { secretPrefix: "api/user/snow", username: "ReadUser" });
     const writeUser = new ApiUser(this, "WriteUser", { secretPrefix: "api/user/snow", username: "WriteUser" });
     api.grantOnRoute(readUser.user, HttpMethod.GET);

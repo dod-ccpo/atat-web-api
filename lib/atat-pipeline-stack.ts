@@ -1,7 +1,7 @@
 import * as cdk from "aws-cdk-lib";
 import * as pipelines from "aws-cdk-lib/pipelines";
 import { Construct } from "constructs";
-import { AtatWebApiStack } from "./atat-web-api-stack";
+import { AtatWebApiStack, ApiCertificateOptions } from "./atat-web-api-stack";
 import { AtatIamStack } from "./atat-iam-stack";
 import { AtatNetStack } from "./atat-net-stack";
 import { AtatNotificationStack } from "./atat-notification-stack";
@@ -12,6 +12,7 @@ export interface AtatProps {
   environmentName: string;
   vpcCidr?: string;
   notificationEmail?: string;
+  apiDomain?: ApiCertificateOptions;
 }
 
 export interface AtatPipelineStackProps extends cdk.StackProps, AtatProps {
@@ -27,6 +28,7 @@ class AtatApplication extends cdk.Stage {
     const net = new AtatNetStack(this, "AtatNetworking", { vpcCidr: props.vpcCidr });
     const atat = new AtatWebApiStack(this, "AtatHothApi", {
       environmentName: props.environmentName,
+      apiDomain: props.apiDomain,
       network: net,
     });
     const monitoredStacks: cdk.Stack[] = [iam, net, atat];
@@ -49,17 +51,20 @@ class AtatApplication extends cdk.Stage {
 export class AtatPipelineStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: AtatPipelineStackProps) {
     super(scope, id, props);
+    const synthParams = [`-c atat:EnvironmentId=${props.environmentName}`, `-c atat:VpcCidr=${props.vpcCidr}`];
+    if (props.apiDomain) {
+      synthParams.push(
+        `-c atat:ApiDomainName=${props.apiDomain.domainName}`,
+        `-c atat:ApiCertificateArn=${props.apiDomain.acmCertificateArn}`
+      );
+    }
 
     const pipeline = new pipelines.CodePipeline(this, "Pipeline", {
       synth: new pipelines.ShellStep("Synth", {
         input: pipelines.CodePipelineSource.gitHub(props.repository, props.branch, {
           authentication: cdk.SecretValue.secretsManager(props.githubPatName),
         }),
-        commands: [
-          "npm ci",
-          "npm run build",
-          `npm run -- cdk synth -c atat:EnvironmentId=${props.environmentName} -c atat:VpcCidr=${props.vpcCidr}`,
-        ],
+        commands: ["npm ci", "npm run build", "npm run -- cdk synth " + synthParams.join(" ")],
       }),
     });
 
@@ -68,6 +73,7 @@ export class AtatPipelineStack extends cdk.Stack {
         vpcCidr: props.vpcCidr,
         environmentName: props.environmentName,
         notificationEmail: props.notificationEmail,
+        apiDomain: props.apiDomain,
       })
     );
   }
