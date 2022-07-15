@@ -62,17 +62,17 @@ export class AtatNetStack extends cdk.Stack {
         })
       ),
     });
-    const dnsLogsGroup = new logs.LogGroup(this, "VpcDnsQueryLogs", {
-      retention: logs.RetentionDays.INFINITE,
-    });
-    // Capture all DNS queries made by all hosts in the VPC
-    const dnsLoggingConfig = new route53Resolver.CfnResolverQueryLoggingConfig(this, "DnsLogging", {
-      destinationArn: dnsLogsGroup.logGroupArn,
-    });
-    const vpcDnsLogging = new route53Resolver.CfnResolverQueryLoggingConfigAssociation(this, "VpcDnsLogging", {
-      resolverQueryLogConfigId: dnsLoggingConfig.attrId,
-      resourceId: vpc.vpcId,
-    });
+    // const dnsLogsGroup = new logs.LogGroup(this, "VpcDnsQueryLogs", {
+    //   retention: logs.RetentionDays.INFINITE,
+    // });
+    // // Capture all DNS queries made by all hosts in the VPC
+    // const dnsLoggingConfig = new route53Resolver.CfnResolverQueryLoggingConfig(this, "DnsLogging", {
+    //   destinationArn: dnsLogsGroup.logGroupArn,
+    // });
+    // const vpcDnsLogging = new route53Resolver.CfnResolverQueryLoggingConfigAssociation(this, "VpcDnsLogging", {
+    //   resolverQueryLogConfigId: dnsLoggingConfig.attrId,
+    //   resourceId: vpc.vpcId,
+    // });
 
     const transitGatewayId = this.findTransitGateway();
 
@@ -118,6 +118,17 @@ export class AtatNetStack extends cdk.Stack {
       secrets: secretsManagerEndpoint,
       sfn: stepFunctionsEndpoint,
     };
+
+    // The firewall in our environment performs NAT, so the source IP address will
+    // always "look like" it comes from, well, just about anywhere. Because of our
+    // network architecture (and because this will always exist in an isolated subnet),
+    // this 0.0.0.0/0 rule is mostly safe. If the firewall were instead modified to
+    // perform break-and-inspect, the source IP address would become the Firewall's
+    // IP address.
+    apiGatewayEndpoint.connections.allowFromAnyIpv4(
+      ec2.Port.tcp(443),
+      "Allow HTTPS connections via NAT to the API Gateway"
+    );
   }
 
   private addDefaultTransitGatewayRoute(transitGatewayAttachment: ec2.CfnTransitGatewayAttachment) {
