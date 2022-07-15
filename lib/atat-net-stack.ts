@@ -134,7 +134,16 @@ export class AtatNetStack extends cdk.Stack {
       }),
     };
 
-    apiGatewayEndpoint.connections.allowFrom(ec2.Peer.ipv4("10.0.0.0/8"), ec2.Port.tcp(443));
+    // The firewall in our environment performs NAT, so the source IP address will
+    // always "look like" it comes from, well, just about anywhere. Because of our
+    // network architecture (and because this will always exist in an isolated subnet),
+    // this 0.0.0.0/0 rule is mostly safe. If the firewall were instead modified to
+    // perform break-and-inspect, the source IP address would become the Firewall's
+    // IP address.
+    apiGatewayEndpoint.connections.allowFromAnyIpv4(
+      ec2.Port.tcp(443),
+      "Allow HTTPS connections via NAT to the API Gateway"
+    );
   }
 
   private addDefaultTransitGatewayRoute(transitGatewayAttachment: ec2.CfnTransitGatewayAttachment) {
