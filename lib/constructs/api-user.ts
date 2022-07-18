@@ -1,3 +1,4 @@
+import * as cdk from "aws-cdk-lib";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as secrets from "aws-cdk-lib/aws-secretsmanager";
 import { Construct } from "constructs";
@@ -30,21 +31,16 @@ export class ApiUser extends Construct {
     const accessKey = new iam.AccessKey(this, `ApiUser${props.username}Key`, {
       user,
     });
-    // To remove the access key ID from the secret name, consider storing a JSON object
-    // in the secret once https://github.com/aws/aws-cdk/issues/20461 is resolved.
-    // For example:
-    // ```json
-    // {
-    //   "accessKeyId": accessKey.accessKeyId,
-    //   "secretAccessKey": accessKey.secretAccessKey
-    // }
-    // ```
-    // This would potentially result in requiring `props.username` to be unique; though,
-    // we could likely use `user.userName` in the Secret name instead which might even
-    // provide a cleaner, more obvious, 1:1 mapping of users to secrets.
     const secret = new secrets.Secret(this, `ApiUser${props.username}KeySecret`, {
-      secretName: `${props.secretPrefix}/${props.username}/${accessKey.accessKeyId}`,
-      secretStringValue: accessKey.secretAccessKey,
+      secretName: `${props.secretPrefix}/${user.userName}`,
+      secretObjectValue: {
+        // This usage of 'unsafePlainText' is safe for two reasons. First, the underlying
+        // value is not truly a secret. Second, the Access Key ID will not actually appear
+        // within the template regardless (it will be a CloudFormation Fn::GetAtt
+        // intrinsic function).
+        accessKeyId: cdk.SecretValue.unsafePlainText(accessKey.accessKeyId),
+        secretAccessKey: accessKey.secretAccessKey,
+      },
     });
 
     this.user = user;
