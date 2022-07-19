@@ -4,7 +4,6 @@ import { getConfiguration } from "../provision/csp-configuration";
 import { getToken } from "../../idp/client";
 import { logger } from "../../utils/logging";
 import axios from "axios";
-import { Network } from "../../models/cloud-service-providers";
 
 export interface CspResponse {
   code: number;
@@ -13,94 +12,6 @@ export interface CspResponse {
     request: CostRequest | ProvisionRequest;
   };
 }
-
-export const costPayload: CspResponse = {
-  code: 200,
-  content: {
-    request: {
-      requestId: "21f9b7182f501110e58359a72799b6d3",
-      portfolioId: "3146a650-a9bd-491d-b34b-a59a1adc048d",
-      targetCsp: {
-        name: "Demo Consume Response CSP_A",
-        uri: "https://www.example.com/api/atat",
-        network: Network.NETWORK_1,
-      },
-      startDate: "2022-06-15",
-      endDate: "2022-06-24",
-    },
-    response: {
-      task_orders: [
-        {
-          task_order_number: "9999999999999",
-          clins: [
-            {
-              clin_number: "0001",
-              actual: [
-                {
-                  total: "50.00",
-                  results: [
-                    {
-                      month: "2021-12",
-                      value: "20.00",
-                    },
-                    {
-                      month: "2022-01",
-                      value: "30.00",
-                    },
-                  ],
-                },
-              ],
-              forecast: [
-                {
-                  total: "100.00",
-                  results: [
-                    {
-                      month: "2022-02",
-                      value: "100.00",
-                    },
-                  ],
-                },
-              ],
-            },
-            {
-              clin_number: "0002",
-              actual: [
-                {
-                  total: "750.00",
-                  results: [
-                    {
-                      month: "2021-12",
-                      value: "50.00",
-                    },
-                    {
-                      month: "2022-01",
-                      value: "700.00",
-                    },
-                  ],
-                },
-              ],
-              forecast: [
-                {
-                  total: "1000.00",
-                  results: [
-                    {
-                      month: "2022-02",
-                      value: "100.00",
-                    },
-                    {
-                      month: "2022-03",
-                      value: "900.00",
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    },
-  },
-};
 
 /**
  * Make a request to an actual CSP implementation of the ATAT API
@@ -150,17 +61,6 @@ export async function cspRequest(request: CspRequestType<CostRequest | Provision
       resolvedUrl: url,
       configSecretPath: process.env.CSP_CONFIG_SECRET_NAME,
     });
-
-    // TODO: Revert immediately after demoing. This is simply a back
-    // up to provide incase the mock server is not ready in time for
-    // demoing. This will allow CSP_A to respond with properly
-    // formatted cost data to be processed in SNOW.
-    // Only CSP_Mock has a csp config and provides a baseUrl so
-    // all other CSP enter this block.
-    if (targetCsp.name === "CSP_A") {
-      return costPayload;
-    }
-
     return {
       code: 400,
       content: {

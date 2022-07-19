@@ -5,7 +5,7 @@ import { Network } from "../../models/cloud-service-providers";
 import { CostRequest, CspRequest, CspRequestType } from "../../models/cost-jobs";
 import { ErrorStatusCode, SuccessStatusCode } from "../../utils/response";
 import { constructProvisionRequestForCsp } from "../provision/csp-write-portfolio.test";
-import { costPayload, cspRequest } from "./csp-request";
+import { cspRequest } from "./csp-request";
 import { ProvisionRequest } from "../../models/provisioning-jobs";
 import { cspA, validCostRequest } from "../util/common-test-fixtures";
 
@@ -35,15 +35,6 @@ describe("Successful invocation of mock CSP function", () => {
     const response = await cspRequest(request);
     // THEN
     expect(response.content).toEqual({ response: fakeGoodResponse, request: request.body });
-    expect(response.code).toBe(SuccessStatusCode.OK);
-  });
-  it("should return 200 when COST csp A request (mock)", async () => {
-    // GIVEN
-    const request: CspRequestType<CostRequest> = { requestType: CspRequest.COST, body: validCostRequest };
-    // WHEN
-    const response = await cspRequest(request);
-    // THEN
-    expect(response.content).toEqual(costPayload.content);
     expect(response.code).toBe(SuccessStatusCode.OK);
   });
   it("should return 200 when PROVISION csp request", async () => {
