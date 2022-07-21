@@ -465,7 +465,7 @@ components:
           - "3000_OTHER"
         dow_task_number:
           type: string
-        service:
+        service_offering:
           description: "The service offering for the particular line item."  
           type: string 
         item_description_or_config_summary:
