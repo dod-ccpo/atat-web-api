@@ -62,6 +62,7 @@
     "cdk-monitoring-constructs": "^1.17.2",
     "cdk-nag": "^2.15.18",
     "constructs": "^10.1.51",
+    "exceljs": "^4.3.0",
     "handlebars": "^4.7.7",
     "http-errors": "^2.0.0",
     "juice": "^8.0.0",

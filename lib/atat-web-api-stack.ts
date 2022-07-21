@@ -145,12 +145,31 @@ export class AtatWebApiStack extends cdk.Stack {
       new apigw.LambdaIntegration(provisioningSfn.provisioningQueueConsumer.fn)
     );
 
+    // Test Excel Resource
+    const generateExcelDocumentResource = api.restApi.root.addResource("generate-excel-document");
+    const excelGenerationLayer = new lambda.LayerVersion(this, "GenerateExcelSupportLayer", {
+      compatibleRuntimes: [lambda.Runtime.NODEJS_16_X],
+      code: lambda.Code.fromAsset("document-generation/templates", {}),
+    });
+    const generateExcelFn = new nodejs.NodejsFunction(this, "GenerateExcelFunction", {
+      entry: "document-generation/generate-excel.ts",
+      runtime: lambda.Runtime.NODEJS_16_X,
+      memorySize: 512,
+      bundling: {
+        nodeModules: ["@sparticuz/chrome-aws-lambda", "puppeteer-core", "exceljs"],
+      },
+      layers: [excelGenerationLayer],
+      timeout: cdk.Duration.seconds(60),
+    });
+    generateExcelDocumentResource.addMethod(HttpMethod.POST, new apigw.LambdaIntegration(generateExcelFn));
+
     // APIGW Document Generation Resource
     const generateDocumentResource = api.restApi.root.addResource("generate-document");
     const documentGenerationLayer = new lambda.LayerVersion(this, "GenerateDocumentSupportLayer", {
       compatibleRuntimes: [lambda.Runtime.NODEJS_16_X],
       code: lambda.Code.fromAsset("document-generation/templates", {}),
     });
+
     const generateDocumentFn = new nodejs.NodejsFunction(this, "GenerateDocumentFunction", {
       entry: "document-generation/generate-document.ts",
       runtime: lambda.Runtime.NODEJS_16_X,
