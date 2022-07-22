@@ -94,7 +94,17 @@ export class AtatWebApiStack extends cdk.Stack {
             vpc: network.vpc,
             protocol: elbv2.ApplicationProtocol.HTTPS,
             healthCheck: {
-              healthyHttpCodes: "200-299,400-499",
+              // Unfortunately, there is not a great way to actually invoke a health route
+              // on the load balancer because we would need to send some kind of header in
+              // order to successfully hit our API via the endpoint. We would hve to send
+              // either the Host or x-apigw-api-id headers and we can only specify paths.
+              // If we at least get a response and that response is either a 200 or it's a
+              // 403 (which is what API Gateway will return when we've failed to provide the
+              // header), then we should be all good.
+              // TODO: Perhaps mitigate this by closely monitoring the number of 4xx or 5xx
+              // returned from the ALB or if the ALB receives a large number of requests that
+              // never make it to the API Gateway? Other solutions may be available.
+              healthyHttpCodes: "200,403",
             },
           }),
         ],
