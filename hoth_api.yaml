@@ -407,10 +407,77 @@ components:
           type: string
           enum:
             - DESCRIPTION_OF_WORK
+            - INDEPENDENT_GOVERNMENT_COST_ESTIMATE
         templatePayload:
           type: object
           oneOf:
             - $ref: "#/components/schemas/DescriptionOfWork"
+            - $ref: "#/components/schemas/IndependentGovernmentCostEstimate"
+    IndependentGovernmentCostEstimate:
+      description: "Data used for generating the Independence Government Cost Estimate (IGCE) document"
+      type: object
+      properties:
+        funding_document:
+          description: >-
+            Information related to a funding plan. Either both the GTC number and Order 
+            number or only the MIPR number. 
+          type: object
+          properties:
+            funding_type:
+              type: string
+              enum: 
+                - FS_FORM
+                - MIPR
+            gtc_number: 
+              type: string
+            order_number:
+              type: string
+            mipr_number: 
+              type: string
+        surge_capabilities:
+          type: string
+        periods_estimate:
+          type: array
+          items:
+            $ref: "#/components/schemas/PeriodEstimate"
+    PeriodEstimate:
+      description: "Information specific to a base or option period sheet in the IGCE document"
+      type: object
+      properties:
+        period:
+          description: "The period of performance for a specific period sheet."
+          $ref: "#/components/schemas/Period"
+        period_line_items:
+          type: array
+          items:
+            $ref: "#/components/schemas/PeriodLineItem"
+    PeriodLineItem:
+      description: "Line items entered for each period sheet in the IGCE document"
+      type: object
+      properties:
+        clin: 
+          type: string
+        idiq_clin:
+          type: string
+          enum: 
+          - "1000_CLOUD"
+          - "2000_CLOUD_SUPPORT"
+          - "3000_OTHER"
+        dow_task_number:
+          type: string
+        service_offering:
+          description: "The service offering for the particular line item."  
+          type: string 
+        item_description_or_config_summary:
+          type: string
+        monthly_price:
+          type: number
+        months_in_period: 
+          description: >-
+            Months in the specified period. The days/weeks/year should be converted into
+            months and always rounded up to a whole number. Average weeks in a month 4.345.
+            Average days in a month 30.4167. Example 6 wks / 4.345 = 1.381 => 2 months.
+          type: number 
     DescriptionOfWork:
       description: "Schema used to generate DescriptionOfWork document"
       type: object
