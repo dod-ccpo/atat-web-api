@@ -219,6 +219,12 @@ export interface GenerateDocumentRequest {
   documentType: string;
   templatePayload: DescriptionOfWork;
 }
+export interface GenerateExcelRequest {
+  funding_type: string;
+  gtc_number: string;
+  order_number: string;
+  mipr_number: string;
+}
 
 export interface RequestEvent<T> {
   body: T;
