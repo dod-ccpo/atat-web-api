@@ -18,6 +18,7 @@ async function blockS3PublicAccess() {
     PublicAccessBlockConfiguration: {
       BlockPublicAcls: true,
       BlockPublicPolicy: true,
+      IgnorePublicAcls: true,
       RestrictPublicBuckets: true,
     },
   });

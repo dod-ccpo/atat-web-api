@@ -32,11 +32,6 @@ const API_ACCESS_LOG_FORMAT = apigw.AccessLogFormat.custom(
 export interface RestApiVpcConfiguration {
   vpc: ec2.IVpc;
   interfaceEndpoint: ec2.IVpcEndpoint;
-  // TODO: REMOVE THIS ATTRIBUTE. This is a temporary workaround to resolve issues
-  // with networking. At the moment, the rest of the networking infrastructure
-  // (across accounts) does not fully and properly support ingress traffic. This
-  // must be removed once those fixes are in-place.
-  tempDontUseVpcEndpoint?: boolean;
 }
 
 export interface AtatRestApiProps extends apigw.RestApiProps {
@@ -57,7 +52,6 @@ export class AtatRestApi extends Construct {
     // endpoint. Otherwise, a regional endpoint is used. Edge endpoints are not
     // configured purely for convenience (as they're not available in all
     // regions or partitions).
-    const isPrivateApi = !!props?.vpcConfig && !props.vpcConfig.tempDontUseVpcEndpoint;
     const privateEndpointConfig = () => ({
       endpointConfiguration: {
         types: [apigw.EndpointType.PRIVATE],
@@ -72,7 +66,7 @@ export class AtatRestApi extends Construct {
     const restApi = new apigw.RestApi(this, "Api", {
       description: "The REST API between ATAT in ServiceNow and in the Cloud",
       ...props,
-      ...(isPrivateApi ? privateEndpointConfig() : regionalEndpointConfig()),
+      ...(props?.vpcConfig?.vpc ? privateEndpointConfig() : regionalEndpointConfig()),
       deployOptions: {
         ...props?.deployOptions,
         cachingEnabled: true,
