@@ -1,4 +1,5 @@
 import * as cdk from "aws-cdk-lib";
+import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as lambdaNodeJs from "aws-cdk-lib/aws-lambda-nodejs";
 import * as logs from "aws-cdk-lib/aws-logs";
@@ -30,6 +31,7 @@ export const clientErrorResponse = sfn.Condition.or(
 export interface ProvisioningWorkflowProps {
   environmentName: string;
   idp?: IIdentityProvider;
+  vpc?: ec2.IVpc;
 }
 
 export interface IProvisioningWorkflow {
@@ -70,6 +72,7 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
       environment: { CSP_CONFIG_SECRET_NAME: cspConfig.secretArn },
       timeout: cdk.Duration.minutes(5),
       memorySize: 256,
+      vpc: props.vpc,
     });
     props.idp?.addClient(new IdentityProviderLambdaClient("CspWritePortfolioClient", cspWritePortfolioFn), [
       "atat/write-portfolio",
@@ -82,6 +85,7 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
       environment: {
         PROVISIONING_QUEUE_URL: this.provisioningJobsQueue.queueUrl,
       },
+      vpc: props.vpc,
     });
     this.provisioningQueueConsumer = new ApiSfnFunction(this, "ConsumeProvisioningJobRequest", {
       method: HttpMethod.GET,
@@ -92,6 +96,7 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
           PROVISIONING_QUEUE_URL: this.provisioningJobsQueue.queueUrl,
         },
       },
+      vpc: props.vpc,
     });
     this.provisioningJobsQueue.grantSendMessages(this.resultFn);
     this.provisioningJobsQueue.grantConsumeMessages(this.provisioningQueueConsumer.fn);

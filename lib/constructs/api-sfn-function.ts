@@ -1,9 +1,11 @@
 import { Duration } from "aws-cdk-lib";
+import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as lambdaNodeJs from "aws-cdk-lib/aws-lambda-nodejs";
 import * as sfn from "aws-cdk-lib/aws-stepfunctions";
-import { HttpMethod } from "../http";
 import { Construct } from "constructs";
+import { HttpMethod } from "../http";
+
 export interface ApiSfnFunctionProps {
   /**
    * The HTTP method this route applies to.
@@ -28,6 +30,11 @@ export interface ApiSfnFunctionProps {
    * is called.
    */
   readonly stateMachine?: sfn.IStateMachine;
+
+  /**
+   * The VPC associated with this deployment (if present)
+   */
+  readonly vpc?: ec2.IVpc;
 }
 
 export class ApiSfnFunction extends Construct {
@@ -54,9 +61,9 @@ export class ApiSfnFunction extends Construct {
     this.fn = new lambdaNodeJs.NodejsFunction(this, "PackagedFunction", {
       entry: props.handlerPath,
       runtime: lambda.Runtime.NODEJS_16_X,
-      // vpc: props.lambdaVpc,
       memorySize: 256,
       timeout: Duration.seconds(5),
+      vpc: props.vpc,
       ...props.functionPropsOverride,
     });
 

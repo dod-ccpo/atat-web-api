@@ -1,7 +1,7 @@
 import * as cdk from "aws-cdk-lib";
 import * as apigw from "aws-cdk-lib/aws-apigateway";
 import * as acm from "aws-cdk-lib/aws-certificatemanager";
-import { Port } from "aws-cdk-lib/aws-ec2";
+import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as elbv2 from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
@@ -15,7 +15,7 @@ import { AtatRestApi, AtatRestApiProps } from "./constructs/apigateway";
 import { CostApiImplementation } from "./constructs/cost-api-implementation";
 import * as idp from "./constructs/identity-provider";
 import { ProvisioningWorkflow } from "./constructs/provisioning-sfn-workflow";
-import { VpcEndpointApplicationTargetGroup, VpcEndpointNetworkTargetGroup } from "./constructs/vpc-endpoint-lb-target";
+import { VpcEndpointApplicationTargetGroup } from "./constructs/vpc-endpoint-lb-target";
 import { HttpMethod } from "./http";
 
 export interface ApiCertificateOptions {
@@ -110,10 +110,10 @@ export class AtatWebApiStack extends cdk.Stack {
         ],
       });
       // We're behind NAT so we need to allow this
-      loadBalancer.connections.allowFromAnyIpv4(Port.tcp(443));
+      loadBalancer.connections.allowFromAnyIpv4(ec2.Port.tcp(443));
       // We manually set the targets so we need to allow this
       // TODO: Fix that in the TargetGroup config?
-      loadBalancer.connections.allowToAnyIpv4(Port.tcp(443));
+      loadBalancer.connections.allowToAnyIpv4(ec2.Port.tcp(443));
       new cdk.CfnOutput(this, "LoadBalancerDns", { value: loadBalancer.loadBalancerDnsName });
     }
 
@@ -178,13 +178,18 @@ export class AtatWebApiStack extends cdk.Stack {
     });
 
     // State Machine and workflow
-    const provisioningSfn = new ProvisioningWorkflow(this, "ProvisioningWorkflow", { environmentName, idp: atatIdp });
+    const provisioningSfn = new ProvisioningWorkflow(this, "ProvisioningWorkflow", {
+      environmentName,
+      idp: atatIdp,
+      vpc: network?.vpc,
+    });
 
     // Provisioning lambda that translates and invokes the state machine
     const provisioningJob = new ApiSfnFunction(this, "ProvisioningJobRequest", {
       method: HttpMethod.POST,
       handlerPath: "api/provision/start-provisioning-job.ts",
       stateMachine: provisioningSfn.stateMachine,
+      vpc: network?.vpc,
     });
 
     // APIGW Provisioning Job Resource
@@ -210,6 +215,7 @@ export class AtatWebApiStack extends cdk.Stack {
       },
       layers: [documentGenerationLayer],
       timeout: cdk.Duration.seconds(60),
+      vpc: network?.vpc,
     });
     generateDocumentResource.addMethod(HttpMethod.POST, new apigw.LambdaIntegration(generateDocumentFn));
 
