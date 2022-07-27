@@ -21,11 +21,15 @@ async function baseHandler(event: RequestEvent<GenerateDocumentRequest>): Promis
   const workbook = new exceljs.Workbook();
   await workbook.xlsx.readFile("/opt/DRAFT JWCC TO IGCE Template 25 April 2022.xlsx");
 
-  // Change C8 cell to "changed"
+  // Manipulate an existing table
   const worksheet = workbook.getWorksheet("Base Period");
-  const cell = worksheet.getCell("C8");
-  console.log(cell.value);
-  cell.value = "changed";
+
+  // Change C8 cell to "changed"
+  const ws = workbook.getWorksheet("Option Period 1");
+  const optionTable = ws.getTable("OptionTable");
+  console.log(optionTable);
+  optionTable.addRow(["My clin number", "clin", "dow task", "service title", "desc of item", 12, 3], 1);
+  optionTable.commit();
 
   // add row
   const selected_row = worksheet.getRow(7);
