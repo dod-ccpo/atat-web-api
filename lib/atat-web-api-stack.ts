@@ -4,7 +4,6 @@ import * as acm from "aws-cdk-lib/aws-certificatemanager";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as elbv2 from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import * as iam from "aws-cdk-lib/aws-iam";
-import * as kms from "aws-cdk-lib/aws-kms";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as nodejs from "aws-cdk-lib/aws-lambda-nodejs";
 import { Construct } from "constructs";
@@ -61,11 +60,17 @@ export class AtatWebApiStack extends cdk.Stack {
 
   constructor(scope: Construct, id: string, props: AtatWebApiStackProps) {
     super(scope, id, props);
+    NagSuppressions.addStackSuppressions(this, [
+      // This is a temporary supression (hopefully) and we will adopt this as soon as the feature
+      // is actually available within the GovCloud partition. We have internally opened an
+      // AWS Support case for this issue.
+      {
+        id: "NIST.800.53.R4-CloudWatchLogGroupEncrypted",
+        reason: "CloudFormation does not support KmsKeyId for AWS::Logs::LogGroup in us-gov-west-1",
+      },
+    ]);
 
     const { environmentName, network } = props;
-    const sharedAtatKmsKey = new kms.Key(this, "AtatKey", {
-      enableKeyRotation: true,
-    });
     if (props?.isSandbox) {
       this.atatDeveloperRole = iam.Role.fromRoleName(this, "AtatDeveloper", "AtatDeveloper");
     }
@@ -73,7 +78,6 @@ export class AtatWebApiStack extends cdk.Stack {
     const apiProps: AtatRestApiProps = {
       restApiName: `${environmentName}HothApi`,
       binaryMediaTypes: ["application/json", "application/pdf"],
-      logEncryptionKey: sharedAtatKmsKey,
     };
     if (network) {
       apiProps.vpcConfig = {
@@ -217,7 +221,6 @@ export class AtatWebApiStack extends cdk.Stack {
       environmentName,
       idp: atatIdp,
       vpc: network?.vpc,
-      logEncryptionKey: sharedAtatKmsKey,
     });
 
     // Provisioning lambda that translates and invokes the state machine
