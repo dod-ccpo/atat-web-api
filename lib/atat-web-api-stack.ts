@@ -4,6 +4,7 @@ import * as acm from "aws-cdk-lib/aws-certificatemanager";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as elbv2 from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import * as iam from "aws-cdk-lib/aws-iam";
+import * as kms from "aws-cdk-lib/aws-kms";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as nodejs from "aws-cdk-lib/aws-lambda-nodejs";
 import { Construct } from "constructs";
@@ -17,6 +18,7 @@ import * as idp from "./constructs/identity-provider";
 import { ProvisioningWorkflow } from "./constructs/provisioning-sfn-workflow";
 import { VpcEndpointApplicationTargetGroup } from "./constructs/vpc-endpoint-lb-target";
 import { HttpMethod } from "./http";
+import { NagSuppressions } from "cdk-nag";
 
 export interface ApiCertificateOptions {
   domainName: string;
@@ -59,7 +61,11 @@ export class AtatWebApiStack extends cdk.Stack {
 
   constructor(scope: Construct, id: string, props: AtatWebApiStackProps) {
     super(scope, id, props);
+
     const { environmentName, network } = props;
+    const sharedAtatKmsKey = new kms.Key(this, "AtatKey", {
+      enableKeyRotation: true,
+    });
     if (props?.isSandbox) {
       this.atatDeveloperRole = iam.Role.fromRoleName(this, "AtatDeveloper", "AtatDeveloper");
     }
@@ -67,6 +73,7 @@ export class AtatWebApiStack extends cdk.Stack {
     const apiProps: AtatRestApiProps = {
       restApiName: `${environmentName}HothApi`,
       binaryMediaTypes: ["application/json", "application/pdf"],
+      logEncryptionKey: sharedAtatKmsKey,
     };
     if (network) {
       apiProps.vpcConfig = {
@@ -81,7 +88,16 @@ export class AtatWebApiStack extends cdk.Stack {
       const loadBalancer = new elbv2.ApplicationLoadBalancer(this, "LoadBalancer", {
         vpc: network.vpc,
         internetFacing: false,
+        deletionProtection: true,
       });
+      NagSuppressions.addResourceSuppressions(loadBalancer, [
+        { id: "NIST.800.53.R4-ALBWAFEnabled", reason: "Palo Alto NGFW is in use" },
+        {
+          id: "NIST.800.53.R4-ELBLoggingEnabled",
+          reason: "The API Gateway logs all requests, the Palo Alto NGFW is in use, and VPC Flow Logs are enabled",
+        },
+      ]);
+      loadBalancer.setAttribute("routing.http.drop_invalid_header_fields.enabled", "true");
       loadBalancer.addListener("HttpsListener", {
         port: 443,
         protocol: elbv2.ApplicationProtocol.HTTPS,
@@ -126,6 +142,25 @@ export class AtatWebApiStack extends cdk.Stack {
     this.grantToDeveloperInSandbox((role) => writeUser.accessKey.grantRead(role));
     new cdk.CfnOutput(this, "ReadUserAccessKey", { value: readUser.accessKey.secretName });
     new cdk.CfnOutput(this, "WriteUserAccessKey", { value: writeUser.accessKey.secretName });
+
+    [readUser, writeUser].forEach((user) => {
+      NagSuppressions.addResourceSuppressions(
+        user,
+        [
+          {
+            id: "NIST.800.53.R4-IAMUserGroupMembership",
+            reason: "These users are created automatically and the lack of group membership is intentional",
+          },
+          {
+            id: "NIST.800.53.R4-IAMUserNoPolicies",
+            reason:
+              "Attaching IAM policies to the user is intentional. " +
+              "The user will not be modified outside of CloudFormation and is not part of a larger group.",
+          },
+        ],
+        true
+      );
+    });
 
     // Ensure that no IAM users in this Stack can ever do anything
     // except for invoke the created API Gateway.
@@ -182,6 +217,7 @@ export class AtatWebApiStack extends cdk.Stack {
       environmentName,
       idp: atatIdp,
       vpc: network?.vpc,
+      logEncryptionKey: sharedAtatKmsKey,
     });
 
     // Provisioning lambda that translates and invokes the state machine
@@ -234,5 +270,20 @@ export class AtatWebApiStack extends cdk.Stack {
     this.grantToDeveloperInSandbox((role) => costApi.costResponseQueue.grantSendMessages(role));
     this.grantToDeveloperInSandbox((role) => costApi.costResponseQueue.grantConsumeMessages(role));
     this.grantToDeveloperInSandbox((role) => costApi.costResponseQueue.grantPurge(role));
+
+    // This suppression has to be added here because of the way the AwsCustomResource and the
+    // SingletonLambda work. See https://github.com/cdklabs/cdk-nag/issues/959
+    NagSuppressions.addResourceSuppressionsByPath(
+      this,
+      `/${this.node.path}/AWS679f53fac002430cb0da5b7982bd2287/Resource`,
+      [
+        {
+          id: "NIST.800.53.R4-LambdaInsideVPC",
+          reason:
+            "The AwsCustomResource type does not support being placed in a VPC. " +
+            "This can only ever make limited-permissions calls that will appear in CloudTrail.",
+        },
+      ]
+    );
   }
 }

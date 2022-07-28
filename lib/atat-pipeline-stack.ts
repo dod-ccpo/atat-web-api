@@ -1,12 +1,13 @@
 import * as cdk from "aws-cdk-lib";
 import * as pipelines from "aws-cdk-lib/pipelines";
 import { Construct } from "constructs";
-import { AtatWebApiStack, ApiCertificateOptions } from "./atat-web-api-stack";
+import { GovCloudCompatibilityAspect } from "./aspects/govcloud-compatibility";
 import { AtatIamStack } from "./atat-iam-stack";
+import { AtatMonitoringStack } from "./atat-monitoring-stack";
 import { AtatNetStack } from "./atat-net-stack";
 import { AtatNotificationStack } from "./atat-notification-stack";
-import { AtatMonitoringStack } from "./atat-monitoring-stack";
-import { GovCloudCompatibilityAspect } from "./aspects/govcloud-compatibility";
+import { ApiCertificateOptions, AtatWebApiStack } from "./atat-web-api-stack";
+import { NagSuppressions, NIST80053R4Checks } from "cdk-nag";
 
 export interface AtatProps {
   environmentName: string;
@@ -45,6 +46,13 @@ class AtatApplication extends cdk.Stage {
       environmentName: props.environmentName,
     });
     cdk.Aspects.of(this).add(new GovCloudCompatibilityAspect());
+    cdk.Aspects.of(atat).add(new NIST80053R4Checks({ verbose: true }));
+    NagSuppressions.addStackSuppressions(atat, [
+      {
+        id: "NIST.800.53.R4-IAMNoInlinePolicy",
+        reason: "Inline policies are used in a large number of situations by CDK constructs.",
+      },
+    ]);
   }
 }
 
