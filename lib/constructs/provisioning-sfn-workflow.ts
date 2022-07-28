@@ -1,5 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
+import * as kms from "aws-cdk-lib/aws-kms";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as lambdaNodeJs from "aws-cdk-lib/aws-lambda-nodejs";
 import * as logs from "aws-cdk-lib/aws-logs";
@@ -32,6 +33,7 @@ export interface ProvisioningWorkflowProps {
   environmentName: string;
   idp?: IIdentityProvider;
   vpc?: ec2.IVpc;
+  logEncryptionKey?: kms.IKey;
 }
 
 export interface IProvisioningWorkflow {
@@ -137,8 +139,9 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
     // Composing state machine
     this.workflow = InvokeCspApi.next(httpResponseChoices);
     this.logGroup = new logs.LogGroup(scope, "StepFunctionsLogs", {
-      retention: logs.RetentionDays.INFINITE,
+      retention: logs.RetentionDays.TEN_YEARS,
       logGroupName: `/aws/vendedlogs/states/StepFunctionsLogs${environmentName}`,
+      encryptionKey: props.logEncryptionKey,
     });
     this.stateMachine = new LoggingStandardStateMachine(this, "ProvisioningStateMachine", {
       logGroup: this.logGroup,

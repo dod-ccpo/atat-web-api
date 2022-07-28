@@ -93,6 +93,7 @@ abstract class VpcEndpointBaseTargetGroup<T extends elbv2.ITargetGroup>
       runtime: lambda.Runtime.NODEJS_16_X,
       entry: "lib/custom-resources/endpoint-ips.ts",
       handler: "onEvent",
+      vpc: props.vpc,
       initialPolicy: [
         new iam.PolicyStatement({
           effect: iam.Effect.ALLOW,
@@ -103,6 +104,7 @@ abstract class VpcEndpointBaseTargetGroup<T extends elbv2.ITargetGroup>
     });
     const vpcEndpointIpProvider = new cr.Provider(this, "VpcEndpointIps", {
       onEventHandler: handler,
+      vpc: props.vpc,
     });
     const customResource = new cdk.CustomResource(this, "ApiGatewayEndpointIps", {
       serviceToken: vpcEndpointIpProvider.serviceToken,
@@ -126,7 +128,11 @@ export class VpcEndpointApplicationTargetGroup
 {
   constructor(scope: Construct, id: string, props: VpcEndpointApplicationTargetGroupProps) {
     super(scope, id, props);
-    this.targetGroup = new elbv2.ApplicationTargetGroup(this, "TargetGroup", props);
+    this.targetGroup = new elbv2.ApplicationTargetGroup(this, "TargetGroup", {
+      protocol: elbv2.ApplicationProtocol.HTTPS,
+      ...props,
+      targetType: elbv2.TargetType.IP,
+    });
     const targetGroupCfn = this.targetGroup.node.defaultChild as elbv2.CfnTargetGroup;
     targetGroupCfn.addPropertyOverride("Targets", this.targetJson);
     targetGroupCfn.addPropertyOverride("TargetType", "ip");
@@ -154,7 +160,7 @@ export class VpcEndpointNetworkTargetGroup
 {
   constructor(scope: Construct, id: string, props: VpcEndpointNetworkTargetGroupProps) {
     super(scope, id, props);
-    this.targetGroup = new elbv2.NetworkTargetGroup(this, "TargetGroup", props);
+    this.targetGroup = new elbv2.NetworkTargetGroup(this, "TargetGroup", { ...props, targetType: elbv2.TargetType.IP });
     const targetGroupCfn = this.targetGroup.node.defaultChild as elbv2.CfnTargetGroup;
     targetGroupCfn.addPropertyOverride("Targets", this.targetJson);
     targetGroupCfn.addPropertyOverride("TargetType", "ip");

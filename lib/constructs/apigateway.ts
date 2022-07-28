@@ -1,6 +1,7 @@
 import * as cdk from "aws-cdk-lib";
 import * as apigw from "aws-cdk-lib/aws-apigateway";
 import * as iam from "aws-cdk-lib/aws-iam";
+import * as kms from "aws-cdk-lib/aws-kms";
 import * as logs from "aws-cdk-lib/aws-logs";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 
@@ -36,6 +37,7 @@ export interface RestApiVpcConfiguration {
 
 export interface AtatRestApiProps extends apigw.RestApiProps {
   vpcConfig?: RestApiVpcConfiguration;
+  logEncryptionKey?: kms.IKey;
 }
 
 export class AtatRestApi extends Construct {
@@ -44,7 +46,8 @@ export class AtatRestApi extends Construct {
   constructor(scope: Construct, id: string, props?: AtatRestApiProps) {
     super(scope, id);
     const accessLogs = new logs.LogGroup(this, "AccessLogs", {
-      retention: logs.RetentionDays.INFINITE,
+      retention: logs.RetentionDays.TEN_YEARS,
+      encryptionKey: props?.logEncryptionKey,
     });
 
     // When a VPC is provided (which may not always be the case), a private
