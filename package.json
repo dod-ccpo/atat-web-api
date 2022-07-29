@@ -24,7 +24,7 @@
     "@types/puppeteer": "^5.4.6",
     "@typescript-eslint/eslint-plugin": "^5.31.0",
     "@typescript-eslint/parser": "^5.31.0",
-    "aws-cdk": "2.33.0",
+    "aws-cdk": "2.34.0",
     "aws-sdk-client-mock": "^1.0.0",
     "esbuild": "^0.14.50",
     "eslint": "^8.20.0",
