@@ -44,7 +44,7 @@
   },
   "dependencies": {
     "@aws-lambda-powertools/logger": "^1.0.2",
-    "@aws-sdk/client-ec2": "^3.137.0",
+    "@aws-sdk/client-ec2": "^3.139.0",
     "@aws-sdk/client-iam": "^3.137.0",
     "@aws-sdk/client-s3": "^3.137.0",
     "@aws-sdk/client-s3-control": "^3.137.0",
