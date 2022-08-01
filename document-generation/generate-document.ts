@@ -1,9 +1,11 @@
-import { injectLambdaContext } from "@aws-lambda-powertools/logger";
 import middy from "@middy/core";
+import { injectLambdaContext } from "@aws-lambda-powertools/logger";
+import { captureLambdaHandler } from "@aws-lambda-powertools/tracer";
 import httpJsonBodyParser from "@middy/http-json-body-parser";
 import inputOutputLogger from "@middy/input-output-logger";
 import errorLogger from "@middy/error-logger";
 import { logger } from "../utils/logging";
+import { tracer } from "../utils/tracing";
 import { ApiBase64SuccessResponse, SuccessStatusCode, ValidationErrorResponse } from "../utils/response";
 import { INTERNAL_SERVER_ERROR } from "../utils/errors";
 import { LoggingContextMiddleware } from "../utils/middleware/logging-context-middleware";
@@ -69,6 +71,7 @@ async function baseHandler(event: RequestEvent<GenerateDocumentRequest>): Promis
 
 export const handler = middy(baseHandler)
   .use(injectLambdaContext(logger, { clearState: true }))
+  .use(captureLambdaHandler(tracer))
   .use(LoggingContextMiddleware())
   .use(inputOutputLogger({ logger: (message) => logger.info("Event/Result", message) }))
   .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))

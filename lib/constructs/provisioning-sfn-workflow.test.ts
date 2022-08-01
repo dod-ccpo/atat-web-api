@@ -127,8 +127,8 @@ describe("Provisioning Workflow Tests", () => {
 });
 
 function createPolicyDocument(statements: Record<string, string | string[]>[]) {
-  return {
-    Statement: [...statements],
+  return Match.objectLike({
+    Statement: Match.arrayWith([...statements]),
     Version: "2012-10-17",
-  };
+  });
 }
