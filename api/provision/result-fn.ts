@@ -1,13 +1,15 @@
 import { injectLambdaContext } from "@aws-lambda-powertools/logger";
+import { captureLambdaHandler } from "@aws-lambda-powertools/tracer";
 import { SendMessageCommand } from "@aws-sdk/client-sqs";
 import middy from "@middy/core";
+import errorLogger from "@middy/error-logger";
+import inputOutputLogger from "@middy/input-output-logger";
 import validator from "@middy/validator";
 import { ProvisionRequest, provisionRequestSchema } from "../../models/provisioning-jobs";
 import { sqsClient } from "../../utils/aws-sdk/sqs";
 import { logger } from "../../utils/logging";
 import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
-import errorLogger from "@middy/error-logger";
-import inputOutputLogger from "@middy/input-output-logger";
+import { tracer } from "../../utils/tracing";
 
 const MESSAGE_GROUP_ID = "provisioning-queue-message-group";
 
@@ -39,6 +41,7 @@ export async function baseHandler(stateInput: ProvisionRequest): Promise<Provisi
 
 export const handler = middy(baseHandler)
   .use(injectLambdaContext(logger, { clearState: true }))
+  .use(captureLambdaHandler(tracer))
   .use(inputOutputLogger({ logger: (message) => logger.info("Event/Result", message) }))
   .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
   .use(validator({ ajvOptions: { verbose: true }, eventSchema: provisionRequestSchema }))

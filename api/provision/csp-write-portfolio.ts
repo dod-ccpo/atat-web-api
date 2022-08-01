@@ -1,4 +1,5 @@
 import { injectLambdaContext } from "@aws-lambda-powertools/logger";
+import { captureLambdaHandler } from "@aws-lambda-powertools/tracer";
 import middy from "@middy/core";
 import errorLogger from "@middy/error-logger";
 import inputOutputLogger from "@middy/input-output-logger";
@@ -10,6 +11,7 @@ import { ProvisionRequest, provisionRequestSchema } from "../../models/provision
 import { logger } from "../../utils/logging";
 import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
 import { ValidationErrorResponse } from "../../utils/response";
+import { tracer } from "../../utils/tracing";
 import { cspRequest, CspResponse } from "../util/csp-request";
 
 /**
@@ -89,6 +91,7 @@ export async function createCspResponse(request: ProvisionRequest): Promise<CspR
 
 export const handler = middy(baseHandler)
   .use(injectLambdaContext(logger, { clearState: true }))
+  .use(captureLambdaHandler(tracer))
   .use(inputOutputLogger({ logger: (message) => logger.info("Event/Result", message) }))
   .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
   .use(validator({ eventSchema: provisionRequestSchema }))

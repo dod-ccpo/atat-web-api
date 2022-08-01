@@ -1,4 +1,6 @@
 import { injectLambdaContext } from "@aws-lambda-powertools/logger";
+import { captureLambdaHandler } from "@aws-lambda-powertools/tracer";
+import { SendMessageCommand } from "@aws-sdk/client-sqs";
 import middy from "@middy/core";
 import errorLogger from "@middy/error-logger";
 import httpJsonBodyParser from "@middy/http-json-body-parser";
@@ -6,16 +8,16 @@ import inputOutputLogger from "@middy/input-output-logger";
 import validator from "@middy/validator";
 import { APIGatewayProxyResult } from "aws-lambda";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
+import { CostRequest, costRequestSchema } from "../../models/cost-jobs";
 import { RequestEvent } from "../../models/document-generation";
+import { sqsClient } from "../../utils/aws-sdk/sqs";
 import { logger } from "../../utils/logging";
 import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
 import { LoggingContextMiddleware } from "../../utils/middleware/logging-context-middleware";
 import { wrapSchema } from "../../utils/middleware/schema-wrapper";
 import xssSanitizer from "../../utils/middleware/xss-sanitizer";
 import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
-import { sqsClient } from "../../utils/aws-sdk/sqs";
-import { SendMessageCommand } from "@aws-sdk/client-sqs";
-import { CostRequest, costRequestSchema } from "../../models/cost-jobs";
+import { tracer } from "../../utils/tracing";
 
 const MESSAGE_GROUP_ID = "cost-request-queue-message-group";
 
@@ -44,6 +46,7 @@ export async function baseHandler(event: RequestEvent<CostRequest>): Promise<API
 
 export const handler = middy(baseHandler)
   .use(injectLambdaContext(logger, { clearState: true }))
+  .use(captureLambdaHandler(tracer))
   .use(LoggingContextMiddleware())
   .use(inputOutputLogger({ logger: (message) => logger.info("Event/Result", message) }))
   .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))

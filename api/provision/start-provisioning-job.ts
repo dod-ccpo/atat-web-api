@@ -1,4 +1,5 @@
 import { injectLambdaContext } from "@aws-lambda-powertools/logger";
+import { captureLambdaHandler } from "@aws-lambda-powertools/tracer";
 import middy from "@middy/core";
 import errorLogger from "@middy/error-logger";
 import httpJsonBodyParser from "@middy/http-json-body-parser";
@@ -23,6 +24,7 @@ import { LoggingContextMiddleware } from "../../utils/middleware/logging-context
 import { wrapSchema } from "../../utils/middleware/schema-wrapper";
 import xssSanitizer from "../../utils/middleware/xss-sanitizer";
 import { ApiSuccessResponse, ErrorStatusCode, OtherErrorResponse, SuccessStatusCode } from "../../utils/response";
+import { tracer } from "../../utils/tracing";
 
 const SFN_ARN = process.env.SFN_ARN ?? "";
 
@@ -97,6 +99,7 @@ export function transformProvisionRequest(request: ProvisionRequest): CspInvocat
 
 export const handler = middy(baseHandler)
   .use(injectLambdaContext(logger, { clearState: true }))
+  .use(captureLambdaHandler(tracer))
   .use(LoggingContextMiddleware())
   .use(inputOutputLogger({ logger: (message) => logger.info("Event/Result", message) }))
   .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))

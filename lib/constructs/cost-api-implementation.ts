@@ -102,6 +102,7 @@ export class CostApiImplementation extends Construct implements ICostApiImplemen
       memorySize: 256,
       timeout: Duration.seconds(5),
       ...functionPropsOverride,
+      tracing: lambda.Tracing.ACTIVE,
     });
   }
 }

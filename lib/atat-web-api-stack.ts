@@ -255,6 +255,7 @@ export class AtatWebApiStack extends cdk.Stack {
       layers: [documentGenerationLayer],
       timeout: cdk.Duration.seconds(60),
       vpc: network?.vpc,
+      tracing: lambda.Tracing.ACTIVE,
     });
     generateDocumentResource.addMethod(HttpMethod.POST, new apigw.LambdaIntegration(generateDocumentFn));
 
