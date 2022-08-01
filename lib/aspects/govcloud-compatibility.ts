@@ -1,6 +1,5 @@
 import * as cdk from "aws-cdk-lib";
 import * as cognito from "aws-cdk-lib/aws-cognito";
-import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as logs from "aws-cdk-lib/aws-logs";
 import { IConstruct } from "constructs";
 
@@ -23,16 +22,6 @@ export class GovCloudCompatibilityAspect implements cdk.IAspect {
       if (node.tags) {
         cdk.Annotations.of(node).addWarning("Tags are not supported on Log Groups in GovCloud");
         node.addPropertyDeletionOverride("Tags");
-      }
-    }
-
-    if (node instanceof lambda.CfnFunction) {
-      // https://docs.aws.amazon.com/govcloud-us/latest/UserGuide/govcloud-lambda.html
-      // We don't _really_ need to remove this because it doesn't have any impact, but it
-      // provides more consistency if we do.
-      if (node.tracingConfig) {
-        cdk.Annotations.of(node).addWarning("Lambda X-Ray integration is not supported in GovCloud");
-        node.addPropertyDeletionOverride("TracingConfig");
       }
     }
 

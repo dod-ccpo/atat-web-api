@@ -75,6 +75,7 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
       timeout: cdk.Duration.minutes(5),
       memorySize: 256,
       vpc: props.vpc,
+      tracing: lambda.Tracing.ACTIVE,
     });
     props.idp?.addClient(new IdentityProviderLambdaClient("CspWritePortfolioClient", cspWritePortfolioFn), [
       "atat/write-portfolio",
@@ -88,6 +89,7 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
         PROVISIONING_QUEUE_URL: this.provisioningJobsQueue.queueUrl,
       },
       vpc: props.vpc,
+      tracing: lambda.Tracing.ACTIVE,
     });
     this.provisioningQueueConsumer = new ApiSfnFunction(this, "ConsumeProvisioningJobRequest", {
       method: HttpMethod.GET,

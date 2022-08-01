@@ -65,6 +65,7 @@ export class ApiSfnFunction extends Construct {
       timeout: Duration.seconds(5),
       vpc: props.vpc,
       ...props.functionPropsOverride,
+      tracing: lambda.Tracing.ACTIVE,
     });
 
     if (props.stateMachine) {

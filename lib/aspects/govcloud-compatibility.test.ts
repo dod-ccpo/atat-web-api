@@ -22,25 +22,6 @@ describe("Ensure the GovCloudCompatibilityAspect makes necessary changes for Gov
     });
   });
 
-  test("that Lambda Functions do not have a tracing config", async () => {
-    // GIVEN
-    const app = new cdk.App();
-    const stack = new cdk.Stack(app, "TestStack");
-    const fn = new lambda.Function(stack, "TestFn", {
-      runtime: lambda.Runtime.NODEJS_16_X,
-      code: lambda.Code.fromInline("foo"),
-      handler: "foo",
-      tracing: lambda.Tracing.ACTIVE,
-    });
-    // WHEN
-    cdk.Aspects.of(stack).add(new GovCloudCompatibilityAspect());
-    // THEN
-    const template = Template.fromStack(stack);
-    template.hasResourceProperties("AWS::Lambda::Function", {
-      TracingConfig: Match.absent(),
-    });
-  });
-
   test("that Cognito User Pools do not have Advanced Security", async () => {
     // GIVEN
     const app = new cdk.App();

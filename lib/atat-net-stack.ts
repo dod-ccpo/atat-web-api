@@ -99,7 +99,7 @@ export class AtatNetStack extends cdk.Stack {
       service: ec2.InterfaceVpcEndpointAwsService.SQS,
     });
     const xrayEndpoint = vpc.addInterfaceEndpoint("XrayEndpoint", {
-      service: new ec2.InterfaceVpcEndpointAwsService("xray"),
+      service: ec2.InterfaceVpcEndpointAwsService.XRAY,
     });
     const secretsManagerEndpoint = vpc.addInterfaceEndpoint("SecretsManager", {
       service: ec2.InterfaceVpcEndpointAwsService.SECRETS_MANAGER,

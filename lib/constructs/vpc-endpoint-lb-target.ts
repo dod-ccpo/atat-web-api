@@ -101,6 +101,7 @@ abstract class VpcEndpointBaseTargetGroup<T extends elbv2.ITargetGroup>
           resources: ["*"],
         }),
       ],
+      tracing: lambda.Tracing.ACTIVE,
     });
     const vpcEndpointIpProvider = new cr.Provider(this, "VpcEndpointIps", {
       onEventHandler: handler,
