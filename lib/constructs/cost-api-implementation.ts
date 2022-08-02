@@ -79,9 +79,7 @@ export class CostApiImplementation extends Construct implements ICostApiImplemen
 
     // secrets permissions
     cspConfig.grantRead(this.costRequestFn);
-    props.idp?.addClient(new idp.IdentityProviderLambdaClient("CspWriteCost", this.costRequestFn), [
-      "atat/write-portfolio",
-    ]);
+    props.idp?.addClient(new idp.IdentityProviderLambdaClient("CspReadCost", this.costRequestFn), ["atat/read-cost"]);
 
     this.path = props.apiParent.addResource("cost-jobs");
     this.methods = {} as Record<HttpMethod, Method>;

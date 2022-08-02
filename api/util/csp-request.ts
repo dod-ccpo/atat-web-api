@@ -86,6 +86,7 @@ export async function cspRequest(request: CspRequestType<CostRequest | Provision
       csp: targetCsp.name,
       request: {
         csp: targetCsp.name,
+        body: request.body,
         url,
       },
       response: { statusCode: response.status, body: response.data },
