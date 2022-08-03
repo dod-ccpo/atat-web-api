@@ -13,7 +13,7 @@ async function getAccountId(): Promise<string> {
 }
 
 async function blockS3PublicAccess() {
-  s3Control.putPublicAccessBlock({
+  const result = await s3Control.putPublicAccessBlock({
     AccountId: await getAccountId(),
     PublicAccessBlockConfiguration: {
       BlockPublicAcls: true,
@@ -22,10 +22,11 @@ async function blockS3PublicAccess() {
       RestrictPublicBuckets: true,
     },
   });
+  console.log("Public access block: %j", result);
 }
 
-function setIamPasswordPolicy() {
-  iam.updateAccountPasswordPolicy({
+async function setIamPasswordPolicy() {
+  const result = iam.updateAccountPasswordPolicy({
     AllowUsersToChangePassword: true,
     HardExpiry: true,
     // V-222545
@@ -38,6 +39,7 @@ function setIamPasswordPolicy() {
     RequireSymbols: true,
     RequireUppercaseCharacters: true,
   });
+  console.log("Password Policy: %j", result);
 }
 
 blockS3PublicAccess();
