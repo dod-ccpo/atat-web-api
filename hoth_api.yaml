@@ -272,11 +272,10 @@ components:
           items:
             $ref: "#/components/schemas/FundingSource"
         operators:
+          description: Array of operator objects
           type: array
-          description: Array of operator email addresses
           items:
-            type: string
-            example: "user@mail.mil"
+            $ref: "#/components/schemas/Operator"
         csp_id:
           type: string
           readOnly: true
@@ -299,11 +298,21 @@ components:
         - operators
       properties:
         operators:
+          description: Array of operator objects
           type: array
-          description: Array of operator email addresses
           items:
-            type: string
-            example: "user@mail.mil"
+            $ref: "#/components/schemas/Operator"
+    Operator:
+      description: Operator data for provisioning resources in a CSP
+      type: object
+      properties:
+        email:
+          type: string
+          example: "user@mail.mil"
+        dod_id:
+          type: string
+        needs_reset:
+          type: boolean
     FundingSource:
       type: object
       description: >-
