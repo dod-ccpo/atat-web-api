@@ -14,7 +14,18 @@ export const fundingSources = [
   },
 ];
 
-export const operators = ["admin1@mail.mil", "superAdmin@mail.mil"];
+export const operators = [
+  {
+    email: "admin1@mail.mil",
+    dodId: "1122334455",
+    needsReset: false,
+  },
+  {
+    email: "superAdmin@mail.mil",
+    dodId: "1234567890",
+    needsReset: false,
+  },
+];
 export const cspA = {
   name: "CSP_A",
   uri: "https://cspa.example.com/api/atat",
