@@ -54,7 +54,14 @@ describe("Successful provisioning operations", () => {
         ...provisioningBodyNoPayload,
         operationType: ProvisionRequestType.ADD_OPERATORS,
         payload: {
-          operators: [...operators, "root.admin@mail.mil"],
+          operators: [
+            ...operators,
+            {
+              email: "root.admin@mail.mil",
+              dodId: "9999999999",
+              needsReset: false,
+            },
+          ],
         },
       }),
       headers: {

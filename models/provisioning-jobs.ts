@@ -15,10 +15,16 @@ export interface FundingSource {
   popEndDate: string;
 }
 
+export interface Operator {
+  email: string;
+  dodId: string;
+  needsReset: boolean;
+}
+
 export interface NewPortfolioPayload {
   name: string;
   fundingSources: Array<FundingSource>;
-  operators: Array<string>;
+  operators: Array<Operator>;
 }
 
 export interface FundingSourcePayload {
@@ -26,7 +32,7 @@ export interface FundingSourcePayload {
 }
 
 export interface OperatorPayload {
-  operators: Array<string>;
+  operators: Array<Operator>;
 }
 
 export interface CspInvocation {
@@ -87,7 +93,18 @@ export const provisionRequestSchema = {
             required: ["taskOrderNumber", "clin", "popStartDate", "popEndDate"],
           },
         },
-        operators: { type: "array", items: { type: "string" } },
+        operators: {
+          type: "array",
+          items: {
+            type: "object",
+            required: ["email", "dodId"],
+            properties: {
+              email: { type: "string" },
+              dodId: { type: "string" },
+              needsReset: { type: "boolean", default: false },
+            },
+          },
+        },
       },
       additionalProperties: false,
       minProperties: 1,
