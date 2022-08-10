@@ -2,7 +2,6 @@ import * as cdk from "aws-cdk-lib";
 import * as cognito from "aws-cdk-lib/aws-cognito";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as secrets from "aws-cdk-lib/aws-secretsmanager";
-import * as cr from "aws-cdk-lib/custom-resources";
 import { Construct, DependencyGroup } from "constructs";
 
 /**
@@ -102,7 +101,6 @@ export interface CognitoIdentityProviderClientProps extends IdentityProviderClie
  */
 export class CognitoIdentityProviderClient extends Construct {
   public readonly clientId: string;
-  public readonly name: string;
   public readonly secret: secrets.ISecret;
 
   public readonly userPoolClient: cognito.IUserPoolClient;
@@ -120,16 +118,9 @@ export class CognitoIdentityProviderClient extends Construct {
       },
       generateSecret: true,
     });
-    const clientDetails = new UserPoolClientDetails(this, "ClientDetails", {
-      client: this.userPoolClient,
-      userPool: props.userPool,
-    });
-    this.name = clientDetails.getResponseField("UserPoolClient.ClientName");
     this.clientId = this.userPoolClient.userPoolClientId;
     this.secret = new secrets.Secret(this, "ClientSecret", {
-      secretStringValue: cdk.SecretValue.resourceAttribute(
-        clientDetails.getResponseField("UserPoolClient.ClientSecret")
-      ),
+      secretStringValue: this.userPoolClient.userPoolClientSecret,
     });
   }
 }
@@ -259,52 +250,5 @@ export class CognitoIdentityProvider extends Construct implements IIdentityProvi
     const suffix = cdk.Aws.URL_SUFFIX;
     const userPoolId = this.userPool.userPoolId;
     return `https://cognito-idp-fips.${region}.${suffix}/${userPoolId}/.well-known/openid-configuration`;
-  }
-}
-
-/**
- * Configuration options for creating a UserPoolClientDetails
- */
-interface UserPoolClientDetailsProps {
-  /**
-   * The User Pool Client to describe
-   */
-  readonly client: cognito.IUserPoolClient;
-  /**
-   * The User Pool that the client is associated with.
-   *
-   * This is unfortunately required by the API called and not exposed as an
-   * attribute of the UserPoolClient
-   */
-  readonly userPool: cognito.IUserPool;
-}
-
-/**
- * A custom resource with additional details about an AWS::Cognito::UserPoolClient.
- *
- * This AWS::Cognito::UserPoolClient resource type exposes depressingly few attributes
- * about the Client itself (like, not even the ID). This custom resource performs
- * a cognito-idp:DescribeUserPoolClient API call to fetch all the attributes. This
- * may not be a totally ideal use of a custom resource but it means that we don't have
- * to do weird things and grant a ton of permissions in resources created later.
- */
-class UserPoolClientDetails extends cr.AwsCustomResource {
-  constructor(scope: Construct, id: string, props: UserPoolClientDetailsProps) {
-    super(scope, id, {
-      onCreate: {
-        service: "CognitoIdentityServiceProvider",
-        action: "describeUserPoolClient",
-        parameters: {
-          ClientId: props.client.userPoolClientId,
-          UserPoolId: props.userPool.userPoolId,
-        },
-        physicalResourceId: cr.PhysicalResourceId.of(props.client.userPoolClientId),
-      },
-      policy: cr.AwsCustomResourcePolicy.fromSdkCalls({
-        // According to the Service Authorization reference the only resource specifier
-        // allowed for this API action is the User Pool itself.
-        resources: [props.userPool.userPoolArn],
-      }),
-    });
   }
 }
