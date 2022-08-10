@@ -86,6 +86,17 @@ export enum ServiceOfferingGroup {
   TRAINING = "TRAINING",
 }
 
+export interface GeneratedDocument {
+  buffer: Buffer;
+  headers: {
+    "Content-Type": string;
+    "Content-Disposition": string;
+  };
+}
+export interface TemplatePaths {
+  [DocumentType.DESCRIPTION_OF_WORK]: { html: string; css: string };
+  [DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE]: { excel: string };
+}
 export interface IAward {
   contract_award_type: AwardType;
   effective_date: string;
@@ -216,9 +227,45 @@ export interface DescriptionOfWork {
   section_508_accessibility_standards: ISensitiveInformation;
 }
 
+export enum FundingType {
+  FS_FORM = "FS_FORM",
+  MIPR = "MIPR",
+}
+export enum IdiqClin {
+  CLOUD_1000 = "1000_CLOUD",
+  CLOUD_SUPPORT_2000 = "2000_CLOUD_SUPPORT",
+  OTHER_3000 = "3000_OTHER",
+}
+
+interface IFundingDocument {
+  fundingType: FundingType;
+  gtcNumber?: string;
+  orderNumber?: string;
+  miprNumber?: string;
+}
+
+export interface IPeriodLineItem {
+  clin: string;
+  idiqClin: IdiqClin;
+  dowTaskNumber: string;
+  serviceOffering: string;
+  itemDescriptionOrConfigSummary: string;
+  monthlyPrice: number;
+  monthsInPeriod: number;
+}
+export interface IPeriodEstimate {
+  period: IPeriod;
+  periodLineItems: IPeriodLineItem[];
+}
+export interface IndependentGovernmentCostEstimate {
+  fundingDocument: IFundingDocument;
+  surgeCapabilities: number;
+  periodsEstimate: IPeriodEstimate[];
+}
+
 export interface GenerateDocumentRequest {
-  documentType: string;
-  templatePayload: DescriptionOfWork;
+  documentType: DocumentType;
+  templatePayload: DescriptionOfWork | IndependentGovernmentCostEstimate;
 }
 
 export interface RequestEvent<T> {
@@ -418,10 +465,60 @@ const descriptionOfWork = {
   },
 };
 
+const fundingDocument = {
+  type: "object",
+  oneOf: [
+    {
+      properties: {
+        fundingType: { enum: [FundingType.FS_FORM] },
+        gtcNumber: { type: "string" },
+        orderNumber: { type: "string" },
+      },
+    },
+    {
+      properties: {
+        fundingType: { enum: [FundingType.MIPR] },
+        miprNumber: { type: "string" },
+      },
+    },
+  ],
+};
+
+const periodLineItem = {
+  clin: { type: "string" },
+  idiqClin: { type: "string" },
+  dowTaskNumber: { type: "string" },
+  serviceOffering: { type: "string" },
+  itemDescriptionOrConfigSummary: { type: "string" },
+  monthlyPrice: { type: "number" },
+  monthsInPeriod: { type: "integer" },
+};
+
+const periodsEstimate = {
+  type: "object",
+  properties: {
+    period,
+    periodLineItems: { type: "array", items: periodLineItem },
+  },
+};
+
+const independentGovernmentCostEstimate = {
+  type: "object",
+  properties: {
+    fundingDocument,
+    surgeCapabilities: { type: "integer" },
+    periodsEstimate,
+  },
+};
+
 export const generateDocumentSchema = {
   type: "object",
   properties: {
-    documentType: { enum: [DocumentType.DESCRIPTION_OF_WORK, DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE] },
-    templatePayload: descriptionOfWork,
+    documentType: {
+      enum: [DocumentType.DESCRIPTION_OF_WORK, DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE],
+    },
+    templatePayload: {
+      oneOf: [descriptionOfWork, independentGovernmentCostEstimate],
+    },
   },
 };
