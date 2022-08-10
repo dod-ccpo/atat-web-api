@@ -305,6 +305,9 @@ components:
     Operator:
       description: Operator data for provisioning resources in a CSP
       type: object
+      required:
+        - email
+        - dod_id
       properties:
         email:
           type: string
@@ -313,6 +316,7 @@ components:
           type: string
         needs_reset:
           type: boolean
+          default: false
     FundingSource:
       type: object
       description: >-

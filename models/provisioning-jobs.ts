@@ -97,10 +97,11 @@ export const provisionRequestSchema = {
           type: "array",
           items: {
             type: "object",
+            required: ["email", "dodId"],
             properties: {
               email: { type: "string" },
               dodId: { type: "string" },
-              needsReset: { type: "boolean" },
+              needsReset: { type: "boolean", default: false },
             },
           },
         },
