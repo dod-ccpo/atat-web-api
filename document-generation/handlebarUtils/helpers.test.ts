@@ -2,47 +2,47 @@ import { HelperOptions } from "handlebars";
 import { AwardType, Classification, ImpactLevel, PeriodType, PeriodUnit } from "../../models/document-generation";
 import { formatDuration, formatGroupAndClassification, formatAwardType, countSections, counter } from "./helpers";
 
-const baseAdnOptionPeriods = [
+const baseAndOptionPeriods = [
   {
-    period_type: PeriodType.OPTION,
-    period_unit_count: 12,
-    period_unit: PeriodUnit.WEEK,
-    option_order: 2,
+    periodType: PeriodType.OPTION,
+    periodUnitCount: 12,
+    periodUnit: PeriodUnit.WEEK,
+    optionOrder: 2,
   },
   {
-    period_type: PeriodType.BASE,
-    period_unit_count: 1,
-    period_unit: PeriodUnit.YEAR,
+    periodType: PeriodType.BASE,
+    periodUnitCount: 1,
+    periodUnit: PeriodUnit.YEAR,
     // probably good to make base periods -1 to keep type consistent
-    option_order: -1,
+    optionOrder: -1,
   },
 ];
 const basePeriodOnly = [
   {
-    period_type: PeriodType.BASE,
-    period_unit_count: 6,
-    period_unit: PeriodUnit.MONTH,
-    option_order: -1,
+    periodType: PeriodType.BASE,
+    periodUnitCount: 6,
+    periodUnit: PeriodUnit.MONTH,
+    optionOrder: -1,
   },
 ];
 const optionPeriodsOnly = [
   {
-    period_type: PeriodType.OPTION,
-    period_unit_count: 30,
-    period_unit: PeriodUnit.DAY,
-    option_order: 4,
+    periodType: PeriodType.OPTION,
+    periodUnitCount: 30,
+    periodUnit: PeriodUnit.DAY,
+    optionOrder: 4,
   },
   {
-    period_type: PeriodType.OPTION,
-    period_unit_count: 3,
-    period_unit: PeriodUnit.MONTH,
-    option_order: 1,
+    periodType: PeriodType.OPTION,
+    periodUnitCount: 3,
+    periodUnit: PeriodUnit.MONTH,
+    optionOrder: 1,
   },
 ];
 
 describe("formatDuration - used when not entire duration", () => {
   it("format the duration of base and option periods", async () => {
-    const duration = formatDuration(baseAdnOptionPeriods);
+    const duration = formatDuration(baseAndOptionPeriods);
     expect(duration).toBe("Base: 1 Year and option(s) OP2: 12 Week(s)");
   });
   it("format the duration of base periods only", async () => {
@@ -67,11 +67,11 @@ describe("formatGroupAndClassification", () => {
   it("format section title", async () => {
     const serviceOffering = {
       name: "Cloud Audit/Monitoring Tools",
-      service_offering_group: "DEVELOPER_TOOLS",
+      serviceOfferingGroup: "DEVELOPER_TOOLS",
     };
     const classificationLevel = {
       classification: Classification.TS,
-      impact_level: null,
+      impactLevel: null,
     };
     const duration = formatGroupAndClassification(serviceOffering, classificationLevel);
     expect(duration).toBe("Top Secret — Developer Tools");
@@ -79,11 +79,11 @@ describe("formatGroupAndClassification", () => {
   it("format section title", async () => {
     const otherServiceOffering = {
       name: "Special custom built app",
-      service_offering_group: null,
+      serviceOfferingGroup: null,
     };
     const classificationLevel = {
       classification: Classification.S,
-      impact_level: ImpactLevel.IL6,
+      impactLevel: ImpactLevel.IL6,
     };
     const duration = formatGroupAndClassification(otherServiceOffering, classificationLevel);
     expect(duration).toBe("Secret/IL6 — Other: Special custom built app");
@@ -91,11 +91,11 @@ describe("formatGroupAndClassification", () => {
   it("should return U classification with offering", async () => {
     const serviceOffering = {
       name: "Unclassified app",
-      service_offering_group: "APPLICATIONS",
+      serviceOfferingGroup: "APPLICATIONS",
     };
     const classificationLevel = {
       classification: Classification.U,
-      impact_level: ImpactLevel.IL4,
+      impactLevel: ImpactLevel.IL4,
     };
     const duration = formatGroupAndClassification(serviceOffering, classificationLevel);
     expect(duration).toBe("Unclassified/IL4 — Applications");
@@ -103,11 +103,11 @@ describe("formatGroupAndClassification", () => {
   it("should return S classification with no classification", async () => {
     const serviceOffering = {
       name: "Hoth app no class provided",
-      service_offering_group: "APPLICATIONS",
+      serviceOfferingGroup: "APPLICATIONS",
     };
     const classificationLevel = {
       classification: null,
-      impact_level: null,
+      impactLevel: null,
     };
     const duration = formatGroupAndClassification(serviceOffering, classificationLevel);
     expect(duration).toBe("Secret/IL6 — Applications");
@@ -149,26 +149,26 @@ describe("countSections", () => {
   it("should return 3 for number of classification instances", async () => {
     const serviceOfferings = [
       {
-        classification_instances: [
+        classificationInstances: [
           {
-            classification_level: {
-              impact_level: null,
+            classificationLevel: {
+              impactLevel: null,
               classification: Classification.TS,
             },
           },
           {
-            classification_level: {
-              impact_level: ImpactLevel.IL4,
+            classificationLevel: {
+              impactLevel: ImpactLevel.IL4,
               classification: Classification.U,
             },
           },
         ],
       },
       {
-        classification_instances: [
+        classificationInstances: [
           {
-            classification_level: {
-              impact_level: ImpactLevel.IL2,
+            classificationLevel: {
+              impactLevel: ImpactLevel.IL2,
               classification: Classification.U,
             },
           },

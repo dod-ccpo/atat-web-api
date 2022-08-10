@@ -18,10 +18,10 @@
             </tr>
           </thead>
           <tbody>
-            {{#each award_history}}
+            {{#each awardHistory}}
               <tr>
-                <td>{{formatAwardType this.contract_award_type}}</td>
-                <td class="text-right">{{this.effective_date}}</td>
+                <td>{{formatAwardType this.contractAwardType}}</td>
+                <td class="text-right">{{this.effectiveDate}}</td>
               </tr>
             {{/each}}
           </tbody>
@@ -47,13 +47,13 @@
           <tr>
             <th>Follow-on to Previous Contract and Task Order Number:</th>
             <td>
-              Contract Number: {{contract_information.contract_number}} <br />
-              Task Order Number: {{contract_information.previous_task_order_number}}</td>
+              Contract Number: {{contractInformation.contractNumber}} <br />
+              Task Order Number: {{contractInformation.previousTaskOrderNumber}}</td>
           </tr>
         </table>
         <section class="d-flex">
           <div class="number">1.</div> 
-          <div class="content"><u>TO Title.</u> {{to_title}}</div>
+          <div class="content"><u>TO Title.</u> {{toTitle}}</div>
         </section>
         <section class="d-flex">
           <div class="number">2.</div> 
@@ -66,7 +66,7 @@
               The Government may require surge capabilities during the base or any option period, 
               and surge modifications will be within the scope of the contract for the defined task 
               areas of this description of work. Surge capabilities over the life of the task order 
-              will not exceed {{scope_surge}}% of the contractor’s total proposed price for the 
+              will not exceed {{scopeSurge}}% of the contractor’s total proposed price for the
               base and all option periods, excluding any six-month extension of services pursuant 
               to Federal Acquisition Regulation (FAR) <span style="white-space: nowrap;">52.217-8.</span>
             </p>
@@ -90,21 +90,21 @@
             <p>
               <u>Subtask 2 Developer Tools and Services</u>
             </p>
-            {{#each selected_service_offerings }}
-              {{#each this.classification_instances }}
+            {{#each selectedServiceOfferings }}
+              {{#each this.classificationInstances }}
               <p>
-                <strong>4.2.2.{{counter sectionCount=(countSections ../../selected_service_offerings)}}
+                <strong>4.2.2.{{counter sectionCount=(countSections ../../selectedServiceOfferings)}}
                 </strong>
                 <u>
-                  {{formatGroupAndClassification ../service_offering this.classification_level}}
+                  {{formatGroupAndClassification ../serviceOffering this.classificationLevel}}
                 </u><br/>
-                {{#if this.need_for_entire_task_order_duration}}
+                {{#if this.needForEntireTaskOrderDuration}}
                   Duration: Entire duration of Task Order
                 {{else}}
-                  Duration: {{formatDuration this.selected_periods}}
+                  Duration: {{formatDuration this.selectedPeriods}}
                 {{/if}}
               </p>
-              <p>{{this.usage_description}}</p>
+              <p>{{this.usageDescription}}</p>
               {{/each }}
             {{/each }} 
           </div>
@@ -116,7 +116,7 @@
             <p>
               <u>Section 508 Accessibility Standards for Cloud Computing.</u>
             </p>
-            {{section_508_accessibility_standards.accessibility_reqs_508}}
+            {{section508AccessibilityStandards.accessibilityReqs508}}
           </div>
         </section>
       </div>
