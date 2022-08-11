@@ -25,6 +25,8 @@ import {
   RequestEvent,
   GenerateDocumentRequest,
   DocumentType,
+  TemplatePaths,
+  IndependentGovernmentCostEstimate,
 } from "../models/document-generation";
 import * as fs from "fs";
 import handlebars from "handlebars";
@@ -36,6 +38,7 @@ import {
   countSections,
   formatAwardType,
 } from "./handlebarUtils/helpers";
+import { generateIGCEDocument } from "./igce-document";
 
 async function baseHandler(event: RequestEvent<GenerateDocumentRequest>): Promise<ApiBase64SuccessResponse> {
   const { documentType } = event.body;
@@ -53,34 +56,49 @@ async function baseHandler(event: RequestEvent<GenerateDocumentRequest>): Promis
 
 async function generatePdf(event: RequestEvent<GenerateDocumentRequest>): Promise<ApiBase64SuccessResponse> {
   const { documentType, templatePayload } = event.body;
+  let response: ApiBase64SuccessResponse;
 
-  const documentTemplatePaths = {
-    [DocumentType.DESCRIPTION_OF_WORK as string]: {
+  const documentTemplatePaths: TemplatePaths = {
+    [DocumentType.DESCRIPTION_OF_WORK]: {
       html: "/opt/dow-template.html",
       css: "/opt/dow-style.css",
     },
+    [DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE]: {
+      excel: "/opt/igce-template.xlsx",
+    },
   };
 
-  // get files to generate documents
-  const html = fs.readFileSync(documentTemplatePaths[documentType].html, "utf-8");
-  const css = fs.readFileSync(documentTemplatePaths[documentType].css, "utf-8");
-  const htmlWithCss = juice.inlineContent(html, css);
+  if (documentType === DocumentType.DESCRIPTION_OF_WORK) {
+    // get files to generate documents
+    const html = fs.readFileSync(documentTemplatePaths[documentType].html, "utf-8");
+    const css = fs.readFileSync(documentTemplatePaths[documentType].css, "utf-8");
+    const htmlWithCss = juice.inlineContent(html, css);
 
-  // use handlebars to populate data into template
-  const template = handlebars.compile(htmlWithCss);
-  const templateWithData = template(templatePayload);
+    // use handlebars to populate data into template
+    const template = handlebars.compile(htmlWithCss);
+    const templateWithData = template(templatePayload);
 
-  // use puppeteer to generate pdf
-  const pdf = await generateDocument(templateWithData);
-  if (!pdf) {
-    return INTERNAL_SERVER_ERROR;
+    // use puppeteer to generate pdf
+    const pdf = await generateDocument(templateWithData);
+    if (!pdf) {
+      return INTERNAL_SERVER_ERROR;
+    }
+
+    const headers = {
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `attachment; filename=DescriptionOfWork.pdf`,
+    };
+    response = new ApiBase64SuccessResponse(pdf.toString("base64"), SuccessStatusCode.OK, headers);
   }
 
-  const headers = {
-    "Content-Type": "application/pdf",
-    "Content-Disposition": `attachment; filename=DescriptionOfWork.pdf`,
-  };
-  return new ApiBase64SuccessResponse(pdf.toString("base64"), SuccessStatusCode.OK, headers);
+  let excelTemplatePath = "";
+  if (documentType === DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE) {
+    excelTemplatePath = documentTemplatePaths[documentType].excel;
+  }
+
+  const igce = await generateIGCEDocument(excelTemplatePath, templatePayload as IndependentGovernmentCostEstimate);
+  response = new ApiBase64SuccessResponse(igce.buffer.toString("base64"), SuccessStatusCode.OK, igce.headers);
+  return response;
 }
 
 async function generateXlsx(): Promise<OtherErrorResponse> {
@@ -95,7 +113,8 @@ export const handler = middy(baseHandler)
   .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
   .use(httpJsonBodyParser())
   .use(xssSanitizer())
-  .use(validator({ eventSchema: wrapSchema(generateDocumentSchema) }))
+  // unknown keyword 'clin' found when strict set to true
+  .use(validator({ eventSchema: wrapSchema(generateDocumentSchema), ajvOptions: { strict: false } }))
   .use(errorHandlingMiddleware())
   .use(JSONErrorHandlerMiddleware());
 
