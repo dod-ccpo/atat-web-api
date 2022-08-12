@@ -6,8 +6,14 @@ import inputOutputLogger from "@middy/input-output-logger";
 import errorLogger from "@middy/error-logger";
 import { logger } from "../utils/logging";
 import { tracer } from "../utils/tracing";
-import { ApiBase64SuccessResponse, SuccessStatusCode, ValidationErrorResponse } from "../utils/response";
-import { INTERNAL_SERVER_ERROR } from "../utils/errors";
+import {
+  ApiBase64SuccessResponse,
+  ErrorStatusCode,
+  OtherErrorResponse,
+  SuccessStatusCode,
+  ValidationErrorResponse,
+} from "../utils/response";
+import { INTERNAL_SERVER_ERROR, NOT_IMPLEMENTED } from "../utils/errors";
 import { LoggingContextMiddleware } from "../utils/middleware/logging-context-middleware";
 import { errorHandlingMiddleware } from "../utils/middleware/error-handling-middleware";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
@@ -33,6 +39,20 @@ import {
 } from "./handlebarUtils/helpers";
 
 async function baseHandler(event: RequestEvent<GenerateDocumentRequest>): Promise<ApiBase64SuccessResponse> {
+  const { documentType } = event.body;
+  switch (documentType) {
+    case DocumentType.DESCRIPTION_OF_WORK:
+      return generatePdf(event);
+    case DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE:
+      return generateXlsx();
+    default:
+      return new ValidationErrorResponse(`Invalid document type: "${documentType}"`, {
+        cause: `Invalid document type "${documentType}" provided. Please provide a valid document  type.`,
+      });
+  }
+}
+
+async function generatePdf(event: RequestEvent<GenerateDocumentRequest>): Promise<ApiBase64SuccessResponse> {
   const { documentType, templatePayload } = event.body;
 
   const documentTemplatePaths = {
@@ -41,11 +61,6 @@ async function baseHandler(event: RequestEvent<GenerateDocumentRequest>): Promis
       css: "/opt/dow-style.css",
     },
   };
-  if (!(documentType in documentTemplatePaths)) {
-    return new ValidationErrorResponse(`Invalid document type: "${documentType}"`, {
-      cause: `Invalid document type "${documentType}" provided. Please provide a valid document  type.`,
-    });
-  }
 
   // get files to generate documents
   const html = fs.readFileSync(documentTemplatePaths[documentType].html, "utf-8");
@@ -67,6 +82,10 @@ async function baseHandler(event: RequestEvent<GenerateDocumentRequest>): Promis
     "Content-Disposition": `attachment; filename=DescriptionOfWork.pdf`,
   };
   return new ApiBase64SuccessResponse(pdf.toString("base64"), SuccessStatusCode.OK, headers);
+}
+
+async function generateXlsx(): Promise<OtherErrorResponse> {
+  return NOT_IMPLEMENTED;
 }
 
 export const handler = middy(baseHandler)
