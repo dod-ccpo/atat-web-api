@@ -94,7 +94,6 @@ describe("Temporary Not Implemented generate-document handler", () => {
       requestContext,
     } as any;
 
-    console.log("=======================> " + JSON.stringify(igceRequest));
     // WHEN / ACT
     const response = await handler(igceRequest, {} as Context);
 
