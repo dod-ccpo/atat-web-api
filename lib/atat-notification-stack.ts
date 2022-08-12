@@ -13,6 +13,35 @@ export interface AtatNotificationStackProps {
   notificationEmail: string;
 }
 
+export class SsoUserChangeRule extends events.Rule {
+  constructor(scope: Construct, id: string, props?: events.RuleProps) {
+    super(scope, id, {
+      ...props,
+      eventPattern: {
+        source: ["aws.sso-directory"],
+        detailType: ["AWS API Call via CloudTrail"],
+        detail: {
+          eventSource: ["sso-directory.amazonaws.com"],
+          eventName: [
+            // AC-2(4).5, AC-2(4).11 - Account Creation/Enabling actions
+            "CreateUser",
+            "EnableUser",
+            // AC-2(4).6 - Account Modification Actions
+            "UpdateUser",
+            "UpdatePassword",
+            "UpdateUserName",
+            "UpdateMfaDeviceForUser",
+            "DeleteMfaForUser",
+            // AC-2(4).7, AC-2(4).8 - Account Disabling/Delete Actions
+            "DeleteUser",
+            "DisableUser",
+          ],
+        },
+      },
+    });
+  }
+}
+
 export class IamChangeRule extends events.Rule {
   constructor(scope: Construct, id: string, props?: events.RuleProps) {
     super(scope, id, {
@@ -51,5 +80,7 @@ export class AtatNotificationStack extends cdk.Stack {
 
     const iamChanges = new IamChangeRule(this, "IamChanges");
     iamChanges.addTarget(topicTarget);
+    const ssoChanges = new SsoUserChangeRule(this, "SsoChanges");
+    ssoChanges.addTarget(topicTarget);
   }
 }
