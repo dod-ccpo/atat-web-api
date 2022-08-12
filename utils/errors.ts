@@ -17,3 +17,8 @@ export const REQUEST_BODY_INVALID = new OtherErrorResponse(
   "A valid request body must be provided",
   ErrorStatusCode.BAD_REQUEST
 );
+
+/**
+ * To be used in the interim until a feature has been implemented.
+ */
+export const NOT_IMPLEMENTED = new OtherErrorResponse("Not implemented", ErrorStatusCode.NOT_IMPLEMENTED);
