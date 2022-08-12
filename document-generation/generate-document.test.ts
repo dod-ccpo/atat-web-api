@@ -84,13 +84,17 @@ describe("Temporary Not Implemented generate-document handler", () => {
   it("should return 501 response", async () => {
     // GIVEN / ARRANGE
     const igceRequest = {
-      ...validRequest,
-      body: JSON.stringify({
+      body: {
         documentType: "INDEPENDENT_GOVERNMENT_COST_ESTIMATE",
-        templatePayload: "",
-      }),
-    };
+        templatePayload: {},
+      },
+      headers: {
+        "Content-Type": "application/json",
+      },
+      requestContext,
+    } as any;
 
+    console.log("=======================> " + JSON.stringify(igceRequest));
     // WHEN / ACT
     const response = await handler(igceRequest, {} as Context);
 
