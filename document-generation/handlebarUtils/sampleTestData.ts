@@ -248,3 +248,55 @@ export const sampleDowRequest = {
     },
   },
 };
+
+export const sampleIgceRequest = {
+  documentType: "INDEPENDENT_GOVERNMENT_COST_ESTIMATE",
+  templatePayload: {
+    funding_document: {
+      funding_type: "FS_FORM",
+      gtc_number: "1234",
+      order_number: "1234",
+      mipr_number: "1234",
+    },
+    surge_capabilities: 5,
+    periods_estimate: [
+      {
+        period: {
+          period_unit: "YEAR",
+          period_unit_count: "1",
+          period_type: "BASE",
+          option_order: null,
+        },
+        period_line_items: [
+          {
+            clin: "0001",
+            idiq_clin: "1000_CLOUD",
+            dow_task_number: "4.2.1.1",
+            service_offering: "Compute",
+            item_description_or_config_summary: "description of item",
+            monthly_price: "500",
+            months_in_period: 12,
+          },
+          {
+            clin: "0002",
+            idiq_clin: "2000_CLOUD_SUPPORT",
+            dow_task_number: "4.2.1.2",
+            service_offering: "Applications",
+            item_description_or_config_summary: "description of item",
+            monthly_price: "500",
+            months_in_period: 12,
+          },
+          {
+            clin: "0003",
+            idiq_clin: "3000_OTHER",
+            dow_task_number: "4.2.1.3",
+            service_offering: "Database",
+            item_description_or_config_summary: "description of item",
+            monthly_price: "500",
+            months_in_period: 12,
+          },
+        ],
+      },
+    ],
+  },
+};
