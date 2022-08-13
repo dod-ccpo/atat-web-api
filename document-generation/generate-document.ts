@@ -8,7 +8,6 @@ import { logger } from "../utils/logging";
 import { tracer } from "../utils/tracing";
 import {
   ApiBase64SuccessResponse,
-  ErrorStatusCode,
   OtherErrorResponse,
   SuccessStatusCode,
   ValidationErrorResponse,
