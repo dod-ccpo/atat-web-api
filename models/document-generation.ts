@@ -421,7 +421,7 @@ const descriptionOfWork = {
 export const generateDocumentSchema = {
   type: "object",
   properties: {
-    documentType: { enum: [DocumentType.DESCRIPTION_OF_WORK] },
+    documentType: { enum: [DocumentType.DESCRIPTION_OF_WORK, DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE] },
     templatePayload: descriptionOfWork,
   },
 };
