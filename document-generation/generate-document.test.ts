@@ -4,7 +4,7 @@ import { DocumentType } from "../models/document-generation";
 import { ErrorStatusCode, OtherErrorResponse, SuccessBase64Response, ValidationErrorResponse } from "../utils/response";
 import { handler } from "./generate-document";
 import { requestContext } from "../api/util/common-test-fixtures";
-import { sampleDowRequest } from "./handlebarUtils/sampleTestData";
+import { sampleDowRequest, sampleIgceRequest } from "./handlebarUtils/sampleTestData";
 
 const validRequest = {
   body: JSON.stringify(sampleDowRequest),
@@ -83,11 +83,8 @@ describe("Invalid requests for generate-document handler", () => {
 describe("Temporary Not Implemented generate-document handler", () => {
   it("should return 501 response", async () => {
     // GIVEN / ARRANGE
-    const igceRequest = {
-      body: {
-        documentType: "INDEPENDENT_GOVERNMENT_COST_ESTIMATE",
-        templatePayload: {},
-      },
+    const validIgceRequest = {
+      body: JSON.stringify(sampleIgceRequest),
       headers: {
         "Content-Type": "application/json",
       },
@@ -95,7 +92,7 @@ describe("Temporary Not Implemented generate-document handler", () => {
     } as any;
 
     // WHEN / ACT
-    const response = await handler(igceRequest, {} as Context);
+    const response = await handler(validIgceRequest, {} as Context);
 
     // THEN / ASSERT
     expect(response).toBeInstanceOf(OtherErrorResponse);
