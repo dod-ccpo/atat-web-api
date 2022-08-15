@@ -8,6 +8,7 @@ export enum AwardType {
 
 export enum DocumentType {
   DESCRIPTION_OF_WORK = "DESCRIPTION_OF_WORK",
+  INDEPENDENT_GOVERNMENT_COST_ESTIMATE = "INDEPENDENT_GOVERNMENT_COST_ESTIMATE",
 }
 
 export enum PeriodType {
@@ -420,7 +421,7 @@ const descriptionOfWork = {
 export const generateDocumentSchema = {
   type: "object",
   properties: {
-    documentType: { enum: [DocumentType.DESCRIPTION_OF_WORK] },
+    documentType: { enum: [DocumentType.DESCRIPTION_OF_WORK, DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE] },
     templatePayload: descriptionOfWork,
   },
 };

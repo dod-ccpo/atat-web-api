@@ -1,10 +1,10 @@
 import fs from "fs";
 import { Context } from "aws-lambda";
-import { requestContext } from "../api/util/common-test-fixtures";
-import { handler } from "./generate-document";
-import { sampleDowRequest } from "./handlebarUtils/sampleTestData";
-import { SuccessBase64Response, ValidationErrorResponse } from "../utils/response";
 import { DocumentType } from "../models/document-generation";
+import { ErrorStatusCode, OtherErrorResponse, SuccessBase64Response, ValidationErrorResponse } from "../utils/response";
+import { handler } from "./generate-document";
+import { requestContext } from "../api/util/common-test-fixtures";
+import { sampleDowRequest, sampleIgceRequest } from "./handlebarUtils/sampleTestData";
 
 const validRequest = {
   body: JSON.stringify(sampleDowRequest),
@@ -77,5 +77,25 @@ describe("Invalid requests for generate-document handler", () => {
     // THEN / ASSERT
     expect(response).toBeInstanceOf(ValidationErrorResponse);
     expect(responseBody.message).toBe("Request failed validation");
+  });
+});
+
+describe("Temporary Not Implemented generate-document handler", () => {
+  it("should return 501 response", async () => {
+    // GIVEN / ARRANGE
+    const validIgceRequest = {
+      body: JSON.stringify(sampleIgceRequest),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      requestContext,
+    } as any;
+
+    // WHEN / ACT
+    const response = await handler(validIgceRequest, {} as Context);
+
+    // THEN / ASSERT
+    expect(response).toBeInstanceOf(OtherErrorResponse);
+    expect(response.statusCode).toBe(ErrorStatusCode.NOT_IMPLEMENTED);
   });
 });
