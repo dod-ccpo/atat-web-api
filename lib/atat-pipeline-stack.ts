@@ -2,7 +2,6 @@ import * as cdk from "aws-cdk-lib";
 import * as pipelines from "aws-cdk-lib/pipelines";
 import { Construct } from "constructs";
 import { GovCloudCompatibilityAspect } from "./aspects/govcloud-compatibility";
-import { AtatIamStack } from "./atat-iam-stack";
 import { AtatMonitoringStack } from "./atat-monitoring-stack";
 import { AtatNetStack } from "./atat-net-stack";
 import { AtatNotificationStack } from "./atat-notification-stack";
@@ -25,14 +24,13 @@ export interface AtatPipelineStackProps extends cdk.StackProps, AtatProps {
 class AtatApplication extends cdk.Stage {
   constructor(scope: Construct, id: string, props: cdk.StageProps & AtatProps) {
     super(scope, id, props);
-    const iam = new AtatIamStack(this, "AtatIam");
     const net = new AtatNetStack(this, "AtatNetworking", { vpcCidr: props.vpcCidr });
     const atat = new AtatWebApiStack(this, "AtatHothApi", {
       environmentName: props.environmentName,
       apiDomain: props.apiDomain,
       network: net,
     });
-    const monitoredStacks: cdk.Stack[] = [iam, net, atat];
+    const monitoredStacks: cdk.Stack[] = [net, atat];
     if (props.notificationEmail) {
       monitoredStacks.push(
         new AtatNotificationStack(this, "AtatNotifications", {
