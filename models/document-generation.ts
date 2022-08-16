@@ -380,7 +380,7 @@ const classificationInstance = {
   },
 };
 
-const selectedServiceOffering = {
+const selectedServiceOfferings = {
   type: "object",
   properties: {
     serviceOffering,
@@ -457,12 +457,13 @@ const descriptionOfWork = {
     scope: { type: "string" },
     scopeSurge: { type: "integer" },
     currentEnvironment,
-    selectedServiceOfferings: { type: "array", items: selectedServiceOffering },
+    selectedServiceOfferings: { type: "array", items: selectedServiceOfferings },
     periodOfPerformance,
     gfeOverview,
     contractConsiderations,
     section508AccessibilityStandards,
   },
+  additionalProperties: false,
 };
 
 const fundingDocument = {
@@ -485,20 +486,26 @@ const fundingDocument = {
 };
 
 const periodLineItem = {
-  clin: { type: "string" },
-  idiqClin: { type: "string" },
-  dowTaskNumber: { type: "string" },
-  serviceOffering: { type: "string" },
-  itemDescriptionOrConfigSummary: { type: "string" },
-  monthlyPrice: { type: "number" },
-  monthsInPeriod: { type: "integer" },
+  type: "object",
+  properties: {
+    clin: { type: "string" },
+    idiqClin: { type: "string" },
+    dowTaskNumber: { type: "string" },
+    serviceOffering: { type: "string" },
+    itemDescriptionOrConfigSummary: { type: "string" },
+    monthlyPrice: { type: "number" },
+    monthsInPeriod: { type: "integer" },
+  },
 };
 
 const periodsEstimate = {
-  type: "object",
-  properties: {
-    period,
-    periodLineItems: { type: "array", items: periodLineItem },
+  type: "array",
+  items: {
+    type: "object",
+    properties: {
+      period,
+      periodLineItems: { type: "array", items: periodLineItem },
+    },
   },
 };
 
@@ -509,6 +516,7 @@ const independentGovernmentCostEstimate = {
     surgeCapabilities: { type: "integer" },
     periodsEstimate,
   },
+  additionalProperties: false,
 };
 
 export const generateDocumentSchema = {
