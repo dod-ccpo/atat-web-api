@@ -5,7 +5,7 @@ import {
   IPeriodEstimate,
   PeriodType,
 } from "../models/document-generation";
-import { convertPeriodToMonths } from "./handlebarUtils/helpers";
+import { convertPeriodToMonths } from "./utils/utils";
 
 export async function generateIGCEDocument(
   templatePath: string,

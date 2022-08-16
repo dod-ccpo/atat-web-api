@@ -31,13 +31,7 @@ import {
 import * as fs from "fs";
 import handlebars from "handlebars";
 import juice from "juice";
-import {
-  formatDuration,
-  formatGroupAndClassification,
-  counter,
-  countSections,
-  formatAwardType,
-} from "./handlebarUtils/helpers";
+import { formatDuration, formatGroupAndClassification, counter, countSections, formatAwardType } from "./utils/helpers";
 import { generateIGCEDocument } from "./igce-document";
 
 async function baseHandler(event: RequestEvent<GenerateDocumentRequest>): Promise<ApiBase64SuccessResponse> {

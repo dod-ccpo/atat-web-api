@@ -1,13 +1,6 @@
 import { HelperOptions } from "handlebars";
 import { AwardType, Classification, ImpactLevel, PeriodType, PeriodUnit } from "../../models/document-generation";
-import {
-  formatDuration,
-  formatGroupAndClassification,
-  formatAwardType,
-  countSections,
-  counter,
-  convertPeriodToMonths,
-} from "./helpers";
+import { formatDuration, formatGroupAndClassification, formatAwardType, countSections, counter } from "./helpers";
 
 const baseAndOptionPeriods = [
   {
@@ -185,46 +178,5 @@ describe("countSections", () => {
 
     const sectionCount = countSections(serviceOfferings as any);
     expect(sectionCount).toBe(3);
-  });
-});
-
-describe("convertPeriodToMonths", () => {
-  const period = {
-    periodType: PeriodType.OPTION,
-    periodUnitCount: 2,
-    periodUnit: PeriodUnit.YEAR,
-    optionOrder: 2,
-  };
-  it("should return number of months from years", async () => {
-    const yearPeriod = {
-      ...period,
-      periodUnitCount: 2,
-      periodUnit: PeriodUnit.YEAR,
-    };
-    expect(convertPeriodToMonths(yearPeriod)).toEqual(24);
-  });
-  it("should return number of months", async () => {
-    const monthPeriod = {
-      ...period,
-      periodUnitCount: 6,
-      periodUnit: PeriodUnit.MONTH,
-    };
-    expect(convertPeriodToMonths(monthPeriod)).toEqual(6);
-  });
-  it("should return a whole number of months from weeks", async () => {
-    const weekPeriod = {
-      ...period,
-      periodUnitCount: 12,
-      periodUnit: PeriodUnit.WEEK,
-    };
-    expect(convertPeriodToMonths(weekPeriod)).toEqual(3);
-  });
-  it("should return a whole number of months from days", async () => {
-    const dayPeriod = {
-      ...period,
-      periodUnitCount: 45,
-      periodUnit: PeriodUnit.DAY,
-    };
-    expect(convertPeriodToMonths(dayPeriod)).toEqual(2);
   });
 });

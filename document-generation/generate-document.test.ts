@@ -4,7 +4,7 @@ import { DocumentType } from "../models/document-generation";
 import { ErrorStatusCode, OtherErrorResponse, SuccessBase64Response, ValidationErrorResponse } from "../utils/response";
 import { handler } from "./generate-document";
 import { requestContext } from "../api/util/common-test-fixtures";
-import { sampleDowRequest, sampleIgceRequest } from "./handlebarUtils/sampleTestData";
+import { sampleDowRequest, sampleIgceRequest } from "./utils/sampleTestData";
 
 const validRequest = {
   body: JSON.stringify(sampleDowRequest),

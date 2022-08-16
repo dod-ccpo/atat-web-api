@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 import { capitalize } from "./utils";
-import { AwardType, IPeriod, ISelectedServiceOffering, PeriodUnit } from "../../models/document-generation";
+import { AwardType, IPeriod, ISelectedServiceOffering } from "../../models/document-generation";
 import { HelperOptions } from "handlebars";
 
 // DoW helpers
@@ -101,21 +101,4 @@ export const countSections = (serviceOfferings: ISelectedServiceOffering[]): num
   return serviceOfferings
     .map((service) => service.classificationInstances.length)
     .reduce((sum, current) => sum + current, 0);
-};
-
-// IGCE helpers
-export const convertPeriodToMonths = (period: IPeriod): number => {
-  const { periodUnit, periodUnitCount } = period;
-  switch (periodUnit) {
-    case PeriodUnit.YEAR:
-      return periodUnitCount * 12;
-    case PeriodUnit.MONTH:
-      return periodUnitCount;
-    case PeriodUnit.WEEK:
-      return Math.ceil(periodUnitCount / 4.345);
-    case PeriodUnit.DAY:
-      return Math.ceil(periodUnitCount / 30.4167);
-    default:
-      return 12;
-  }
 };
