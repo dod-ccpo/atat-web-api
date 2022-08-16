@@ -56,7 +56,8 @@ async function baseHandler(event: RequestEvent<GenerateDocumentRequest>): Promis
 
 async function generatePdf(event: RequestEvent<GenerateDocumentRequest>): Promise<ApiBase64SuccessResponse> {
   const { documentType, templatePayload } = event.body;
-  let response: ApiBase64SuccessResponse;
+  logger.info("Generating document", { documentType });
+  let response = new ApiBase64SuccessResponse("", SuccessStatusCode.OK, {});
 
   const documentTemplatePaths: TemplatePaths = {
     [DocumentType.DESCRIPTION_OF_WORK]: {
@@ -91,13 +92,12 @@ async function generatePdf(event: RequestEvent<GenerateDocumentRequest>): Promis
     response = new ApiBase64SuccessResponse(pdf.toString("base64"), SuccessStatusCode.OK, headers);
   }
 
-  let excelTemplatePath = "";
   if (documentType === DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE) {
-    excelTemplatePath = documentTemplatePaths[documentType].excel;
+    const excelTemplatePath = documentTemplatePaths[documentType].excel;
+    const igce = await generateIGCEDocument(excelTemplatePath, templatePayload as IndependentGovernmentCostEstimate);
+    response = new ApiBase64SuccessResponse(igce.buffer.toString("base64"), SuccessStatusCode.OK, igce.headers);
   }
 
-  const igce = await generateIGCEDocument(excelTemplatePath, templatePayload as IndependentGovernmentCostEstimate);
-  response = new ApiBase64SuccessResponse(igce.buffer.toString("base64"), SuccessStatusCode.OK, igce.headers);
   return response;
 }
 
@@ -113,8 +113,7 @@ export const handler = middy(baseHandler)
   .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
   .use(httpJsonBodyParser())
   .use(xssSanitizer())
-  // unknown keyword 'clin' found when strict set to true
-  .use(validator({ eventSchema: wrapSchema(generateDocumentSchema), ajvOptions: { strict: false } }))
+  .use(validator({ eventSchema: wrapSchema(generateDocumentSchema) }))
   .use(errorHandlingMiddleware())
   .use(JSONErrorHandlerMiddleware());
 
