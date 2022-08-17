@@ -76,6 +76,13 @@ Resources:
       InlinePolicy:
         Version: 2012-10-17
         Statement:
+          - Sid: DenyActionsInOtherAccoutns
+            Effect: Deny
+            Action: "*"
+            Resource: "*"
+            Condition:
+              StringNotEquals:
+                aws:ResourceAccount: "${aws:PrincipalAccount}"
           - Effect: Allow
             Action: apigateway:GET
             Resource: 
@@ -96,14 +103,14 @@ Resources:
           - Effect: Allow
             Action: s3:*
             Resource:
-              - !Sub arn:${AWS::Partition}:s3:::cdk-*-assets-${AWS::AccountId}-*
+              - !Sub arn:${AWS::Partition}:s3:::cdk-*-assets-*-*
               - !Sub arn:${AWS::Partition}:s3:::cdktoolkit-stagingbucket-*
           - Effect: Allow
             Action: sts:AssumeRole
-            Resource: !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-*-*-role-${AWS::AccountId}-${AWS::Region}
+            Resource: !Sub arn:${AWS::Partition}:iam::*:role/cdk-*-*-role-*-us-gov-*
           - Effect: Allow
             Action: ssm:GetParameter
-            Resource: !Sub arn:${AWS::Partition}:ssm:*:${AWS::AccountId}:parameter/cdk-bootstrap/*
+            Resource: !Sub arn:${AWS::Partition}:ssm:*:*:parameter/cdk-bootstrap/*
           - Effect: Allow
             Action:
               - sqs:Get*
@@ -144,6 +151,13 @@ Resources:
       InlinePolicy:
         Version: 2012-10-17
         Statement:
+          - Sid: DenyActionsInOtherAccoutns
+            Effect: Deny
+            Action: "*"
+            Resource: "*"
+            Condition:
+              StringNotEquals:
+                aws:ResourceAccount: "${aws:PrincipalAccount}"
           - Effect: Allow
             Action: apigateway:GET
             Resource: 
@@ -179,6 +193,13 @@ Resources:
       InlinePolicy:
         Version: 2012-10-17
         Statement:
+          - Sid: DenyActionsInOtherAccoutns
+            Effect: Deny
+            Action: "*"
+            Resource: "*"
+            Condition:
+              StringNotEquals:
+                aws:ResourceAccount: "${aws:PrincipalAccount}"
           - Effect: Allow
             Action: apigateway:GET
             Resource: 
