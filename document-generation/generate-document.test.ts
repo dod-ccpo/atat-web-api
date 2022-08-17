@@ -1,7 +1,12 @@
 import fs from "fs";
 import { Context } from "aws-lambda";
 import { DocumentType } from "../models/document-generation";
-import { ErrorStatusCode, OtherErrorResponse, SuccessBase64Response, ValidationErrorResponse } from "../utils/response";
+import {
+  ApiBase64SuccessResponse,
+  SuccessBase64Response,
+  SuccessStatusCode,
+  ValidationErrorResponse,
+} from "../utils/response";
 import { handler } from "./generate-document";
 import { requestContext } from "../api/util/common-test-fixtures";
 import { sampleDowRequest, sampleIgceRequest } from "./utils/sampleTestData";
@@ -29,7 +34,7 @@ jest.mock("./igce-document", () => {
         "Content-Disposition": `attachment; filename=IndependentGovernmentCostEstimate.xlsx`,
       };
       const buffer = Buffer.from("generateDocument");
-      return { buffer, headers };
+      return new ApiBase64SuccessResponse(buffer.toString("base64"), SuccessStatusCode.OK, headers);
     }),
   };
 });
@@ -142,25 +147,5 @@ describe("Invalid requests for generate-document handler", () => {
     // THEN / ASSERT
     expect(response).toBeInstanceOf(ValidationErrorResponse);
     expect(responseBody.message).toBe("Request failed validation");
-  });
-});
-
-describe("Temporary Not Implemented generate-document handler", () => {
-  it("should return 501 response", async () => {
-    // GIVEN / ARRANGE
-    const validIgceRequest = {
-      body: JSON.stringify(sampleIgceRequest),
-      headers: {
-        "Content-Type": "application/json",
-      },
-      requestContext,
-    } as any;
-
-    // WHEN / ACT
-    const response = await handler(validIgceRequest, {} as Context);
-
-    // THEN / ASSERT
-    expect(response).toBeInstanceOf(OtherErrorResponse);
-    expect(response.statusCode).toBe(ErrorStatusCode.NOT_IMPLEMENTED);
   });
 });
