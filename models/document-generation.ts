@@ -85,14 +85,6 @@ export enum ServiceOfferingGroup {
   SECURITY = "SECURITY",
   TRAINING = "TRAINING",
 }
-
-export interface GeneratedDocument {
-  buffer: Buffer;
-  headers: {
-    "Content-Type": string;
-    "Content-Disposition": string;
-  };
-}
 export interface TemplatePaths {
   [DocumentType.DESCRIPTION_OF_WORK]: { html: string; css: string };
   [DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE]: { excel: string };

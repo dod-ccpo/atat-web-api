@@ -1,16 +1,12 @@
 import exceljs from "exceljs";
-import {
-  GeneratedDocument,
-  IndependentGovernmentCostEstimate,
-  IPeriodEstimate,
-  PeriodType,
-} from "../models/document-generation";
+import { IndependentGovernmentCostEstimate, IPeriodEstimate, PeriodType } from "../models/document-generation";
+import { ApiBase64SuccessResponse, SuccessStatusCode } from "../utils/response";
 import { convertPeriodToMonths } from "./utils/utils";
 
 export async function generateIGCEDocument(
   templatePath: string,
   payload: IndependentGovernmentCostEstimate
-): Promise<GeneratedDocument> {
+): Promise<ApiBase64SuccessResponse> {
   const basePeriodLineItems = payload.periodsEstimate.filter((periodEstimate: IPeriodEstimate) => {
     return periodEstimate.period.periodType === PeriodType.BASE;
   });
@@ -24,6 +20,8 @@ export async function generateIGCEDocument(
   const { orderNumber, gtcNumber } = payload.fundingDocument;
   const summarySheet = workbook.getWorksheet("Summary");
   const fundingDocumentNumber = `Order Number: ${orderNumber} and GT&C Number: ${gtcNumber}`;
+  const periodSummaryLines: string[] = [];
+  let summaryLineCounter = 0;
 
   function populatePeriodLineItems(estimate: IPeriodEstimate): void {
     const { optionOrder, periodUnit, periodUnitCount, periodType } = estimate.period;
@@ -58,24 +56,33 @@ export async function generateIGCEDocument(
     });
 
     // group line items to be placed in summary page
-    const lineGroupings = periodSheet.getRows(28, uniqueIdiqClins.length);
+    const lineGroupings = periodSheet.getRows(28 + summaryLineCounter, uniqueIdiqClins.length);
     lineGroupings?.forEach((row, index) => {
       row.getCell("H").value = uniqueIdiqClins[index];
+      periodSummaryLines.push(uniqueIdiqClins[index]);
+      summaryLineCounter++;
     });
   }
+
+  // populate period sheets
+  basePeriodLineItems.forEach(populatePeriodLineItems);
+  optionPeriodsLineItems.forEach(populatePeriodLineItems);
 
   // Summary sheet
   // funding document number (A3)
   const summaryFundingDocCell = summarySheet.getCell("A3");
   summaryFundingDocCell.value = fundingDocumentNumber;
-  // A23 surge capabilities (A23)
+
+  // surge capabilities (A23)
   const summarySurge = summarySheet.getCell("A23");
   summarySurge.value = payload.surgeCapabilities / 100;
-  // summarySheet.commit();
 
-  // populate period sheets
-  basePeriodLineItems.forEach(populatePeriodLineItems);
-  optionPeriodsLineItems.forEach(populatePeriodLineItems);
+  // populate the summary sheet TO and IDIQ CLIN
+  const summaryToDocCells = summarySheet.getRows(6, periodSummaryLines.length);
+  summaryToDocCells?.forEach((row, index) => {
+    row.getCell("A").value = periodSummaryLines[index].slice(0, 4);
+    row.getCell("B").value = periodSummaryLines[index];
+  });
 
   const headers = {
     "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -84,5 +91,5 @@ export async function generateIGCEDocument(
 
   const buffer = (await workbook.xlsx.writeBuffer()) as Buffer;
 
-  return { headers, buffer };
+  return new ApiBase64SuccessResponse(buffer.toString("base64"), SuccessStatusCode.OK, headers);
 }
