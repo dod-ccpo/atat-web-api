@@ -1,5 +1,6 @@
 import exceljs from "exceljs";
 import { IndependentGovernmentCostEstimate, IPeriodEstimate, PeriodType } from "../models/document-generation";
+import { INTERNAL_SERVER_ERROR } from "../utils/errors";
 import { ApiBase64SuccessResponse, SuccessStatusCode } from "../utils/response";
 import { convertPeriodToMonths } from "./utils/utils";
 
@@ -7,6 +8,10 @@ export async function generateIGCEDocument(
   templatePath: string,
   payload: IndependentGovernmentCostEstimate
 ): Promise<ApiBase64SuccessResponse> {
+  if (!payload.periodsEstimate && !payload.fundingDocument && !payload.surgeCapabilities) {
+    return INTERNAL_SERVER_ERROR;
+  }
+
   const basePeriodLineItems = payload.periodsEstimate.filter((periodEstimate: IPeriodEstimate) => {
     return periodEstimate.period.periodType === PeriodType.BASE;
   });
@@ -21,7 +26,10 @@ export async function generateIGCEDocument(
   const summarySheet = workbook.getWorksheet("Summary");
   const fundingDocumentNumber = `Order Number: ${orderNumber} and GT&C Number: ${gtcNumber}`;
   const periodSummaryLines: string[] = [];
-  let summaryLineCounter = 0;
+  let summaryLineCounter = 0; // keep count of unique idiq clins of each period
+  // top added rows (if more room is needed in the top half)
+  // bottom added rows (if more room is needed on the bottom half (more likely))
+  // summary added rows (if more room needed on the items)
 
   function populatePeriodLineItems(estimate: IPeriodEstimate): void {
     const { optionOrder, periodUnit, periodUnitCount, periodType } = estimate.period;
@@ -40,10 +48,19 @@ export async function generateIGCEDocument(
 
     // fill in items on a sheet
     const numberOfItems = subLineItems.length;
+    // TODO: add extra rows if number or rows not sufficient
+    // subLineItems top half of period sheet
+    // uniqueLineItems lower half of period sheet
+    // summaryLineItems top half of summary sheet (total of uniqueLineItems in period sheets)
+    // if () {
+
+    // }
     const lineItemRows = periodSheet.getRows(8, numberOfItems); // was 20 rows
     lineItemRows?.forEach((row, index) => {
       if (!uniqueIdiqClins.includes(subLineItems[index].idiqClin)) {
         uniqueIdiqClins.push(subLineItems[index].idiqClin);
+        // TODO: increase summaryLineCounter here??
+        // summaryLineCounter++
       }
       row.getCell("B").value = subLineItems[index].clin; // 1000
       row.getCell("C").value = subLineItems[index].idiqClin; // "1000 Cloud";
@@ -58,9 +75,19 @@ export async function generateIGCEDocument(
     // group line items to be placed in summary page
     const lineGroupings = periodSheet.getRows(28 + summaryLineCounter, uniqueIdiqClins.length);
     lineGroupings?.forEach((row, index) => {
-      row.getCell("H").value = uniqueIdiqClins[index];
-      periodSummaryLines.push(uniqueIdiqClins[index]);
-      summaryLineCounter++;
+      // TODO: increase lower half for uniqueLineItems
+      console.log("ROW NUMBER: ", row.number);
+      if (summaryLineCounter > periodSummaryLines.length) {
+        // TODO: add row
+        // periodSheet.addRow();
+        row.getCell("H").value = uniqueIdiqClins[index];
+        periodSummaryLines.push(uniqueIdiqClins[index]);
+        summaryLineCounter++;
+      } else {
+        row.getCell("H").value = uniqueIdiqClins[index];
+        periodSummaryLines.push(uniqueIdiqClins[index]);
+        summaryLineCounter++;
+      }
     });
   }
 
@@ -80,6 +107,7 @@ export async function generateIGCEDocument(
   // populate the summary sheet TO and IDIQ CLIN
   const summaryToDocCells = summarySheet.getRows(6, periodSummaryLines.length);
   summaryToDocCells?.forEach((row, index) => {
+    // TODO: increase lower half based on
     row.getCell("A").value = periodSummaryLines[index].slice(0, 4);
     row.getCell("B").value = periodSummaryLines[index];
   });
@@ -88,7 +116,6 @@ export async function generateIGCEDocument(
     "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     "Content-Disposition": `attachment; filename=IndependentGovernmentCostEstimate.xlsx`,
   };
-
   const buffer = (await workbook.xlsx.writeBuffer()) as Buffer;
 
   return new ApiBase64SuccessResponse(buffer.toString("base64"), SuccessStatusCode.OK, headers);
