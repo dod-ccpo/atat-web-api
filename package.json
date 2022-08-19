@@ -63,7 +63,7 @@
     "axios": "^0.27.2",
     "cdk-monitoring-constructs": "^1.19.3",
     "cdk-nag": "^2.15.46",
-    "constructs": "^10.1.78",
+    "constructs": "^10.1.80",
     "handlebars": "^4.7.7",
     "http-errors": "^2.0.0",
     "juice": "^8.1.0",
