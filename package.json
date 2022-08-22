@@ -58,7 +58,7 @@
     "@middy/http-json-body-parser": "^3.2.1",
     "@middy/input-output-logger": "^3.2.1",
     "@middy/validator": "^3.2.1",
-    "@sparticuz/chrome-aws-lambda": "^16.1.0",
+    "@sparticuz/chrome-aws-lambda": "^16.2.0",
     "aws-cdk-lib": "2.38.1",
     "axios": "^0.27.2",
     "cdk-monitoring-constructs": "^1.19.4",
