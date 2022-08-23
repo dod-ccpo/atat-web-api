@@ -304,7 +304,7 @@ export const sampleIgceRequest = {
         period: { periodUnit: "WEEK", periodUnitCount: 12, periodType: "OPTION", optionOrder: 2 },
         periodLineItems: [
           {
-            clin: "3000",
+            clin: "3002",
             idiqClin: "3000 Cloud Support UNCLASSIFIED",
             dowTaskNumber: "4.2.2.5",
             serviceOffering: "Cloud Audit/Monitoring Tools",
@@ -313,7 +313,7 @@ export const sampleIgceRequest = {
             monthsInPeriod: 36,
           },
           {
-            clin: "2000",
+            clin: "2002",
             idiqClin: "2000 Cloud SECRET",
             dowTaskNumber: "4.2.2.6",
             serviceOffering: "Special custom built app - not SNOW",
@@ -322,7 +322,7 @@ export const sampleIgceRequest = {
             monthsInPeriod: 36,
           },
           {
-            clin: "1000",
+            clin: "1002",
             idiqClin: "1000 Cloud UNCLASSIFIED ",
             dowTaskNumber: "4.2.2.7",
             serviceOffering: "Application",
@@ -336,7 +336,7 @@ export const sampleIgceRequest = {
         period: { periodUnit: "MONTH", periodUnitCount: 3, periodType: "OPTION", optionOrder: 1 },
         periodLineItems: [
           {
-            clin: "3000",
+            clin: "3001",
             idiqClin: "3000 Cloud Support UNCLASSIFIED",
             dowTaskNumber: "4.2.2.8",
             serviceOffering: "Cloud Audit/Monitoring Tools",
@@ -345,7 +345,7 @@ export const sampleIgceRequest = {
             monthsInPeriod: 36,
           },
           {
-            clin: "2000",
+            clin: "2001",
             idiqClin: "2000 Cloud SECRET",
             dowTaskNumber: "4.2.2.9",
             serviceOffering: "Special custom built app - not SNOW",
@@ -354,7 +354,7 @@ export const sampleIgceRequest = {
             monthsInPeriod: 36,
           },
           {
-            clin: "1000",
+            clin: "1001",
             idiqClin: "1000 Cloud UNCLASSIFIED ",
             dowTaskNumber: "4.2.2.10",
             serviceOffering: "Application",
@@ -368,7 +368,7 @@ export const sampleIgceRequest = {
         period: { periodUnit: "DAY", periodUnitCount: 30, periodType: "OPTION", optionOrder: 4 },
         periodLineItems: [
           {
-            clin: "3000",
+            clin: "3004",
             idiqClin: "3000 Cloud Support UNCLASSIFIED",
             dowTaskNumber: "4.2.2.11",
             serviceOffering: "Cloud Audit/Monitoring Tools",
@@ -377,7 +377,7 @@ export const sampleIgceRequest = {
             monthsInPeriod: 36,
           },
           {
-            clin: "2000",
+            clin: "2004",
             idiqClin: "2000 Cloud SECRET",
             dowTaskNumber: "4.2.2.12",
             serviceOffering: "Special custom built app - not SNOW",
@@ -386,7 +386,7 @@ export const sampleIgceRequest = {
             monthsInPeriod: 36,
           },
           {
-            clin: "1000",
+            clin: "1004",
             idiqClin: "1000 Cloud UNCLASSIFIED ",
             dowTaskNumber: "4.2.2.13",
             serviceOffering: "Application",
@@ -395,7 +395,7 @@ export const sampleIgceRequest = {
             monthsInPeriod: 36,
           },
           {
-            clin: "1000",
+            clin: "1004",
             idiqClin: "1000 Cloud UNCLASSIFIED ",
             dowTaskNumber: "4.2.2.14",
             serviceOffering: "Application",

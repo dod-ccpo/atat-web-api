@@ -98,7 +98,7 @@ async function generateXlsx(
   if (documentType === DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE) {
     excelTemplatePath = documentTemplatePaths[documentType].excel;
   }
-  return await generateIGCEDocument(excelTemplatePath, templatePayload as IndependentGovernmentCostEstimate);
+  return generateIGCEDocument(excelTemplatePath, templatePayload as IndependentGovernmentCostEstimate);
 }
 
 export const handler = middy(baseHandler)
