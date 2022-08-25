@@ -482,133 +482,133 @@ components:
       type: object
       properties:
         # DOW award history
-        award_history:
+        awardHistory:
           type: array
           items:
             $ref: "#/components/schemas/Award"
         # DOW contract information table
-        contract_information:
+        contractInformation:
           $ref: "#/components/schemas/ContractInformation"
         # DOW section 1
-        to_title:
+        toTitle:
           type: string
         # DOW section 2
         scope:
           type: string
-        scope_surge:
+        scopeSurge:
           type: integer
         # DOW section 3
-        current_environment:
+        currentEnvironment:
           $ref: "#/components/schemas/CurrentEnvironment"
         # DOW section 4 (and its subtasks)
-        selected_service_offerings:
+        selectedServiceOfferings:
           type: array
           items:
             $ref: "#/components/schemas/SelectedServiceOffering"
         # DOW section 5 TBD
         # DOW section 6 TBD
         # DOW section 7
-        period_of_performance:
+        periodOfPerformance:
           $ref: "#/components/schemas/PeriodOfPerformance"
         # DOW section 8 TBD
         # DOW section 9
-        gfe_overview:
+        gfeOverview:
           $ref: "#/components/schemas/GFEOverview"
         # DOW section 10 (and its subtasks)
-        contract_considerations:
+        contractConsiderations:
           $ref: "#/components/schemas/ContractConsiderations"
           # DOW section 11
-        section_508_accessibility_standards:
+        section508AccessibilityStandards:
           $ref: "#/components/schemas/SensitiveInformation"
     Award:
       description: "Part of DOW, represents a single Award in the Award History table"
       type: object
       properties:
-        contract_award_type:
+        contractAwardType:
           type: string
           enum:
             - INITIAL_AWARD
             - MODIFICATION
-        modification_order:
+        modificationOrder:
           type: integer
-        effective_date:
+        effectiveDate:
           type: string
           format: date
     ContractInformation:
       description: "Part of DOW, represents Current Contract Information table fields"
       type: object
       properties:
-        contract_number:
+        contractNumber:
           type: string
-        current_contract_exists:
+        currentContractExists:
           type: boolean
-        contract_expiration_date:
+        contractExpirationDate:
           type: string
           format: date
-        incumbent_contractor_name:
+        incumbentContractorName:
           type: string
-        previous_task_order_number:
+        previousTaskOrderNumber:
           type: string
     CurrentEnvironment:
       description: "Part of DOW, encapsulates all data for 3. Background/Current Environment section."
       type: object
       properties:
-        current_environment_exists:
+        currentEnvironmentExists:
           type: boolean
-        environment_instances:
+        environmentInstances:
           type: array
           items:
             $ref: "#/components/schemas/EnvironmentInstance"
-        additional_info:
+        additionalInfo:
           type: string
     EnvironmentInstance:
       description: "Part of DOW, represents a single Environment Instance"
       type: object
       properties:
-        instance_name:
+        instanceName:
           type: string
-        classification_level:
+        classificationLevel:
           $ref: "#/components/schemas/ClassificationLevel"
-        instance_location:
+        instanceLocation:
           type: string
           enum:
             - CSP
             - HYBRID
             - ON_PREMISE
-        csp_region:
+        cspRegion:
           # On the SNOW side, this is CSP_REGION a choice field with no options, so using TargetCSPName instead
           $ref: "#/components/schemas/TargetCloudServiceProviderName"
-        performance_tier:
+        performanceTier:
           # This is also an empty choice on the SNOW side, set as empty String until we get details
           type: string
-        pricing_model:
+        pricingModel:
           type: string
           enum:
             - ON_DEMAND
             - PAY_AS_YOU_GO
             - RESERVED
-        pricing_model_expiration:
+        pricingModelExpiration:
           type: string
           format: date
           example: "2022-07-01"
-        operating_system_licensing:
+        operatingSystemLicensing:
           type: string
-        number_of_vCPUs:
+        numberOfvCPUs:
           type: integer
-        storage_type:
+        storageType:
           # Empty choice on SNOW side, set as empty String until we get details
           type: string
-        storage_amount:
+        storageAmount:
           type: integer
-        storage_unit:
+        storageUnit:
           $ref: "#/components/schemas/StorageUnit"
-        memory_amount:
+        memoryAmount:
           type: integer
-        memory_unit:
+        memoryUnit:
           $ref: "#/components/schemas/StorageUnit"
-        data_egress_monthly_amount:
+        dataEgressMonthlyAmount:
           type: integer
-        data_egress_monthly_unit:
+        dataEgressMonthlyUnit:
           $ref: "#/components/schemas/StorageUnit"
     ClassificationLevel:
       description: "Part of DOW, Classification Level table fields"
@@ -620,7 +620,7 @@ components:
             - U
             - S
             - TS
-        impact_level:
+        impactLevel:
           type: string
           enum:
             - IL2
@@ -637,53 +637,53 @@ components:
       description: "Part of DOW, represents a single Selected Service Offering"
       type: object
       properties:
-        service_offering:
+        serviceOffering:
           $ref: "#/components/schemas/ServiceOffering"
-        classification_instances:
+        classificationInstances:
           type: array
           items:
             $ref: "#/components/schemas/ClassificationInstance"
-        other_service_offering:
+        otherServiceOffering:
           type: string
     ClassificationInstance:
       description: "Part of DOW, represents a single classification instance"
       type: object
       properties:
-        usage_description:
+        usageDescription:
           type: string
-        selected_periods:
+        selectedPeriods:
           type: array
           items:
             $ref: "#/components/schemas/Period"
-        classification_level:
+        classificationLevel:
           $ref: "#/components/schemas/ClassificationLevel"
-        need_for_entire_task_order_duration:
+        needForEntireTaskOrderDuration:
           type: boolean
     Period:
       description: "Part of DOW, represents Period Table fields"
       type: object
       properties:
-        period_type:
+        periodType:
           type: string
           enum:
             - BASE
             - OPTION
-        period_unit_count:
+        periodUnitCount:
           type: integer
-        period_unit:
+        periodUnit:
           type: string
           enum:
             - DAY
             - WEEK
             - MONTH
             - YEAR
-        option_order:
+        optionOrder:
           type: integer
     ServiceOffering:
       description: "Part of DOW, represents a single Service Offering (Service Offering table)"
       type: object
       properties:
-        service_offering_group:
+        serviceOfferingGroup:
           type: string
           enum:
             - ADVISORY
@@ -704,58 +704,58 @@ components:
       description: "Part of DOW, represents a single Period of Performance"
       type: object
       properties:
-        base_period:
+        basePeriod:
           $ref: "#/components/schemas/Period"
-        option_periods:
+        optionPeriods:
           type: array
           items:
             $ref: "#/components/schemas/Period"
-        pop_start_request:
+        popStartRequest:
           type: boolean
-        requested_pop_start_date:
+        requestedPopStartDate:
           type: string
           format: date
           example: "2021-07-01"
-        time_frame:
+        timeFrame:
           type: string
           enum:
             - NO_LATER_THAN
             - NO_SOONER_THAN
-        recurring_requirement:
+        recurringRequirement:
           type: boolean
     GFEOverview:
       description: "Part of DOW, represents GFE Overview fields"
       type: object
       properties:
-        dpas_unit_id:
+        dpasUnitId:
           type: string
-        property_custodian_name:
+        propertyCustodianName:
           type: string
-        dpas_custodian_number:
+        dpasCustodianNumber:
           type: string
-        property_accountable:
+        propertyAccountable:
           type: boolean
-        gfe_or_gfp_furnished:
+        gfeOrGfpFurnished:
           type: boolean
     ContractConsiderations:
       description: "Part of DOW, represents Contract Considerations Table"
       type: object
       properties:
-        packaging_shipping_none_apply:
+        packagingShippingNoneApply:
           type: boolean
-        packaging_shipping_other:
+        packagingShippingOther:
           type: boolean
-        packaging_shipping_other_explanation:
+        packagingShippingOtherExplanation:
           type: string
-        potential_conflict_of_interest:
+        potentialConflictOfInterest:
           type: boolean
-        conflict_of_interest_explanation:
+        conflictOfInterestExplanation:
           type: string
-        contractor_provided_transfer:
+        contractorProvidedTransfer:
           type: boolean
-        contractor_required_training:
+        contractorRequiredTraining:
           type: boolean
-        required_training_services:
+        requiredTrainingServices:
           type: array
           items:
             $ref: "#/components/schemas/TrainingCourses"
@@ -771,42 +771,42 @@ components:
       description: "Part of DOW, represents Sensitive Information Table fields"
       type: object
       properties:
-        pii_present:
+        piiPresent:
           type: boolean
-        work_to_be_performed:
+        workToBePerformed:
           type: string
-        system_of_record_name:
+        systemOfRecordName:
           type: string
-        FOIA_city_apo_fpo:
+        FOIACityApoFpo:
           type: string
-        FOIA_country:
+        FOIACountry:
           type: string
-        FOIA_street_address_1:
+        FOIAStreetAddress1:
           type: string
-        FOIA_street_address_2:
+        FOIAStreetAddress2:
           type: string
-        FOIA_address_type:
+        FOIAAddressType:
           type: string
           enum:
             - FOREIGN
             - MILITARY
             - US
-        FOIA_state_province_code:
+        FOIAStateProvinceCode:
           type: string
-        FOIA_full_name:
+        FOIAFullName:
           type: string
-        FOIA_email:
+        FOIAEmail:
           type: string
           format: email
-        FOIA_zip_postal_code:
+        FOIAZipPostalCode:
           type: string
-        BAA_required:
+        BAARequired:
           type: boolean
-        potential_to_be_harmful:
+        potentialToBeHarmful:
           type: boolean
-        section_508_sufficient:
+        section508Sufficient:
           type: boolean
-        accessibility_reqs_508:
+        accessibilityReqs508:
           type: string
     AsyncProvisioningJobRequest:
       required:
