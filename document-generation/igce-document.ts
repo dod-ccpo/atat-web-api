@@ -1,7 +1,12 @@
 import exceljs, { Row, Worksheet } from "exceljs";
 import { logger } from "../utils/logging";
 
-import { IndependentGovernmentCostEstimate, IPeriodEstimate, PeriodType } from "../models/document-generation";
+import {
+  FundingType,
+  IndependentGovernmentCostEstimate,
+  IPeriodEstimate,
+  PeriodType,
+} from "../models/document-generation";
 import { INTERNAL_SERVER_ERROR } from "../utils/errors";
 import { ApiBase64SuccessResponse, SuccessStatusCode } from "../utils/response";
 import { convertPeriodToMonths } from "./utils/utils";
@@ -28,12 +33,17 @@ export async function generateIGCEDocument(
   await workbook.xlsx.readFile(templatePath);
 
   // variables used within the sheets
+  const fundingDoc = payload.fundingDocument;
   let fundingDocumentNumber: string;
-  if (!payload.fundingDocument.gtcNumber && !payload.fundingDocument.orderNumber) {
-    fundingDocumentNumber = `MIPR Number: ${payload.fundingDocument.miprNumber}`;
-  } else {
-    const { orderNumber, gtcNumber } = payload.fundingDocument;
-    fundingDocumentNumber = `Order Number: ${orderNumber} and GT&C Number: ${gtcNumber}`;
+  switch (fundingDoc.fundingType) {
+    case FundingType.FS_FORM:
+      fundingDocumentNumber = `Order Number: ${fundingDoc.orderNumber} and GT&C Number: ${fundingDoc.gtcNumber}`;
+      break;
+    case FundingType.MIPR:
+      fundingDocumentNumber = `MIPR Number: ${fundingDoc.miprNumber}`;
+      break;
+    default:
+      fundingDocumentNumber = "";
   }
 
   const summarySheet = workbook.getWorksheet("Summary");
@@ -44,7 +54,6 @@ export async function generateIGCEDocument(
   // function that populates each period sheet
   function populatePeriodLineItems(estimate: IPeriodEstimate): void {
     const { optionOrder, periodUnit, periodUnitCount, periodType } = estimate.period;
-    let periodSheet: Worksheet;
     const periodLineItems = estimate.periodLineItems;
     const uniqueIdiqClins = Array.from(new Set(periodLineItems.map((lineItem) => lineItem.idiqClin)));
     const periodSheetTopHalfInitialStartRow = 8;
@@ -59,11 +68,11 @@ export async function generateIGCEDocument(
       "Option Period 6": "I",
     };
 
-    if (periodType === PeriodType.BASE) {
-      periodSheet = workbook.getWorksheet("Base Period");
-    } else {
-      periodSheet = workbook.getWorksheet(`Option Period ${optionOrder}`);
-    }
+    const periodSheet =
+      periodType === PeriodType.BASE
+        ? workbook.getWorksheet("Base Period")
+        : workbook.getWorksheet(`Option Period ${optionOrder}`);
+
     const pop = `${periodUnitCount} ${periodUnit[0] + periodUnit.slice(1).toLowerCase()}(s)`;
     periodSheet.getCell("C2").value = pop;
     periodSheet.getCell("C3").value = fundingDocumentNumber;

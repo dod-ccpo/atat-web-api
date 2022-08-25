@@ -1,4 +1,4 @@
-import { IndependentGovernmentCostEstimate } from "../models/document-generation";
+import { FundingType, IndependentGovernmentCostEstimate } from "../models/document-generation";
 import { generateIGCEDocument } from "./igce-document";
 import { sampleIgceRequest } from "./utils/sampleTestData";
 import * as fs from "fs";
@@ -9,22 +9,40 @@ beforeEach(() => {
 });
 
 describe("Generate an IGCE binary document - happy path", () => {
-  it("should return an ApiBase64Resposne ", async () => {
-    // GIVEN
-    const filepath = fs.realpathSync("./document-generation/templates/igce-template.xlsx");
-    const payload = sampleIgceRequest.templatePayload as IndependentGovernmentCostEstimate;
-    const headers = {
-      "Content-Disposition": "attachment; filename=IndependentGovernmentCostEstimate.xlsx",
-      "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    };
+  const sampleIgceRequestWithGTCNumber = sampleIgceRequest.templatePayload as IndependentGovernmentCostEstimate;
+  const sampleIgceRequestWithMIPRNumber = {
+    ...sampleIgceRequest.templatePayload,
+    fundingDocument: {
+      fundingType: FundingType.MIPR,
+      miprNumber: "M2206-07-077-458790",
+    },
+  } as IndependentGovernmentCostEstimate;
+  const sampleIgceRequestWithNoType = {
+    ...sampleIgceRequest.templatePayload,
+    fundingDocument: {
+      fundingType: "UNKNOWN_TYPE" as any,
+    },
+  } as IndependentGovernmentCostEstimate;
 
-    // WHEN
-    const response = await generateIGCEDocument(filepath, payload);
+  it.each([sampleIgceRequestWithGTCNumber, sampleIgceRequestWithMIPRNumber, sampleIgceRequestWithNoType])(
+    "should return an ApiBase64Response",
+    async (igcePayload) => {
+      // GIVEN
+      const filepath = fs.realpathSync("./document-generation/templates/igce-template.xlsx");
+      const payload = igcePayload;
+      const headers = {
+        "Content-Disposition": "attachment; filename=IndependentGovernmentCostEstimate.xlsx",
+        "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      };
 
-    // THEN
-    expect(response.headers).toEqual(headers);
-    expect(response).toBeInstanceOf(ApiBase64SuccessResponse);
-  });
+      // WHEN
+      const response = await generateIGCEDocument(filepath, payload);
+
+      // THEN
+      expect(response.headers).toEqual(headers);
+      expect(response).toBeInstanceOf(ApiBase64SuccessResponse);
+    }
+  );
 });
 
 describe("Generate an IGCE binary document - sad path", () => {

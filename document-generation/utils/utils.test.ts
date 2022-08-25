@@ -55,6 +55,14 @@ describe("convertPeriodToMonths", () => {
     };
     expect(convertPeriodToMonths(dayPeriod)).toEqual(2);
   });
+  it("should default to 12 months", async () => {
+    const dayPeriod = {
+      ...period,
+      periodUnitCount: 45,
+      periodUnit: "UNKNOWN_UNIT",
+    };
+    expect(convertPeriodToMonths(dayPeriod)).toEqual(12);
+  });
 });
 
 describe("getPDFDocumentTemplates", () => {
