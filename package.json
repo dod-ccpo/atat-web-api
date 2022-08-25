@@ -62,7 +62,7 @@
     "aws-cdk-lib": "2.38.1",
     "axios": "^0.27.2",
     "cdk-monitoring-constructs": "^1.20.0",
-    "cdk-nag": "^2.15.52",
+    "cdk-nag": "^2.16.1",
     "constructs": "^10.1.84",
     "handlebars": "^4.7.7",
     "http-errors": "^2.0.0",
