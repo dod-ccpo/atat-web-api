@@ -16,15 +16,14 @@ import xssSanitizer from "../utils/middleware/xss-sanitizer";
 import { wrapSchema } from "../utils/middleware/schema-wrapper";
 import { generateDocument } from "./chromium";
 import { generateIGCEDocument } from "./igce-document";
+import { getPDFDocumentTemplates, getExcelTemplatePath } from "./utils/utils";
 import {
   generateDocumentSchema,
   RequestEvent,
   GenerateDocumentRequest,
   DocumentType,
-  TemplatePaths,
   IndependentGovernmentCostEstimate,
 } from "../models/document-generation";
-import * as fs from "fs";
 import handlebars from "handlebars";
 import juice from "juice";
 import { formatDuration, formatGroupAndClassification, counter, countSections, formatAwardType } from "./utils/helpers";
@@ -32,21 +31,12 @@ import { formatDuration, formatGroupAndClassification, counter, countSections, f
 async function baseHandler(event: RequestEvent<GenerateDocumentRequest>): Promise<ApiBase64SuccessResponse> {
   const { documentType } = event.body;
   logger.info("Generating document", { documentType });
-  const documentTemplatePaths: TemplatePaths = {
-    [DocumentType.DESCRIPTION_OF_WORK]: {
-      html: "/opt/dow-template.html",
-      css: "/opt/dow-style.css",
-    },
-    [DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE]: {
-      excel: "/opt/igce-template.xlsx",
-    },
-  };
 
   switch (documentType) {
     case DocumentType.DESCRIPTION_OF_WORK:
-      return generatePdf(event, documentTemplatePaths);
+      return generatePdf(event);
     case DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE:
-      return generateXlsx(event, documentTemplatePaths);
+      return generateXlsx(event);
     default:
       return new ValidationErrorResponse(`Invalid document type: "${documentType}"`, {
         cause: `Invalid document type "${documentType}" provided. Please provide a valid document  type.`,
@@ -54,20 +44,9 @@ async function baseHandler(event: RequestEvent<GenerateDocumentRequest>): Promis
   }
 }
 
-async function generatePdf(
-  event: RequestEvent<GenerateDocumentRequest>,
-  documentTemplatePaths: TemplatePaths
-): Promise<ApiBase64SuccessResponse> {
+async function generatePdf(event: RequestEvent<GenerateDocumentRequest>): Promise<ApiBase64SuccessResponse> {
   const { documentType, templatePayload } = event.body;
-  let html = "";
-  let css = "";
-
-  if (documentType === DocumentType.DESCRIPTION_OF_WORK) {
-    // get files to generate documents
-    html = fs.readFileSync(documentTemplatePaths[documentType].html, "utf-8");
-    css = fs.readFileSync(documentTemplatePaths[documentType].css, "utf-8");
-  }
-
+  const { html, css } = getPDFDocumentTemplates(documentType);
   const htmlWithCss = juice.inlineContent(html, css);
 
   // use handlebars to populate data into template
@@ -88,16 +67,9 @@ async function generatePdf(
   return new ApiBase64SuccessResponse(pdf.toString("base64"), SuccessStatusCode.OK, headers);
 }
 
-async function generateXlsx(
-  event: RequestEvent<GenerateDocumentRequest>,
-  documentTemplatePaths: TemplatePaths
-): Promise<ApiBase64SuccessResponse> {
+async function generateXlsx(event: RequestEvent<GenerateDocumentRequest>): Promise<ApiBase64SuccessResponse> {
   const { documentType, templatePayload } = event.body;
-  let excelTemplatePath = "";
-
-  if (documentType === DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE) {
-    excelTemplatePath = documentTemplatePaths[documentType].excel;
-  }
+  const excelTemplatePath = getExcelTemplatePath(documentType);
   return generateIGCEDocument(excelTemplatePath, templatePayload as IndependentGovernmentCostEstimate);
 }
 

@@ -1,4 +1,5 @@
-import { PeriodUnit, IPeriod } from "../../models/document-generation";
+import { PeriodUnit, IPeriod, DocumentType, TemplatePaths } from "../../models/document-generation";
+import * as fs from "fs";
 
 export const capitalize = (string: string) => {
   if (typeof string !== "string") {
@@ -21,4 +22,48 @@ export const convertPeriodToMonths = (period: IPeriod): number => {
     default:
       return 12;
   }
+};
+
+interface PDFTemplateFiles {
+  html: string;
+  css: string;
+}
+
+// documents and the related templates
+const documentTemplatePaths: TemplatePaths = {
+  [DocumentType.DESCRIPTION_OF_WORK]: {
+    html: "/opt/dow-template.html",
+    css: "/opt/dow-style.css",
+  },
+  [DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE]: {
+    excel: "/opt/igce-template.xlsx",
+  },
+};
+
+export const getPDFDocumentTemplates = (documentType: DocumentType): PDFTemplateFiles => {
+  let html = "";
+  let css = "";
+  switch (documentType) {
+    case DocumentType.DESCRIPTION_OF_WORK:
+      html = fs.readFileSync(documentTemplatePaths[documentType].html, "utf-8");
+      css = fs.readFileSync(documentTemplatePaths[documentType].css, "utf-8");
+      break;
+    default:
+      throw new Error(`Unsupported PDF generation type: "${documentType}"`);
+  }
+
+  return { html, css };
+};
+
+export const getExcelTemplatePath = (documentType: DocumentType): string => {
+  let excelPath = "";
+  switch (documentType) {
+    case DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE:
+      excelPath = documentTemplatePaths[documentType].excel;
+      break;
+    default:
+      throw new Error(`Unsupported Excel generation type: "${documentType}"`);
+  }
+
+  return excelPath;
 };

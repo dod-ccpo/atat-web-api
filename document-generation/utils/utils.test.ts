@@ -1,5 +1,9 @@
-import { PeriodUnit, PeriodType } from "../../models/document-generation";
-import { capitalize, convertPeriodToMonths } from "./utils";
+import { PeriodUnit, PeriodType, DocumentType } from "../../models/document-generation";
+import { capitalize, convertPeriodToMonths, getPDFDocumentTemplates, getExcelTemplatePath } from "./utils";
+import * as fs from "fs";
+
+jest.mock("fs");
+const mockedFs = fs as jest.Mocked<typeof fs>;
 
 describe("capitalize", () => {
   it.each(["atat", "hoTH", "API", "DoW"])("should return capitalized word", async (string) => {
@@ -50,5 +54,45 @@ describe("convertPeriodToMonths", () => {
       periodUnit: PeriodUnit.DAY,
     };
     expect(convertPeriodToMonths(dayPeriod)).toEqual(2);
+  });
+});
+
+describe("getPDFDocumentTemplates", () => {
+  it("should return the PDF template files", async () => {
+    // GIVEN
+    const html = "<H1>ATAT {{to_title}}</H1>";
+    const css = `h1 {
+      font-size: 1.9rem;
+      text-transform: uppercase;
+      margin-bottom: 2.4rem !important;
+      text-align: center;
+      margin-top: 0;
+    }`;
+
+    // WHEN / ACT
+    mockedFs.readFileSync.mockImplementationOnce(() => html);
+    mockedFs.readFileSync.mockImplementationOnce(() => css);
+
+    // THEN
+    expect(getPDFDocumentTemplates(DocumentType.DESCRIPTION_OF_WORK)).toEqual({ html, css });
+  });
+  it("should throw an error if invalid PDF documentType", async () => {
+    const documentType = "RANDOM_PDF_DOCUMENT_TYPE" as unknown as DocumentType;
+    expect(() => getPDFDocumentTemplates(documentType)).toThrow(
+      `Unsupported PDF generation type: "RANDOM_PDF_DOCUMENT_TYPE"`
+    );
+  });
+});
+
+describe("getExcelTemplatePath", () => {
+  it("should return template path for IGCE document", async () => {
+    const igcePath = "/opt/igce-template.xlsx";
+    expect(getExcelTemplatePath(DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE)).toBe(igcePath);
+  });
+  it("should throw an error if invalid Excel documentType", async () => {
+    const documentType = "RANDOM_EXCEL_DOCUMENT_TYPE" as unknown as DocumentType;
+    expect(() => getExcelTemplatePath(documentType)).toThrow(
+      `Unsupported Excel generation type: "RANDOM_EXCEL_DOCUMENT_TYPE"`
+    );
   });
 });

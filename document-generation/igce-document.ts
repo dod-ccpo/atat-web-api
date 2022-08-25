@@ -18,9 +18,11 @@ export async function generateIGCEDocument(
   const basePeriodLineItems = payload.periodsEstimate.filter((periodEstimate: IPeriodEstimate) => {
     return periodEstimate.period.periodType === PeriodType.BASE;
   });
-  const optionPeriodsLineItems = payload.periodsEstimate.filter((periodEstimate: IPeriodEstimate) => {
-    return periodEstimate.period.periodType === PeriodType.OPTION;
-  });
+  const optionPeriodsLineItems = payload.periodsEstimate
+    .filter((periodEstimate: IPeriodEstimate) => {
+      return periodEstimate.period.periodType === PeriodType.OPTION;
+    })
+    .sort((a, b) => a.period.optionOrder - b.period.optionOrder);
 
   const workbook = new exceljs.Workbook();
   await workbook.xlsx.readFile(templatePath);
@@ -44,9 +46,18 @@ export async function generateIGCEDocument(
     const { optionOrder, periodUnit, periodUnitCount, periodType } = estimate.period;
     let periodSheet: Worksheet;
     const periodLineItems = estimate.periodLineItems;
-    const uniqueIdiqClins: string[] = [];
+    const uniqueIdiqClins = Array.from(new Set(periodLineItems.map((lineItem) => lineItem.idiqClin)));
     const periodSheetTopHalfInitialStartRow = 8;
     const periodSheetLowerHalfInitialStartRow = 28;
+    const mappingOfPeriodsToColumnOnSummarySheet: { [key: string]: string } = {
+      "Base Period": "C",
+      "Option Period 1": "D",
+      "Option Period 2": "E",
+      "Option Period 3": "F",
+      "Option Period 4": "G",
+      "Option Period 5": "H",
+      "Option Period 6": "I",
+    };
 
     if (periodType === PeriodType.BASE) {
       periodSheet = workbook.getWorksheet("Base Period");
@@ -60,11 +71,8 @@ export async function generateIGCEDocument(
     // add each line item to the period sheet (top half)
     const numberOfItems = periodLineItems.length;
     const lineItemRows = periodSheet.getRows(periodSheetTopHalfInitialStartRow, numberOfItems);
-    lineItemRows?.forEach((row, index) => {
-      if (!uniqueIdiqClins.includes(periodLineItems[index].idiqClin)) {
-        uniqueIdiqClins.push(periodLineItems[index].idiqClin);
-      }
 
+    lineItemRows?.forEach((row, index) => {
       // fill each line item data
       row.getCell("B").value = periodLineItems[index].clin; // 1000
       row.getCell("C").value = periodLineItems[index].idiqClin; // "1000 Cloud";
@@ -90,15 +98,6 @@ export async function generateIGCEDocument(
       });
 
       // update formulas on summary sheet if additional rows were added
-      const mappingOfPeriodsToColumnOnSummarySheet: { [key: string]: string } = {
-        "Base Period": "C",
-        "Option Period 1": "D",
-        "Option Period 2": "E",
-        "Option Period 3": "F",
-        "Option Period 4": "G",
-        "Option Period 5": "H",
-        "Option Period 6": "I",
-      };
       summarySheetColumnsToExtend.push(mappingOfPeriodsToColumnOnSummarySheet[periodSheet.name]);
     }
 
@@ -138,7 +137,7 @@ export async function generateIGCEDocument(
     summarySheet.duplicateRow(lastSummarySheetRow, summarySheetAdditionalRows, true);
     const ref = `J6:J${summarySheetInitialRow + availableSummarySheetRows + summarySheetAdditionalRows}`;
 
-    // * update ref formula to include the additional rows
+    // update ref formula to include the additional rows
     const cell: any = summarySheet.getCell("J6").value;
     summarySheet.getCell("J6").value = { ...cell, ref };
   }
@@ -232,14 +231,19 @@ function updateSummaryFormulas(numberOfAddedRows: number, sheet: Worksheet): voi
       const cellId = `${col}${row.number}`;
       const cell = sheet.getCell(cellId);
       let updatedFormula;
-      if (index === 0) {
-        updatedFormula = `=SUM(${col}6:${col}${row.number - 3})`;
-      } else if (index === 1) {
-        updatedFormula = `=${col}${row.number - 1}*.0225`;
-      } else if (index === 2) {
-        updatedFormula = `=SUM(${col}${row.number - 2}:${col}${row.number - 1})`;
-      } else {
-        updatedFormula = "";
+
+      switch (index) {
+        case 0:
+          updatedFormula = `=SUM(${col}6:${col}${row.number - 3})`;
+          break;
+        case 1:
+          updatedFormula = `=${col}${row.number - 1}*.0225`;
+          break;
+        case 2:
+          updatedFormula = `=SUM(${col}${row.number - 2}:${col}${row.number - 1})`;
+          break;
+        default:
+          updatedFormula = "";
       }
       sheet.getCell(cellId).value = { ...cell, formula: updatedFormula };
     });
