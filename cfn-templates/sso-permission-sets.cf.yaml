@@ -1,0 +1,219 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+
+Parameters:
+  InstanceArn:
+    Description: >-
+      The ARN of the SSO instance. This can be found via the AWS SSO API using the
+      `ListInstances` operation. For example, `aws sso-admin list-instances.
+    Type: String
+  CentralAccountRolePermissionsBoundary:
+    Description: >-
+      The name of the permissions boundary in the ATAT central account that must be
+      applied to roles. This must be the role NAME not the role ARN.
+    Type: String
+    Default: "GovCloudAdminRoleBoundary"
+
+Resources:
+  # Only Administrators and Auditors should have access to the the Central account. There
+  # is not any reason to create roles in the Central Account. The Central Account is also
+  # treated differently because there is a permissions boundary and SCP in place that
+  # requires a Permissions Boundary to be attached to all roles
+  CentralAccountAdminAccess:
+    Type: AWS::SSO::PermissionSet
+    Properties:
+      InstanceArn: !Ref InstanceArn
+      Name: CentralAccountAdministrator
+      Description: >-
+        Administrator access in the central account of the AWS organization
+      ManagedPolicies:
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AdministratorAccess"
+      SessionDuration: PT1H
+      PermissionsBoundary:
+        CustomerManagedPolicyReference:
+          Name: !Ref CentralAccountRolePermissionsBoundary
+  CentralAccountAuditorAccess:
+    Type: AWS::SSO::PermissionSet
+    Properties:
+      InstanceArn: !Ref InstanceArn
+      Name: CentralAccountAuditor
+      Description: >-
+        Auditor access in the central account of the AWS organization
+      ManagedPolicies:
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/job-function/ViewOnlyAccess"
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/SecurityAudit"
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/CloudWatchLogsReadOnlyAccess"
+      SessionDuration: PT1H
+      PermissionsBoundary:
+        CustomerManagedPolicyReference:
+          Name: !Ref CentralAccountRolePermissionsBoundary
+
+  AtatAdministratorAccess:
+    Type: AWS::SSO::PermissionSet
+    Properties:
+      InstanceArn: !Ref InstanceArn
+      Name: AtatAdministrator
+      Description: >-
+        Administrator access to general purpose AWS accounts. This does not rely
+        on any custom managed or inline policies and uses the AWS
+        AdministratorAccess policy
+      ManagedPolicies:
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AdministratorAccess"
+      SessionDuration: PT1H
+
+  AtatDeveloperAccess:
+    Type: AWS::SSO::PermissionSet
+    Properties:
+      InstanceArn: !Ref InstanceArn
+      Name: AtatDeveloper
+      Description: >-
+        Developer access to the mission application AWS accounts for ATAT.
+      SessionDuration: PT1H
+      ManagedPolicies:
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/job-function/ViewOnlyAccess"
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/CloudWatchLogsReadOnlyAccess"
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AWSCloudFormationFullAccess"
+      InlinePolicy:
+        Version: 2012-10-17
+        Statement:
+          - Sid: DenyActionsInOtherAccoutns
+            Effect: Deny
+            Action: "*"
+            Resource: "*"
+            Condition:
+              StringNotEquals:
+                aws:ResourceAccount: "${aws:PrincipalAccount}"
+          - Effect: Allow
+            Action: apigateway:GET
+            Resource: 
+              - !Sub arn:${AWS::Partition}:apigateway:*::/account
+              - !Sub arn:${AWS::Partition}:apigateway:*::/restapis
+              - !Sub arn:${AWS::Partition}:apigateway:*::/restapis/*
+          - Effect: Allow
+            Action:
+              - xray:Get*
+              - xray:List*
+            Resource: "*"
+          - Effect: Allow
+            Action:
+              - states:Describe*
+              - states:Get*
+              - states:List*
+            Resource: "*"
+          - Effect: Allow
+            Action: s3:*
+            Resource:
+              - !Sub arn:${AWS::Partition}:s3:::cdk-*-assets-*-*
+              - !Sub arn:${AWS::Partition}:s3:::cdktoolkit-stagingbucket-*
+          - Effect: Allow
+            Action: sts:AssumeRole
+            Resource: !Sub arn:${AWS::Partition}:iam::*:role/cdk-*-*-role-*-us-gov-*
+          - Effect: Allow
+            Action: ssm:GetParameter
+            Resource: !Sub arn:${AWS::Partition}:ssm:*:*:parameter/cdk-bootstrap/*
+          - Effect: Allow
+            Action:
+              - sqs:Get*
+              - sqs:List*
+              - sqs:ReceiveMessage
+              - sqs:SendMessage
+              - sqs:PurgeQueue
+            Resource: "*"
+          - Effect: Allow
+            Action:
+              - codebuild:BatchGet*
+              - codebuild:Describe*
+              - codebuild:Get*
+              - codebuild:List*
+              - codepipeline:Get*
+              - codepipeline:List*
+            Resource: "*"
+          - Effect: Allow
+            Action:
+              - lambda:List*
+              - lambda:GetAccountSettings
+              - lambda:GetFunction
+            Resource: "*"
+          - Effect: Allow
+            Action: apigateway:POST
+            Resource: !Sub arn:${AWS::Partition}:apigateway:*::/restapis/*/deployments
+  AtatAuditorAccess:
+    Type: AWS::SSO::PermissionSet
+    Properties:
+      InstanceArn: !Ref InstanceArn
+      Name: AtatAuditor
+      Description: >-
+        Auditor access to the mission application AWS accounts for ATAT
+      ManagedPolicies:
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/job-function/ViewOnlyAccess"
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/SecurityAudit"
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/CloudWatchLogsReadOnlyAccess"
+      InlinePolicy:
+        Version: 2012-10-17
+        Statement:
+          - Sid: DenyActionsInOtherAccoutns
+            Effect: Deny
+            Action: "*"
+            Resource: "*"
+            Condition:
+              StringNotEquals:
+                aws:ResourceAccount: "${aws:PrincipalAccount}"
+          - Effect: Allow
+            Action: apigateway:GET
+            Resource: 
+              - !Sub arn:${AWS::Partition}:apigateway:*::/account
+              - !Sub arn:${AWS::Partition}:apigateway:*::/restapis
+              - !Sub arn:${AWS::Partition}:apigateway:*::/restapis/*
+          - Effect: Allow
+            Action:
+              - xray:Get*
+              - xray:List*
+            Resource: "*"
+          - Effect: Allow
+            Action:
+              - states:Describe*
+              - states:Get*
+              - states:List*
+            Resource: "*"
+          - Effect: Allow
+            Action:
+              - artifact:Get*
+              - artifact:DownloadAgreement
+            Resource: "*"
+
+  AtatQaAccess:
+    Type: AWS::SSO::PermissionSet
+    Properties:
+      InstanceArn: !Ref InstanceArn
+      Name: AtatQa
+      Description: >-
+        Access for members of Test and QA teams supporting ATAT.
+      ManagedPolicies:
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/job-function/ViewOnlyAccess"
+      InlinePolicy:
+        Version: 2012-10-17
+        Statement:
+          - Sid: DenyActionsInOtherAccoutns
+            Effect: Deny
+            Action: "*"
+            Resource: "*"
+            Condition:
+              StringNotEquals:
+                aws:ResourceAccount: "${aws:PrincipalAccount}"
+          - Effect: Allow
+            Action: apigateway:GET
+            Resource: 
+              - !Sub arn:${AWS::Partition}:apigateway:*::/account
+              - !Sub arn:${AWS::Partition}:apigateway:*::/restapis
+              - !Sub arn:${AWS::Partition}:apigateway:*::/restapis/*
+          - Effect: Allow
+            Action:
+              - xray:Get*
+              - xray:List*
+            Resource: "*"
+          - Effect: Allow
+            Action:
+              - states:Describe*
+              - states:Get*
+              - states:List*
+            Resource: "*"
