@@ -2,32 +2,34 @@
 import { capitalize } from "./utils";
 import { AwardType, IPeriod, ISelectedServiceOffering } from "../../models/document-generation";
 import { HelperOptions } from "handlebars";
+
+// DoW helpers
 export const formatDuration = (periods: IPeriod[]): string => {
   if (periods === null || typeof periods === "string" || typeof periods === "boolean") {
     return "No periods provided.";
   }
   periods = periods.map((period: IPeriod) => {
-    let period_unit = capitalize(period.period_unit);
-    if (period_unit !== "Year") {
-      period_unit += "(s)";
+    let periodUnit = capitalize(period.periodUnit);
+    if (periodUnit !== "Year") {
+      periodUnit += "(s)";
     }
-    return { ...period, period_unit };
+    return { ...period, periodUnit };
   });
 
-  const base = periods.filter((period: IPeriod) => period.period_type === "BASE");
+  const base = periods.filter((period: IPeriod) => period.periodType === "BASE");
 
   const options = periods
-    .filter((period) => period.period_type === "OPTION")
-    .sort((a, b) => a.option_order - b.option_order);
+    .filter((period) => period.periodType === "OPTION")
+    .sort((a, b) => a.optionOrder - b.optionOrder);
 
   // structure the base and option periods
   const hasBase = base.length > 0;
   const basePeriod = hasBase
-    ? base.map((period) => `Base: ${period.period_unit_count} ${period.period_unit}`).join("")
+    ? base.map((period) => `Base: ${period.periodUnitCount} ${period.periodUnit}`).join("")
     : "";
   const hasOptions = options.length > 0;
   const optionPeriods = hasOptions
-    ? options.map((period) => `OP${period.option_order}: ${period.period_unit_count} ${period.period_unit}`).join(", ")
+    ? options.map((period) => `OP${period.optionOrder}: ${period.periodUnitCount} ${period.periodUnit}`).join(", ")
     : "";
 
   // display periods based on what duration is available
@@ -45,25 +47,25 @@ export const formatGroupAndClassification = (serviceOffering: any, classificatio
   let formattedClassification: string;
 
   // structure and display classification levels
-  const { classification, impact_level } = classificationLevel;
+  const { classification, impactLevel } = classificationLevel;
   if (classification === "TS") {
     formattedClassification = `Top Secret`;
   } else if (classification === "S") {
-    formattedClassification = `Secret/${impact_level}`;
+    formattedClassification = `Secret/${impactLevel}`;
   } else if (classification === "U") {
-    formattedClassification = `Unclassified/${impact_level}`;
+    formattedClassification = `Unclassified/${impactLevel}`;
   } else {
     // defaulting to a higher classification
     formattedClassification = "Secret/IL6";
   }
 
   // manual service offering input by the user as Other
-  if (serviceOffering.service_offering_group === null) {
+  if (serviceOffering.serviceOfferingGroup === null) {
     return `${formattedClassification} — Other: ${serviceOffering.name}`;
   }
 
   // structure provided service offerings
-  const offering = serviceOffering.service_offering_group.split("_").map(capitalize).join(" ");
+  const offering = serviceOffering.serviceOfferingGroup.split("_").map(capitalize).join(" ");
   return `${formattedClassification} — ${offering}`;
 };
 
@@ -97,6 +99,6 @@ export const counter = (options: HelperOptions): string => {
 
 export const countSections = (serviceOfferings: ISelectedServiceOffering[]): number => {
   return serviceOfferings
-    .map((service) => service.classification_instances.length)
+    .map((service) => service.classificationInstances.length)
     .reduce((sum, current) => sum + current, 0);
 };

@@ -6,13 +6,8 @@ import inputOutputLogger from "@middy/input-output-logger";
 import errorLogger from "@middy/error-logger";
 import { logger } from "../utils/logging";
 import { tracer } from "../utils/tracing";
-import {
-  ApiBase64SuccessResponse,
-  OtherErrorResponse,
-  SuccessStatusCode,
-  ValidationErrorResponse,
-} from "../utils/response";
-import { INTERNAL_SERVER_ERROR, NOT_IMPLEMENTED } from "../utils/errors";
+import { ApiBase64SuccessResponse, SuccessStatusCode, ValidationErrorResponse } from "../utils/response";
+import { INTERNAL_SERVER_ERROR } from "../utils/errors";
 import { LoggingContextMiddleware } from "../utils/middleware/logging-context-middleware";
 import { errorHandlingMiddleware } from "../utils/middleware/error-handling-middleware";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
@@ -20,30 +15,28 @@ import validator from "@middy/validator";
 import xssSanitizer from "../utils/middleware/xss-sanitizer";
 import { wrapSchema } from "../utils/middleware/schema-wrapper";
 import { generateDocument } from "./chromium";
+import { generateIGCEDocument } from "./igce-document";
+import { getPDFDocumentTemplates, getExcelTemplatePath } from "./utils/utils";
 import {
   generateDocumentSchema,
   RequestEvent,
   GenerateDocumentRequest,
   DocumentType,
+  IndependentGovernmentCostEstimate,
 } from "../models/document-generation";
-import * as fs from "fs";
 import handlebars from "handlebars";
 import juice from "juice";
-import {
-  formatDuration,
-  formatGroupAndClassification,
-  counter,
-  countSections,
-  formatAwardType,
-} from "./handlebarUtils/helpers";
+import { formatDuration, formatGroupAndClassification, counter, countSections, formatAwardType } from "./utils/helpers";
 
 async function baseHandler(event: RequestEvent<GenerateDocumentRequest>): Promise<ApiBase64SuccessResponse> {
   const { documentType } = event.body;
+  logger.info("Generating document", { documentType });
+
   switch (documentType) {
     case DocumentType.DESCRIPTION_OF_WORK:
       return generatePdf(event);
     case DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE:
-      return generateXlsx();
+      return generateXlsx(event);
     default:
       return new ValidationErrorResponse(`Invalid document type: "${documentType}"`, {
         cause: `Invalid document type "${documentType}" provided. Please provide a valid document  type.`,
@@ -53,17 +46,7 @@ async function baseHandler(event: RequestEvent<GenerateDocumentRequest>): Promis
 
 async function generatePdf(event: RequestEvent<GenerateDocumentRequest>): Promise<ApiBase64SuccessResponse> {
   const { documentType, templatePayload } = event.body;
-
-  const documentTemplatePaths = {
-    [DocumentType.DESCRIPTION_OF_WORK as string]: {
-      html: "/opt/dow-template.html",
-      css: "/opt/dow-style.css",
-    },
-  };
-
-  // get files to generate documents
-  const html = fs.readFileSync(documentTemplatePaths[documentType].html, "utf-8");
-  const css = fs.readFileSync(documentTemplatePaths[documentType].css, "utf-8");
+  const { html, css } = getPDFDocumentTemplates(documentType);
   const htmlWithCss = juice.inlineContent(html, css);
 
   // use handlebars to populate data into template
@@ -80,11 +63,14 @@ async function generatePdf(event: RequestEvent<GenerateDocumentRequest>): Promis
     "Content-Type": "application/pdf",
     "Content-Disposition": `attachment; filename=DescriptionOfWork.pdf`,
   };
+
   return new ApiBase64SuccessResponse(pdf.toString("base64"), SuccessStatusCode.OK, headers);
 }
 
-async function generateXlsx(): Promise<OtherErrorResponse> {
-  return NOT_IMPLEMENTED;
+async function generateXlsx(event: RequestEvent<GenerateDocumentRequest>): Promise<ApiBase64SuccessResponse> {
+  const { documentType, templatePayload } = event.body;
+  const excelTemplatePath = getExcelTemplatePath(documentType);
+  return generateIGCEDocument(excelTemplatePath, templatePayload as IndependentGovernmentCostEstimate);
 }
 
 export const handler = middy(baseHandler)
