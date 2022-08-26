@@ -59,7 +59,7 @@
     "@middy/input-output-logger": "^3.2.2",
     "@middy/validator": "^3.2.2",
     "@sparticuz/chrome-aws-lambda": "^16.2.0",
-    "aws-cdk-lib": "2.38.1",
+    "aws-cdk-lib": "2.39.0",
     "axios": "^0.27.2",
     "cdk-monitoring-constructs": "^1.22.0",
     "cdk-nag": "^2.16.1",
