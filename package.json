@@ -61,7 +61,7 @@
     "@sparticuz/chrome-aws-lambda": "^16.2.0",
     "aws-cdk-lib": "2.38.1",
     "axios": "^0.27.2",
-    "cdk-monitoring-constructs": "^1.22.0",
+    "cdk-monitoring-constructs": "^1.22.1",
     "cdk-nag": "^2.16.1",
     "constructs": "^10.1.86",
     "exceljs": "^4.3.0",
