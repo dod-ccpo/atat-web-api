@@ -4,7 +4,7 @@ import * as logs from "aws-cdk-lib/aws-logs";
 import * as custom from "aws-cdk-lib/custom-resources";
 import * as route53Resolver from "aws-cdk-lib/aws-route53resolver";
 
-import { Construct } from "constructs";
+import { Construct, DependencyGroup } from "constructs";
 
 const DEFAULT_ROUTE = "0.0.0.0/0";
 
@@ -147,11 +147,7 @@ export class AtatNetStack extends cdk.Stack {
       // starts Creation before the attachment is accepted and attached then the
       // route will fail to be created and the stack creation will fail.
       route.addDependsOn(transitGatewayAttachment);
-      // We need to disable this check because we're actually bypassing the
-      // private member check in TypeScript. This is because we may want to leverage
-      // the actual `internetConnectivityEstablished` attribute later
-      // eslint-disable-next-line dot-notation
-      subnet["_internetConnectivityEstablished"].add(route);
+      (subnet.internetConnectivityEstablished as DependencyGroup).add(route);
     });
   }
 
