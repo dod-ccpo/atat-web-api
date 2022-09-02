@@ -63,7 +63,7 @@
     "axios": "^0.27.2",
     "cdk-monitoring-constructs": "^1.22.2",
     "cdk-nag": "^2.17.1",
-    "constructs": "^10.1.91",
+    "constructs": "^10.1.94",
     "exceljs": "^4.3.0",
     "handlebars": "^4.7.7",
     "http-errors": "^2.0.0",
