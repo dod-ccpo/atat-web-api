@@ -4,18 +4,19 @@ import { AtatWebApiStack, ApiCertificateOptions } from "../lib/atat-web-api-stac
 import { RemovalPolicySetter } from "../lib/aspects/removal-policy";
 import { GovCloudCompatibilityAspect } from "../lib/aspects/govcloud-compatibility";
 import { AtatPipelineStack } from "../lib/atat-pipeline-stack";
+import { AtatContextValue } from "../lib/context-values";
 
 export function createApp(props?: cdk.AppProps): cdk.App {
   const app = new cdk.App(props);
 
-  const environmentParam = app.node.tryGetContext("atat:EnvironmentId");
-  const sandboxParam = app.node.tryGetContext("atat:Sandbox");
-  const vpcCidrParam = app.node.tryGetContext("atat:VpcCidr");
-  const apiDomainParam = app.node.tryGetContext("atat:ApiDomainName");
-  const apiCertParam = app.node.tryGetContext("atat:ApiCertificateArn");
+  const environmentParam = AtatContextValue.ENVIRONMENT_ID.resolve(app);
+  const sandboxParam = AtatContextValue.SANDBOX_ENVIRONMENT.resolve(app);
+  const vpcCidrParam = AtatContextValue.VPC_CIDR.resolve(app);
+  const apiDomainParam = AtatContextValue.API_DOMAIN_NAME.resolve(app);
+  const apiCertParam = AtatContextValue.API_CERTIFICATE_ARN.resolve(app);
 
   if (!utils.isString(environmentParam)) {
-    const err = "An EnvironmentId must be provided (use the atat:EnvironmentId context key)";
+    const err = `An EnvironmentId must be provided (use the ${AtatContextValue.ENVIRONMENT_ID} context key)`;
     console.error(err);
     throw new Error(err);
   }
@@ -23,7 +24,9 @@ export function createApp(props?: cdk.AppProps): cdk.App {
   let apiCertOptions: ApiCertificateOptions | undefined;
 
   if (utils.isString(apiDomainParam) !== utils.isString(apiCertParam)) {
-    const err = "Both or neither of ApiDomainName and ApiCertificateArn must be specified";
+    const err =
+      `Both or neither of ${AtatContextValue.API_DOMAIN_NAME} ` +
+      `and ${AtatContextValue.API_CERTIFICATE_ARN} must be specified`;
     console.error(err);
     throw new Error(err);
   } else if (apiDomainParam && apiCertParam) {
@@ -49,7 +52,7 @@ export function createApp(props?: cdk.AppProps): cdk.App {
   if (isSandbox) {
     // Sandbox environments (which do NOT have a VPC) must NOT have a VpcCidr parameter
     if (utils.isString(vpcCidrParam) || validateCidr(vpcCidrParam)) {
-      const err = "A VpcCidr must NOT be provided for Sandbox environments.";
+      const err = `${AtatContextValue.VPC_CIDR} must NOT be provided for Sandbox environments.`;
       console.error(err);
       throw new Error(err);
     }
@@ -64,7 +67,7 @@ export function createApp(props?: cdk.AppProps): cdk.App {
     // Non Sandbox environments (which have a VPC) must have a VpcCidr parameter
     if (!utils.isString(vpcCidrParam) || !validateCidr(vpcCidrParam)) {
       const err =
-        "A VpcCidr must be provided for non-Sandbox environments (use the atat:VpcCidr context key) " +
+        `A VpcCidr must be provided for non-Sandbox environments (use the ${AtatContextValue.VPC_CIDR} context key) ` +
         "and it must be a valid CIDR block.";
       console.error(err);
       throw new Error(err);
@@ -80,13 +83,13 @@ export function createApp(props?: cdk.AppProps): cdk.App {
     const pipelineStack = new AtatPipelineStack(app, "AtatEnvironmentPipeline", {
       environmentName,
       vpcCidr: vpcCidrParam,
-      repository: app.node.tryGetContext("atat:VersionControlRepo"),
-      branch: app.node.tryGetContext("atat:VersionControlBranch"),
-      githubPatName: app.node.tryGetContext("atat:GitHubPatName"),
+      repository: AtatContextValue.VERSION_CONTROL_REPO.resolve(app),
+      branch: AtatContextValue.VERSION_CONTROL_BRANCH.resolve(app),
+      githubPatName: AtatContextValue.GITHUB_PAT_NAME.resolve(app),
       apiDomain: apiCertOptions,
       // Set the notification email address, unless we're building the account where
       // sandbox environments live because our inboxes would never recover.
-      notificationEmail: environmentName === "Sandbox" ? undefined : app.node.tryGetContext("atat:NotificationEmail"),
+      notificationEmail: environmentName === "Sandbox" ? undefined : AtatContextValue.NOTIFICATION_EMAIL.resolve(app),
     });
   }
   return app;
