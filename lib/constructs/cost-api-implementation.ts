@@ -11,6 +11,7 @@ import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 import * as idp from "../constructs/identity-provider";
 import * as secrets from "aws-cdk-lib/aws-secretsmanager";
 import { NodejsFunctionProps } from "aws-cdk-lib/aws-lambda-nodejs";
+import { AtatContextValue } from "../context-values";
 
 export interface ICostApiImplementation extends IApiRoute {
   readonly costRequestQueue: FifoQueue;
@@ -38,7 +39,7 @@ export class CostApiImplementation extends Construct implements ICostApiImplemen
     const cspConfig = secrets.Secret.fromSecretNameV2(
       this,
       "CspConfiguration",
-      this.node.tryGetContext("atat:CspConfigurationName")
+      AtatContextValue.CSP_CONFIGURATION_NAME.resolve(this)
     );
 
     // Cost Queues

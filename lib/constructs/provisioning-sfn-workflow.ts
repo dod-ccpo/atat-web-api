@@ -14,6 +14,7 @@ import { IdentityProviderLambdaClient, IIdentityProvider } from "./identity-prov
 import { mapTasks, TasksMap } from "./sfn-lambda-invoke-task";
 import { FifoQueue } from "./sqs";
 import { LoggingStandardStateMachine } from "./state-machine";
+import { AtatContextValue } from "../context-values";
 
 /**
  * Successful condition check
@@ -66,7 +67,7 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
     const cspConfig = secrets.Secret.fromSecretNameV2(
       this,
       "CspConfiguration",
-      this.node.tryGetContext("atat:CspConfigurationName")
+      AtatContextValue.CSP_CONFIGURATION_NAME.resolve(this)
     );
     const cspWritePortfolioFn = new lambdaNodeJs.NodejsFunction(scope, "CspWritePortfolioFn", {
       entry: "api/provision/csp-write-portfolio.ts",

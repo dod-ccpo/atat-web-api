@@ -7,6 +7,7 @@ import { AtatNetStack } from "./atat-net-stack";
 import { AtatNotificationStack } from "./atat-notification-stack";
 import { ApiCertificateOptions, AtatWebApiStack } from "./atat-web-api-stack";
 import { NagSuppressions, NIST80053R4Checks } from "cdk-nag";
+import { AtatContextValue } from "./context-values";
 
 export interface AtatProps {
   environmentName: string;
@@ -57,11 +58,14 @@ class AtatApplication extends cdk.Stage {
 export class AtatPipelineStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: AtatPipelineStackProps) {
     super(scope, id, props);
-    const synthParams = [`-c atat:EnvironmentId=${props.environmentName}`, `-c atat:VpcCidr=${props.vpcCidr}`];
+    const synthParams = [
+      AtatContextValue.ENVIRONMENT_ID.toCliArgument(props.environmentName),
+      AtatContextValue.VPC_CIDR.toCliArgument(props.vpcCidr),
+    ];
     if (props.apiDomain) {
       synthParams.push(
-        `-c atat:ApiDomainName=${props.apiDomain.domainName}`,
-        `-c atat:ApiCertificateArn=${props.apiDomain.acmCertificateArn}`
+        AtatContextValue.API_DOMAIN_NAME.toCliArgument(props.apiDomain.domainName),
+        AtatContextValue.API_CERTIFICATE_ARN.toCliArgument(props.apiDomain.acmCertificateArn)
       );
     }
 
@@ -69,7 +73,7 @@ export class AtatPipelineStack extends cdk.Stack {
       synth: new pipelines.ShellStep("Synth", {
         input: pipelines.CodePipelineSource.gitHub(props.repository, props.branch, {
           authentication: cdk.SecretValue.secretsManager(props.githubPatName, {
-            versionId: this.node.tryGetContext("atat:ForceGitHubTokenVersion"),
+            versionId: AtatContextValue.FORCE_GITHUB_TOKEN_VERSION.resolve(this),
           }),
         }),
         commands: ["npm ci", "npm run build", "npm run -- cdk synth " + synthParams.join(" ")],

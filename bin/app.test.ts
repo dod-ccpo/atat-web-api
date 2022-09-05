@@ -27,7 +27,7 @@ describe("Validation tests", () => {
           "atat:VpcCidr": validCidr,
         },
       });
-    }).toThrow("A VpcCidr must NOT be provided for Sandbox environments.");
+    }).toThrow("atat:VpcCidr must NOT be provided for Sandbox environments.");
   });
 
   it("should have ViprCidr if not Sandbox", async () => {
