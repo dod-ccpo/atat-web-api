@@ -75,5 +75,10 @@ And then once you've confirmed that they do, deploy:
 cdk deploy -c atat:EnvironmentId=<ENVIRONMENT_ID> -c atat:Sandbox=true
 ```
 
-The deployed pipeline will be self-mutating so further manual deployments should be rarely (if ever) be
-needed.
+The deployed pipeline will be self-mutating so futher manual deployments should be rarely needed.
+The primary situations needing manual deployment are:
+ - When the GitHub PAT is rotated (using the `atat:ForceGitHubTokenVersion` context)
+ - When changes that require additional command line arguments to `cdk synth` in the self-mutate
+   step are made
+ - When it is necessary to change the branch being watched without a corresponding push to the
+   current target branch (for example, to switch from watching `main` to watching `develop`)
