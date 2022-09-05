@@ -68,7 +68,9 @@ export class AtatPipelineStack extends cdk.Stack {
     const pipeline = new pipelines.CodePipeline(this, "Pipeline", {
       synth: new pipelines.ShellStep("Synth", {
         input: pipelines.CodePipelineSource.gitHub(props.repository, props.branch, {
-          authentication: cdk.SecretValue.secretsManager(props.githubPatName),
+          authentication: cdk.SecretValue.secretsManager(props.githubPatName, {
+            versionId: this.node.tryGetContext("atat:ForceGitHubTokenVersion"),
+          }),
         }),
         commands: ["npm ci", "npm run build", "npm run -- cdk synth " + synthParams.join(" ")],
       }),

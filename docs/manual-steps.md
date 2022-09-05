@@ -38,6 +38,13 @@ partitions where CodeStar integration is not possible.
 The Secret Name/Path/ARN is configured in the `atat:GitHubPatName` context
 setting. The default Secret Name is `auth/github/pat`.
 
+When the GitHub PAT is updated in AWS Secrets Manager, the Version ID must be
+obtained (this can be done with the `ListSecretVersionIds` API). Then, a
+manual deployment of the pipeline stack must be performed in _each_ environment,
+passing the `atat:ForceGitHubTokenVersion` context value set to the version ID.
+This will ensure that CloudFormation resolves the new version of the secret and
+updates all necessary resources appropriately.
+
 ### Cloud Service Provider Integration Configuration
 
 The configuration values for integrating with Cloud Service Providers is stored
