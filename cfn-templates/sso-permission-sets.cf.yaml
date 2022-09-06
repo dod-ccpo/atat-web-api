@@ -43,6 +43,8 @@ Resources:
         - !Sub "arn:${AWS::Partition}:iam::aws:policy/job-function/ViewOnlyAccess"
         - !Sub "arn:${AWS::Partition}:iam::aws:policy/SecurityAudit"
         - !Sub "arn:${AWS::Partition}:iam::aws:policy/CloudWatchLogsReadOnlyAccess"
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AWSSSOReadOnly"
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AWSSSODirectoryReadOnly"
       SessionDuration: PT1H
       PermissionsBoundary:
         CustomerManagedPolicyReference:
