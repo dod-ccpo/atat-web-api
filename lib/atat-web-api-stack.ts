@@ -18,6 +18,7 @@ import { ProvisioningWorkflow } from "./constructs/provisioning-sfn-workflow";
 import { VpcEndpointApplicationTargetGroup } from "./constructs/vpc-endpoint-lb-target";
 import { HttpMethod } from "./http";
 import { NagSuppressions } from "cdk-nag";
+import * as cr from "aws-cdk-lib/custom-resources";
 
 export interface ApiCertificateOptions {
   domainName: string;
@@ -43,6 +44,30 @@ export class AtatWebApiStack extends cdk.Stack {
         reason: "CloudFormation does not support KmsKeyId for AWS::Logs::LogGroup in us-gov-west-1",
       },
     ]);
+
+    // This forces all created `AwsCustomResource` constructs to use a VPC. The reasoning for
+    // this requires some understanding of how the CDK creates an `AwsCustomResource` construct.
+    // At the base, it is a `lambda.SingletonFunction` which gets reused across the stack. This
+    // also means that if we create this first in the stack, it will be reused any time that
+    // `AwsCustomResource` is used in our constructs or within the CDK's inner constructs across
+    // this stack.
+    // sts:GetCallerIdentity is the most nop API action that one can think of and it's the only
+    // API call that can never return a permission error so long as you've got valid credentials
+    // so it seems like a pretty reasonable choice for this.
+    // Because we don't control all the places where an `AwsCustomResource` is created and it's
+    // not viable for us to reimplement all of them ourselves to avoid CDK-created ones, this is
+    // the best possible workaround.
+    if (props.network) {
+      new cr.AwsCustomResource(this, "NopCustomResource", {
+        onCreate: {
+          service: "STS",
+          action: "getCallerIdentity",
+          physicalResourceId: cr.PhysicalResourceId.of("unused-value"),
+        },
+        vpc: props.network?.vpc,
+        policy: cr.AwsCustomResourcePolicy.fromSdkCalls({ resources: cr.AwsCustomResourcePolicy.ANY_RESOURCE }),
+      });
+    }
 
     const { environmentName, network } = props;
     const apiProps: AtatRestApiProps = {
@@ -238,20 +263,5 @@ export class AtatWebApiStack extends cdk.Stack {
       vpc: props?.network?.vpc,
       idp: atatIdp,
     });
-
-    // This suppression has to be added here because of the way the AwsCustomResource and the
-    // SingletonLambda work. See https://github.com/cdklabs/cdk-nag/issues/959
-    NagSuppressions.addResourceSuppressionsByPath(
-      this,
-      `/${this.node.path}/AWS679f53fac002430cb0da5b7982bd2287/Resource`,
-      [
-        {
-          id: "NIST.800.53.R4-LambdaInsideVPC",
-          reason:
-            "The AwsCustomResource type does not support being placed in a VPC. " +
-            "This can only ever make limited-permissions calls that will appear in CloudTrail.",
-        },
-      ]
-    );
   }
 }
