@@ -365,20 +365,20 @@ components:
         API for a given Cloud Service Provider
       type: object
       properties:
-        request_id:
+        requestId:
           description: ID to enable correlating Cost reqeusts with responses
           type: string
           format: uuid
-        portfolio_id:
+        portfolioId:
           type: string
-        target_csp:
+        targetCsp:
           $ref: "#/components/schemas/TargetCloudServiceProvider"
-        start_date:
+        startDate:
           description: Start date of Cost query
           type: string
           format: date
           example: "2021-07-01"
-        end_date:
+        endDate:
           description: End date of Cost query
           type: string
           format: date
