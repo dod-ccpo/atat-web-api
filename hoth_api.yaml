@@ -261,13 +261,13 @@ components:
         - $ref: "#/components/schemas/ProvisioningPayload"
       required:
         - name
-        - funding_sources
+        - fundingSources
         - operators
       properties:
         name:
           type: string
           description: Name of the Portfolio being created
-        funding_sources:
+        fundingSources:
           type: array
           items:
             $ref: "#/components/schemas/FundingSource"
@@ -276,7 +276,7 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Operator"
-        csp_id:
+        cspId:
           type: string
           readOnly: true
     FundingSourcePayload:
@@ -284,9 +284,9 @@ components:
       allOf:
         - $ref: "#/components/schemas/ProvisioningPayload"
       required:
-        - funding_sources
+        - fundingSources
       properties:
-        funding_sources:
+        fundingSources:
           type: array
           items:
             $ref: "#/components/schemas/FundingSource"
