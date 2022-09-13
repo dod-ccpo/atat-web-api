@@ -6,19 +6,105 @@ import inputOutputLogger from "@middy/input-output-logger";
 import validator from "@middy/validator";
 import { Context } from "aws-lambda";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
-import { CspRequest } from "../../models/cost-jobs";
-import { ProvisionRequest, provisionRequestSchema } from "../../models/provisioning-jobs";
+import {
+  AsyncProvisionRequest,
+  NewPortfolioPayload,
+  ProvisionCspResponse,
+  ProvisionRequest,
+  provisionRequestSchema,
+} from "../../models/provisioning-jobs";
 import { logger } from "../../utils/logging";
 import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
 import { ValidationErrorResponse } from "../../utils/response";
 import { tracer } from "../../utils/tracing";
-import { cspRequest, CspResponse } from "../util/csp-request";
+import { CspResponse } from "../util/csp-request";
+import { AtatClient, AtatApiError, IAtatClient } from "../client/client";
+import * as atatApiTypes from "../client/types";
+import { makeClient } from "../../utils/atat-client";
+
+function transformSynchronousResponse(
+  response: atatApiTypes.AddPortfolioResponseSync,
+  request: atatApiTypes.AddPortfolioRequest
+): CspResponse<atatApiTypes.AddPortfolioRequest, atatApiTypes.AddPortfolioResponseSync> {
+  return {
+    code: response.$metadata.status,
+    content: {
+      response,
+      request,
+    },
+  };
+}
+
+function transformAsynchronousResponse(
+  response: atatApiTypes.AddPortfolioResponseAsync,
+  request: atatApiTypes.AddPortfolioRequest
+): CspResponse<atatApiTypes.AddPortfolioRequest, atatApiTypes.AddPortfolioResponseAsync | { details: string }> {
+  if (response.location) {
+    return {
+      code: response.$metadata.status,
+      content: {
+        response,
+        request,
+      },
+    };
+  }
+  return {
+    code: 500,
+    content: {
+      response: {
+        details: "Location header was invalid or not provided",
+      },
+      request,
+    },
+  };
+}
+
+async function makeRequest(client: IAtatClient, request: ProvisionRequest): Promise<ProvisionCspResponse> {
+  // This function will always be operating for creating new portfolios; if we have something
+  // else, this will be a non-recoverable error anyway.
+  const payload = request.payload as NewPortfolioPayload;
+  const creationRequest: atatApiTypes.AddPortfolioRequest = {
+    portfolio: {
+      name: payload.name,
+      administrators: payload.operators,
+      taskOrders: payload.fundingSources.map((funding) => ({
+        ...funding,
+        clins: [{ clinNumber: funding.clin, popStartDate: funding.popStartDate, popEndDate: funding.popEndDate }],
+        clin: undefined,
+      })),
+    },
+  };
+  try {
+    const cspResponse = await client.addPortfolio(creationRequest);
+    if (cspResponse.$metadata.status === 202) {
+      const asyncResponse = cspResponse as atatApiTypes.AddPortfolioResponseAsync;
+      return transformAsynchronousResponse(asyncResponse, creationRequest);
+    }
+    return transformSynchronousResponse(cspResponse as atatApiTypes.AddPortfolioResponseSync, creationRequest);
+  } catch (err) {
+    // Re-throw any unsupported error type
+    if (!err || typeof err !== "object" || !(err instanceof AtatApiError)) {
+      throw err;
+    }
+
+    // TODO: Make this more safe if these fields are in fact undefined. If they are
+    // undefined there's not really much to do to recover though; they're required by
+    // the specification. If they're absent, something has gone quite wrong.
+    return {
+      code: err.response!.status,
+      content: {
+        response: err.response?.data,
+        request: creationRequest,
+      },
+    };
+  }
+}
 
 /**
- * Mock invocation of CSP and returns a CSP Response based on CSP
- * - CspA URI - 200 response
- * - CspB URI - 400 response
- * - CspC or CspD URI - 500 response retries 2 times
+ * Make a provisioning request to the Cloud Service Provider.
+ *
+ * The output of this function is set as the `cspResponse` field by the Step
+ * Functions state machine.
  *
  * @param stateInput - Csp Invocation request
  * @return - CspResponse or throw error for 500 or above
@@ -26,67 +112,11 @@ import { cspRequest, CspResponse } from "../util/csp-request";
 export async function baseHandler(
   stateInput: ProvisionRequest,
   context: Context
-): Promise<CspResponse | ValidationErrorResponse> {
-  logger.info("Event", { event: stateInput as any });
+): Promise<ProvisionCspResponse | ValidationErrorResponse> {
   logger.addPersistentLogAttributes({ correlationIds: { jobId: stateInput.jobId } });
-
-  // TODO: Replace `createCspResponse` with `cspRequest` when
-  // we no longer need the mock implementations of CSP_<A|B|C|D> and can fully use the
-  // mock (or real) integration endpoints.
-  const cspResponse = await createCspResponse(stateInput);
-
-  // Throws a custom error identified by the state machine and the function retries 2
-  // times before failing continuing through the remaining states
-  if (cspResponse.code >= 500) {
-    const error = new Error(JSON.stringify(cspResponse));
-    Object.defineProperty(error, "name", {
-      value: "CspApiError",
-    });
-    throw error;
-  }
-
-  return cspResponse;
-}
-
-export async function createCspResponse(request: ProvisionRequest): Promise<CspResponse> {
-  let response: CspResponse;
-  switch (request.targetCsp.name) {
-    case "CSP_A":
-      response = {
-        code: 200,
-        content: {
-          response: { some: "good content" },
-          request,
-        },
-      };
-      logger.info("Success response", { response: response as any });
-      return response;
-    case "CSP_B":
-      response = {
-        code: 400,
-        content: {
-          response: { some: "bad content" },
-          request,
-        },
-      };
-      logger.error("Failed response", { response: response as any });
-      return response;
-    case "CSP_C":
-    case "CSP_D":
-      response = {
-        code: 500,
-        content: {
-          response: { some: "internal error" },
-          request,
-        },
-      };
-      logger.error("Internal error response", { response: response as any });
-      return response;
-    default:
-      response = await cspRequest({ requestType: CspRequest.PROVISION, body: request });
-      logger.info("Mock response", { response: response as any });
-      return response;
-  }
+  // TODO: actually populate this data (currently handled by `cspRequest` function)
+  const client = await makeClient(stateInput.targetCsp.name);
+  return makeRequest(client, stateInput);
 }
 
 export const handler = middy(baseHandler)

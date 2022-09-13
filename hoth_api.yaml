@@ -341,28 +341,6 @@ components:
           type: string
           format: date
           example: "2022-07-01"
-    CspInvocation:
-      required:
-        - method
-        - endpoint
-        - payload
-      properties:
-        method:
-          type: string
-          enum:
-            - GET
-            - POST
-            - PUT
-            - DELETE
-        headers:
-          type: object
-          additionalProperties:
-            type: string
-        endpoint:
-          type: string
-          format: uri
-        payload:
-          type: object
     CspResponse:
       required:
         - code

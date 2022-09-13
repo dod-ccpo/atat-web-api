@@ -19,18 +19,21 @@ const MESSAGE_GROUP_ID = "provisioning-queue-message-group";
  *
  * @param stateInput - input to the state task that is processed
  */
-
 export async function baseHandler(stateInput: ProvisionRequest): Promise<ProvisionRequest> {
-  const QUEUE_URL = process.env.PROVISIONING_QUEUE_URL ?? "";
+  let queueUrl = process.env.PROVISIONING_QUEUE_URL ?? "";
+  // Use the async queue if this is an async request.
+  if ("location" in (stateInput.cspResponse?.content.response ?? {})) {
+    queueUrl = process.env.ASYNC_PROVISIONING_JOBS_QUEUE_URL ?? "";
+  }
   logger.info("Sending result message to queue", {
     messageData: {
-      queue: QUEUE_URL,
+      queue: queueUrl,
       messageGroupId: MESSAGE_GROUP_ID,
     },
   });
   await sqsClient.send(
     new SendMessageCommand({
-      QueueUrl: QUEUE_URL,
+      QueueUrl: queueUrl,
       MessageBody: JSON.stringify(stateInput),
       MessageGroupId: MESSAGE_GROUP_ID,
     })

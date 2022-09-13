@@ -35,3 +35,10 @@ const baseLogger = new Logger({
 });
 
 export const logger = baseLogger;
+export interface ILogger {
+  debug(message?: any, ...params: any[]): void;
+  info(message?: any, ...params: any[]): void;
+  warn(message?: any, ...params: any[]): void;
+  error(message?: any, ...params: any[]): void;
+  [x: string]: any;
+}

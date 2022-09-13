@@ -1,5 +1,4 @@
 import { SQSEvent } from "aws-lambda";
-import { Network } from "../../models/cloud-service-providers";
 import { CostRequest } from "../../models/cost-jobs";
 import { ProvisionRequestType } from "../../models/provisioning-jobs";
 import * as crypto from "crypto";
@@ -29,10 +28,10 @@ export const operators = [
 export const cspA = {
   name: "CSP_A",
   uri: "https://cspa.example.com/api/atat",
-  network: Network.NETWORK_1,
+  network: "NETWORK_1",
 };
 
-export function constructCspTarget(csp: string, network: Network) {
+export function constructCspTarget(csp: string, network: string) {
   return {
     name: csp,
     uri: `https://${csp.toLocaleLowerCase()}.example/com/api/atat`,
@@ -46,7 +45,6 @@ export const provisioningBodyNoPayload = {
   portfolioId: "b02e77d1-234d-4e3d-bc85-b57ca5a93952",
   operationType: ProvisionRequestType.ADD_OPERATORS,
   targetCsp: cspA,
-  cspInvocation: undefined,
   cspResponse: undefined,
 };
 

@@ -3,6 +3,7 @@ import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as kms from "aws-cdk-lib/aws-kms";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as lambdaNodeJs from "aws-cdk-lib/aws-lambda-nodejs";
+import * as lambdaEvents from "aws-cdk-lib/aws-lambda-event-sources";
 import * as logs from "aws-cdk-lib/aws-logs";
 import * as secrets from "aws-cdk-lib/aws-secretsmanager";
 import * as sqs from "aws-cdk-lib/aws-sqs";
@@ -20,6 +21,11 @@ import { AtatContextValue } from "../context-values";
  * Successful condition check
  */
 export const successResponse = sfn.Condition.numberEquals("$.cspResponse.Payload.code", 200);
+
+/**
+ * A successful HTTP 202 response check
+ */
+export const asyncSuccessResponse = sfn.Condition.numberEquals("$.cspResponse.Payload.code", 202);
 
 /**
  * Client error condition check
@@ -53,6 +59,7 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
   readonly workflow: sfn.IChainable;
   readonly logGroup: logs.ILogGroup;
   readonly provisioningJobsQueue: sqs.IQueue;
+  readonly asyncProvisioningJobsQueue: sqs.IQueue;
   readonly resultFn: lambdaNodeJs.NodejsFunction;
   readonly provisioningQueueConsumer: ApiSfnFunction;
   readonly stateMachine: sfn.IStateMachine;
@@ -62,6 +69,9 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
     const { environmentName } = props;
 
     this.provisioningJobsQueue = new FifoQueue(scope, "ProvisioningJobsQueue");
+    this.asyncProvisioningJobsQueue = new FifoQueue(scope, "AsyncProvisioningJobsQueue", {
+      visibilityTimeout: cdk.Duration.hours(1),
+    });
 
     // Provisioning State machine functions
     const cspConfig = secrets.Secret.fromSecretNameV2(
@@ -88,6 +98,7 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
       runtime: lambda.Runtime.NODEJS_16_X,
       environment: {
         PROVISIONING_QUEUE_URL: this.provisioningJobsQueue.queueUrl,
+        ASYNC_PROVISIONING_JOBS_QUEUE_URL: this.asyncProvisioningJobsQueue.queueUrl,
       },
       vpc: props.vpc,
       tracing: lambda.Tracing.ACTIVE,
@@ -105,6 +116,7 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
     });
     this.provisioningJobsQueue.grantSendMessages(this.resultFn);
     this.provisioningJobsQueue.grantConsumeMessages(this.provisioningQueueConsumer.fn);
+    this.asyncProvisioningJobsQueue.grantSendMessages(this.resultFn);
 
     // Tasks for the Provisioning State Machine
     const tasks = [
@@ -135,8 +147,10 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
 
     // State machine choices based on the tasks output
     const httpResponseChoices = new sfn.Choice(scope, "HttpResponse")
+      // Intentionally, the 202 response is omitted here; it's cleanup will happen
       .when(successResponse, Results)
       .when(clientErrorResponse, Results)
+      .when(asyncSuccessResponse, new sfn.Succeed(scope, "AsyncHandledElsewhere"))
       .afterwards(); // converge choices and allows for additional tasks to be chained on
 
     // Composing state machine
@@ -150,5 +164,24 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
       logGroup: this.logGroup,
       definition: this.workflow,
     });
+
+    // Setup the Async event handling
+    const asyncProvisionWatcher = new lambdaNodeJs.NodejsFunction(this, "AsyncProvisionJob", {
+      entry: "api/provision/async-provisioning-check.ts",
+      runtime: lambda.Runtime.NODEJS_16_X,
+      environment: { CSP_CONFIG_SECRET_NAME: cspConfig.secretArn },
+      timeout: cdk.Duration.minutes(5),
+      memorySize: 256,
+      vpc: props.vpc,
+      tracing: lambda.Tracing.ACTIVE,
+    });
+    props.idp?.addClient(new IdentityProviderLambdaClient("CspAsyncProvisionJobClient", asyncProvisionWatcher), [
+      "atat/read-portfolio",
+    ]);
+    cspConfig.grantRead(cspWritePortfolioFn);
+    const asyncProvisionEventSource = new lambdaEvents.SqsEventSource(this.asyncProvisioningJobsQueue, {
+      reportBatchItemFailures: true,
+    });
+    asyncProvisionWatcher.addEventSource(asyncProvisionEventSource);
   }
 }

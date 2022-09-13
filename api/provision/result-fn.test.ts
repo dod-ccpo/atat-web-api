@@ -17,7 +17,7 @@ const withResponse = {
       request: provisioningBodyWithPayload,
     },
   },
-};
+} as any;
 
 beforeEach(() => {
   sqsMock.reset();
