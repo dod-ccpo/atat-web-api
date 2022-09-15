@@ -830,3 +830,14 @@ components:
           type: boolean
         accessibility_reqs_508:
           type: string
+    AsyncProvisioningJobRequest:
+      required:
+        - location
+      properties:
+        request:
+          $ref: "#/components/schemas/ProvisioningRequest"
+        location:
+          type: string
+          description: >-
+            URI which ATAT clients will poll until a provisioning job is complete or times out
+          format: uri
