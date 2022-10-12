@@ -10,9 +10,12 @@ Parameters:
   CentralAccountRolePermissionsBoundary:
     Description: >-
       The name of the permissions boundary in the ATAT central account that must be
-      applied to roles. This must be the role NAME not the role ARN.
+      applied to roles. This must be the role NAME not the role ARN. If your account
+      does not require a permissions boundary, use the value "!".
     Type: String
-    Default: "GovCloudAdminRoleBoundary"
+
+Conditions:
+  HasPermissionsBoundary: !Equals [!Ref CentralAccountRolePermissionsBoundary, "!"]
 
 Resources:
   # Only Administrators and Auditors should have access to the the Central account. There
@@ -29,9 +32,11 @@ Resources:
       ManagedPolicies:
         - !Sub "arn:${AWS::Partition}:iam::aws:policy/AdministratorAccess"
       SessionDuration: PT1H
-      PermissionsBoundary:
-        CustomerManagedPolicyReference:
-          Name: !Ref CentralAccountRolePermissionsBoundary
+      PermissionsBoundary: !If
+        - HasPermissionsBoundary
+        - CustomerManagedPolicyReference:
+            Name: !Ref CentralAccountRolePermissionsBoundary
+        - !Ref AWS::NoValue
   CentralAccountAuditorAccess:
     Type: AWS::SSO::PermissionSet
     Properties:
@@ -46,9 +51,11 @@ Resources:
         - !Sub "arn:${AWS::Partition}:iam::aws:policy/AWSSSOReadOnly"
         - !Sub "arn:${AWS::Partition}:iam::aws:policy/AWSSSODirectoryReadOnly"
       SessionDuration: PT1H
-      PermissionsBoundary:
-        CustomerManagedPolicyReference:
-          Name: !Ref CentralAccountRolePermissionsBoundary
+      PermissionsBoundary: !If
+        - HasPermissionsBoundary
+        - CustomerManagedPolicyReference:
+            Name: !Ref CentralAccountRolePermissionsBoundary
+        - !Ref AWS::NoValue
 
   AtatAdministratorAccess:
     Type: AWS::SSO::PermissionSet
