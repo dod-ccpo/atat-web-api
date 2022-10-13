@@ -15,7 +15,7 @@ Parameters:
     Type: String
 
 Conditions:
-  HasPermissionsBoundary: !Equals [!Ref CentralAccountRolePermissionsBoundary, "!"]
+  HasPermissionsBoundary: !Not [!Equals [!Ref CentralAccountRolePermissionsBoundary, "!"]]
 
 Resources:
   # Only Administrators and Auditors should have access to the the Central account. There
