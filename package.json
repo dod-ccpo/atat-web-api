@@ -52,7 +52,7 @@
     "@aws-sdk/client-secrets-manager": "^3.186.0",
     "@aws-sdk/client-sfn": "^3.186.0",
     "@aws-sdk/client-sqs": "^3.186.0",
-    "@aws-sdk/client-sts": "^3.186.0",
+    "@aws-sdk/client-sts": "^3.188.0",
     "@middy/core": "^3.6.0",
     "@middy/error-logger": "^3.6.0",
     "@middy/http-json-body-parser": "^3.6.0",
