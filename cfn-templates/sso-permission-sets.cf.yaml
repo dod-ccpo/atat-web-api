@@ -146,9 +146,6 @@ Resources:
           - Effect: Allow
             Action: apigateway:POST
             Resource: !Sub arn:${AWS::Partition}:apigateway:*::/restapis/*/deployments
-          - Effect: Allow
-            Action: secretsmanager:GetSecretValue
-            Resource: "*"
   AtatAuditorAccess:
     Type: AWS::SSO::PermissionSet
     Properties:
