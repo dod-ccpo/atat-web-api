@@ -247,4 +247,5 @@ Resources:
             Action: 
               - secretsmanager:GetSecretValue
               - secretsmanager:ListSecrets
+              - secretsmanager:DescribeSecret
             Resource: "*"
