@@ -284,9 +284,9 @@ export class AtatClient implements IAtatClient {
           location: request.location,
         };
       case 404:
-        throw new AtatApiError("Provisionining job ID not found", "ProvisioningJobNotFound", request, response);
+        throw new AtatApiError("Provisioning job ID not found", "ProvisioningJobNotFound", request, response);
       default:
-        throw new AtatApiError("Unexpected APU error", "CspApiError", request, response);
+        throw new AtatApiError("Unexpected API error", "CspApiError", request, response);
     }
   }
 }
