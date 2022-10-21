@@ -12,7 +12,7 @@ import { sqsClient } from "../../utils/aws-sdk/sqs";
 import { logger } from "../../utils/logging";
 import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
 import { tracer } from "../../utils/tracing";
-import { AtatApiError, AtatClient, IAtatClient } from "../client";
+import { AtatApiError, IAtatClient } from "../client";
 
 const COST_RESPONSE_QUEUE_URL = process.env.COST_RESPONSE_QUEUE_URL ?? "";
 export const MESSAGE_GROUP_ID = "cost-response-queue-message-group";
@@ -72,7 +72,7 @@ async function baseHandler(event: SQSEvent): Promise<void> {
     logger.info("Sent message", { sqsResponse });
   }
 
-  logger.info("Records processed: ", { processedMessages });
+  logger.info(`Records processed: ${processedMessages.length}`, { processedMessages });
 }
 
 export const handler = middy(baseHandler)
