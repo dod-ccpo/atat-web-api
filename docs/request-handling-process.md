@@ -32,3 +32,50 @@ sequenceDiagram
     ConsumeCostResponse->>HOTH: Cost data
     HOTH->>-SNOW: Cost data
 ```
+
+## Provisioning Request process
+
+This diagram covers the process for how the HOTH API is invoked for a Provisioning Request
+including sync and async operations for
+- AddPortfolio
+- AddTaskorder
+- AddOperators
+
+**Note:** [Mermaid Live](https://mermaid.live/) to view interactive diagram or [VS code extension Markdown](https://marketplace.visualstudio.com/items?itemName=bierner.markdown-mermaid&ssr=false#review-details).
+
+```mermaid
+sequenceDiagram
+    SNOW->>+HOTH: Start provisioning request
+    HOTH->>SNOW: HTTP 201 Response
+    HOTH->>StartProvisioningJobs: Invoke Lambda (start SFN)
+    StartProvisioningJobs->>SFNWorkflow: Start SFN steps
+
+    rect rgb(16,109,163)
+    SFNWorkflow->>InvokeCspApi: Invoke cspWritePortfolioFn lambda
+    Note right of SFNWorkflow: SFN Workflow
+    loop Retry
+      InvokeCspApi->>InvokeCspApi: Retry lambda twice before erroring out
+    end
+    InvokeCspApi->>HttpResponse: Choice steps based on response status code
+    HttpResponse->>EnqueueResults: Invoke resultFn lambda
+    InvokeCspApi-->>EnqueueResults: Retry failure
+    EnqueueResults->>ProvisioningJobsQueue: HTTP 200 - Write Sync messages
+    ProvisioningJobsQueue->>ProvisioningJobConsumer: Poll messages (event source)
+    end
+
+    rect rgb(53,138,89)
+    Note right of EnqueueResults: Async processing of CSP provisioning requests
+    EnqueueResults->>AsyncProvisioningJobsQueue: HTTP 202 - Write Async messages
+    AsyncProvisioningJobsQueue->>AsyncProvisionWatcher: Poll messages (event source) 
+    AsyncProvisionWatcher->>CSP: Provisioning request to CSP
+    CSP->>AsyncProvisionWatcher: CSP response
+    AsyncProvisionWatcher->>AsyncProvisioningJobsQueue: Provisioning job still processing
+    AsyncProvisionWatcher->>ProvisioningJobsQueue: Provisioning job completed/failed
+    end
+
+    deactivate HOTH
+    SNOW->>+HOTH: GET Provisioning Jobs
+    HOTH->>ProvisioningJobConsumer: Provisioning jobs request
+    ProvisioningJobConsumer->>HOTH: Completed/failed Provisioning jobs
+    HOTH->>-SNOW: Provisioning jobs
+```
