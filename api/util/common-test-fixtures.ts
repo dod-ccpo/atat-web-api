@@ -127,7 +127,7 @@ export function generateTestSQSEvent(recordBodies: any[]): SQSEvent {
     const recordBody = JSON.stringify(body);
     return {
       body: recordBody,
-      messageId: "0",
+      messageId: "999",
       messageAttributes: {},
       receiptHandle: "",
       eventSource: "",

@@ -23,7 +23,7 @@ import { tracer } from "../../utils/tracing";
 import { mockCspClientResponse } from "../util/csp-request";
 
 const PROVISIONING_QUEUE_URL = process.env.PROVISIONING_QUEUE_URL ?? "";
-const MESSAGE_GROUP_ID = "processed-async-events";
+export const MESSAGE_GROUP_ID = "processed-async-events";
 
 async function makeRequest(
   client: IAtatClient,
