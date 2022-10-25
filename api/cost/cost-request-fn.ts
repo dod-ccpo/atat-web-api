@@ -33,12 +33,14 @@ async function makeRequest(client: IAtatClient, request: CostRequest): Promise<C
         },
       };
     }
-    throw new AtatApiError("Portfolio not found", "PortfolioNotFound", request, {
-      status: 404,
-      data: { mockPortfolio: "not found" },
-    } as any);
+    const cspNamesThrowError = ["CSP_B", "CSP_C", "CSP_D"];
+    if (cspNamesThrowError.includes(request.targetCsp.name))
+      throw new AtatApiError("Portfolio not found", "PortfolioNotFound", request, {
+        status: 404,
+        data: { mockPortfolio: "not found" },
+      } as any);
 
-    // will not reach here because of mocking
+    logger.info("Should not reach here at the current moment because of mocking.");
     const cspResponse = await client.getCostsByPortfolio({
       portfolioId: request.portfolioId,
       startDate: request.startDate,
