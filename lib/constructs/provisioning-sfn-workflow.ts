@@ -33,6 +33,7 @@ export const asyncSuccessResponse = sfn.Condition.numberEquals("$.cspResponse.Pa
 export const clientErrorResponse = sfn.Condition.or(
   sfn.Condition.numberEquals("$.cspResponse.Payload.code", 400),
   sfn.Condition.numberEquals("$.cspResponse.Payload.code", 402),
+  sfn.Condition.numberEquals("$.cspResponse.Payload.code", 403),
   sfn.Condition.numberEquals("$.cspResponse.Payload.code", 404)
 );
 
@@ -140,17 +141,17 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
       },
     ];
     this.mappedTasks = mapTasks(scope, tasks);
-    const { InvokeCspApi, Results } = this.mappedTasks;
+    const { InvokeCspApi, EnqueueResults } = this.mappedTasks;
     // update retry for the tasks
     InvokeCspApi.addRetry({ maxAttempts: 2, errors: ["MockCspApiError"] });
-    InvokeCspApi.addCatch(Results, { errors: ["States.ALL"], resultPath: "$.catchErrorResult" });
+    InvokeCspApi.addCatch(EnqueueResults, { errors: ["States.ALL"], resultPath: "$.catchErrorResult" });
 
     // State machine choices based on the tasks output
     const httpResponseChoices = new sfn.Choice(scope, "HttpResponse")
       // Intentionally, the 202 response is omitted here; it's cleanup will happen
-      .when(successResponse, Results)
-      .when(clientErrorResponse, Results)
-      .when(asyncSuccessResponse, new sfn.Succeed(scope, "AsyncHandledElsewhere"))
+      .when(successResponse, EnqueueResults)
+      .when(clientErrorResponse, EnqueueResults)
+      .when(asyncSuccessResponse, EnqueueResults)
       .afterwards(); // converge choices and allows for additional tasks to be chained on
 
     // Composing state machine
@@ -169,7 +170,10 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
     const asyncProvisionWatcher = new lambdaNodeJs.NodejsFunction(this, "AsyncProvisionJob", {
       entry: "api/provision/async-provisioning-check.ts",
       runtime: lambda.Runtime.NODEJS_16_X,
-      environment: { CSP_CONFIG_SECRET_NAME: cspConfig.secretArn },
+      environment: {
+        CSP_CONFIG_SECRET_NAME: cspConfig.secretArn,
+        PROVISIONING_QUEUE_URL: this.provisioningJobsQueue.queueUrl,
+      },
       timeout: cdk.Duration.minutes(5),
       memorySize: 256,
       vpc: props.vpc,
@@ -178,10 +182,11 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
     props.idp?.addClient(new IdentityProviderLambdaClient("CspAsyncProvisionJobClient", asyncProvisionWatcher), [
       "atat/read-portfolio",
     ]);
-    cspConfig.grantRead(cspWritePortfolioFn);
+    cspConfig.grantRead(asyncProvisionWatcher);
     const asyncProvisionEventSource = new lambdaEvents.SqsEventSource(this.asyncProvisioningJobsQueue, {
       reportBatchItemFailures: true,
     });
     asyncProvisionWatcher.addEventSource(asyncProvisionEventSource);
+    this.provisioningJobsQueue.grantSendMessages(asyncProvisionWatcher);
   }
 }
