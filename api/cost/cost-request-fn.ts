@@ -13,12 +13,32 @@ import { logger } from "../../utils/logging";
 import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
 import { tracer } from "../../utils/tracing";
 import { AtatApiError, IAtatClient } from "../client";
+import { FAKE_COST_DATA } from "./cost-request-fn.test";
 
 const COST_RESPONSE_QUEUE_URL = process.env.COST_RESPONSE_QUEUE_URL ?? "";
 export const MESSAGE_GROUP_ID = "cost-response-queue-message-group";
 
 async function makeRequest(client: IAtatClient, request: CostRequest): Promise<CostResponse> {
   try {
+    // TODO: remove once an external endpoint is provided to make cost requests.
+    // The intent is to avoid the code after the throw AtatApiError which
+    // requires an external endpoint (e.g., mock csp)
+    const mockCspNames = ["CSP_A"];
+    if (mockCspNames.includes(request.targetCsp.name)) {
+      return {
+        code: 200,
+        content: {
+          response: FAKE_COST_DATA,
+          request,
+        },
+      };
+    }
+    throw new AtatApiError("Portfolio not found", "PortfolioNotFound", request, {
+      status: 404,
+      data: { mockPortfolio: "not found" },
+    } as any);
+
+    // will not reach here because of mocking
     const cspResponse = await client.getCostsByPortfolio({
       portfolioId: request.portfolioId,
       startDate: request.startDate,

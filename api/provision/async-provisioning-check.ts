@@ -29,6 +29,26 @@ async function makeRequest(client: IAtatClient, request: ProvisionRequest): Prom
   const requestBody: GetProvisioningStatusRequest = {
     location: origResponse.location,
   };
+  const mockCspNames = ["CSP_B", "CSP_C", "CSP_F"];
+  if (mockCspNames.includes(origResponse.$metadata.request.targetCsp.name)) {
+    const cspMockResponse = mockCspClientResponse(origResponse.$metadata.request);
+    const mockResponse = {
+      code: request.code,
+      content: {
+        request: requestBody,
+        response: cspMockResponse,
+      },
+    };
+    if (
+      cspMockResponse.status.status === ProvisioningStatusType.COMPLETE ||
+      cspMockResponse.status.status === ProvisioningStatusType.FAILED
+    ) {
+      return mockResponse;
+    }
+    return undefined;
+  }
+
+  logger.info("Should not reach here at the current moment because of mocking.");
   const cspResponse = await client.getProvisioningStatus(requestBody);
   if (
     cspResponse.status.status === ProvisioningStatusType.COMPLETE ||

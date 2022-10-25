@@ -28,7 +28,16 @@ export async function getConfiguration(cspName: string): Promise<CspConfiguratio
 export async function makeClient(cspName: string): Promise<AtatClient> {
   const cspConfiguration = await getConfiguration(cspName);
   if (!cspConfiguration) {
-    throw new Error(`No configuration is available for ${cspName}`);
+    // After mock endpoint implementation or CSP integration happens revert to
+    // throw error. This bypasses the error to return an ATAT client requires setup
+    // of csps as secrets within AWS to provided information
+    return new AtatClient("MOCK_TOKEN", {
+      name: cspName,
+      uri: `https://${cspName}.example.com`,
+      network: "NETWORK_1",
+    } as any);
+    // TODO: revert once external endpoint available
+    // throw new Error(`No configuration is available for ${cspName}`);
   }
   const token = await getToken();
   return new AtatClient(token.access_token, cspConfiguration);

@@ -17,7 +17,7 @@ import { logger } from "../../utils/logging";
 import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
 import { ValidationErrorResponse } from "../../utils/response";
 import { tracer } from "../../utils/tracing";
-import { CspResponse } from "../util/csp-request";
+import { CspResponse, mockCspClientResponse } from "../util/csp-request";
 import { AtatClient, AtatApiError, IAtatClient } from "../client/client";
 import * as atatApiTypes from "../client/types";
 import { makeClient } from "../../utils/atat-client";
@@ -75,6 +75,26 @@ async function makeRequest(client: IAtatClient, request: ProvisionRequest): Prom
     },
   };
   try {
+    // TODO: remove once mocking is no longer needed (e.g., mocking api implemented or actual csp integration)
+    // Intent is to not use the 'client' to make external call
+    let transformedResponse;
+    const mockCspNames = ["CSP_A", "CSP_B", "CSP_C", "CSP_D", "CSP_E", "CSP_F"];
+    if (mockCspNames.includes(request.targetCsp.name)) {
+      const response = mockCspClientResponse(request);
+      if (response.$metadata.status === 202) {
+        transformedResponse = {
+          ...transformAsynchronousResponse(response, creationRequest),
+        };
+        console.log("DB 202:", JSON.stringify(transformedResponse));
+        return transformedResponse;
+      }
+      transformedResponse = {
+        ...transformSynchronousResponse(response, creationRequest),
+      };
+      return transformedResponse;
+    }
+
+    logger.info("Should not reach here at the current moment because of mocking.");
     const cspResponse = await client.addPortfolio(creationRequest);
     if (cspResponse.$metadata.status === 202) {
       const asyncResponse = cspResponse as atatApiTypes.AddPortfolioResponseAsync;
@@ -114,7 +134,6 @@ export async function baseHandler(
   context: Context
 ): Promise<ProvisionCspResponse | ValidationErrorResponse> {
   logger.addPersistentLogAttributes({ correlationIds: { jobId: stateInput.jobId } });
-  // TODO: actually populate this data (currently handled by `cspRequest` function)
   const client = await makeClient(stateInput.targetCsp.name);
   return makeRequest(client, stateInput);
 }
