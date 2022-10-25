@@ -5,7 +5,7 @@ import middy from "@middy/core";
 import errorLogger from "@middy/error-logger";
 import inputOutputLogger from "@middy/input-output-logger";
 import validator from "@middy/validator";
-import { ProvisionRequest, provisionRequestSchema } from "../../models/provisioning-jobs";
+import { provisionResponseSchema, ProvisionCspResponse } from "../../models/provisioning-jobs";
 import { sqsClient } from "../../utils/aws-sdk/sqs";
 import { logger } from "../../utils/logging";
 import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
@@ -19,10 +19,10 @@ const MESSAGE_GROUP_ID = "provisioning-queue-message-group";
  *
  * @param stateInput - input to the state task that is processed
  */
-export async function baseHandler(stateInput: ProvisionRequest): Promise<ProvisionRequest> {
+export async function baseHandler(stateInput: ProvisionCspResponse): Promise<ProvisionCspResponse> {
   let queueUrl = process.env.PROVISIONING_QUEUE_URL ?? "";
   // Use the async queue if this is an async request.
-  if ("location" in (stateInput.cspResponse?.content.response ?? {})) {
+  if ("location" in (stateInput.content.response ?? {})) {
     queueUrl = process.env.ASYNC_PROVISIONING_JOBS_QUEUE_URL ?? "";
   }
   logger.info("Sending result message to queue", {
@@ -47,5 +47,5 @@ export const handler = middy(baseHandler)
   .use(captureLambdaHandler(tracer))
   .use(inputOutputLogger({ logger: (message) => logger.info("Event/Result", message) }))
   .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
-  .use(validator({ ajvOptions: { verbose: true }, eventSchema: provisionRequestSchema }))
+  .use(validator({ ajvOptions: { verbose: true }, eventSchema: provisionResponseSchema }))
   .use(errorHandlingMiddleware());

@@ -5,16 +5,7 @@ const PROVISIONING_QUEUE_URL = process.env.PROVISIONING_QUEUE_URL ?? "";
 
 class ConsumeProvisioningJob extends QueueConsumer<ProvisionRequest> {
   processMessage(message: string | undefined): ProvisionRequest | undefined {
-    const { jobId, userId, portfolioId, operationType, targetCsp, payload, cspResponse } = JSON.parse(message ?? "");
-    return {
-      jobId,
-      userId,
-      portfolioId,
-      operationType,
-      targetCsp,
-      payload,
-      cspResponse: cspResponse.Payload,
-    };
+    return JSON.parse(message ?? "");
   }
 }
 

@@ -1,11 +1,12 @@
 import {
   AddPortfolioResponseAsync,
+  AsyncProvisionResponse,
   GetProvisioningStatusRequest,
   GetProvisioningStatusResponse,
   IAtatClient,
   ProvisioningStatusType,
 } from "../client";
-import { ProvisionRequest } from "../../models/provisioning-jobs";
+import { ProvisionCspResponse } from "../../models/provisioning-jobs";
 import { SQSEvent, SQSBatchResponse } from "aws-lambda";
 import { logger } from "../../utils/logging";
 import { sqsClient } from "../../utils/aws-sdk/sqs";
@@ -19,13 +20,18 @@ import errorLogger from "@middy/error-logger";
 import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import { tracer } from "../../utils/tracing";
+import { mockCspClientResponse } from "../util/csp-request";
 
 const PROVISIONING_QUEUE_URL = process.env.PROVISIONING_QUEUE_URL ?? "";
 const MESSAGE_GROUP_ID = "processed-async-events";
 
-async function makeRequest(client: IAtatClient, request: ProvisionRequest): Promise<ProvisionRequest | undefined> {
-  const origResponse: GetProvisioningStatusResponse | AddPortfolioResponseAsync = request.cspResponse!.content
-    .response as GetProvisioningStatusResponse | AddPortfolioResponseAsync;
+async function makeRequest(
+  client: IAtatClient,
+  request: ProvisionCspResponse
+): Promise<ProvisionCspResponse | undefined> {
+  const origResponse: GetProvisioningStatusResponse | AddPortfolioResponseAsync = request.content.response as
+    | GetProvisioningStatusResponse
+    | AddPortfolioResponseAsync;
   const requestBody: GetProvisioningStatusRequest = {
     location: origResponse.location,
   };
@@ -55,13 +61,10 @@ async function makeRequest(client: IAtatClient, request: ProvisionRequest): Prom
     cspResponse.status.status === ProvisioningStatusType.FAILED
   ) {
     return {
-      ...request,
-      cspResponse: {
-        code: cspResponse.$metadata.status,
-        content: {
-          request: requestBody,
-          response: cspResponse,
-        },
+      code: cspResponse.$metadata.status,
+      content: {
+        request: requestBody,
+        response: cspResponse,
       },
     };
   }
@@ -72,13 +75,14 @@ async function baseHandler(event: SQSEvent): Promise<SQSBatchResponse> {
   // The item IDs for records that are still in the IN_PROGRESS or NOT_STARTED state
   const stillInProgress: string[] = [];
   // Items that have moved to the COMPELTE or FAILED state
-  const moveToReady: ProvisionRequest[] = [];
+  const moveToReady: ProvisionCspResponse[] = [];
   if (!event?.Records?.length) {
     logger.info("There are no records in this request.");
   }
   for (const record of event.Records) {
-    const request = JSON.parse(record.body) as ProvisionRequest;
-    const client = await makeClient(request.targetCsp.name);
+    const request = JSON.parse(record.body) as ProvisionCspResponse;
+    const response = request.content.response as AsyncProvisionResponse;
+    const client = await makeClient(response.$metadata.request.targetCsp.name);
     const provisioningStatus = await makeRequest(client, request);
     if (provisioningStatus) {
       moveToReady.push(provisioningStatus);

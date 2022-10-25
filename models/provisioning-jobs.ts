@@ -53,7 +53,6 @@ export interface ProvisionRequest {
   operationType: ProvisionRequestType;
   targetCsp: CloudServiceProvider;
   payload: NewPortfolioPayload | FundingSourcePayload | OperatorPayload;
-  cspResponse: ProvisionCspResponse | undefined;
 }
 
 export interface AsyncProvisionRequest extends ProvisionRequest {
@@ -76,7 +75,7 @@ export const provisionRequestSchema = {
     },
     targetCsp: {
       type: "object",
-      required: ["name", "uri", "network"],
+      required: ["name"],
       properties: {
         name: { type: "string" },
         uri: { type: "string", deprecated: true },
@@ -116,18 +115,26 @@ export const provisionRequestSchema = {
       additionalProperties: false,
       minProperties: 1,
     },
-    cspResponse: {
-      type: "object",
-      properties: {
-        code: {
-          type: "number",
-        },
-        content: {
-          type: "object",
-        },
-      },
-    },
   },
   required: ["jobId", "userId", "portfolioId", "operationType", "targetCsp", "payload"],
+  additionalProperties: false,
+};
+
+export const provisionResponseSchema = {
+  type: "object",
+  properties: {
+    code: {
+      type: "number",
+    },
+    content: {
+      type: "object",
+      properties: {
+        request: { type: "object" },
+        response: { type: "object" },
+      },
+      required: ["request", "response"],
+    },
+  },
+  required: ["code", "content"],
   additionalProperties: false,
 };

@@ -6,12 +6,13 @@ import { SendMessageCommand } from "@aws-sdk/client-sqs";
 import * as idpClient from "../../idp/client";
 import * as cspConfig from "../provision/csp-configuration";
 import * as client from "../client";
-import { AtatClient, CostResponseByPortfolio, GetCostsByPortfolioResponse } from "../client";
+import { AtatClient, GetCostsByPortfolioResponse } from "../client";
 import {
   validCostRequest,
   generateMockMessageResponses,
   generateTestSQSEvent,
   constructCspTarget,
+  FAKE_COST_DATA,
 } from "../util/common-test-fixtures";
 import * as atatClientHelper from "../../utils/atat-client";
 import { AxiosResponse } from "axios";
@@ -36,46 +37,6 @@ beforeEach(() => {
   sqsMock.reset();
 });
 
-const FAKE_COST_DATA: CostResponseByPortfolio = {
-  taskOrders: [
-    {
-      taskOrderNumber: "1234567890123",
-      clins: [
-        {
-          clinNumber: "0001",
-          actual: [
-            {
-              total: "123.00",
-              results: [
-                { month: "2022-01", value: "1.00" },
-                { month: "2022-02", value: "12.00" },
-                { month: "2022-03", value: "110.00" },
-              ],
-            },
-          ],
-          forecast: [
-            {
-              total: "1350.00",
-              results: [
-                { month: "2022-04", value: "150.00" },
-                { month: "2022-05", value: "150.00" },
-                { month: "2022-06", value: "150.00" },
-                { month: "2022-07", value: "150.00" },
-                { month: "2022-08", value: "150.00" },
-                { month: "2022-09", value: "150.00" },
-                { month: "2022-10", value: "150.00" },
-                { month: "2022-11", value: "150.00" },
-                { month: "2022-12", value: "150.00" },
-              ],
-            },
-          ],
-        },
-      ],
-    },
-  ],
-};
-
-const cspMock = constructCspTarget("CSP_Mock", "NETWORK_1");
 describe("Cost Request Fn - Success", () => {
   it("poll messages from request queue and send to response queue", async () => {
     // GIVEN
@@ -84,7 +45,7 @@ describe("Cost Request Fn - Success", () => {
       {
         ...validCostRequest,
         requestId: "7w1er266-4a04-47ec-a3c9-6775f2a82d28",
-        targetCsp: cspMock,
+        targetCsp: constructCspTarget("CSP_A", "NETWORK_1"),
       },
     ];
     const queueEvent = generateTestSQSEvent(validMessages);
@@ -131,17 +92,18 @@ describe("Cost Request Fn - Errors", () => {
     const invalidCostRequest: CostRequest = {
       ...validCostRequest,
       portfolioId: "",
+      targetCsp: constructCspTarget("CSP_B", "Network_2"),
     };
     const errorMessages = [invalidCostRequest];
     const queueEvent = generateTestSQSEvent(errorMessages);
     const mockResponse = generateMockMessageResponses(errorMessages);
     const axiosBadResponse = {
-      status: 400,
-      data: { bad: "request" },
+      status: 404,
+      data: { mockPortfolio: "not found" },
     } as AxiosResponse;
     sqsMock.on(SendMessageCommand).resolves(mockResponse);
     jest.spyOn(client.AtatClient.prototype, "getCostsByPortfolio").mockImplementation(() => {
-      throw new client.AtatApiError("Invalid ID or query parameters", "InvalidCostQuery", {}, axiosBadResponse);
+      throw new client.AtatApiError("Portfolio not found", "PortfolioNotFound", {}, axiosBadResponse);
     });
     mockedMakeClient.mockResolvedValue(new AtatClient("SAMPLE", { uri: "http://fake.example.com" }));
 
@@ -155,7 +117,10 @@ describe("Cost Request Fn - Errors", () => {
     expect(firstSentMessage.MessageGroupId).toEqual(MESSAGE_GROUP_ID);
     expect(JSON.parse(firstSentMessage.MessageBody).content.response).toEqual(axiosBadResponse.data);
   });
-  it("request to CSP throws unknown errors", async () => {
+
+  // due to mocking CSP internally this test is skipped since there are
+  // no external calls using the atat-client
+  it.skip("request to CSP throws unknown errors", async () => {
     // GIVEN
     const invalidCostRequest: CostRequest = {
       ...validCostRequest,

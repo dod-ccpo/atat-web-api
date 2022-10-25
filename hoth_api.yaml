@@ -60,7 +60,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/ProvisioningRequest"
+                  $ref: "#/components/schemas/ProvisionResponse"
     post:
       tags:
         - provisioning
@@ -217,10 +217,11 @@ components:
             - $ref: "#/components/schemas/NewPortfolioPayload"
             - $ref: "#/components/schemas/FundingSourcePayload"
             - $ref: "#/components/schemas/OperatorPayload"
-        response:
-          description: Response from the CSP which will be set after a request has been processed
-          $ref: "#/components/schemas/CspResponse"
-          readOnly: true
+    ProvisionResponse:
+      description: Response from the CSP which will be set after a request has been processed
+      type: object
+      $ref: "#/components/schemas/CspResponse"
+      readOnly: true
     OperationType:
       description: Distinguishes type of operation that a user is performing
       type: string

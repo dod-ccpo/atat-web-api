@@ -130,11 +130,11 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
         },
       },
       {
-        id: "Results",
+        id: "EnqueueResults",
         props: {
           lambdaFunction: this.resultFn,
-          inputPath: "$",
-          resultPath: "$.resultResponse",
+          inputPath: "$.cspResponse.Payload",
+          resultPath: "$.enqueueResultResponse",
           outputPath: "$",
         },
       },
