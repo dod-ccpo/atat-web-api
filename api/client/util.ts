@@ -1,5 +1,5 @@
-import { camelCase, snakeCase, mapKeys, mapValues, cloneDeep, isPlainObject, isArray, map, functions } from "lodash";
-import axios, { Axios, AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
+import { camelCase, snakeCase, mapKeys, mapValues, cloneDeep, isPlainObject, isArray, map } from "lodash";
+import { AxiosRequestConfig, AxiosResponse } from "axios";
 
 /**
  * Deeply convert keys within an object to a given case (either snake_case or camelCase are

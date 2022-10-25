@@ -1,6 +1,11 @@
 import { Context } from "aws-lambda";
 import * as idpClient from "../../idp/client";
-import { ProvisionRequest } from "../../models/provisioning-jobs";
+import {
+  NewPortfolioPayload,
+  ProvisionCspResponse,
+  ProvisionRequest,
+  ProvisionRequestType,
+} from "../../models/provisioning-jobs";
 import { ErrorStatusCode, SuccessStatusCode, ValidationErrorResponse } from "../../utils/response";
 import * as cspConfig from "./csp-configuration";
 import { handler } from "./csp-write-portfolio";
@@ -11,30 +16,70 @@ import {
   operators,
   cspA,
 } from "../util/common-test-fixtures";
+import { AddPortfolioRequest, ProvisioningStatusType } from "../client";
+import * as atatClientHelper from "../../utils/atat-client";
 
 // Reused mocks
-jest.mock("./csp-configuration");
+jest.mock("../provision/csp-configuration");
 const mockedConfig = cspConfig.getConfiguration as jest.MockedFn<typeof cspConfig.getConfiguration>;
+mockedConfig.mockImplementation(() => Promise.resolve({ name: "test", uri: "https://csp.example.com/atat/api/test" }));
 jest.mock("../../idp/client");
 const mockedGetToken = idpClient.getToken as jest.MockedFn<typeof idpClient.getToken>;
+mockedGetToken.mockImplementation(() =>
+  Promise.resolve({ access_token: "FAKE_TOKEN", expires_in: 0, token_type: "Bearer" })
+);
+jest.mock("../../utils/atat-client");
+const mockedMakeClient = atatClientHelper.makeClient as jest.MockedFn<typeof atatClientHelper.makeClient>;
+
+beforeEach(() => {
+  jest.resetAllMocks();
+});
 
 // Skipped because this covers old mock behavior
-describe.skip("Successful invocation of mock CSP function", () => {
+describe("Successful invocation of mock CSP function", () => {
   it("should return 200 when CSP A provided in the request", async () => {
-    const response = await handler(constructProvisionRequestForCsp("CSP_A"), {} as Context);
+    const response = await handler(provisioningBodyWithPayload, {} as Context);
     if (!(response instanceof ValidationErrorResponse)) {
       expect(response.code).toBe(SuccessStatusCode.OK);
     }
   });
   it("should basically just return a reformatted CSP response", async () => {
     // GIVEN
-    const request = constructProvisionRequestForCsp("CSP_E");
-    const expectedResponse = {
-      totally: "fake",
-      csp: "response",
+    const request = {
+      ...constructProvisionRequestForCsp("CSP_B"),
+      operationType: ProvisionRequestType.ADD_PORTFOLIO,
     };
-    mockedGetToken.mockResolvedValueOnce({ access_token: "FakeToken", expires_in: 0, token_type: "Bearer" });
-    mockedConfig.mockResolvedValueOnce({ uri: cspA.uri });
+
+    const payload = request.payload as NewPortfolioPayload;
+    const createdRequest: AddPortfolioRequest = {
+      portfolio: {
+        name: payload.name,
+        administrators: payload.operators,
+        taskOrders: payload.fundingSources.map((funding) => ({
+          ...funding,
+          clins: [{ clinNumber: funding.clin, popStartDate: funding.popStartDate, popEndDate: funding.popEndDate }],
+          clin: undefined,
+        })),
+      },
+    };
+    const expectedResponse = {
+      code: 202,
+      content: {
+        request: createdRequest,
+        response: {
+          location: request.targetCsp.uri,
+          status: {
+            status: ProvisioningStatusType.COMPLETE,
+            portfolioId: request.portfolioId,
+            provisioningJobId: request.jobId,
+          },
+          $metadata: {
+            request,
+            status: 202,
+          },
+        },
+      },
+    };
 
     // mockedAxios.post.mockResolvedValueOnce({
     //   data: expectedResponse,
@@ -51,13 +96,10 @@ describe.skip("Successful invocation of mock CSP function", () => {
     // });
 
     // WHEN
-    const response = await handler(request, {} as Context);
+    const response = (await handler(request, {} as Context)) as ProvisionCspResponse;
 
     // THEN
-    expect(response).toEqual({
-      code: 200,
-      content: { response: expectedResponse, request },
-    });
+    expect(response).toEqual(expectedResponse);
   });
 });
 

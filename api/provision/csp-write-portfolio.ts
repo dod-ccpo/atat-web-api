@@ -7,7 +7,6 @@ import validator from "@middy/validator";
 import { Context } from "aws-lambda";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import {
-  AsyncProvisionRequest,
   NewPortfolioPayload,
   ProvisionCspResponse,
   ProvisionRequest,
@@ -18,7 +17,7 @@ import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-m
 import { ValidationErrorResponse } from "../../utils/response";
 import { tracer } from "../../utils/tracing";
 import { CspResponse, mockCspClientResponse } from "../util/csp-request";
-import { AtatClient, AtatApiError, IAtatClient } from "../client/client";
+import { AtatApiError, IAtatClient } from "../client/client";
 import * as atatApiTypes from "../client/types";
 import { makeClient } from "../../utils/atat-client";
 

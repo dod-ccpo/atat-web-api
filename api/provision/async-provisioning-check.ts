@@ -91,7 +91,7 @@ async function baseHandler(event: SQSEvent): Promise<SQSBatchResponse> {
     }
   }
   for (const request of moveToReady) {
-    const sqsResponse = await sqsClient.send(
+    await sqsClient.send(
       new SendMessageCommand({
         QueueUrl: PROVISIONING_QUEUE_URL,
         MessageBody: JSON.stringify(request),

@@ -13,7 +13,7 @@ import { logger } from "../../utils/logging";
 import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
 import { tracer } from "../../utils/tracing";
 import { AtatApiError, IAtatClient } from "../client";
-import { FAKE_COST_DATA } from "./cost-request-fn.test";
+import { FAKE_COST_DATA } from "../util/common-test-fixtures";
 
 const COST_RESPONSE_QUEUE_URL = process.env.COST_RESPONSE_QUEUE_URL ?? "";
 export const MESSAGE_GROUP_ID = "cost-response-queue-message-group";
