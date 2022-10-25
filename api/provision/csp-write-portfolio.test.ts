@@ -35,6 +35,24 @@ beforeEach(() => {
   jest.resetAllMocks();
 });
 
+const request = {
+  ...constructProvisionRequestForCsp("CSP_B"),
+  operationType: ProvisionRequestType.ADD_PORTFOLIO,
+};
+
+const payload = request.payload as NewPortfolioPayload;
+const createdRequest: AddPortfolioRequest = {
+  portfolio: {
+    name: payload.name,
+    administrators: payload.operators,
+    taskOrders: payload.fundingSources.map((funding) => ({
+      ...funding,
+      clins: [{ clinNumber: funding.clin, popStartDate: funding.popStartDate, popEndDate: funding.popEndDate }],
+      clin: undefined,
+    })),
+  },
+};
+
 // Skipped because this covers old mock behavior
 describe("Successful invocation of mock CSP function", () => {
   it("should return 200 when CSP A provided in the request", async () => {
@@ -43,25 +61,8 @@ describe("Successful invocation of mock CSP function", () => {
       expect(response.code).toBe(SuccessStatusCode.OK);
     }
   });
-  it("should basically just return a reformatted CSP response", async () => {
+  it("should basically just return 202 with a reformatted CSP_B response", async () => {
     // GIVEN
-    const request = {
-      ...constructProvisionRequestForCsp("CSP_B"),
-      operationType: ProvisionRequestType.ADD_PORTFOLIO,
-    };
-
-    const payload = request.payload as NewPortfolioPayload;
-    const createdRequest: AddPortfolioRequest = {
-      portfolio: {
-        name: payload.name,
-        administrators: payload.operators,
-        taskOrders: payload.fundingSources.map((funding) => ({
-          ...funding,
-          clins: [{ clinNumber: funding.clin, popStartDate: funding.popStartDate, popEndDate: funding.popEndDate }],
-          clin: undefined,
-        })),
-      },
-    };
     const expectedResponse = {
       code: 202,
       content: {
@@ -100,11 +101,12 @@ describe("Successful invocation of mock CSP function", () => {
 
     // THEN
     expect(response).toEqual(expectedResponse);
+    expect(response.code).toBe(SuccessStatusCode.ACCEPTED);
   });
 });
 
 // This test is skipped because it covers the old mock behavior
-describe.skip("Failed invocation operations", () => {
+describe("Failed invocation operations", () => {
   it.each([
     { desc: "empty", request: {} },
     { desc: "undefined", request: undefined },
@@ -114,22 +116,102 @@ describe.skip("Failed invocation operations", () => {
     expect(response.statusCode).toBe(ErrorStatusCode.BAD_REQUEST);
   });
 
-  it("should return a 400 when the CSP's configuration is unknown", async () => {
+  it.each(["CSP_DNE", "CSP_D"])("should return a 500 when the internal error for %s", async (cspName) => {
     // GIVEN
-    const request = constructProvisionRequestForCsp("CSP_DNE");
-    mockedConfig.mockResolvedValueOnce(undefined);
+    const request = constructProvisionRequestForCsp(cspName);
+
+    // WHEN
+    const response = await handler(request, {} as Context);
+    // THEN
+    expect(response).toEqual({
+      code: 500,
+      content: {
+        response: {
+          // details: "Invalid CSP provided",
+          $metadata: {
+            request: { unknown: "response" },
+            status: 500,
+          },
+          status: {},
+        },
+        request: createdRequest,
+      },
+    });
+  });
+  it("should return a 400 when CSP_C (failed)", async () => {
+    // GIVEN
+    const request = constructProvisionRequestForCsp("CSP_C");
+
     // WHEN
     const response = await handler(request, {} as Context);
     // THEN
     expect(response).toEqual({
       code: 400,
       content: {
-        response: { details: "Invalid CSP provided" },
-        request,
+        response: {
+          location: request.targetCsp.uri,
+          status: {
+            status: ProvisioningStatusType.FAILED,
+            portfolioId: request.portfolioId,
+            provisioningJobId: request.jobId,
+          },
+          $metadata: {
+            request,
+            status: 400,
+          },
+        },
+        request: createdRequest,
       },
     });
   });
-  it("should basically just return a reformatted CSP response", async () => {
+  it("should return a 404 when CSP_E (portfolio not found)", async () => {
+    // GIVEN
+    const request = constructProvisionRequestForCsp("CSP_E");
+
+    // WHEN
+    const response = await handler(request, {} as Context);
+    // THEN
+    expect(response).toEqual({
+      code: 404,
+      content: {
+        response: {
+          status: {},
+          $metadata: {
+            request,
+            status: 404,
+          },
+        },
+        request: createdRequest,
+      },
+    });
+  });
+  it("should return a 202 when CSP_F (in progress)", async () => {
+    // GIVEN
+    const request = constructProvisionRequestForCsp("CSP_F");
+
+    // WHEN
+    const response = await handler(request, {} as Context);
+    // THEN
+    expect(response).toEqual({
+      code: 202,
+      content: {
+        response: {
+          location: request.targetCsp.uri,
+          status: {
+            status: ProvisioningStatusType.IN_PROGRESS,
+            portfolioId: request.portfolioId,
+            provisioningJobId: request.jobId,
+          },
+          $metadata: {
+            request,
+            status: 202,
+          },
+        },
+        request: createdRequest,
+      },
+    });
+  });
+  it.skip("should basically just return a reformatted CSP response", async () => {
     // GIVEN
     const request = constructProvisionRequestForCsp("CSP_E");
     const expectedResponse = {
@@ -156,14 +238,14 @@ describe.skip("Failed invocation operations", () => {
     });
   });
 
-  it("should return a 400 when CSP_B is provided in the request", async () => {
+  it.skip("should return a 400 when CSP_B is provided in the request", async () => {
     const response = await handler(constructProvisionRequestForCsp("CSP_B"), {} as Context);
     if (!(response instanceof ValidationErrorResponse)) {
       expect(response?.code).toBe(ErrorStatusCode.BAD_REQUEST);
     }
   });
 
-  it("should return a 400 when additional payload property due to validation error", async () => {
+  it.skip("should return a 400 when additional payload property due to validation error", async () => {
     const cspABody = {
       ...provisioningBodyNoPayload,
       payload: {
@@ -184,7 +266,7 @@ describe.skip("Failed invocation operations", () => {
       expect(response.statusCode).toBe(ErrorStatusCode.BAD_REQUEST);
     }
   });
-  it("should throw a 500 error when a CSP internal error occurs", async () => {
+  it.skip("should throw a 500 error when a CSP internal error occurs", async () => {
     const request = constructProvisionRequestForCsp("CSP_C");
     expect(async () => await handler(request, {} as Context)).rejects.toThrow(
       JSON.stringify({

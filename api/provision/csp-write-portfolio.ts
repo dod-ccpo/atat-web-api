@@ -76,21 +76,13 @@ async function makeRequest(client: IAtatClient, request: ProvisionRequest): Prom
   try {
     // TODO: remove once mocking is no longer needed (e.g., mocking api implemented or actual csp integration)
     // Intent is to not use the 'client' to make external call
-    let transformedResponse;
-    const mockCspNames = ["CSP_A", "CSP_B", "CSP_C", "CSP_D", "CSP_E", "CSP_F"];
+    const mockCspNames = ["CSP_A", "CSP_B", "CSP_C", "CSP_D", "CSP_E", "CSP_F", "CSP_DNE"];
+    const response = mockCspClientResponse(request);
+    if (response.$metadata.status === 202 && mockCspNames.includes(request.targetCsp.name)) {
+      return transformAsynchronousResponse(response, creationRequest);
+    }
     if (mockCspNames.includes(request.targetCsp.name)) {
-      const response = mockCspClientResponse(request);
-      if (response.$metadata.status === 202) {
-        transformedResponse = {
-          ...transformAsynchronousResponse(response, creationRequest),
-        };
-        console.log("DB 202:", JSON.stringify(transformedResponse));
-        return transformedResponse;
-      }
-      transformedResponse = {
-        ...transformSynchronousResponse(response, creationRequest),
-      };
-      return transformedResponse;
+      return transformSynchronousResponse(response, creationRequest);
     }
 
     logger.info("Should not reach here at the current moment because of mocking.");

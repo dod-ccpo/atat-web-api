@@ -8,7 +8,7 @@ export interface CspResponse<Req, Resp> {
   };
 }
 
-// TODO: this is merely a stop gap to provide mock responses
+// This is merely a stop gap to provide mock responses
 // this should be removed shortly and is not meant as a true representation
 // of the different provisioning actions that can be performed with the
 // async Csp request client and transformed into the CspResponse interface above
@@ -17,14 +17,13 @@ export function mockCspClientResponse(request: any) {
   switch (request.targetCsp.name) {
     case "CSP_A":
       response = {
-        // location: request.targetCsp.uri,
         status: {},
         $metadata: {
           status: 200,
           request,
         },
       };
-      logger.info("Success Sync response", { response: response as any });
+      logger.info("Success Sync response", { response });
       return response;
     case "CSP_B":
       response = {
@@ -39,7 +38,7 @@ export function mockCspClientResponse(request: any) {
           request,
         },
       };
-      logger.info("Success Async response - COMPLETE", { response: response as any });
+      logger.info("Success Async response - COMPLETE", { response });
       return response;
     case "CSP_C":
       response = {
@@ -54,29 +53,27 @@ export function mockCspClientResponse(request: any) {
           request,
         },
       };
-      logger.error("Failed Async response - FAILED", { response: response as any });
+      logger.error("Failed Async response - FAILED", { response });
       return response;
     case "CSP_D":
       response = {
-        // location: request.targetCsp.uri,
         status: {},
         $metadata: {
           status: 500,
-          request,
+          request: { unknown: "response" },
         },
       };
-      logger.error("Internal error response", { response: response as any });
+      logger.error("Internal error response", { response });
       return response;
     case "CSP_E":
       response = {
-        // location: request.targetCsp.uri,
         status: {},
         $metadata: {
           status: 404,
           request,
         },
       };
-      logger.error("Invalid Request", { response: response as any });
+      logger.error("Invalid Request", { response });
       return response;
     case "CSP_F":
       response = {
@@ -91,17 +88,15 @@ export function mockCspClientResponse(request: any) {
           request,
         },
       };
-      logger.info("Success Async response - IN PROGRESS", { response: response as any });
+      logger.info("Success Async response - IN PROGRESS", { response });
       return response;
     default:
-      // response = await cspRequest({ requestType: CspRequest.PROVISION, body: request });
-      logger.info(`${request.targetCsp.name} unknown response`, { response: response as any });
+      logger.info(`${request.targetCsp.name} unknown response`, { response });
       return {
-        location: request.targetCsp.uri,
         status: {},
         $metadata: {
           status: 500,
-          request,
+          request: { unknown: "response" },
         },
       };
   }
