@@ -8,12 +8,16 @@ import { handler } from "./consume-provisioning-job";
 
 const messageBodies = [
   {
-    jobId: "81b31",
-    cspResponse: { ExecutedVersion: "$LATEST", Payload: { code: 200, content: { some: "good content" } } },
+    code: 200,
+    content: {
+      some: "good content",
+    },
   },
   {
-    jobId: "81b317",
-    cspResponse: { ExecutedVersion: "$LATEST", Payload: { code: 400, content: { some: "bad content" } } },
+    code: 400,
+    content: {
+      some: "bad content",
+    },
   },
 ];
 const mockReceiveMessageResponse = generateMockMessageResponses(messageBodies);
@@ -39,7 +43,7 @@ describe("Consumer Provisioning Job handler valid behavior", () => {
     expect(responseBody).toEqual(
       mockReceiveMessageResponse.Messages.map((message) => {
         const body = JSON.parse(message.Body);
-        return { jobId: body.jobId, cspResponse: body.cspResponse.Payload };
+        return { code: body.code, content: body.content };
       })
     );
   });

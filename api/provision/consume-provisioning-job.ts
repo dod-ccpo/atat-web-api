@@ -4,20 +4,8 @@ import { QueueConsumer } from "../util/queueConsumer";
 const PROVISIONING_QUEUE_URL = process.env.PROVISIONING_QUEUE_URL ?? "";
 
 class ConsumeProvisioningJob extends QueueConsumer<ProvisionRequest> {
-  processMessage(message: string | undefined): ProvisionRequest {
-    const { jobId, userId, portfolioId, operationType, targetCsp, payload, cspInvocation, cspResponse } = JSON.parse(
-      message ?? ""
-    );
-    return {
-      jobId,
-      userId,
-      portfolioId,
-      operationType,
-      targetCsp,
-      payload,
-      cspInvocation,
-      cspResponse: cspResponse.Payload,
-    };
+  processMessage(message: string | undefined): ProvisionRequest | undefined {
+    return JSON.parse(message ?? "");
   }
 }
 

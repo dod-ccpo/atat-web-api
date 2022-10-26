@@ -50,11 +50,12 @@ updates all necessary resources appropriately.
 The configuration values for integrating with Cloud Service Providers is stored
 in Secrets Manager. It may not necessarily need to be but doing so provides a
 few specific tangible benefits:
- - Encryption-at-rest
- - Cross-region replication (if needed)
- - Native support for JSON structure
- - Other things are already stored in Secrets Manager
- - The values in the configuration are kept non-public
+
+- Encryption-at-rest
+- Cross-region replication (if needed)
+- Native support for JSON structure
+- Other things are already stored in Secrets Manager
+- The values in the configuration are kept non-public
 
 The format/structure of the configuration should meet the following TypeScript
 interface:

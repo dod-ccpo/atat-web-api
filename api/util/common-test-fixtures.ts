@@ -1,8 +1,8 @@
 import { SQSEvent } from "aws-lambda";
-import { Network } from "../../models/cloud-service-providers";
 import { CostRequest } from "../../models/cost-jobs";
 import { ProvisionRequestType } from "../../models/provisioning-jobs";
 import * as crypto from "crypto";
+import { CostResponseByPortfolio } from "../client";
 
 // provisioning fixtures
 export const fundingSources = [
@@ -29,10 +29,10 @@ export const operators = [
 export const cspA = {
   name: "CSP_A",
   uri: "https://cspa.example.com/api/atat",
-  network: Network.NETWORK_1,
+  network: "NETWORK_1",
 };
 
-export function constructCspTarget(csp: string, network: Network) {
+export function constructCspTarget(csp: string, network: string) {
   return {
     name: csp,
     uri: `https://${csp.toLocaleLowerCase()}.example/com/api/atat`,
@@ -46,8 +46,6 @@ export const provisioningBodyNoPayload = {
   portfolioId: "b02e77d1-234d-4e3d-bc85-b57ca5a93952",
   operationType: ProvisionRequestType.ADD_OPERATORS,
   targetCsp: cspA,
-  cspInvocation: undefined,
-  cspResponse: undefined,
 };
 
 export const provisioningBodyWithPayload = {
@@ -85,12 +83,51 @@ export const baseApiRequest = {
   requestContext,
 } as any;
 
+export const FAKE_COST_DATA: CostResponseByPortfolio = {
+  taskOrders: [
+    {
+      taskOrderNumber: "1234567890123",
+      clins: [
+        {
+          clinNumber: "0001",
+          actual: [
+            {
+              total: "123.00",
+              results: [
+                { month: "2022-01", value: "1.00" },
+                { month: "2022-02", value: "12.00" },
+                { month: "2022-03", value: "110.00" },
+              ],
+            },
+          ],
+          forecast: [
+            {
+              total: "1350.00",
+              results: [
+                { month: "2022-04", value: "150.00" },
+                { month: "2022-05", value: "150.00" },
+                { month: "2022-06", value: "150.00" },
+                { month: "2022-07", value: "150.00" },
+                { month: "2022-08", value: "150.00" },
+                { month: "2022-09", value: "150.00" },
+                { month: "2022-10", value: "150.00" },
+                { month: "2022-11", value: "150.00" },
+                { month: "2022-12", value: "150.00" },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  ],
+};
+
 export function generateTestSQSEvent(recordBodies: any[]): SQSEvent {
   const records = recordBodies.map((body) => {
     const recordBody = JSON.stringify(body);
     return {
       body: recordBody,
-      messageId: "0",
+      messageId: "999",
       messageAttributes: {},
       receiptHandle: "",
       eventSource: "",

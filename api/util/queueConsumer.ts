@@ -14,6 +14,11 @@ import errorLogger from "@middy/error-logger";
 import inputOutputLogger from "@middy/input-output-logger";
 
 export abstract class QueueConsumer<T> {
+  /**
+   * The maximum number of messages to read from the queue on each event.
+   */
+  protected readonly maxMessages = 10;
+
   readonly handler: (event: APIGatewayProxyEvent) => Promise<APIGatewayProxyResult>;
 
   constructor(queueUrl: string) {
@@ -21,7 +26,7 @@ export abstract class QueueConsumer<T> {
       // poll messages from the queue
       const receiveMessageInput: ReceiveMessageCommandInput = {
         QueueUrl: queueUrl,
-        MaxNumberOfMessages: 10,
+        MaxNumberOfMessages: this.maxMessages,
       };
       const receiveMessageCommand = new ReceiveMessageCommand(receiveMessageInput);
       const consumedMessages = await sqsClient.send(receiveMessageCommand);
@@ -36,7 +41,13 @@ export abstract class QueueConsumer<T> {
       const messages: T[] = [];
       for (const record of consumedMessages.Messages) {
         // messages being returned to client
-        messages.push(this.processMessage(record.Body));
+        const processedRecord = this.processMessage(record.Body);
+        if (processedRecord === undefined) {
+          // Skip further processing (and avoid returning) if undefined
+          logger.info("Skipping removal & return for message", { message: record.Body });
+          continue;
+        }
+        messages.push(processedRecord);
 
         // deleting message after processing
         const deleteInput = { QueueUrl: queueUrl, ReceiptHandle: record.ReceiptHandle };
@@ -50,7 +61,12 @@ export abstract class QueueConsumer<T> {
     };
   }
 
-  abstract processMessage(message: string | undefined): T;
+  /**
+   * Process the record for removal from the Queue.
+   *
+   * If the record is not ready to be removed, return `undefined` to prevent removal.
+   */
+  abstract processMessage(message: string | undefined): T | undefined;
 
   createHandler() {
     return middy(this.handler)

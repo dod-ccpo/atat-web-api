@@ -1,6 +1,12 @@
-import { HttpMethod } from "../lib/http";
-import { CloudServiceProvider, Network } from "./cloud-service-providers";
+import { CloudServiceProvider } from "./cloud-service-providers";
 import { CspResponse } from "../api/util/csp-request";
+import {
+  AddPortfolioResponseSync,
+  AddPortfolioResponseAsync,
+  GetProvisioningStatusResponse,
+  AddPortfolioRequest,
+  GetProvisioningStatusRequest,
+} from "../api/client";
 
 export enum ProvisionRequestType {
   ADD_PORTFOLIO = "ADD_PORTFOLIO",
@@ -35,12 +41,10 @@ export interface OperatorPayload {
   operators: Array<Operator>;
 }
 
-export interface CspInvocation {
-  method: HttpMethod;
-  headers: Record<string, string>;
-  endpoint: string;
-  payload: NewPortfolioPayload | FundingSourcePayload | OperatorPayload;
-}
+export type ProvisionCspResponse =
+  | CspResponse<AddPortfolioRequest, AddPortfolioResponseSync>
+  | CspResponse<AddPortfolioRequest, AddPortfolioResponseAsync | { details: string }>
+  | CspResponse<GetProvisioningStatusRequest, GetProvisioningStatusResponse>;
 
 export interface ProvisionRequest {
   jobId: string;
@@ -49,8 +53,10 @@ export interface ProvisionRequest {
   operationType: ProvisionRequestType;
   targetCsp: CloudServiceProvider;
   payload: NewPortfolioPayload | FundingSourcePayload | OperatorPayload;
-  cspInvocation: CspInvocation | undefined;
-  cspResponse: CspResponse | undefined;
+}
+
+export interface AsyncProvisionRequest extends ProvisionRequest {
+  location: string;
 }
 
 // temporary schema to use for validating /provision-job request
@@ -69,11 +75,11 @@ export const provisionRequestSchema = {
     },
     targetCsp: {
       type: "object",
-      required: ["name", "uri", "network"],
+      required: ["name"],
       properties: {
         name: { type: "string" },
-        uri: { type: "string" },
-        network: { enum: [Network.NETWORK_1, Network.NETWORK_2, Network.NETWORK_3] },
+        uri: { type: "string", deprecated: true },
+        network: { type: "string", deprecated: true },
       },
     },
     payload: {
@@ -109,31 +115,26 @@ export const provisionRequestSchema = {
       additionalProperties: false,
       minProperties: 1,
     },
-    cspInvocation: {
-      type: "object",
-      properties: {
-        method: { enum: [HttpMethod.PATCH, HttpMethod.POST, HttpMethod.GET] },
-        headers: {
-          type: "object",
-        },
-        endpoint: { type: "string" },
-        payload: {
-          type: "object",
-        },
-      },
-    },
-    cspResponse: {
-      type: "object",
-      properties: {
-        code: {
-          type: "number",
-        },
-        content: {
-          type: "object",
-        },
-      },
-    },
   },
   required: ["jobId", "userId", "portfolioId", "operationType", "targetCsp", "payload"],
+  additionalProperties: false,
+};
+
+export const provisionResponseSchema = {
+  type: "object",
+  properties: {
+    code: {
+      type: "number",
+    },
+    content: {
+      type: "object",
+      properties: {
+        request: { type: "object" },
+        response: { type: "object" },
+      },
+      required: ["request", "response"],
+    },
+  },
+  required: ["code", "content"],
   additionalProperties: false,
 };
