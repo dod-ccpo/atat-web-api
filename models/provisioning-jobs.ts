@@ -49,7 +49,7 @@ export type ProvisionCspResponse =
 export interface ProvisionRequest {
   jobId: string;
   userId: string;
-  portfolioId: string;
+  portfolioId?: string;
   operationType: ProvisionRequestType;
   targetCsp: CloudServiceProvider;
   payload: NewPortfolioPayload | FundingSourcePayload | OperatorPayload;
@@ -116,7 +116,7 @@ export const provisionRequestSchema = {
       minProperties: 1,
     },
   },
-  required: ["jobId", "userId", "portfolioId", "operationType", "targetCsp", "payload"],
+  required: ["jobId", "userId", "operationType", "targetCsp", "payload"],
   additionalProperties: false,
 };
 
