@@ -27,7 +27,7 @@ export function mockCspClientResponse(request: any) {
       return response;
     case "CSP_B":
       response = {
-        location: request.targetCsp.uri,
+        location: "https://cspB.example.com/v1/",
         status: {
           status: ProvisioningStatusType.COMPLETE,
           portfolioId: request.portfolioId,
@@ -42,7 +42,7 @@ export function mockCspClientResponse(request: any) {
       return response;
     case "CSP_C":
       response = {
-        location: request.targetCsp.uri,
+        location: "https://cspC.example.com/v1/",
         status: {
           status: ProvisioningStatusType.FAILED,
           portfolioId: request.portfolioId,
@@ -77,7 +77,7 @@ export function mockCspClientResponse(request: any) {
       return response;
     case "CSP_F":
       response = {
-        location: request.targetCsp.uri,
+        location: "https://cspF.example.com/v1/",
         status: {
           status: ProvisioningStatusType.IN_PROGRESS,
           portfolioId: request.portfolioId,
