@@ -21,12 +21,12 @@ describe("Async Provisioning Checker - Success", () => {
   it("poll messages from AsyncProvisioningQueue and send completed jobs to ProvisioningQueue", async () => {
     const cspB = {
       name: "CSP_B",
-      uri: "https://cspB.example.com",
+      uri: "https://cspB.example.com/v1/",
       network: "NETWORK_1",
     };
     const cspC = {
       name: "CSP_C",
-      uri: "https://cspC.example.com",
+      uri: "https://cspC.example.com/v1/",
       network: "NETWORK_2",
     };
 

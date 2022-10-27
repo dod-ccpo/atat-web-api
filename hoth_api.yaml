@@ -194,7 +194,6 @@ components:
       required:
         - job_id
         - user_id
-        - portfolio_id
         - operation_type
         - target_csp
         - payload
