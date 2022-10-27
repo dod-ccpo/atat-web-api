@@ -45,7 +45,7 @@ describe("Cost Request Fn - Success", () => {
       {
         ...validCostRequest,
         requestId: "7w1er266-4a04-47ec-a3c9-6775f2a82d28",
-        targetCsp: constructCspTarget("CSP_A", "NETWORK_1"),
+        targetCsp: constructCspTarget("CSP_A"),
       },
     ];
     const queueEvent = generateTestSQSEvent(validMessages);
@@ -92,7 +92,7 @@ describe("Cost Request Fn - Errors", () => {
     const invalidCostRequest: CostRequest = {
       ...validCostRequest,
       portfolioId: "",
-      targetCsp: constructCspTarget("CSP_B", "Network_2"),
+      targetCsp: constructCspTarget("CSP_B"),
     };
     const errorMessages = [invalidCostRequest];
     const queueEvent = generateTestSQSEvent(errorMessages);

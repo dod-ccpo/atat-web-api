@@ -68,7 +68,7 @@ describe("Successful invocation of mock CSP function", () => {
       content: {
         request: createdRequest,
         response: {
-          location: request.targetCsp.uri,
+          location: "https://cspB.example.com/v1/",
           status: {
             status: ProvisioningStatusType.COMPLETE,
             portfolioId: request.portfolioId,
@@ -149,7 +149,7 @@ describe("Failed invocation operations", () => {
       code: 400,
       content: {
         response: {
-          location: request.targetCsp.uri,
+          location: "https://cspC.example.com/v1/",
           status: {
             status: ProvisioningStatusType.FAILED,
             portfolioId: request.portfolioId,
@@ -196,7 +196,7 @@ describe("Failed invocation operations", () => {
       code: 202,
       content: {
         response: {
-          location: request.targetCsp.uri,
+          location: "https://cspF.example.com/v1/",
           status: {
             status: ProvisioningStatusType.IN_PROGRESS,
             portfolioId: request.portfolioId,
@@ -219,7 +219,7 @@ describe("Failed invocation operations", () => {
       csp: "response",
     };
     mockedGetToken.mockResolvedValueOnce({ access_token: "FakeToken", expires_in: 0, token_type: "Bearer" });
-    mockedConfig.mockResolvedValueOnce({ uri: cspA.uri });
+    mockedConfig.mockResolvedValueOnce({ uri: "https://cspA.example.com/v1/" });
     // mockedAxios.post.mockResolvedValueOnce({
     //   data: expectedResponse,
     //   status: 400,
@@ -281,7 +281,6 @@ export function constructProvisionRequestForCsp(csp: string): ProvisionRequest {
   const body = {
     ...provisioningBodyWithPayload,
     targetCsp: {
-      ...cspA,
       name: csp,
     },
   };

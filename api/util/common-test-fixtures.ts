@@ -28,15 +28,11 @@ export const operators = [
 ];
 export const cspA = {
   name: "CSP_A",
-  uri: "https://cspa.example.com/api/atat",
-  network: "NETWORK_1",
 };
 
-export function constructCspTarget(csp: string, network: string) {
+export function constructCspTarget(csp: string) {
   return {
     name: csp,
-    uri: `https://${csp.toLocaleLowerCase()}.example/com/api/atat`,
-    network,
   };
 }
 
