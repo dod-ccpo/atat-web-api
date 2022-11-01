@@ -40,5 +40,5 @@ export async function makeClient(cspName: string): Promise<AtatClient> {
     // throw new Error(`No configuration is available for ${cspName}`);
   }
   const token = await getToken();
-  return new AtatClient(token.access_token, cspConfiguration);
+  return new AtatClient(token.access_token, cspConfiguration, logger);
 }
