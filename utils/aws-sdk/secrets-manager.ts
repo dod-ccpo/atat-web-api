@@ -7,4 +7,4 @@ import { tracer } from "../tracing";
 // for `secretsmanager-fips.<region>.amazonaws.com. The private endpoint will only "register"
 // as `secretsmanager.<region>.amazonaws.com. This results in failed queries to the endpoint
 // with our networking configuration.
-export const secretsClient = tracer.captureAWSv3Client(new SecretsManager({ logger }));
+export const secretsClient = tracer.captureAWSv3Client(new SecretsManager({ logger: logger as any }));
