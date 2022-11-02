@@ -247,7 +247,7 @@ export class AtatWebApiStack extends cdk.Stack {
       runtime: lambda.Runtime.NODEJS_16_X,
       memorySize: 512,
       bundling: {
-        nodeModules: ["@sparticuz/chrome-aws-lambda", "puppeteer-core"],
+        nodeModules: ["@sparticuz/chromium", "puppeteer-core"],
       },
       layers: [documentGenerationLayer],
       timeout: cdk.Duration.seconds(60),
