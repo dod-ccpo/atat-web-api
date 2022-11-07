@@ -110,23 +110,37 @@ export class AtatClient implements IAtatClient {
     return headers;
   }
 
-  private transformSynchronousResponse<T extends types.AtatResponse>(field: keyof T, response: AxiosResponse): T {
+  private transformSynchronousResponse<T extends types.AtatResponse>(
+    field: keyof T,
+    response: AxiosResponse,
+    request:
+      | types.GetPortfolioRequest
+      | types.GetCostsByPortfolioRequest
+      | types.GetCostsByClinRequest
+      | types.GetProvisioningStatusRequest
+      | types.AddPortfolioRequest
+      | types.PatchPortfolioRequest
+      | types.AddTaskOrderRequest
+  ): T {
     return {
       [field]: response.data,
       $metadata: {
         status: response.status,
-        request: response.request,
+        request,
       },
     } as T;
   }
 
-  private transformAsynchronousResponse(response: AxiosResponse): types.AsyncProvisionResponse {
+  private transformAsynchronousResponse(
+    response: AxiosResponse,
+    request: types.AddPortfolioRequest | types.PatchPortfolioRequest | types.AddTaskOrderRequest
+  ): types.AsyncProvisionResponse {
     return {
       status: response.data,
       location: response.headers.location,
       $metadata: {
         status: response.status,
-        request: response.request,
+        request,
       },
     };
   }
@@ -148,9 +162,9 @@ export class AtatClient implements IAtatClient {
     const response = await this.client.post("/portfolios", request.portfolio, { headers });
     switch (response.status) {
       case 200:
-        return this.transformSynchronousResponse<types.AddPortfolioResponseSync>("portfolio", response);
+        return this.transformSynchronousResponse<types.AddPortfolioResponseSync>("portfolio", response, request);
       case 202:
-        return this.transformAsynchronousResponse(response);
+        return this.transformAsynchronousResponse(response, request);
       case 400:
         throw new AtatApiError("Invalid portfolio provided", "InvalidPortfolio", request, response);
       default:
@@ -166,7 +180,7 @@ export class AtatClient implements IAtatClient {
     const response = await this.client.get(`/portfolios/${request.portfolioId}`, { headers });
     switch (response.status) {
       case 200:
-        return this.transformSynchronousResponse<types.GetPortfolioResponse>("portfolio", response);
+        return this.transformSynchronousResponse<types.GetPortfolioResponse>("portfolio", response, request);
       case 400:
         throw new AtatApiError("Invalid ID supplied", "InvalidPortfolioId", request, response);
       case 404:
@@ -188,9 +202,9 @@ export class AtatClient implements IAtatClient {
     const response = await this.client.patch(`/portfolios/${request.portfolioId}`, request.patch, { headers });
     switch (response.status) {
       case 200:
-        return this.transformSynchronousResponse<types.PatchPortfolioResponseSync>("patch", response);
+        return this.transformSynchronousResponse<types.PatchPortfolioResponseSync>("patch", response, request);
       case 202:
-        return this.transformAsynchronousResponse(response);
+        return this.transformAsynchronousResponse(response, request);
       case 400:
         throw new AtatApiError("Invalid portfolio provided", "InvalidPortfolio", request, response);
       case 404:
@@ -216,7 +230,7 @@ export class AtatClient implements IAtatClient {
     });
     switch (response.status) {
       case 200:
-        return this.transformSynchronousResponse<types.GetCostsByPortfolioResponse>("costs", response);
+        return this.transformSynchronousResponse<types.GetCostsByPortfolioResponse>("costs", response, request);
       case 400:
         throw new AtatApiError("Invalid ID or query parameters", "InvalidCostQuery", request, response);
       case 404:
@@ -238,9 +252,9 @@ export class AtatClient implements IAtatClient {
     });
     switch (response.status) {
       case 200:
-        return this.transformSynchronousResponse<types.AddTaskOrderResponseSync>("taskOrder", response);
+        return this.transformSynchronousResponse<types.AddTaskOrderResponseSync>("taskOrder", response, request);
       case 202:
-        return this.transformAsynchronousResponse(response);
+        return this.transformAsynchronousResponse(response, request);
       case 400:
         throw new AtatApiError("Invalid ID supplied", "InvalidPortfolioId", request, response);
       case 404:
@@ -262,7 +276,7 @@ export class AtatClient implements IAtatClient {
     );
     switch (response.status) {
       case 200:
-        return this.transformSynchronousResponse<types.GetCostsByClinResponse>("costs", response);
+        return this.transformSynchronousResponse<types.GetCostsByClinResponse>("costs", response, request);
       case 400:
         throw new AtatApiError("Invalid ID or query parameters", "InvalidCostQuery", request, response);
       case 404:
@@ -280,7 +294,7 @@ export class AtatClient implements IAtatClient {
     switch (response.status) {
       case 200:
         return {
-          ...this.transformSynchronousResponse<types.GetProvisioningStatusResponse>("status", response),
+          ...this.transformSynchronousResponse<types.GetProvisioningStatusResponse>("status", response, request),
           location: request.location,
         };
       case 404:
