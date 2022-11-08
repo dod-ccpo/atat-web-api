@@ -90,13 +90,22 @@ export class AtatClient implements IAtatClient {
       // more custom error information.
       validateStatus: () => true,
     });
+    this.logger = logger ?? defaultLogger;
 
     // Dynamically convert all values to snake_case to send across the wire, per the API
     // specification and then convert responses to camelCase for the internal API of this
     // client.
+    this.client.interceptors.request.use((cspClientRequest) => {
+      this.logger.info("CSP Request", { cspClientRequest });
+      return cspClientRequest;
+    });
     this.client.interceptors.request.use(camelToSnakeRequestInterceptor);
+
+    this.client.interceptors.response.use((cspClientResponse) => {
+      this.logger.info("CSP Response", { cspClientResponse });
+      return cspClientResponse;
+    });
     this.client.interceptors.response.use(snakeToCamelResponseInterceptor);
-    this.logger = logger ?? defaultLogger;
   }
 
   private buildHeaders(request: Partial<types.ProvisionRequest>): Record<string, string> {
