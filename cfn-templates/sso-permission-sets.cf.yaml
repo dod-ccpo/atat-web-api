@@ -226,3 +226,26 @@ Resources:
               - states:Get*
               - states:List*
             Resource: "*"
+  AtatDeveloperSecretReadAccess:
+    Type: AWS::SSO::PermissionSet
+    Properties:
+      InstanceArn: !Ref InstanceArn
+      Name: AtatDeveloperSecretReadAccess
+      Description: >-
+        Allow the ability to read Secrets Manager values.
+      InlinePolicy:
+        Version: 2012-10-17
+        Statement:
+          - Sid: DenyActionsInOtherAccoutns
+            Effect: Deny
+            Action: "*"
+            Resource: "*"
+            Condition:
+              StringNotEquals:
+                aws:ResourceAccount: "${aws:PrincipalAccount}"
+          - Effect: Allow
+            Action: 
+              - secretsmanager:GetSecretValue
+              - secretsmanager:ListSecrets
+              - secretsmanager:DescribeSecret
+            Resource: "*"
