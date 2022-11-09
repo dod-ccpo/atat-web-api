@@ -85,7 +85,7 @@ async function makeRequest(client: IAtatClient, request: ProvisionRequest): Prom
       return transformSynchronousResponse(response, creationRequest);
     }
 
-    logger.info("Should not reach here at the current moment because of mocking.");
+    logger.info("Making an actual CSP request w/ atat-client - CspWritePortfolio");
     const cspResponse = await client.addPortfolio(creationRequest);
     if (cspResponse.$metadata.status === 202) {
       const asyncResponse = cspResponse as atatApiTypes.AddPortfolioResponseAsync;

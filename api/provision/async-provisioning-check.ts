@@ -1,6 +1,5 @@
 import {
   AddPortfolioResponseAsync,
-  AsyncProvisionResponse,
   GetProvisioningStatusRequest,
   GetProvisioningStatusResponse,
   IAtatClient,
@@ -44,6 +43,7 @@ async function makeRequest(
         request: requestBody,
         response: cspMockResponse,
       },
+      targetCsp: request.targetCsp,
     };
     if (
       cspMockResponse.status.status === ProvisioningStatusType.COMPLETE ||
@@ -54,7 +54,7 @@ async function makeRequest(
     return undefined;
   }
 
-  logger.info("Should not reach here at the current moment because of mocking.");
+  logger.info("Making an actual CSP request w/ atat-client - AsyncProvisioningCheck");
   const cspResponse = await client.getProvisioningStatus(requestBody);
   if (
     cspResponse.status.status === ProvisioningStatusType.COMPLETE ||
@@ -66,6 +66,7 @@ async function makeRequest(
         request: requestBody,
         response: cspResponse,
       },
+      targetCsp: request.targetCsp,
     };
   }
   return undefined;
@@ -81,8 +82,11 @@ async function baseHandler(event: SQSEvent): Promise<SQSBatchResponse> {
   }
   for (const record of event.Records) {
     const request = JSON.parse(record.body) as ProvisionCspResponse;
-    const response = request.content.response as AsyncProvisionResponse;
-    const client = await makeClient(response.$metadata.request.targetCsp.name);
+    let cspName = "";
+    if (request.targetCsp) {
+      cspName = request.targetCsp.name;
+    }
+    const client = await makeClient(cspName);
     const provisioningStatus = await makeRequest(client, request);
     if (provisioningStatus) {
       moveToReady.push(provisioningStatus);
