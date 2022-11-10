@@ -82,11 +82,10 @@ async function baseHandler(event: SQSEvent): Promise<SQSBatchResponse> {
   }
   for (const record of event.Records) {
     const request = JSON.parse(record.body) as ProvisionCspResponse;
-    let cspName = "";
-    if (request.targetCsp) {
-      cspName = request.targetCsp.name;
+    if (!request.targetCsp) {
+      throw new Error(`No target CSP provided for Async request`);
     }
-    const client = await makeClient(cspName);
+    const client = await makeClient(request.targetCsp.name);
     const provisioningStatus = await makeRequest(client, request);
     if (provisioningStatus) {
       moveToReady.push(provisioningStatus);

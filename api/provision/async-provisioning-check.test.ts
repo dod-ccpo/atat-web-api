@@ -8,6 +8,7 @@ import { generateMockMessageResponses, generateTestSQSEvent } from "../util/comm
 import * as client from "../client";
 import * as types from "../client/types";
 import * as atatClientHelper from "../../utils/atat-client";
+import { ErrorStatusCode, ValidationErrorResponse } from "../../utils/response";
 
 // Mocks
 jest.mock("../../utils/atat-client");
@@ -53,6 +54,7 @@ describe("Async Provisioning Checker - Success", () => {
             location: cspB.uri,
           },
         },
+        targetCsp: cspB,
       },
       {
         code: 400,
@@ -73,6 +75,7 @@ describe("Async Provisioning Checker - Success", () => {
             location: cspC.uri,
           },
         },
+        targetCsp: cspC,
       },
     ];
     const queueEvent = generateTestSQSEvent(messages);
@@ -122,6 +125,7 @@ describe("Async Provisioning Checker - Success", () => {
             location: cspF.uri,
           },
         },
+        targetCsp: cspF,
       },
     ];
     const queueEvent = generateTestSQSEvent(messages);
@@ -208,5 +212,31 @@ describe("Async Provisioning Checker - Success", () => {
     // THEN
     expect(commandCalls.length).toBe(0);
     expect(response.batchItemFailures.length).toEqual(0);
+  });
+});
+
+describe("Async Provisioning Checker - Errors", () => {
+  it("No target CSP provided", async () => {
+    // GIVEN
+    const messages = [
+      {
+        code: 202,
+        content: {
+          response: {},
+          request: {},
+        },
+        // targetCsp: {},
+      },
+    ];
+    const queueEvent = generateTestSQSEvent(messages);
+    const mockResponse = generateMockMessageResponses(messages);
+    sqsMock.on(SendMessageCommand).resolves(mockResponse);
+
+    // WHEN
+    const response = (await handler(queueEvent, {} as Context)) as unknown as ValidationErrorResponse;
+
+    // THEN
+    expect(response).toBeInstanceOf(ValidationErrorResponse);
+    expect(response.statusCode).toBe(ErrorStatusCode.BAD_REQUEST);
   });
 });
