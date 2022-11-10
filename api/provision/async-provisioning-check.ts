@@ -75,7 +75,7 @@ async function makeRequest(
 async function baseHandler(event: SQSEvent): Promise<SQSBatchResponse> {
   // The item IDs for records that are still in the IN_PROGRESS or NOT_STARTED state
   const stillInProgress: string[] = [];
-  // Items that have moved to the COMPELTE or FAILED state
+  // Items that have moved to the COMPLETE or FAILED state
   const moveToReady: ProvisionCspResponse[] = [];
   if (!event?.Records?.length) {
     logger.info("There are no records in this request.");
