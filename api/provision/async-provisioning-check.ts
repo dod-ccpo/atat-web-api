@@ -1,6 +1,5 @@
 import {
   AddPortfolioResponseAsync,
-  AsyncProvisionResponse,
   GetProvisioningStatusRequest,
   GetProvisioningStatusResponse,
   IAtatClient,
@@ -44,6 +43,7 @@ async function makeRequest(
         request: requestBody,
         response: cspMockResponse,
       },
+      targetCsp: request.targetCsp,
     };
     if (
       cspMockResponse.status.status === ProvisioningStatusType.COMPLETE ||
@@ -54,7 +54,7 @@ async function makeRequest(
     return undefined;
   }
 
-  logger.info("Should not reach here at the current moment because of mocking.");
+  logger.info("Making an actual CSP request w/ atat-client - AsyncProvisioningCheck");
   const cspResponse = await client.getProvisioningStatus(requestBody);
   if (
     cspResponse.status.status === ProvisioningStatusType.COMPLETE ||
@@ -66,6 +66,7 @@ async function makeRequest(
         request: requestBody,
         response: cspResponse,
       },
+      targetCsp: request.targetCsp,
     };
   }
   return undefined;
@@ -74,15 +75,17 @@ async function makeRequest(
 async function baseHandler(event: SQSEvent): Promise<SQSBatchResponse> {
   // The item IDs for records that are still in the IN_PROGRESS or NOT_STARTED state
   const stillInProgress: string[] = [];
-  // Items that have moved to the COMPELTE or FAILED state
+  // Items that have moved to the COMPLETE or FAILED state
   const moveToReady: ProvisionCspResponse[] = [];
   if (!event?.Records?.length) {
     logger.info("There are no records in this request.");
   }
   for (const record of event.Records) {
     const request = JSON.parse(record.body) as ProvisionCspResponse;
-    const response = request.content.response as AsyncProvisionResponse;
-    const client = await makeClient(response.$metadata.request.targetCsp.name);
+    if (!request.targetCsp) {
+      throw new Error(`No target CSP provided for Async request`);
+    }
+    const client = await makeClient(request.targetCsp.name);
     const provisioningStatus = await makeRequest(client, request);
     if (provisioningStatus) {
       moveToReady.push(provisioningStatus);

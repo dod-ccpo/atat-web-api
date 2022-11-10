@@ -134,6 +134,12 @@ export const provisionResponseSchema = {
       },
       required: ["request", "response"],
     },
+    targetCsp: {
+      type: "object",
+      properties: {
+        name: { type: "string" },
+      },
+    },
   },
   required: ["code", "content"],
   additionalProperties: false,

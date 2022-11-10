@@ -20,21 +20,21 @@ import { AtatContextValue } from "../context-values";
 /**
  * Successful condition check
  */
-export const successResponse = sfn.Condition.numberEquals("$.cspResponse.Payload.code", 200);
+export const successResponse = sfn.Condition.numberEquals("$.cspResponse.code", 200);
 
 /**
  * A successful HTTP 202 response check
  */
-export const asyncSuccessResponse = sfn.Condition.numberEquals("$.cspResponse.Payload.code", 202);
+export const asyncSuccessResponse = sfn.Condition.numberEquals("$.cspResponse.code", 202);
 
 /**
  * Client error condition check
  */
 export const clientErrorResponse = sfn.Condition.or(
-  sfn.Condition.numberEquals("$.cspResponse.Payload.code", 400),
-  sfn.Condition.numberEquals("$.cspResponse.Payload.code", 402),
-  sfn.Condition.numberEquals("$.cspResponse.Payload.code", 403),
-  sfn.Condition.numberEquals("$.cspResponse.Payload.code", 404)
+  sfn.Condition.numberEquals("$.cspResponse.code", 400),
+  sfn.Condition.numberEquals("$.cspResponse.code", 402),
+  sfn.Condition.numberEquals("$.cspResponse.code", 403),
+  sfn.Condition.numberEquals("$.cspResponse.code", 404)
 );
 
 export interface ProvisioningWorkflowProps {
@@ -126,6 +126,10 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
         props: {
           lambdaFunction: cspWritePortfolioFn,
           inputPath: "$",
+          resultSelector: {
+            code: sfn.JsonPath.objectAt("$.Payload.code"),
+            content: sfn.JsonPath.objectAt("$.Payload.content"),
+          },
           resultPath: "$.cspResponse",
           outputPath: "$",
         },
@@ -134,7 +138,11 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
         id: "EnqueueResults",
         props: {
           lambdaFunction: this.resultFn,
-          inputPath: "$.cspResponse.Payload",
+          payload: sfn.TaskInput.fromObject({
+            code: sfn.JsonPath.objectAt("$.cspResponse.code"),
+            content: sfn.JsonPath.objectAt("$.cspResponse.content"),
+            targetCsp: sfn.JsonPath.objectAt("$.targetCsp"),
+          }),
           resultPath: "$.enqueueResultResponse",
           outputPath: "$",
         },

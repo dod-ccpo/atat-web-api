@@ -18,6 +18,8 @@ import {
 } from "../util/common-test-fixtures";
 import { AddPortfolioRequest, ProvisioningStatusType } from "../client";
 import * as atatClientHelper from "../../utils/atat-client";
+import * as client from "../client";
+import * as types from "../client/types";
 
 // Reused mocks
 jest.mock("../provision/csp-configuration");
@@ -102,6 +104,116 @@ describe("Successful invocation of mock CSP function", () => {
     // THEN
     expect(response).toEqual(expectedResponse);
     expect(response.code).toBe(SuccessStatusCode.ACCEPTED);
+  });
+  it("should use atat-client to make request to CSP Async (202)", async () => {
+    // GIVEN
+    const atatClientRequest = {
+      ...constructProvisionRequestForCsp("CSP_Real"),
+      operationType: ProvisionRequestType.ADD_PORTFOLIO,
+    };
+    const payload = atatClientRequest.payload as NewPortfolioPayload;
+    const createdRequest: AddPortfolioRequest = {
+      portfolio: {
+        name: payload.name,
+        administrators: payload.operators,
+        taskOrders: payload.fundingSources.map((funding) => ({
+          ...funding,
+          clins: [{ clinNumber: funding.clin, popStartDate: funding.popStartDate, popEndDate: funding.popEndDate }],
+          clin: undefined,
+        })),
+      },
+    };
+    const expectedResponse = {
+      code: 202,
+      content: {
+        request: createdRequest,
+        response: {
+          location: "https://cspReal.example.com/v1/",
+          status: {
+            portfolioId: atatClientRequest.portfolioId,
+            provisioningJobId: atatClientRequest.jobId,
+            status: ProvisioningStatusType.NOT_STARTED,
+          },
+          $metadata: {
+            request: atatClientRequest,
+            status: 202,
+          },
+        },
+      },
+    };
+
+    jest.spyOn(client.AtatClient.prototype, "addPortfolio").mockImplementation(() => {
+      return Promise.resolve({
+        location: "https://cspReal.example.com/v1/",
+        status: {
+          portfolioId: atatClientRequest.portfolioId,
+          provisioningJobId: atatClientRequest.jobId,
+          status: ProvisioningStatusType.NOT_STARTED,
+        },
+        $metadata: {
+          status: 202,
+          request: atatClientRequest,
+        },
+      } as types.AddPortfolioResponseAsync);
+    });
+    mockedMakeClient.mockResolvedValue(new client.AtatClient("SAMPLE", { uri: "http://fake.example.com" }));
+
+    // WHEN
+    const response = (await handler(atatClientRequest, {} as Context)) as ProvisionCspResponse;
+
+    // THEN
+    expect(response).toEqual(expectedResponse);
+    expect(response.code).toBe(SuccessStatusCode.ACCEPTED);
+  });
+  it("should use atat-client to make request to CSP Sync - 200", async () => {
+    // GIVEN
+    const atatClientRequest = {
+      ...constructProvisionRequestForCsp("CSP_Real"),
+      operationType: ProvisionRequestType.ADD_PORTFOLIO,
+    };
+    const payload = atatClientRequest.payload as NewPortfolioPayload;
+    const createdRequest: AddPortfolioRequest = {
+      portfolio: {
+        name: payload.name,
+        administrators: payload.operators,
+        taskOrders: payload.fundingSources.map((funding) => ({
+          ...funding,
+          clins: [{ clinNumber: funding.clin, popStartDate: funding.popStartDate, popEndDate: funding.popEndDate }],
+          clin: undefined,
+        })),
+      },
+    };
+    const expectedResponse = {
+      code: 200,
+      content: {
+        request: createdRequest,
+        response: {
+          portfolio: createdRequest.portfolio,
+          $metadata: {
+            request: atatClientRequest,
+            status: 200,
+          },
+        },
+      },
+    };
+
+    jest.spyOn(client.AtatClient.prototype, "addPortfolio").mockImplementation(() => {
+      return Promise.resolve({
+        portfolio: createdRequest.portfolio,
+        $metadata: {
+          status: 200,
+          request: atatClientRequest,
+        },
+      } as types.AddPortfolioResponseSync);
+    });
+    mockedMakeClient.mockResolvedValue(new client.AtatClient("SAMPLE", { uri: "http://fake.example.com" }));
+
+    // WHEN
+    const response = (await handler(atatClientRequest, {} as Context)) as ProvisionCspResponse;
+
+    // THEN
+    expect(response).toEqual(expectedResponse);
+    expect(response.code).toBe(SuccessStatusCode.OK);
   });
 });
 
