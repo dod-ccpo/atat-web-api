@@ -35,7 +35,7 @@ async function makeRequest(
     location: origResponse.location,
   };
   const mockCspNames = ["CSP_B", "CSP_C", "CSP_F"];
-  if (mockCspNames.includes(origResponse.$metadata.request.targetCsp.name)) {
+  if (request.targetCsp && mockCspNames.includes(request.targetCsp.name)) {
     const cspMockResponse = mockCspClientResponse(origResponse.$metadata.request);
     const mockResponse = {
       code: request.code,
