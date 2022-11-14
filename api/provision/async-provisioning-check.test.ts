@@ -9,6 +9,7 @@ import * as client from "../client";
 import * as types from "../client/types";
 import * as atatClientHelper from "../../utils/atat-client";
 import { ErrorStatusCode, ValidationErrorResponse } from "../../utils/response";
+import { constructProvisionRequestForCsp } from "./csp-write-portfolio.test";
 
 // Mocks
 jest.mock("../../utils/atat-client");
@@ -54,7 +55,7 @@ describe("Async Provisioning Checker - Success", () => {
             location: cspB.uri,
           },
         },
-        targetCsp: cspB,
+        initialSnowRequest: constructProvisionRequestForCsp("CSP_B"),
       },
       {
         code: 400,
@@ -75,7 +76,7 @@ describe("Async Provisioning Checker - Success", () => {
             location: cspC.uri,
           },
         },
-        targetCsp: cspC,
+        initialSnowRequest: constructProvisionRequestForCsp("CSP_C"),
       },
     ];
     const queueEvent = generateTestSQSEvent(messages);
@@ -125,7 +126,7 @@ describe("Async Provisioning Checker - Success", () => {
             location: cspF.uri,
           },
         },
-        targetCsp: cspF,
+        initialSnowRequest: constructProvisionRequestForCsp("CSP_F"),
       },
     ];
     const queueEvent = generateTestSQSEvent(messages);
@@ -167,7 +168,7 @@ describe("Async Provisioning Checker - Success", () => {
           location: cspMock.uri,
         },
       },
-      targetCsp: { name: cspMock.name },
+      initialSnowRequest: constructProvisionRequestForCsp("CSP_Mock"),
     };
 
     // GIVEN
@@ -216,7 +217,7 @@ describe("Async Provisioning Checker - Success", () => {
 });
 
 describe("Async Provisioning Checker - Errors", () => {
-  it("No target CSP provided", async () => {
+  it("No initial SNOW request provided", async () => {
     // GIVEN
     const messages = [
       {
@@ -225,7 +226,7 @@ describe("Async Provisioning Checker - Errors", () => {
           response: {},
           request: {},
         },
-        // targetCsp: {},
+        // initialSnowRequest: {},
       },
     ];
     const queueEvent = generateTestSQSEvent(messages);

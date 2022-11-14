@@ -34,7 +34,7 @@ export const errorHandlingMiddleware = (): middy.MiddlewareObj<MiddlewareInputs,
 
     switch (errorMessage) {
       case "CSP portfolio ID required.":
-      case "No target CSP provided for Async request":
+      case "No initial ServiceNow Request provided for Async request":
         request.response = new ValidationErrorResponse("Request failed validation", {
           issue: errorMessage,
           name: error.name,

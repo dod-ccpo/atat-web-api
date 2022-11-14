@@ -35,7 +35,7 @@ async function makeRequest(
     location: origResponse.location,
   };
   const mockCspNames = ["CSP_B", "CSP_C", "CSP_F"];
-  if (request.targetCsp && mockCspNames.includes(request.targetCsp.name)) {
+  if (request.initialSnowRequest && mockCspNames.includes(request.initialSnowRequest.targetCsp.name)) {
     const cspMockResponse = mockCspClientResponse(origResponse.$metadata.request);
     const mockResponse = {
       code: request.code,
@@ -43,7 +43,7 @@ async function makeRequest(
         request: requestBody,
         response: cspMockResponse,
       },
-      targetCsp: request.targetCsp,
+      initialSnowRequest: request.initialSnowRequest,
     };
     if (
       cspMockResponse.status.status === ProvisioningStatusType.COMPLETE ||
@@ -66,7 +66,7 @@ async function makeRequest(
         request: requestBody,
         response: cspResponse,
       },
-      targetCsp: request.targetCsp,
+      initialSnowRequest: request.initialSnowRequest,
     };
   }
   return undefined;
@@ -82,10 +82,10 @@ async function baseHandler(event: SQSEvent): Promise<SQSBatchResponse> {
   }
   for (const record of event.Records) {
     const request = JSON.parse(record.body) as ProvisionCspResponse;
-    if (!request.targetCsp) {
-      throw new Error(`No target CSP provided for Async request`);
+    if (!request.initialSnowRequest) {
+      throw new Error("No initial ServiceNow Request provided for Async request");
     }
-    const client = await makeClient(request.targetCsp.name);
+    const client = await makeClient(request.initialSnowRequest.targetCsp.name);
     const provisioningStatus = await makeRequest(client, request);
     if (provisioningStatus) {
       moveToReady.push(provisioningStatus);

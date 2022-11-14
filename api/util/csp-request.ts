@@ -1,4 +1,4 @@
-import { CloudServiceProvider } from "../../models/cloud-service-providers";
+import { ProvisionRequest } from "../../models/provisioning-jobs";
 import { logger } from "../../utils/logging";
 import { ProvisioningStatusType } from "../client";
 export interface CspResponse<Req, Resp> {
@@ -7,7 +7,7 @@ export interface CspResponse<Req, Resp> {
     request: Req;
     response: Resp;
   };
-  targetCsp?: CloudServiceProvider;
+  initialSnowRequest?: ProvisionRequest;
 }
 
 // This is merely a stop gap to provide mock responses
