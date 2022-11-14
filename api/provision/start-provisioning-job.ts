@@ -34,7 +34,7 @@ export async function baseHandler(event: RequestEvent<ProvisionRequest>): Promis
       ...event.body,
     };
     await sfnClient.startExecution({
-      input: JSON.stringify(sfnInput),
+      input: JSON.stringify({ initialSnowRequest: sfnInput }),
       stateMachineArn: SFN_ARN,
     });
 
