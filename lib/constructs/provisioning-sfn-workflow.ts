@@ -125,7 +125,7 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
         id: "InvokeCspApi",
         props: {
           lambdaFunction: cspWritePortfolioFn,
-          inputPath: "$",
+          inputPath: "$.initialSnowRequest",
           resultSelector: {
             code: sfn.JsonPath.objectAt("$.Payload.code"),
             content: sfn.JsonPath.objectAt("$.Payload.content"),
@@ -141,7 +141,7 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
           payload: sfn.TaskInput.fromObject({
             code: sfn.JsonPath.objectAt("$.cspResponse.code"),
             content: sfn.JsonPath.objectAt("$.cspResponse.content"),
-            targetCsp: sfn.JsonPath.objectAt("$.targetCsp"),
+            initialSnowRequest: sfn.JsonPath.objectAt("$.initialSnowRequest"),
           }),
           resultPath: "$.enqueueResultResponse",
           outputPath: "$",

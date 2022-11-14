@@ -134,12 +134,7 @@ export const provisionResponseSchema = {
       },
       required: ["request", "response"],
     },
-    targetCsp: {
-      type: "object",
-      properties: {
-        name: { type: "string" },
-      },
-    },
+    initialSnowRequest: provisionRequestSchema,
   },
   required: ["code", "content"],
   additionalProperties: false,
