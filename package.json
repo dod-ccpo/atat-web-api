@@ -22,7 +22,7 @@
     "@types/jest": "^29.2.3",
     "@types/node": "^18.11.9",
     "@types/lodash": "^4.14.189",
-    "@types/puppeteer": "^5.4.6",
+    "@types/puppeteer": "^7.0.4",
     "@typescript-eslint/eslint-plugin": "^5.43.0",
     "@typescript-eslint/parser": "^5.43.0",
     "aws-cdk": "2.50.0",
