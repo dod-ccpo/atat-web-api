@@ -146,7 +146,7 @@ export class AtatClient implements IAtatClient {
   ): types.AsyncProvisionResponse {
     return {
       status: response.data,
-      location: response.headers.location,
+      location: response.headers.location ?? "",
       $metadata: {
         status: response.status,
         request,
