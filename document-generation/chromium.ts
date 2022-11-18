@@ -1,12 +1,12 @@
-import chromium from "@sparticuz/chrome-aws-lambda";
-import { PDFOptions } from "puppeteer-core";
+import chromium from "@sparticuz/chromium";
+import { PDFOptions, launch } from "puppeteer-core";
 import { logger } from "../utils/logging";
 
 export async function generateDocument(document: string): Promise<Buffer | undefined> {
   let browser, generatedDocument;
 
   try {
-    browser = await chromium.puppeteer.launch({
+    browser = await launch({
       args: chromium.args,
       defaultViewport: chromium.defaultViewport,
       executablePath: await chromium.executablePath,
