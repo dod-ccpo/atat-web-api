@@ -402,9 +402,44 @@ components:
         templatePayload:
           type: object
           oneOf:
+            - $ref: "#/components/schemas/EvalPlan"
             - $ref: "#/components/schemas/DescriptionOfWork"
             - $ref: "#/components/schemas/IndependentGovernmentCostEstimate"
-    IndependentGovernmentCostEstimate:
+   EvalPlan:
+     description: Provides the basis of evaluation for an Aquisition Package
+     type: object
+     properties:
+        source_selection:
+          type: string
+          enum:
+            - NO_TECH_PROPOSAL
+            - TECH_PROPOSAL
+            - SET_LUMP_SUM
+            - EQUAL_SET_LUMP_SUM
+        method:
+          type: string
+          enum:
+            - LPTA
+            - BVTO
+            - BEST_USE
+            - LOWEST_RISK
+        standard_specifications:
+          type: array
+          items:
+            type: string
+        custom_specifications:
+          type: array
+          items:
+            type: string
+        standard_differentiators:
+          type: array
+          items:
+            type: string
+        custom_differentiators:
+          type: array
+          items:
+            type: string
+   IndependentGovernmentCostEstimate:
       description: "Data used for generating the Independent Government Cost Estimate (IGCE) document"
       type: object
       properties:
