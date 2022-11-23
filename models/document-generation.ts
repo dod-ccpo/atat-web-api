@@ -7,7 +7,8 @@ export enum AwardType {
 }
 
 export enum DocumentType {
-  DESCRIPTION_OF_WORK = "DESCRIPTION_OF_WORK",
+  DESCRIPTION_OF_WORK_PDF = "DESCRIPTION_OF_WORK_PDF",
+  DESCRIPTION_OF_WORK_DOCX = "DESCRIPTION_OF_WORK_DOCX",
   INDEPENDENT_GOVERNMENT_COST_ESTIMATE = "INDEPENDENT_GOVERNMENT_COST_ESTIMATE",
 }
 
@@ -86,7 +87,8 @@ export enum ServiceOfferingGroup {
   TRAINING = "TRAINING",
 }
 export interface TemplatePaths {
-  [DocumentType.DESCRIPTION_OF_WORK]: { html: string; css: string };
+  [DocumentType.DESCRIPTION_OF_WORK_PDF]: { html: string; css: string };
+  [DocumentType.DESCRIPTION_OF_WORK_DOCX]: { docx: string };
   [DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE]: { excel: string };
 }
 export interface IAward {
@@ -515,7 +517,11 @@ export const generateDocumentSchema = {
   type: "object",
   properties: {
     documentType: {
-      enum: [DocumentType.DESCRIPTION_OF_WORK, DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE],
+      enum: [
+        DocumentType.DESCRIPTION_OF_WORK_PDF,
+        DocumentType.DESCRIPTION_OF_WORK_DOCX,
+        DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE,
+      ],
     },
     templatePayload: {
       oneOf: [descriptionOfWork, independentGovernmentCostEstimate],

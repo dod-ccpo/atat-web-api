@@ -33,7 +33,7 @@ async function baseHandler(event: RequestEvent<GenerateDocumentRequest>): Promis
   logger.info("Generating document", { documentType });
 
   switch (documentType) {
-    case DocumentType.DESCRIPTION_OF_WORK:
+    case DocumentType.DESCRIPTION_OF_WORK_PDF:
       return generatePdf(event);
     case DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE:
       return generateXlsx(event);
