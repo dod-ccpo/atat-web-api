@@ -27,12 +27,15 @@ import {
 import handlebars from "handlebars";
 import juice from "juice";
 import { formatDuration, formatGroupAndClassification, counter, countSections, formatAwardType } from "./utils/helpers";
+import { generateDow } from "./.docx/generateDow";
 
 async function baseHandler(event: RequestEvent<GenerateDocumentRequest>): Promise<ApiBase64SuccessResponse> {
   const { documentType } = event.body;
   logger.info("Generating document", { documentType });
 
   switch (documentType) {
+    case DocumentType.DESCRIPTION_OF_WORK_DOCX:
+      return generateDow(event);
     case DocumentType.DESCRIPTION_OF_WORK_PDF:
       return generatePdf(event);
     case DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE:
