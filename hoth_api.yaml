@@ -753,14 +753,72 @@ components:
       description: "Part of DOW, encapsulates all data for 3. Background/Current Environment section."
       type: object
       properties:
+        # TODO: do we add an additional property for cloud support package question?
+        # OR is it located in another place?
         current_environment_exists:
           type: boolean
-        environment_instances:
+        additional_growth:
+          type: boolean
+        anticipatedYearlyAdditionalCapacity:
+          type: integer
+        currentEnvironmentReplicatedOptimized:
+          type: string
+          enum:
+            - YES_REPLICATE
+            - YES_OPTIMIZE
+            - NO
+        hasMigrationDocumentation:
+          type: boolean
+        # TODO: how are documents being combined with generated document?
+        # OR are we just providing a list of the document name in DoW?
+        migrationDocumentation:
           type: array
           items:
-            $ref: "#/components/schemas/EnvironmentInstance"
-        additional_info:
+            type: string
+        statementReplicatedOptimized:
           type: string
+        needsArchitecturalDesignServices:
+          type: boolean
+        applicationsNeedArchitecturalDesign:
+          type: string
+        externalFactorsArchitecturalDesign:
+          type: string
+        hasSystemDocumentation:
+          type: boolean
+        # TODO: how are documents being combined with generated document?
+        # OR are we just providing a list of the document names in DoW?
+        systemDocumentation:
+          type: array
+          items:
+            type: string
+        statementArchitecturalDesign:
+          type: string
+        hasPhasedApproach:
+          type: boolean
+        phasedApproachSchedule:
+          type: string
+        envLocation:
+          type: string
+          enum:
+            - CLOUD
+            - ON_PREM
+            - HYBRID
+        dataClassificationsImpactLevels:
+          type: array
+          items:
+            $ref: "#/components/schemas/ClassificationLevel"
+        envClassificationsCloud:
+          type: array
+          items:
+            $ref: "#/components/schemas/ClassificationLevel"
+        envClassificationsOnprem:
+          type: array
+          items:
+            $ref: "#/components/schemas/ClassificationLevel"
+        envInstances:
+          type: array
+          item:
+            $ref: "#/components/schemas/CurrentEnvironmentInstance"
     EnvironmentInstance:
       description: "Part of DOW, represents a single Environment Instance"
       type: object
@@ -828,6 +886,50 @@ components:
           type: integer
         data_egress_monthly_unit:
           $ref: "#/components/schemas/StorageUnit"
+    CurrentEnvironmentInstance:
+      description: "Part of DOW, represents a single Current Environment Instance"
+      type: object
+      properties:
+        additionalInformation:
+          type: string
+        anticipatedNeedUsage:
+          type: string
+        currentUsageDescription:
+          type: string
+          enum:
+          # TODO: should this match up with DoW exactly?
+            - EVEN_USAGE
+            - IRREGULAR_USAGE
+        isTrafficSpikeEventBased:
+          type: boolean
+        trafficeSpikeEventDescription:
+          type: string
+        isTrafficSpikePeriodBased:
+          type: boolean
+        trafficSpikePeriodDescription:
+          type: string
+        deployedRegions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Region"
+        usersPerRegion:
+          type: string
+        operatingEnvironment:
+          type: string
+          enum:
+            - VM
+            - CONTAINERS
+            - SERVERLESS
+            - VIRTUAL_DESKTOP
+        operatingType:
+          type: string
+          enum:
+            - DEV_TESTING
+            - PREPRODUCTION
+            - PRODUCTION
+            - COOP_DISASTERRECOVERY
+      allOf:
+        - $ref: "#/components/schemas/EnvironmentInstance"
     ClassificationLevel:
       description: "Part of DOW, Classification Level table fields"
       type: object
