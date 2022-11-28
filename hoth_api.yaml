@@ -697,14 +697,17 @@ components:
           type: string
         scope_surge:
           type: integer
-        # DOW section 3
+        # DOW section 3 (and 4.1)
         current_environment:
           $ref: "#/components/schemas/CurrentEnvironment"
         # DOW section 4 (and its subtasks)
-        selected_service_offerings:
-          type: array
-          items:
-            $ref: "#/components/schemas/SelectedServiceOffering"
+        performanceRequirements:
+          $ref: "#/components/schemas/PerformanceRequirements"
+        # selected_service_offerings:
+        #   type: array
+        #   items:
+        #     $ref: "#/components/schemas/SelectedServiceOffering"
+
         # DOW section 5 TBD
         # DOW section 6 TBD
         # DOW section 7
@@ -819,6 +822,17 @@ components:
           type: array
           item:
             $ref: "#/components/schemas/CurrentEnvironmentInstance"
+    PerformanceRequirements:
+      type: object
+      properties:
+        xaas:
+          type: array
+          items:
+            $ref: "#/components/schemas/SelectedServiceOffering"
+        cloudSupportPackages:
+          type: array
+          items:
+            $ref: "#/components/schemas/SelectedServiceOffering"
     EnvironmentInstance:
       description: "Part of DOW, represents a single Environment Instance"
       type: object
@@ -902,7 +916,7 @@ components:
             - IRREGULAR_USAGE
         isTrafficSpikeEventBased:
           type: boolean
-        trafficeSpikeEventDescription:
+        trafficSpikeEventDescription:
           type: string
         isTrafficSpikePeriodBased:
           type: boolean
@@ -930,6 +944,24 @@ components:
             - COOP_DISASTERRECOVERY
       allOf:
         - $ref: "#/components/schemas/EnvironmentInstance"
+    EstimatedEnvironmentInstance:
+      description: "Part of DOW, represents a single Estimated Environment Instance"
+      type: object
+      properties:
+        dowTaskNumber:
+          type: string
+        monthlyPrice:
+          type: float
+        statementObjectiveForNeedUsage:
+          type: string
+        osLicensing:
+          type: string
+          enum:
+            - NEW
+            - TRANSFER_EXISTING
+      allOf:
+        - $ref: "#/components/schemas/EnvironmentInstance"
+
     ClassificationLevel:
       description: "Part of DOW, Classification Level table fields"
       type: object
@@ -981,6 +1013,24 @@ components:
             $ref: "#/components/schemas/ClassificationInstance"
         other_service_offering:
           type: string
+        # TODO: add additional properties?
+        usersPerRegion:
+          type: string
+        anticipatedFutureNeeds:
+          type: object
+          properties:
+            anticipatedUserGrowth:
+              type: boolean
+            userGrowth:
+              type: integer
+            anticipatedDataGrowth:
+              type: boolean
+            dataGrowth:
+              type: integer
+        estimatedEnvironmentInstances:
+          type: array
+          items:
+            $ref: "#/components/schemas/EstimatedEnvironmentInstance"
     ClassificationInstance:
       description: "Part of DOW, represents a single classification instance"
       type: object
