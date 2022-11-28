@@ -400,14 +400,16 @@ components:
             - EVAL_PLAN
             - DESCRIPTION_OF_WORK
             - INDEPENDENT_GOVERNMENT_COST_ESTIMATE
+            - INCREMENTAL_FUNDING_PLAN
         templatePayload:
           type: object
           oneOf:
             - $ref: "#/components/schemas/EvalPlan"
             - $ref: "#/components/schemas/DescriptionOfWork"
             - $ref: "#/components/schemas/IndependentGovernmentCostEstimate"
+            - $ref: "#/components/schemas/IncrementalFundingPlan"
     EvalPlan:
-      description: Provides the basis of evaluation for an Aquisition Package
+      description: Provides the basis of evaluation for an Acquisition Package
       type: object
       properties:
         sourceSelection:
@@ -440,28 +442,52 @@ components:
           type: array
           items:
             type: string
+    IncrementalFundingPlan:
+      description: >-
+        Provides an Incremental Funding Plant (IFP) for an Acquisition Package
+      type: object
+      properties:
+        # ? is this the CSS Tracking Number/PostAwardId?
+        # DITCO will fill in doing review, will be left as TBD
+        contractNumber:
+          type: string
+        # DITCO will fill in after the award, will be left as TBD
+        taskOrderNumber:
+          type: string
+        missionOwner:
+          type: string
+        estimatedTotalAmount:
+          type: float
+        initialAmount:
+          type: float
+        remainingAmount:
+          type: float
+        remainingAmountIncrements:
+          type: array
+          items:
+            $ref: "#/components/schemas/FundingIncrement"
+        scheduleText:
+          type: string
+        requirementsTitle:
+          description: >-
+            Acquisition Package Title
+          type: string
+        fundingDocument:
+          $ref: "#/components/schemas/FundingDocument"
+      required:
+        - missionOwner
+        - requirementsTitle
+        - estimatedTotalAmount
+        - initialAmount
+        - remainingAmount
+        - remainingAmountIncrements
+        - fundingDocument
     IndependentGovernmentCostEstimate:
       description: "Data used for generating the Independent Government Cost Estimate (IGCE) document"
       type: object
       properties:
         funding_document:
-          description: >-
-            Numbers from funding document(s).  Either both the GT&C number and Order 
-            number from US Treasury Bureau of the Fiscal Service Forms (FS_FORM)
-            or only the MIPR number from Military Interdepartmental Purchase Request (MIPR).
-          type: object
-          properties:
-            funding_type:
-              type: string
-              enum: 
-                - FS_FORM
-                - MIPR
-            gtc_number: 
-              type: string
-            order_number:
-              type: string
-            mipr_number: 
-              type: string
+          $ref: "#/components/schemas/FundingDocument"
         surge_capabilities:
           description: Not to exceed this percentage of contractor's total proposed price (1-50)
           type: integer
@@ -512,6 +538,36 @@ components:
             Months in the specified period (1-12). The days/weeks/year should be converted into
             months and always rounded up to a whole number. Average weeks in a month 4.345.
             Average days in a month 30.4167. Example 6 wks / 4.345 = 1.381 => 2 months.
+          type: integer
+    FundingDocument:
+      description: >-
+        Numbers from funding document(s). Either both the GT&C number and Order
+        number from US Treasury Bureau of the Fiscal Service Forms (FS_FORM)
+        or only the MIPR number from Military Interdepartmental Purchase Request (MIPR).
+      type: object
+      properties:
+        fundingType:
+          type: string
+          enum:
+            - FS_FORM
+            - MIPR
+        gtcNumber:
+          type: string
+        orderNumber:
+          type: string
+        miprNumber:
+          type: string
+      required:
+        - fundingType
+    FundingIncrement:
+      type: object
+      properties:
+        amount:
+          type: float
+        description:
+          type: string
+          example: "1st QTR FY23"
+        order:
           type: integer
     DescriptionOfWork:
       description: "Schema used to generate DescriptionOfWork document"
