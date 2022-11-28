@@ -767,6 +767,14 @@ components:
       properties:
         instance_name:
           type: string
+        numberOfInstances:
+          type: integer
+        needForEntireTaskOrderDuration:
+          type: boolean
+        selectedPeriods:
+          type: array
+          items:
+            $ref: "#/components/schemas/Period"
         classification_level:
           $ref: "#/components/schemas/ClassificationLevel"
         instance_location:
@@ -775,29 +783,39 @@ components:
             - CSP
             - HYBRID
             - ON_PREMISE
-        csp_region:
-          # On the SNOW side, this is CSP_REGION a choice field with no options, so using TargetCSPName instead
-          $ref: "#/components/schemas/TargetCloudServiceProviderName"
+        region:
+          $ref: "#/components/schemas/Region"
         performance_tier:
-          # This is also an empty choice on the SNOW side, set as empty String until we get details
           type: string
+          enum:
+            - GENERAL
+            - COMPUTE
+            - MEMORY
+            - STORAGE
         pricing_model:
           type: string
           enum:
-            - ON_DEMAND
             - PAY_AS_YOU_GO
-            - RESERVED
+            - PREPAID
         pricing_model_expiration:
           type: string
           format: date
           example: "2022-07-01"
-        operating_system_licensing:
+        licensing:
+          type: string
+        operatingSystem:
           type: string
         number_of_vCPUs:
           type: integer
+        processorSpeed:
+          type: integer
         storage_type:
-          # Empty choice on SNOW side, set as empty String until we get details
           type: string
+          enum:
+            - BLOCK
+            - OBJECT
+            - FILE
+            - ARCHIVE
         storage_amount:
           type: integer
         storage_unit:
@@ -833,6 +851,22 @@ components:
       enum:
         - GB
         - TB
+        - PB
+    Region:
+      description: "part of DOW, used in EnvironmentInstance schema"
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        group:
+          type: string
+          enum:
+            - CONUS
+            - OCONUS
+        sequence:
+          type: integer
     SelectedServiceOffering:
       description: "Part of DOW, represents a single Selected Service Offering"
       type: object
