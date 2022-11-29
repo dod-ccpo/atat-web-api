@@ -54,6 +54,8 @@ export class AtatNetStack extends cdk.Stack {
       })
     );
 
+    this.outputs.push(new cdk.CfnOutput(this, "TestOutput", { value: "test" }));
+
     // Capture all VPC flow logs and send to CloudWatch Logs with indefinite retention
     vpc.addFlowLog("AllFlowLogs", {
       destination: ec2.FlowLogDestination.toCloudWatchLogs(
@@ -65,7 +67,7 @@ export class AtatNetStack extends cdk.Stack {
     // const dnsLogsGroup = new logs.LogGroup(this, "VpcDnsQueryLogs", {
     //   retention: logs.RetentionDays.INFINITE,
     // });
-    // // Capture all DNS queries made by all hosts in the VPC
+    // Capture all DNS queries made by all hosts in the VPC
     // const dnsLoggingConfig = new route53Resolver.CfnResolverQueryLoggingConfig(this, "DnsLogging", {
     //   destinationArn: dnsLogsGroup.logGroupArn,
     // });
@@ -116,6 +118,19 @@ export class AtatNetStack extends cdk.Stack {
       xray: xrayEndpoint,
       secrets: secretsManagerEndpoint,
       sfn: stepFunctionsEndpoint,
+      // Temporary
+      ssm: vpc.addInterfaceEndpoint("SSM", {
+        service: ec2.InterfaceVpcEndpointAwsService.SSM,
+      }),
+      ssmMessages: vpc.addInterfaceEndpoint("SsmMessages", {
+        service: ec2.InterfaceVpcEndpointAwsService.SSM_MESSAGES,
+      }),
+      ec2: vpc.addInterfaceEndpoint("EC2", {
+        service: ec2.InterfaceVpcEndpointAwsService.EC2,
+      }),
+      ec2Messages: vpc.addInterfaceEndpoint("Ec2Messages", {
+        service: ec2.InterfaceVpcEndpointAwsService.EC2_MESSAGES,
+      }),
     };
 
     // The firewall in our environment performs NAT, so the source IP address will
