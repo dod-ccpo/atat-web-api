@@ -455,13 +455,13 @@ components:
           type: string
         missionOwner:
           type: string
-        estimatedTotalAmount:
+        estimatedTaskOrderValue:
           type: float
         initialAmount:
           type: float
         remainingAmount:
           type: float
-        remainingAmountIncrements:
+        fundingIncrements:
           type: array
           items:
             $ref: "#/components/schemas/FundingIncrement"
@@ -476,10 +476,10 @@ components:
       required:
         - missionOwner
         - requirementsTitle
-        - estimatedTotalAmount
+        - estimatedTaskOrderValue
         - initialAmount
         - remainingAmount
-        - remainingAmountIncrements
+        - fundingIncrements
         - fundingDocument
     IndependentGovernmentCostEstimate:
       description: "Data used for generating the Independent Government Cost Estimate (IGCE) document"
