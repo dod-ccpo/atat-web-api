@@ -34,6 +34,8 @@ async function baseHandler(event: RequestEvent<GenerateDocumentRequest>): Promis
   logger.info("Generating document", { documentType });
 
   switch (documentType) {
+    // case document type = document type enum
+    // return generateDOCUMENTNAME (located in docx folder)
     case DocumentType.DESCRIPTION_OF_WORK_DOCX:
       return generateDow(event);
     case DocumentType.DESCRIPTION_OF_WORK_PDF:
