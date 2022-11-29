@@ -1,4 +1,3 @@
-import { logger } from "../../utils/logging";
 import { ApiBase64SuccessResponse, SuccessStatusCode } from "../../utils/response";
 import { GenerateDocumentRequest, RequestEvent } from "../../models/document-generation";
 import * as fs from "fs";
@@ -7,6 +6,7 @@ import PizZip from "pizzip";
 import Docxtemplater from "docxtemplater";
 
 export async function generateDow(event: RequestEvent<GenerateDocumentRequest>): Promise<ApiBase64SuccessResponse> {
+  // Extract payload
   const payload = event.body.templatePayload;
 
   // Load the docx file as binary content
@@ -24,7 +24,6 @@ export async function generateDow(event: RequestEvent<GenerateDocumentRequest>):
     type: "nodebuffer",
     compression: "DEFLATE",
   });
-
 
   const headers = {
     "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
