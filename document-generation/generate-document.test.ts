@@ -107,7 +107,7 @@ describe("Invalid requests for generate-document handler", () => {
       expect(responseBody.message).toBe("Request failed validation");
     }
   );
-  it.each([DocumentType.DESCRIPTION_OF_WORK, DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE])(
+  it.each([DocumentType.DESCRIPTION_OF_WORK_PDF, DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE])(
     "should return validation error when payload not an object",
     async (documentType) => {
       // GIVEN / ARRANGE
@@ -128,7 +128,7 @@ describe("Invalid requests for generate-document handler", () => {
   );
   it.each([
     {
-      documentType: DocumentType.DESCRIPTION_OF_WORK,
+      documentType: DocumentType.DESCRIPTION_OF_WORK_PDF,
       templatePayload: { ...sampleDowRequest.templatePayload, another: "prop" },
     },
     {
