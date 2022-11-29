@@ -18,7 +18,6 @@ export async function generateDow(event: RequestEvent<GenerateDocumentRequest>):
   });
 
   document.render(payload);
-  // document.render(test_payload);
 
   // Create Node JS Buffer to send as response
   const report = document.getZip().generate({
@@ -26,8 +25,6 @@ export async function generateDow(event: RequestEvent<GenerateDocumentRequest>):
     compression: "DEFLATE",
   });
 
-  // Write file locally (for testing only)
-  // fs.writeFileSync(path.resolve(__dirname, "output.docx"), report);
 
   const headers = {
     "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
