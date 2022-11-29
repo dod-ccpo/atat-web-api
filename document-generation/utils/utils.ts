@@ -31,9 +31,12 @@ interface PDFTemplateFiles {
 
 // documents and the related templates
 const documentTemplatePaths: TemplatePaths = {
-  [DocumentType.DESCRIPTION_OF_WORK]: {
+  [DocumentType.DESCRIPTION_OF_WORK_PDF]: {
     html: "/opt/dow-template.html",
     css: "/opt/dow-style.css",
+  },
+  [DocumentType.DESCRIPTION_OF_WORK_DOCX]: {
+    docx: "/opt/dow.docx",
   },
   [DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE]: {
     excel: "/opt/igce-template.xlsx",
@@ -44,7 +47,7 @@ export const getPDFDocumentTemplates = (documentType: DocumentType): PDFTemplate
   let html = "";
   let css = "";
   switch (documentType) {
-    case DocumentType.DESCRIPTION_OF_WORK:
+    case DocumentType.DESCRIPTION_OF_WORK_PDF:
       html = fs.readFileSync(documentTemplatePaths[documentType].html, "utf-8");
       css = fs.readFileSync(documentTemplatePaths[documentType].css, "utf-8");
       break;
