@@ -444,11 +444,10 @@ components:
             type: string
     IncrementalFundingPlan:
       description: >-
-        Provides an Incremental Funding Plant (IFP) for an Acquisition Package
+        For generating the Incremental Funding Plan (IFP) document
       type: object
       properties:
-        # ? is this the CSS Tracking Number/PostAwardId?
-        # DITCO will fill in doing review, will be left as TBD
+        # DITCO will fill in during review, will be left as TBD
         contractNumber:
           type: string
         # DITCO will fill in after the award, will be left as TBD
@@ -542,7 +541,7 @@ components:
     FundingDocument:
       description: >-
         Numbers from funding document(s). Either both the GT&C number and Order
-        number from US Treasury Bureau of the Fiscal Service Forms (FS_FORM)
+        number from US Treasury's Bureau of the Fiscal Service forms (FS_FORM)
         or only the MIPR number from Military Interdepartmental Purchase Request (MIPR).
       type: object
       properties:
