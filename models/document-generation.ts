@@ -231,7 +231,7 @@ export enum IdiqClin {
   OTHER_3000 = "3000_OTHER",
 }
 
-interface IFundingDocument {
+export interface IFundingDocument {
   fundingType: FundingType;
   gtcNumber?: string;
   orderNumber?: string;

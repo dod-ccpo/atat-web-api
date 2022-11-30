@@ -335,3 +335,27 @@ export const sampleIgceRequest = {
     ],
   },
 };
+
+export const sampleIfpRequest = {
+  documentType: "INCREMENTAL_FUNDING_PLAN",
+  templatePayload: {
+    requirementsTitle: "Versatile Demo Package",
+    missionOwner: "Jewel Heart",
+    estimatedTaskOrderValue: 125000.55,
+    initialAmount: 50000.55,
+    remainingAmount: 75000,
+    fundingDocument: { fundingType: "FS_FORM", gtcNumber: "234234", orderNumber: "O-23434-34234" },
+    fundingIncrements: [
+      { amount: 25000, description: "2nd QTR FY23", order: 1 },
+      { amount: 50000, description: "3rd QTR FY23", order: 2 },
+    ],
+    scheduleText: "Funding Increment #1:\n2nd QTR FY23 - $25,000.00\nFunding Increment #2:\n3rd QTR FY23 - $50,000.00",
+    contractNumber: "TBD",
+    taskOrderNumber: "TBD",
+  },
+};
+
+export const fundingDocumentWithMiprNumber = {
+  fundingType: "MIPR",
+  miprNumber: "M2206-07-077-458790",
+};
