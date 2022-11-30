@@ -16,13 +16,15 @@ import xssSanitizer from "../utils/middleware/xss-sanitizer";
 import { wrapSchema } from "../utils/middleware/schema-wrapper";
 import { generateDocument } from "./chromium";
 import { generateIGCEDocument } from "./igce-document";
-import { getPDFDocumentTemplates, getExcelTemplatePath } from "./utils/utils";
+import { generateIFPDocument } from "./ifp-document";
+import { getPDFDocumentTemplates, getExcelTemplatePath, getWordTemplate } from "./utils/utils";
 import {
   generateDocumentSchema,
   RequestEvent,
   GenerateDocumentRequest,
   DocumentType,
   IndependentGovernmentCostEstimate,
+  IncrementalFundingPlan,
 } from "../models/document-generation";
 import handlebars from "handlebars";
 import juice from "juice";
@@ -37,6 +39,8 @@ async function baseHandler(event: RequestEvent<GenerateDocumentRequest>): Promis
       return generatePdf(event);
     case DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE:
       return generateXlsx(event);
+    case DocumentType.INCREMENTAL_FUNDING_PLAN:
+      return generateWordDocument(event);
     default:
       return new ValidationErrorResponse(`Invalid document type: "${documentType}"`, {
         cause: `Invalid document type "${documentType}" provided. Please provide a valid document  type.`,
@@ -71,6 +75,22 @@ async function generateXlsx(event: RequestEvent<GenerateDocumentRequest>): Promi
   const { documentType, templatePayload } = event.body;
   const excelTemplatePath = getExcelTemplatePath(documentType);
   return generateIGCEDocument(excelTemplatePath, templatePayload as IndependentGovernmentCostEstimate);
+}
+
+async function generateWordDocument(event: RequestEvent<GenerateDocumentRequest>): Promise<ApiBase64SuccessResponse> {
+  const { documentType, templatePayload } = event.body;
+  const wordTemplate = getWordTemplate(documentType);
+  switch (documentType) {
+    // TODO: Add in DoW docx generation
+    // case DocumentType.DESCRIPTION_OF_WORK_DOCX:
+    //   return generateIFPDocument(wordTemplate, templatePayload as DescriptionOfWork);
+    case DocumentType.INCREMENTAL_FUNDING_PLAN:
+      return generateIFPDocument(wordTemplate, templatePayload as IncrementalFundingPlan);
+    default:
+      return new ValidationErrorResponse(`Invalid document type: "${documentType}"`, {
+        cause: `Invalid document type "${documentType}" provided. Please provide a valid document type.`,
+      });
+  }
 }
 
 export const handler = middy(baseHandler)
