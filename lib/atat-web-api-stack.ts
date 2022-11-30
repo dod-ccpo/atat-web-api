@@ -76,6 +76,7 @@ export class AtatWebApiStack extends cdk.Stack {
         "application/json",
         "application/pdf",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       ],
     };
     if (network) {
