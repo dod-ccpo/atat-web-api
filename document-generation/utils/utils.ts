@@ -70,3 +70,16 @@ export const getExcelTemplatePath = (documentType: DocumentType): string => {
 
   return excelPath;
 };
+
+export const getDocxTemplatePath = (documentType: DocumentType): Buffer => {
+  let word;
+  switch (documentType) {
+    case DocumentType.DESCRIPTION_OF_WORK_DOCX:
+      word = fs.readFileSync(documentTemplatePaths[documentType].docx);
+      break;
+    default:
+      throw new Error(`Unsupported Word generation type: "${documentType}"`);
+  }
+
+  return word;
+};
