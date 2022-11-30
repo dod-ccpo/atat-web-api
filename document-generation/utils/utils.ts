@@ -1,4 +1,11 @@
-import { PeriodUnit, IPeriod, DocumentType, TemplatePaths } from "../../models/document-generation";
+import {
+  PeriodUnit,
+  IPeriod,
+  DocumentType,
+  TemplatePaths,
+  IFundingDocument,
+  FundingType,
+} from "../../models/document-generation";
 import * as fs from "fs";
 
 export const capitalize = (string: string) => {
@@ -24,6 +31,18 @@ export const convertPeriodToMonths = (period: IPeriod): number => {
   }
 };
 
+export const getFundingDocInfo = (fundingDoc: IFundingDocument): string => {
+  const documentTypes = [FundingType.MIPR, FundingType.FS_FORM];
+  if (!fundingDoc || !documentTypes.includes(fundingDoc.fundingType)) {
+    return "";
+  }
+
+  if (fundingDoc.fundingType === FundingType.MIPR) {
+    return `MIPR #: ${fundingDoc.miprNumber}`;
+  }
+  return `GT&C #: ${fundingDoc.gtcNumber} and Order #: ${fundingDoc.orderNumber}`;
+};
+
 interface PDFTemplateFiles {
   html: string;
   css: string;
@@ -37,6 +56,9 @@ const documentTemplatePaths: TemplatePaths = {
   },
   [DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE]: {
     excel: "/opt/igce-template.xlsx",
+  },
+  [DocumentType.INCREMENTAL_FUNDING_PLAN]: {
+    word: "/opt/ifp-template.docx",
   },
 };
 
@@ -66,4 +88,17 @@ export const getExcelTemplatePath = (documentType: DocumentType): string => {
   }
 
   return excelPath;
+};
+
+export const getWordTemplate = (documentType: DocumentType): Buffer => {
+  let word;
+  switch (documentType) {
+    case DocumentType.INCREMENTAL_FUNDING_PLAN:
+      word = fs.readFileSync(documentTemplatePaths[documentType].word);
+      break;
+    default:
+      throw new Error(`Unsupported Word generation type: "${documentType}"`);
+  }
+
+  return word;
 };

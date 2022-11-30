@@ -1,5 +1,19 @@
-import { PeriodUnit, PeriodType, DocumentType } from "../../models/document-generation";
-import { capitalize, convertPeriodToMonths, getPDFDocumentTemplates, getExcelTemplatePath } from "./utils";
+import {
+  PeriodUnit,
+  PeriodType,
+  DocumentType,
+  FundingType,
+  IncrementalFundingPlan,
+  IFundingDocument,
+} from "../../models/document-generation";
+import {
+  capitalize,
+  convertPeriodToMonths,
+  getPDFDocumentTemplates,
+  getExcelTemplatePath,
+  getFundingDocInfo,
+  getWordTemplate,
+} from "./utils";
 import * as fs from "fs";
 
 jest.mock("fs");
@@ -65,6 +79,34 @@ describe("convertPeriodToMonths", () => {
   });
 });
 
+describe("getFundingDocInfo", () => {
+  it("should return MIPR number when MIPR document type", async () => {
+    const fundingDocument = {
+      fundingType: FundingType.MIPR,
+      miprNumber: "29348403",
+    } as IFundingDocument;
+    const fundingDocInfo = getFundingDocInfo(fundingDocument);
+    expect(fundingDocInfo).toEqual(`MIPR #: ${fundingDocument.miprNumber}`);
+  });
+  it("should return GT&C and Order number when FS_FORM document type", async () => {
+    const gtcNumber = "29348403";
+    const orderNumber = "O-03049-2034-48403";
+    const fundingDocument = {
+      fundingType: FundingType.FS_FORM,
+      gtcNumber,
+      orderNumber,
+    } as IFundingDocument;
+    const fundingDocInfo = getFundingDocInfo(fundingDocument);
+    expect(fundingDocInfo).toEqual(`GT&C #: ${gtcNumber} and Order #: ${orderNumber}`);
+  });
+  it.each(["", null, undefined, {}])("should return an empty string when invalid inputs", async (type) => {
+    const fundingDocument = {
+      fundingType: type,
+    } as IFundingDocument;
+    const fundingDocInfo = getFundingDocInfo(fundingDocument);
+    expect(fundingDocInfo).toEqual("");
+  });
+});
 describe("getPDFDocumentTemplates", () => {
   it("should return the PDF template files", async () => {
     // GIVEN
@@ -101,6 +143,21 @@ describe("getExcelTemplatePath", () => {
     const documentType = "RANDOM_EXCEL_DOCUMENT_TYPE" as unknown as DocumentType;
     expect(() => getExcelTemplatePath(documentType)).toThrow(
       `Unsupported Excel generation type: "RANDOM_EXCEL_DOCUMENT_TYPE"`
+    );
+  });
+});
+
+describe("getWordTemplate", () => {
+  it("should return buffer of template for IFP document", async () => {
+    const ifpTemplateBuffer = "/opt/ifp-template.docx";
+
+    mockedFs.readFileSync.mockImplementationOnce(() => Buffer.from(ifpTemplateBuffer));
+    expect(getWordTemplate(DocumentType.INCREMENTAL_FUNDING_PLAN).toString()).toBe(ifpTemplateBuffer);
+  });
+  it("should throw an error if invalid Word documentType", async () => {
+    const documentType = "RANDOM_WORD_DOCUMENT_TYPE" as unknown as DocumentType;
+    expect(() => getWordTemplate(documentType)).toThrow(
+      `Unsupported Word generation type: "RANDOM_WORD_DOCUMENT_TYPE"`
     );
   });
 });
