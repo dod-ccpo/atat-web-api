@@ -9,6 +9,7 @@ export enum AwardType {
 export enum DocumentType {
   DESCRIPTION_OF_WORK = "DESCRIPTION_OF_WORK",
   INDEPENDENT_GOVERNMENT_COST_ESTIMATE = "INDEPENDENT_GOVERNMENT_COST_ESTIMATE",
+  INCREMENTAL_FUNDING_PLAN = "INCREMENTAL_FUNDING_PLAN",
 }
 
 export enum PeriodType {
@@ -88,6 +89,7 @@ export enum ServiceOfferingGroup {
 export interface TemplatePaths {
   [DocumentType.DESCRIPTION_OF_WORK]: { html: string; css: string };
   [DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE]: { excel: string };
+  [DocumentType.INCREMENTAL_FUNDING_PLAN]: { word: string };
 }
 export interface IAward {
   contractAwardType: AwardType;
@@ -255,9 +257,27 @@ export interface IndependentGovernmentCostEstimate {
   periodsEstimate: IPeriodEstimate[];
 }
 
+export interface IFundingIncrement {
+  amount: number;
+  description: string;
+  order: number;
+}
+export interface IncrementalFundingPlan {
+  requirementsTitle: string;
+  missionOwner: string;
+  estimatedTaskOrderValue: number;
+  initialAmount: number;
+  remainingAmount: number;
+  fundingIncrements: IFundingIncrement[];
+  fundingDocument: IFundingDocument;
+  scheduleText?: string;
+  contractNumber?: string;
+  taskOrderNumber?: string;
+}
+
 export interface GenerateDocumentRequest {
   documentType: DocumentType;
-  templatePayload: DescriptionOfWork | IndependentGovernmentCostEstimate;
+  templatePayload: DescriptionOfWork | IndependentGovernmentCostEstimate | IncrementalFundingPlan;
 }
 
 export interface RequestEvent<T> {
@@ -511,14 +531,45 @@ const independentGovernmentCostEstimate = {
   additionalProperties: false,
 };
 
+const incrementalFundingPlan = {
+  type: "object",
+  properties: {
+    requirementsTitle: { type: "string" },
+    missionOwner: { type: "string" },
+    estimatedTaskOrderValue: { type: "number" },
+    initialAmount: { type: "number" },
+    remainingAmount: { type: "number" },
+    fundingIncrements: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          amount: { type: "number" },
+          description: { type: "string" },
+          order: { type: "integer" },
+        },
+      },
+    },
+    fundingDocument,
+    scheduleText: { type: "string" },
+    contractNumber: { type: "string" },
+    taskOrderNumber: { type: "string" },
+  },
+  additionalProperties: false,
+};
+
 export const generateDocumentSchema = {
   type: "object",
   properties: {
     documentType: {
-      enum: [DocumentType.DESCRIPTION_OF_WORK, DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE],
+      enum: [
+        DocumentType.DESCRIPTION_OF_WORK,
+        DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE,
+        DocumentType.INCREMENTAL_FUNDING_PLAN,
+      ],
     },
     templatePayload: {
-      oneOf: [descriptionOfWork, independentGovernmentCostEstimate],
+      oneOf: [descriptionOfWork, independentGovernmentCostEstimate, incrementalFundingPlan],
     },
   },
 };
