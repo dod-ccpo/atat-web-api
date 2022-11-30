@@ -10,6 +10,7 @@ export enum DocumentType {
   DESCRIPTION_OF_WORK = "DESCRIPTION_OF_WORK",
   INDEPENDENT_GOVERNMENT_COST_ESTIMATE = "INDEPENDENT_GOVERNMENT_COST_ESTIMATE",
   INCREMENTAL_FUNDING_PLAN = "INCREMENTAL_FUNDING_PLAN",
+  EVALUATION_PLAN = "EVALUATION_PLAN",
 }
 
 export enum PeriodType {
@@ -86,10 +87,25 @@ export enum ServiceOfferingGroup {
   SECURITY = "SECURITY",
   TRAINING = "TRAINING",
 }
+
+export enum SourceSelection {
+  NO_TECH_PROPOSAL = "NO_TECH_PROPOSAL",
+  TECH_PROPOSAL = "TECH_PROPOSAL",
+  SET_LUMP_SUM = "SET_LUMP_SUM",
+  EQUAL_SET_LUMP_SUM = "EQUAL_SET_LUMP_SUM",
+}
+
+export enum EvalPlanMethod {
+  LPTA = "LPTA",
+  BVTO = "BVTO",
+  BEST_USE = "BEST_USE",
+  LOWEST_RISK = "LOWEST_RISK",
+}
 export interface TemplatePaths {
   [DocumentType.DESCRIPTION_OF_WORK]: { html: string; css: string };
   [DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE]: { excel: string };
   [DocumentType.INCREMENTAL_FUNDING_PLAN]: { word: string };
+  [DocumentType.EVALUATION_PLAN]: { word: string };
 }
 export interface IAward {
   contractAwardType: AwardType;
@@ -275,9 +291,18 @@ export interface IncrementalFundingPlan {
   taskOrderNumber?: string;
 }
 
+export interface EvaluationPlan {
+  sourceSelection: SourceSelection;
+  method: EvalPlanMethod;
+  standardSpecifications: string[];
+  customSpecifications: string[];
+  standardDifferentiators: string[];
+  customDifferentiators: string[];
+}
+
 export interface GenerateDocumentRequest {
   documentType: DocumentType;
-  templatePayload: DescriptionOfWork | IndependentGovernmentCostEstimate | IncrementalFundingPlan;
+  templatePayload: DescriptionOfWork | IndependentGovernmentCostEstimate | IncrementalFundingPlan | EvaluationPlan;
 }
 
 export interface RequestEvent<T> {
@@ -556,6 +581,21 @@ const incrementalFundingPlan = {
     taskOrderNumber: { type: "string" },
   },
   additionalProperties: false,
+};
+// TODO FINISH EVAL PLAN OBJECT
+export const evalPlan = {
+  type: "object",
+  properties: {
+    sourceSelection: {
+      type: "string",
+      enum: [
+        SourceSelection.NO_TECH_PROPOSAL,
+        SourceSelection.TECH_PROPOSAL,
+        SourceSelection.SET_LUMP_SUM,
+        SourceSelection.EQUAL_SET_LUMP_SUM,
+      ],
+    },
+  },
 };
 
 export const generateDocumentSchema = {
