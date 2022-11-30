@@ -9,10 +9,10 @@ import {
 } from "../utils/response";
 import { handler } from "./generate-document";
 import { requestContext } from "../api/util/common-test-fixtures";
-import { sampleDowRequest, sampleIgceRequest } from "./utils/sampleTestData";
+import { sampleDowPdfRequest, sampleIgceRequest } from "./utils/sampleTestData";
 
 const validRequest = {
-  body: JSON.stringify(sampleDowRequest),
+  body: JSON.stringify(sampleDowPdfRequest),
   headers: {
     "Content-Type": "application/json",
   },
@@ -88,7 +88,7 @@ describe("Successful generate-document handler", () => {
 });
 
 describe("Invalid requests for generate-document handler", () => {
-  it.each([sampleDowRequest.templatePayload, sampleIgceRequest.templatePayload])(
+  it.each([sampleDowPdfRequest.templatePayload, sampleIgceRequest.templatePayload])(
     "should return validation error when invalid document type",
     async (payload) => {
       // GIVEN / ARRANGE
@@ -129,7 +129,7 @@ describe("Invalid requests for generate-document handler", () => {
   it.each([
     {
       documentType: DocumentType.DESCRIPTION_OF_WORK_PDF,
-      templatePayload: { ...sampleDowRequest.templatePayload, another: "prop" },
+      templatePayload: { ...sampleDowPdfRequest.templatePayload, another: "prop" },
     },
     {
       documentType: DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE,
