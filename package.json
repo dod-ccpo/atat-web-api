@@ -50,7 +50,7 @@
     "@aws-sdk/client-ec2": "^3.210.0",
     "@aws-sdk/client-iam": "^3.210.0",
     "@aws-sdk/client-s3": "^3.210.0",
-    "@aws-sdk/client-s3-control": "^3.210.0",
+    "@aws-sdk/client-s3-control": "^3.221.0",
     "@aws-sdk/client-secrets-manager": "^3.210.0",
     "@aws-sdk/client-sfn": "^3.210.0",
     "@aws-sdk/client-sqs": "^3.210.0",
