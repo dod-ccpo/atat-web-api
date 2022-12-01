@@ -341,6 +341,7 @@ export const sampleIfpRequest = {
   templatePayload: {
     requirementsTitle: "Versatile Demo Package",
     missionOwner: "Jewel Heart",
+    financialPoc: "Ester Crest",
     estimatedTaskOrderValue: 125000.55,
     initialAmount: 50000.55,
     remainingAmount: 75000,

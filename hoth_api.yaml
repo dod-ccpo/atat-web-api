@@ -457,6 +457,8 @@ components:
           type: string
         missionOwner:
           type: string
+        financialPoc:
+          type: string
         estimatedTaskOrderValue:
           type: number
           format: float
