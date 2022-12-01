@@ -659,7 +659,8 @@ components:
                   type: boolean
     CorContact:
       description: >-
-        A Task Order (Alternative) Contracting Officer Representative (COR/ACOR) information
+        A Contracting Officer's Representative (COR) or Alternate Contracting
+        Officer's Representative (ACOR)
       type: object
       properties:
         name:
@@ -668,7 +669,9 @@ components:
           type: string
         phoneNumber:
           type: string
-        dodaa:
+        dodaac:
+          description: >-
+            Department of Defense Activity Address Code (DoDAAC)
           type: string
     DescriptionOfWork:
       description: "Schema used to generate DescriptionOfWork document"
