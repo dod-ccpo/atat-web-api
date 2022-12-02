@@ -29,6 +29,7 @@ import {
 import handlebars from "handlebars";
 import juice from "juice";
 import { formatDuration, formatGroupAndClassification, counter, countSections, formatAwardType } from "./utils/helpers";
+import { generateEvalPlanDocument } from "./eval-plan-document";
 
 async function baseHandler(event: RequestEvent<GenerateDocumentRequest>): Promise<ApiBase64SuccessResponse> {
   const { documentType } = event.body;
@@ -39,7 +40,7 @@ async function baseHandler(event: RequestEvent<GenerateDocumentRequest>): Promis
       return generatePdf(event);
     case DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE:
       return generateXlsx(event);
-    case DocumentType.INCREMENTAL_FUNDING_PLAN:
+    case DocumentType.INCREMENTAL_FUNDING_PLAN || DocumentType.EVALUATION_PLAN:
       return generateWordDocument(event);
     default:
       return new ValidationErrorResponse(`Invalid document type: "${documentType}"`, {
@@ -86,6 +87,8 @@ async function generateWordDocument(event: RequestEvent<GenerateDocumentRequest>
     //   return generateIFPDocument(wordTemplate, templatePayload as DescriptionOfWork);
     case DocumentType.INCREMENTAL_FUNDING_PLAN:
       return generateIFPDocument(wordTemplate, templatePayload as IncrementalFundingPlan);
+    case DocumentType.EVALUATION_PLAN:
+      return generateEvalPlanDocument(wordTemplate, templatePayload as IncrementalFundingPlan);
     default:
       return new ValidationErrorResponse(`Invalid document type: "${documentType}"`, {
         cause: `Invalid document type "${documentType}" provided. Please provide a valid document type.`,

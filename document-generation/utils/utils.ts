@@ -60,6 +60,9 @@ const documentTemplatePaths: TemplatePaths = {
   [DocumentType.INCREMENTAL_FUNDING_PLAN]: {
     word: "/opt/ifp-template.docx",
   },
+  [DocumentType.EVALUATION_PLAN]: {
+    word: "/opt/eval-plan-template.docx",
+  },
 };
 
 export const getPDFDocumentTemplates = (documentType: DocumentType): PDFTemplateFiles => {
@@ -94,6 +97,9 @@ export const getWordTemplate = (documentType: DocumentType): Buffer => {
   let word;
   switch (documentType) {
     case DocumentType.INCREMENTAL_FUNDING_PLAN:
+      word = fs.readFileSync(documentTemplatePaths[documentType].word);
+      break;
+    case DocumentType.EVALUATION_PLAN:
       word = fs.readFileSync(documentTemplatePaths[documentType].word);
       break;
     default:
