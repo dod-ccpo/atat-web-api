@@ -25,6 +25,7 @@ import {
   DocumentType,
   IndependentGovernmentCostEstimate,
   IncrementalFundingPlan,
+  EvaluationPlan,
 } from "../models/document-generation";
 import handlebars from "handlebars";
 import juice from "juice";
@@ -88,7 +89,7 @@ async function generateWordDocument(event: RequestEvent<GenerateDocumentRequest>
     case DocumentType.INCREMENTAL_FUNDING_PLAN:
       return generateIFPDocument(wordTemplate, templatePayload as IncrementalFundingPlan);
     case DocumentType.EVALUATION_PLAN:
-      return generateEvalPlanDocument(wordTemplate, templatePayload as IncrementalFundingPlan);
+      return generateEvalPlanDocument(wordTemplate, templatePayload as EvaluationPlan);
     default:
       return new ValidationErrorResponse(`Invalid document type: "${documentType}"`, {
         cause: `Invalid document type "${documentType}" provided. Please provide a valid document type.`,
