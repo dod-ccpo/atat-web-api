@@ -13,12 +13,6 @@ export async function generateEvalPlanDocument(
       template,
       data: {
         ...payload,
-        // update amounts to have commas
-        estimatedTaskOrderValue: payload.estimatedTaskOrderValue.toLocaleString("en-US"),
-        initialAmount: payload.initialAmount.toLocaleString("en-US"),
-        remainingAmount: payload.remainingAmount.toLocaleString("en-US"),
-        // construct Funding Document information to be used in template
-        fundingDocInfo: getFundingDocInfo(payload.fundingDocument),
       },
       cmdDelimiter: ["{", "}"],
     })

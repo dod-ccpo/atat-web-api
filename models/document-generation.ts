@@ -292,6 +292,7 @@ export interface IncrementalFundingPlan {
 }
 
 export interface EvaluationPlan {
+  taskOrderTitle: string;
   sourceSelection: SourceSelection;
   method: EvalPlanMethod;
   standardSpecifications: string[];
