@@ -31,6 +31,29 @@ export const convertPeriodToMonths = (period: IPeriod): number => {
   }
 };
 
+export const formatPeriodOfPerformance = (basePeriod: IPeriod, optionPeriods: IPeriod[]): string => {
+  let formattedPop = "";
+  formattedPop += capitalize(basePeriod.periodType);
+  formattedPop += " period: ";
+  formattedPop += basePeriod.periodUnitCount;
+  formattedPop += " ";
+  formattedPop += `${capitalize(basePeriod.periodUnit)}(s)`;
+
+  const orderedPeriods = [...optionPeriods].sort((a, b) => a.optionOrder - b.optionOrder);
+  for (const period of orderedPeriods) {
+    // Format the option Period text as "Option period M: N <Days(s) | Month(s) | Year(s)>"
+    formattedPop += ", ";
+    formattedPop += capitalize(period.periodType);
+    formattedPop += " period ";
+    formattedPop += period.optionOrder;
+    formattedPop += ": ";
+    formattedPop += period.periodUnitCount;
+    formattedPop += " ";
+    formattedPop += `${capitalize(period.periodUnit)}(s)`;
+  }
+  return formattedPop;
+};
+
 export const getFundingDocInfo = (fundingDoc: IFundingDocument): string => {
   const documentTypes = [FundingType.MIPR, FundingType.FS_FORM];
   if (!fundingDoc || !documentTypes.includes(fundingDoc.fundingType)) {
@@ -62,6 +85,9 @@ const documentTemplatePaths: TemplatePaths = {
   },
   [DocumentType.EVALUATION_PLAN]: {
     docx: "/opt/eval-plan-template.docx",
+  },
+  [DocumentType.REQUIREMENTS_CHECKLIST]: {
+    docx: "/opt/requirements-checklist-template.docx",
   },
 };
 
@@ -100,6 +126,9 @@ export const getDocxTemplate = (documentType: DocumentType): Buffer => {
       docx = fs.readFileSync(documentTemplatePaths[documentType].docx);
       break;
     case DocumentType.EVALUATION_PLAN:
+      docx = fs.readFileSync(documentTemplatePaths[documentType].docx);
+      break;
+    case DocumentType.REQUIREMENTS_CHECKLIST:
       docx = fs.readFileSync(documentTemplatePaths[documentType].docx);
       break;
     default:

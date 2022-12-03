@@ -1,10 +1,11 @@
+import * as fs from "fs";
 import {
   PeriodUnit,
   PeriodType,
   DocumentType,
   FundingType,
-  IncrementalFundingPlan,
   IFundingDocument,
+  IPeriod,
 } from "../../models/document-generation";
 import {
   capitalize,
@@ -13,8 +14,9 @@ import {
   getExcelTemplatePath,
   getFundingDocInfo,
   getDocxTemplate,
+  formatPeriodOfPerformance,
 } from "./utils";
-import * as fs from "fs";
+import { sampleRequirementsChecklistRequest } from "./sampleTestData";
 
 jest.mock("fs");
 const mockedFs = fs as jest.Mocked<typeof fs>;
@@ -28,6 +30,36 @@ describe("capitalize", () => {
     const emptyString = capitalize(item as any);
     expect(emptyString).toBe("");
   });
+});
+
+describe("formatPeriodOfPerformance", () => {
+  const samplePop = sampleRequirementsChecklistRequest.templatePayload.periodOfPerformance;
+  const popOrderedOptions = {
+    basePeriod: samplePop.basePeriod,
+    optionPeriods: samplePop.optionPeriods.sort((a, b) => a.optionOrder - b.optionOrder),
+  };
+  const popUnorderedOptions = {
+    basePeriod: samplePop.basePeriod,
+    optionPeriods: samplePop.optionPeriods, // already unordered in the sample
+  };
+  it("should return defined PoP with no option periods in a human readable format", async () => {
+    const basePeriod: IPeriod = samplePop.basePeriod as unknown as IPeriod;
+    const optionPeriods: IPeriod[] = [];
+    const expectedPopFormat = "Base period: 1 Year(s)";
+    const popString = formatPeriodOfPerformance(basePeriod, optionPeriods);
+    expect(popString).toEqual(expectedPopFormat);
+  });
+  it.each([popOrderedOptions, popUnorderedOptions])(
+    "should return defined PoP with un/ordered option periods in a human readable format",
+    async (pop) => {
+      const basePeriod: IPeriod = pop.basePeriod as unknown as IPeriod;
+      const optionPeriods = pop.optionPeriods as IPeriod[];
+      const expectedPopFormat = "Base period: 1 Year(s), Option period 2: 7 Month(s), Option period 4: 36 Week(s)";
+
+      const popString = formatPeriodOfPerformance(basePeriod, optionPeriods);
+      expect(popString).toEqual(expectedPopFormat);
+    }
+  );
 });
 
 describe("convertPeriodToMonths", () => {
@@ -147,7 +179,7 @@ describe("getExcelTemplatePath", () => {
   });
 });
 
-describe("getWordTemplate", () => {
+describe("getDocxTemplate", () => {
   it("should return buffer of template for IFP document", async () => {
     const ifpTemplateBuffer = "/opt/ifp-template.docx";
 
