@@ -622,7 +622,7 @@ components:
               type: string
             contractExpiration:
               type: string
-        exceptionTofairOpportunity:
+        exceptionToFairOpportunity:
           type: string
           enum:
             - NO_NONE
