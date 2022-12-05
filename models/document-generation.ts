@@ -1,5 +1,6 @@
 /* eslint-disable camelcase */
 import { APIGatewayEventRequestContext } from "aws-lambda";
+import { requirementsCheckList, RequirementsChecklist } from "./document-generation/requirements-checklist";
 
 export enum AwardType {
   INITIAL_AWARD = "INITIAL_AWARD",
@@ -11,6 +12,7 @@ export enum DocumentType {
   INDEPENDENT_GOVERNMENT_COST_ESTIMATE = "INDEPENDENT_GOVERNMENT_COST_ESTIMATE",
   INCREMENTAL_FUNDING_PLAN = "INCREMENTAL_FUNDING_PLAN",
   EVALUATION_PLAN = "EVALUATION_PLAN",
+  REQUIREMENTS_CHECKLIST = "REQUIREMENTS_CHECKLIST",
 }
 
 export enum PeriodType {
@@ -106,6 +108,7 @@ export interface TemplatePaths {
   [DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE]: { excel: string };
   [DocumentType.INCREMENTAL_FUNDING_PLAN]: { docx: string };
   [DocumentType.EVALUATION_PLAN]: { docx: string };
+  [DocumentType.REQUIREMENTS_CHECKLIST]: { docx: string };
 }
 export interface IAward {
   contractAwardType: AwardType;
@@ -304,7 +307,12 @@ export interface EvaluationPlan {
 
 export interface GenerateDocumentRequest {
   documentType: DocumentType;
-  templatePayload: DescriptionOfWork | IndependentGovernmentCostEstimate | IncrementalFundingPlan | EvaluationPlan;
+  templatePayload:
+    | DescriptionOfWork
+    | IndependentGovernmentCostEstimate
+    | IncrementalFundingPlan
+    | EvaluationPlan 
+    | RequirementsChecklist;
 }
 
 export interface RequestEvent<T> {
@@ -428,7 +436,7 @@ const selectedServiceOfferings = {
   },
 };
 
-const periodOfPerformance = {
+export const periodOfPerformance = {
   type: "object",
   properties: {
     basePeriod: period,
@@ -638,10 +646,17 @@ export const generateDocumentSchema = {
         DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE,
         DocumentType.INCREMENTAL_FUNDING_PLAN,
         DocumentType.EVALUATION_PLAN,
+        DocumentType.REQUIREMENTS_CHECKLIST,
       ],
     },
     templatePayload: {
-      oneOf: [descriptionOfWork, independentGovernmentCostEstimate, incrementalFundingPlan, evalPlan],
+      oneOf: [
+        descriptionOfWork, 
+        independentGovernmentCostEstimate, 
+        incrementalFundingPlan, 
+        evalPlan, 
+        requirementsCheckList
+      ],
     },
   },
 };
