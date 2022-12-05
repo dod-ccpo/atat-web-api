@@ -113,7 +113,7 @@ export const getWordTemplate = (documentType: DocumentType): Buffer => {
   return word;
 };
 
-export const getWordIgceTemplate = (documentType: DocumentType, templatePayload: EvaluationPlan): Buffer => {
+export const getEvalPlanTemplate = (documentType: DocumentType, templatePayload: EvaluationPlan): Buffer => {
   let template;
   if (templatePayload.sourceSelection === SourceSelection.NO_TECH_PROPOSAL) {
     if (templatePayload.method === EvalPlanMethod.LPTA) {

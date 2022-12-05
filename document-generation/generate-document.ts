@@ -17,7 +17,7 @@ import { wrapSchema } from "../utils/middleware/schema-wrapper";
 import { generateDocument } from "./chromium";
 import { generateIGCEDocument } from "./igce-document";
 import { generateIFPDocument } from "./ifp-document";
-import { getPDFDocumentTemplates, getExcelTemplatePath, getWordTemplate } from "./utils/utils";
+import { getPDFDocumentTemplates, getExcelTemplatePath, getWordTemplate, getEvalPlanTemplate } from "./utils/utils";
 import {
   generateDocumentSchema,
   RequestEvent,
@@ -91,7 +91,9 @@ async function generateWordDocument(event: RequestEvent<GenerateDocumentRequest>
     case DocumentType.INCREMENTAL_FUNDING_PLAN:
       return generateIFPDocument(wordTemplate, templatePayload as IncrementalFundingPlan);
     case DocumentType.EVALUATION_PLAN:
-      return generateEvalPlanDocument(wordTemplate, templatePayload as EvaluationPlan);
+      // eslint-disable-next-line no-case-declarations
+      const evalPlanTemplate = getEvalPlanTemplate(documentType, templatePayload as EvaluationPlan);
+      return generateEvalPlanDocument(evalPlanTemplate, templatePayload as EvaluationPlan);
     default:
       return new ValidationErrorResponse(`Invalid document type: "${documentType}"`, {
         cause: `Invalid document type "${documentType}" provided. Please provide a valid document type.`,
