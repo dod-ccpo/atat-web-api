@@ -41,7 +41,9 @@ async function baseHandler(event: RequestEvent<GenerateDocumentRequest>): Promis
       return generatePdf(event);
     case DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE:
       return generateXlsx(event);
-    case DocumentType.INCREMENTAL_FUNDING_PLAN || DocumentType.EVALUATION_PLAN:
+    case DocumentType.INCREMENTAL_FUNDING_PLAN:
+      return generateWordDocument(event);
+    case DocumentType.EVALUATION_PLAN:
       return generateWordDocument(event);
     default:
       return new ValidationErrorResponse(`Invalid document type: "${documentType}"`, {
