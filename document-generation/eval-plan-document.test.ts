@@ -8,10 +8,10 @@ import { generateEvalPlanDocument } from "./eval-plan-document";
 describe("Generate an Evaluation Plan document - success path", () => {
   const sampleEPRequest = sampleEvalPlanRequest.templatePayload as EvaluationPlan;
   const sampleEPCustomSpecsRequest = sampleEvalPlanRequest.templatePayload as EvaluationPlan;
+  const templateBuffer = fs.readFileSync(path.resolve(__dirname, "templates/eval-plan-template.docx"));
 
   it.each([sampleEPRequest, sampleEPCustomSpecsRequest])("should return an ApiBase64Response", async (epPayload) => {
     // GIVEN
-    const templateBuffer = fs.readFileSync(path.resolve(__dirname, "templates/eval-plan-template.docx"));
     const headers = {
       "Content-Disposition": "attachment; filename=EvaluationPlan.docx",
       "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -27,10 +27,10 @@ describe("Generate an Evaluation Plan document - success path", () => {
 });
 
 describe("Generate an Evaluation Plan document - failure path", () => {
+  const templateBuffer = fs.readFileSync(path.resolve(__dirname, "templates/eval-plan-template.docx"));
   it("should return an error if empty argument", async () => {
     // WHEN
-    const emptyArgument = Buffer;
-    const response = await generateEvalPlanDocument(emptyArgument as any, {} as EvaluationPlan);
+    const response = await generateEvalPlanDocument(templateBuffer, {} as EvaluationPlan);
     // THEN
     expect(response).toBeInstanceOf(OtherErrorResponse);
     expect(response.statusCode).toBe(ErrorStatusCode.INTERNAL_SERVER_ERROR);
