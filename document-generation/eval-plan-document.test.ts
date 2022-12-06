@@ -11,7 +11,7 @@ describe("Generate an Evaluation Plan document - success path", () => {
 
   it.each([sampleEPRequest, sampleEPCustomSpecsRequest])("should return an ApiBase64Response", async (epPayload) => {
     // GIVEN
-    const templateBuffer = fs.readFileSync(path.resolve(__dirname, "templates/ifp-template.docx"));
+    const templateBuffer = fs.readFileSync(path.resolve(__dirname, "templates/eval-plan-template.docx"));
     const headers = {
       "Content-Disposition": "attachment; filename=EvaluationPlan.docx",
       "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
