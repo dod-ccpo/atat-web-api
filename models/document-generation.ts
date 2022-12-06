@@ -596,6 +596,34 @@ export const evalPlan = {
         SourceSelection.EQUAL_SET_LUMP_SUM,
       ],
     },
+    method: {
+      type: "string",
+      enum: [EvalPlanMethod.BEST_USE, EvalPlanMethod.LOWEST_RISK, EvalPlanMethod.BVTO, EvalPlanMethod.LPTA],
+    },
+    standardSpecifications: {
+      type: "array",
+      items: {
+        type: "string",
+      },
+    },
+    customSpecifications: {
+      type: "array",
+      items: {
+        type: "string",
+      },
+    },
+    standardDifferentiators: {
+      type: "array",
+      items: {
+        type: "string",
+      },
+    },
+    customDifferentiators: {
+      type: "array",
+      items: {
+        type: "string",
+      },
+    },
   },
 };
 
@@ -607,10 +635,11 @@ export const generateDocumentSchema = {
         DocumentType.DESCRIPTION_OF_WORK,
         DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE,
         DocumentType.INCREMENTAL_FUNDING_PLAN,
+        DocumentType.EVALUATION_PLAN,
       ],
     },
     templatePayload: {
-      oneOf: [descriptionOfWork, independentGovernmentCostEstimate, incrementalFundingPlan],
+      oneOf: [descriptionOfWork, independentGovernmentCostEstimate, incrementalFundingPlan, evalPlan],
     },
   },
 };
