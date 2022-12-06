@@ -9,7 +9,12 @@ import {
 } from "../utils/response";
 import { handler } from "./generate-document";
 import { requestContext } from "../api/util/common-test-fixtures";
-import { sampleDowRequest, sampleIfpRequest, sampleIgceRequest } from "./utils/sampleTestData";
+import {
+  sampleDowRequest,
+  sampleIfpRequest,
+  sampleIgceRequest,
+  sampleRequirementsChecklistRequest,
+} from "./utils/sampleTestData";
 
 const validRequest = {
   body: JSON.stringify(sampleDowRequest),
@@ -27,6 +32,10 @@ const docHeaders = {
   ifp: {
     "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     "Content-Disposition": `attachment; filename=IncrementalFundingPlan.docx`,
+  },
+  requirementsChecklist: {
+    "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "Content-Disposition": `attachment; filename=RequirementsChecklist.docx`,
   },
 };
 
@@ -50,6 +59,18 @@ jest.mock("./ifp-document", () => {
     generateIFPDocument: jest.fn().mockImplementation(() => {
       const buffer = Buffer.from("generateIFPDocument");
       return new ApiBase64SuccessResponse(buffer.toString("base64"), SuccessStatusCode.OK, docHeaders.ifp);
+    }),
+  };
+});
+jest.mock("./requirements-checklist-document", () => {
+  return {
+    generateRequirementsChecklistDocument: jest.fn().mockImplementation(() => {
+      const buffer = Buffer.from("generateRequirementsChecklistDocument");
+      return new ApiBase64SuccessResponse(
+        buffer.toString("base64"),
+        SuccessStatusCode.OK,
+        docHeaders.requirementsChecklist
+      );
     }),
   };
 });
@@ -109,33 +130,52 @@ describe("Successful generate-document handler", () => {
     expect(response).toBeInstanceOf(SuccessBase64Response);
     expect(response.headers).toEqual(docHeaders.ifp);
   });
+  it("should return successful Requirements Checklist document response", async () => {
+    // GIVEN / ARRANGE
+    const request = {
+      ...validRequest,
+      body: JSON.stringify({
+        ...sampleRequirementsChecklistRequest,
+      }),
+    };
+
+    // WHEN / ACT
+    const response = await handler(request, {} as Context);
+    console.log("RESPONSE: ", JSON.stringify(response));
+    // THEN / ASSERT
+    expect(response).toBeInstanceOf(SuccessBase64Response);
+    expect(response.headers).toEqual(docHeaders.requirementsChecklist);
+  });
 });
 
 describe("Invalid requests for generate-document handler", () => {
-  it.each([sampleDowRequest.templatePayload, sampleIgceRequest.templatePayload, sampleIfpRequest.templatePayload])(
-    "should return validation error when invalid document type",
-    async (payload) => {
-      // GIVEN / ARRANGE
-      const invalidRequest = {
-        ...validRequest,
-        body: JSON.stringify({
-          documentType: "invalid document",
-          templatePayload: payload,
-        }),
-      };
-      // WHEN / ACT
-      const response = await handler(invalidRequest, {} as Context);
-      const responseBody = JSON.parse(response?.body ?? "");
-      // THEN / ASSERT
-      expect(response).toBeInstanceOf(ValidationErrorResponse);
-      expect(responseBody.message).toBe("Request failed validation");
-    }
-  );
+  it.each([
+    sampleDowRequest.templatePayload,
+    sampleIgceRequest.templatePayload,
+    sampleIfpRequest.templatePayload,
+    sampleRequirementsChecklistRequest.templatePayload,
+  ])("should return validation error when invalid document type", async (payload) => {
+    // GIVEN / ARRANGE
+    const invalidRequest = {
+      ...validRequest,
+      body: JSON.stringify({
+        documentType: "invalid document",
+        templatePayload: payload,
+      }),
+    };
+    // WHEN / ACT
+    const response = await handler(invalidRequest, {} as Context);
+    const responseBody = JSON.parse(response?.body ?? "");
+    // THEN / ASSERT
+    expect(response).toBeInstanceOf(ValidationErrorResponse);
+    expect(responseBody.message).toBe("Request failed validation");
+  });
   it.each([
     DocumentType.DESCRIPTION_OF_WORK,
     DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE,
     DocumentType.INCREMENTAL_FUNDING_PLAN,
     DocumentType.EVALUATION_PLAN,
+    DocumentType.REQUIREMENTS_CHECKLIST,
   ])("should return validation error when payload not an object", async (documentType) => {
     // GIVEN / ARRANGE
     const invalidRequest = {
@@ -164,6 +204,10 @@ describe("Invalid requests for generate-document handler", () => {
     {
       documentType: DocumentType.INCREMENTAL_FUNDING_PLAN,
       templatePayload: { ...sampleIfpRequest.templatePayload, unknown: "prop" },
+    },
+    {
+      documentType: DocumentType.REQUIREMENTS_CHECKLIST,
+      templatePayload: { ...sampleRequirementsChecklistRequest.templatePayload, special: "prop" },
     },
   ])("should return validation error when payload has additional properties", async (requestBody) => {
     // GIVEN / ARRANGE
