@@ -401,6 +401,7 @@ components:
             - DESCRIPTION_OF_WORK
             - INDEPENDENT_GOVERNMENT_COST_ESTIMATE
             - INCREMENTAL_FUNDING_PLAN
+            - REQUIREMENTS_CHECKLIST
         templatePayload:
           type: object
           oneOf:
@@ -408,6 +409,7 @@ components:
             - $ref: "#/components/schemas/DescriptionOfWork"
             - $ref: "#/components/schemas/IndependentGovernmentCostEstimate"
             - $ref: "#/components/schemas/IncrementalFundingPlan"
+            - $ref: "#/components/schemas/RequirementsChecklist"
     EvalPlan:
       description: Provides the basis of evaluation for an Acquisition Package
       type: object
@@ -455,12 +457,17 @@ components:
           type: string
         missionOwner:
           type: string
+        financialPoc:
+          type: string
         estimatedTaskOrderValue:
-          type: float
+          type: number
+          format: float
         initialAmount:
-          type: float
+          type: number
+          format: float
         remainingAmount:
-          type: float
+          type: number
+          format: float
         fundingIncrements:
           type: array
           items:
@@ -568,6 +575,106 @@ components:
           example: "1st QTR FY23"
         order:
           type: integer
+    RequirementsChecklist:
+      description: >-
+        Schema used to generate Requirements Checklist document
+      type: object
+      properties:
+        projectOverview:
+          type: object
+          properties:
+            title:
+              type: string
+            scope:
+              type: string
+            emergencyDeclaration:
+              type: boolean
+        organization:
+          type: object
+          properties:
+            agency:
+              type: string
+            name:
+              description: >-
+                The DISA Organization or Organization Name column
+              type: string
+        contacts:
+          type: object
+          properties:
+            missionOwnerName:
+              type: string
+            cor:
+              $ref: "#/components/schemas/CorContact"
+            acor:
+              $ref: "#/components/schemas/CorContact"
+        currentContract:
+          type: object
+          properties:
+            exists:
+              type: boolean
+            incumbentContractorName:
+              type: string
+            contractNumber:
+              type: string
+            taskOrderNumber:
+              type: string
+            contractExpiration:
+              type: string
+        exceptionTofairOpportunity:
+          type: string
+          enum:
+            - NO_NONE
+            - YES_FAR_16_505_B_2_I_A
+            - YES_FAR_16_505_B_2_I_B
+            - YES_FAR_16_505_B_2_I_C
+        periodOfPerformance:
+          $ref: "#/components/schemas/PeriodOfPerformance"
+        contractType:
+          type: object
+          properties:
+            firmFixedPrice:
+              type: boolean
+            timeAndMaterials:
+              type: boolean
+            justification:
+              type: string
+        sensitiveInformation:
+          type: object
+          properties:
+            baaRequired:
+              type: boolean
+            potentialToBeHarmful:
+              type: boolean
+            foiaContact:
+              type: object
+              properties:
+                fullName:
+                  type: string
+                email:
+                  type: string
+                address:
+                  type: string
+            section508:
+              type: object
+              properties:
+                section508Sufficient:
+                  type: boolean
+    CorContact:
+      description: >-
+        A Contracting Officer's Representative (COR) or Alternate Contracting
+        Officer's Representative (ACOR)
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        phoneNumber:
+          type: string
+        dodaac:
+          description: >-
+            Department of Defense Activity Address Code (DoDAAC)
+          type: string
     DescriptionOfWork:
       description: "Schema used to generate DescriptionOfWork document"
       type: object
@@ -751,7 +858,8 @@ components:
         need_for_entire_task_order_duration:
           type: boolean
     Period:
-      description: "Part of DOW, represents Period Table fields"
+      description: >-
+        Represents a record in the Period table used for Periods of Performance
       type: object
       properties:
         period_type:
@@ -792,7 +900,8 @@ components:
         name:
           type: string
     PeriodOfPerformance:
-      description: "Part of DOW, represents a single Period of Performance"
+      description: >-
+        Represents a Period of Performance (PoP) for a package
       type: object
       properties:
         base_period:
