@@ -42,7 +42,6 @@ async function baseHandler(event: RequestEvent<GenerateDocumentRequest>): Promis
     case DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE:
       return generateXlsx(event);
     case DocumentType.INCREMENTAL_FUNDING_PLAN:
-      return generateWordDocument(event);
     case DocumentType.EVALUATION_PLAN:
       return generateWordDocument(event);
     default:
