@@ -583,7 +583,6 @@ const incrementalFundingPlan = {
   },
   additionalProperties: false,
 };
-// TODO FINISH EVAL PLAN OBJECT
 export const evalPlan = {
   type: "object",
   properties: {
@@ -625,6 +624,7 @@ export const evalPlan = {
       },
     },
   },
+  additionalProperties: false,
 };
 
 export const generateDocumentSchema = {
