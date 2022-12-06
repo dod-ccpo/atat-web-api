@@ -2,12 +2,15 @@ import { logger } from "../utils/logging";
 import createReport from "docx-templates";
 import { EvaluationPlan } from "../models/document-generation";
 import { ApiBase64SuccessResponse, SuccessStatusCode } from "../utils/response";
-import { getFundingDocInfo } from "./utils/utils";
+import { INTERNAL_SERVER_ERROR } from "../utils/errors";
 
 export async function generateEvalPlanDocument(
   template: Buffer,
   payload: EvaluationPlan
 ): Promise<ApiBase64SuccessResponse> {
+  if (!payload.taskOrderTitle) {
+    return INTERNAL_SERVER_ERROR;
+  }
   const report = Buffer.from(
     await createReport({
       template,
