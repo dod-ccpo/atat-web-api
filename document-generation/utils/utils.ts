@@ -5,12 +5,8 @@ import {
   TemplatePaths,
   IFundingDocument,
   FundingType,
-  EvaluationPlan,
-  SourceSelection,
-  EvalPlanMethod,
 } from "../../models/document-generation";
 import * as fs from "fs";
-import { EvaluationResultFilterSensitiveLog } from "@aws-sdk/client-iam";
 
 export const capitalize = (string: string) => {
   if (typeof string !== "string") {
@@ -111,30 +107,4 @@ export const getWordTemplate = (documentType: DocumentType): Buffer => {
   }
 
   return word;
-};
-
-export const getEvalPlanTemplate = (documentType: DocumentType, templatePayload: EvaluationPlan): Buffer => {
-  let template;
-  if (templatePayload.sourceSelection === SourceSelection.NO_TECH_PROPOSAL) {
-    if (templatePayload.method === EvalPlanMethod.LPTA) {
-      template = fs.readFileSync(documentTemplatePaths[DocumentType.EVALUATION_PLAN].word);
-    }
-  } else if (templatePayload.sourceSelection === SourceSelection.TECH_PROPOSAL) {
-    if (templatePayload.method === EvalPlanMethod.LPTA) {
-      template = fs.readFileSync(documentTemplatePaths[DocumentType.EVALUATION_PLAN].word);
-    }
-    if (templatePayload.method === EvalPlanMethod.BVTO) {
-      template = fs.readFileSync(documentTemplatePaths[DocumentType.EVALUATION_PLAN].word);
-    }
-  } else if (templatePayload.sourceSelection === SourceSelection.EQUAL_SET_LUMP_SUM) {
-    template = fs.readFileSync(documentTemplatePaths[DocumentType.EVALUATION_PLAN].word);
-  } else if (templatePayload.method === EvalPlanMethod.BEST_USE) {
-    template = fs.readFileSync(documentTemplatePaths[DocumentType.EVALUATION_PLAN].word);
-  } else if (templatePayload.method === EvalPlanMethod.LOWEST_RISK) {
-    template = fs.readFileSync(documentTemplatePaths[DocumentType.EVALUATION_PLAN].word);
-  } else {
-    throw new Error(`Unsupported Word generation type: "${documentType}"`);
-  }
-
-  return template as Buffer;
 };
