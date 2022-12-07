@@ -599,7 +599,7 @@ export const evalPlan = {
     },
     method: {
       type: "string",
-      enum: [EvalPlanMethod.BEST_USE, EvalPlanMethod.LOWEST_RISK, EvalPlanMethod.BVTO, EvalPlanMethod.LPTA],
+      enum: [EvalPlanMethod.BEST_USE, EvalPlanMethod.LOWEST_RISK, EvalPlanMethod.BVTO, EvalPlanMethod.LPTA, null],
     },
     standardSpecifications: {
       type: "array",
