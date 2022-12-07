@@ -351,8 +351,8 @@ components:
         content:
           type: object
           required:
-           - response
-           - request
+            - response
+            - request
           properties:
             response:
               type: object
@@ -414,6 +414,8 @@ components:
       description: Provides the basis of evaluation for an Acquisition Package
       type: object
       properties:
+        taskOrderTitle:
+          type: string
         sourceSelection:
           type: string
           enum:
@@ -523,10 +525,10 @@ components:
         idiq_clin:
           description: Contract Line Item Number from Indefinite Delivery-Indefinite Quantity (IDIQ) contract
           type: string
-          enum: 
-          - "1000_CLOUD"
-          - "2000_CLOUD_SUPPORT"
-          - "3000_OTHER"
+          enum:
+            - "1000_CLOUD"
+            - "2000_CLOUD_SUPPORT"
+            - "3000_OTHER"
         dow_task_number:
           description: Section number from DOW document
           type: string
@@ -539,7 +541,7 @@ components:
           type: string
         monthly_price:
           type: number
-        months_in_period: 
+        months_in_period:
           description: >-
             Months in the specified period (1-12). The days/weeks/year should be converted into
             months and always rounded up to a whole number. Average weeks in a month 4.345.
