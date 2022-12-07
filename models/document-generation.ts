@@ -104,8 +104,8 @@ export enum EvalPlanMethod {
 export interface TemplatePaths {
   [DocumentType.DESCRIPTION_OF_WORK]: { html: string; css: string };
   [DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE]: { excel: string };
-  [DocumentType.INCREMENTAL_FUNDING_PLAN]: { word: string };
-  [DocumentType.EVALUATION_PLAN]: { word: string };
+  [DocumentType.INCREMENTAL_FUNDING_PLAN]: { docx: string };
+  [DocumentType.EVALUATION_PLAN]: { docx: string };
 }
 export interface IAward {
   contractAwardType: AwardType;

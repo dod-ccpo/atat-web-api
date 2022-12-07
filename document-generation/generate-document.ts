@@ -17,7 +17,7 @@ import { wrapSchema } from "../utils/middleware/schema-wrapper";
 import { generateDocument } from "./chromium";
 import { generateIGCEDocument } from "./igce-document";
 import { generateIFPDocument } from "./ifp-document";
-import { getPDFDocumentTemplates, getExcelTemplatePath, getWordTemplate } from "./utils/utils";
+import { getPDFDocumentTemplates, getExcelTemplatePath, getDocxTemplate } from "./utils/utils";
 import {
   generateDocumentSchema,
   RequestEvent,
@@ -43,7 +43,7 @@ async function baseHandler(event: RequestEvent<GenerateDocumentRequest>): Promis
       return generateXlsx(event);
     case DocumentType.INCREMENTAL_FUNDING_PLAN:
     case DocumentType.EVALUATION_PLAN:
-      return generateWordDocument(event);
+      return generateDocxDocument(event);
     default:
       return new ValidationErrorResponse(`Invalid document type: "${documentType}"`, {
         cause: `Invalid document type "${documentType}" provided. Please provide a valid document  type.`,
@@ -80,9 +80,9 @@ async function generateXlsx(event: RequestEvent<GenerateDocumentRequest>): Promi
   return generateIGCEDocument(excelTemplatePath, templatePayload as IndependentGovernmentCostEstimate);
 }
 
-async function generateWordDocument(event: RequestEvent<GenerateDocumentRequest>): Promise<ApiBase64SuccessResponse> {
+async function generateDocxDocument(event: RequestEvent<GenerateDocumentRequest>): Promise<ApiBase64SuccessResponse> {
   const { documentType, templatePayload } = event.body;
-  const wordTemplate = getWordTemplate(documentType);
+  const wordTemplate = getDocxTemplate(documentType);
   switch (documentType) {
     // TODO: Add in DoW docx generation
     // case DocumentType.DESCRIPTION_OF_WORK_DOCX:
