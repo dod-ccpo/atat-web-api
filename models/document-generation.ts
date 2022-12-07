@@ -588,6 +588,7 @@ const incrementalFundingPlan = {
 export const evalPlan = {
   type: "object",
   properties: {
+    taskOrderTitle: { type: "string" },
     sourceSelection: {
       type: "string",
       enum: [
