@@ -11,11 +11,18 @@ export async function generateEvalPlanDocument(
   if (!payload.taskOrderTitle) {
     return INTERNAL_SERVER_ERROR;
   }
+  // if its not null (has a method, add a dash)
+  let formattedMethod = "";
+  if (payload.method) {
+    formattedMethod = " — " + payload.method;
+  }
   const report = Buffer.from(
     await createReport({
       template,
       data: {
         ...payload,
+        formattedMethod,
+        formattedSourceSelection: payload.sourceSelection.split("_").join(" "),
       },
       cmdDelimiter: ["{", "}"],
     })
