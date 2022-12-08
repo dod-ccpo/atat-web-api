@@ -311,7 +311,7 @@ export interface GenerateDocumentRequest {
     | DescriptionOfWork
     | IndependentGovernmentCostEstimate
     | IncrementalFundingPlan
-    | EvaluationPlan 
+    | EvaluationPlan
     | RequirementsChecklist;
 }
 
@@ -651,11 +651,11 @@ export const generateDocumentSchema = {
     },
     templatePayload: {
       oneOf: [
-        descriptionOfWork, 
-        independentGovernmentCostEstimate, 
-        incrementalFundingPlan, 
-        evalPlan, 
-        requirementsCheckList
+        descriptionOfWork,
+        independentGovernmentCostEstimate,
+        incrementalFundingPlan,
+        evalPlan,
+        requirementsCheckList,
       ],
     },
   },

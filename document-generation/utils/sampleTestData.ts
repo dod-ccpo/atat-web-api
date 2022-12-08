@@ -371,9 +371,9 @@ export const sampleEvalPlanRequest = {
     customSpecifications: ["string"],
     standardDifferentiators: ["string"],
     customDifferentiators: ["string"],
-    },
+  },
 };
- 
+
 export const sampleRequirementsChecklistRequest = {
   documentType: "REQUIREMENTS_CHECKLIST",
   templatePayload: {
