@@ -11,18 +11,30 @@ export async function generateEvalPlanDocument(
   if (!payload.taskOrderTitle) {
     return INTERNAL_SERVER_ERROR;
   }
-  // if its not null (has a method, add a dash)
+  // Basis of evaluation formatting
   let formattedMethod = "";
-  if (payload.method) {
-    formattedMethod = " — " + payload.method;
+  let formattedSourceSelection = "";
+
+  if (payload.sourceSelection !== "SET_LUMP_SUM") {
+    formattedSourceSelection = payload.sourceSelection.split("_").join(" ");
+    if (payload.sourceSelection === "EQUAL_SET_LUMP_SUM") {
+      formattedSourceSelection = "EQUAL AWARD";
+    }
   }
+  if (payload.method) {
+    formattedMethod = payload.method.split("_").join(" ");
+    if (payload.sourceSelection === "TECH_PROPOSAL" || payload.sourceSelection === "NO_TECH_PROPOSAL") {
+      formattedMethod = " — " + payload.method.split("_").join(" ");
+    }
+  }
+
   const report = Buffer.from(
     await createReport({
       template,
       data: {
         ...payload,
         formattedMethod,
-        formattedSourceSelection: payload.sourceSelection.split("_").join(" "),
+        formattedSourceSelection,
       },
       cmdDelimiter: ["{", "}"],
     })
