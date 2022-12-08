@@ -12,7 +12,7 @@ import {
   getPDFDocumentTemplates,
   getExcelTemplatePath,
   getFundingDocInfo,
-  getWordTemplate,
+  getDocxTemplate,
 } from "./utils";
 import * as fs from "fs";
 
@@ -152,11 +152,11 @@ describe("getWordTemplate", () => {
     const ifpTemplateBuffer = "/opt/ifp-template.docx";
 
     mockedFs.readFileSync.mockImplementationOnce(() => Buffer.from(ifpTemplateBuffer));
-    expect(getWordTemplate(DocumentType.INCREMENTAL_FUNDING_PLAN).toString()).toBe(ifpTemplateBuffer);
+    expect(getDocxTemplate(DocumentType.INCREMENTAL_FUNDING_PLAN).toString()).toBe(ifpTemplateBuffer);
   });
   it("should throw an error if invalid Word documentType", async () => {
     const documentType = "RANDOM_WORD_DOCUMENT_TYPE" as unknown as DocumentType;
-    expect(() => getWordTemplate(documentType)).toThrow(
+    expect(() => getDocxTemplate(documentType)).toThrow(
       `Unsupported Word generation type: "RANDOM_WORD_DOCUMENT_TYPE"`
     );
   });

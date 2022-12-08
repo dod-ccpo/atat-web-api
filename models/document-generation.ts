@@ -10,6 +10,7 @@ export enum DocumentType {
   DESCRIPTION_OF_WORK = "DESCRIPTION_OF_WORK",
   INDEPENDENT_GOVERNMENT_COST_ESTIMATE = "INDEPENDENT_GOVERNMENT_COST_ESTIMATE",
   INCREMENTAL_FUNDING_PLAN = "INCREMENTAL_FUNDING_PLAN",
+  EVALUATION_PLAN = "EVALUATION_PLAN",
 }
 
 export enum PeriodType {
@@ -86,10 +87,25 @@ export enum ServiceOfferingGroup {
   SECURITY = "SECURITY",
   TRAINING = "TRAINING",
 }
+
+export enum SourceSelection {
+  NO_TECH_PROPOSAL = "NO_TECH_PROPOSAL",
+  TECH_PROPOSAL = "TECH_PROPOSAL",
+  SET_LUMP_SUM = "SET_LUMP_SUM",
+  EQUAL_SET_LUMP_SUM = "EQUAL_SET_LUMP_SUM",
+}
+
+export enum EvalPlanMethod {
+  LPTA = "LPTA",
+  BVTO = "BVTO",
+  BEST_USE = "BEST_USE",
+  LOWEST_RISK = "LOWEST_RISK",
+}
 export interface TemplatePaths {
   [DocumentType.DESCRIPTION_OF_WORK]: { html: string; css: string };
   [DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE]: { excel: string };
-  [DocumentType.INCREMENTAL_FUNDING_PLAN]: { word: string };
+  [DocumentType.INCREMENTAL_FUNDING_PLAN]: { docx: string };
+  [DocumentType.EVALUATION_PLAN]: { docx: string };
 }
 export interface IAward {
   contractAwardType: AwardType;
@@ -276,9 +292,19 @@ export interface IncrementalFundingPlan {
   taskOrderNumber?: string;
 }
 
+export interface EvaluationPlan {
+  taskOrderTitle: string;
+  sourceSelection: SourceSelection;
+  method: EvalPlanMethod;
+  standardSpecifications: string[];
+  customSpecifications: string[];
+  standardDifferentiators: string[];
+  customDifferentiators: string[];
+}
+
 export interface GenerateDocumentRequest {
   documentType: DocumentType;
-  templatePayload: DescriptionOfWork | IndependentGovernmentCostEstimate | IncrementalFundingPlan;
+  templatePayload: DescriptionOfWork | IndependentGovernmentCostEstimate | IncrementalFundingPlan | EvaluationPlan;
 }
 
 export interface RequestEvent<T> {
@@ -559,6 +585,49 @@ const incrementalFundingPlan = {
   },
   additionalProperties: false,
 };
+export const evalPlan = {
+  type: "object",
+  properties: {
+    taskOrderTitle: { type: "string" },
+    sourceSelection: {
+      type: "string",
+      enum: [
+        SourceSelection.NO_TECH_PROPOSAL,
+        SourceSelection.TECH_PROPOSAL,
+        SourceSelection.SET_LUMP_SUM,
+        SourceSelection.EQUAL_SET_LUMP_SUM,
+      ],
+    },
+    method: {
+      enum: [EvalPlanMethod.BEST_USE, EvalPlanMethod.LOWEST_RISK, EvalPlanMethod.BVTO, EvalPlanMethod.LPTA, null],
+    },
+    standardSpecifications: {
+      type: "array",
+      items: {
+        type: "string",
+      },
+    },
+    customSpecifications: {
+      type: "array",
+      items: {
+        type: "string",
+      },
+    },
+    standardDifferentiators: {
+      type: "array",
+      items: {
+        type: "string",
+      },
+    },
+    customDifferentiators: {
+      type: "array",
+      items: {
+        type: "string",
+      },
+    },
+  },
+  additionalProperties: false,
+};
 
 export const generateDocumentSchema = {
   type: "object",
@@ -568,10 +637,11 @@ export const generateDocumentSchema = {
         DocumentType.DESCRIPTION_OF_WORK,
         DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE,
         DocumentType.INCREMENTAL_FUNDING_PLAN,
+        DocumentType.EVALUATION_PLAN,
       ],
     },
     templatePayload: {
-      oneOf: [descriptionOfWork, independentGovernmentCostEstimate, incrementalFundingPlan],
+      oneOf: [descriptionOfWork, independentGovernmentCostEstimate, incrementalFundingPlan, evalPlan],
     },
   },
 };

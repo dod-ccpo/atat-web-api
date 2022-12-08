@@ -58,7 +58,10 @@ const documentTemplatePaths: TemplatePaths = {
     excel: "/opt/igce-template.xlsx",
   },
   [DocumentType.INCREMENTAL_FUNDING_PLAN]: {
-    word: "/opt/ifp-template.docx",
+    docx: "/opt/ifp-template.docx",
+  },
+  [DocumentType.EVALUATION_PLAN]: {
+    docx: "/opt/eval-plan-template.docx",
   },
 };
 
@@ -90,15 +93,18 @@ export const getExcelTemplatePath = (documentType: DocumentType): string => {
   return excelPath;
 };
 
-export const getWordTemplate = (documentType: DocumentType): Buffer => {
-  let word;
+export const getDocxTemplate = (documentType: DocumentType): Buffer => {
+  let docx;
   switch (documentType) {
     case DocumentType.INCREMENTAL_FUNDING_PLAN:
-      word = fs.readFileSync(documentTemplatePaths[documentType].word);
+      docx = fs.readFileSync(documentTemplatePaths[documentType].docx);
+      break;
+    case DocumentType.EVALUATION_PLAN:
+      docx = fs.readFileSync(documentTemplatePaths[documentType].docx);
       break;
     default:
       throw new Error(`Unsupported Word generation type: "${documentType}"`);
   }
 
-  return word;
+  return docx;
 };

@@ -17,7 +17,7 @@ import { wrapSchema } from "../utils/middleware/schema-wrapper";
 import { generateDocument } from "./chromium";
 import { generateIGCEDocument } from "./igce-document";
 import { generateIFPDocument } from "./ifp-document";
-import { getPDFDocumentTemplates, getExcelTemplatePath, getWordTemplate } from "./utils/utils";
+import { getPDFDocumentTemplates, getExcelTemplatePath, getDocxTemplate } from "./utils/utils";
 import {
   generateDocumentSchema,
   RequestEvent,
@@ -25,10 +25,12 @@ import {
   DocumentType,
   IndependentGovernmentCostEstimate,
   IncrementalFundingPlan,
+  EvaluationPlan,
 } from "../models/document-generation";
 import handlebars from "handlebars";
 import juice from "juice";
 import { formatDuration, formatGroupAndClassification, counter, countSections, formatAwardType } from "./utils/helpers";
+import { generateEvalPlanDocument } from "./eval-plan-document";
 
 async function baseHandler(event: RequestEvent<GenerateDocumentRequest>): Promise<ApiBase64SuccessResponse> {
   const { documentType } = event.body;
@@ -40,7 +42,8 @@ async function baseHandler(event: RequestEvent<GenerateDocumentRequest>): Promis
     case DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE:
       return generateXlsx(event);
     case DocumentType.INCREMENTAL_FUNDING_PLAN:
-      return generateWordDocument(event);
+    case DocumentType.EVALUATION_PLAN:
+      return generateDocxDocument(event);
     default:
       return new ValidationErrorResponse(`Invalid document type: "${documentType}"`, {
         cause: `Invalid document type "${documentType}" provided. Please provide a valid document  type.`,
@@ -77,15 +80,17 @@ async function generateXlsx(event: RequestEvent<GenerateDocumentRequest>): Promi
   return generateIGCEDocument(excelTemplatePath, templatePayload as IndependentGovernmentCostEstimate);
 }
 
-async function generateWordDocument(event: RequestEvent<GenerateDocumentRequest>): Promise<ApiBase64SuccessResponse> {
+async function generateDocxDocument(event: RequestEvent<GenerateDocumentRequest>): Promise<ApiBase64SuccessResponse> {
   const { documentType, templatePayload } = event.body;
-  const wordTemplate = getWordTemplate(documentType);
+  const wordTemplate = getDocxTemplate(documentType);
   switch (documentType) {
     // TODO: Add in DoW docx generation
     // case DocumentType.DESCRIPTION_OF_WORK_DOCX:
     //   return generateIFPDocument(wordTemplate, templatePayload as DescriptionOfWork);
     case DocumentType.INCREMENTAL_FUNDING_PLAN:
       return generateIFPDocument(wordTemplate, templatePayload as IncrementalFundingPlan);
+    case DocumentType.EVALUATION_PLAN:
+      return generateEvalPlanDocument(wordTemplate, templatePayload as EvaluationPlan);
     default:
       return new ValidationErrorResponse(`Invalid document type: "${documentType}"`, {
         cause: `Invalid document type "${documentType}" provided. Please provide a valid document type.`,

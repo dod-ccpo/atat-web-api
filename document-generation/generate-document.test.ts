@@ -135,6 +135,7 @@ describe("Invalid requests for generate-document handler", () => {
     DocumentType.DESCRIPTION_OF_WORK,
     DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE,
     DocumentType.INCREMENTAL_FUNDING_PLAN,
+    DocumentType.EVALUATION_PLAN,
   ])("should return validation error when payload not an object", async (documentType) => {
     // GIVEN / ARRANGE
     const invalidRequest = {

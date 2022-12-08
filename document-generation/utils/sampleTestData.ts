@@ -360,3 +360,16 @@ export const fundingDocumentWithMiprNumber = {
   fundingType: "MIPR",
   miprNumber: "M2206-07-077-458790",
 };
+
+export const sampleEvalPlanRequest = {
+  documentType: "EVALUATION_PLAN",
+  templatePayload: {
+    taskOrderTitle: "Maria Mission Owner's Eval Plan",
+    sourceSelection: "NO_TECH_PROPOSAL",
+    method: "LPTA",
+    standardSpecifications: ["string"],
+    customSpecifications: ["string"],
+    standardDifferentiators: ["string"],
+    customDifferentiators: ["string"],
+  },
+};
