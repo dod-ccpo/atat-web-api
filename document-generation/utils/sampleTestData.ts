@@ -429,7 +429,7 @@ export const sampleRequirementsChecklistRequest = {
       foiaContact: {
         fullName: "Info Protector",
         email: "protector@mail.mil",
-        address: "123 FOIA St\nCrystal,  22001\nUnited States of America",
+        address: "123 FOIA St\nCrystal, VA 22001\nUnited States of America",
       },
       section508: { section508Sufficient: true },
     },
