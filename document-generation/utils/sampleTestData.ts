@@ -373,3 +373,65 @@ export const sampleEvalPlanRequest = {
     customDifferentiators: ["string"],
   },
 };
+
+export const sampleRequirementsChecklistRequest = {
+  documentType: "REQUIREMENTS_CHECKLIST",
+  templatePayload: {
+    projectOverview: {
+      title: "Versatile Demo Package",
+      scope: "Trying to build up another package that can be used for testing different parts of the system.",
+      emergencyDeclaration: true,
+    },
+    organization: {
+      agency: "Federal Bureau Of Investigation (FBI/ITD)",
+      name: "Special Div",
+    },
+    contacts: {
+      missionOwnerName: "ADM Jewel Heart IV",
+      cor: {
+        type: "COR",
+        name: "Dak Prescott",
+        email: "dak@cowboys.com",
+        phoneNumber: "+1 (703) 123-4567, ext. 820",
+        dodaac: "aaa999",
+      },
+      acor: {
+        type: "ACOR",
+        name: "Yoda",
+        email: "yoda@atat.com",
+        phoneNumber: "+1 (999) 123-4567, ext. 999",
+        dodaac: "bbb888",
+      },
+    },
+    currentContract: {
+      exists: true,
+      incumbentContractorName: "Someone Making Decisions",
+      contractNumber: "928384",
+      taskOrderNumber: "29284484",
+      contractExpiration: "2022-12-09",
+    },
+    exceptionToFairOpportunity: "YES_FAR_16_505_B_2_I_B",
+    periodOfPerformance: {
+      basePeriod: { periodType: "BASE", periodUnitCount: 1, periodUnit: "YEAR", optionOrder: null },
+      optionPeriods: [
+        { periodType: "OPTION", periodUnitCount: 36, periodUnit: "WEEK", optionOrder: 4 },
+        { periodType: "OPTION", periodUnitCount: 7, periodUnit: "MONTH", optionOrder: 2 },
+      ],
+      popStartRequest: true,
+      requestedPopStartDate: "2022-11-30",
+      timeFrame: "NO_SOONER_THAN",
+      recurringRequirement: false,
+    },
+    contractType: { firmFixedPrice: true, timeAndMaterials: true, justification: "Really need this." },
+    sensitiveInformation: {
+      baaRequired: true,
+      potentialToBeHarmful: true,
+      foiaContact: {
+        fullName: "Info Protector",
+        email: "protector@mail.mil",
+        address: "123 FOIA St\nCrystal, VA 22001\nUnited States of America",
+      },
+      section508: { section508Sufficient: true },
+    },
+  },
+};

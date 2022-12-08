@@ -30,6 +30,8 @@ import {
 import handlebars from "handlebars";
 import juice from "juice";
 import { formatDuration, formatGroupAndClassification, counter, countSections, formatAwardType } from "./utils/helpers";
+import { RequirementsChecklist } from "../models/document-generation/requirements-checklist";
+import { generateRequirementsChecklistDocument } from "./requirements-checklist-document";
 import { generateEvalPlanDocument } from "./eval-plan-document";
 
 async function baseHandler(event: RequestEvent<GenerateDocumentRequest>): Promise<ApiBase64SuccessResponse> {
@@ -43,6 +45,7 @@ async function baseHandler(event: RequestEvent<GenerateDocumentRequest>): Promis
       return generateXlsx(event);
     case DocumentType.INCREMENTAL_FUNDING_PLAN:
     case DocumentType.EVALUATION_PLAN:
+    case DocumentType.REQUIREMENTS_CHECKLIST:
       return generateDocxDocument(event);
     default:
       return new ValidationErrorResponse(`Invalid document type: "${documentType}"`, {
@@ -82,15 +85,17 @@ async function generateXlsx(event: RequestEvent<GenerateDocumentRequest>): Promi
 
 async function generateDocxDocument(event: RequestEvent<GenerateDocumentRequest>): Promise<ApiBase64SuccessResponse> {
   const { documentType, templatePayload } = event.body;
-  const wordTemplate = getDocxTemplate(documentType);
+  const docxTemplate = getDocxTemplate(documentType);
   switch (documentType) {
     // TODO: Add in DoW docx generation
     // case DocumentType.DESCRIPTION_OF_WORK_DOCX:
-    //   return generateIFPDocument(wordTemplate, templatePayload as DescriptionOfWork);
+    //   return generateDowDocument(wordTemplate, templatePayload as DescriptionOfWork);
     case DocumentType.INCREMENTAL_FUNDING_PLAN:
-      return generateIFPDocument(wordTemplate, templatePayload as IncrementalFundingPlan);
+      return generateIFPDocument(docxTemplate, templatePayload as IncrementalFundingPlan);
     case DocumentType.EVALUATION_PLAN:
-      return generateEvalPlanDocument(wordTemplate, templatePayload as EvaluationPlan);
+      return generateEvalPlanDocument(docxTemplate, templatePayload as EvaluationPlan);
+    case DocumentType.REQUIREMENTS_CHECKLIST:
+      return generateRequirementsChecklistDocument(docxTemplate, templatePayload as RequirementsChecklist);
     default:
       return new ValidationErrorResponse(`Invalid document type: "${documentType}"`, {
         cause: `Invalid document type "${documentType}" provided. Please provide a valid document type.`,
