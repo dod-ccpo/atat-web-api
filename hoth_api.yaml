@@ -539,9 +539,14 @@ components:
           example: "Compute"
         item_description_or_config_summary:
           type: string
-        monthly_price:
+        contract_type:
+          type: string
+          enum:
+            - "FFP"
+            - "T&M"
+        unit_price:
           type: number
-        months_in_period:
+        unit_quantity:
           description: >-
             Months in the specified period (1-12). The days/weeks/year should be converted into
             months and always rounded up to a whole number. Average weeks in a month 4.345.
