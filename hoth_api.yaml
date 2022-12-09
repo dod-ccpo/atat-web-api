@@ -398,7 +398,8 @@ components:
           type: string
           enum:
             - EVAL_PLAN
-            - DESCRIPTION_OF_WORK
+            - DESCRIPTION_OF_WORK_PDF
+            - DESCRIPTION_OF_WORK_DOCX
             - INDEPENDENT_GOVERNMENT_COST_ESTIMATE
             - INCREMENTAL_FUNDING_PLAN
             - REQUIREMENTS_CHECKLIST
@@ -678,114 +679,119 @@ components:
             Department of Defense Activity Address Code (DoDAAC)
           type: string
     DescriptionOfWork:
-      description: "Schema used to generate DescriptionOfWork document"
+      description: >-
+        Schema used for generating th Description Of Work (DOW) document"
       type: object
       properties:
         # DOW award history
-        award_history:
+        awardHistory:
           type: array
           items:
             $ref: "#/components/schemas/Award"
         # DOW contract information table
-        contract_information:
+        contractInformation:
           $ref: "#/components/schemas/ContractInformation"
         # DOW section 1
-        to_title:
+        toTitle:
           type: string
         # DOW section 2
         scope:
           type: string
-        scope_surge:
+        scopeSurge:
           type: integer
+        # currentEnvironment:
+        #   $ref: "#/components/schemas/CurrentEnvironment"
         # DOW section 3 (and 4.1)
-        current_environment:
-          $ref: "#/components/schemas/CurrentEnvironment"
         # DOW section 4 (and its subtasks)
-        performanceRequirements:
-          $ref: "#/components/schemas/PerformanceRequirements"
-        # selected_service_offerings:
-        #   type: array
-        #   items:
-        #     $ref: "#/components/schemas/SelectedServiceOffering"
+        # performanceRequirements:
+        #   # $ref: "#/components/schemas/PerformanceRequirements"
+        #   type: object
+        #   properties:
 
-        # DOW section 5 TBD
-        # DOW section 6 TBD
+        # Performance Requirements
+        # DOW section 3 and 4.1
+        currentEnvironment:
+          $ref: "#/components/schemas/CurrentEnvironment"
+        # DOW section 4.2 and section 8
+        selectedClassificationLevel:
+          type: array
+          items:
+            $ref: "#/components/schemas/SelectedClassificationLevel"
+        xaas:
+          type: array
+          items:
+            oneOf:
+              - $ref: "#/components/schemas/EnvironmentInstance" # storage
+              - $ref: "#/components/schemas/ComputeEnvironmentInstance"
+              - $ref: "#/components/schemas/DatabaseEnvironmentInstance"
+              - $ref: "#/components/schemas/SelectedServiceOffering"
+        # DOW section 4.3
+        cloudSupportPackages:
+          type: array
+          items:
+            $ref: "#/components/schemas/SelectedServiceOffering"
+        # DOW section 5 - no data ?
+        # DOW section 6 - no data ?
         # DOW section 7
-        period_of_performance:
+        # Q: we need to keep a track of selected periods from instances?
+        # Q: while instances have selected periods, selected service offerings do Not
+        # should selected service offerings require selected periods to fill in DOW
+        # section 7?
+        periodOfPerformance:
           $ref: "#/components/schemas/PeriodOfPerformance"
-        # DOW section 8 TBD
-        # DOW section 9
-        gfe_overview:
-          $ref: "#/components/schemas/GFEOverview"
+             s
+        # DOW section 8 - Security Requirements
+        # Q: uses the selectedClassificationLevels?
+        #
+        # DOW section 9 - no data ?
+
         # DOW section 10 (and its subtasks)
-        contract_considerations:
+        contractConsiderations:
           $ref: "#/components/schemas/ContractConsiderations"
-          # DOW section 11
-        section_508_accessibility_standards:
-          $ref: "#/components/schemas/SensitiveInformation"
+        # DOW section 11 - no data ?
+
+        # TODO: remove
+        # gfe_overview:
+        #   $ref: "#/components/schemas/GFEOverview"
+        # section_508_accessibility_standards:
+        #   $ref: "#/components/schemas/SensitiveInformation"
     Award:
       description: "Part of DOW, represents a single Award in the Award History table"
       type: object
       properties:
-        contract_award_type:
+        contractAwardType:
           type: string
           enum:
             - INITIAL_AWARD
             - MODIFICATION
-        modification_order:
+        modificationOrder:
           type: integer
-        effective_date:
+        effectiveDate:
           type: string
           format: date
     ContractInformation:
       description: "Part of DOW, represents Current Contract Information table fields"
       type: object
       properties:
-        contract_number:
+        contractNumber:
           type: string
-        current_contract_exists:
+        currentContractExists:
           type: boolean
-        contract_expiration_date:
+        contractExpirationDate:
           type: string
           format: date
-        incumbent_contractor_name:
+        incumbentContractorName:
           type: string
-        previous_task_order_number:
+        previousTaskOrderNumber:
           type: string
     CurrentEnvironment:
-      description: "Part of DOW, encapsulates all data for 3. Background/Current Environment section."
+      description: >-
+        Encapsulates data for the Background/Current Environment and part of Performance
+        Requirements sections of the DOW
       type: object
       properties:
-        # TODO: do we add an additional property for cloud support package question?
-        # OR is it located in another place?
-        current_environment_exists:
+        currentEnvironmentExists:
           type: boolean
-        additional_growth:
-          type: boolean
-        anticipatedYearlyAdditionalCapacity:
-          type: integer
-        currentEnvironmentReplicatedOptimized:
-          type: string
-          enum:
-            - YES_REPLICATE
-            - YES_OPTIMIZE
-            - NO
-        hasMigrationDocumentation:
-          type: boolean
-        # TODO: how are documents being combined with generated document?
-        # OR are we just providing a list of the document name in DoW?
-        migrationDocumentation:
-          type: array
-          items:
-            type: string
-        statementReplicatedOptimized:
-          type: string
-        needsArchitecturalDesignServices:
-          type: boolean
-        applicationsNeedArchitecturalDesign:
-          type: string
-        externalFactorsArchitecturalDesign:
-          type: string
         hasSystemDocumentation:
           type: boolean
         # TODO: how are documents being combined with generated document?
@@ -794,22 +800,20 @@ components:
           type: array
           items:
             type: string
-        statementArchitecturalDesign:
-          type: string
-        hasPhasedApproach:
+        hasMigrationDocumentation:
           type: boolean
-        phasedApproachSchedule:
-          type: string
+        # TODO: how are documents being combined with generated document?
+        # OR are we just providing a list of the document name in DoW?
+        migrationDocumentation:
+          type: array
+          items:
+            type: string
         envLocation:
           type: string
           enum:
             - CLOUD
             - ON_PREM
             - HYBRID
-        dataClassificationsImpactLevels:
-          type: array
-          items:
-            $ref: "#/components/schemas/ClassificationLevel"
         envClassificationsCloud:
           type: array
           items:
@@ -822,22 +826,55 @@ components:
           type: array
           item:
             $ref: "#/components/schemas/CurrentEnvironmentInstance"
-    PerformanceRequirements:
-      type: object
-      properties:
-        xaas:
+
+        # current Env
+        additionalGrowth:
+          type: boolean
+        anticipatedYearlyAdditionalCapacity:
+          type: integer
+        # replicated or optimized
+        currentEnvironmentReplicatedOptimized:
+          type: string
+          enum:
+            - YES_REPLICATE
+            - YES_OPTIMIZE
+            - NO
+        statementReplicatedOptimized:
+          type: string
+        hasPhasedApproach:
+          type: boolean
+        phasedApproachSchedule:
+          type: string
+        # architecture design
+        needsArchitecturalDesignServices:
+          type: boolean
+        statementArchitecturalDesign:
+          type: string
+        applicationsNeedArchitecturalDesign:
+          type: string
+        dataClassificationsImpactLevels:
           type: array
           items:
-            $ref: "#/components/schemas/SelectedServiceOffering"
-        cloudSupportPackages:
-          type: array
-          items:
-            $ref: "#/components/schemas/SelectedServiceOffering"
+            $ref: "#/components/schemas/ClassificationLevel"
+        externalFactorsArchitecturalDesign:
+          type: string
+        # TODO: do we add an additional property for cloud support package question?
+        # OR is it located in another place?
+    # PerformanceRequirements:
     EnvironmentInstance:
-      description: "Part of DOW, represents a single Environment Instance"
+      description: >-
+        Base instance used for various sections of information captured in a Package
+        mainly used for document generation (e.g., DOW)
       type: object
       properties:
-        instance_name:
+        # Q: sould this be added to all or just some?
+        statementObjectiveForNeedUsage:
+          type: string
+        # Q: propbably add to compute and database
+        osLicensing:
+          $ref: "#/components/schemas/Licensing"
+        # -----
+        instanceName:
           type: string
         numberOfInstances:
           type: integer
@@ -847,29 +884,29 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Period"
-        classification_level:
+        classificationLevel:
           $ref: "#/components/schemas/ClassificationLevel"
-        instance_location:
+        instanceLocation:
           type: string
           enum:
             - CSP
-            - HYBRID
             - ON_PREMISE
+            # - HYBRID
         region:
           $ref: "#/components/schemas/Region"
-        performance_tier:
+        performanceTier:
           type: string
           enum:
             - GENERAL
             - COMPUTE
             - MEMORY
             - STORAGE
-        pricing_model:
+        pricingModel:
           type: string
           enum:
             - PAY_AS_YOU_GO
             - PREPAID
-        pricing_model_expiration:
+        pricingModelExpiration:
           type: string
           format: date
           example: "2022-07-01"
@@ -877,31 +914,33 @@ components:
           type: string
         operatingSystem:
           type: string
-        number_of_vCPUs:
+        numberOfvCPUs:
           type: integer
         processorSpeed:
           type: integer
-        storage_type:
+        storageType:
           type: string
           enum:
             - BLOCK
             - OBJECT
             - FILE
             - ARCHIVE
-        storage_amount:
+        storageAmount:
           type: integer
-        storage_unit:
+        storageUnit:
           $ref: "#/components/schemas/StorageUnit"
-        memory_amount:
+        memoryAmount:
           type: integer
-        memory_unit:
+        memoryUnit:
           $ref: "#/components/schemas/StorageUnit"
-        data_egress_monthly_amount:
+        dataEgressMonthlyAmount:
           type: integer
-        data_egress_monthly_unit:
+        dataEgressMonthlyUnit:
           $ref: "#/components/schemas/StorageUnit"
     CurrentEnvironmentInstance:
-      description: "Part of DOW, represents a single Current Environment Instance"
+      description: >-
+        Extends Envrionment Instance with additional properties specific to current
+        environment instances
       type: object
       properties:
         additionalInformation:
@@ -944,26 +983,67 @@ components:
             - COOP_DISASTERRECOVERY
       allOf:
         - $ref: "#/components/schemas/EnvironmentInstance"
+    ComputeEnvironmentInstance:
+      description: >-
+        Extends Envrionment Instance with additional properties specific to compute instances
+      type: object
+      propertes:
+        # Q: not sure if there should be one set or if different for current env enums
+        environmentType:
+          type: string
+          enum:
+            - DEV_TEST
+            - PRE_PROD
+            - PROD_STAGING
+            - COOP_DIASTER_RECOVERY
+        operatingEnvironment:
+          type: string
+          enum:
+            - VIRTUAL
+            - CONTAINERS
+            - SERVERLESS
+            - END_USER_COMPUTING_VIRTUAL_DESKTOP
+      allOf:
+        - $ref: "#/components/schemas/EnvironmentInstance"
+
+    DatabaseEnvironmentInstance:
+      description: >-
+        Extends Envrionment Instance with additional properties specific to database instances
+      type: object
+      properties:
+        databaseType:
+          type: string
+          enum:
+            - ANALYTICAL
+            - TRANSACTIONAL
+            - GRAPH
+            - RELATIONAL
+            - OTHER
+        databaseTypeOther:
+          type: string
+        databaseLicensing:
+          $ref: "#/components/schemas/Licensing"
     EstimatedEnvironmentInstance:
-      description: "Part of DOW, represents a single Estimated Environment Instance"
+      description: >-
+        Extends Environment Instance with additional properties specific to estimated environment
+        instances used for documeng generation
       type: object
       properties:
         dowTaskNumber:
           type: string
         monthlyPrice:
           type: float
-        statementObjectiveForNeedUsage:
-          type: string
-        osLicensing:
-          type: string
-          enum:
-            - NEW
-            - TRANSFER_EXISTING
       allOf:
         - $ref: "#/components/schemas/EnvironmentInstance"
 
+    Licensing:
+      type: string
+      enum:
+        - NEW
+        - TRANSFER_EXISTING
     ClassificationLevel:
-      description: "Part of DOW, Classification Level table fields"
+      description: >-
+        Represents a Classification Level table record
       type: object
       properties:
         classification:
@@ -972,111 +1052,182 @@ components:
             - U
             - S
             - TS
-        impact_level:
+        impactLevel:
           type: string
           enum:
             - IL2
             - IL4
             - IL5
             - IL6
+    ClassifiedInformationType:
+      description: >-
+        Describes the classified information in a Classification Instance
+      $ref: "#/components/schemas/GeneralInformation"
+      # # this name, description, sequence structure is common can probably 
+      # # extract into on schema
+      # type: object
+      # properties:
+      #   name:
+      #     type: string
+      #   description:
+      #     type: string
+      #   sequence:
+      #     type: integer
+    SelectedClassificationLevel:
+      description: >-
+        Selected Classition Levels for XaaS services
+      type: object
+      properties:
+        classificationLevel:
+          $ref: "#/components/schemas/ClassificationLevel"
+        classifiedInformationTypes:
+          type: array
+          items:
+            $ref: "#/components/schemas/ClassifiedInformationType"
+        usersPerRegion:
+          # JSON string
+          type: string
+        dataEgressMonthlyAmount:
+          type: integer
+        dataEgressMonthlyUnit:
+          $ref: "#/components/schemas/StorageUnit"
+        usersIncrease:
+          type: boolean
+        userGrowthEstimatedPercentage:
+          type: string
+        userGrowthEstimateType:
+          $ref: "#/components/schemas/GrowthEstimateType"
+        dataIncrease:
+          type: boolean
+        dataGrowthEstimatedPercentage:
+          type: string
+        dataGrowthEstimateType:
+          $ref: "#/components/schemas/GrowthEstimateType"
+    GrowthEstimateType:
+      description: >-
+        Growth estimate based on a growth in periods or over entire duration
+      type: string
+      enum:
+        - SINGLE
+        - MULTIPLE
     StorageUnit:
-      description: "Part of DOW, used in EnvironmentInstance schema"
+      description: >-
+        Commmonly used units for instances used for document generation
       type: string
       enum:
         - GB
         - TB
         - PB
     Region:
-      description: "part of DOW, used in EnvironmentInstance schema"
+      description: >-
+        A region defining where instances are deployed
       type: object
       properties:
-        name:
-          type: string
-        description:
-          type: string
         group:
           type: string
           enum:
             - CONUS
             - OCONUS
-        sequence:
-          type: integer
+        # name:
+        #   type: string
+        # description:
+        #   type: string
+        # sequence:
+        #   type: integer
+      allOf:
+        - $ref: "#/components/schemas/GeneralInformation"
     SelectedServiceOffering:
-      description: "Part of DOW, represents a single Selected Service Offering"
+      description: >-
+        A service selected by the user for a speicifc usage/need
       type: object
       properties:
-        service_offering:
+        serviceOffering:
           $ref: "#/components/schemas/ServiceOffering"
-        classification_instances:
+        classificationInstances:
           type: array
           items:
             $ref: "#/components/schemas/ClassificationInstance"
-        other_service_offering:
+        otherServiceOffering:
           type: string
-        # TODO: add additional properties?
-        usersPerRegion:
-          type: string
-        anticipatedFutureNeeds:
-          type: object
-          properties:
-            anticipatedUserGrowth:
-              type: boolean
-            userGrowth:
-              type: integer
-            anticipatedDataGrowth:
-              type: boolean
-            dataGrowth:
-              type: integer
-        estimatedEnvironmentInstances:
-          type: array
-          items:
-            $ref: "#/components/schemas/EstimatedEnvironmentInstance"
-    ClassificationInstance:
-      description: "Part of DOW, represents a single classification instance"
+        # TODO: this will live in Selected Classification Level
+        # usersPerRegion:
+        #   type: string
+        # anticipatedFutureNeeds:
+        #   type: object
+        #   properties:
+        #     anticipatedUserGrowth:
+        #       type: boolean
+        #     userGrowth:
+        #       type: integer
+        #     anticipatedDataGrowth:
+        #       type: boolean
+        #     dataGrowth:
+        #       type: integer
+        # TODO: expected this to be removed
+        # estimatedEnvironmentInstances:
+        #   type: array
+        #   items:
+        #     $ref: "#/components/schemas/EstimatedEnvironmentInstance"
+      ClassificationInstance:
+        description: >-
+          A general unit to define classification needs
       type: object
       properties:
-        usage_description:
+        usageDescription:
           type: string
-        selected_periods:
+        classificationLevel:
+          $ref: "#/components/schemas/ClassificationLevel"
+        classifiedInformationTypes:
+          type: array
+          items:
+            $ref: "#/components/schemas/ClassifiedInformationType"
+        needForEntireTaskOrderDuration:
+          type: boolean
+        selectedPeriods:
           type: array
           items:
             $ref: "#/components/schemas/Period"
-        classification_level:
-          $ref: "#/components/schemas/ClassificationLevel"
-        need_for_entire_task_order_duration:
+        # Q: should this be added? Relates to section 4.3.x.x
+        requiresOnSiteCspPersonel:
           type: boolean
     Period:
       description: >-
-        Represents a record in the Period table used for Periods of Performance
+        A period used for a package Period Of Performance
       type: object
       properties:
-        period_type:
+        periodType:
           type: string
           enum:
             - BASE
             - OPTION
-        period_unit_count:
+        periodUnitCount:
           type: integer
-        period_unit:
+        periodUnit:
           type: string
           enum:
             - DAY
             - WEEK
             - MONTH
-            - YEAR
-        option_order:
           type: integer
     ServiceOffering:
-      description: "Part of DOW, represents a single Service Offering (Service Offering table)"
+      description: >-
+        A single Service Offering Group (Service Offering table)
       type: object
       properties:
-        service_offering_group:
+        # name:
+        #   type: string
+        # description:
+        #   type: string
+        # sequence:
+        #   type: integer 
+        serviceOfferingGroup:
           type: string
           enum:
-            - ADVISORY
+            - ADVISORY_ASSISTANCE
             - APPLICATIONS
             - COMPUTE
             - DATABASE
+            - STORAGE
             - DEVELOPER_TOOLS
             - EDGE_COMPUTING
             - GENERAL_XAAS
@@ -1085,117 +1236,147 @@ components:
             - NETWORKING
             - SECURITY
             - TRAINING
-        name:
-          type: string
+            - PORTABILITY_PLAN
+            - HELP_DESK_SERVICES
+            - DOCUMENTATION_SUPPORT
+            - GENERAL_CLOUD_SUPPORT
+      allOf:
+        - $ref: "#/components/schemas/GeneralInformation"
     PeriodOfPerformance:
       description: >-
         Represents a Period of Performance (PoP) for a package
       type: object
       properties:
-        base_period:
+        basePeriod:
           $ref: "#/components/schemas/Period"
-        option_periods:
+        optionPeriods:
           type: array
           items:
             $ref: "#/components/schemas/Period"
-        pop_start_request:
+        popStartRequest:
           type: boolean
-        requested_pop_start_date:
+        requestedPopStartDate:
           type: string
           format: date
           example: "2021-07-01"
-        time_frame:
+        timeFrame:
           type: string
           enum:
             - NO_LATER_THAN
             - NO_SOONER_THAN
-        recurring_requirement:
+        recurringRequirement:
           type: boolean
-    GFEOverview:
-      description: "Part of DOW, represents GFE Overview fields"
-      type: object
-      properties:
-        dpas_unit_id:
-          type: string
-        property_custodian_name:
-          type: string
-        dpas_custodian_number:
-          type: string
-        property_accountable:
-          type: boolean
-        gfe_or_gfp_furnished:
-          type: boolean
+    # GFEOverview:
+    #   description: "Part of DOW, represents GFE Overview fields"
+    #   type: object
+    #   properties:
+    #     dpas_unit_id:
+    #       type: string
+    #     property_custodian_name:
+    #       type: string
+    #     dpas_custodian_number:
+    #       type: string
+    #     property_accountable:
+    #       type: boolean
+    #     gfe_or_gfp_furnished:
+    #       type: boolean
     ContractConsiderations:
-      description: "Part of DOW, represents Contract Considerations Table"
+      description: >-
+        Information for the DOW from the Sensitive Information and
+        Contract Considerations tables
       type: object
       properties:
-        packaging_shipping_none_apply:
+        # 10a
+        potentialConflictOfInterest:
           type: boolean
-        packaging_shipping_other:
-          type: boolean
-        packaging_shipping_other_explanation:
+        conflictOfInterestExplanation:
           type: string
-        potential_conflict_of_interest:
+        # 10b
+        packagingShippingNoneApply:
           type: boolean
-        conflict_of_interest_explanation:
+        packagingShippingOther:
+          type: boolean
+        packagingShippingOtherExplanation:
           type: string
-        contractor_provided_transfer:
+        contractorProvidedTransfer:
           type: boolean
-        contractor_required_training:
+        # 10c and d - no data ?
+
+        # 10e
+        piiPresent:
           type: boolean
-        required_training_services:
-          type: array
-          items:
-            $ref: "#/components/schemas/TrainingCourses"
-    TrainingCourses:
-      description: "Part of DOW, part of schema for ContractConsiderations, includes training courses name and value"
+        systemOfRecordName:
+          type: string
+        # 10f
+        travel:
+          # JSON string ?
+          type: string
+          # type: array
+          # items:
+          #   $ref: "#/components/schema/Travel"
+        # TODO: remove based on old Dow
+        # contractor_required_training:
+        #   type: boolean
+        # required_training_services:
+        #   type: array
+        #   items:
+        #     $ref: "#/components/schemas/TrainingCourses"
+    GeneralInformation:
+      description >-
+        Basic information commonly used to describe different units inside a package
       type: object
       properties:
         name:
           type: string
-        value:
+        description:
           type: string
-    SensitiveInformation:
-      description: "Part of DOW, represents Sensitive Information Table fields"
-      type: object
-      properties:
-        pii_present:
-          type: boolean
-        work_to_be_performed:
-          type: string
-        system_of_record_name:
-          type: string
-        FOIA_city_apo_fpo:
-          type: string
-        FOIA_country:
-          type: string
-        FOIA_street_address_1:
-          type: string
-        FOIA_street_address_2:
-          type: string
-        FOIA_address_type:
-          type: string
-          enum:
-            - FOREIGN
-            - MILITARY
-            - US
-        FOIA_state_province_code:
-          type: string
-        FOIA_full_name:
-          type: string
-        FOIA_email:
-          type: string
-          format: email
-        FOIA_zip_postal_code:
-          type: string
-        BAA_required:
-          type: boolean
-        potential_to_be_harmful:
-          type: boolean
-        section_508_sufficient:
-          type: boolean
-        accessibility_reqs_508:
-          type: string
+        sequence:
+          type: integer
+    # TrainingCourses:
+    #   description: "Part of DOW, part of schema for ContractConsiderations, includes training courses name and value"
+    #   type: object
+    #   properties:
+    #     name:
+    #       type: string
+    #     value:
+    #       type: string
+    # SensitiveInformation:
+    #   description: "Part of DOW, represents Sensitive Information Table fields"
+    #   type: object
+    #   properties:
+    #     work_to_be_performed:
+    #       type: string
+    #     FOIA_city_apo_fpo:
+    #       type: string
+    #     FOIA_country:
+    #       type: string
+    #     FOIA_street_address_1:
+    #       type: string
+    #     FOIA_street_address_2:
+    #       type: string
+    #     FOIA_address_type:
+    #       type: string
+    #       enum:
+    #         - FOREIGN
+    #         - MILITARY
+    #         - US
+    #     FOIA_state_province_code:
+    #       type: string
+    #     FOIA_full_name:
+    #       type: string
+    #     FOIA_email:
+    #       type: string
+    #       format: email
+    #     FOIA_zip_postal_code:
+    #       type: string
+    #     BAA_required:
+    #       type: boolean
+    #     potential_to_be_harmful:
+    #       type: boolean
+    #     section_508_sufficient:
+    #       type: boolean
+    #     accessibility_reqs_508:
+    #       type: string
     AsyncProvisioningJobRequest:
       required:
         - location
