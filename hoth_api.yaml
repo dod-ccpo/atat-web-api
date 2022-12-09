@@ -704,11 +704,11 @@ components:
         currentEnvironment:
           $ref: "#/components/schemas/CurrentEnvironment"
         # DOW section 4.2 and section 8
-        selectedClassificationLevel:
+        selectedClassificationLevels:
           type: array
           items:
             $ref: "#/components/schemas/SelectedClassificationLevel"
-        xaas:
+        xaasOfferings:
           type: array
           items:
             oneOf:
