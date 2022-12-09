@@ -711,11 +711,17 @@ components:
         xaasOfferings:
           type: array
           items:
-            oneOf:
-              - $ref: "#/components/schemas/EnvironmentInstance" # storage
-              - $ref: "#/components/schemas/ComputeEnvironmentInstance"
-              - $ref: "#/components/schemas/DatabaseEnvironmentInstance"
-              - $ref: "#/components/schemas/SelectedServiceOffering"
+            type: object
+            properties:
+              serviceOffering:
+                - $ref: "#/components/schemas/SelectedServiceOffering"
+              instanceConfigurations:
+                type: array
+                items:
+                  anyOf:
+                    - $ref: "#/components/schemas/EnvironmentInstance" # storage
+                    - $ref: "#/components/schemas/ComputeEnvironmentInstance"
+                    - $ref: "#/components/schemas/DatabaseEnvironmentInstance"
         # DOW section 4.3
         cloudSupportPackages:
           type: array
