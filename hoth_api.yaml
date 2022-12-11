@@ -518,10 +518,6 @@ components:
       description: A single line item entered on a period sheet in the IGCE document
       type: object
       properties:
-        clin:
-          description: Contract Line Item Number from Task Order
-          type: string
-          example: "0001"
         idiq_clin:
           description: Contract Line Item Number from Indefinite Delivery-Indefinite Quantity (IDIQ) contract
           type: string
