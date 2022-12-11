@@ -529,6 +529,11 @@ components:
             - "1000_CLOUD"
             - "2000_CLOUD_SUPPORT"
             - "3000_OTHER"
+        contract_type:
+          type: string
+          enum:
+            - "FFP"
+            - "T&M"
         dow_task_number:
           description: Section number from DOW document
           type: string
@@ -539,18 +544,11 @@ components:
           example: "Compute"
         item_description_or_config_summary:
           type: string
-        contract_type:
-          type: string
-          enum:
-            - "FFP"
-            - "T&M"
         unit_price:
           type: number
         unit_quantity:
           description: >-
-            Months in the specified period (1-12). The days/weeks/year should be converted into
-            months and always rounded up to a whole number. Average weeks in a month 4.345.
-            Average days in a month 30.4167. Example 6 wks / 4.345 = 1.381 => 2 months.
+            Quantity of units for specificed service for a specific period
           type: integer
     FundingDocument:
       description: >-
