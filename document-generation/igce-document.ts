@@ -59,13 +59,13 @@ export async function generateIGCEDocument(
     const periodSheetTopHalfInitialStartRow = 8;
     const periodSheetLowerHalfInitialStartRow = 28;
     const mappingOfPeriodsToColumnOnSummarySheet: { [key: string]: string } = {
-      "Base Period": "C",
-      "Option Period 1": "D",
-      "Option Period 2": "E",
-      "Option Period 3": "F",
-      "Option Period 4": "G",
-      "Option Period 5": "H",
-      "Option Period 6": "I",
+      "Base Period": "D",
+      "Option Period 1": "E",
+      "Option Period 2": "F",
+      "Option Period 3": "G",
+      "Option Period 4": "H",
+      "Option Period 5": "I",
+      "Option Period 6": "J",
     };
 
     const periodSheet =
@@ -83,14 +83,13 @@ export async function generateIGCEDocument(
 
     lineItemRows?.forEach((row, index) => {
       // fill each line item data
-      row.getCell("B").value = periodLineItems[index].clin; // 1000
-      row.getCell("C").value = periodLineItems[index].idiqClin; // "1000 Cloud";
-      row.getCell("D").value = periodLineItems[index].dowTaskNumber; // "4.2.2.1.1";
-      row.getCell("E").value = periodLineItems[index].serviceOffering; // "Compute";
-      row.getCell("F").value = periodLineItems[index].itemDescriptionOrConfigSummary; // "Compute - special project"
-      row.getCell("G").value = periodLineItems[index].monthlyPrice; // 159.03;
-      // periodLineItems[index].monthsInPeriod is calculated from period
-      row.getCell("H").value = convertPeriodToMonths(estimate.period); // 12;
+      row.getCell("A").value = periodLineItems[index].idiqClin; // "1000 Cloud";
+      row.getCell("B").value = periodLineItems[index].contractType; // FFP or T&M
+      row.getCell("C").value = periodLineItems[index].dowTaskNumber; // "4.2.2.1.1";
+      row.getCell("D").value = periodLineItems[index].serviceOffering; // "Compute";
+      row.getCell("E").value = periodLineItems[index].itemDescriptionOrConfigSummary; // "Compute - special project"
+      row.getCell("F").value = periodLineItems[index].unitPrice; // "Compute - special project"
+      row.getCell("G").value = periodLineItems[index].unitQuantity; // "Compute - special project"
     });
 
     // add additional rows to offset the numbers used on the summary sheet for idiq clins
@@ -116,7 +115,7 @@ export async function generateIGCEDocument(
       uniqueIdiqClins.length
     );
     periodIdiqClinLines?.forEach((row, index) => {
-      row.getCell("C").value = uniqueIdiqClins[index];
+      row.getCell("A").value = uniqueIdiqClins[index];
       allPeriodsIdiqClins.push(uniqueIdiqClins[index]);
       summarySheetIdiqClinCounter++;
     });
@@ -144,11 +143,11 @@ export async function generateIGCEDocument(
   if (allPeriodsIdiqClins.length > availableSummarySheetRows) {
     summarySheetAdditionalRows = allPeriodsIdiqClins.length - availableSummarySheetRows;
     summarySheet.duplicateRow(lastSummarySheetRow, summarySheetAdditionalRows, true);
-    const ref = `J6:J${summarySheetInitialRow + availableSummarySheetRows + summarySheetAdditionalRows}`;
+    const ref = `K6:K${summarySheetInitialRow + availableSummarySheetRows + summarySheetAdditionalRows}`;
 
     // update ref formula to include the additional rows
-    const cell: any = summarySheet.getCell("J6").value;
-    summarySheet.getCell("J6").value = { ...cell, ref };
+    const cell: any = summarySheet.getCell("K6").value;
+    summarySheet.getCell("K6").value = { ...cell, ref };
   }
 
   // populate the TO and IDIQ CLIN from the period sheets
@@ -170,16 +169,16 @@ export async function generateIGCEDocument(
         const data: any = summarySheet.getCell(`${col}${row.number}`).value;
 
         // mapping formulas to columns that were added
-        const summaryCols = ["C", "D", "E", "F", "G", "H", "I"];
-        if (col !== "C") {
+        const summaryCols = ["D", "E", "F", "G", "H", "I", "J"];
+        if (col !== "D") {
           summarySheet.getCell(`${col}${row.number}`).value = {
             ...data,
-            formula: `'Option Period ${summaryCols.indexOf(col)}'!I${row.number + periodSheetRowOffset}`,
+            formula: `'Option Period ${summaryCols.indexOf(col)}'!J${row.number + periodSheetRowOffset}`,
           };
         } else {
           summarySheet.getCell(`${col}${row.number}`).value = {
             ...data,
-            formula: `'Base Period'!I${row.number + periodSheetRowOffset}`,
+            formula: `'Base Period'!J${row.number + periodSheetRowOffset}`,
           };
         }
       });
