@@ -258,13 +258,13 @@ export interface IFundingDocument {
 }
 
 export interface IPeriodLineItem {
-  clin: string;
-  idiqClin: IdiqClin;
+  idiqClin: string;
+  contractType: string;
   dowTaskNumber: string;
   serviceOffering: string;
   itemDescriptionOrConfigSummary: string;
-  monthlyPrice: number;
-  monthsInPeriod: number;
+  unitPrice: number;
+  unitQuantity: number;
 }
 export interface IPeriodEstimate {
   period: IPeriod;
