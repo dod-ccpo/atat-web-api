@@ -714,7 +714,7 @@ components:
             type: object
             properties:
               serviceOffering:
-                - $ref: "#/components/schemas/SelectedServiceOffering"
+                $ref: "#/components/schemas/SelectedServiceOffering"
               instanceConfigurations:
                 type: array
                 items:
@@ -726,13 +726,16 @@ components:
         cloudSupportPackages:
           type: array
           items:
-            $ref: "#/components/schemas/SelectedServiceOffering"
+            type: object
+            properties:
+                serviceOffering:
+                  $ref: "#/components/schemas/SelectedServiceOffering"
+                supportingInfo:
+                  $ref: "#/components/schemas/CloudSupportEnvironmentInstance"
         # DOW section 5 - no data ?
         # DOW section 6 - no data ?
         # DOW section 7
         # Q: we need to keep a track of selected periods from instances?
-        # Q: while instances have selected periods, selected service offerings do Not
-        # should selected service offerings require selected periods to fill in DOW
         # section 7?
         periodOfPerformance:
           $ref: "#/components/schemas/PeriodOfPerformance"
@@ -834,16 +837,8 @@ components:
         # architecture design
         needsArchitecturalDesignServices:
           type: boolean
-        statementArchitecturalDesign:
-          type: string
-        applicationsNeedArchitecturalDesign:
-          type: string
-        dataClassificationsImpactLevels:
-          type: array
-          items:
-            $ref: "#/components/schemas/ClassificationLevel"
-        externalFactorsArchitecturalDesign:
-          type: string
+        architecturalDesignRequirement:
+          $ref: "#/components/schemas/ArchitecturalDesignRequirement"
         # Q: do we add an additional property for cloud support package question?
         # OR is it located in another place?
     EnvironmentInstance:
@@ -852,13 +847,10 @@ components:
         mainly used for document generation (e.g., DOW)
       type: object
       properties:
-        # Q: sould this be added to all or just some of instances?
-        statementObjectiveForNeedUsage:
+        anticipatedNeedOrUsage:
           type: string
-        # Q: propbably add to compute and database?
         osLicensing:
           $ref: "#/components/schemas/Licensing"
-        # -----
         instanceName:
           type: string
         numberOfInstances:
@@ -953,19 +945,9 @@ components:
         usersPerRegion:
           type: string
         operatingEnvironment:
-          type: string
-          enum:
-            - VM
-            - CONTAINERS
-            - SERVERLESS
-            - VIRTUAL_DESKTOP
-        operatingType:
-          type: string
-          enum:
-            - DEV_TESTING
-            - PREPRODUCTION
-            - PRODUCTION
-            - COOP_DISASTERRECOVERY
+          $ref: "#/components/schemas/OperatingEnvironment"
+        environmentType:
+          $ref: "#/components/schemas/EnvironmentType"
       allOf:
         - $ref: "#/components/schemas/EnvironmentInstance"
     ComputeEnvironmentInstance:
@@ -973,23 +955,10 @@ components:
         Extends Environment Instance with additional properties specific to compute instances
       type: object
       properties:
-        # Q: can the env type be consolidated to be the same?
-        # not sure if they should be different from the current env enums or not
         environmentType:
-          type: string
-          enum:
-            - DEV_TEST
-            - PRE_PROD
-            - PROD_STAGING
-            - COOP_DIASTER_RECOVERY
-        # Q: similar to env type, can the op env be consolidated to be the same?
+          $ref: "#/components/schemas/EnvironmentType"
         operatingEnvironment:
-          type: string
-          enum:
-            - VIRTUAL
-            - CONTAINERS
-            - SERVERLESS
-            - END_USER_COMPUTING_VIRTUAL_DESKTOP
+          $ref: "#/components/schemas/OperatingEnvironment"
       allOf:
         - $ref: "#/components/schemas/EnvironmentInstance"
     DatabaseEnvironmentInstance:
@@ -1009,6 +978,20 @@ components:
           type: string
         databaseLicensing:
           $ref: "#/components/schemas/Licensing"
+    CloudSupportEnvironmentInstance:
+      description: >-
+        Details related Cloud Support Packages for the Selected Service Offering
+      type:
+        properties:
+          personnelOnsiteAccess:
+            type: boolean
+          tsContractorClearanceType:
+            type: string
+            enum:
+              - TS
+              - TS_SCI
+      allOf:
+        - $ref: "#/components/schemas/EnvironmentInstance"
     EstimatedEnvironmentInstance:
       description: >-
         Extends Environment Instance with additional properties specific to estimated environment
@@ -1021,11 +1004,40 @@ components:
           type: float
       allOf:
         - $ref: "#/components/schemas/EnvironmentInstance"
+    EnvironmentType:
+      type: string
+      enum:
+        - DEV_TEST
+        - PRE_PROD
+        - PROD_STAGING
+        - COOP_DIASTER_RECOVERY
+    OperatingEnvironment:
+      type: string
+      enum:
+        - VIRTUAL
+        - CONTAINERS
+        - SERVERLESS
+        - END_USER_COMPUTING_VIRTUAL_DESKTOP
     Licensing:
       type: string
       enum:
         - NEW
         - TRANSFER_EXISTING
+    ArchitecturalDesignRequirement:
+      description: >-
+        Details for an architectural design of application(s)
+      type: object
+      properties:
+        applicationsNeedingDesign:
+          type: string
+        statement:
+          type: string
+        externalFactors:
+          type: string
+        dataClassificationLevels:
+          type: array
+          items:
+            $ref: "#/components/schemas/ClassificationLevel"
     ClassificationLevel:
       description: >-
         Represents a Classification Level for instances of a package
@@ -1137,9 +1149,6 @@ components:
             type: array
             items:
               $ref: "#/components/schemas/Period"
-          # Q: should this be added? Relates to section 4.3.x.x
-          requiresOnSiteCspPersonnel:
-            type: boolean
     Period:
       description: >-
         A period used for a package Period Of Performance
