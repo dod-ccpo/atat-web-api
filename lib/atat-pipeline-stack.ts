@@ -8,6 +8,7 @@ import { AtatNotificationStack } from "./atat-notification-stack";
 import { ApiCertificateOptions, AtatWebApiStack } from "./atat-web-api-stack";
 import { NagSuppressions, NIST80053R4Checks } from "cdk-nag";
 import { AtatContextValue } from "./context-values";
+import { AtatSharedDataStack } from "./atat-shared-data-stack";
 
 export interface AtatProps {
   environmentName: string;
@@ -31,11 +32,13 @@ class AtatApplication extends cdk.Stage {
       apiDomain: props.apiDomain,
       network: net,
     });
+    const sharedData = new AtatSharedDataStack(this, "AtatSharedData");
     const monitoredStacks: cdk.Stack[] = [net, atat];
     if (props.notificationEmail) {
       monitoredStacks.push(
         new AtatNotificationStack(this, "AtatNotifications", {
           notificationEmail: props.notificationEmail,
+          topicEncryptionKey: sharedData.encryptionKey,
         })
       );
     }
@@ -43,6 +46,7 @@ class AtatApplication extends cdk.Stage {
       monitoredScopes: monitoredStacks,
       notifiedEmail: props.notificationEmail,
       environmentName: props.environmentName,
+      topicEncryptionKey: sharedData.encryptionKey,
     });
     cdk.Aspects.of(this).add(new GovCloudCompatibilityAspect());
     cdk.Aspects.of(atat).add(new NIST80053R4Checks({ verbose: true }));
