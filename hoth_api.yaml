@@ -572,7 +572,8 @@ components:
       type: object
       properties:
         amount:
-          type: float
+          type: number
+          format: float
         description:
           type: string
           example: "1st QTR FY23"
@@ -722,6 +723,7 @@ components:
                     - $ref: "#/components/schemas/EnvironmentInstance" # storage
                     - $ref: "#/components/schemas/ComputeEnvironmentInstance"
                     - $ref: "#/components/schemas/DatabaseEnvironmentInstance"
+        # DOW section 4.2.6 - CDS
         # DOW section 4.3
         cloudSupportPackages:
           type: array
@@ -866,7 +868,7 @@ components:
         instanceLocation:
           type: string
           enum:
-            - CSP
+            - CLOUD
             - ON_PREMISE
         region:
           $ref: "#/components/schemas/Region"
@@ -920,8 +922,6 @@ components:
       type: object
       properties:
         additionalInformation:
-          type: string
-        anticipatedNeedUsage:
           type: string
         currentUsageDescription:
           type: string
@@ -1001,7 +1001,8 @@ components:
         dowTaskNumber:
           type: string
         monthlyPrice:
-          type: float
+          type: number
+          format: float
       allOf:
         - $ref: "#/components/schemas/EnvironmentInstance"
     EnvironmentType:
