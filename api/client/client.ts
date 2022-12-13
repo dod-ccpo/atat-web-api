@@ -101,7 +101,14 @@ export class AtatClient implements IAtatClient {
     });
     this.client.interceptors.request.use(camelToSnakeRequestInterceptor);
 
-    this.client.interceptors.response.use((cspClientResponse) => {
+    this.client.interceptors.response.use((clientResponse) => {
+      const cspClientResponse = {
+        status: clientResponse.status,
+        statusText: clientResponse.statusText,
+        headers: clientResponse.headers,
+        config: clientResponse.config,
+        data: clientResponse.data,
+      };
       this.logger.info("CSP Response", { cspClientResponse });
       return cspClientResponse;
     });
