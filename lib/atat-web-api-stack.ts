@@ -20,6 +20,8 @@ import { VpcEndpointApplicationTargetGroup } from "./constructs/vpc-endpoint-lb-
 import { HttpMethod } from "./http";
 import { NagSuppressions } from "cdk-nag";
 import * as cr from "aws-cdk-lib/custom-resources";
+//Added this
+import * as s3 from "aws-cdk-lib/aws-s3";
 
 export interface ApiCertificateOptions {
   domainName: string;
@@ -98,7 +100,7 @@ export class AtatWebApiStack extends cdk.Stack {
     NagSuppressions.addResourceSuppressions(accessLogsBucket, [
       {
         id: "NIST.800.53.R4-S3BucketLoggingEnabled",
-        reason: "The ideal bucket for this to log to is itself, which is not supported via the CDK constructor",
+        reason: "The ideal bucket for this to log to is itself. That creates complexity with receiving other logs",
       },
       {
         id: "NIST.800.53.R4-S3BucketReplicationEnabled",
@@ -119,6 +121,10 @@ export class AtatWebApiStack extends cdk.Stack {
         dropInvalidHeaderFields: true,
       });
       loadBalancer.logAccessLogs(accessLogsBucket);
+      NagSuppressions.addResourceSuppressions(loadBalancer, [
+        { id: "NIST.800.53.R4-ALBWAFEnabled", reason: "Palo Alto NGFW is in use" },
+      ]);
+      loadBalancer.setAttribute("routing.http.drop_invalid_header_fields.enabled", "true");
       loadBalancer.addListener("HttpsListener", {
         port: 443,
         protocol: elbv2.ApplicationProtocol.HTTPS,
