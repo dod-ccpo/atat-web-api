@@ -742,6 +742,8 @@ components:
         periodOfPerformance:
           $ref: "#/components/schemas/PeriodOfPerformance"
         # DOW section 8 - Security Requirements
+        securityRequirement:
+          $ref: "#/components/schemas/SecurityRequirement"
         # Q: uses the selectedClassificationLevels for security requirements?
         # DOW section 9 - no data ?
         # DOW section 10 (and its subtasks)
@@ -983,13 +985,34 @@ components:
         Details related Cloud Support Packages for the Selected Service Offering
       type:
         properties:
+          canTrainInUnclassEnv:
+            type: boolean
+          trainingLocation:
+            type: string
+          trainingRequirementTitle:
+            type: string
+          trainingTimeZone:
+            type: string
           personnelOnsiteAccess:
             type: boolean
-          tsContractorClearanceType:
+          trainingFacilityType:
             type: string
             enum:
-              - TS
-              - TS_SCI
+              - GOVERNMENT_FACILITY
+              - NON_GOVERNMENT_FACILITY
+          trainingFormat:
+            type: string
+            enum:
+              - ONSITE_INSTRUCTOR_CONUS
+              - ONSITE_INSTRUCTOR_OCONUS
+              - VIRTUAL_INSTRUCTOR
+              - VIRUTAL_SELF_LED
+              - NO_PREFERENCE
+          personnelRequiringTraining:
+            type: number
+            format: integer
+          serviceType:
+            $ref: "#/components/schemas/ServiceOfferingGroup"
       allOf:
         - $ref: "#/components/schemas/EnvironmentInstance"
     EstimatedEnvironmentInstance:
@@ -1024,6 +1047,26 @@ components:
       enum:
         - NEW
         - TRANSFER_EXISTING
+    SecurityRequirement:
+      description: >-
+        Security Requirements for a package
+      type: object
+      properties:
+        advisoryServicesSecret:
+          type: array
+          items:
+            $ref: "#/components/schemas/ClassifiedInformationType"
+        advisoryServicesTopSecret:
+          type: array
+          items:
+            $ref: "#/components/schemas/ClassifiedInformationType"
+        serviceOfferingGroup:
+          $ref: "#/components/schemas/ServiceOfferingGroup"
+        tsContractorClearanceType:
+          type: string
+          enum:
+            - TS
+            - TS_SCI
     ArchitecturalDesignRequirement:
       description: >-
         Details for an architectural design of application(s)
@@ -1172,32 +1215,33 @@ components:
     ServiceOffering:
       description: >-
         A single Service Offering Group (Service Offering table)
-      type: object
       properties:
         serviceOfferingGroup:
-          type: string
-          enum:
-            - ADVISORY_ASSISTANCE
-            - APPLICATIONS
-            - COMPUTE
-            - DATABASE
-            - STORAGE
-            - DEVELOPER_TOOLS
-            - EDGE_COMPUTING
-            - GENERAL_XAAS
-            - IOT
-            - MACHINE_LEARNING
-            - NETWORKING
-            - SECURITY
-            - TRAINING
-            - PORTABILITY_PLAN
-            - HELP_DESK_SERVICES
-            - DOCUMENTATION_SUPPORT
-            - GENERAL_CLOUD_SUPPORT
+          $ref: "#/components/schemas/ServiceOfferingGroup"
             # Q: do we need an OTHER option record for each of the
             # above enums
       allOf:
         - $ref: "#/components/schemas/GeneralInformation"
+    ServiceOfferingGroup:
+      type: string
+      enum:
+        - ADVISORY_ASSISTANCE
+        - APPLICATIONS
+        - COMPUTE
+        - DATABASE
+        - STORAGE
+        - DEVELOPER_TOOLS
+        - EDGE_COMPUTING
+        - GENERAL_XAAS
+        - IOT
+        - MACHINE_LEARNING
+        - NETWORKING
+        - SECURITY
+        - TRAINING
+        - PORTABILITY_PLAN
+        - HELP_DESK_SERVICES
+        - DOCUMENTATION_SUPPORT
+        - GENERAL_CLOUD_SUPPORT
     PeriodOfPerformance:
       description: >-
         Represents a Period of Performance (PoP) for a package
@@ -1251,11 +1295,29 @@ components:
           type: string
         # section 10f
         travel:
-          # Q: JSON string ?
+          type: array
+          items:
+            $ref: "#/components/schema/Travel"
+    Travel:
+      description: >-
+        Describes the Travel Requirements of a package
+      type: object
+      properties:
+        tripLocation:
           type: string
-          # type: array
-          # items:
-          #   $ref: "#/components/schema/Travel"
+        numberOfTravelers:
+          type: number
+          format: integer
+        numberOfTrips:
+          type: number
+          format: integer
+        durationInDays:
+          type: number
+          format: integer
+        selectedPeriods:
+          type: array
+          items:
+            $ref: "#/components/schemas/Period"
     GeneralInformation:
       description >-
         Basic information commonly used to describe different units inside a package
