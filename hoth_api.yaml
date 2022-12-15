@@ -724,6 +724,8 @@ components:
                     - $ref: "#/components/schemas/ComputeEnvironmentInstance"
                     - $ref: "#/components/schemas/DatabaseEnvironmentInstance"
         # DOW section 4.2.6 - CDS
+        crossDomainSolutions:
+          $ref: "#/components/schemas/CrossDomainSolutions"
         # DOW section 4.3
         cloudSupportPackages:
           type: array
@@ -742,8 +744,10 @@ components:
         periodOfPerformance:
           $ref: "#/components/schemas/PeriodOfPerformance"
         # DOW section 8 - Security Requirements
-        securityRequirement:
-          $ref: "#/components/schemas/SecurityRequirement"
+        securityRequirements:
+          type: array
+          items:
+            $ref: "#/components/schemas/SecurityRequirement"
         # Q: uses the selectedClassificationLevels for security requirements?
         # DOW section 9 - no data ?
         # DOW section 10 (and its subtasks)
@@ -779,6 +783,26 @@ components:
           type: string
         previousTaskOrderNumber:
           type: string
+    CrossDomainSolutions:
+      description: >-
+        Cross Domain Solutions (CDS) for the transfer of data between classification levels
+      type: object
+      properties:
+        crossDomainSolutionRequired:
+          type: boolean
+        anticipatedNeedOrUsage:
+          type: string
+        needForEntireTaskOrderDuration:
+          type: boolean
+        selectedPeriods:
+          type: array
+          items:
+            $ref: "#/components/schemas/Period"
+        trafficPerDomainPair:
+          # JSON string
+          type: string
+        projectedFileStreamType:
+          type: string
     CurrentEnvironment:
       description: >-
         Encapsulates data for the Background/Current Environment and part of Performance
@@ -789,19 +813,8 @@ components:
           type: boolean
         hasSystemDocumentation:
           type: boolean
-        # TODO: how are documents being combined with generated document?
-        # OR are we just providing a list of the document names in DoW?
-        # OR will this just be included with all documents that are downloaded?
-        systemDocumentation:
-          type: array
-          items:
-            type: string
         hasMigrationDocumentation:
           type: boolean
-        migrationDocumentation:
-          type: array
-          items:
-            type: string
         envLocation:
           type: string
           enum:
@@ -1006,7 +1019,7 @@ components:
               - ONSITE_INSTRUCTOR_CONUS
               - ONSITE_INSTRUCTOR_OCONUS
               - VIRTUAL_INSTRUCTOR
-              - VIRUTAL_SELF_LED
+              - VIRTUAL_SELF_LED
               - NO_PREFERENCE
           personnelRequiringTraining:
             type: number
@@ -1049,7 +1062,7 @@ components:
         - TRANSFER_EXISTING
     SecurityRequirement:
       description: >-
-        Security Requirements for a package
+        A Security Requirement for a specific Service Offering Group in a package
       type: object
       properties:
         advisoryServicesSecret:
@@ -1143,7 +1156,7 @@ components:
         - MULTIPLE
     StorageUnit:
       description: >-
-        Commmonly used units for instances used for document generation
+        Commonly used units for instances used for document generation
       type: string
       enum:
         - GB
@@ -1187,6 +1200,8 @@ components:
             type: array
             items:
               $ref: "#/components/schemas/ClassifiedInformationType"
+          dowTaskNumber:
+            type: string
           needForEntireTaskOrderDuration:
             type: boolean
           selectedPeriods:
