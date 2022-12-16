@@ -704,7 +704,7 @@ components:
         # DOW section 3 and 4.1
         currentEnvironment:
           $ref: "#/components/schemas/CurrentEnvironment"
-        # DOW section 4.2 and section 8
+        # DOW section 4.2
         selectedClassificationLevels:
           type: array
           items:
@@ -736,11 +736,9 @@ components:
                   $ref: "#/components/schemas/SelectedServiceOffering"
                 supportingInfo:
                   $ref: "#/components/schemas/CloudSupportEnvironmentInstance"
-        # DOW section 5 - no data ?
-        # DOW section 6 - no data ?
+        # DOW section 5
+        # based on selected service offerings and training selected
         # DOW section 7
-        # Q: we need to keep a track of selected periods from instances?
-        # section 7?
         periodOfPerformance:
           $ref: "#/components/schemas/PeriodOfPerformance"
         # DOW section 8 - Security Requirements
@@ -748,12 +746,19 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/SecurityRequirement"
-        # Q: uses the selectedClassificationLevels for security requirements?
-        # DOW section 9 - no data ?
         # DOW section 10 (and its subtasks)
         contractConsiderations:
           $ref: "#/components/schemas/ContractConsiderations"
-        # DOW section 11 - no data ?
+        # DOW section 11
+        sensitiveInformation:
+          description: >-
+            Sensitive Information for a package
+          type: object
+          properties:
+            section508Sufficient:
+              type: boolean
+            accessibilityReqs508:
+              type: string
     Award:
       description: "Part of DOW, represents a single Award in the Award History table"
       type: object
@@ -1301,8 +1306,6 @@ components:
           type: string
         contractorProvidedTransfer:
           type: boolean
-        # section 10c - no data ?
-        # section 10d - no data ?
         # section 10e
         piiPresent:
           type: boolean
