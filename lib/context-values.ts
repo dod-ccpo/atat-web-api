@@ -110,6 +110,15 @@ export class AtatContextValue {
     "config/csp/integration"
   );
 
+  /**
+   * The region where the stack will be deployed to.
+   *
+   * The resulting stack will only work in this region. Orginally, this was added to support
+   * ELB log delivery; however, once added other parts of the code base may adapt to this no
+   * longer being an unresolved value.
+   */
+  public static readonly DEPLOY_REGION = new AtatContextValue("atat:DeployRegion", "us-gov-west-1");
+
   // This eslint-disable is required as it picks up on the constructor shorthand as a
   // "useless" constructor which is not a correct determination.
   // eslint-disable-next-line no-useless-constructor

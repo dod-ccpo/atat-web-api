@@ -14,6 +14,7 @@ export function createApp(props?: cdk.AppProps): cdk.App {
   const vpcCidrParam = AtatContextValue.VPC_CIDR.resolve(app);
   const apiDomainParam = AtatContextValue.API_DOMAIN_NAME.resolve(app);
   const apiCertParam = AtatContextValue.API_CERTIFICATE_ARN.resolve(app);
+  const deployRegion = AtatContextValue.DEPLOY_REGION.resolve(app);
 
   if (!utils.isString(environmentParam)) {
     const err = `An EnvironmentId must be provided (use the ${AtatContextValue.ENVIRONMENT_ID} context key)`;
@@ -60,6 +61,9 @@ export function createApp(props?: cdk.AppProps): cdk.App {
       environmentName,
       isSandbox,
       apiDomain: apiCertOptions,
+      env: {
+        region: deployRegion,
+      },
     });
     cdk.Aspects.of(app).add(new RemovalPolicySetter({ globalRemovalPolicy: cdk.RemovalPolicy.DESTROY }));
     cdk.Aspects.of(app).add(new GovCloudCompatibilityAspect());
@@ -90,6 +94,9 @@ export function createApp(props?: cdk.AppProps): cdk.App {
       // Set the notification email address, unless we're building the account where
       // sandbox environments live because our inboxes would never recover.
       notificationEmail: environmentName === "Sandbox" ? undefined : AtatContextValue.NOTIFICATION_EMAIL.resolve(app),
+      env: {
+        region: deployRegion,
+      },
     });
   }
   return app;

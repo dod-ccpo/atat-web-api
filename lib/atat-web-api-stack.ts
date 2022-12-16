@@ -6,6 +6,7 @@ import * as elbv2 from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as nodejs from "aws-cdk-lib/aws-lambda-nodejs";
+import * as s3 from "aws-cdk-lib/aws-s3";
 import { Construct } from "constructs";
 import { UserPermissionBoundary } from "./aspects/user-only-permission-boundary";
 import { AtatNetStack } from "./atat-net-stack";
@@ -86,6 +87,28 @@ export class AtatWebApiStack extends cdk.Stack {
       };
     }
 
+    const accessLogsBucket = new s3.Bucket(this, "ResourceAccessLogs", {
+      // Elastic Load Balancing Log Delivery requires SSE-S3 and _does not_ support
+      // SSE-KMS. This still ensures that log data is encrypted at rest.
+      encryption: s3.BucketEncryption.S3_MANAGED,
+      enforceSSL: true,
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      versioned: true,
+    });
+    NagSuppressions.addResourceSuppressions(accessLogsBucket, [
+      {
+        id: "NIST.800.53.R4-S3BucketLoggingEnabled",
+        reason: "The ideal bucket for this to log to is itself, which is not supported via the CDK constructor",
+      },
+      {
+        id: "NIST.800.53.R4-S3BucketReplicationEnabled",
+        reason: "Cross region replication is not required for this use case",
+      },
+      {
+        id: "NIST.800.53.R4-S3BucketDefaultLockEnabled",
+        reason: "Server Access Logs cannot be delivered to a bucket with Object Lock enabled",
+      },
+    ]);
     const api = new AtatRestApi(this, "HothApi", apiProps);
     if (props.apiDomain && network) {
       const certificate = acm.Certificate.fromCertificateArn(this, "ApiCertificate", props.apiDomain.acmCertificateArn);
@@ -93,15 +116,9 @@ export class AtatWebApiStack extends cdk.Stack {
         vpc: network.vpc,
         internetFacing: false,
         deletionProtection: true,
+        dropInvalidHeaderFields: true,
       });
-      NagSuppressions.addResourceSuppressions(loadBalancer, [
-        { id: "NIST.800.53.R4-ALBWAFEnabled", reason: "Palo Alto NGFW is in use" },
-        {
-          id: "NIST.800.53.R4-ELBLoggingEnabled",
-          reason: "The API Gateway logs all requests, the Palo Alto NGFW is in use, and VPC Flow Logs are enabled",
-        },
-      ]);
-      loadBalancer.setAttribute("routing.http.drop_invalid_header_fields.enabled", "true");
+      loadBalancer.logAccessLogs(accessLogsBucket);
       loadBalancer.addListener("HttpsListener", {
         port: 443,
         protocol: elbv2.ApplicationProtocol.HTTPS,
@@ -115,7 +132,7 @@ export class AtatWebApiStack extends cdk.Stack {
             protocol: elbv2.ApplicationProtocol.HTTPS,
             healthCheck: {
               // Unfortunately, there is not a great way to actually invoke a health route
-              // on the load balancer because we would need to send some kind of header in
+              // on the AWS API Gateway because we would need to send some kind of header in
               // order to successfully hit our API via the endpoint. We would hve to send
               // either the Host or x-apigw-api-id headers and we can only specify paths.
               // If we at least get a response and that response is either a 200 or it's a
@@ -135,6 +152,12 @@ export class AtatWebApiStack extends cdk.Stack {
       // TODO: Fix that in the TargetGroup config?
       loadBalancer.connections.allowToAnyIpv4(ec2.Port.tcp(443));
       new cdk.CfnOutput(this, "LoadBalancerDns", { value: loadBalancer.loadBalancerDnsName });
+      NagSuppressions.addResourceSuppressions(loadBalancer, [
+        {
+          id: "NIST.800.53.R4-ALBWAFEnabled",
+          reason: "Layer 7 rules are applied on a separate firewall appliance",
+        },
+      ]);
     }
 
     const readUser = new ApiUser(this, "ReadUser", { secretPrefix: "api/user/snow", username: "ReadUser" });
