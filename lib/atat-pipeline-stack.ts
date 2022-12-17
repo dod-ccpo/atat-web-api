@@ -86,6 +86,10 @@ export class AtatPipelineStack extends cdk.Stack {
         environmentName: props.environmentName,
         notificationEmail: props.notificationEmail,
         apiDomain: props.apiDomain,
+        env: {
+          region: this.region,
+          account: this.account,
+        },
       })
     );
   }

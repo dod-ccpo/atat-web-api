@@ -37,7 +37,7 @@ export class AtatNetStack extends cdk.Stack {
     this.templateOptions.description = "Creates the necessary networking infrastructure for the ATAT application";
 
     const vpc = new ec2.Vpc(this, "AtatVpc", {
-      cidr: props.vpcCidr,
+      ipAddresses: props.vpcCidr ? ec2.IpAddresses.cidr(props.vpcCidr) : undefined,
       maxAzs: 2,
       subnetConfiguration: [
         {
