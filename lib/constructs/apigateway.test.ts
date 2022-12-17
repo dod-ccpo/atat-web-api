@@ -3,6 +3,7 @@ import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as iam from "aws-cdk-lib/aws-iam";
 import { Template } from "aws-cdk-lib/assertions";
 import { AtatRestApi, RestApiVpcConfiguration } from "./apigateway";
+import { test } from "@jest/globals";
 
 describe("ATAT apigateway construct creation", () => {
   test("Ensure AtatRestApi is created", async () => {

@@ -2,6 +2,7 @@ import * as cdk from "aws-cdk-lib";
 import { Template } from "aws-cdk-lib/assertions";
 import { AtatNetStack } from "./atat-net-stack";
 import * as AtatWebApi from "./atat-web-api-stack";
+import { test } from "@jest/globals";
 
 test("Rest API is created", () => {
   // GIVEN
