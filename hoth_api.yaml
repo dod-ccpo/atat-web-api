@@ -271,6 +271,11 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/FundingSource"
+        targetImpactLevel:
+          $ref: "#/components/schemas/ImpactLevel"
+        provisionDeadline:
+          type: string
+          format: date-time
         operators:
           description: Array of operator objects
           type: array
@@ -1138,12 +1143,7 @@ components:
             - S
             - TS
         impactLevel:
-          type: string
-          enum:
-            - IL2
-            - IL4
-            - IL5
-            - IL6
+          $ref: "#/components/schemas/ImpactLevel"
     ClassifiedInformationType:
       description: >-
         Describes the classified information in a Classification Instance
@@ -1185,6 +1185,13 @@ components:
       enum:
         - SINGLE
         - MULTIPLE
+    ImpactLevel:
+      type: string
+      enum:
+        - IL2
+        - IL4
+        - IL5
+        - IL6
     StorageUnit:
       description: >-
         Commonly used units for instances used for document generation

@@ -72,6 +72,8 @@ async function makeRequest(client: IAtatClient, request: ProvisionRequest): Prom
         clin: undefined,
       })),
     },
+    targetImpactLevel: request.targetImpactLevel,
+    provisionDeadline: request.provisionDeadline,
   };
   try {
     // TODO: remove once mocking is no longer needed (e.g., mocking api implemented or actual csp integration)
