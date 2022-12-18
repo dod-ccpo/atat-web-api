@@ -5,7 +5,6 @@ import { CostApiImplementation } from "./cost-api-implementation";
 import { AtatRestApi, AtatRestApiProps } from "./apigateway";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as idp from "./identity-provider";
-import { test } from "@jest/globals";
 
 describe("Cost API Implementation Tests", () => {
   let stack: cdk.Stack;

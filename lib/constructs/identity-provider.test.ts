@@ -4,7 +4,6 @@ import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as secrets from "aws-cdk-lib/aws-secretsmanager";
 import { Match, Template } from "aws-cdk-lib/assertions";
 import * as idp from "./identity-provider";
-import { test } from "@jest/globals";
 
 const sampleScopes = [
   {

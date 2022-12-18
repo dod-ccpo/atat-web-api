@@ -1,7 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import { Match, Template } from "aws-cdk-lib/assertions";
 import { FifoQueue } from "./sqs";
-import { test } from "@jest/globals";
 
 describe("IFP Cost Queues", () => {
   test("Ensure Cost Request and Response Queues are created", async () => {

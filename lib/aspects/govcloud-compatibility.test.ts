@@ -5,7 +5,6 @@ import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as logs from "aws-cdk-lib/aws-logs";
 import { Annotations, Match, Template } from "aws-cdk-lib/assertions";
 import { GovCloudCompatibilityAspect } from "./govcloud-compatibility";
-import { test } from "@jest/globals";
 
 describe("Ensure the GovCloudCompatibilityAspect makes necessary changes for GovCloud", () => {
   test("that CloudWatch Log Groups have tags removed", async () => {
