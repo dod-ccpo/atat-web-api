@@ -256,6 +256,13 @@ export interface IFundingDocument {
   orderNumber?: string;
   miprNumber?: string;
 }
+export interface IGCEInstructions {
+  how_was_estimate_made: string;
+  what_assumptions_were_made: string;
+  tools_used: string;
+  where_was_information_obtained: string;
+  previous_estimate_comparison: string;
+}
 
 export interface IPeriodLineItem {
   idiqClin: string;
@@ -264,7 +271,8 @@ export interface IPeriodLineItem {
   serviceOffering: string;
   itemDescriptionOrConfigSummary: string;
   unitPrice: number;
-  unitQuantity: number;
+  quantity: number;
+  unit: string;
 }
 export interface IPeriodEstimate {
   period: IPeriod;
@@ -274,6 +282,7 @@ export interface IndependentGovernmentCostEstimate {
   fundingDocument: IFundingDocument;
   surgeCapabilities: number;
   periodsEstimate: IPeriodEstimate[];
+  instructions: IGCEInstructions;
 }
 
 export interface IFundingIncrement {
@@ -535,13 +544,14 @@ const fundingDocument = {
 const periodLineItem = {
   type: "object",
   properties: {
-    clin: { type: "string" },
     idiqClin: { type: "string" },
+    contractType: { type: "string" },
     dowTaskNumber: { type: "string" },
     serviceOffering: { type: "string" },
     itemDescriptionOrConfigSummary: { type: "string" },
-    monthlyPrice: { type: "number" },
-    monthsInPeriod: { type: "integer" },
+    unitPrice: { type: "number" },
+    quantity: { type: "integer" },
+    unit: { type: "string" },
   },
 };
 
@@ -555,6 +565,16 @@ const periodsEstimate = {
     },
   },
 };
+const instructions = {
+  type: "object",
+  properties: {
+    how_was_estimate_made: { type: "string" },
+    what_assumptions_were_made: { type: "string" },
+    tools_used: { type: "string" },
+    where_was_information_obtained: { type: "string" },
+    previous_estimate_comparison: { type: "string" },
+  },
+};
 
 const independentGovernmentCostEstimate = {
   type: "object",
@@ -562,6 +582,7 @@ const independentGovernmentCostEstimate = {
     fundingDocument,
     surgeCapabilities: { type: "integer" },
     periodsEstimate,
+    instructions,
   },
   additionalProperties: false,
 };
