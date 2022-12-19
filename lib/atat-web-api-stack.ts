@@ -104,6 +104,11 @@ export class AtatWebApiStack extends cdk.Stack {
 
       loadBalancer.setAttribute("routing.http.drop_invalid_header_fields.enabled", "true");
 
+      const elbRegion = { region: 'us-gov-west-1' };
+      const devEnv = {
+        account: process.env.CDK_DEFAULT_ACCOUNT,
+        region: process.env.CDK_DEFAULT_REGION,
+      };
 
       loadBalancer.addListener("HttpsListener", {
         port: 443,
