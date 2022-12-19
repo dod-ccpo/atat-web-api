@@ -9,7 +9,6 @@ import {
 } from "../models/document-generation";
 import { INTERNAL_SERVER_ERROR } from "../utils/errors";
 import { ApiBase64SuccessResponse, SuccessStatusCode } from "../utils/response";
-import { convertPeriodToMonths } from "./utils/utils";
 
 export async function generateIGCEDocument(
   templatePath: string,
@@ -18,21 +17,19 @@ export async function generateIGCEDocument(
   if (!payload.periodsEstimate && !payload.fundingDocument && !payload.surgeCapabilities) {
     return INTERNAL_SERVER_ERROR;
   }
-
-  // sort the base period and option periods
+  // Sort the base period and option periods
   const basePeriodLineItems = payload.periodsEstimate.filter((periodEstimate: IPeriodEstimate) => {
     return periodEstimate.period.periodType === PeriodType.BASE;
   });
+
   const optionPeriodsLineItems = payload.periodsEstimate
     .filter((periodEstimate: IPeriodEstimate) => {
       return periodEstimate.period.periodType === PeriodType.OPTION;
     })
     .sort((a, b) => a.period.optionOrder - b.period.optionOrder);
 
-  const workbook = new exceljs.Workbook();
-  await workbook.xlsx.readFile(templatePath);
-
-  // variables used within the sheets
+  // Set fundingDocumentNumber variable
+  // Located at the top of each Period sheet
   const fundingDoc = payload.fundingDocument;
   let fundingDocumentNumber: string;
   switch (fundingDoc.fundingType) {
@@ -45,239 +42,225 @@ export async function generateIGCEDocument(
     default:
       fundingDocumentNumber = "";
   }
+  // Set references for clin and contract drop down boxes
+  const clinRangeString = `'CLIN Info'!$G$2:$G$9`;
+  const contractRangeString = `'CLIN Info'!$H$2:$H$4`;
+
+  // Determine unique CLINs from payload...
+  const uniqueAndSorted = [...new Set(payload.periodsEstimate)].sort(
+    (a, b) => a.period.optionOrder - b.period.optionOrder
+  );
+
+  // On the Summary sheet, contractCLINHelper will be used to fill
+  // unique CLINs with associated contract type.
+  const contractCLINHelper: Array<{ clin: string; contract: string }> = [];
+  uniqueAndSorted.forEach(function (item) {
+    item.periodLineItems.forEach(function (lineItem) {
+      contractCLINHelper.push({ clin: lineItem.idiqClin.trim(), contract: lineItem.contractType });
+    });
+  });
+
+  const uniqueCLINwithContract = [...new Map(contractCLINHelper.map((item) => [item.clin, item])).values()];
+
+  // Use Exceljs to generate the workbook
+  const workbook = new exceljs.Workbook();
+  await workbook.xlsx.readFile(templatePath);
 
   const summarySheet = workbook.getWorksheet("Summary");
-  const allPeriodsIdiqClins: string[] = [];
-  const summarySheetColumnsToExtend: string[] = []; // keep track of columns to extend
-  let summarySheetIdiqClinCounter = 0; // keep count of unique idiq clins of each period
 
-  // function that populates each period sheet
-  function populatePeriodLineItems(estimate: IPeriodEstimate): void {
-    const { optionOrder, periodUnit, periodUnitCount, periodType } = estimate.period;
-    const periodLineItems = estimate.periodLineItems;
-    const uniqueIdiqClins = Array.from(new Set(periodLineItems.map((lineItem) => lineItem.idiqClin)));
-    const periodSheetTopHalfInitialStartRow = 8;
-    const periodSheetLowerHalfInitialStartRow = 28;
-    const mappingOfPeriodsToColumnOnSummarySheet: { [key: string]: string } = {
-      "Base Period": "C",
-      "Option Period 1": "D",
-      "Option Period 2": "E",
-      "Option Period 3": "F",
-      "Option Period 4": "G",
-      "Option Period 5": "H",
-      "Option Period 6": "I",
-    };
-
-    const periodSheet =
-      periodType === PeriodType.BASE
-        ? workbook.getWorksheet("Base Period")
-        : workbook.getWorksheet(`Option Period ${optionOrder}`);
-
-    const pop = `${periodUnitCount} ${periodUnit[0] + periodUnit.slice(1).toLowerCase()}(s)`;
-    periodSheet.getCell("C2").value = pop;
-    periodSheet.getCell("C3").value = fundingDocumentNumber;
-
-    // add each line item to the period sheet (top half)
-    const numberOfItems = periodLineItems.length;
-    const lineItemRows = periodSheet.getRows(periodSheetTopHalfInitialStartRow, numberOfItems);
-
-    lineItemRows?.forEach((row, index) => {
-      // fill each line item data
-      row.getCell("B").value = periodLineItems[index].clin; // 1000
-      row.getCell("C").value = periodLineItems[index].idiqClin; // "1000 Cloud";
-      row.getCell("D").value = periodLineItems[index].dowTaskNumber; // "4.2.2.1.1";
-      row.getCell("E").value = periodLineItems[index].serviceOffering; // "Compute";
-      row.getCell("F").value = periodLineItems[index].itemDescriptionOrConfigSummary; // "Compute - special project"
-      row.getCell("G").value = periodLineItems[index].monthlyPrice; // 159.03;
-      // periodLineItems[index].monthsInPeriod is calculated from period
-      row.getCell("H").value = convertPeriodToMonths(estimate.period); // 12;
-    });
-
-    // add additional rows to offset the numbers used on the summary sheet for idiq clins
-    const initialUsableRows = 12;
-    const lowerHalfEndingRow = periodSheetLowerHalfInitialStartRow + initialUsableRows;
-    const expectedLinesNeeded = summarySheetIdiqClinCounter + uniqueIdiqClins.length;
-    if (expectedLinesNeeded > initialUsableRows) {
-      const summarySheetAdditionalRows = uniqueIdiqClins.length + 2;
-      periodSheet.duplicateRow(lowerHalfEndingRow, summarySheetAdditionalRows, true);
-
-      // update the formula of the duplicated rows
-      periodSheet.eachRow((row, rowNumber) => {
-        updatePeriodFormulas(row, rowNumber, periodSheet);
-      });
-
-      // update formulas on summary sheet if additional rows were added
-      summarySheetColumnsToExtend.push(mappingOfPeriodsToColumnOnSummarySheet[periodSheet.name]);
-    }
-
-    // populate unique IDIQ CLIN items used on the period sheet (lower half)
-    const periodIdiqClinLines = periodSheet.getRows(
-      periodSheetLowerHalfInitialStartRow + summarySheetIdiqClinCounter,
-      uniqueIdiqClins.length
-    );
-    periodIdiqClinLines?.forEach((row, index) => {
-      row.getCell("C").value = uniqueIdiqClins[index];
-      allPeriodsIdiqClins.push(uniqueIdiqClins[index]);
-      summarySheetIdiqClinCounter++;
-    });
-  }
-
-  // populate period sheets
-  basePeriodLineItems.forEach(populatePeriodLineItems);
-  optionPeriodsLineItems.forEach(populatePeriodLineItems);
-
-  // Summary sheet
-  // funding document number (A3)
-  const summaryFundingDocCell = summarySheet.getCell("A3");
-  summaryFundingDocCell.value = fundingDocumentNumber;
-
-  // surge capabilities (A23)
-  const summarySurge = summarySheet.getCell("A23");
-  summarySurge.value = payload.surgeCapabilities / 100;
-
-  // populate the summary sheet TO and IDIQ CLIN
-  let summarySheetAdditionalRows = 0;
-  const summarySheetInitialRow = 6;
-  const availableSummarySheetRows = 14;
-  const lastSummarySheetRow = 19;
-
-  if (allPeriodsIdiqClins.length > availableSummarySheetRows) {
-    summarySheetAdditionalRows = allPeriodsIdiqClins.length - availableSummarySheetRows;
-    summarySheet.duplicateRow(lastSummarySheetRow, summarySheetAdditionalRows, true);
-    const ref = `J6:J${summarySheetInitialRow + availableSummarySheetRows + summarySheetAdditionalRows}`;
-
-    // update ref formula to include the additional rows
-    const cell: any = summarySheet.getCell("J6").value;
-    summarySheet.getCell("J6").value = { ...cell, ref };
-  }
-
-  // populate the TO and IDIQ CLIN from the period sheets
-  const summarySheetEstimateRows = summarySheet.getRows(summarySheetInitialRow, allPeriodsIdiqClins.length);
-  summarySheetEstimateRows?.forEach((row, index) => {
-    const displayIdiqClin = allPeriodsIdiqClins[index].slice(0, 3) + "x";
-    row.getCell("A").value = displayIdiqClin;
-    row.getCell("B").value = displayIdiqClin + " " + allPeriodsIdiqClins[index].slice(5);
-  });
-
-  // update each column formula for the added rows on the summary sheet
-  const initialDuplicatedRow = lastSummarySheetRow + 1;
-  const periodSheetRowOffset = 22;
-  const duplicatedSummaryRows = summarySheet.getRows(initialDuplicatedRow, summarySheetAdditionalRows);
-  duplicatedSummaryRows?.forEach((row) => {
-    if (row.number > lastSummarySheetRow) {
-      // update the formulas in columns that required additional rows
-      summarySheetColumnsToExtend.forEach((col) => {
-        const data: any = summarySheet.getCell(`${col}${row.number}`).value;
-
-        // mapping formulas to columns that were added
-        const summaryCols = ["C", "D", "E", "F", "G", "H", "I"];
-        if (col !== "C") {
-          summarySheet.getCell(`${col}${row.number}`).value = {
-            ...data,
-            formula: `'Option Period ${summaryCols.indexOf(col)}'!I${row.number + periodSheetRowOffset}`,
-          };
-        } else {
-          summarySheet.getCell(`${col}${row.number}`).value = {
-            ...data,
-            formula: `'Base Period'!I${row.number + periodSheetRowOffset}`,
-          };
-        }
-      });
-    }
-  });
-
-  // offset the summary calculations if rows added
-  updateSummaryFormulas(summarySheetAdditionalRows, summarySheet);
-
-  // exceljs does not support text boxs or shapes and the signature text box
-  // is removed during generation of the IGCE document
-  // see https://github.com/exceljs/exceljs/issues/1147
-  // Add in signature rows to replace the removed text box
-  const summarySheetSignatureRow = 31 + summarySheetAdditionalRows;
-  summarySheet.getCell(`A${summarySheetSignatureRow}`).value = "Preparer Name: _____________________";
-  summarySheet.getCell(`A${summarySheetSignatureRow + 1}`).value = "Title: _____________________________";
-  summarySheet.getCell(`A${summarySheetSignatureRow + 2}`).value = "Email: _____________________________";
-  summarySheet.getCell(`A${summarySheetSignatureRow + 4}`).value = "Signature: _________________________";
+  /* Period sheet helper is used to get the specific cell reference ranges for the summary sheet
+    that are generated during populatePeriodLineItems.
+    Example output for periodSheetHelper: 
+      { period: 'Base Period', cellRef: 'A41:I54' }
+      { period: 'Option Period 1', cellRef: 'A28:I41' }
+      { period: 'Option Period 2', cellRef: 'A28:I41' }
+  */
+  const periodSheetHelper: Array<{ period: string; cellRef: string }> = [];
 
   const headers = {
     "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     "Content-Disposition": `attachment; filename=IndependentGovernmentCostEstimate.xlsx`,
   };
 
+  // Populate Period sheets (Base and Option Periods)
+  function populatePeriodLineItems(estimate: IPeriodEstimate): void {
+    const { optionOrder, periodUnit, periodUnitCount, periodType } = estimate.period;
+    const periodLineItems = estimate.periodLineItems;
+    // unique IDIQ Clins PER period sheet
+    const uniqueIdiqClins = Array.from(new Set(periodLineItems.map((lineItem) => lineItem.idiqClin)));
+    const periodSheetTopStartRow = 8;
+    const periodSheetBottomStartRow = 28;
+
+    let periodSheetName: string;
+    if (periodType === PeriodType.BASE) {
+      periodSheetName = "Base Period";
+    } else {
+      periodSheetName = `Option Period ${optionOrder}`;
+    }
+
+    // Get the specific worksheet
+    const periodSheet =
+      periodType === PeriodType.BASE
+        ? workbook.getWorksheet("Base Period")
+        : workbook.getWorksheet(`Option Period ${optionOrder}`);
+
+    // Set Period of Performance and Funding Document Number
+    // Located at the top of each Period Sheet
+    const pop = `${periodUnitCount} ${periodUnit[0] + periodUnit.slice(1).toLowerCase()}(s)`;
+    periodSheet.getCell("C2").value = pop;
+    periodSheet.getCell("C3").value = fundingDocumentNumber;
+
+    // Track number of Line Items in periodLineItems
+    const initialUsableRows = 20;
+    let numberOfRowsToAdd = 0;
+    const numberOfItems = periodLineItems.length;
+    if (numberOfItems > initialUsableRows) {
+      numberOfRowsToAdd = numberOfItems - initialUsableRows;
+      console.log("Number of rows to add: " + numberOfRowsToAdd);
+      periodSheet.duplicateRow(26, numberOfRowsToAdd, true);
+    }
+
+    // Get lineItemRows
+    const lineItemRows = periodSheet.getRows(periodSheetTopStartRow, numberOfItems);
+
+    // Fill each cell in the designated row with periodLineItems info
+    lineItemRows?.forEach((row, index) => {
+      row.getCell("A").value = periodLineItems[index].idiqClin; // idiqClin
+      row.getCell("A").dataValidation = {
+        type: "list",
+        allowBlank: false,
+        formulae: [clinRangeString],
+      };
+      row.getCell("B").value = periodLineItems[index].contractType; // Contract Type
+      row.getCell("B").dataValidation = {
+        type: "list",
+        allowBlank: false,
+        formulae: [contractRangeString],
+      };
+      row.getCell("C").value = periodLineItems[index].dowTaskNumber; // "4.2.2.1.1";
+      row.getCell("D").value = periodLineItems[index].serviceOffering; // "Compute";
+      row.getCell("E").value = periodLineItems[index].itemDescriptionOrConfigSummary; // Description
+      row.getCell("F").value = periodLineItems[index].unitPrice; // Unit Price
+      row.getCell("G").value = periodLineItems[index].quantity; // Quantity
+      row.getCell("H").value = periodLineItems[index].unit; // Unit
+
+      const totalPrice = `=F${row.number}*G${row.number}`;
+      row.getCell("I").value = { formula: totalPrice, date1904: false };
+    });
+
+    // Populate unique IDIQ CLIN items
+    // Located on each Period Sheet (lower half)
+    const periodIdiqClinLines = periodSheet.getRows(
+      periodSheetBottomStartRow + numberOfRowsToAdd,
+      uniqueIdiqClins.length
+    );
+    // For each IDIQ CLIN Line item
+    periodIdiqClinLines?.forEach((row, index) => {
+      row.getCell("A").value = uniqueIdiqClins[index];
+      // Set formmula for totalIdiqClinValue
+      const totalIdiqClinValue = `=SUMIF($A${periodSheetTopStartRow}:$A$${
+        periodSheetBottomStartRow + numberOfRowsToAdd - 1
+      },"="&A$${row.number},'${periodSheetName}'!$I$${periodSheetTopStartRow}:$I$${
+        periodSheetBottomStartRow + numberOfRowsToAdd
+      })`;
+      // Fill formula for the specified cell
+      row.getCell("I").value = { formula: totalIdiqClinValue, date1904: false };
+    });
+
+    // Set periodCellSummary caluclation, this is pushed to periodSheetHelper as cellRef, and used in the summary sheet
+    const periodCellSummaryCalculation = `A${periodSheetBottomStartRow + numberOfRowsToAdd}:I${
+      periodSheetBottomStartRow + numberOfRowsToAdd + 13
+    }`;
+    periodSheetHelper.push({ period: periodSheetName, cellRef: periodCellSummaryCalculation });
+
+    // Set the formula for the Total Price of the period sheet (bottom right of table)
+    const totalPeriodValueFormula = `=SUM(I${periodSheetBottomStartRow + numberOfRowsToAdd}:I${
+      periodSheetBottomStartRow + numberOfRowsToAdd + 13
+    })`;
+    // Fill the formula for the Total price of the selected period sheet
+    periodSheet.getCell(`I${periodSheetBottomStartRow + numberOfRowsToAdd + 14}`).value = {
+      formula: totalPeriodValueFormula,
+      date1904: false,
+    };
+  }
+  // For each PeriodLineItem in the BASE Period, populatePeriodLineItems()
+  basePeriodLineItems.forEach(populatePeriodLineItems);
+  // For each PeriodLineItem in the OPTION Period, populatePeriodLineItems()
+  optionPeriodsLineItems.forEach(populatePeriodLineItems);
+
+  console.log("Period sheet helper output: ");
+  periodSheetHelper.forEach(function (value) {
+    console.log(value);
+  });
+  const summaryRows = summarySheet.getRows(6, uniqueCLINwithContract.length);
+  summaryRows?.forEach((row, index) => {
+    row.getCell("A").dataValidation = {
+      type: "list",
+      allowBlank: false,
+      formulae: [clinRangeString],
+    };
+    row.getCell("A").value = uniqueCLINwithContract[index].clin;
+    // CELL C is Contract
+    row.getCell("C").dataValidation = {
+      type: "list",
+      allowBlank: false,
+      formulae: [contractRangeString],
+    };
+    row.getCell("C").value = uniqueCLINwithContract[index].contract;
+
+    // CELL D is always Base Period
+    const basePeriodCell = periodSheetHelper.find((obj) => {
+      return obj.period === "Base Period";
+    });
+    const basePeriodCalc = `=IFERROR(VLOOKUP(A${row.number},'Base Period'!${basePeriodCell!.cellRef},9, FALSE),0)`;
+    row.getCell("D").value = { formula: basePeriodCalc, date1904: false };
+    // CELL E is always Option Period 1
+    for (let i = 1; i <= 6; i++) {
+      const optionPeriod = periodSheetHelper.find((obj) => {
+        return obj.period === `Option Period ${i}`;
+      });
+      // Skip filling in any option periods that don't exist
+      if (!optionPeriod) continue;
+      const optionPeriodCalc = `=IFERROR(VLOOKUP(A${row.number},
+        'Option Period ${i}'!${optionPeriod.cellRef},9, FALSE),0)`;
+      // The base period is "D" and all option periods are offset from that
+      const col = String.fromCharCode("D".charCodeAt(0) + i);
+      console.log(col);
+      row.getCell(col).value = { formula: optionPeriodCalc, date1904: false };
+    }
+  });
+  // Set static Summary sheet cell values
+  // Funding Document Number
+  const summaryFundingDocCell = summarySheet.getCell("A3");
+  summaryFundingDocCell.value = fundingDocumentNumber;
+
+  // Surge Capabilities
+  const surgeCapabilities = summarySheet.getCell("A23");
+  surgeCapabilities.value = payload.surgeCapabilities / 100;
+
+  // DITCO Fee
+  const ditcoFee = summarySheet.getCell("C26");
+  ditcoFee.value = { formula: `=K24 *.0225`, date1904: false };
+
+  // Grand Total With Fee
+  const grandTotalWithFee = summarySheet.getCell("C27");
+  grandTotalWithFee.value = { formula: `=C26 + K24`, date1904: false };
+
+  // Set Instruction Sheet Cells
+  const instructionSheet = workbook.getWorksheet("INSTRUCTIONS-MUST COMPLETE");
+  const estimateMadeCell = instructionSheet.getCell("B11");
+  estimateMadeCell.value = payload.instructions.how_was_estimate_made;
+  const assumptionsMadeCell = instructionSheet.getCell("B12");
+  assumptionsMadeCell.value = payload.instructions.what_assumptions_were_made;
+  const infoToolsCell = instructionSheet.getCell("B13");
+  infoToolsCell.value = payload.instructions.tools_used;
+  const infoObtainedCell = instructionSheet.getCell("B14");
+  infoObtainedCell.value = payload.instructions.where_was_information_obtained;
+  const previousEstimate = instructionSheet.getCell("B15");
+  previousEstimate.value = payload.instructions.previous_estimate_comparison;
+
   const buffer = (await workbook.xlsx.writeBuffer()) as Buffer;
   logger.info("IGCE document generated");
 
   return new ApiBase64SuccessResponse(buffer.toString("base64"), SuccessStatusCode.OK, headers);
-}
-
-function updatePeriodFormulas(row: Row, rowNumber: number, sheet: Worksheet): void {
-  const rowValues: any = row.values;
-  const cellId = `I${rowNumber}`;
-  if (rowValues[9] && String(rowValues[9].formula).includes("&C")) {
-    const formula: string = rowValues[9].formula;
-    const splitFormula = formula.split("&C");
-    const newFormula = splitFormula[0] + `&C${rowNumber}` + splitFormula[1].slice(2);
-    const cell = sheet.getCell(cellId);
-    sheet.getCell(cellId).value = { ...cell, formula: newFormula };
-  }
-
-  if (String(rowValues[7]).includes("Total Price")) {
-    const totalCell = sheet.getCell(cellId);
-    sheet.getCell(cellId).value = { ...totalCell, formula: `=SUM(I28:I${rowNumber - 1})` };
-  }
-}
-
-function updateSummaryFormulas(numberOfAddedRows: number, sheet: Worksheet): void {
-  const initialSumRow = 22;
-  const summaryStartRow = initialSumRow + numberOfAddedRows;
-  const columns = ["C", "D", "E", "F", "G", "H", "I", "J"];
-
-  // removed original calculations due to an error with master and shared formula types
-  // added back in the original formulas to calculate totals
-  const summaryCalculations = sheet.getRows(summaryStartRow, 3);
-  summaryCalculations?.forEach((row, index) => {
-    columns.forEach((col) => {
-      const cellId = `${col}${row.number}`;
-      const cell = sheet.getCell(cellId);
-      let updatedFormula;
-
-      switch (index) {
-        case 0:
-          updatedFormula = `=SUM(${col}6:${col}${row.number - 3})`;
-          break;
-        case 1:
-          updatedFormula = `=${col}${row.number - 1}*.0225`;
-          break;
-        case 2:
-          updatedFormula = `=SUM(${col}${row.number - 2}:${col}${row.number - 1})`;
-          break;
-        default:
-          updatedFormula = "";
-      }
-      sheet.getCell(cellId).value = { ...cell, formula: updatedFormula };
-    });
-  });
-
-  // update final cells to produce the grand total
-  const initialPeriodsSumRow = 24;
-  const initialGrandTotalCalculationStartRow = 26;
-  const updatedStartingRow = initialGrandTotalCalculationStartRow + numberOfAddedRows;
-
-  // total
-  const totalCellId = `C${updatedStartingRow}`;
-  const totalCell = sheet.getCell(totalCellId);
-  sheet.getCell(totalCellId).value = { ...totalCell, formula: `=J${initialPeriodsSumRow + numberOfAddedRows}` };
-
-  // total with fee
-  const ditcoFeeCellId = `C${updatedStartingRow + 1}`;
-  const ditcoFeeCell = sheet.getCell(ditcoFeeCellId);
-  sheet.getCell(ditcoFeeCellId).value = { ...ditcoFeeCell, formula: `=${totalCellId}*.0225` };
-
-  // grand total
-  const grandTotalCellId = `C${updatedStartingRow + 2}`;
-  const grandTotalCell = sheet.getCell(grandTotalCellId);
-  sheet.getCell(grandTotalCellId).value = {
-    ...grandTotalCell,
-    formula: `=SUM(${totalCellId}:${ditcoFeeCellId})`,
-  };
 }

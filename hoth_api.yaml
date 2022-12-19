@@ -503,6 +503,22 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/PeriodEstimate"
+        instructions:
+          $ref: "#/components/schemas/IGCEInstructions"
+    IGCEInstructions:
+      description: IGCE Instruction Page questions
+      type: object
+      properties:
+        how_was_estimate_made:
+          type: string
+        what_assumptions_were_made:
+          type: string
+        tools_used:
+          type: string
+        where_was_information_obtained:
+          type: string
+        previous_estimate_comparison:
+          type: string
     PeriodEstimate:
       description: "Information specific to a base or option period sheet in the IGCE document"
       type: object
