@@ -20,8 +20,6 @@ import { VpcEndpointApplicationTargetGroup } from "./constructs/vpc-endpoint-lb-
 import { HttpMethod } from "./http";
 import { NagSuppressions } from "cdk-nag";
 import * as cr from "aws-cdk-lib/custom-resources";
-//Added this
-import * as s3 from "aws-cdk-lib/aws-s3";
 
 export interface ApiCertificateOptions {
   domainName: string;
