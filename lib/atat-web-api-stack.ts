@@ -19,8 +19,6 @@ import { VpcEndpointApplicationTargetGroup } from "./constructs/vpc-endpoint-lb-
 import { HttpMethod } from "./http";
 import { NagSuppressions } from "cdk-nag";
 import * as cr from "aws-cdk-lib/custom-resources";
-//Added this
-import * as s3 from "aws-cdk-lib/aws-s3";
 
 export interface ApiCertificateOptions {
   domainName: string;
@@ -106,17 +104,6 @@ export class AtatWebApiStack extends cdk.Stack {
 
       loadBalancer.setAttribute("routing.http.drop_invalid_header_fields.enabled", "true");
 
-
-      //Added this 
-      const loggingBucket = new s3.Bucket(this, 'ProdLoadBalancer-Logging', {
-        encryption: s3.BucketEncryption.KMS,
-        bucketKeyEnabled: true,
-        blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
-        enforceSSL: true
-        
-      });
-      //Added this 
-      loadBalancer.logAccessLogs(loggingBucket, "Prod-Load-Balancer")
 
       loadBalancer.addListener("HttpsListener", {
         port: 443,
