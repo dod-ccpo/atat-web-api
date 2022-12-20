@@ -1,10 +1,7 @@
 import createReport from "docx-templates";
 import fs from "fs";
 import * as path from "path";
-import juice, { ignoredPseudos } from "juice";
 import * as dow from "../models/document-generation/description-of-work";
-// import PizZip from "pizzip";
-// import DocxTemplater from "docxtemplater";
 
 export async function handler(body: any) {
   const { documentType, templatePayload } = body;
@@ -29,6 +26,114 @@ export async function handler(body: any) {
           }
           return number;
         },
+        filterCloudSupport: (cloudSupportPackage:any) => {
+
+          let impactLevel2:any = [];
+          let impactLevel4:any = []; 
+          let impactLevel5:any = []; 
+          let impactLevel6:any = [];
+          //iterate over Cloud Support Package
+          cloudSupportPackage.instanceConfigurations.forEach((plan:any) => {
+            plan.portabilityPlan.forEach((item:any) => {
+              switch(item.classificationLevel.impactLevel.impactLevel){
+                      case dow.ImpactLevel.IL2:
+                        impactLevel2.push(item);
+                        break;
+                      case dow.ImpactLevel.IL4:
+                        impactLevel4.push(item);
+                        break;
+                      case dow.ImpactLevel.IL5:
+                        impactLevel5.push(item);
+                        break;
+                      default:
+                        impactLevel6.push(item);
+                    }
+            })
+            plan.advisoryAndAssistance.forEach((item:any) => {
+              switch(item.classificationLevel.impactLevel.impactLevel){
+                      case dow.ImpactLevel.IL2:
+                        impactLevel2.push(item);
+                        break;
+                      case dow.ImpactLevel.IL4:
+                        impactLevel4.push(item);
+                        break;
+                      case dow.ImpactLevel.IL5:
+                        impactLevel5.push(item);
+                        break;
+                      default:
+                        impactLevel6.push(item);
+                    }
+            })
+            plan.helpDesk.forEach((item:any) => {
+              switch(item.classificationLevel.impactLevel.impactLevel){
+                      case dow.ImpactLevel.IL2:
+                        impactLevel2.push(item);
+                        break;
+                      case dow.ImpactLevel.IL4:
+                        impactLevel4.push(item);
+                        break;
+                      case dow.ImpactLevel.IL5:
+                        impactLevel5.push(item);
+                        break;
+                      default:
+                        impactLevel6.push(item);
+                    }
+            })
+            plan.training.forEach((item:any) => {
+              switch(item.classificationLevel.impactLevel.impactLevel){
+                      case dow.ImpactLevel.IL2:
+                        impactLevel2.push(item);
+                        break;
+                      case dow.ImpactLevel.IL4:
+                        impactLevel4.push(item);
+                        break;
+                      case dow.ImpactLevel.IL5:
+                        impactLevel5.push(item);
+                        break;
+                      default:
+                        impactLevel6.push(item);
+                    }
+            })
+            plan.docSupport.forEach((item:any) => {
+              switch(item.classificationLevel.impactLevel.impactLevel){
+                      case dow.ImpactLevel.IL2:
+                        impactLevel2.push(item);
+                        break;
+                      case dow.ImpactLevel.IL4:
+                        impactLevel4.push(item);
+                        break;
+                      case dow.ImpactLevel.IL5:
+                        impactLevel5.push(item);
+                        break;
+                      default:
+                        impactLevel6.push(item);
+                    }
+            })
+            plan.generalXaaS.forEach((item:any) => {
+              switch(item.classificationLevel.impactLevel.impactLevel){
+                      case dow.ImpactLevel.IL2:
+                        impactLevel2.push(item);
+                        break;
+                      case dow.ImpactLevel.IL4:
+                        impactLevel4.push(item);
+                        break;
+                      case dow.ImpactLevel.IL5:
+                        impactLevel5.push(item);
+                        break;
+                      default:
+                        impactLevel6.push(item);
+                    }
+            })
+          })
+          let data = {
+            il2: impactLevel2,
+            il4: impactLevel4,
+            il5: impactLevel5,
+            il6: impactLevel6
+          }
+          console.log(data);
+          return data;
+          },
         //fully implemented
         checkForCloudSupport: () => {
           if(templatePayload.cloudSupportPackage.length > 0){
@@ -90,8 +195,6 @@ export async function handler(body: any) {
       })
       return numInstances;
     },
-      //coming back to this one... need to finish the dow
-      //TODO FIX THE CALCULATION
         calcAvgDataEgress: () => {
           let gbEgress = 0;
           let pbEgress = 0;
@@ -152,18 +255,6 @@ export async function handler(body: any) {
 
           }*/
         }
-        // add commas to amounts
-        // estimatedTaskOrderValue: templatePayload.estimatedTaskOrderValue.toLocaleString("en-US"),
-        // initialAmount: templatePayload.initialAmount.toLocaleString("en-US"),
-        // remainingAmount: templatePayload.remainingAmount.toLocaleString("en-US"),
-        // getDocInfo: () => {
-        //   const fundingDoc = templatePayload.fundingDocument;
-        //   const docType = fundingDoc.fundingType;
-        //   if (docType === "MIPR") {
-        //     return `MIPR #: ${fundingDoc.miprNumber}`;
-        //   }
-        //   return `GT&C #: ${fundingDoc.gtcNumber} and Order #: ${fundingDoc.orderNumber}`;
-        // },
       },
       cmdDelimiter: ["{", "}"],
     });
@@ -194,7 +285,15 @@ const body = {
     }],
     crossDomainSolution: {
       crossDomainSolutionRequired: true,
-      trafficPerDomainPair: "50",
+      trafficPerDomainPair: [{
+        name: "U_TO_S",
+        dataQuantity: 500
+      },
+      {
+        name: "S_TO_U",
+        dataQuantity: 50,
+      }
+    ],
       projectedFileStreamType: "xml",
       anticipatedNeedOrUsage: "Unknown",
     },
@@ -205,51 +304,83 @@ const body = {
 
       },
       instanceConfigurations: [{
-        environmentInstance: {
+        // environmentInstance: {
 
-        },
-        computeInstance: {
+        // },
+        // computeInstance: {
 
-        },
-        databaseInstance: {
+        // },
+        // databaseInstance: {
 
-        },
-        portabilityPlan:{
+        // },
+        portabilityPlan:[{
           cloudServiceOffering: dow.ServiceOfferingGroup.PORTABILITY_PLAN,
           classificationInstances: [{
             dowTaskNumber: "ABC123",
           }],
           otherServiceOffering: "Something?",
+          //refactor
           durationOfTaskOrder: true,
           statementOfObjectives: " Something else ",
           cspOnSiteAccess: true,
           classificationLevel: { 
-            classification: [dow.Classification.S, dow.Classification.U],
             impactLevel: {
-              impactLevel: [dow.ImpactLevel.IL2, dow.ImpactLevel.IL4]
+              impactLevel: dow.ImpactLevel.IL2
             },
         },
-      },
-        advisoryAndAssistance: {
-          classificationLevel: {
-            classification: [dow.ImpactLevel.IL4, dow.ImpactLevel.IL6]
-          },
-          cspOnSiteAccess: false,
-          statementOfObjective: "Shouldn't print"
-        },
-        helpDesk: {
-
-        },
-        training: {
-
-        },
-        docSupport: {
-
-        },
-        generalXaaS: {
-
-        }
+        planRequired: true,
       }],
+        advisoryAndAssistance: [{
+          cloudServiceOffering: dow.ServiceOfferingGroup.ADVISORY_ASSISTANCE,
+          cspOnSiteAccess: true,
+          statementOfObjectives: "Some statement",
+          classificationLevel: { 
+            impactLevel: {
+              impactLevel: dow.ImpactLevel.IL2
+            },
+        }
+        }],
+        helpDesk: [{
+          classificationLevel: { 
+            cloudServiceOffering: dow.ServiceOfferingGroup.HELP_DESK_SERVICES,
+            impactLevel: {
+              impactLevel: dow.ImpactLevel.IL2
+            },
+        },
+      }],
+        training: [{
+          cloudServiceOffering: dow.ServiceOfferingGroup.TRAINING,
+          classificationLevel: { 
+            impactLevel: {
+              impactLevel: dow.ImpactLevel.IL2
+            },
+          },
+            canTrainInUnclassEnv: true,
+            trainingLocation: "DC",
+            trainingRequirementTitle: "NetHunter",
+            trainingTimeZone: "EST",
+            personnelOnsiteAccess: false,
+            trainingFacilityType: dow.FacilityType.NON_GOVERNMENT_FACILITY,
+            trainingFormat: dow.TrainingFormat.VIRTUAL_INSTRUCTOR,
+            personnelRequiringTraining: 25,
+            statementOfObjectives: "Some statement"
+        
+      }],
+        docSupport: [{
+          classificationLevel: { 
+            impactLevel: {
+              impactLevel: dow.ImpactLevel.IL4
+            },
+        },
+      }],
+        generalXaaS: [{
+          classificationLevel: { 
+            impactLevel: {
+              impactLevel: dow.ImpactLevel.IL4
+            },
+        }
+      }]
+    }],
     },
     periodOfPerformance: {
       basePeriod: {
@@ -287,7 +418,7 @@ const body = {
           classificationLevel: { 
             classification: [dow.Classification.S, dow.Classification.U],
             impactLevel: {
-              impactLevel: [dow.ImpactLevel.IL2, dow.ImpactLevel.IL4]
+              impactLevel: [dow.ImpactLevel.IL4, dow.ImpactLevel.IL4]
             },
             additionalInformation: "Cloud"
           },
@@ -382,7 +513,6 @@ const body = {
   ],
     },
     xaasOfferings: {
-      //{EXEC IL2Compute = xaasOfferings.computeInstances} 4.2
        //All basic Subtasks for DOW (i.e Name/Description)
       xaasServiceOffering: {
         application: [{
@@ -396,7 +526,7 @@ const body = {
           },
           classificationLevel: {
             classification: dow.Classification.U,
-            impactLevel: dow.ImpactLevel.IL2
+            impactLevel: dow.ImpactLevel.IL4
           }
         }],
         developerTools: [{
@@ -410,7 +540,7 @@ const body = {
           },
           classificationLevel: {
             classification: dow.Classification.U,
-            impactLevel: dow.ImpactLevel.IL2
+            impactLevel: dow.ImpactLevel.IL4
           }
         },{          
           name: "Some Dev Tool - Too",
@@ -423,7 +553,7 @@ const body = {
         },
         classificationLevel: {
           classification: dow.Classification.U,
-          impactLevel: dow.ImpactLevel.IL2
+          impactLevel: dow.ImpactLevel.IL4
         }}],
         edgeComputing: [{
           name: "Some Edge Comp",
@@ -436,7 +566,7 @@ const body = {
           },
           classificationLevel: {
             classification: dow.Classification.U,
-            impactLevel: dow.ImpactLevel.IL2
+            impactLevel: dow.ImpactLevel.IL4
           }
         }],
         generalXaaS: [{
@@ -450,7 +580,7 @@ const body = {
           },
           classificationLevel: {
             classification: dow.Classification.U,
-            impactLevel: dow.ImpactLevel.IL2
+            impactLevel: dow.ImpactLevel.IL4
           }
         }],
         iot: [{
@@ -464,7 +594,7 @@ const body = {
           },
           classificationLevel: {
             classification: dow.Classification.U,
-            impactLevel: dow.ImpactLevel.IL2
+            impactLevel: dow.ImpactLevel.IL4
           }
         }],
         machineLearning: [{
@@ -478,7 +608,7 @@ const body = {
           },
           classificationLevel: {
             classification: dow.Classification.U,
-            impactLevel: dow.ImpactLevel.IL2
+            impactLevel: dow.ImpactLevel.IL4
           }
         }],
         networking: [{
@@ -492,7 +622,7 @@ const body = {
           },
           classificationLevel: {
             classification: dow.Classification.U,
-            impactLevel: dow.ImpactLevel.IL2
+            impactLevel: dow.ImpactLevel.IL4
           }
         }],
         security: [{
@@ -506,7 +636,7 @@ const body = {
           },
           classificationLevel: {
             classification: dow.Classification.U,
-            impactLevel: dow.ImpactLevel.IL2
+            impactLevel: dow.ImpactLevel.IL4
           }
         }]
       },
@@ -520,7 +650,7 @@ const body = {
           storageType: dow.StorageType.ARCHIVE,
           classificationLevel: {
             classification: dow.Classification.U,
-            impactLevel: dow.ImpactLevel.IL2
+            impactLevel: dow.ImpactLevel.IL4
           }
         }],
         computeInstances: [ 
@@ -558,13 +688,13 @@ const body = {
           memoryUnit: dow.StorageUnit.GB,
           dataEgressMonthlyAmount: 275,
           dataEgressMonthlyUnit: dow.StorageUnit.TB,
-          operatingEnvironment: dow.OperatingEnvironment.SERVERLESS, //STRINGIFY IT
+          operatingEnvironment: dow.OperatingEnvironment.SERVERLESS,
           selectedClassificationLevels: {
             //Anticipated Future needs
-            usersIncrease: true,
+            usersIncrease: false,
             usersGrowthEstimatedPercentage: 14,
             usersGrowthEstimateType: dow.GrowthEstimateType.MULTIPLE,
-            dataIncreate: true,
+            dataIncrease: false,
             dataGrowthEstimatedPercentage: "12",
             dataGrowthEstimateType: dow.GrowthEstimateType.SINGLE
           }
@@ -578,7 +708,7 @@ const body = {
           needForEntierTaskOrderDuration: true,
           classificationLevel: {
             classification: dow.Classification.U,
-            impactLevel: dow.ImpactLevel.IL2
+            impactLevel: dow.ImpactLevel.IL4
           },
           instanceLocation: dow.InstanceLocation.CLOUD,
           deployedRegions: [{
@@ -608,48 +738,64 @@ const body = {
             //Anticipated Future needs
             usersIncrease: true,
             usersGrowthEstimatedPercentage: 14,
-            usersGrowthEstimateType: dow.GrowthEstimateType.MULTIPLE,
+            usersGrowthEstimateType: dow.GrowthEstimateType.SINGLE,
             dataIncreate: true,
             dataGrowthEstimatedPercentage: "12",
-            dataGrowthEstimateType: dow.GrowthEstimateType.SINGLE
+            dataGrowthEstimateType: dow.GrowthEstimateType.MULTIPLE
           }
         },
-        // {
-        //   //should not be in IL2
-        //   environmentType: dow.EnvironmentType.PROD_STAGING,
-        //   anticipatedNeedOrUsage: "Test String",
-        //   osLicensing: dow.Licensing.NEW,
-        //   instanceName: "Prod Prod",
-        //   numberOfInstances: 5,
-        //   needForEntierTaskOrderDuration: true,
-        //   classificationLevel: {
-        //     classification: dow.Classification.U,
-        //     impactLevel: dow.ImpactLevel.IL4
-        //   },
-        //   instanceLocation: dow.InstanceLocation.CLOUD,
-        //   region: dow.Region.CONUS,
-        //   performanceTier: dow.PerformanceTier.COMPUTE,
-        //   pricingModel: dow.PricingModel.PAY_AS_YOU_GO,
-        //   pricingModelExpiration: "2023-06-24", //TODO add in date formatting
-        //   licensing: "OSS License",
-        //   operatingSystem: "Kali Linux",
-        //   numberOfvCPUs: 10,
-        //   processorSpeed: 4.7,
-        //   storageType: dow.StorageType.BLOCK,
-        //   storageAmount: 500,
-        //   storageUnit: dow.StorageUnit.TB,
-        //   memoryAmount: 256,
-        //   memoryUnit: dow.StorageUnit.GB,
-        //   dataEgressMonthlyAmount: 275,
-        //   dataEgressMonthlyUnit: dow.StorageUnit.TB,
-        //   operatingEnvironment: dow.OperatingEnvironment.SERVERLESS 
-        // }
+        {
+          environmentType: dow.EnvironmentType.DEV_TEST,
+          anticipatedNeedOrUsage: "Test String",
+          osLicensing: dow.Licensing.NEW,
+          instanceName: "Dev Too",
+          numberOfInstances: 10,
+          needForEntierTaskOrderDuration: true,
+          classificationLevel: {
+            classification: dow.Classification.U,
+            impactLevel: dow.ImpactLevel.IL5
+          },
+          instanceLocation: dow.InstanceLocation.CLOUD,
+          deployedRegions: [{
+            usersPerRegion: 50,
+            regions: [dow.Region.CENTCOM],
+          },
+          {
+            usersPerRegion: 1000,
+            regions: [dow.Region.CENTCOM]
+          }],
+          performanceTier: dow.PerformanceTier.COMPUTE,
+          pricingModel: dow.PricingModel.PAY_AS_YOU_GO,
+          pricingModelExpiration: "2023-06-24", //TODO add in date formatting
+          licensing: "OSS License",
+          operatingSystem: "Kali Linux",
+          numberOfvCPUs: 10,
+          processorSpeed: 4.7,
+          storageType: dow.StorageType.BLOCK,
+          storageAmount: 500,
+          storageUnit: dow.StorageUnit.TB,
+          memoryAmount: 256,
+          memoryUnit: dow.StorageUnit.GB,
+          dataEgressMonthlyAmount: 275,
+          dataEgressMonthlyUnit: dow.StorageUnit.TB,
+          operatingEnvironment: dow.OperatingEnvironment.SERVERLESS,
+          selectedClassificationLevels: {
+            //Anticipated Future needs
+            usersIncrease: false,
+            usersGrowthEstimatedPercentage: 14,
+            usersGrowthEstimateType: dow.GrowthEstimateType.MULTIPLE,
+            dataIncrease: false,
+            dataGrowthEstimatedPercentage: "12",
+            dataGrowthEstimateType: dow.GrowthEstimateType.SINGLE
+          },
+        },
+
       ],
         databaseInstances: [{
           anticipatedNeedOrUsage: "Test String",
           osLicensing: dow.Licensing.NEW,
           instanceName: "Dev Too",
-          numberOfInstances: 10,
+          numberOfInstances: 2,
           needForEntierTaskOrderDuration: true,
           classificationLevel: {
             classification: dow.Classification.U,
@@ -685,7 +831,7 @@ const body = {
           anticipatedNeedOrUsage: "Test String",
           osLicensing: dow.Licensing.NEW,
           instanceName: "Dev Too",
-          numberOfInstances: 10,
+          numberOfInstances: 4,
           needForEntierTaskOrderDuration: true,
           classificationLevel: {
             classification: dow.Classification.U,
@@ -716,28 +862,49 @@ const body = {
           dataEgressMonthlyUnit: dow.StorageUnit.TB,
           databaseType: dow.DatabaseType.GRAPH,
           databaseLicensing: dow.Licensing.NEW
-        }],
-
+        },        
+        {
+          anticipatedNeedOrUsage: "Test String",
+          osLicensing: dow.Licensing.NEW,
+          instanceName: "Dev Too",
+          numberOfInstances: 5,
+          needForEntierTaskOrderDuration: true,
+          classificationLevel: {
+            classification: dow.Classification.U,
+            impactLevel: dow.ImpactLevel.IL5
+          },
+          instanceLocation: dow.InstanceLocation.CLOUD,
+          deployedRegions: [{
+            usersPerRegion: 500,
+            regions: [dow.Region.CENTCOM],
+          },
+          {
+            usersPerRegion: 10000,
+            regions: [dow.Region.CENTCOM]
+          }],
+          performanceTier: dow.PerformanceTier.COMPUTE,
+          pricingModel: dow.PricingModel.PAY_AS_YOU_GO,
+          pricingModelExpiration: "2023-06-24", //TODO add in date formatting
+          licensing: "OSS License",
+          operatingSystem: "Kali Linux",
+          numberOfvCPUs: 10,
+          processorSpeed: 4.7,
+          storageType: dow.StorageType.BLOCK,
+          storageAmount: 500,
+          storageUnit: dow.StorageUnit.TB,
+          memoryAmount: 256,
+          memoryUnit: dow.StorageUnit.GB,
+          dataEgressMonthlyAmount: 275,
+          dataEgressMonthlyUnit: dow.StorageUnit.TB,
+          databaseType: dow.DatabaseType.GRAPH,
+          databaseLicensing: dow.Licensing.NEW
+        },
+      ],
       }
     },
 
   }
-    //   requirementsTitle: "Versatile Demo Package",
-  //   missionOwner: " Jewel Heart",
-  //   estimatedTaskOrderValue: (125000.55).toLocaleString("en-US"),
-  //   initialAmount: 50000.55,
-  //   remainingAmount: 75000,
-  //   // fundingDocument: { fundingType: "MIPR", miprNumber: "234234" },
-  //   fundingDocument: { fundingType: "FS_FORM", gtcNumber: "234234", orderNumber: "O-23434-34234" },
-  //   requirementAmountIncrements: [
-  //     { amount: 25000, description: "2nd QTR FY23", order: 1 },
-  //     { amount: 50000, description: "3rd QTR FY23", order: 2 },
-  //   ],
-  //   scheduleText:
-  //     "Funding Increment #1:\n2nd QTR FY23 - $25,000.00\n\nFunding Increment #2:\n3rd QTR FY23 - $50,000.00",
-  //   contractNumber: "TBD",
-  //   taskOrderNumber: "TBD",
-  // },
+
 };
 
 handler(body);

@@ -187,16 +187,16 @@ export interface IDatabaseEnvironmentInstance {
 }
 
 export enum FacilityType {
-    GOVERNMENT_FACILITY,
-    NON_GOVERNMENT_FACILITY
+    GOVERNMENT_FACILITY = "Government Facility",
+    NON_GOVERNMENT_FACILITY = "Non-Government Facility"
 }
 
 export enum TrainingFormat {
-    ONSITE_INSTRUCTOR_CONUS,
-    ONSITE_INSTRUCTOR_OCONUS,
-    VIRTUAL_INSTRUCTOR,
-    VIRTUAL_SELF_LED,
-    NO_PREFERENCE
+    ONSITE_INSTRUCTOR_CONUS = "Onsite - Instructor Led - CONUS",
+    ONSITE_INSTRUCTOR_OCONUS = "Onsite - Instructor Led - OCONUS",
+    VIRTUAL_INSTRUCTOR = "Virtual - Instructor Led",
+    VIRTUAL_SELF_LED = "Virtual - Self Paced",
+    NO_PREFERENCE = "No Preference"
 }
 /** @description Details related Cloud Support Packages for the Selected Service Offering */
 export interface ICloudSupportEnvironmentInstance extends IEnvironmentInstance {
@@ -283,7 +283,7 @@ export interface IClassificationLevel {
 
 /** @description Describes the classified information in a Classification Instance */
 export interface IClassifiedInformationType extends IGeneralInformation{
-    
+
     
 } 
 
@@ -371,26 +371,26 @@ export interface ServiceOffering extends IGeneralInformation {
 } 
 /** @enum {string} */
 export enum ServiceOfferingGroup {
-    ADVISORY_ASSISTANCE,
-    TRAINING,
-    PORTABILITY_PLAN,
-    HELP_DESK_SERVICES,
-    DOCUMENTATION_SUPPORT,
-    GENERAL_CLOUD_SUPPORT
+    ADVISORY_ASSISTANCE = "Advisory Assistance",
+    TRAINING = "Training",
+    PORTABILITY_PLAN = "Portability Plan",
+    HELP_DESK_SERVICES = "Help Desk Services",
+    DOCUMENTATION_SUPPORT = "Documentation Support",
+    GENERAL_CLOUD_SUPPORT = "General Cloud Support"
 }  
 
 export enum XaasServiceOfferingGroup {
-    APPLICATIONS, //YES
-    COMPUTE, //created
-    DATABASE, //object (databaseInstance)
-    STORAGE, //YES
-    DEVELOPER_TOOLS, //YES
-    EDGE_COMPUTING, //YES
-    GENERAL_XAAS, //YES
-    IOT, //YES 
-    MACHINE_LEARNING, //Yes
-    NETWORKING, //Yes
-    SECURITY //Yes
+    APPLICATIONS, 
+    COMPUTE, 
+    DATABASE, 
+    STORAGE, 
+    DEVELOPER_TOOLS, 
+    EDGE_COMPUTING, 
+    GENERAL_XAAS, 
+    IOT, 
+    MACHINE_LEARNING, 
+    NETWORKING, 
+    SECURITY
 }
 
 export interface GeneralSubtask {
@@ -565,42 +565,47 @@ const period = {
     },
   };
 
+const classifiedInformationTypes = {
+    type: "object",
+    properties: {
+        name: {type: "string"},
+        description: {type: "string"},
+        sequence: {type: "integer"}
+    }
+}
+
 const classificationInstance = {
     type: "object",
     properties: {
         usageDescription: {type: "string"},
         classificationLevel,
-        //TODO Identify the classifiedInformationTypes and declare it
-        //classifiedInformationTypes:
+        classifiedInformationTypes,
         dowTaskNumber: {type: "string"},
         needForEntireTaskOrderDuration: {type: "boolean"},
         selectedPeriods: {type: "array", items: period}
     }
 }
-//1 level
+
 const selectedServiceOffering = {
     type: "object",
     properties: {
         cloudServiceOffering,
-        classificationInstances: { type: "array", items: classificationInstance },
-        otherServiceOffering: { type: "string" },
-        portabilityPlan: {type: "boolean"},
+        //classificationInstances: { type: "array", items: classificationInstance },
+        //otherServiceOffering: { type: "string" },
+        //portabilityPlan: {type: "boolean"},
         statementOfObjectives: {type: "string"},
         durationOfTaskOrder: {type: "boolean"},
+        partOfTaskOrder: {type: "array", items: period},
         cspOnSiteAccess: {type: "boolean"},
         classificationLevel
     }
 }
 
-
-
-//Lua : 4.2.1 | 4.2.2 | 4.2.3 | 4.2.4 | 4.2.5
-//Anticipated future needs:
 const selectedClassificationLevels = {
     type: "object",
     properties: {
         classificationLevel: {type: "array", items: classificationLevel},
-        //classifiedInformationTypes: IClassifiedInformationType[];
+        //classifiedInformationTypes: IClassifiedInformationType[]; //name, description, sequence ONLY!
         usersPerRegion: {type: "integer"},
         dataEgressMonthlyAmount: {type: "integer"},
         dataEgressMonthlyUnit: {
@@ -830,17 +835,53 @@ const portabilityPlan = {
         planRequired: {type: "boolean"}
     }
 }
+export interface ITrafficPerDomainPair {
+    name: string,
+    dataTransfer: number
+}
 
-const crossDomainSolutions = {
+const trafficPerDomainPair = {
+    type: "object",
+    properties: {
+        name: {type: "string"},
+        dataQuantity: {type: "integer"}
+    }
+}
+
+const crossDomainSolution = {
     type: "object",
     properties: {
         crossDomainSolutionRequired: {type: "boolean"},
         anticipatedNeedOrUsage: {type: "string"},
         needForEntireTaskOrderDuration: {type: "boolean"},
         selectedPeriods: {type: "array", items: period},
-        trafficPerDomainPair: {type: "string"},
+        trafficPerDomainPair: {type: "array", items: trafficPerDomainPair},
+        //trafficPerDomainPair: {type: "string"},
         projectedFileStreamType: {type: "string"}
 
+    }
+}
+
+const cloudSupportEnvironmentInstance = {
+    type: "object",
+    properties: {
+        canTrainInUnclassEnv: {type: "boolean"},
+        trainingLocation: {type: "string"},
+        trainingRequirementTitle: {type: "string"},
+        trainingTimeZone: {type: "string"},
+        personnelOnsiteAccess: {type: "boolean"},
+        trainingFacilityType: FacilityType,
+        trainingFormat: TrainingFormat,
+        personnelRequiringTraining: {type: "number"},
+        serviceType: ServiceOfferingGroup
+    }
+}
+
+const training = {
+    type: "object",
+    properties: {
+        ...selectedServiceOffering,
+        cloudSupportEnvironmentInstance
     }
 }
 
@@ -850,15 +891,17 @@ const cloudSupportPackage = {
         instanceConfigurations: {
             type: "array",
             items: {
-                environmentInstance,
-                computeInstance,
-                databaseInstance,
+                //maybe we can remove the "instances???"
+                // environmentInstance,
+                // computeInstance,
+                // databaseInstance,
+                // classificationLevel,
                 portabilityPlan,
-                advisoryAndAssistance: selectedServiceOffering,
-                helpDesk: selectedServiceOffering,
-                training: selectedServiceOffering,
-                docSupport: selectedServiceOffering,
-                generalXaaS: selectedServiceOffering
+                advisoryAndAssistance: {type: "array", items: selectedServiceOffering},
+                helpDesk: {type: "array", items: selectedServiceOffering},
+                training: {type: "array", items: training},
+                docSupport: {type: "array", items: selectedServiceOffering},
+                generalXaaS: {type: "array", items: selectedServiceOffering},
             }
         }
     }
@@ -885,7 +928,7 @@ const DescriptionOfWork = {
         scopeSurge: {type: "integer"},
         currentEnvironment,
         xaasOfferings,
-        crossDomainSolutions,
+        crossDomainSolution,
         cloudSupportPackage,
         periodOfPerformance
     }
