@@ -902,7 +902,48 @@ const body = {
       ],
       }
     },
-
+    contractConsiderations: {
+      // 10a
+      potentialConflictOfInterest: true,
+      conflictOfInterestExplanation: "Company investment in same solutions.",
+      // 10b
+      packagingShippingNoneApply: false,
+      // packagingShippingOther: false,
+      // packagingShippingOtherExplanation: "",
+      packagingShippingOther: true,
+      packagingShippingOtherExplanation: "We have a private carrier being used.",
+      contractorProvidedTransfer: false,
+      // piiPresent: false,
+      // systemOfRecordName: "",
+      piiPresent: true,
+      systemOfRecordName: "System Cool Name",
+      // testing empty travel
+      // travel: [],
+      travel: [
+        {
+          durationInDays: 14,
+          numberOfTravelers: 2,
+          numberOfTrips: 6,
+          selectedPeriods: [{ periodType: "OPTION", periodUnitCount: 7, periodUnit: "MONTH", optionOrder: 1 }],
+          tripLocation: "Canada",
+        },
+        {
+          durationInDays: 4,
+          numberOfTravelers: 1,
+          numberOfTrips: 8,
+          selectedPeriods: [{ periodType: "OPTION", periodUnitCount: 7, periodUnit: "MONTH", optionOrder: 1 }],
+          tripLocation: "Washington DC",
+        },
+        {
+          durationInDays: 160,
+          numberOfTravelers: 5,
+          numberOfTrips: 2,
+          selectedPeriods: [{ periodType: "OPTION", periodUnitCount: 7, periodUnit: "MONTH", optionOrder: 1 }],
+          tripLocation: "Europe",
+        },
+      ],
+    },
+    sensitiveInformation: { section508Sufficient: true, accessibilityReqs508: "Some requirments for section 508." },
   }
 
 };
