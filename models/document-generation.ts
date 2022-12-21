@@ -8,7 +8,8 @@ export enum AwardType {
 }
 
 export enum DocumentType {
-  DESCRIPTION_OF_WORK = "DESCRIPTION_OF_WORK",
+  DESCRIPTION_OF_WORK_PDF = "DESCRIPTION_OF_WORK_PDF",
+  DESCRIPTION_OF_WORK_DOCX = "DESCRIPTION_OF_WORK_DOCX",
   INDEPENDENT_GOVERNMENT_COST_ESTIMATE = "INDEPENDENT_GOVERNMENT_COST_ESTIMATE",
   INCREMENTAL_FUNDING_PLAN = "INCREMENTAL_FUNDING_PLAN",
   EVALUATION_PLAN = "EVALUATION_PLAN",
@@ -104,7 +105,8 @@ export enum EvalPlanMethod {
   LOWEST_RISK = "LOWEST_RISK",
 }
 export interface TemplatePaths {
-  [DocumentType.DESCRIPTION_OF_WORK]: { html: string; css: string };
+  [DocumentType.DESCRIPTION_OF_WORK_PDF]: { html: string; css: string };
+  [DocumentType.DESCRIPTION_OF_WORK_DOCX]: { docx: string; };
   [DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE]: { excel: string };
   [DocumentType.INCREMENTAL_FUNDING_PLAN]: { docx: string };
   [DocumentType.EVALUATION_PLAN]: { docx: string };
@@ -338,6 +340,7 @@ const classificationLevel = {
   properties: {
     classification: { enum: [Classification.U, Classification.S, Classification.TS] },
     impactLevel: { enum: [ImpactLevel.IL2, ImpactLevel.IL4, ImpactLevel.IL5, ImpactLevel.IL6, null] },
+    display: { type: "string" }
   },
 };
 
@@ -379,6 +382,20 @@ const currentEnvironment = {
   properties: {
     currentEnvironmentExists: { type: "boolean" },
     environmentInstances: { type: "array", items: environmentInstance },
+    hasSystemDocumentation: { type: "boolean" },
+    hasMigrationDocumentation: { type: "boolean" },
+    envLocation: { type: "string" },
+    envClassificationCloud: {type: "array", items: classificationLevel},
+    envClassificationOnprem: {type: "array", items: classificationLevel},
+    envInstances: {type: "array", items: { type: "object"}},
+    additionalGrowth: { type: "boolean" },
+    anticipatedYearlyAdditionalCapacity: { type: "integer" },
+    currentEnvironmentReplicatedOptimized: { type: "string" },
+    statementReplicated: { type: "string" },
+    hasPhasedApproach: { type: "boolean" },
+    phasedApproachSchedule: { type: "string" },
+    needsArchitecturalDesignServices: { type: "boolean" },
+    architecturalDesignRequirement: { type: "array", items: { type: "object"} },
     additionalInfo: { type: "string" },
   },
 };
@@ -459,6 +476,10 @@ const gfeOverview = {
   },
 };
 
+const travel = {
+  type: "array",
+  items: { type: "object" },
+}
 const contractConsiderations = {
   type: "object",
   properties: {
@@ -468,28 +489,15 @@ const contractConsiderations = {
     potentialConflictOfInterest: { type: "boolean" },
     conflictOfInterestExplanation: { type: "string" },
     contractorProvidedTransfer: { type: "boolean" },
-    contractorRequiredTraining: { type: "boolean" },
-    requiredTrainingServices: { type: "array", items: { type: "string" } },
+    piiPresent: { type: "boolean" },
+    systemOfRecordName: { type: "string" },
+    travel,
   },
 };
 
 const section508AccessibilityStandards = {
   type: "object",
   properties: {
-    piiPresent: { type: "boolean" },
-    workToBePerformed: { type: "string" },
-    systemOfRecordName: { type: "string" },
-    FOIACityApoFpo: { type: "string" },
-    FOIACountry: { type: "string" },
-    FOIAStreetAddress1: { type: "string" },
-    FOIAStreetAddress2: { type: "string" },
-    FOIAAddressType: { enum: [AddressType.FOREIGN, AddressType.MILITARY, AddressType.US, null] },
-    FOIAStateProvinceCode: { type: "string" },
-    FOIAFullName: { type: "string" },
-    FOIAEmail: { type: "string" },
-    FOIAZipPostalCode: { type: "string" },
-    BAARequired: { type: "boolean" },
-    potentialToBeHarmful: { type: "boolean" },
     section508Sufficient: { type: "boolean" },
     accessibilityReqs508: { type: "string" },
   },
@@ -504,11 +512,16 @@ const descriptionOfWork = {
     scope: { type: "string" },
     scopeSurge: { type: "integer" },
     currentEnvironment,
-    selectedServiceOfferings: { type: "array", items: selectedServiceOfferings },
+    selectedClassificationLevels: { type: "array", items: { type: "object"}},
+    xaasOfferings: { type: "array", items: { type: "object"} },
+    crossDomainSolutions: { type: "object"},
+    cloudSupportPackages: { type: "array", items: { type: "object"}},
+    // TODO: add contract type to SNOW  Dow script include
+    contractType: { type: "object", },
     periodOfPerformance,
-    gfeOverview,
+    securityRequirements: { type: "array", items: { type: "object"}},
     contractConsiderations,
-    section508AccessibilityStandards,
+    sensitiveInformation: section508AccessibilityStandards,
   },
   additionalProperties: false,
 };
@@ -642,7 +655,8 @@ export const generateDocumentSchema = {
   properties: {
     documentType: {
       enum: [
-        DocumentType.DESCRIPTION_OF_WORK,
+        DocumentType.DESCRIPTION_OF_WORK_PDF,
+        DocumentType.DESCRIPTION_OF_WORK_DOCX,
         DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE,
         DocumentType.INCREMENTAL_FUNDING_PLAN,
         DocumentType.EVALUATION_PLAN,
