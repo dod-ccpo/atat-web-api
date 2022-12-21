@@ -1,4 +1,5 @@
 import * as cdk from "aws-cdk-lib";
+import * as kms from "aws-cdk-lib/aws-kms";
 import { Template } from "aws-cdk-lib/assertions";
 import { AtatNotificationStack, IamChangeRule } from "./atat-notification-stack";
 
@@ -39,8 +40,11 @@ describe("Atat Notification Stack", () => {
   it("should contain an SNS topic", async () => {
     // GIVEN
     const app = new cdk.App();
+    const keyStack = new cdk.Stack(app);
+    const key = new kms.Key(keyStack, "TestKey");
     const stack = new AtatNotificationStack(app, "TestStack", {
       notificationEmail: "foo@example.com",
+      topicEncryptionKey: key,
     });
 
     // WHEN
