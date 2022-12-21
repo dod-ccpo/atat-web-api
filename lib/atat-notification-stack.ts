@@ -47,12 +47,11 @@ export class IamChangeRule extends events.Rule {
 export class AtatNotificationStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: AtatNotificationStackProps) {
     super(scope, id);
-    const topic = new sns.Topic(this, "AtatNotifications", {masterKey: props.topicEncryptionKey});
+    const topic = new sns.Topic(this, "AtatNotifications", { masterKey: props.topicEncryptionKey });
     topic.addSubscription(new subscriptions.EmailSubscription(props.notificationEmail));
     const topicTarget = new eventTargets.SnsTopic(topic);
 
     const iamChanges = new IamChangeRule(this, "IamChanges");
     iamChanges.addTarget(topicTarget);
-    
   }
 }
