@@ -534,13 +534,6 @@ components:
       description: A single line item entered on a period sheet in the IGCE document
       type: object
       properties:
-        idiq_clin:
-          description: Contract Line Item Number from Indefinite Delivery-Indefinite Quantity (IDIQ) contract
-          type: string
-          enum:
-            - "1000_CLOUD"
-            - "2000_CLOUD_SUPPORT"
-            - "3000_OTHER"
         contract_type:
           type: string
           enum:
