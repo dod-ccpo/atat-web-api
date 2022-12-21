@@ -235,11 +235,15 @@ export interface DescriptionOfWork {
   scope: string;
   scopeSurge: number;
   currentEnvironment: ICurrentEnvironment;
-  selectedServiceOfferings: ISelectedServiceOffering[];
+  selectedClassificationLevels: Record<string, any>[];
+  xaasOfferings: Record<string, any>[];
+  crossDomainSolutions: Record<string, any>;
+  cloudSupportPackages: Record<string, any>[];
+  contractType: Record<string, any>;
   periodOfPerformance: IPeriodOfPerformance;
-  gfeOverview: IGFEOverview;
+  securityRequirements: Record<string, any>[];
   contractConsiderations: IContractConsiderations;
-  section508AccessibilityStandards: ISensitiveInformation;
+  sensitiveInformation: ISensitiveInformation;
 }
 
 export enum FundingType {
