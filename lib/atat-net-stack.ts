@@ -3,6 +3,7 @@ import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as logs from "aws-cdk-lib/aws-logs";
 import * as custom from "aws-cdk-lib/custom-resources";
 import * as route53Resolver from "aws-cdk-lib/aws-route53resolver";
+import { VpcDefaultSecurityGroupRuleRemover } from "./constructs/vpc-default-sg-rule-remove";
 
 import { Construct, DependencyGroup } from "constructs";
 
@@ -107,6 +108,15 @@ export class AtatNetStack extends cdk.Stack {
     const stepFunctionsEndpoint = vpc.addInterfaceEndpoint("StepFunctions", {
       service: ec2.InterfaceVpcEndpointAwsService.STEP_FUNCTIONS,
     });
+    const ec2Endpoint = vpc.addInterfaceEndpoint("Ec2Endpoint", {
+      service: ec2.InterfaceVpcEndpointAwsService.EC2,
+    });
+    const ec2MessagesEndpoint = vpc.addInterfaceEndpoint("Ec2MessagesEndpoint", {
+      service: ec2.InterfaceVpcEndpointAwsService.EC2_MESSAGES,
+    });
+    const cloudformationEndpoint = vpc.addInterfaceEndpoint("CloudFormationEndpoint", {
+      service: ec2.InterfaceVpcEndpointAwsService.CLOUDFORMATION,
+    });
     this.endpoints = {
       ...this.endpoints,
       apigateway: apiGatewayEndpoint,
@@ -116,6 +126,9 @@ export class AtatNetStack extends cdk.Stack {
       xray: xrayEndpoint,
       secrets: secretsManagerEndpoint,
       sfn: stepFunctionsEndpoint,
+      ec2: ec2Endpoint,
+      ec2Messages: ec2MessagesEndpoint,
+      cloudformation: cloudformationEndpoint,
     };
 
     // The firewall in our environment performs NAT, so the source IP address will
@@ -128,6 +141,12 @@ export class AtatNetStack extends cdk.Stack {
       ec2.Port.tcp(443),
       "Allow HTTPS connections via NAT to the API Gateway"
     );
+
+    // Delete all rules from the default security group of the VPC
+    const defaultSgCleanup = new VpcDefaultSecurityGroupRuleRemover(this, "RemoveDefaultSGRules", { vpc });
+    // Explicitly depend on resources that may be necessary for sending creation and deletion
+    // events.
+    defaultSgCleanup.node.addDependency(ec2Endpoint, cloudformationEndpoint, s3Endpoint);
   }
 
   private addDefaultTransitGatewayRoute(transitGatewayAttachment: ec2.CfnTransitGatewayAttachment) {
