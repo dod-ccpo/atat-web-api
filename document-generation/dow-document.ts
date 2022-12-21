@@ -2,9 +2,8 @@ import { logger } from "../utils/logging";
 import createReport from "docx-templates";
 import { DescriptionOfWork } from "../models/document-generation";
 import { ApiBase64SuccessResponse, SuccessStatusCode } from "../utils/response";
-import { getWordTemplate } from "./utils/utils";
 
-export async function generateIFPDocument(
+export async function generateDowDocument(
   template: Buffer,
   payload: DescriptionOfWork
 ): Promise<ApiBase64SuccessResponse> {

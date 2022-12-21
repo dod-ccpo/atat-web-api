@@ -17,6 +17,7 @@ import { wrapSchema } from "../utils/middleware/schema-wrapper";
 import { generateDocument } from "./chromium";
 import { generateIGCEDocument } from "./igce-document";
 import { generateIFPDocument } from "./ifp-document";
+import { generateDowDocument } from "./dow-document";
 import { getPDFDocumentTemplates, getExcelTemplatePath, getDocxTemplate } from "./utils/utils";
 import {
   generateDocumentSchema,
@@ -26,6 +27,7 @@ import {
   IndependentGovernmentCostEstimate,
   IncrementalFundingPlan,
   EvaluationPlan,
+  DescriptionOfWork,
 } from "../models/document-generation";
 import handlebars from "handlebars";
 import juice from "juice";
@@ -39,10 +41,11 @@ async function baseHandler(event: RequestEvent<GenerateDocumentRequest>): Promis
   logger.info("Generating document", { documentType });
 
   switch (documentType) {
-    case DocumentType.DESCRIPTION_OF_WORK:
+    case DocumentType.DESCRIPTION_OF_WORK_PDF:
       return generatePdf(event);
     case DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE:
       return generateXlsx(event);
+    case DocumentType.DESCRIPTION_OF_WORK_DOCX:
     case DocumentType.INCREMENTAL_FUNDING_PLAN:
     case DocumentType.EVALUATION_PLAN:
     case DocumentType.REQUIREMENTS_CHECKLIST:
@@ -87,9 +90,8 @@ async function generateDocxDocument(event: RequestEvent<GenerateDocumentRequest>
   const { documentType, templatePayload } = event.body;
   const docxTemplate = getDocxTemplate(documentType);
   switch (documentType) {
-    // TODO: Add in DoW docx generation
-    // case DocumentType.DESCRIPTION_OF_WORK_DOCX:
-    //   return generateDowDocument(wordTemplate, templatePayload as DescriptionOfWork);
+    case DocumentType.DESCRIPTION_OF_WORK_DOCX:
+      return generateDowDocument(docxTemplate, templatePayload as DescriptionOfWork);
     case DocumentType.INCREMENTAL_FUNDING_PLAN:
       return generateIFPDocument(docxTemplate, templatePayload as IncrementalFundingPlan);
     case DocumentType.EVALUATION_PLAN:
