@@ -37,17 +37,17 @@ describe("IAM Change Notifications", () => {
 });
 
 describe("Atat Notification Stack", () => {
-  it("should contain an SNS topic", async () => {
+  it("should contain an SNS topic", () => {
     // GIVEN
     const app = new cdk.App();
-    const keyStack = new cdk.Stack(app);
+    const keyStack = new cdk.Stack(app, "KeyStack");
     const key = new kms.Key(keyStack, "TestKey");
+
+    // WHEN
     const stack = new AtatNotificationStack(app, "TestStack", {
       notificationEmail: "foo@example.com",
       topicEncryptionKey: key,
     });
-
-    // WHEN
     const template = Template.fromStack(stack);
 
     // THEN
