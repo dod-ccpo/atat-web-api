@@ -61,6 +61,8 @@ function transformAsynchronousResponse(
 async function makeRequest(client: IAtatClient, request: ProvisionRequest): Promise<ProvisionCspResponse> {
   // This function will always be operating for creating new portfolios; if we have something
   // else, this will be a non-recoverable error anyway.
+  const now = new Date();
+  const provisionDeadline = now.setDate(now.getDate() + 12); // deadline in 12 days
   const payload = request.payload as NewPortfolioPayload;
   const creationRequest: atatApiTypes.AddPortfolioRequest = {
     portfolio: {
@@ -72,8 +74,7 @@ async function makeRequest(client: IAtatClient, request: ProvisionRequest): Prom
         clin: undefined,
       })),
     },
-    targetImpactLevel: request.targetImpactLevel,
-    provisionDeadline: request.provisionDeadline,
+    provisionDeadline: new Date(provisionDeadline).toISOString(),
   };
   try {
     // TODO: remove once mocking is no longer needed (e.g., mocking api implemented or actual csp integration)

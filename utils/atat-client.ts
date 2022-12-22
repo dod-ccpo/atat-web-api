@@ -9,6 +9,10 @@ export interface CspConfiguration {
    * The base URL at which the CSP implementation of the ATAT API can be reached.
    */
   uri: string;
+  /**
+   * The target Impact Level at which the CSP implementation is to be sent.
+   */
+  network: string[];
 }
 
 export async function getConfiguration(cspName: string): Promise<CspConfiguration | undefined> {
