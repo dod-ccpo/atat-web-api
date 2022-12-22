@@ -54,8 +54,13 @@ function setIamPasswordPolicy() {
  * There shouldn't be any EBS volumes but if one happens to exist, it will
  * be encrypted using the default `aws/ebs` KMS key.
  */
-function setDefaultEbsEncryption() {
-  ec2.resetEbsDefaultKmsKeyId({});
+async function setDefaultEbsEncryption() {
+  // First reset to using the default KMS key ID
+  await ec2.resetEbsDefaultKmsKeyId({});
+  const enableResult = await ec2.enableEbsEncryptionByDefault({});
+  if (!enableResult.EbsEncryptionByDefault) {
+    throw new Error("EBS Encryption by Default is not enabled");
+  }
 }
 
 blockS3PublicAccess();
