@@ -730,14 +730,18 @@ components:
         cloudSupportPackages:
           type: array
           items:
-            type: object
-            properties:
-                serviceOffering:
-                  $ref: "#/components/schemas/SelectedServiceOffering"
-                supportingInfo:
-                  $ref: "#/components/schemas/CloudSupportEnvironmentInstance"
+            $ref: "#/components/schemas/CloudSupportEnvironmentInstance"
         # DOW section 5
         # based on selected service offerings and training selected
+        contractType:
+          type: object
+          properties:
+            firmFixedPrice:
+              type: boolean
+            timeAndMaterials:
+              type: boolean
+            contractTypeJustification:
+              type: string
         # DOW section 7
         periodOfPerformance:
           $ref: "#/components/schemas/PeriodOfPerformance"
