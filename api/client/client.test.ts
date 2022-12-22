@@ -38,6 +38,7 @@ import {
 
 const TEST_API_TOKEN = "TEST-TOKEN-NOT-REAL";
 const TEST_CSP_ENDPOINT = "https://localhost/atat/api/v1";
+const TEST_CSP_NETWORKS = ["NETWORK_1", "NETWORK_2"];
 
 describe("addPortfolio", () => {
   let client: AtatClient;
@@ -49,7 +50,7 @@ describe("addPortfolio", () => {
   };
   const url = `${TEST_CSP_ENDPOINT}/portfolios`;
   beforeAll(() => {
-    client = new AtatClient(TEST_API_TOKEN, { uri: TEST_CSP_ENDPOINT });
+    client = new AtatClient(TEST_API_TOKEN, { uri: TEST_CSP_ENDPOINT, network: TEST_CSP_NETWORKS });
     // This is necessary to mock the specific instance of Axios. Perhaps we could instead
     // change the constructor to accept an optional axios instance or do something more
     // creative here. But for the time being, bypassing the visibility check and directly
@@ -99,7 +100,7 @@ describe("getPortfolioById", () => {
     id: "csp-portfolio-id-123",
   };
   beforeAll(() => {
-    client = new AtatClient(TEST_API_TOKEN, { uri: TEST_CSP_ENDPOINT });
+    client = new AtatClient(TEST_API_TOKEN, { uri: TEST_CSP_ENDPOINT, network: TEST_CSP_NETWORKS });
     // see comment in 'addPortfolio' test above for more info on the mocking axios instance
     // eslint-disable-next-line dot-notation
     mock = new MockAdapter(client["client"], { onNoMatch: "throwException" });
@@ -141,7 +142,7 @@ describe("patchPortfolio", () => {
   let mock: MockAdapter;
   const url = `${TEST_CSP_ENDPOINT}/portfolios/${portfolioId}`;
   beforeAll(() => {
-    client = new AtatClient(TEST_API_TOKEN, { uri: TEST_CSP_ENDPOINT });
+    client = new AtatClient(TEST_API_TOKEN, { uri: TEST_CSP_ENDPOINT, network: TEST_CSP_NETWORKS });
     // see comment in 'addPortfolio' test above for more info on the mocking axios instance
     // eslint-disable-next-line dot-notation
     mock = new MockAdapter(client["client"], { onNoMatch: "throwException" });
@@ -191,7 +192,7 @@ describe("getCostsByPortfolio", () => {
   let mock: MockAdapter;
   const url = `${TEST_CSP_ENDPOINT}/portfolios/${portfolioId}/cost`;
   beforeAll(() => {
-    client = new AtatClient(TEST_API_TOKEN, { uri: TEST_CSP_ENDPOINT });
+    client = new AtatClient(TEST_API_TOKEN, { uri: TEST_CSP_ENDPOINT, network: TEST_CSP_NETWORKS });
     // see comment in 'addPortfolio' test above for more info on the mocking axios instance
     // eslint-disable-next-line dot-notation
     mock = new MockAdapter(client["client"], { onNoMatch: "throwException" });
@@ -235,7 +236,7 @@ describe("addTaskOrder", () => {
   let mock: MockAdapter;
   const url = `${TEST_CSP_ENDPOINT}/portfolios/${portfolioId}/task-orders`;
   beforeAll(() => {
-    client = new AtatClient(TEST_API_TOKEN, { uri: TEST_CSP_ENDPOINT });
+    client = new AtatClient(TEST_API_TOKEN, { uri: TEST_CSP_ENDPOINT, network: TEST_CSP_NETWORKS });
     // see comment in 'addPortfolio' test above for more info on the mocking axios instance
     // eslint-disable-next-line dot-notation
     mock = new MockAdapter(client["client"], { onNoMatch: "throwException" });
@@ -284,7 +285,7 @@ describe("getCostsByClin", () => {
   const url = `${TEST_CSP_ENDPOINT}/portfolios/${portfolioId}/task-orders/${taskOrderNumber}/clins/${clin}/cost`;
   const badUrl = `${TEST_CSP_ENDPOINT}/portfolios/undefined/task-orders/undefined/clins/undefined/cost`;
   beforeAll(() => {
-    client = new AtatClient(TEST_API_TOKEN, { uri: TEST_CSP_ENDPOINT });
+    client = new AtatClient(TEST_API_TOKEN, { uri: TEST_CSP_ENDPOINT, network: TEST_CSP_NETWORKS });
     // see comment in 'addPortfolio' test above for more info on the mocking axios instance
     // eslint-disable-next-line dot-notation
     mock = new MockAdapter(client["client"], { onNoMatch: "throwException" });
@@ -330,7 +331,7 @@ describe("getProvisioningStatus", () => {
   // the url is the location used for finding the status
   const url = `${TEST_CSP_ENDPOINT}/provisioning/${provisioningJobId}/status`;
   beforeAll(() => {
-    client = new AtatClient(TEST_API_TOKEN, { uri: TEST_CSP_ENDPOINT });
+    client = new AtatClient(TEST_API_TOKEN, { uri: TEST_CSP_ENDPOINT, network: TEST_CSP_NETWORKS });
     // see comment in 'addPortfolio' test above for more info on the mocking axios instance
     // eslint-disable-next-line dot-notation
     mock = new MockAdapter(client["client"], { onNoMatch: "throwException" });
