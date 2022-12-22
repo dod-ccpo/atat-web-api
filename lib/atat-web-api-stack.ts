@@ -125,7 +125,6 @@ export class AtatWebApiStack extends cdk.Stack {
 
       loadBalancer.setAttribute("routing.http.drop_invalid_header_fields.enabled", "true");
 
-
       loadBalancer.addListener("HttpsListener", {
         port: 443,
         protocol: elbv2.ApplicationProtocol.HTTPS,

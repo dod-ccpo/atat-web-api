@@ -14,4 +14,3 @@ export class AtatSharedDataStack extends cdk.Stack {
     this.encryptionKey = key;
   }
 }
-

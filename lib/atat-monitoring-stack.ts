@@ -1,9 +1,8 @@
 import * as cdk from "aws-cdk-lib";
+import * as kms from "aws-cdk-lib/aws-kms";
 import * as sns from "aws-cdk-lib/aws-sns";
 import * as subscriptions from "aws-cdk-lib/aws-sns-subscriptions";
 import * as cdkMonitoring from "cdk-monitoring-constructs";
-//ADDED THIS
-import * as kms from "aws-cdk-lib/aws-kms";
 import { Construct } from "constructs";
 
 export interface AtatMonitoringStackProps extends cdk.StackProps {
@@ -16,9 +15,7 @@ export interface AtatMonitoringStackProps extends cdk.StackProps {
 export class AtatMonitoringStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: AtatMonitoringStackProps) {
     super(scope, id, props);
-    //ADDED THIS
     const topic = new sns.Topic(this, "MonitoringTopic", {
-      //ADDED THIS
       masterKey: props.topicEncryptionKey,
     });
     if (props?.notifiedEmail) {
