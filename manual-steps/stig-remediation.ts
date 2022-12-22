@@ -3,15 +3,21 @@
 import { IAM } from "@aws-sdk/client-iam";
 import { S3Control } from "@aws-sdk/client-s3-control";
 import { STS } from "@aws-sdk/client-sts";
+import { EC2 } from "@aws-sdk/client-ec2";
 
 const iam = new IAM({ useFipsEndpoint: true });
 const s3Control = new S3Control({ useFipsEndpoint: true });
 const sts = new STS({ useFipsEndpoint: true });
+const ec2 = new EC2({ useFipsEndpoint: true });
 
 async function getAccountId(): Promise<string> {
   return (await sts.getCallerIdentity({})).Account!;
 }
 
+/**
+ * At an account level, block public access to all S3 buckets and objects.
+ * This ensures that all access must be authenticated and authorized.
+ */
 async function blockS3PublicAccess() {
   s3Control.putPublicAccessBlock({
     AccountId: await getAccountId(),
@@ -24,6 +30,9 @@ async function blockS3PublicAccess() {
   });
 }
 
+/**
+ * Set the IAM password policy to comply with organizational requirements.
+ */
 function setIamPasswordPolicy() {
   iam.updateAccountPasswordPolicy({
     AllowUsersToChangePassword: true,
@@ -40,5 +49,15 @@ function setIamPasswordPolicy() {
   });
 }
 
+/**
+ * Use the default KMS key for EBS to encrypt all EBS volumes by default.
+ * There shouldn't be any EBS volumes but if one happens to exist, it will
+ * be encrypted using the default `aws/ebs` KMS key.
+ */
+function setDefaultEbsEncryption() {
+  ec2.resetEbsDefaultKmsKeyId({});
+}
+
 blockS3PublicAccess();
 setIamPasswordPolicy();
+setDefaultEbsEncryption();
