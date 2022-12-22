@@ -1,6 +1,7 @@
 import * as cdk from "aws-cdk-lib";
 import * as events from "aws-cdk-lib/aws-events";
 import * as eventTargets from "aws-cdk-lib/aws-events-targets";
+import * as kms from "aws-cdk-lib/aws-kms";
 import * as sns from "aws-cdk-lib/aws-sns";
 import * as subscriptions from "aws-cdk-lib/aws-sns-subscriptions";
 import { Construct } from "constructs";
@@ -11,6 +12,7 @@ export interface AtatNotificationStackProps {
    * must be sent.
    */
   notificationEmail: string;
+  topicEncryptionKey: kms.IKey;
 }
 
 export class IamChangeRule extends events.Rule {
@@ -45,7 +47,7 @@ export class IamChangeRule extends events.Rule {
 export class AtatNotificationStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: AtatNotificationStackProps) {
     super(scope, id);
-    const topic = new sns.Topic(this, "AtatNotifications");
+    const topic = new sns.Topic(this, "AtatNotifications", { masterKey: props.topicEncryptionKey });
     topic.addSubscription(new subscriptions.EmailSubscription(props.notificationEmail));
     const topicTarget = new eventTargets.SnsTopic(topic);
 
