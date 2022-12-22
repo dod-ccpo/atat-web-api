@@ -709,6 +709,8 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/SelectedClassificationLevel"
+        architecturalDesignRequirement:
+          $ref: "#/components/schemas/ArchitecturalDesignRequirement"
         xaasOfferings:
           type: array
           items:
@@ -865,8 +867,6 @@ components:
           type: boolean
         architecturalDesignRequirement:
           $ref: "#/components/schemas/ArchitecturalDesignRequirement"
-        # Q: do we add an additional property for cloud support package question?
-        # OR is it located in another place?
     EnvironmentInstance:
       description: >-
         Base instance used for various sections of information captured in a Package
@@ -1104,6 +1104,11 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ClassificationLevel"
+        source:
+          type: string
+          enum:
+            - DOW
+            - CURRENT_ENVIRONMENT
     ClassificationLevel:
       description: >-
         Represents a Classification Level for instances of a package
