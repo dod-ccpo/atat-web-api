@@ -7,7 +7,6 @@ import {
   AddPortfolioRequest,
   GetProvisioningStatusRequest,
 } from "../api/client";
-import { ImpactLevel } from "./document-generation";
 
 export enum ProvisionRequestType {
   ADD_PORTFOLIO = "ADD_PORTFOLIO",
@@ -32,8 +31,6 @@ export interface NewPortfolioPayload {
   name: string;
   fundingSources: Array<FundingSource>;
   operators: Array<Operator>;
-  targetImpactLevel?: ImpactLevel;
-  provisionDeadline?: string;
 }
 
 export interface FundingSourcePayload {
@@ -55,8 +52,6 @@ export interface ProvisionRequest {
   portfolioId?: string;
   operationType: ProvisionRequestType;
   targetCsp: CloudServiceProvider;
-  targetImpactLevel?: ImpactLevel;
-  provisionDeadline?: string;
   payload: NewPortfolioPayload | FundingSourcePayload | OperatorPayload;
 }
 
@@ -71,8 +66,6 @@ export const provisionRequestSchema = {
     jobId: { type: "string" },
     userId: { type: "string" },
     portfolioId: { type: "string" },
-    provisionDeadline: { type: "string", format: "date-time" },
-    targetImpactLevel: { enum: [ImpactLevel.IL2, ImpactLevel.IL4, ImpactLevel.IL5, ImpactLevel.IL6] },
     operationType: {
       enum: [
         ProvisionRequestType.ADD_FUNDING_SOURCE,

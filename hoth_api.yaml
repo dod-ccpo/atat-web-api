@@ -271,11 +271,6 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/FundingSource"
-        targetImpactLevel:
-          $ref: "#/components/schemas/ImpactLevel"
-        provisionDeadline:
-          type: string
-          format: date-time
         operators:
           description: Array of operator objects
           type: array
