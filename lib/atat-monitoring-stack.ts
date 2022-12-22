@@ -42,6 +42,11 @@ export class AtatMonitoringStack extends cdk.Stack {
           // our secrets.
           enabled: false,
         },
+        ec2: {
+          // We do not use any of the support EC2 resources in our stacks, and this results
+          // in odd synthesis warnings.
+          enabled: false,
+        },
       })
     );
   }
