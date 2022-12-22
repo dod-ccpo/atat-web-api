@@ -55,6 +55,11 @@ const createdRequest: AddPortfolioRequest = {
   },
 };
 
+const testCspConfig = {
+  uri: "http://fake.example.com",
+  networks: ["NETWORK_1", "NETWORK_2"],
+};
+
 // Skipped because this covers old mock behavior
 describe("Successful invocation of mock CSP function", () => {
   it("should return 200 when CSP A provided in the request", async () => {
@@ -156,7 +161,7 @@ describe("Successful invocation of mock CSP function", () => {
         },
       } as types.AddPortfolioResponseAsync);
     });
-    mockedMakeClient.mockResolvedValue(new client.AtatClient("SAMPLE", { uri: "http://fake.example.com" }));
+    mockedMakeClient.mockResolvedValue(new client.AtatClient("SAMPLE", testCspConfig));
 
     // WHEN
     const response = (await handler(atatClientRequest, {} as Context)) as ProvisionCspResponse;
@@ -206,7 +211,7 @@ describe("Successful invocation of mock CSP function", () => {
         },
       } as types.AddPortfolioResponseSync);
     });
-    mockedMakeClient.mockResolvedValue(new client.AtatClient("SAMPLE", { uri: "http://fake.example.com" }));
+    mockedMakeClient.mockResolvedValue(new client.AtatClient("SAMPLE", testCspConfig));
 
     // WHEN
     const response = (await handler(atatClientRequest, {} as Context)) as ProvisionCspResponse;

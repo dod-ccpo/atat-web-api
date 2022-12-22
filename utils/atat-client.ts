@@ -12,7 +12,7 @@ export interface CspConfiguration {
   /**
    * The target Impact Level at which the CSP implementation is to be sent.
    */
-  network: string[];
+  networks: string[];
 }
 
 export async function getConfiguration(cspName: string): Promise<CspConfiguration | undefined> {
