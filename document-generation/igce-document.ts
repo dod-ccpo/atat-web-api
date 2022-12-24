@@ -138,8 +138,8 @@ export async function generateIGCEDocument(
         formulae: [contractRangeString],
       };
       row.getCell("C").value = periodLineItems[index].dowTaskNumber; // "4.2.2.1.1";
-      row.getCell("D").value = periodLineItems[index].serviceOffering; // "Compute";
-      row.getCell("E").value = periodLineItems[index].itemDescriptionOrConfigSummary; // Description
+      row.getCell("D").value = periodLineItems[index].serviceTitle; // "Compute";
+      row.getCell("E").value = periodLineItems[index].itemDescription; // Description
       row.getCell("F").value = periodLineItems[index].unitPrice; // Unit Price
       row.getCell("G").value = periodLineItems[index].quantity; // Quantity
       row.getCell("H").value = periodLineItems[index].unit; // Unit
@@ -249,15 +249,15 @@ export async function generateIGCEDocument(
   // Set Instruction Sheet Cells
   const instructionSheet = workbook.getWorksheet("INSTRUCTIONS-MUST COMPLETE");
   const estimateMadeCell = instructionSheet.getCell("B11");
-  estimateMadeCell.value = payload.instructions.how_was_estimate_made;
+  estimateMadeCell.value = payload.instructions.estimateDescription;
   const assumptionsMadeCell = instructionSheet.getCell("B12");
-  assumptionsMadeCell.value = payload.instructions.what_assumptions_were_made;
+  assumptionsMadeCell.value = payload.instructions.assumptionsMade;
   const infoToolsCell = instructionSheet.getCell("B13");
-  infoToolsCell.value = payload.instructions.tools_used;
+  infoToolsCell.value = payload.instructions.toolsUsed;
   const infoObtainedCell = instructionSheet.getCell("B14");
-  infoObtainedCell.value = payload.instructions.where_was_information_obtained;
+  infoObtainedCell.value = payload.instructions.informationSource;
   const previousEstimate = instructionSheet.getCell("B15");
-  previousEstimate.value = payload.instructions.previous_estimate_comparison;
+  previousEstimate.value = payload.instructions.previousEstimateComparison;
 
   const buffer = (await workbook.xlsx.writeBuffer()) as Buffer;
   logger.info("IGCE document generated");
