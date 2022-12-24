@@ -257,19 +257,19 @@ export interface IFundingDocument {
   miprNumber?: string;
 }
 export interface IGCEInstructions {
-  how_was_estimate_made: string;
-  what_assumptions_were_made: string;
-  tools_used: string;
-  where_was_information_obtained: string;
-  previous_estimate_comparison: string;
+  estimateDescription: string;
+  assumptionsMade: string;
+  toolsUsed: string;
+  informationSource: string;
+  previousEstimateComparison: string;
 }
 
 export interface IPeriodLineItem {
   idiqClin: string;
   contractType: string;
   dowTaskNumber: string;
-  serviceOffering: string;
-  itemDescriptionOrConfigSummary: string;
+  serviceTitle: string;
+  itemDescription: string;
   unitPrice: number;
   quantity: number;
   unit: string;
@@ -283,6 +283,7 @@ export interface IndependentGovernmentCostEstimate {
   surgeCapabilities: number;
   periodsEstimate: IPeriodEstimate[];
   instructions: IGCEInstructions;
+  contractingShop: string;
 }
 
 export interface IFundingIncrement {
