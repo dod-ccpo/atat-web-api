@@ -494,30 +494,35 @@ components:
       description: "Data used for generating the Independent Government Cost Estimate (IGCE) document"
       type: object
       properties:
-        funding_document:
+        fundingDocument:
           $ref: "#/components/schemas/FundingDocument"
-        surge_capabilities:
+        surgeCapabilities:
           description: Not to exceed this percentage of contractor's total proposed price (1-50)
           type: integer
-        periods_estimate:
+        periodsEstimate:
           type: array
           items:
             $ref: "#/components/schemas/PeriodEstimate"
         instructions:
           $ref: "#/components/schemas/IGCEInstructions"
+        contractingShop:
+          type: string
+          enum:
+            - "DITCO"
+            - "OTHER"
     IGCEInstructions:
       description: IGCE Instruction Page questions
       type: object
       properties:
-        how_was_estimate_made:
+        estimateDescription:
           type: string
-        what_assumptions_were_made:
+        assumptionsMade:
           type: string
-        tools_used:
+        toolsUsed:
           type: string
-        where_was_information_obtained:
+        informationSource:
           type: string
-        previous_estimate_comparison:
+        previousEstimateComparison:
           type: string
     PeriodEstimate:
       description: "Information specific to a base or option period sheet in the IGCE document"
@@ -526,7 +531,7 @@ components:
         period:
           description: "A base or option period."
           $ref: "#/components/schemas/Period"
-        period_line_items:
+        periodLineItems:
           type: array
           items:
             $ref: "#/components/schemas/PeriodLineItem"
@@ -534,27 +539,31 @@ components:
       description: A single line item entered on a period sheet in the IGCE document
       type: object
       properties:
-        contract_type:
+        idiqClin:
+          type: string
+        contractType:
           type: string
           enum:
             - "FFP"
             - "T&M"
-        dow_task_number:
+        dowTaskNumber:
           description: Section number from DOW document
           type: string
           example: "4.2.1.1"
-        service_offering:
+        serviceTitle:
           description: DOW Subtask name or name of a CSP service offering
           type: string
           example: "Compute"
-        item_description_or_config_summary:
+        itemDescription:
           type: string
-        unit_price:
+        unitPrice:
           type: number
-        unit_quantity:
+        quantity:
           description: >-
             Quantity of units for specificed service for a specific period
           type: integer
+        unit:
+          type: string
     FundingDocument:
       description: >-
         Numbers from funding document(s). Either both the GT&C number and Order
