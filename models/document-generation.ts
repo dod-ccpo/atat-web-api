@@ -547,8 +547,8 @@ const periodLineItem = {
     idiqClin: { type: "string" },
     contractType: { type: "string" },
     dowTaskNumber: { type: "string" },
-    serviceOffering: { type: "string" },
-    itemDescriptionOrConfigSummary: { type: "string" },
+    serviceTitle: { type: "string" },
+    itemDescription: { type: "string" },
     unitPrice: { type: "number" },
     quantity: { type: "integer" },
     unit: { type: "string" },
@@ -568,11 +568,11 @@ const periodsEstimate = {
 const instructions = {
   type: "object",
   properties: {
-    how_was_estimate_made: { type: "string" },
-    what_assumptions_were_made: { type: "string" },
-    tools_used: { type: "string" },
-    where_was_information_obtained: { type: "string" },
-    previous_estimate_comparison: { type: "string" },
+    estimateDescription: { type: "string" },
+    assumptionsMade: { type: "string" },
+    toolsUsed: { type: "string" },
+    informationSource: { type: "string" },
+    previousEstimateComparison: { type: "string" },
   },
 };
 
@@ -583,6 +583,7 @@ const independentGovernmentCostEstimate = {
     surgeCapabilities: { type: "integer" },
     periodsEstimate,
     instructions,
+    contractingShop: { type: "string" },
   },
   additionalProperties: false,
 };
