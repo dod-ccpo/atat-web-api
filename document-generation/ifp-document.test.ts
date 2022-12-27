@@ -7,7 +7,7 @@ import { ApiBase64SuccessResponse, ErrorStatusCode, OtherErrorResponse } from ".
 import { generateIFPDocument } from "./ifp-document";
 
 describe("Generate an IFP binary document - happy path", () => {
-  const sampleIfpRequestWithGTCNumber = sampleIfpRequest.templatePayload as IncrementalFundingPlan;
+  const sampleIfpRequestWithOrderNumber = sampleIfpRequest.templatePayload as IncrementalFundingPlan;
   const sampleIfpRequestWithMIPRNumber = {
     ...sampleIfpRequest.templatePayload,
     fundingDocument: fundingDocumentWithMiprNumber,
@@ -19,7 +19,7 @@ describe("Generate an IFP binary document - happy path", () => {
     },
   } as IncrementalFundingPlan;
 
-  it.each([sampleIfpRequestWithGTCNumber, sampleIfpRequestWithMIPRNumber, sampleIfpRequestWithNoType])(
+  it.each([sampleIfpRequestWithOrderNumber, sampleIfpRequestWithMIPRNumber, sampleIfpRequestWithNoType])(
     "should return an ApiBase64Response",
     async (ifpPayload) => {
       // GIVEN
