@@ -9,7 +9,10 @@ export class AtatSharedDataStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    const key = new kms.Key(this, "AtatKey");
+    const key = new kms.Key(this, "AtatKey",{
+      enableKeyRotation: true,
+      description: "This key is used for SNS topic encryption"
+    });
     this.encryptionKeyAlias = key.addAlias("atat-default");
     this.encryptionKey = key;
   }
