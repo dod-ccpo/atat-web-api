@@ -12,11 +12,12 @@ export interface DescriptionOfWork {
     securityRequirements?: SecurityRequirement[];
     contractConsiderations?: IContractConsiderations;
     sensitiveInformation?: ISensitiveInformation
+    architecturalDesignRequirements: ArchitecturalDesignRequirement
 }
-export interface contractType {
+export interface IContractType {
     firmFixedPrice: boolean;
     timeAndMaterials: boolean;
-    justification: string;
+    contractTypeJustification: string;
   }
 
 export interface ISensitiveInformation {
@@ -29,8 +30,7 @@ export interface IXaaSOfferings {
 }
 
 export interface ICloudSupportPackage {
-    serviceOffering?: ISelectedServiceOffering;
-    supportingInfo?: ICloudSupportEnvironmentInstance;
+    supportingInfo?: ICloudSupportEnvironmentInstance[];
 }
 export enum ContractAwardType {
     INITIAL_AWARD = "INITIAL_AWARD",
@@ -176,7 +176,7 @@ export enum DatabaseType {
     TRANSACTIONAL = "Transactional",
     GRAPH = "Graph",
     RELATIONAL = "Relational",
-    OTHER = "Other"
+    OTHER = "OTHER"
 }
 
 /** @description Extends Environment Instance with additional properties specific to database instances */
@@ -230,10 +230,10 @@ export interface ISupportPackage {
 }
 
 export enum EnvironmentType { 
-    DEV_TEST = "Dev/Test",
-    PRE_PROD = "Pre-Prod",
-    PROD_STAGING = "Prod/Staging",
-    COOP_DIASTER_RECOVERY = "Coop Disaster Recovery"
+    DEV_TEST = "DEV_TEST",
+    PRE_PROD = "PRE_PROD",
+    PROD_STAGING = "PROD_STAGING",
+    COOP_DIASTER_RECOVERY = "COOP_DIASTER_RECOVERY"
 }
 
 export enum OperatingEnvironment { 
@@ -284,7 +284,6 @@ export interface IClassificationLevel {
 /** @description Describes the classified information in a Classification Instance */
 export interface IClassifiedInformationType extends IGeneralInformation{
 
-    
 } 
 
 /** @description Selected Classification Levels for XaaS services */
@@ -321,14 +320,8 @@ export enum StorageUnit {
 }
 /** @description A region defining where instances are deployed */
 export enum Region {
-    CONUS_EAST = "CONUS East",
-    CONUS_CENTRAL = "CONUS Central",
-    CONUS_WEST = "CONUS West",
-    AFRICOM = "AFRICOM",
-    CENTCOM = "CENTCOM",
-    EUCOM = "EUCOM",
-    INDOPACOM = "INDOPACOM",
-    SOUTHCOM = "SOUTHCOM"
+    CONUS = "CONUS",
+    OCONUS = "OCONUS",
 } 
 /** @description A service selected by the user for a specific usage/need */
 export interface ISelectedServiceOffering {
@@ -355,7 +348,8 @@ export enum PeriodType {
 export enum PeriodUnit {
     DAY,
     WEEK,
-    MONTH
+    MONTH,
+    YEAR
 }
 
 /** @description A period used for a package Period Of Performance */
@@ -367,35 +361,33 @@ export interface IPeriod {
 }
 /** @description A single Service Offering Group (Service Offering table) */
 export interface ServiceOffering extends IGeneralInformation {
-    serviceOfferingGroup?: ServiceOfferingGroup;
+    serviceOfferingGroup: ServiceOfferingGroup;
 } 
 /** @enum {string} */
 export enum ServiceOfferingGroup {
-    ADVISORY_ASSISTANCE = "Advisory Assistance",
-    TRAINING = "Training",
-    PORTABILITY_PLAN = "Portability Plan",
-    HELP_DESK_SERVICES = "Help Desk Services",
-    DOCUMENTATION_SUPPORT = "Documentation Support",
-    GENERAL_CLOUD_SUPPORT = "General Cloud Support"
+        ADVISORY_ASSISTANCE = "ADVISORY",
+        APPLICATIONS = "APPLICATIONS",
+        COMPUTE = "COMPUTE",
+        DATABASE = "DATABASE",
+        DEVELOPER_TOOLS = "DEVELOPER_TOOLS",
+        EDGE_COMPUTING = "EDGE_COMPUTING",
+        GENERAL_XAAS = "GENERAL_XAAS",
+        IOT = "IOT",
+        MACHINE_LEARNING = "MACHINE_LEARNING",
+        NETWORKING = "NETWORKING",
+        SECURITY = "SECURITY",
+        TRAINING = "TRAINING",
+        PORTABILITY_PLAN = "PORTABILITY_PLAN",
+        HELP_DESK_SERVICES = "HELP_DESK_SERVICES",
+        DOCUMENTATION_SUPPORT = "DOCUMENTATION_SUPPORT",
+        GENERAL_CLOUD_SUPPORT = "GENERAL_CLOUD_SUPPORT",
+        STORAGE = "STORAGE"
 }  
-
-export enum XaasServiceOfferingGroup {
-    APPLICATIONS, 
-    COMPUTE, 
-    DATABASE, 
-    STORAGE, 
-    DEVELOPER_TOOLS, 
-    EDGE_COMPUTING, 
-    GENERAL_XAAS, 
-    IOT, 
-    MACHINE_LEARNING, 
-    NETWORKING, 
-    SECURITY
-}
 
 export interface GeneralSubtask {
     name: string,
-    description: string
+    description: string,
+    sequence?: number
 }
 
 export interface Storage extends GeneralSubtask {
@@ -513,12 +505,19 @@ const architecturalDesignRequirement = {
     }
 
     }
+    const generalInformation = {
+        type: "object",
+        properties: {
+            name: {type: "string"},
+            description: {type: "string"},
+            sequence: {type: "string"}
+        }
+    }
 
-const cloudServiceOffering = {
+const serviceOffering = {
     type: "object",
     properties: {
-        name: {type: "string"},
-        ServiceOfferingGroup: {
+        serviceOfferingGroup: {
             enum: [
                 ServiceOfferingGroup.ADVISORY_ASSISTANCE,
                 ServiceOfferingGroup.DOCUMENTATION_SUPPORT,
@@ -526,34 +525,24 @@ const cloudServiceOffering = {
                 ServiceOfferingGroup.HELP_DESK_SERVICES,
                 ServiceOfferingGroup.PORTABILITY_PLAN,
                 ServiceOfferingGroup.TRAINING,
+                ServiceOfferingGroup.APPLICATIONS,
+                ServiceOfferingGroup.COMPUTE,
+                ServiceOfferingGroup.DATABASE,
+                ServiceOfferingGroup.DEVELOPER_TOOLS,
+                ServiceOfferingGroup.EDGE_COMPUTING,
+                ServiceOfferingGroup.GENERAL_XAAS,
+                ServiceOfferingGroup.IOT,
+                ServiceOfferingGroup.MACHINE_LEARNING,
+                ServiceOfferingGroup.NETWORKING,
+                ServiceOfferingGroup.SECURITY,
+                ServiceOfferingGroup.STORAGE,
                 null
             ]
-        }
+        },
+        ...generalInformation.properties
     }
 }
-//TODO REFACTOR TO REMOVE IN FAVOR OF OTHER xaasServiceOffering w/ descriptions et. al.
-const xaasServiceOffering = {
-    type: "object",
-    properties: {
-        name: {type: "string"},
-        xaasServiceOfferingGroup: {
-            enum: [
-                XaasServiceOfferingGroup.APPLICATIONS,
-                XaasServiceOfferingGroup.COMPUTE,
-                XaasServiceOfferingGroup.DATABASE,
-                XaasServiceOfferingGroup.DEVELOPER_TOOLS,
-                XaasServiceOfferingGroup.EDGE_COMPUTING,
-                XaasServiceOfferingGroup.GENERAL_XAAS,
-                XaasServiceOfferingGroup.IOT,
-                XaasServiceOfferingGroup.MACHINE_LEARNING,
-                XaasServiceOfferingGroup.NETWORKING,
-                XaasServiceOfferingGroup.SECURITY,
-                XaasServiceOfferingGroup.STORAGE,
-                null
-            ]
-        }
-    }
-}
+
 
 const period = {
     type: "object",
@@ -589,15 +578,10 @@ const classificationInstance = {
 const selectedServiceOffering = {
     type: "object",
     properties: {
-        cloudServiceOffering,
-        //classificationInstances: { type: "array", items: classificationInstance },
-        //otherServiceOffering: { type: "string" },
-        //portabilityPlan: {type: "boolean"},
-        statementOfObjectives: {type: "string"},
-        durationOfTaskOrder: {type: "boolean"},
-        partOfTaskOrder: {type: "array", items: period},
-        cspOnSiteAccess: {type: "boolean"},
-        classificationLevel
+        serviceOffering,
+        classificationInstances: { type: "array", items: classificationInstance },
+        otherServiceOffering: { type: "string" },
+        generalInformation
     }
 }
 
@@ -605,7 +589,6 @@ const selectedClassificationLevels = {
     type: "object",
     properties: {
         classificationLevel: {type: "array", items: classificationLevel},
-        //classifiedInformationTypes: IClassifiedInformationType[]; //name, description, sequence ONLY!
         usersPerRegion: {type: "integer"},
         dataEgressMonthlyAmount: {type: "integer"},
         dataEgressMonthlyUnit: {
@@ -631,15 +614,10 @@ const deployedRegions = {
         regions: {
             type: "array", 
             items: {
-                enum: [
-                    Region.AFRICOM, 
-                    Region.CENTCOM, 
-                    Region.CONUS_CENTRAL, 
-                    Region.CONUS_EAST,
-                    Region.CONUS_WEST,
-                    Region.EUCOM,
-                    Region.INDOPACOM,
-                    Region.SOUTHCOM
+                enum: [ 
+                    Region.CONUS, 
+                    Region.OCONUS,
+
                 ]}}
     }
     
@@ -732,9 +710,6 @@ const currentEnvironment = {
         phasedApproachSchedule: {type: "string"},
         needsArchitecturalDesignServices: {type: "boolean"},
         architecturalDesignRequirement: {type: "array", items: architecturalDesignRequirement},
-        // systemDocumentation: {type: "ArrayBuffer", nullable: true},
-        // migrationDocumentation: {type: "ArrayBuffer", nullable: true},
-        //currentEnvironmentInstance
         
     }
 }
@@ -742,7 +717,7 @@ const currentEnvironment = {
 const computeInstance = {
     type: "object",
     properties: {
-        ...environmentInstance,
+        ...environmentInstance.properties,
         environmentType: {
             enum: [EnvironmentType.COOP_DIASTER_RECOVERY, EnvironmentType.DEV_TEST, EnvironmentType.PRE_PROD, EnvironmentType.PROD_STAGING]
         },
@@ -755,7 +730,7 @@ const computeInstance = {
 const databaseInstance = {
     type: "object",
     properties: {
-        ...environmentInstance,
+        ...environmentInstance.properties,
         databaseType: { 
             enum: [DatabaseType.ANALYTICAL, DatabaseType.GRAPH, DatabaseType.OTHER, DatabaseType.RELATIONAL, DatabaseType.TRANSACTIONAL]
         },
@@ -766,66 +741,33 @@ const databaseInstance = {
     }
 }
 
+
 const instanceConfigurations = {
-    type: "object",
-    properties: {
-        environmentInstances: {
-            type: "array",
-            items: environmentInstance
-        },
-        computeInstances: {
-            type: "array",
-            items: computeInstance
-        },
-        databaseInstances: {
-            type: "array",
-            items: databaseInstance
+    type: "array",
+    items: {
+            items: {
+                environmentInstance,
+                computeInstance,
+                databaseInstance
         },
 
     }
 }
 
-export interface IXaaSOfferingGroup {
-    application: GeneralSubtask[],
-    developerTools: GeneralSubtask[],
-    edgeComputing: GeneralSubtask[],
-    generalXaas: GeneralSubtask[],
-    iot: GeneralSubtask[],
-    machineLearning: GeneralSubtask[],
-    networking: GeneralSubtask[],
-    security: GeneralSubtask[],
 
-}
-const generalSubtask = {
+const service = {
     type: "object",
     properties: {
-        name: {type: "string"},
-        description: {type: "string"},
-        classificationLevel,
-        period
+        selectedServiceOffering,
+        instanceConfigurations: instanceConfigurations,
+
     }
-}
-const xaasOfferingGroup = {
-    type: "object",
-    properties: {
-        application: {type: "array", items: generalSubtask },
-        developerTools: {type: "array", items: generalSubtask },
-        edgeComputing: {type: "array", items: generalSubtask },
-        generalXaaS: {type: "array", items: generalSubtask },
-        iot: {type: "array", items: generalSubtask },
-        machineLearning: {type: "array", items: generalSubtask },
-        networking: {type: "array", items: generalSubtask },
-        security: {type: "array", items: generalSubtask },
-        }
 }
 
 const xaasOfferings = {
-    type: "object",
-    properties:{
-        
-        xaasServiceOffering: xaasOfferingGroup,
-        instanceConfigurations: instanceConfigurations
-    }
+    type: "array",
+    items: service,
+
 }
 
 const portabilityPlan = {
@@ -856,7 +798,6 @@ const crossDomainSolution = {
         needForEntireTaskOrderDuration: {type: "boolean"},
         selectedPeriods: {type: "array", items: period},
         trafficPerDomainPair: {type: "array", items: trafficPerDomainPair},
-        //trafficPerDomainPair: {type: "string"},
         projectedFileStreamType: {type: "string"}
 
     }
@@ -865,6 +806,7 @@ const crossDomainSolution = {
 const cloudSupportEnvironmentInstance = {
     type: "object",
     properties: {
+        ...environmentInstance.properties,
         canTrainInUnclassEnv: {type: "boolean"},
         trainingLocation: {type: "string"},
         trainingRequirementTitle: {type: "string"},
@@ -874,36 +816,6 @@ const cloudSupportEnvironmentInstance = {
         trainingFormat: TrainingFormat,
         personnelRequiringTraining: {type: "number"},
         serviceType: ServiceOfferingGroup
-    }
-}
-
-const training = {
-    type: "object",
-    properties: {
-        ...selectedServiceOffering,
-        cloudSupportEnvironmentInstance
-    }
-}
-
-const cloudSupportPackage = {
-    type: "object",
-    properties: {
-        instanceConfigurations: {
-            type: "array",
-            items: {
-                //maybe we can remove the "instances???"
-                // environmentInstance,
-                // computeInstance,
-                // databaseInstance,
-                // classificationLevel,
-                portabilityPlan,
-                advisoryAndAssistance: {type: "array", items: selectedServiceOffering},
-                helpDesk: {type: "array", items: selectedServiceOffering},
-                training: {type: "array", items: training},
-                docSupport: {type: "array", items: selectedServiceOffering},
-                generalXaaS: {type: "array", items: selectedServiceOffering},
-            }
-        }
     }
 }
 
@@ -918,6 +830,15 @@ const periodOfPerformance = {
     }
 }
 
+const contractType = {
+    type: "object",
+    properties: {
+        firmFixedPrice: {type: "boolean"},
+        timeAndMaterials: {type: "boolean"},
+        contractTypeJustification: {type: "string"},
+    }
+  }
+
 const DescriptionOfWork = {
     type: "object",
     properties: {
@@ -929,7 +850,9 @@ const DescriptionOfWork = {
         currentEnvironment,
         xaasOfferings,
         crossDomainSolution,
-        cloudSupportPackage,
-        periodOfPerformance
+        cloudSupportPackages: {type: "array", items: cloudSupportEnvironmentInstance},
+        periodOfPerformance,
+        contractType,
+        architecturalDesignRequirement
     }
 }
