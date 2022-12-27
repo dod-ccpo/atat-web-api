@@ -23,7 +23,7 @@ beforeEach(() => {
 
 const testCspConfig = {
   uri: "http://fake.example.com",
-  networks: ["NETWORK_1", "NETWORK_2"],
+  network: "NETWORK_2",
 };
 
 describe("Async Provisioning Checker - Success", () => {

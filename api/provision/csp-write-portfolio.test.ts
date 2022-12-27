@@ -57,7 +57,7 @@ const createdRequest: AddPortfolioRequest = {
 
 const testCspConfig = {
   uri: "http://fake.example.com",
-  networks: ["NETWORK_1", "NETWORK_2"],
+  network: "NETWORK_1",
 };
 
 // Skipped because this covers old mock behavior

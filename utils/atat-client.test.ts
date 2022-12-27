@@ -3,7 +3,7 @@ import * as atatClient from "./atat-client";
 const testCspConfig = {
   name: "test",
   uri: "https://cspTest.example.com/atat/api/test",
-  networks: ["NETWORK_1"],
+  network: "NETWORK_1",
 };
 
 jest.mock("./atat-client");
