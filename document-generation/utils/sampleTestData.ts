@@ -258,6 +258,7 @@ export const sampleIgceRequest = {
       orderNumber: "O2206-097-097-184790",
       gtcNumber: "A2201-097-097-18092",
     },
+    contractingShop: "DITCO",
     periodsEstimate: [
       {
         period: { periodUnit: "YEAR", periodUnitCount: "1", periodType: "BASE", optionOrder: "" },
@@ -265,8 +266,8 @@ export const sampleIgceRequest = {
           {
             idiqClin: "x001/x017 Cloud UNCLASSIFIED",
             dowTaskNumber: "4.2.2.1",
-            serviceOffering: "Cloud Audit/Monitoring Tools",
-            itemDescriptionOrConfigSummary: "Monitoring network data",
+            serviceTitle: "Cloud Audit/Monitoring Tools",
+            itemDescription: "Monitoring network data",
             unitPrice: 394.38,
             quantity: 1,
             unit: "period",
@@ -275,8 +276,8 @@ export const sampleIgceRequest = {
           {
             idiqClin: "x001/x017 Cloud UNCLASSIFIED",
             dowTaskNumber: "4.2.2.2",
-            serviceOffering: "Special custom built app - not SNOW",
-            itemDescriptionOrConfigSummary: "To handle special cases that can not be done in SNOW",
+            serviceTitle: "Special custom built app - not SNOW",
+            itemDescription: "To handle special cases that can not be done in SNOW",
             unitPrice: 799.0,
             quantity: 2,
             unit: "period",
@@ -290,8 +291,8 @@ export const sampleIgceRequest = {
           {
             idiqClin: "x004/x020 Cloud Support SECRET CLASSIFIED",
             dowTaskNumber: "4.2.2.4",
-            serviceOffering: "Application",
-            itemDescriptionOrConfigSummary: "Basic App ",
+            serviceTitle: "Application",
+            itemDescription: "Basic App ",
             unitPrice: 1200.0,
             quantity: 1,
             unit: "month",
@@ -300,8 +301,8 @@ export const sampleIgceRequest = {
           {
             idiqClin: "x001/x017 Cloud UNCLASSIFIED",
             dowTaskNumber: "4.2.2.3",
-            serviceOffering: "Application",
-            itemDescriptionOrConfigSummary: "Staging App",
+            serviceTitle: "Application",
+            itemDescription: "Staging App",
             unitPrice: 1200.0,
             unit: "months",
             quantity: 10,
@@ -311,11 +312,11 @@ export const sampleIgceRequest = {
       },
     ],
     instructions: {
-      how_was_estimate_made: "Through this service, and that service",
-      what_assumptions_were_made: "Using this calculator, and years of experience",
-      tools_used: "List of tools used: calculator service 1, calculator service 2",
-      where_was_information_obtained: "This government agency, that government agency",
-      previous_estimate_comparison: "Overestimated how much time was needed",
+      estimateDescription: "Through this service, and that service",
+      assumptionsMade: "Using this calculator, and years of experience",
+      toolsUsed: "List of tools used: calculator service 1, calculator service 2",
+      informationSource: "This government agency, that government agency",
+      previousEstimateComparison: "Overestimated how much time was needed",
     },
   },
 };

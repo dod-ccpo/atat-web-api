@@ -257,19 +257,19 @@ export interface IFundingDocument {
   miprNumber?: string;
 }
 export interface IGCEInstructions {
-  how_was_estimate_made: string;
-  what_assumptions_were_made: string;
-  tools_used: string;
-  where_was_information_obtained: string;
-  previous_estimate_comparison: string;
+  estimateDescription: string;
+  assumptionsMade: string;
+  toolsUsed: string;
+  informationSource: string;
+  previousEstimateComparison: string;
 }
 
 export interface IPeriodLineItem {
   idiqClin: string;
   contractType: string;
   dowTaskNumber: string;
-  serviceOffering: string;
-  itemDescriptionOrConfigSummary: string;
+  serviceTitle: string;
+  itemDescription: string;
   unitPrice: number;
   quantity: number;
   unit: string;
@@ -283,6 +283,7 @@ export interface IndependentGovernmentCostEstimate {
   surgeCapabilities: number;
   periodsEstimate: IPeriodEstimate[];
   instructions: IGCEInstructions;
+  contractingShop: string;
 }
 
 export interface IFundingIncrement {
@@ -547,8 +548,8 @@ const periodLineItem = {
     idiqClin: { type: "string" },
     contractType: { type: "string" },
     dowTaskNumber: { type: "string" },
-    serviceOffering: { type: "string" },
-    itemDescriptionOrConfigSummary: { type: "string" },
+    serviceTitle: { type: "string" },
+    itemDescription: { type: "string" },
     unitPrice: { type: "number" },
     quantity: { type: "integer" },
     unit: { type: "string" },
@@ -568,11 +569,11 @@ const periodsEstimate = {
 const instructions = {
   type: "object",
   properties: {
-    how_was_estimate_made: { type: "string" },
-    what_assumptions_were_made: { type: "string" },
-    tools_used: { type: "string" },
-    where_was_information_obtained: { type: "string" },
-    previous_estimate_comparison: { type: "string" },
+    estimateDescription: { type: "string" },
+    assumptionsMade: { type: "string" },
+    toolsUsed: { type: "string" },
+    informationSource: { type: "string" },
+    previousEstimateComparison: { type: "string" },
   },
 };
 
@@ -583,6 +584,7 @@ const independentGovernmentCostEstimate = {
     surgeCapabilities: { type: "integer" },
     periodsEstimate,
     instructions,
+    contractingShop: { type: "string" },
   },
   additionalProperties: false,
 };
