@@ -21,6 +21,11 @@ beforeEach(() => {
   sqsMock.reset();
 });
 
+const testCspConfig = {
+  uri: "http://fake.example.com",
+  network: "NETWORK_2",
+};
+
 describe("Async Provisioning Checker - Success", () => {
   it("poll messages from AsyncProvisioningQueue and send completed jobs to ProvisioningQueue", async () => {
     const cspB = {
@@ -189,7 +194,7 @@ describe("Async Provisioning Checker - Success", () => {
           $metadata: failedMessage.content.response.$metadata,
         });
       });
-    mockedMakeClient.mockResolvedValue(new client.AtatClient("SAMPLE", { uri: "http://fake.example.com" }));
+    mockedMakeClient.mockResolvedValue(new client.AtatClient("SAMPLE", testCspConfig));
 
     // WHEN
     await handler(queueEvent, {} as Context);

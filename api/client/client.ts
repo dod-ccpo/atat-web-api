@@ -7,6 +7,7 @@ import { camelToSnakeRequestInterceptor, snakeToCamelResponseInterceptor } from 
 // TODO: Move this block to another file. It is marginally useful here.
 interface CspConfigurationItem {
   uri: string;
+  network: string;
 }
 
 /**
@@ -84,6 +85,7 @@ export class AtatClient implements IAtatClient {
         "User-Agent": "ATAT CSP Api Client",
         "Content-Type": "application/json",
         "X-Atat-Api-Version": AtatClient.supportedApiVersion,
+        "X-Target-Impact-Level": cspConfiguration.network,
       },
       // We will perform all validation of the status code within the various API invocation
       // methods rather than relying on Axios' configuration. This will allow us to return
@@ -117,12 +119,12 @@ export class AtatClient implements IAtatClient {
 
   private buildHeaders(request: Partial<types.ProvisionRequest>): Record<string, string> {
     const headers: Record<string, string> = {};
-    if (request.targetImpactLevel) {
-      headers["X-Target-Impact-Level"] = request.targetImpactLevel.toString();
-    }
-    if (request.provisionDeadline) {
-      headers["X-Provision-Deadline"] = request.provisionDeadline;
-    }
+
+    // set deadline
+    const now = new Date();
+    const provisionDeadline = now.setDate(now.getDate() + 12); // deadline in 12 days
+    headers["X-Provision-Deadline"] = new Date(provisionDeadline).toISOString();
+
     return headers;
   }
 
