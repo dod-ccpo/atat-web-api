@@ -63,7 +63,7 @@ export const getFundingDocInfo = (fundingDoc: IFundingDocument): string => {
   if (fundingDoc.fundingType === FundingType.MIPR) {
     return `MIPR #: ${fundingDoc.miprNumber}`;
   }
-  return `GT&C #: ${fundingDoc.gtcNumber} and Order #: ${fundingDoc.orderNumber}`;
+  return `Order #: ${fundingDoc.orderNumber}`;
 };
 
 interface PDFTemplateFiles {

@@ -121,15 +121,13 @@ describe("getFundingDocInfo", () => {
     expect(fundingDocInfo).toEqual(`MIPR #: ${fundingDocument.miprNumber}`);
   });
   it("should return GT&C and Order number when FS_FORM document type", async () => {
-    const gtcNumber = "29348403";
     const orderNumber = "O-03049-2034-48403";
     const fundingDocument = {
       fundingType: FundingType.FS_FORM,
-      gtcNumber,
       orderNumber,
     } as IFundingDocument;
     const fundingDocInfo = getFundingDocInfo(fundingDocument);
-    expect(fundingDocInfo).toEqual(`GT&C #: ${gtcNumber} and Order #: ${orderNumber}`);
+    expect(fundingDocInfo).toEqual(`Order #: ${orderNumber}`);
   });
   it.each(["", null, undefined, {}])("should return an empty string when invalid inputs", async (type) => {
     const fundingDocument = {
