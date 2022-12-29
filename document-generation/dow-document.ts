@@ -32,6 +32,10 @@ export async function generateDowDocument(
         cdrls,
         popPeriods,
         sr: securityRequirements,
+        crossDomainSolutions: {
+          ...payload.crossDomainSolutions,
+          trafficPerDomainPair: JSON.parse(payload.crossDomainSolutions.trafficPerDomainPair),
+        },
         // TODO: refactor and place in utils or a seperate folder for dow
         sumTotalInstances: () => {
           let number = 0;
