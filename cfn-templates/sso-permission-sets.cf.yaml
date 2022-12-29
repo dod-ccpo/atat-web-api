@@ -189,6 +189,10 @@ Resources:
               - artifact:Get*
               - artifact:DownloadAgreement
             Resource: "*"
+          - Effect: Allow
+            Action:
+              - securityhub:UpdateFindings
+            Resource: "*"
 
   AtatQaAccess:
     Type: AWS::SSO::PermissionSet
