@@ -66,7 +66,7 @@ export async function generateDowDocument(
                 }
               });
             }
-            if (Object.keys(offering.serviceOffering).length != 0) {
+            if (Object.keys(offering.serviceOffering).length !== 0) {
               offering.serviceOffering.classificationInstances.forEach((instance: any) => {
                 switch (instance.classificationLevel.impactLevel) {
                   case dow.ImpactLevel.IL2:
@@ -572,9 +572,9 @@ export async function generateDowDocument(
                 console.error();
             }
           });
-          let pbToGB;
-          let tbToGB;
-          let gbDataEgress;
+          let pbToGB = 0;
+          let tbToGB = 0;
+          let gbDataEgress = 0;
           if (isNaN(gbEgress)) {
             gbEgress = 0;
           }

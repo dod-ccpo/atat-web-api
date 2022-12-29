@@ -43,7 +43,7 @@ export const sampleDowRequest = {
             { periodType: "BASE", periodUnitCount: 1, periodUnit: "YEAR", optionOrder: null },
             { periodType: "OPTION", periodUnitCount: 7, periodUnit: "MONTH", optionOrder: 1 },
           ],
-          classificationLevel: { classification: "U", display: "Unclassified - IL4", impactLevel: "IL4"},
+          classificationLevel: { classification: "U", display: "Unclassified - IL4", impactLevel: "IL4" },
           classifiedInformationTypes: [],
           dataEgressMonthlyAmount: null,
           dataEgressMonthlyUnit: null,
@@ -140,7 +140,7 @@ export const sampleDowRequest = {
         ],
         dataEgressMonthlyAmount: 345,
         dataEgressMonthlyUnit: "GB",
-        usersPerRegion: JSON.stringify([{EAST:"1234"},{WEST:"75"}]),
+        usersPerRegion: JSON.stringify([{ EAST: "1234" }, { WEST: "75" }]),
         dataIncrease: false,
         userGrowthEstimatePercentage: "346",
         userGrowthEstimateType: "SINGLE",
@@ -153,7 +153,7 @@ export const sampleDowRequest = {
         classifiedInformationTypes: [{ name: "Formerly Restricted Data", description: null, sequence: 4 }],
         dataEgressMonthlyAmount: 12231,
         dataEgressMonthlyUnit: "GB",
-        usersPerRegion: JSON.stringify([{"CONUSEast":"5,000"},{"CONUSCentral":"1,000"},{"CONUSWest":"4,000"}]),
+        usersPerRegion: JSON.stringify([{ CONUSEast: "5,000" }, { CONUSCentral: "1,000" }, { CONUSWest: "4,000" }]),
         dataIncrease: false,
         userGrowthEstimatePercentage: null,
         userGrowthEstimateType: "SINGLE",
@@ -309,8 +309,8 @@ export const sampleDowRequest = {
       trafficPerDomainPair: [
         {
           name: "S_TO_U",
-          dataQuantity: "3495 GB"
-        }
+          dataQuantity: "3495 GB",
+        },
       ],
     },
     cloudSupportPackages: [

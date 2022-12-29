@@ -2,37 +2,55 @@ import createReport from "docx-templates";
 import fs from "fs";
 import * as path from "path";
 import * as dow from "../models/document-generation/description-of-work";
+import { Classification } from "../models/document-generation";
+import { getCDRLs, getTaskPeriods, formatPeriodOfPerformance, getSecurityRequirements } from "./utils/utils";
 
 export async function handler(body: any) {
   const { documentType, templatePayload } = body;
 
-  //const docxPath = path.join(__dirname, "./templates/dow-template.docx");
+  // const docxPath = path.join(__dirname, "./templates/dow-template.docx");
   const docxTemplatesPath = path.join(__dirname, "./templates/dow-template.docx");
-  const docxTemplatesPathActual = path.join(__dirname, "./templates/Clean_JWCC Description of Work.docx");
+  // const docxTemplatesPathActual = path.join(__dirname, "./templates/Clean_JWCC Description of Work.docx");
+  // const docxTemplatesPathActual = path.join(__dirname, "./templates/dow-template-testing.docx");
 
   try {
+    const popTasks = getTaskPeriods(templatePayload);
+    const entirePeriodTasks = popTasks.entireDurationTasks.map((taskNumber: any) => taskNumber);
+    const selectedPeriodTask = popTasks.taskNumberGroups.flatMap((group: any) => group.dowTaskNumbers);
+    const allPopTasks = entirePeriodTasks.concat(selectedPeriodTask);
+    const cdrls = getCDRLs(allPopTasks, templatePayload.contractType);
+    const { basePeriod, optionPeriods } = templatePayload.periodOfPerformance;
+    const popPeriods = formatPeriodOfPerformance(basePeriod, optionPeriods);
+
+    // security Requirements
+    const securityRequirements = getSecurityRequirements(templatePayload);
+    console.log("Security REQUs.", securityRequirements);
     // NOTE: docx-templates
     const report = await createReport({
-      template: fs.readFileSync(docxTemplatesPathActual),
+      template: fs.readFileSync(docxTemplatesPath),
       data: {
         ...templatePayload,
+        pop: popTasks,
+        cdrls,
+        popPeriods,
+        sr: securityRequirements,
         sumTotalInstances: () => {
           let number = 0;
           for (let i = 0; i < templatePayload.currentEnvironment.envInstances.length; i++) {
-            number += templatePayload.currentEnvironment.envInstances[i].currentEnvironmentInstance.numberOfInstances;
+            number += templatePayload.currentEnvironment.envInstances[i].numberOfInstances;
           }
           return number;
         },
-        checkXaas: (xaasOfferings:any) => {
-          let il2:any = [];
-          let il4:any = [];
-          let il5:any = [];
-          let il6:any = [];
+        checkXaas: (xaasOfferings: any) => {
+          const il2: any = [];
+          const il4: any = [];
+          const il5: any = [];
+          const il6: any = [];
 
-          xaasOfferings.forEach((offering:any)=> {
-            if(Object.keys(offering.instanceConfigurations).length !== 0){
-              offering.instanceConfigurations.forEach((instance:any)=> {
-                switch(instance.classificationLevel.impactLevel){
+          xaasOfferings.forEach((offering: any) => {
+            if (Object.keys(offering.instanceConfigurations).length !== 0) {
+              offering.instanceConfigurations.forEach((instance: any) => {
+                switch (instance.classificationLevel.impactLevel) {
                   case dow.ImpactLevel.IL2:
                     il2.push(offering);
                     break;
@@ -49,9 +67,9 @@ export async function handler(body: any) {
                 }
               });
             }
-            if(Object.keys(offering.serviceOffering).length !=0){
-              offering.serviceOffering.classificationInstances.forEach((instance:any)=> {
-                switch(instance.classificationLevel.impactLevel){
+            if (Object.keys(offering.serviceOffering).length !== 0) {
+              offering.serviceOffering.classificationInstances.forEach((instance: any) => {
+                switch (instance.classificationLevel.impactLevel) {
                   case dow.ImpactLevel.IL2:
                     il2.push(offering);
                     break;
@@ -69,19 +87,19 @@ export async function handler(body: any) {
               });
             }
           });
-          let data = {
-            il2: il2,
-            il4: il4,
-            il5: il5,
-            il6: il6
-          }
+          const data = {
+            il2,
+            il4,
+            il5,
+            il6,
+          };
           return data;
         },
         filterCloudSupport: (cloudSupportPackages: any) => {
-          let impactLevel2: any = [];
-          let impactLevel4: any = [];
-          let impactLevel5: any = [];
-          let impactLevel6: any = [];
+          const impactLevel2: any = [];
+          const impactLevel4: any = [];
+          const impactLevel5: any = [];
+          const impactLevel6: any = [];
           cloudSupportPackages.forEach((plan: any) => {
             switch (plan.classificationLevel.impactLevel) {
               case dow.ImpactLevel.IL2:
@@ -97,7 +115,7 @@ export async function handler(body: any) {
                 impactLevel6.push(plan);
             }
           });
-          let data = {
+          const data = {
             il2: impactLevel2,
             il4: impactLevel4,
             il5: impactLevel5,
@@ -105,11 +123,21 @@ export async function handler(body: any) {
           };
           return data;
         },
-        dataRequirementsList: (cloudSupportPackages: any, check4IL2:any, check4IL4:any, check4IL5:any, check4IL6:any, 
-          il2EdgeCount:any, il4EdgeCount:any, il5EdgeCount:any,il6EdgeCount:any, contractType: any) => {
+        dataRequirementsList: (
+          cloudSupportPackages: any,
+          check4IL2: any,
+          check4IL4: any,
+          check4IL5: any,
+          check4IL6: any,
+          il2EdgeCount: any,
+          il4EdgeCount: any,
+          il5EdgeCount: any,
+          il6EdgeCount: any,
+          contractType: any
+        ) => {
           let ffp;
           let timeMaterial;
-          let data = [];
+          const data = [];
           if (contractType.firmFixedPrice) {
             ffp = true;
           }
@@ -117,16 +145,16 @@ export async function handler(body: any) {
             timeMaterial = true;
           }
 
-          let trainingDowTaskNumbers: any = [];
-          let trainingClinNumbers: any = [];
-          let portabilityPlanTaskNumbers: any = [];
-          let portabilityClinNumbers:any = []; 
-          let monthlyClinNumbers:any = "";
-          let teDeviceTaskNumbers: any = [];
-          let teDeviceClinNumbers: any = [];
-          
+          const trainingDowTaskNumbers: any = [];
+          const trainingClinNumbers: any = [];
+          const portabilityPlanTaskNumbers: any = [];
+          const portabilityClinNumbers: any = [];
+          let monthlyClinNumbers: any = "";
+          const teDeviceTaskNumbers: any = [];
+          const teDeviceClinNumbers: any = [];
+
           cloudSupportPackages.forEach((plan: any) => {
-            if(plan.serviceType == dow.ServiceOfferingGroup.PORTABILITY_PLAN){
+            if (plan.serviceType === dow.ServiceOfferingGroup.PORTABILITY_PLAN) {
               switch (plan.classificationLevel.impactLevel.impactLevel) {
                 case dow.ImpactLevel.IL2:
                   portabilityPlanTaskNumbers.push("4.3.1");
@@ -139,11 +167,12 @@ export async function handler(body: any) {
                   break;
                 case dow.ImpactLevel.IL6:
                   portabilityPlanTaskNumbers.push("4.3.4");
+                  break;
                 default:
                 // do nothing
               }
             }
-            if(plan.serviceType == dow.ServiceOfferingGroup.TRAINING){
+            if (plan.serviceType === dow.ServiceOfferingGroup.TRAINING) {
               switch (plan.classificationLevel.impactLevel) {
                 case dow.ImpactLevel.IL2:
                   trainingDowTaskNumbers.push("4.3.1.3");
@@ -156,27 +185,30 @@ export async function handler(body: any) {
                   break;
                 case dow.ImpactLevel.IL6:
                   trainingDowTaskNumbers.push("4.3.4.3");
+                  break;
                 default:
-                //do nothing
+                // do nothing
               }
             }
-            });
-          /** 
+          });
+          /**
            * Training
            */
 
-          if ( (ffp == true) && (
-            trainingDowTaskNumbers.includes("4.3.1.3") ||
-            trainingDowTaskNumbers.includes("4.3.2.1") ||
-            trainingDowTaskNumbers.includes("4.3.3.3") )
+          if (
+            ffp === true &&
+            (trainingDowTaskNumbers.includes("4.3.1.3") ||
+              trainingDowTaskNumbers.includes("4.3.2.1") ||
+              trainingDowTaskNumbers.includes("4.3.3.3"))
           ) {
-              trainingClinNumbers.push("x002");
-          }
-          else if((timeMaterial == true) && (
-            trainingDowTaskNumbers.includes("4.3.1.3") ||
-            trainingDowTaskNumbers.includes("4.3.2.1") ||
-            trainingDowTaskNumbers.includes("4.3.3.3") )){
-              trainingClinNumbers.push("x018");
+            trainingClinNumbers.push("x002");
+          } else if (
+            timeMaterial === true &&
+            (trainingDowTaskNumbers.includes("4.3.1.3") ||
+              trainingDowTaskNumbers.includes("4.3.2.1") ||
+              trainingDowTaskNumbers.includes("4.3.3.3"))
+          ) {
+            trainingClinNumbers.push("x018");
           }
           if (trainingDowTaskNumbers.includes("4.3.4.3")) {
             if (ffp) {
@@ -190,18 +222,20 @@ export async function handler(body: any) {
           /**
            * Portability
            */
-          if ( (ffp == true) && (
-            portabilityPlanTaskNumbers.includes("4.3.1.3") ||
-            portabilityPlanTaskNumbers.includes("4.3.2.1") ||
-            portabilityPlanTaskNumbers.includes("4.3.3.3") )
+          if (
+            ffp === true &&
+            (portabilityPlanTaskNumbers.includes("4.3.1.3") ||
+              portabilityPlanTaskNumbers.includes("4.3.2.1") ||
+              portabilityPlanTaskNumbers.includes("4.3.3.3"))
           ) {
-              portabilityClinNumbers.push("x002");
-          }
-          else if((timeMaterial == true) && (
-            portabilityPlanTaskNumbers.includes("4.3.1.3") ||
-            portabilityPlanTaskNumbers.includes("4.3.2.1") ||
-            portabilityPlanTaskNumbers.includes("4.3.3.3") )){
-              portabilityClinNumbers.push("x018");
+            portabilityClinNumbers.push("x002");
+          } else if (
+            timeMaterial === true &&
+            (portabilityPlanTaskNumbers.includes("4.3.1.3") ||
+              portabilityPlanTaskNumbers.includes("4.3.2.1") ||
+              portabilityPlanTaskNumbers.includes("4.3.3.3"))
+          ) {
+            portabilityClinNumbers.push("x018");
           }
           if (portabilityPlanTaskNumbers.includes("4.3.4.3")) {
             if (ffp) {
@@ -214,103 +248,110 @@ export async function handler(body: any) {
           /**
            * Monthly Progress Report
            */
-          if((ffp==true) && (check4IL2 > 0 || check4IL4 > 0 || check4IL5 > 0) ){
-            monthlyClinNumbers += "x001"
+          if (ffp === true && (check4IL2 > 0 || check4IL4 > 0 || check4IL5 > 0)) {
+            monthlyClinNumbers += "x001";
           }
-          if((ffp==true) && check4IL6 > 0){
-            monthlyClinNumbers += "x003"
+          if (ffp === true && check4IL6 > 0) {
+            monthlyClinNumbers += "x003";
           }
-          if((timeMaterial == true) && (check4IL2 > 0 || check4IL4 > 0 || check4IL5 > 0)){
-            monthlyClinNumbers += "x017"
+          if (timeMaterial === true && (check4IL2 > 0 || check4IL4 > 0 || check4IL5 > 0)) {
+            monthlyClinNumbers += "x017";
           }
-          if(timeMaterial == true && check4IL6 > 0){
-            monthlyClinNumbers += "x019"
+          if (timeMaterial === true && check4IL6 > 0) {
+            monthlyClinNumbers += "x019";
           }
           /**
            * Tactical Edge Device Specifications
            */
-          
-            if(il2EdgeCount >= 1){
-              teDeviceTaskNumbers.push("4.2.1.9");
-            } 
-            if(il4EdgeCount >= 1){
-              teDeviceTaskNumbers.push("4.2.2.9");
-            } 
-            if(il5EdgeCount >= 1){
-              teDeviceTaskNumbers.push("4.2.3.9")
-            }
-            if(il6EdgeCount >= 1){
-              teDeviceTaskNumbers.push("4.2.4.9")
-            }
 
-            if((ffp == true) && (teDeviceTaskNumbers.includes("4.2.1.9") || teDeviceTaskNumbers.includes("4.2.2.9")
-             || teDeviceTaskNumbers.includes("4.2.3.9"))){
-              teDeviceClinNumbers.push("x001")
-             }
-             if((timeMaterial == true) && (teDeviceTaskNumbers.includes("4.2.1.9") || teDeviceTaskNumbers.includes("4.2.2.9")
-             || teDeviceTaskNumbers.includes("4.2.3.9"))){
-              teDeviceClinNumbers.push("x017")
-             }
-             if(ffp == true && teDeviceTaskNumbers.includes("4.2.4.9")){
-              teDeviceClinNumbers.push("x003")
-             }
-             if(timeMaterial == true && teDeviceTaskNumbers.includes("4.2.4.9")){
-              teDeviceClinNumbers.push("x019")
-             }
+          if (il2EdgeCount >= 1) {
+            teDeviceTaskNumbers.push("4.2.1.9");
+          }
+          if (il4EdgeCount >= 1) {
+            teDeviceTaskNumbers.push("4.2.2.9");
+          }
+          if (il5EdgeCount >= 1) {
+            teDeviceTaskNumbers.push("4.2.3.9");
+          }
+          if (il6EdgeCount >= 1) {
+            teDeviceTaskNumbers.push("4.2.4.9");
+          }
 
+          if (
+            ffp === true &&
+            (teDeviceTaskNumbers.includes("4.2.1.9") ||
+              teDeviceTaskNumbers.includes("4.2.2.9") ||
+              teDeviceTaskNumbers.includes("4.2.3.9"))
+          ) {
+            teDeviceClinNumbers.push("x001");
+          }
+          if (
+            timeMaterial === true &&
+            (teDeviceTaskNumbers.includes("4.2.1.9") ||
+              teDeviceTaskNumbers.includes("4.2.2.9") ||
+              teDeviceTaskNumbers.includes("4.2.3.9"))
+          ) {
+            teDeviceClinNumbers.push("x017");
+          }
+          if (ffp === true && teDeviceTaskNumbers.includes("4.2.4.9")) {
+            teDeviceClinNumbers.push("x003");
+          }
+          if (timeMaterial === true && teDeviceTaskNumbers.includes("4.2.4.9")) {
+            teDeviceClinNumbers.push("x019");
+          }
 
-          if(trainingDowTaskNumbers.length != 0){
-            let obj = {
+          if (trainingDowTaskNumbers.length !== 0) {
+            const obj = {
               dowTaskNumbers: trainingDowTaskNumbers.toString(),
               clinNumbers: trainingClinNumbers.toString(),
               cdrl: {
                 code: "*A004",
                 name: "System Administrator Training Materials",
               },
-            }
+            };
             data.push(obj);
-            let obj2 = {
+            const obj2 = {
               dowTaskNumbers: trainingDowTaskNumbers.toString(),
               clinNumbers: trainingClinNumbers.toString(),
               cdrl: {
                 code: "*A005",
                 name: "Role-Based User Training Materials",
               },
-            }
-            data.push(obj2)
+            };
+            data.push(obj2);
           }
-          if(portabilityPlanTaskNumbers.length != 0){
-            let obj =    {
+          if (portabilityPlanTaskNumbers.length !== 0) {
+            const obj = {
               dowTaskNumbers: portabilityPlanTaskNumbers.toString(),
               clinNumbers: portabilityClinNumbers.toString(),
               cdrl: {
                 code: "**A006",
-                name: "Portability Plan"
-              }
-             }
-             data.push(obj);
+                name: "Portability Plan",
+              },
+            };
+            data.push(obj);
           }
-          if(monthlyClinNumbers.length >0){
-            let obj = {
+          if (monthlyClinNumbers.length > 0) {
+            const obj = {
               dowTaskNumbers: "ANY",
               clinNumbers: monthlyClinNumbers,
               cdrl: {
                 code: "A012",
-                name: "TO Monthly Progress Report"
-              }
-            }
+                name: "TO Monthly Progress Report",
+              },
+            };
             data.push(obj);
           }
-          if(teDeviceClinNumbers.length > 0){
-            let obj = {
+          if (teDeviceClinNumbers.length > 0) {
+            const obj = {
               dowTaskNumbers: teDeviceTaskNumbers.toString(),
               clinNumbers: teDeviceClinNumbers.toString(),
               cdrl: {
                 code: "***A017",
-                name: "TE Device Specifications"
-              }
-            }
-            data.push(obj)
+                name: "TE Device Specifications",
+              },
+            };
+            data.push(obj);
           }
           return data;
         },
@@ -323,19 +364,17 @@ export async function handler(body: any) {
           }
         },
         getNumberComputeInstances: (impactLevel: any) => {
-          let numInstances = {
+          const numInstances = {
             dev: 0,
             preProd: 0,
             prod: 0,
             coop: 0,
           };
-          console.log(numInstances);
-          templatePayload.xaasOfferings.forEach((offering:any)=> { 
-            if(offering.serviceOffering.serviceOffering.serviceOfferingGroup === dow.ServiceOfferingGroup.COMPUTE)
-            {
-              offering.instanceConfigurations.forEach((instance:any)=> {
-                if(instance.classificationLevel.impactLevel === impactLevel){
-                    switch (instance.environmentType) {
+          templatePayload.xaasOfferings.forEach((offering: any) => {
+            if (offering.serviceOffering.serviceOffering.serviceOfferingGroup === dow.ServiceOfferingGroup.COMPUTE) {
+              offering.instanceConfigurations.forEach((instance: any) => {
+                if (instance.classificationLevel.impactLevel === impactLevel) {
+                  switch (instance.environmentType) {
                     case dow.EnvironmentType.DEV_TEST:
                       numInstances.dev += instance.numberOfInstances;
                       break;
@@ -349,165 +388,164 @@ export async function handler(body: any) {
                       numInstances.prod += instance.numberOfInstances;
                   }
                 }
-              })
+              });
             }
-        });
+          });
+          console.log(numInstances);
           return numInstances;
         },
-        getComputeInstances: (impactLevel:any) => {
-          let computeInstances:any = [];
-          templatePayload.xaasOfferings.forEach((offering:any) => {
-            if(offering.serviceOffering.serviceOffering.serviceOfferingGroup === dow.ServiceOfferingGroup.COMPUTE){
-              offering.instanceConfigurations.forEach((instance:any)=> {
-                if(instance.classificationLevel.impactLevel === impactLevel){
+        getComputeInstances: (impactLevel: any) => {
+          const computeInstances: any = [];
+          templatePayload.xaasOfferings.forEach((offering: any) => {
+            if (offering.serviceOffering.serviceOffering.serviceOfferingGroup === dow.ServiceOfferingGroup.COMPUTE) {
+              offering.instanceConfigurations.forEach((instance: any) => {
+                if (instance.classificationLevel.impactLevel === impactLevel) {
                   computeInstances.push(instance);
                 }
-              })
+              });
             }
-          })
+          });
           return computeInstances;
         },
         getNumberDatabaseInstances: (impactLevel: any) => {
           let numInstances = 0;
-          templatePayload.xaasOfferings.forEach((offering:any)=> { 
-            if(offering.serviceOffering.serviceOffering.serviceOfferingGroup === dow.ServiceOfferingGroup.DATABASE)
-            {
-              offering.instanceConfigurations.forEach((instance:any)=> {
-                if(instance.classificationLevel.impactLevel === impactLevel){
+          templatePayload.xaasOfferings.forEach((offering: any) => {
+            if (offering.serviceOffering.serviceOffering.serviceOfferingGroup === dow.ServiceOfferingGroup.DATABASE) {
+              offering.instanceConfigurations.forEach((instance: any) => {
+                if (instance.classificationLevel.impactLevel === impactLevel) {
                   numInstances += instance.numberOfInstances;
                 }
-              })
+              });
             }
-        });
+          });
           return numInstances;
         },
-        getDatabaseInstances: (impactLevel:any) => {
-          let databaseInstances:any = [];
-          templatePayload.xaasOfferings.forEach((offering:any) => {
-            if(offering.serviceOffering.serviceOffering.serviceOfferingGroup === dow.ServiceOfferingGroup.DATABASE){
-              offering.instanceConfigurations.forEach((instance:any)=> {
-                if(instance.classificationLevel.impactLevel === impactLevel){
+        getDatabaseInstances: (impactLevel: any) => {
+          const databaseInstances: any = [];
+          templatePayload.xaasOfferings.forEach((offering: any) => {
+            if (offering.serviceOffering.serviceOffering.serviceOfferingGroup === dow.ServiceOfferingGroup.DATABASE) {
+              offering.instanceConfigurations.forEach((instance: any) => {
+                if (instance.classificationLevel.impactLevel === impactLevel) {
                   databaseInstances.push(instance);
                 }
-              })
+              });
             }
-          })
+          });
           return databaseInstances;
         },
-        getStorageInstances: (impactLevel:any) => {
-          let storageInstances:any = [];
-          templatePayload.xaasOfferings.forEach((offering:any) => {
-            if(offering.serviceOffering.serviceOffering.serviceOfferingGroup === dow.ServiceOfferingGroup.STORAGE){
-              offering.instanceConfigurations.forEach((instance:any)=> {
-                if(instance.classificationLevel.impactLevel === impactLevel){
+        getStorageInstances: (impactLevel: any) => {
+          const storageInstances: any = [];
+          templatePayload.xaasOfferings.forEach((offering: any) => {
+            if (offering.serviceOffering.serviceOffering.serviceOfferingGroup === dow.ServiceOfferingGroup.STORAGE) {
+              offering.instanceConfigurations.forEach((instance: any) => {
+                if (instance.classificationLevel.impactLevel === impactLevel) {
                   storageInstances.push(instance);
                 }
-              })
+              });
             }
-          })
+          });
           return storageInstances;
         },
-        getStandardInstances: (impactLevel:any, service:any) => {
-          
-          let tools:any = [];
-          templatePayload.xaasOfferings.forEach((offering:any) => {
-            offering.serviceOffering.classificationInstances.forEach((classification:any) => {
-              if(classification.classificationLevel.impactLevel === impactLevel && offering.serviceOffering.serviceOffering.serviceOfferingGroup === service){
-                tools.push(offering.serviceOffering)
+        getStandardInstances: (impactLevel: any, service: any) => {
+          const tools: any = [];
+          templatePayload.xaasOfferings.forEach((offering: any) => {
+            offering.serviceOffering.classificationInstances.forEach((classification: any) => {
+              if (
+                classification.classificationLevel.impactLevel === impactLevel &&
+                offering.serviceOffering.serviceOffering.serviceOfferingGroup === service
+              ) {
+                tools.push(offering.serviceOffering);
               }
-            })
-          })
+            });
+          });
           return tools;
         },
-        getRegions: (impactLevel:any) => {
-          let data: any = [];
-          templatePayload.selectedClassificationLevels.forEach((classLevel:any)=> {
-            if(classLevel.classificationLevel.impactLevel === impactLevel){
-              let regions:any[] = classLevel.usersPerRegion.split(',');
-              regions.forEach((region:any)=>{
-                let r = JSON.parse(region);
-                let zone = Object.keys(r);
-                let obj = {
+        getRegions: (impactLevel: string) => {
+          const data: any = [];
+          templatePayload.selectedClassificationLevels.forEach((classLevel: any) => {
+            if (classLevel.classificationLevel.impactLevel === impactLevel) {
+              // let regions:any[] = classLevel.usersPerRegion.split(',');
+              const regions: any[] = JSON.parse(classLevel.usersPerRegion);
+              regions.forEach((region: any) => {
+                // let r = JSON.parse(region);
+                // let zone = Object.keys(r);
+                console.log(impactLevel, region);
+                const zone = Object.keys(region);
+                const obj = {
                   region: zone[0],
-                  users: r[zone[0]]
-                }
-                data.push(obj)
-              })
+                  users: region[zone[0]],
+                };
+                data.push(obj);
+              });
             }
-          })
+          });
           return data;
         },
-        getAnticipatedNeeds: (impactLevel:any) => {
-          let data:any = [];
-          let userGrowthEstimateType:any;
-          let userGrowthEstimatePercentage:any = [];
-          let dataGrowthEstimateType:any;
-          let dataGrowthEstimatePercentage:any = [];
-          templatePayload.selectedClassificationLevels.forEach((classLevel:any)=> {
-            if(classLevel.classificationLevel.impactLevel === impactLevel){
-              let usersIncrease = classLevel.usersIncrease;
-              let dataIncrease = classLevel.dataIncrease;
-              
-              if(usersIncrease == true){
-                userGrowthEstimateType = classLevel.userGrowthEstimateType;
-                if(classLevel.userGrowthEstimateType === "SINGLE"){
-                  console.log("Single", classLevel.userGrowthEstimatePercentage)
-                  userGrowthEstimatePercentage[0] = classLevel.userGrowthEstimatePercentage;
-                }
-                else {
-                  for(let i = 0; i < classLevel.userGrowthEstimatePercentage.length; i++){
-                    let period;
-                    if(i == 0){
-                      period = "Base "
-                    }
-                    else {
-                      period = "Option " + i
-                    }
-                    let obj = {
-                      period: period,
-                      value: classLevel.userGrowthEstimatePercentage[i]
-                    }
+        getAnticipatedNeeds: (impactLevel: any) => {
+          const data: any = [];
+          let userGrowthEstimateType: any;
+          const userGrowthEstimatePercentage: any = [];
+          let dataGrowthEstimateType: any;
+          const dataGrowthEstimatePercentage: any = [];
+          templatePayload.selectedClassificationLevels.forEach((classLevel: any) => {
+            if (classLevel.classificationLevel.impactLevel === impactLevel) {
+              const usersIncrease = classLevel.usersIncrease;
+              const dataIncrease = classLevel.dataIncrease;
 
-                    userGrowthEstimatePercentage.push(obj)
+              if (usersIncrease === true) {
+                userGrowthEstimateType = classLevel.userGrowthEstimateType;
+                if (classLevel.userGrowthEstimateType === "SINGLE") {
+                  console.log("Single", classLevel.userGrowthEstimatePercentage);
+                  userGrowthEstimatePercentage[0] = classLevel.userGrowthEstimatePercentage;
+                } else {
+                  for (let i = 0; i < classLevel.userGrowthEstimatePercentage.length; i++) {
+                    let period;
+                    if (i === 0) {
+                      period = "Base ";
+                    } else {
+                      period = "Option " + i;
+                    }
+                    const obj = {
+                      period,
+                      value: classLevel.userGrowthEstimatePercentage[i],
+                    };
+
+                    userGrowthEstimatePercentage.push(obj);
                   }
                 }
-                let tmp = {
-                  usersIncrease: usersIncrease,
-                  userGrowthEstimateType: userGrowthEstimateType,
-                  userGrowthEstimatePercentage: userGrowthEstimatePercentage
-  
-                }
+                const tmp = {
+                  usersIncrease,
+                  userGrowthEstimateType,
+                  userGrowthEstimatePercentage,
+                };
                 data.push(tmp);
               }
-              if(dataIncrease == true){
-                if(classLevel.dataGrowthEstimateType === "SINGLE"){
-                  dataGrowthEstimatePercentage.push(classLevel.dataGrowthEstimatePercentage)
-                }
-                else{
-                  for(let i = 0; i < classLevel.dataGrowthEstimatePercentage.length; i++){
+              if (dataIncrease === true) {
+                if (classLevel.dataGrowthEstimateType === "SINGLE") {
+                  dataGrowthEstimatePercentage.push(classLevel.dataGrowthEstimatePercentage);
+                } else {
+                  for (let i = 0; i < classLevel.dataGrowthEstimatePercentage.length; i++) {
                     let period;
-                    if(i == 0){
-                      period = "Base"
+                    if (i === 0) {
+                      period = "Base";
+                    } else {
+                      period = "Option " + i;
                     }
-                    else {
-                      period = "Option " + i
-                    }
-                    let obj = {
-                      period: period,
-                      value: classLevel.dataGrowthEstimatePercentage[i]
-                    }
+                    const obj = {
+                      period,
+                      value: classLevel.dataGrowthEstimatePercentage[i],
+                    };
                     dataGrowthEstimatePercentage.push(obj);
                   }
                 }
 
-                let tmp = {
-                  dataIncrease: dataIncrease,
-                  dataGrowthEstimateType: dataGrowthEstimateType,
-                  dataGrowthEstimatePercentage: dataGrowthEstimatePercentage
-                }
-                data.push(tmp)
+                const tmp = {
+                  dataIncrease,
+                  dataGrowthEstimateType,
+                  dataGrowthEstimatePercentage,
+                };
+                data.push(tmp);
               }
-             
             }
           });
           return data;
@@ -516,28 +554,28 @@ export async function handler(body: any) {
           let gbEgress = 0;
           let pbEgress = 0;
           let tbEgress = 0;
-          let response = {
+          const response = {
             dataEgressAverage: 0,
             dataEgressMonthlyUnit: dow.StorageUnit.TB,
           };
-          templatePayload.selectedClassificationLevels.forEach((classLevel:any) => {
+          templatePayload.selectedClassificationLevels.forEach((classLevel: any) => {
             switch (classLevel.dataEgressMonthlyUnit) {
               case dow.StorageUnit.GB:
-                gbEgress += classLevel.dataEgressMonthlyAmount
+                gbEgress += classLevel.dataEgressMonthlyAmount;
                 break;
               case dow.StorageUnit.TB:
-                tbEgress += classLevel.dataEgressMonthlyAmount
+                tbEgress += classLevel.dataEgressMonthlyAmount;
                 break;
               case dow.StorageUnit.PB:
-                pbEgress += classLevel.dataEgressMonthlyAmount
+                pbEgress += classLevel.dataEgressMonthlyAmount;
                 break;
               default:
                 console.error();
             }
           });
-          let pbToGB;
-          let tbToGB;
-          let gbDataEgress;
+          const pbToGB;
+          const tbToGB;
+          const gbDataEgress;
           if (isNaN(gbEgress)) {
             gbEgress = 0;
           }
@@ -561,7 +599,7 @@ export async function handler(body: any) {
             response.dataEgressMonthlyUnit = dow.StorageUnit.GB;
           }
           return response;
-         },
+        },
       },
       cmdDelimiter: ["{", "}"],
     });
@@ -592,13 +630,13 @@ const body = {
       timeAndMaterials: true,
     },
     awardHistory: [
-      {
-        contractAwardType: dow.ContractAwardType.INITIAL_AWARD,
-      },
+      { contractAwardType: "INITIAL_AWARD", modificationOrder: null, effectiveDate: "2022-05-20" },
+      { contractAwardType: "MODIFICATION", modificationOrder: 3, effectiveDate: "2022-09-01" },
+      { contractAwardType: "MODIFICATION", modificationOrder: 1, effectiveDate: "2023-02-01" },
     ],
-    crossDomainSolution: {
+    crossDomainSolutions: {
       crossDomainSolutionRequired: true,
-      //need to parse the string JSON.parse(string)
+      // need to parse the string JSON.parse(string)
       trafficPerDomainPair: [
         {
           name: "U_TO_S",
@@ -622,33 +660,41 @@ const body = {
     },
 
     cloudSupportPackages: [
-      //used for training ONLY
+      // used for training ONLY
       {
         serviceType: dow.ServiceOfferingGroup.ADVISORY_ASSISTANCE,
         classificationLevel: {
+          classification: "U",
           impactLevel: dow.ImpactLevel.IL2,
         },
+        classifiedInformationTypes: [],
         personnelOnsiteAccess: true,
         anticipatedNeedOrUsage: "Anticipated need/usage",
-        needForEntireTaskOrderDuration: false, //true
+        needForEntireTaskOrderDuration: false, // true
       },
       {
         serviceType: dow.ServiceOfferingGroup.HELP_DESK_SERVICES,
         classificationLevel: {
+          classification: "U",
           impactLevel: dow.ImpactLevel.IL2,
         },
+        classifiedInformationTypes: [],
         personnelOnsiteAccess: true,
         anticipatedNeedOrUsage: "Anticipated need/usage",
-        needForEntireTaskOrderDuration: false, //true
+        needForEntireTaskOrderDuration: false, // true
       },
       {
-        serviceType: dow.ServiceOfferingGroup.TRAINING,
+        serviceType: "TRAINING",
         classificationLevel: {
-          impactLevel: dow.ImpactLevel.IL2,
+          classification: "S",
+          impactLevel: "IL6",
         },
+        classifiedInformationTypes: [
+          { name: "Controlled Unclassified Information (CUI)", description: null, sequence: 11 },
+        ],
         personnelOnsiteAccess: true,
         anticipatedNeedOrUsage: "Anticipated need/usage",
-        needForEntireTaskOrderDuration: false, //true
+        needForEntireTaskOrderDuration: false, // true
         selectedPeriods: {
           periodType: dow.PeriodType.BASE,
           periodUnitCount: 1,
@@ -666,95 +712,110 @@ const body = {
       {
         serviceType: dow.ServiceOfferingGroup.DOCUMENTATION_SUPPORT,
         classificationLevel: {
+          classification: "U",
           impactLevel: dow.ImpactLevel.IL2,
         },
+        classifiedInformationTypes: [],
         personnelOnsiteAccess: true,
         anticipatedNeedOrUsage: "Anticipated need/usage",
-        needForEntireTaskOrderDuration: false, //true
+        needForEntireTaskOrderDuration: false, // true
       },
       {
         serviceType: dow.ServiceOfferingGroup.GENERAL_CLOUD_SUPPORT,
         classificationLevel: {
+          classification: "U",
           impactLevel: dow.ImpactLevel.IL2,
         },
+        classifiedInformationTypes: [],
         personnelOnsiteAccess: true,
         anticipatedNeedOrUsage: "Anticipated need/usage",
-        needForEntireTaskOrderDuration: false, //true
+        needForEntireTaskOrderDuration: false, // true
       },
       {
         serviceType: dow.ServiceOfferingGroup.ADVISORY_ASSISTANCE,
         classificationLevel: {
+          classification: "U",
           impactLevel: dow.ImpactLevel.IL4,
         },
+        classifiedInformationTypes: [],
         personnelOnsiteAccess: true,
         anticipatedNeedOrUsage: "Anticipated need/usage",
-        needForEntireTaskOrderDuration: false, //true
+        needForEntireTaskOrderDuration: false, // true
       },
       {
         serviceType: dow.ServiceOfferingGroup.HELP_DESK_SERVICES,
         classificationLevel: {
+          classification: "U",
           impactLevel: dow.ImpactLevel.IL4,
         },
+        classifiedInformationTypes: [],
         personnelOnsiteAccess: true,
         anticipatedNeedOrUsage: "Anticipated need/usage",
-        needForEntireTaskOrderDuration: false, //true
+        needForEntireTaskOrderDuration: false, // true
       },
       {
         serviceType: dow.ServiceOfferingGroup.ADVISORY_ASSISTANCE,
         classificationLevel: {
-          impactLevel: dow.ImpactLevel.IL5,
-        },
-        personnelOnsiteAccess: true,
-        anticipatedNeedOrUsage: "Anticipated need/usage",
-        needForEntireTaskOrderDuration: false, //true
-      },
-      {
-        serviceType: dow.ServiceOfferingGroup.HELP_DESK_SERVICES,
-        classificationLevel: {
-          impactLevel: dow.ImpactLevel.IL5,
-        },
-        personnelOnsiteAccess: true,
-        anticipatedNeedOrUsage: "Anticipated need/usage",
-        needForEntireTaskOrderDuration: false, //true
-      },
-      {
-        serviceType: dow.ServiceOfferingGroup.ADVISORY_ASSISTANCE,
-        classificationLevel: {
+          classification: "S",
           impactLevel: dow.ImpactLevel.IL6,
         },
         personnelOnsiteAccess: true,
         anticipatedNeedOrUsage: "Anticipated need/usage",
-        needForEntireTaskOrderDuration: false, //true
+        needForEntireTaskOrderDuration: false, // true
+        classifiedInformationTypes: [],
       },
       {
         serviceType: dow.ServiceOfferingGroup.HELP_DESK_SERVICES,
         classificationLevel: {
+          classification: "S",
           impactLevel: dow.ImpactLevel.IL6,
         },
+        classifiedInformationTypes: [],
         personnelOnsiteAccess: true,
         anticipatedNeedOrUsage: "Anticipated need/usage",
-        needForEntireTaskOrderDuration: false, //true
-      }
-      
+        needForEntireTaskOrderDuration: false, // true
+      },
+      {
+        serviceType: dow.ServiceOfferingGroup.ADVISORY_ASSISTANCE,
+        classificationLevel: {
+          classification: "TS",
+          impactLevel: null,
+        },
+        classifiedInformationTypes: [],
+        personnelOnsiteAccess: true,
+        anticipatedNeedOrUsage: "Anticipated need/usage",
+        needForEntireTaskOrderDuration: false, // true
+      },
+      {
+        serviceType: dow.ServiceOfferingGroup.HELP_DESK_SERVICES,
+        classificationLevel: {
+          classification: "TS",
+          impactLevel: null,
+        },
+        classifiedInformationTypes: [],
+        personnelOnsiteAccess: true,
+        anticipatedNeedOrUsage: "Anticipated need/usage",
+        needForEntireTaskOrderDuration: false, // true
+      },
     ],
     periodOfPerformance: {
       basePeriod: {
-        periodType: dow.PeriodType.BASE,
+        periodType: "BASE",
         periodUnitCount: 12,
-        periodUnit: dow.PeriodUnit.MONTH,
+        periodUnit: "MONTH",
         optionOrder: null,
       },
       optionPeriods: [
         {
-          periodType: dow.PeriodType.OPTION,
+          periodType: "OPTION",
           periodUnitCount: 12,
-          periodUnit: dow.PeriodUnit.MONTH,
+          periodUnit: "MONTH",
           optionOrder: 1,
         },
         {
-          periodType: dow.PeriodType.OPTION,
+          periodType: "OPTION",
           periodUnitCount: 12,
-          periodUnit: dow.PeriodUnit.MONTH,
+          periodUnit: "MONTH",
           optionOrder: 2,
         },
       ],
@@ -767,57 +828,66 @@ const body = {
       hasSystemDocumentation: true,
       hasMigrationDocumentation: false,
       envLocation: dow.EnvironmentLocation.HYBRID,
+      // TODO: an array of Classification Levels
       envClassificationsCloud: ["IL2", "IL6"],
       envInstances: [
         {
-          //CLOUD
-          currentEnvironmentInstance: {
-            numberOfInstances: 32,
-            classificationLevel: {
-              classification: [dow.Classification.S, dow.Classification.U],
-              impactLevel: {
-                impactLevel: [dow.ImpactLevel.IL4, dow.ImpactLevel.IL4],
-              },
-              additionalInformation: "Cloud",
+          // CLOUD
+          // TODO: this is nested a layer deeper than needed
+          // currentEnvironmentInstance: {
+          numberOfInstances: 32,
+          classificationLevel: {
+            classification: "S",
+            impactLevel: {
+              impactLevel: "IL6",
             },
-            currentUsageDescription: dow.UsageDescription.IRREGULAR_USAGE,
-            isTrafficSpikeEventBased: true,
-            trafficSpikeEventDescription: "Santa",
-            isTrafficSpikePeriodBased: true,
-            trafficSpikePeriodDescription: "Holidays",
-            deployedRegions: [
-              {
-                usersPerRegion: 500,
-                regions: dow.Region.CONUS,
-              },
-              {
-                usersPerRegion: 10000,
-                regions: dow.Region.CONUS,
-              },
-            ],
-            numberOfvCPUs: 7,
-            processorSpeed: 5.2,
-            operatingSystem: "Kali Linux",
-            licensing: "OSS",
-            storageType: dow.StorageType.BLOCK,
-            storageAmount: 500,
-            storageUnit: dow.StorageUnit.GB,
-            memoryAmount: 250,
-            memoryUnit: dow.StorageUnit.GB,
-            performanceTier: dow.PerformanceTier.COMPUTE,
-            dataEgressMonthlyAmount: 1,
-            dataEgressMonthlyUnit: dow.StorageUnit.PB,
-            instanceLocation: "Cloud",
           },
+          additionalInformation: "Cloud",
+          classifiedInformationTypes: [
+            { name: "Foreign Government Information (FGI)", description: null, sequence: 9 },
+            { name: "North Atlantic Treaty Organization (NATO) Information", description: null, sequence: 8 },
+          ],
+          currentUsageDescription: dow.UsageDescription.IRREGULAR_USAGE,
+          isTrafficSpikeEventBased: true,
+          trafficSpikeEventDescription: "Santa",
+          isTrafficSpikePeriodBased: true,
+          trafficSpikePeriodDescription: "Holidays",
+          deployedRegions: [
+            {
+              usersPerRegion: 500,
+              regions: dow.Region.CONUS,
+            },
+            {
+              usersPerRegion: 10000,
+              regions: dow.Region.CONUS,
+            },
+          ],
+          numberOfvCPUs: 7,
+          processorSpeed: 5.2,
+          operatingSystem: "Kali Linux",
+          licensing: "OSS",
+          storageType: dow.StorageType.BLOCK,
+          storageAmount: 500,
+          storageUnit: dow.StorageUnit.GB,
+          memoryAmount: 250,
+          memoryUnit: dow.StorageUnit.GB,
+          performanceTier: dow.PerformanceTier.COMPUTE,
+          dataEgressMonthlyAmount: 1,
+          dataEgressMonthlyUnit: dow.StorageUnit.PB,
+          instanceLocation: "Cloud",
+          // },
         },
         {
-          currentEnvironmentInstance: {
-            numberOfInstances: 8,
-            classificationLevel: {
-              classification: [dow.Classification.S, dow.Classification.U],
-            },
-            additionalInformation: "On-Prem",
+          // currentEnvironmentInstance: {
+          numberOfInstances: 8,
+          classificationLevel: {
+            classification: "U",
+            impactLevel: "IL2",
+            display: "Unclassified - IL2",
           },
+          additionalInformation: "On-Prem",
+          // },
+          classifiedInformationTypes: [],
           currentUsageDescription: dow.UsageDescription.EVEN_USAGE,
           deployedRegions: [
             {
@@ -876,219 +946,225 @@ const body = {
     },
     xaasOfferings: [
       {
-        //edge computing, dev tools & services, apps, machine learning
-        //networking, security solutions, IoT
+        // edge computing, dev tools & services, apps, machine learning
+        // networking, security solutions, IoT
         serviceOffering: {
           classificationInstances: [
             {
               classificationLevel: {
                 classification: "U",
-                impactLevel: "IL2"
+                impactLevel: "IL2",
               },
               classifiedInformationTypes: [],
               selectedPeriods: null,
               usageDescription: "Infra upkeep",
-              dowTaskNumber: "4.2.1.2"
-            },{
-            classificationLevel: {
-              classification: "U",
-              impactLevel: "IL4"
+              dowTaskNumber: "4.2.1.2",
             },
-            classifiedInformationTypes: [],
-            selectedPeriods: null,
-            usageDescription: "Infra upkeep",
-            dowTaskNumber: "4.2.1.2"
-        },],
+            {
+              classificationLevel: {
+                classification: "U",
+                impactLevel: "IL4",
+              },
+              classifiedInformationTypes: [],
+              selectedPeriods: null,
+              usageDescription: "Infra upkeep",
+              dowTaskNumber: "4.2.1.2",
+            },
+          ],
           otherServiceOffering: null,
-          serviceOffering: { 
+          serviceOffering: {
             name: "Edge Computing",
             serviceOfferingGroup: dow.ServiceOfferingGroup.EDGE_COMPUTING,
-          }
+          },
         },
-        //compute, general xaas, database, storage
+        // compute, general xaas, database, storage
         instanceConfigurations: [],
       },
       {
-        //edge computing, dev tools & services, apps, machine learning
-        //networking, security solutions, IoT
+        // edge computing, dev tools & services, apps, machine learning
+        // networking, security solutions, IoT
         serviceOffering: {
           classificationInstances: [
             {
               classificationLevel: {
                 classification: "U",
-                impactLevel: "IL2"
+                impactLevel: "IL2",
               },
               classifiedInformationTypes: [],
               selectedPeriods: null,
               usageDescription: "Infra upkeep",
-              dowTaskNumber: "4.2.1.2"
+              dowTaskNumber: "4.2.1.2",
             },
             {
               classificationLevel: {
                 classification: "U",
-                impactLevel: "IL4"
+                impactLevel: "IL4",
               },
               classifiedInformationTypes: [],
               selectedPeriods: null,
               usageDescription: "Infra upkeep",
-              dowTaskNumber: "4.2.1.2"
-            }
+              dowTaskNumber: "4.2.1.2",
+            },
           ],
           otherServiceOffering: null,
-          serviceOffering: { 
+          serviceOffering: {
             name: "Edge Computing",
             serviceOfferingGroup: dow.ServiceOfferingGroup.DEVELOPER_TOOLS,
-          }
+          },
         },
-        //compute, general xaas, database, storage
+        // compute, general xaas, database, storage
         instanceConfigurations: [],
       },
       {
-        //edge computing, dev tools & services, apps, machine learning
-        //networking, security solutions, IoT
+        // edge computing, dev tools & services, apps, machine learning
+        // networking, security solutions, IoT
         serviceOffering: {
           classificationInstances: [
             {
               classificationLevel: {
                 classification: "U",
-                impactLevel: "IL2"
+                impactLevel: "IL2",
               },
               classifiedInformationTypes: [],
               selectedPeriods: null,
               usageDescription: "Infra upkeep",
-              dowTaskNumber: "4.2.1.2"
-            }
+              dowTaskNumber: "4.2.1.2",
+            },
           ],
           otherServiceOffering: null,
-          serviceOffering: { 
+          serviceOffering: {
             name: "Edge Computing",
             serviceOfferingGroup: dow.ServiceOfferingGroup.APPLICATIONS,
-          }
+          },
         },
-        //compute, general xaas, database, storage
+        // compute, general xaas, database, storage
         instanceConfigurations: [],
       },
       {
-        //edge computing, dev tools & services, apps, machine learning
-        //networking, security solutions, IoT
+        // edge computing, dev tools & services, apps, machine learning
+        // networking, security solutions, IoT
         serviceOffering: {
           classificationInstances: [
             {
               classificationLevel: {
                 classification: "U",
-                impactLevel: "IL2"
+                impactLevel: "IL2",
               },
               classifiedInformationTypes: [],
               selectedPeriods: null,
               usageDescription: "Infra upkeep",
-              dowTaskNumber: "4.2.1.2"
+              dowTaskNumber: "4.2.1.2",
             },
             {
               classificationLevel: {
                 classification: "U",
-                impactLevel: "IL4"
+                impactLevel: "IL4",
               },
               classifiedInformationTypes: [],
               selectedPeriods: null,
               usageDescription: "Infra upkeep",
-              dowTaskNumber: "4.2.1.2"
-            }
+              dowTaskNumber: "4.2.1.2",
+            },
           ],
           otherServiceOffering: null,
-          serviceOffering: { 
+          serviceOffering: {
             name: "Edge Computing",
             serviceOfferingGroup: dow.ServiceOfferingGroup.MACHINE_LEARNING,
-          }
+          },
         },
-        //compute, general xaas, database, storage
+        // compute, general xaas, database, storage
         instanceConfigurations: [],
       },
       {
-        //edge computing, dev tools & services, apps, machine learning
-        //networking, security solutions, IoT
+        // edge computing, dev tools & services, apps, machine learning
+        // networking, security solutions, IoT
         serviceOffering: {
           classificationInstances: [
             {
               classificationLevel: {
                 classification: "U",
-                impactLevel: "IL2"
+                impactLevel: "IL2",
               },
               classifiedInformationTypes: [],
               selectedPeriods: null,
               usageDescription: "Infra upkeep",
-              dowTaskNumber: "4.2.1.2"
-            }
+              dowTaskNumber: "4.2.1.2",
+            },
           ],
           otherServiceOffering: null,
-          serviceOffering: { 
+          serviceOffering: {
             name: "Edge Computing",
             serviceOfferingGroup: dow.ServiceOfferingGroup.NETWORKING,
-          }
+          },
         },
-        //compute, general xaas, database, storage
+        // compute, general xaas, database, storage
         instanceConfigurations: [],
       },
       {
-        //edge computing, dev tools & services, apps, machine learning
-        //networking, security solutions, IoT
+        // edge computing, dev tools & services, apps, machine learning
+        // networking, security solutions, IoT
         serviceOffering: {
           classificationInstances: [
             {
               classificationLevel: {
                 classification: "U",
-                impactLevel: "IL2"
+                impactLevel: "IL2",
               },
               classifiedInformationTypes: [],
               selectedPeriods: null,
               usageDescription: "Infra upkeep",
-              dowTaskNumber: "4.2.1.2"
-            }
+              dowTaskNumber: "4.2.1.2",
+            },
           ],
           otherServiceOffering: null,
-          serviceOffering: { 
+          serviceOffering: {
             name: "Edge Computing",
             serviceOfferingGroup: dow.ServiceOfferingGroup.SECURITY,
-          }
+          },
         },
-        //compute, general xaas, database, storage
+        // compute, general xaas, database, storage
         instanceConfigurations: [],
       },
       {
-        //edge computing, dev tools & services, apps, machine learning
-        //networking, security solutions, IoT
+        // edge computing, dev tools & services, apps, machine learning
+        // networking, security solutions, IoT
         serviceOffering: {
           classificationInstances: [
             {
               classificationLevel: {
                 classification: "U",
-                impactLevel: "IL2"
+                impactLevel: "IL2",
               },
               classifiedInformationTypes: [],
               selectedPeriods: null,
               usageDescription: "Infra upkeep",
-              dowTaskNumber: "4.2.1.2"
-            }
+              dowTaskNumber: "4.2.1.2",
+            },
           ],
           otherServiceOffering: null,
-          serviceOffering: { 
+          serviceOffering: {
             name: "Edge Computing",
             serviceOfferingGroup: dow.ServiceOfferingGroup.IOT,
-          }
+          },
         },
-        //compute, general xaas, database, storage
+        // compute, general xaas, database, storage
         instanceConfigurations: [],
       },
       {
-        serviceOffering: {          
+        serviceOffering: {
           classificationInstances: [
-          {
-            classificationLevel: { classification: "U", display: "Unclassified - IL4", impactLevel: "IL4" },
-            classifiedInformationTypes: [],
-            selectedPeriods: null,
-            needForEntireTaskOrderDuration: true,
-            usageDescription: "Infrastrcture upkeep",
-            dowTaskNumber: "4.2.1.2.",
-          },
+            {
+              classificationLevel: { classification: "S", display: "Unclassified - IL6", impactLevel: "IL6" },
+              classifiedInformationTypes: [
+                { name: "Controlled Unclassified Information (CUI)", description: null, sequence: 11 },
+                { name: "Restricted Data", description: null, sequence: 2 },
+                { name: "Foreign Government Information (FGI)", description: null, sequence: 9 },
+              ],
+              selectedPeriods: null,
+              needForEntireTaskOrderDuration: true,
+              usageDescription: "Infrastrcture upkeep",
+              dowTaskNumber: "4.2.1.2.",
+            },
           ],
           otherServiceOffering: null,
           serviceOffering: { name: "Compute", description: null, serviceOfferingGroup: "COMPUTE", sequence: 1 },
@@ -1111,7 +1187,7 @@ const body = {
             },
             needForEntireTaskOrderDuration: true,
             selectedPeriods: null,
-            classificationLevel: { classification: "U", display: "Unclassified - IL2", impactLevel: "IL2" },
+            classificationLevel: { classification: "S", display: "Unclassified - IL6", impactLevel: "IL6" },
             classifiedInformationTypes: [
               { name: "Foreign Government Information (FGI)", description: null, sequence: 9 },
             ],
@@ -1147,7 +1223,7 @@ const body = {
             },
             needForEntireTaskOrderDuration: true,
             selectedPeriods: null,
-            classificationLevel: { classification: "U", display: "Unclassified - IL2", impactLevel: "IL2" },
+            classificationLevel: { classification: "S", display: "Unclassified - IL6", impactLevel: "IL6" },
             classifiedInformationTypes: [
               { name: "Foreign Government Information (FGI)", description: null, sequence: 9 },
             ],
@@ -1166,19 +1242,19 @@ const body = {
             environmentType: "PRE_PROD",
             operatingEnvironment: "VIRTUAL",
           },
-        ]
+        ],
       },
       {
-        serviceOffering: {          
+        serviceOffering: {
           classificationInstances: [
-          {
-            classificationLevel: { classification: "U", display: "Unclassified - IL2", impactLevel: "IL2" },
-            classifiedInformationTypes: [],
-            selectedPeriods: null,
-            needForEntireTaskOrderDuration: true,
-            usageDescription: "Infrastrcture upkeep",
-            dowTaskNumber: "4.2.1.2.",
-          },
+            {
+              classificationLevel: { classification: "U", display: "Unclassified - IL2", impactLevel: "IL2" },
+              classifiedInformationTypes: [],
+              selectedPeriods: null,
+              needForEntireTaskOrderDuration: true,
+              usageDescription: "Infrastrcture upkeep",
+              dowTaskNumber: "4.2.1.2.",
+            },
           ],
           otherServiceOffering: null,
           serviceOffering: { name: "Database", description: null, serviceOfferingGroup: "DATABASE", sequence: 1 },
@@ -1217,12 +1293,12 @@ const body = {
             processorSpeed: 9999,
             pricingModel: null,
             pricingModelExpiration: null,
-            databaseType: dow.DatabaseType.OTHER, //only if type === "OTHER"
+            databaseType: dow.DatabaseType.OTHER, // only if type === "OTHER"
             databaseTypeOther: "other type...test",
             databaseLicensing: dow.Licensing.NEW,
           },
-        ]
-      }
+        ],
+      },
     ],
     contractConsiderations: {
       // 10a
@@ -1276,7 +1352,7 @@ const body = {
         dataEgressMonthlyUnit: "GB",
         usersPerRegion: '{"EAST":"1234"},{"WEST":"75"}',
         dataIncrease: false,
-        userGrowthEstimatePercentage: ["346","-10"],
+        userGrowthEstimatePercentage: ["346", "-10"],
         userGrowthEstimateType: "MULTIPLE",
         dataGrowthEstimatePercentage: ["2"],
         dataGrowthEstimateType: null,
@@ -1300,4 +1376,443 @@ const body = {
   },
 };
 
-handler(body);
+const alternativePayload = {
+  documentType: "DESCRIPTION_OF_WORK_DOCX",
+  templatePayload: {
+    awardHistory: [
+      { contractAwardType: "INITIAL_AWARD", modificationOrder: null, effectiveDate: "2022-05-20" },
+      { contractAwardType: "MODIFICATION", modificationOrder: 3, effectiveDate: "2022-09-01" },
+      { contractAwardType: "MODIFICATION", modificationOrder: 1, effectiveDate: "2023-02-01" },
+    ],
+    contractInformation: {
+      currentContractExists: true,
+      contractNumber: "928384",
+      contractExpirationDate: "2022-12-09",
+      incumbentContractorName: "Someone Making Decisions",
+      previousTaskOrderNumber: "29284484",
+    },
+    toTitle: "Versatile Demo Package",
+    scope: "Trying to build up another package that can be used for testing different parts of the system.",
+    scopeSurge: "10",
+    currentEnvironment: {
+      currentEnvironmentExists: true,
+      hasSystemDocumentation: false,
+      hasMigrationDocumentation: false,
+      envLocation: "CLOUD",
+      envClassificationsCloud: [{ classification: "U", display: "Unclassified - IL5", impactLevel: "IL5" }],
+      envClassificationsOnprem: [],
+      envInstances: [
+        {
+          instanceName: "Test DB",
+          instanceLocation: "CLOUD",
+          numberOfInstances: 2,
+          usageDescription: null,
+          anticipatedNeedOrUsage: null,
+          operatingSystem: null,
+          licensing: null,
+          region: {
+            name: "CONUS Central",
+            description: "Central Continental United States",
+            sequence: 2,
+            group: "CONUS",
+          },
+          needForEntireTaskOrderDuration: false,
+          selectedPeriods: [
+            { periodType: "BASE", periodUnitCount: 1, periodUnit: "YEAR", optionOrder: null },
+            { periodType: "OPTION", periodUnitCount: 7, periodUnit: "MONTH", optionOrder: 1 },
+          ],
+          classificationLevel: { classification: "U", display: "Unclassified - IL4", impactLevel: "IL4" },
+          classifiedInformationTypes: [],
+          dataEgressMonthlyAmount: null,
+          dataEgressMonthlyUnit: null,
+          memoryAmount: null,
+          memoryUnit: null,
+          storageAmount: null,
+          storageUnit: null,
+          storageType: null,
+          numberOfVcpus: null,
+          performanceTier: null,
+          processorSpeed: null,
+          pricingModel: "PAY_AS_YOU_GO",
+          pricingModelExpiration: null,
+          environmentType: null,
+          operatingEnvironment: "SERVERLESS",
+          deployedRegions: [],
+          usersPerRegion: null,
+          isTrafficSpikeEventBased: false,
+          trafficSpikeEventDescription: null,
+          isTrafficSpikePeriodBased: false,
+          trafficSpikePeriodDescription: null,
+          additionalInformation: null,
+          currentUsageDescription: null,
+          anticipatedNeedUsage: null,
+        },
+        {
+          instanceName: "Test Current Env",
+          instanceLocation: "CLOUD",
+          numberOfInstances: 3,
+          usageDescription: null,
+          anticipatedNeedOrUsage: null,
+          operatingSystem: "Linux",
+          licensing: "MIT",
+          region: {
+            name: "CONUS Central",
+            description: "Central Continental United States",
+            sequence: 2,
+            group: "CONUS",
+          },
+          needForEntireTaskOrderDuration: true,
+          selectedPeriods: null,
+          classificationLevel: { classification: "U", display: "Unclassified - IL2", impactLevel: "IL2" },
+          classifiedInformationTypes: [],
+          dataEgressMonthlyAmount: null,
+          dataEgressMonthlyUnit: null,
+          memoryAmount: null,
+          memoryUnit: null,
+          storageAmount: null,
+          storageUnit: null,
+          storageType: null,
+          numberOfVcpus: null,
+          performanceTier: "COMPUTE",
+          processorSpeed: null,
+          pricingModel: "PAY_AS_YOU_GO",
+          pricingModelExpiration: null,
+          environmentType: null,
+          operatingEnvironment: "SERVERLESS",
+          deployedRegions: [
+            { name: "CONUS Central", description: "Central Continental United States", sequence: 2, group: "CONUS" },
+            { name: "EUCOM", description: "United States European Command", sequence: 6, group: "OCONUS" },
+            { name: "INDOPACOM", description: "United States Indo-Pacific Command", sequence: 7, group: "OCONUS" },
+          ],
+          usersPerRegion: null,
+          isTrafficSpikeEventBased: false,
+          trafficSpikeEventDescription: null,
+          isTrafficSpikePeriodBased: false,
+          trafficSpikePeriodDescription: null,
+          additionalInformation: null,
+          currentUsageDescription: "EVEN_USAGE",
+          anticipatedNeedUsage: null,
+        },
+      ],
+      additionalGrowth: true,
+      anticipatedYearlyAdditionalCapacity: 0,
+      currentEnvironmentReplicatedOptimized: "YES_OPTIMIZE",
+      statementReplicatedOptimized: "",
+      hasPhasedApproach: false,
+      phasedApproachSchedule: "",
+      needsArchitecturalDesignServices: false,
+      architecturalDesignRequirement: {
+        statement: "Helper for the app",
+        applicationsNeedingDesign: "middleware app",
+        externalFactors: null,
+        source: "CURRENT_ENVIRONMENT",
+        dataClassificationLevels: [{ classification: "U", display: "Unclassified - IL5", impactLevel: "IL5" }],
+      },
+    },
+    selectedClassificationLevels: [
+      {
+        classificationLevel: { classification: "U", display: "Unclassified - IL4", impactLevel: "IL4" },
+        classifiedInformationTypes: [
+          { name: "Foreign Government Information (FGI)", description: null, sequence: 9 },
+          { name: "North Atlantic Treaty Organization (NATO) Information", description: null, sequence: 8 },
+        ],
+        dataEgressMonthlyAmount: 345,
+        dataEgressMonthlyUnit: "GB",
+        usersPerRegion: JSON.stringify([{ EAST: "1234" }, { WEST: "75" }]),
+        dataIncrease: false,
+        userGrowthEstimatePercentage: "346",
+        userGrowthEstimateType: "SINGLE",
+        dataGrowthEstimatePercentage: null,
+        dataGrowthEstimateType: null,
+        usersIncrease: false,
+      },
+      {
+        classificationLevel: { classification: "U", display: "Unclassified - IL4", impactLevel: "IL4" },
+        classifiedInformationTypes: [{ name: "Formerly Restricted Data", description: null, sequence: 4 }],
+        dataEgressMonthlyAmount: 12231,
+        dataEgressMonthlyUnit: "GB",
+        usersPerRegion: JSON.stringify([{ EAST: "23948" }, { WEST: "5275" }]),
+        // usersPerRegion: "sfsafsdf",
+        dataIncrease: false,
+        userGrowthEstimatePercentage: null,
+        userGrowthEstimateType: "SINGLE",
+        dataGrowthEstimatePercentage: null,
+        dataGrowthEstimateType: "SINGLE",
+        usersIncrease: false,
+      },
+    ],
+    architecturalDesignRequirement: {
+      statement: "Best cost effective architect",
+      applicationsNeedingDesign: "cloud app",
+      externalFactors: "economy",
+      source: "DOW",
+      dataClassificationLevels: [
+        { classification: "U", display: "Unclassified - IL5", impactLevel: "IL5" },
+        { classification: "U", display: "Unclassified - IL4", impactLevel: "IL4" },
+      ],
+    },
+    xaasOfferings: [
+      {
+        serviceOffering: {
+          classificationInstances: [
+            {
+              classificationLevel: { classification: "U", display: "Unclassified - IL4", impactLevel: "IL4" },
+              classifiedInformationTypes: [],
+              selectedPeriods: null,
+              needForEntireTaskOrderDuration: true,
+              usageDescription: "Infrastrcture upkeep",
+              dowTaskNumber: "4.2.1.2.",
+            },
+          ],
+          otherServiceOffering: null,
+          serviceOffering: { name: "Compute", description: null, serviceOfferingGroup: "COMPUTE", sequence: 1 },
+        },
+        instanceConfigurations: [
+          {
+            instanceName: "Testing Compute instance",
+            instanceLocation: "CLOUD",
+            numberOfInstances: 2,
+            usageDescription: null,
+            anticipatedNeedOrUsage: "Processing OLTP\r\n",
+            operatingSystem: "Linux",
+            licensing: null,
+            region: {
+              name: "CONUS Central",
+              description: "Central Continental United States",
+              sequence: 2,
+              group: "CONUS",
+            },
+            needForEntireTaskOrderDuration: true,
+            selectedPeriods: null,
+            classificationLevel: { classification: "U", display: "Unclassified - IL5", impactLevel: "IL5" },
+            classifiedInformationTypes: [
+              { name: "Foreign Government Information (FGI)", description: null, sequence: 9 },
+            ],
+            dataEgressMonthlyAmount: null,
+            dataEgressMonthlyUnit: null,
+            memoryAmount: 100,
+            memoryUnit: "GB",
+            storageAmount: 124,
+            storageUnit: "GB",
+            storageType: "BLOCK",
+            numberOfVcpus: 6,
+            performanceTier: "GENERAL",
+            processorSpeed: 9999,
+            pricingModel: null,
+            pricingModelExpiration: null,
+            environmentType: "DEV_TEST",
+            operatingEnvironment: "VIRTUAL",
+          },
+        ],
+      },
+      {
+        serviceOffering: {
+          classificationInstances: [
+            {
+              classificationLevel: { classification: "U", display: "Unclassified - IL2", impactLevel: "IL2" },
+              classifiedInformationTypes: [],
+              selectedPeriods: [{ periodType: "OPTION", periodUnitCount: 7, periodUnit: "MONTH", optionOrder: 1 }],
+              needForEntireTaskOrderDuration: false,
+              usageDescription: "Testing",
+              dowTaskNumber: "0.0.0.0",
+            },
+          ],
+          otherServiceOffering: "Special Invesitation",
+          serviceOffering: {
+            name: "Migration Tools",
+            description: null,
+            serviceOfferingGroup: "DEVELOPER_TOOLS",
+            sequence: 3,
+          },
+        },
+        instanceConfigurations: [],
+      },
+      {
+        serviceOffering: {
+          classificationInstances: [
+            {
+              classificationLevel: { classification: "U", display: "Unclassified - IL4", impactLevel: "IL4" },
+              classifiedInformationTypes: [],
+              selectedPeriods: null,
+              needForEntireTaskOrderDuration: true,
+              usageDescription: "Infrastrcture upkeep",
+              dowTaskNumber: "4.2.1.2.",
+            },
+          ],
+          otherServiceOffering: null,
+          serviceOffering: { name: "Database", description: null, serviceOfferingGroup: "DATABASE", sequence: 1 },
+        },
+        instanceConfigurations: [
+          {
+            instanceName: "Testing DB instance",
+            instanceLocation: "CLOUD",
+            numberOfInstances: 2,
+            usageDescription: null,
+            anticipatedNeedOrUsage: null,
+            operatingSystem: null,
+            licensing: null,
+            region: null,
+            needForEntireTaskOrderDuration: true,
+            selectedPeriods: null,
+            classificationLevel: { classification: "U", display: "Unclassified - IL5", impactLevel: "IL5" },
+            classifiedInformationTypes: [],
+            dataEgressMonthlyAmount: null,
+            dataEgressMonthlyUnit: null,
+            memoryAmount: null,
+            memoryUnit: null,
+            storageAmount: null,
+            storageUnit: null,
+            storageType: null,
+            numberOfVcpus: null,
+            performanceTier: null,
+            processorSpeed: null,
+            pricingModel: null,
+            pricingModelExpiration: null,
+            databaseLicensing: null,
+            databaseType: null,
+            databaseTypeOther: null,
+          },
+        ],
+      },
+    ],
+    crossDomainSolutions: {
+      anticipatedNeedOrUsage: "need to transfer a lot of documents ",
+      crossDomainSolutionRequired: true,
+      selectedPeriods: [
+        { periodType: "OPTION", periodUnitCount: 7, periodUnit: "MONTH", optionOrder: 1 },
+        { periodType: "BASE", periodUnitCount: 1, periodUnit: "YEAR", optionOrder: null },
+      ],
+      needForEntireTaskOrderDuration: false,
+      projectedFileStreamType: "PDF",
+      trafficPerDomainPair: [
+        {
+          type: "U_TO_S",
+          dataQuantity: 75,
+        },
+        {
+          type: "S_TO_U",
+          dataQuantity: 50,
+        },
+      ],
+      // trafficPerDomainPair: [
+      //   {
+      //     name: "S_TO_U",
+      //     dataQuantity: "3495 GB"
+      //   }
+      // ],
+    },
+    cloudSupportPackages: [
+      {
+        instanceName: "Special porting",
+        instanceLocation: "CLOUD",
+        numberOfInstances: 3,
+        usageDescription: null,
+        anticipatedNeedOrUsage: null,
+        operatingSystem: null,
+        licensing: null,
+        region: { name: "SOUTHCOM", description: "United States Southern Command", sequence: 8, group: "OCONUS" },
+        needForEntireTaskOrderDuration: true,
+        selectedPeriods: null,
+        classificationLevel: { classification: "U", display: "Unclassified - IL5", impactLevel: "IL5" },
+        classifiedInformationTypes: [{ name: "Foreign Government Information (FGI)", description: null, sequence: 9 }],
+        dataEgressMonthlyAmount: null,
+        dataEgressMonthlyUnit: null,
+        memoryAmount: null,
+        memoryUnit: null,
+        storageAmount: null,
+        storageUnit: null,
+        storageType: null,
+        numberOfVcpus: null,
+        performanceTier: null,
+        processorSpeed: null,
+        pricingModel: "PAY_AS_YOU_GO",
+        pricingModelExpiration: null,
+        personnelOnsiteAccess: "YES",
+        serviceType: "PORTABILITY_PLAN",
+      },
+      {
+        instanceName: "Advisory Assistance for Cloud perforamcne ",
+        instanceLocation: "CLOUD",
+        numberOfInstances: null,
+        usageDescription: null,
+        anticipatedNeedOrUsage: null,
+        operatingSystem: null,
+        licensing: null,
+        region: null,
+        needForEntireTaskOrderDuration: true,
+        selectedPeriods: null,
+        classificationLevel: { classification: "U", display: "Unclassified - IL5", impactLevel: "IL5" },
+        classifiedInformationTypes: [],
+        dataEgressMonthlyAmount: null,
+        dataEgressMonthlyUnit: null,
+        memoryAmount: null,
+        memoryUnit: null,
+        storageAmount: null,
+        storageUnit: null,
+        storageType: null,
+        numberOfVcpus: null,
+        performanceTier: null,
+        processorSpeed: null,
+        pricingModel: null,
+        pricingModelExpiration: null,
+        personnelOnsiteAccess: "NO",
+        serviceType: "ADVISORY_ASSISTANCE",
+      },
+    ],
+    contractType: { firmFixedPrice: true, timeAndMaterials: true, contractTypeJustification: "Really need this." },
+    periodOfPerformance: {
+      basePeriod: { periodType: "BASE", periodUnitCount: 1, periodUnit: "YEAR", optionOrder: null },
+      optionPeriods: [
+        { periodType: "OPTION", periodUnitCount: 36, periodUnit: "WEEK", optionOrder: 2 },
+        { periodType: "OPTION", periodUnitCount: 7, periodUnit: "MONTH", optionOrder: 1 },
+      ],
+      popStartRequest: true,
+      requestedPopStartDate: "2022-11-30",
+      timeFrame: "NO_SOONER_THAN",
+      recurringRequirement: false,
+    },
+    securityRequirements: [
+      {
+        advisoryServicesSecret: [
+          { name: "Foreign Government Information (FGI)", description: null, sequence: 9 },
+          { name: "Controlled Unclassified Information (CUI)", description: null, sequence: 11 },
+          { name: "Restricted Data", description: null, sequence: 2 },
+        ],
+        advisoryServicesTopSecret: [
+          { name: "Foreign Government Information (FGI)", description: null, sequence: 9 },
+          { name: "Restricted Data", description: null, sequence: 2 },
+          {
+            name: "National Intelligence Information: Sensitive Compartmented Information (SCI)",
+            description: null,
+            sequence: 5,
+          },
+        ],
+        serviceOfferingGroup: "ADVISORY_ASSISTANCE",
+        tsContractorClearanceType: "TS_SCI",
+      },
+    ],
+    contractConsiderations: {
+      potentialConflictOfInterest: true,
+      conflictOfInterestExplanation: "Company investment in same solutions.",
+      packagingShippingNoneApply: false,
+      packagingShippingOther: false,
+      packagingShippingOtherExplanation: "",
+      contractorProvidedTransfer: false,
+      piiPresent: false,
+      systemOfRecordName: "",
+      travel: [
+        {
+          durationInDays: 14,
+          numberOfTravelers: 2,
+          numberOfTrips: 6,
+          selectedPeriods: [{ periodType: "OPTION", periodUnitCount: 7, periodUnit: "MONTH", optionOrder: 1 }],
+          tripLocation: "Canada",
+        },
+      ],
+    },
+    sensitiveInformation: { section508Sufficient: true, accessibilityReqs508: "Some requirments for section 508." },
+  },
+};
+
+// handler(body);
+handler(alternativePayload);

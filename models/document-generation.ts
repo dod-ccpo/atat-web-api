@@ -106,7 +106,7 @@ export enum EvalPlanMethod {
 }
 export interface TemplatePaths {
   [DocumentType.DESCRIPTION_OF_WORK_PDF]: { html: string; css: string };
-  [DocumentType.DESCRIPTION_OF_WORK_DOCX]: { docx: string; };
+  [DocumentType.DESCRIPTION_OF_WORK_DOCX]: { docx: string };
   [DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE]: { excel: string };
   [DocumentType.INCREMENTAL_FUNDING_PLAN]: { docx: string };
   [DocumentType.EVALUATION_PLAN]: { docx: string };
@@ -345,7 +345,7 @@ const classificationLevel = {
   properties: {
     classification: { enum: [Classification.U, Classification.S, Classification.TS] },
     impactLevel: { enum: [ImpactLevel.IL2, ImpactLevel.IL4, ImpactLevel.IL5, ImpactLevel.IL6, null] },
-    display: { type: "string" }
+    display: { type: "string" },
   },
 };
 
@@ -390,9 +390,9 @@ const currentEnvironment = {
     hasSystemDocumentation: { type: "boolean" },
     hasMigrationDocumentation: { type: "boolean" },
     envLocation: { type: "string" },
-    envClassificationCloud: {type: "array", items: classificationLevel},
-    envClassificationOnprem: {type: "array", items: classificationLevel},
-    envInstances: {type: "array", items: { type: "object"}},
+    envClassificationCloud: { type: "array", items: classificationLevel },
+    envClassificationOnprem: { type: "array", items: classificationLevel },
+    envInstances: { type: "array", items: { type: "object" } },
     additionalGrowth: { type: "boolean" },
     anticipatedYearlyAdditionalCapacity: { type: "integer" },
     currentEnvironmentReplicatedOptimized: { type: "string" },
@@ -484,7 +484,7 @@ const gfeOverview = {
 const travel = {
   type: "array",
   items: { type: "object" },
-}
+};
 const contractConsiderations = {
   type: "object",
   properties: {
@@ -517,14 +517,14 @@ const descriptionOfWork = {
     scope: { type: "string" },
     scopeSurge: { type: "integer" },
     currentEnvironment,
-    selectedClassificationLevels: { type: "array", items: { type: "object"}},
-    architecturalDesignRequirement: { type: "object"},
-    xaasOfferings: { type: "array", items: { type: "object"} },
-    crossDomainSolutions: { type: "object"},
-    cloudSupportPackages: { type: "array", items: { type: "object"}},
-    contractType: { type: "object", },
+    selectedClassificationLevels: { type: "array", items: { type: "object" } },
+    architecturalDesignRequirement: { type: "object" },
+    xaasOfferings: { type: "array", items: { type: "object" } },
+    crossDomainSolutions: { type: "object" },
+    cloudSupportPackages: { type: "array", items: { type: "object" } },
+    contractType: { type: "object" },
     periodOfPerformance,
-    securityRequirements: { type: "array", items: { type: "object"}},
+    securityRequirements: { type: "array", items: { type: "object" } },
     contractConsiderations,
     sensitiveInformation: section508AccessibilityStandards,
   },
