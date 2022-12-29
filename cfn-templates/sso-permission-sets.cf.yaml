@@ -189,9 +189,11 @@ Resources:
               - artifact:Get*
               - artifact:DownloadAgreement
             Resource: "*"
+            
           - Effect: Allow
             Action:
               - securityhub:UpdateFindings
+              - securityhub:BatchUpdateFindings
             Resource: "*"
 
   AtatQaAccess:
