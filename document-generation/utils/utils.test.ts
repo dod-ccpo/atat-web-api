@@ -156,7 +156,7 @@ describe("getPDFDocumentTemplates", () => {
     mockedFs.readFileSync.mockImplementationOnce(() => css);
 
     // THEN
-    expect(getPDFDocumentTemplates(DocumentType.DESCRIPTION_OF_WORK)).toEqual({ html, css });
+    expect(getPDFDocumentTemplates(DocumentType.DESCRIPTION_OF_WORK_PDF)).toEqual({ html, css });
   });
   it("should throw an error if invalid PDF documentType", async () => {
     const documentType = "RANDOM_PDF_DOCUMENT_TYPE" as unknown as DocumentType;

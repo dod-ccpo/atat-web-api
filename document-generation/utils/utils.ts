@@ -7,13 +7,9 @@ import {
   FundingType,
   Classification,
   PeriodType,
+  ServiceOfferingGroup,
 } from "../../models/document-generation";
 import * as fs from "fs";
-import {
-  IXaaSOfferingGroup,
-  IXaaSOfferings,
-  XaasServiceOfferingGroup,
-} from "../../models/document-generation/description-of-work";
 
 export const capitalize = (string: string) => {
   if (typeof string !== "string") {
@@ -113,23 +109,23 @@ const hasSameSelectedPeriods = (unique: ITaskGrouping, check: string[]) => {
   }
   const hasAllPeriods = check.every((period: any) => unique.taskPeriods.includes(period));
   return hasAllPeriods;
-}
+};
 
 export const getTaskPeriods = (payload: any) => {
   const { xaasOfferings, crossDomainSolutions, cloudSupportPackages, periodOfPerformance } = payload;
   const { basePeriod, optionPeriods } = periodOfPerformance;
   const uniqueSelectedPeriodPairs: ITaskGrouping[] = [];
   const entireDurationTasks: string[] = [];
-  
+
   // group the periods based on array like ["B", "OP1", "OP2"]
   const popPeriods: string[] = [];
   if (basePeriod) {
-    popPeriods.push("B")
+    popPeriods.push("B");
   }
   if (optionPeriods) {
     optionPeriods
       .sort((a: IPeriod, b: IPeriod) => a.optionOrder - b.optionOrder)
-      .forEach((period: IPeriod) => popPeriods.push(`OP${period.optionOrder}`))
+      .forEach((period: IPeriod) => popPeriods.push(`OP${period.optionOrder}`));
   }
 
   // 4.2.x.x
@@ -149,11 +145,11 @@ export const getTaskPeriods = (payload: any) => {
       if (classificationLevel.classification === Classification.TS) {
         // account for zero index
         levelNumber = classificationLevelsOrder.indexOf(classificationLevel.classification) + 1;
-        groupNumber = xaasServiceGroupsOrder.indexOf(groupName) + 1; 
+        groupNumber = xaasServiceGroupsOrder.indexOf(groupName) + 1;
         dowTaskNumber = `4.2.${levelNumber}.${groupNumber}`;
       } else {
-        levelNumber = classificationLevelsOrder.indexOf(classificationLevel.impactLevel) + 1; 
-        groupNumber = xaasServiceGroupsOrder.indexOf(groupName) + 1; 
+        levelNumber = classificationLevelsOrder.indexOf(classificationLevel.impactLevel) + 1;
+        groupNumber = xaasServiceGroupsOrder.indexOf(groupName) + 1;
         dowTaskNumber = `4.2.${levelNumber}.${groupNumber}`;
       }
 
@@ -165,31 +161,29 @@ export const getTaskPeriods = (payload: any) => {
       if (selectedPeriods && selectedPeriods.length >= 1) {
         taskPeriods = selectedPeriods
           .sort((a: IPeriod, b: IPeriod) => a.optionOrder - b.optionOrder)
-          .map((period: IPeriod) => period.periodType === PeriodType.BASE ? "B" : `OP${period.optionOrder}`)
+          .map((period: IPeriod) => (period.periodType === PeriodType.BASE ? "B" : `OP${period.optionOrder}`));
 
         // see if any previous period pairings that the task number can be added to
-        const matchingPeriodPair = uniqueSelectedPeriodPairs.filter((pair, index) =>  {
-          const hasAllPeriods = hasSameSelectedPeriods(pair, taskPeriods)
+        const matchingPeriodPair = uniqueSelectedPeriodPairs.filter((pair, index) => {
+          const hasAllPeriods = hasSameSelectedPeriods(pair, taskPeriods);
           uniqueGroupingIndex = hasAllPeriods ? index : -1;
-          return hasAllPeriods
+          return hasAllPeriods;
         });
 
         // add to a period paring if one found
         if (matchingPeriodPair.length >= 1 && uniqueGroupingIndex > -1) {
-          uniqueSelectedPeriodPairs[uniqueGroupingIndex].dowTaskNumbers.push(dowTaskNumber)
+          uniqueSelectedPeriodPairs[uniqueGroupingIndex].dowTaskNumbers.push(dowTaskNumber);
         }
 
         // create a new period pairing for the task number (and future numbers)
         if (matchingPeriodPair.length < 1) {
           uniqueSelectedPeriodPairs.push({
             dowTaskNumbers: [dowTaskNumber],
-            taskPeriods: taskPeriods
-          })
+            taskPeriods,
+          });
         }
       }
     });
-
-
   });
 
   // 4.2.6
@@ -200,93 +194,170 @@ export const getTaskPeriods = (payload: any) => {
     // which periods is it needed for
     if (crossDomainSolutions.selectedPeriods) {
       // TODO: populate selected periods
-
     }
   }
 
   // cloud support 4.3.x.x
   cloudSupportPackages.forEach((offering: any) => {
-    const groupName: any = offering.serviceOffering.serviceOffering.serviceOfferingGroup;
-    const instances = offering.serviceOffering.classificationInstances;
+    const groupName: any = offering.serviceType;
+    const { classificationLevel, needForEntireTaskOrderDuration, selectedPeriods } = offering;
 
-    // each instances will be a different subtask 4.3.x.1
+    // each offering will be a different subtask 4.3.x.1
     // x is the classification level
     // groups is the last number
-    instances.forEach((classInst: any) => {
-      const { classificationLevel, needForEntireTaskOrderDuration, selectedPeriods } = classInst;
-      let dowTaskNumber: string;
-      let portabilityTaskNumber: string;
-      let levelNumber: number;
-      let groupNumber: number;
-      let taskPeriods: string[] = [];
-      let uniqueGroupingIndex = -1;
+    let dowTaskNumber: string;
+    let levelNumber: number;
+    let groupNumber: number;
+    let taskPeriods: string[] = [];
+    let uniqueGroupingIndex = -1;
 
-      if (classificationLevel.classification === Classification.TS) {
-        levelNumber = classificationLevelsOrder.indexOf(classificationLevel.classification) + 1;
-        groupNumber = cloudSupportGroupsOrder.indexOf(groupName) + 1;
-        dowTaskNumber = groupName === cloudSupportGroupsOrder[5]
-          ? `4.3.${levelNumber}`
-          : `4.3.${levelNumber}.${groupNumber}`
-      } else {
-        levelNumber = classificationLevelsOrder.indexOf(classificationLevel.impactLevel) + 1;
-        groupNumber = cloudSupportGroupsOrder.indexOf(groupName) + 1;
-        dowTaskNumber = groupName === cloudSupportGroupsOrder[5]
-          ? `4.3.${levelNumber}`
-          : `4.3.${levelNumber}.${groupNumber}`
+    if (classificationLevel.classification === Classification.TS) {
+      levelNumber = classificationLevelsOrder.indexOf(classificationLevel.classification) + 1;
+      groupNumber = cloudSupportGroupsOrder.indexOf(groupName) + 1;
+      dowTaskNumber =
+        groupName === cloudSupportGroupsOrder[5] ? `4.3.${levelNumber}` : `4.3.${levelNumber}.${groupNumber}`;
+    } else {
+      levelNumber = classificationLevelsOrder.indexOf(classificationLevel.impactLevel) + 1;
+      groupNumber = cloudSupportGroupsOrder.indexOf(groupName) + 1;
+      dowTaskNumber =
+        groupName === cloudSupportGroupsOrder[5] ? `4.3.${levelNumber}` : `4.3.${levelNumber}.${groupNumber}`;
+    }
+
+    if (needForEntireTaskOrderDuration) {
+      entireDurationTasks.push(dowTaskNumber);
+    }
+
+    if (selectedPeriods && selectedPeriods.length >= 1) {
+      taskPeriods = selectedPeriods
+        .sort((a: IPeriod, b: IPeriod) => a.optionOrder - b.optionOrder)
+        .map((period: IPeriod) => (period.periodType === PeriodType.BASE ? "B" : `OP${period.optionOrder}`));
+
+      // see if there any previous period pairings that the task number can be added to
+      const matchingPeriodPair = uniqueSelectedPeriodPairs.filter((pair, index) => {
+        const hasAllPeriods = hasSameSelectedPeriods(pair, taskPeriods);
+        uniqueGroupingIndex = hasAllPeriods ? index : -1;
+        return hasAllPeriods;
+      });
+
+      if (matchingPeriodPair.length >= 1 && uniqueGroupingIndex > -1) {
+        uniqueSelectedPeriodPairs[uniqueGroupingIndex].dowTaskNumbers.push(dowTaskNumber);
       }
 
-      if (needForEntireTaskOrderDuration) {
-        entireDurationTasks.push(dowTaskNumber)
-      }
-
-      if (selectedPeriods && selectedPeriods.length >= 1) {
-        taskPeriods = selectedPeriods
-          .sort((a: IPeriod, b: IPeriod) => a.optionOrder - b.optionOrder)
-          .map((period: IPeriod) => period.periodType === PeriodType.BASE ? "B" : `OP${period.optionOrder}`)
-
-        // see if there any previous period pairings that the task number can be added to
-        const matchingPeriodPair = uniqueSelectedPeriodPairs.filter((pair, index) =>  {
-          const hasAllPeriods = hasSameSelectedPeriods(pair, taskPeriods)
-          uniqueGroupingIndex = hasAllPeriods ? index : -1;
-          return hasAllPeriods
+      // create a new period pairing for the task number
+      if (matchingPeriodPair.length < 1) {
+        uniqueSelectedPeriodPairs.push({
+          dowTaskNumbers: [dowTaskNumber],
+          taskPeriods,
         });
-
-        if (matchingPeriodPair.length >= 1 && uniqueGroupingIndex > -1) {
-          uniqueSelectedPeriodPairs[uniqueGroupingIndex].dowTaskNumbers.push(dowTaskNumber)
-        }
-
-        // create a new period pairing for the task number
-        if (matchingPeriodPair.length < 1) {
-          uniqueSelectedPeriodPairs.push({
-            dowTaskNumbers: [dowTaskNumber],
-            taskPeriods: taskPeriods
-          })
-        }
       }
-
-    })
+    }
   });
 
-  // sort so the pairts with the most periods are first
-  const sortedUniuqueSelectedPeriodPairs = uniqueSelectedPeriodPairs
-    .sort((a: ITaskGrouping, b: ITaskGrouping) => a.taskPeriods.length - b.taskPeriods.length)
-  
+  // sort so the pairs with the most periods are first
+  const sortedUniqueSelectedPeriodPairs = uniqueSelectedPeriodPairs.sort(
+    (a: ITaskGrouping, b: ITaskGrouping) => a.taskPeriods.length - b.taskPeriods.length
+  );
+
   // template helping object to create table
   const mappedTaskNumbers: any = {
     popPeriods,
     entireDurationTasks,
-    taskNumberGroups: sortedUniuqueSelectedPeriodPairs,
+    taskNumberGroups: sortedUniqueSelectedPeriodPairs,
   };
 
-  console.log(JSON.stringify(mappedTaskNumbers))
   return mappedTaskNumbers;
 };
 
+export interface IXaasAccess {
+  serviceNumber: string;
+  access: string[];
+}
+export const getSecurityRequirements = (payload: any): any => {
+  const { currentEnvironment, xaasOfferings, cloudSupportPackages } = payload;
+  const currentEnvSecret: string[] = [];
+  const currentEnvTopSecret: string[] = [];
+  const xaasSecret: IXaasAccess[] = [];
+  const xaasTopSecret: IXaasAccess[] = [];
+  const cloudSupportSecret: string[] = [];
+  const cloudSupportTopSecret: string[] = [];
+  let isSecurityNeeded = false;
+
+  currentEnvironment.envInstances.forEach((instance: any) => {
+    const classificationLevel = instance.classificationLevel;
+    if (classificationLevel && classificationLevel.classification === Classification.S) {
+      isSecurityNeeded = true;
+      instance.classifiedInformationTypes.forEach((type: any) => currentEnvSecret.push(type.name));
+    }
+    if (classificationLevel && classificationLevel.classification === Classification.TS) {
+      isSecurityNeeded = true;
+      instance.classifiedInformationTypes.forEach((type: any) => currentEnvTopSecret.push(type.name));
+    }
+  });
+
+  xaasOfferings.forEach((service: any) => {
+    const { classificationInstances } = service.serviceOffering;
+    if (classificationInstances.length >= 1) {
+      service.serviceOffering.classificationInstances.forEach((instance: any) => {
+        const classificationLevel = instance.classificationLevel;
+        if (classificationLevel && classificationLevel.classification === Classification.S) {
+          isSecurityNeeded = true;
+          const levelNumber = classificationLevelsOrder.indexOf(classificationLevel.impactLevel) + 1;
+          const xaasAccess: IXaasAccess = {
+            serviceNumber: `4.2.${levelNumber}`,
+            access: [],
+          };
+          instance.classifiedInformationTypes.forEach((type: any) => {
+            xaasAccess.access.push(type.name);
+          });
+          xaasSecret.push(xaasAccess);
+        }
+        if (classificationLevel && classificationLevel.classification === Classification.TS) {
+          isSecurityNeeded = true;
+          const levelNumber = classificationLevelsOrder.indexOf(classificationLevel.classification) + 1;
+          const xaasAccess: IXaasAccess = {
+            serviceNumber: `4.2.${levelNumber}`,
+            access: [],
+          };
+          instance.classifiedInformationTypes.forEach((type: any) => {
+            xaasAccess.access.push(type.name);
+          });
+          xaasTopSecret.push(xaasAccess);
+        }
+      });
+    }
+  });
+
+  cloudSupportPackages.forEach((instance: any) => {
+    if (
+      instance.serviceType === ServiceOfferingGroup.TRAINING &&
+      instance.classificationLevel.classification === Classification.S
+    ) {
+      isSecurityNeeded = true;
+      instance.classifiedInformationTypes.forEach((type: any) => cloudSupportSecret.push(type.name));
+    }
+    if (
+      instance.serviceType === ServiceOfferingGroup.TRAINING &&
+      instance.classificationLevel.classification === Classification.TS
+    ) {
+      isSecurityNeeded = true;
+      instance.classifiedInformationTypes.forEach((type: any) => cloudSupportTopSecret.push(type.name));
+    }
+  });
+
+  return {
+    isSecurityNeeded,
+    currentEnvSecret,
+    currentEnvTopSecret,
+    xaasSecret,
+    xaasTopSecret,
+    cloudSupportSecret,
+    cloudSupportTopSecret,
+  };
+};
 export const getCDRLs = (popTasks: any, contractType: any) => {
-  const { firmFixedPrice, timeAndMaterials} = contractType;
-  const cdrl = []
-  const allTasks = popTasks; 
-  console.log("ALL TaSK: ", allTasks)
+  const { firmFixedPrice, timeAndMaterials } = contractType;
+  const cdrl = [];
+  const allTasks = popTasks;
 
   const progressReport = {
     taskNumbers: ["ANY"],
@@ -296,24 +367,22 @@ export const getCDRLs = (popTasks: any, contractType: any) => {
     name: "TO Monthly Progress Report",
   };
 
-  cdrl.push(progressReport)
-
+  cdrl.push(progressReport);
 
   const trainingClins: string[] = [];
-  const taskNumbers: string[] = []
+  const taskNumbers: string[] = [];
   const portabilityPlanClins: string[] = [];
   let portabilityTaskNumbers: string[] = [];
   const edgeClins: string[] = [];
-  // const edgeTaskNumbers: string[] = [];
   const subtaskNumbers = ["1", "2", "3", "4", "5"];
-  subtaskNumbers.forEach((number: any) =>  {
+  subtaskNumbers.forEach((number: any) => {
     // tasks 4.3.x (portability plan)
     const taskNumber = `4.3.${number}`;
     const containsPortabilityTasks = allTasks.includes(taskNumber);
 
     if (containsPortabilityTasks) {
       portabilityTaskNumbers.push(taskNumber);
-      switch(number) {
+      switch (number) {
         case "1":
         case "2":
         case "3":
@@ -334,13 +403,12 @@ export const getCDRLs = (popTasks: any, contractType: any) => {
     }
 
     // subtasks 4.3.x.1
-    // const subtaskNumber = `4.3.${number}.3`;
     const trainingSubtask = `4.3.${number}.3`;
     const containsTrainingSubtask = allTasks.includes(trainingSubtask);
 
     if (containsTrainingSubtask) {
       taskNumbers.push(trainingSubtask);
-      switch(number) {
+      switch (number) {
         case "1":
         case "2":
         case "3":
@@ -365,7 +433,7 @@ export const getCDRLs = (popTasks: any, contractType: any) => {
 
     if (containsEdgeSubtask) {
       taskNumbers.push(edgeSubtask);
-      switch(number) {
+      switch (number) {
         case "1":
         case "2":
         case "3":
@@ -384,55 +452,44 @@ export const getCDRLs = (popTasks: any, contractType: any) => {
           break;
       }
     }
-
-  })
-
+  });
 
   const training = {
-    // TODO: filter to get only subtask numbers
     taskNumbers,
     clins: trainingClins,
+  };
+  if (training.taskNumbers.length >= 1) {
+    cdrl.push({ ...training, cdrl: "*A004", name: "System Administrator Training Materials" });
+    cdrl.push({ ...training, cdrl: "*A005", name: "Role-Based User Training Material" });
   }
-  console.log("TRAINING Tasks: ", training)
- if (training.taskNumbers.length >= 1) {
-    cdrl.push({ ...training, cdrl: "*A004", name: "System Administrator Training Materials" })
-    cdrl.push({ ...training, cdrl: "*A005", name: "Role-Based User Training Material" })
- }
   portabilityTaskNumbers = subtaskNumbers
     .map((number: string) => `4.3.${number}.9`)
-    .filter((taskNumber) => taskNumbers.includes(taskNumber))
+    .filter((taskNumber) => taskNumbers.includes(taskNumber));
   const portabilityPlan = {
     taskNumbers: portabilityTaskNumbers,
     clins: portabilityPlanClins,
     cdrl: `**A006`,
-    name: "Portability Plan"
-  }
+    name: "Portability Plan",
+  };
   if (portabilityPlan.taskNumbers.length >= 1) {
-    cdrl.push({ ...portabilityPlan })
+    cdrl.push({ ...portabilityPlan });
   }
- 
-  
 
-  // subtaskNumbers.map()
   const edgeTaskNumbers = subtaskNumbers
     .map((number: string) => `4.2.${number}.9`)
-    .filter((taskNumber) => taskNumbers.includes(taskNumber))
-  console.log("IOT #: ", edgeTaskNumbers)
-  console.log("all task #: ", taskNumbers)
+    .filter((taskNumber) => taskNumbers.includes(taskNumber));
   const edge = {
     taskNumbers: edgeTaskNumbers,
     clins: edgeClins,
     cdrl: `**A006`,
-    name: "Portability Plan"
-  }
+    name: "Portability Plan",
+  };
   if (edge.taskNumbers.length >= 1) {
-    cdrl.push({ ...edge})
+    cdrl.push({ ...edge });
   }
-
-  // TE
 
   return cdrl;
-}
+};
 
 // documents and the related templates
 const documentTemplatePaths: TemplatePaths = {

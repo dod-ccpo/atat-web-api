@@ -236,6 +236,7 @@ export interface DescriptionOfWork {
   scopeSurge: number;
   currentEnvironment: ICurrentEnvironment;
   selectedClassificationLevels: Record<string, any>[];
+  architecturalDesignRequirement: Record<string, any>;
   xaasOfferings: Record<string, any>[];
   crossDomainSolutions: Record<string, any>;
   cloudSupportPackages: Record<string, any>[];
@@ -399,7 +400,7 @@ const currentEnvironment = {
     hasPhasedApproach: { type: "boolean" },
     phasedApproachSchedule: { type: "string" },
     needsArchitecturalDesignServices: { type: "boolean" },
-    architecturalDesignRequirement: { type: "array", items: { type: "object"} },
+    architecturalDesignRequirement: { type: "object" },
     additionalInfo: { type: "string" },
   },
 };
@@ -517,10 +518,10 @@ const descriptionOfWork = {
     scopeSurge: { type: "integer" },
     currentEnvironment,
     selectedClassificationLevels: { type: "array", items: { type: "object"}},
+    architecturalDesignRequirement: { type: "object"},
     xaasOfferings: { type: "array", items: { type: "object"} },
     crossDomainSolutions: { type: "object"},
     cloudSupportPackages: { type: "array", items: { type: "object"}},
-    // TODO: add contract type to SNOW  Dow script include
     contractType: { type: "object", },
     periodOfPerformance,
     securityRequirements: { type: "array", items: { type: "object"}},

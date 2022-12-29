@@ -29,6 +29,10 @@ const docHeaders = {
     "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     "Content-Disposition": `attachment; filename=IndependentGovernmentCostEstimate.xlsx`,
   },
+  dow: {
+    "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "Content-Disposition": `attachment; filename=DescriptionOfWork.docx`,
+  },
   ifp: {
     "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     "Content-Disposition": `attachment; filename=IncrementalFundingPlan.docx`,
@@ -51,6 +55,14 @@ jest.mock("./igce-document", () => {
     generateIGCEDocument: jest.fn().mockImplementation(() => {
       const buffer = Buffer.from("generateIGCEDocument");
       return new ApiBase64SuccessResponse(buffer.toString("base64"), SuccessStatusCode.OK, docHeaders.igce);
+    }),
+  };
+});
+jest.mock("./dow-document", () => {
+  return {
+    generateDowDocument: jest.fn().mockImplementation(() => {
+      const buffer = Buffer.from("generateDowDocument");
+      return new ApiBase64SuccessResponse(buffer.toString("base64"), SuccessStatusCode.OK, docHeaders.dow);
     }),
   };
 });
@@ -81,27 +93,17 @@ const mockedFs = fs as jest.Mocked<typeof fs>;
 describe("Successful generate-document handler", () => {
   it("should return successful DoW document response", async () => {
     // GIVEN / ARRANGE
-    const html = "<H1>ATAT {{to_title}}</H1>";
-    const css = `h1 {
-      font-size: 1.9rem;
-      text-transform: uppercase;
-      margin-bottom: 2.4rem !important;
-      text-align: center;
-      margin-top: 0;
-    }`;
-    const dowHeaders = {
-      "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename=DescriptionOfWork.pdf`,
+    const request = {
+      ...validRequest,
+      body: JSON.stringify(sampleDowRequest),
     };
 
     // WHEN / ACT
-    mockedFs.readFileSync.mockImplementationOnce(() => html);
-    mockedFs.readFileSync.mockImplementationOnce(() => css);
-    const response = await handler(validRequest, {} as Context);
+    const response = await handler(request, {} as Context);
 
     // THEN / ASSERT
     expect(response).toBeInstanceOf(SuccessBase64Response);
-    expect(response.headers).toEqual(dowHeaders);
+    expect(response.headers).toEqual(docHeaders.dow);
   });
   it("should return successful IGCE document response", async () => {
     // GIVEN / ARRANGE
@@ -171,7 +173,7 @@ describe("Invalid requests for generate-document handler", () => {
     expect(responseBody.message).toBe("Request failed validation");
   });
   it.each([
-    DocumentType.DESCRIPTION_OF_WORK,
+    DocumentType.DESCRIPTION_OF_WORK_DOCX,
     DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE,
     DocumentType.INCREMENTAL_FUNDING_PLAN,
     DocumentType.EVALUATION_PLAN,
@@ -194,7 +196,7 @@ describe("Invalid requests for generate-document handler", () => {
   });
   it.each([
     {
-      documentType: DocumentType.DESCRIPTION_OF_WORK,
+      documentType: DocumentType.DESCRIPTION_OF_WORK_DOCX,
       templatePayload: { ...sampleDowRequest.templatePayload, another: "prop" },
     },
     {
