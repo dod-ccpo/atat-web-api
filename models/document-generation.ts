@@ -140,6 +140,7 @@ export interface IClassificationLevel {
 
 export interface IEnvironmentInstance {
   instanceName: string;
+  numberOfInstances: number;
   classificationLevel: IClassificationLevel;
   instanceLocation: InstanceLocation;
   cspRegion: TargetCspName;
@@ -159,7 +160,7 @@ export interface IEnvironmentInstance {
 
 export interface ICurrentEnvironment {
   currentEnvironmentExists: boolean;
-  environmentInstances: IEnvironmentInstance[];
+  envInstances: IEnvironmentInstance[];
   additionalInfo: string;
 }
 
