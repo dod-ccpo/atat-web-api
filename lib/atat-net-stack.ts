@@ -62,7 +62,30 @@ export class AtatNetStack extends cdk.Stack {
           retention: logs.RetentionDays.INFINITE,
         })
       ),
+      logFormat: [
+        ec2.LogFormat.VERSION,
+        ec2.LogFormat.custom('${vpc-id}'),
+        ec2.LogFormat.custom('${subnet-id}'),
+        ec2.LogFormat.custom('${interface-id}'),
+        ec2.LogFormat.custom('${account-id}'),
+        ec2.LogFormat.custom('${type}'),
+        ec2.LogFormat.SRC_ADDR,
+        ec2.LogFormat.DST_ADDR,
+        ec2.LogFormat.SRC_PORT,
+        ec2.LogFormat.DST_PORT,
+        ec2.LogFormat.PKT_SRC_ADDR,
+        ec2.LogFormat.PKT_DST_ADDR,
+        ec2.LogFormat.PROTOCOL,
+        ec2.LogFormat.BYTES,
+        ec2.LogFormat.PACKETS,
+        ec2.LogFormat.custom('${start}'),
+        ec2.LogFormat.custom('${end}'),
+        ec2.LogFormat.custom('${action}'),
+        ec2.LogFormat.custom('${tcp-flags}'),
+        ec2.LogFormat.custom('${log-status}')
+      ],
     });
+
     // const dnsLogsGroup = new logs.LogGroup(this, "VpcDnsQueryLogs", {
     //   retention: logs.RetentionDays.INFINITE,
     // });
