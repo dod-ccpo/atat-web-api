@@ -58,7 +58,7 @@ export class AtatNetStack extends cdk.Stack {
     // Capture all VPC flow logs and send to CloudWatch Logs with indefinite retention
     vpc.addFlowLog("AllFlowLogs", {
       destination: ec2.FlowLogDestination.toCloudWatchLogs(
-        new logs.LogGroup(this, "AllFlowLogs", {
+        new logs.LogGroup(this, "ALLFlowLogs", {
           retention: logs.RetentionDays.INFINITE,
         })
       ),
