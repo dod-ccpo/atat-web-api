@@ -234,7 +234,9 @@ export interface DescriptionOfWork {
   contractInformation: IContractInformation;
   toTitle: string;
   scope: string;
-  scopeSurge: number;
+  // scopeSurge: number;
+  surgeRequirementCapacity: number;
+  surgeRequirementCapabilities: boolean;
   currentEnvironment: ICurrentEnvironment;
   selectedClassificationLevels: Record<string, any>[];
   architecturalDesignRequirement: Record<string, any>;
@@ -525,12 +527,12 @@ const descriptionOfWork = {
     awardHistory,
     contractInformation,
     toTitle: { type: "string" },
-    scope: { type: "string" },
-    scopeSurge: { type: "integer" },
+    surgeRequirementCapacity: { type: "integer" },
+    surgeRequirementCapabilities: { type: "boolean" },
     currentEnvironment,
     selectedClassificationLevels: { type: "array", items: { type: "object" } },
     architecturalDesignRequirement: { type: "object" },
-    xaasOfferings: { type: "array", items: { type: "object" } },
+    xaasOfferings: { type: "object" },
     crossDomainSolutions: { type: "object" },
     cloudSupportPackages: { type: "array", items: { type: "object" } },
     contractType: { type: "object" },

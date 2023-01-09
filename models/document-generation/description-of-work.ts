@@ -4,16 +4,18 @@ export interface DescriptionOfWork {
   contractInformation?: IContractInformation;
   toTitle: string;
   scope: string;
-  scopeSurge?: number;
+  surgeRequirementCapacity: number;
+  surgeRequirementCapabilities: boolean;
   currentEnvironment?: ICurrentEnvironment;
-  xaasOfferings?: IXaaSOfferings[];
+  selectedClassificationLevels: ISelectedClassificationLevel[];
+  architecturalDesignRequirements: ArchitecturalDesignRequirement;
+  xaasOfferings?: IXaaSOfferings;
   crossDomainSolutions?: ICrossDomainSolutions;
-  cloudSupportPackages?: ICloudSupportPackage[];
+  cloudSupportPackages?: ICloudSupportEnvironmentInstance[];
   periodOfPerformance: PeriodOfPerformance;
   securityRequirements?: SecurityRequirement[];
   contractConsiderations?: IContractConsiderations;
   sensitiveInformation?: ISensitiveInformation;
-  architecturalDesignRequirements: ArchitecturalDesignRequirement;
 }
 export interface IContractType {
   firmFixedPrice: boolean;
@@ -26,13 +28,13 @@ export interface ISensitiveInformation {
   accessibilityReqs508?: string;
 }
 export interface IXaaSOfferings {
-  serviceOffering: ISelectedServiceOffering;
-  instanceConfigurations: IEnvironmentInstance[] | IComputeEnvironmentInstance[] | IDatabaseEnvironmentInstance[];
+  computeInstances?: IComputeEnvironmentInstance[];
+  databaseInstances?: IDatabaseEnvironmentInstance[];
+  storageInstances?: IEnvironmentInstance[];
+  generalInstances?: IEnvironmentInstance[];
+  selectedServiceInstances?: ISelectedServiceOffering[];
 }
 
-export interface ICloudSupportPackage {
-  supportingInfo?: ICloudSupportEnvironmentInstance[];
-}
 export enum ContractAwardType {
   INITIAL_AWARD = "INITIAL_AWARD",
   MODIFICATION = "MODIFICATION",
@@ -64,15 +66,15 @@ export interface ICrossDomainSolutions {
 }
 
 export enum EnvironmentLocation {
-  CLOUD,
-  ON_PREM,
-  HYBRID,
+  CLOUD = "CLOUD",
+  ON_PREM = "ON_PREM",
+  HYBRID = "HYBRID",
 }
 
 export enum ReplicateOrOptimize {
-  YES_REPLICATE,
-  YES_OPTIMIZE,
-  NO,
+  YES_REPLICATE = "YES_REPLICATE",
+  YES_OPTIMIZE = "YES_OPTIMIZE",
+  NO = "NO",
 }
 /** @description Encapsulates data for the Background/Current Environment
  * and part of Performance Requirements sections of the DOW */
@@ -92,44 +94,42 @@ export interface ICurrentEnvironment {
   phasedApproachSchedule?: string;
   needsArchitecturalDesignServices: boolean;
   architecturalDesignRequirement?: ArchitecturalDesignRequirement;
-  selectedClassificationLevels: ISelectedClassificationLevel[];
-  systemDocumentation?: BinaryData;
-  migrationDocumentation?: BinaryData;
 }
 
 export enum InstanceLocation {
-  CLOUD,
-  ON_PREMISE,
+  CLOUD = "CLOUD",
+  ON_PREMISE = "ON_PREMISE",
 }
 export enum PerformanceTier {
-  GENERAL = "General",
-  COMPUTE = "Compute",
-  MEMORY = "Memory",
-  STORAGE = "Storage",
+  GENERAL = "GENERAL",
+  COMPUTE = "COMPUTE",
+  MEMORY = "MEMORY",
+  STORAGE = "STORAGE",
 }
 export enum PricingModel {
-  PAY_AS_YOU_GO,
-  PREPAID,
+  PAY_AS_YOU_GO = "PAY_AS_YOU_GO",
+  PREPAID = "PREPAID",
 }
 
 export enum StorageType {
-  BLOCK = "Block Storage",
-  OBJECT = "Object Storage",
-  FILE = "File Storage",
-  ARCHIVE = "Archival Storage",
+  BLOCK = "BLOCK",
+  OBJECT = "OBJECT",
+  FILE = "FILE",
+  ARCHIVE = "ARCHIVE",
 }
 /** @description Base instance used for various sections of information
  * captured in a Package mainly used for document generation (e.g., DOW) */
 export interface IEnvironmentInstance {
   anticipatedNeedOrUsage?: string;
-  osLicensing: Licensing;
+  operatingSystemLicensing: Licensing;
   instanceName: string;
   numberOfInstances?: number;
   needForEntireTaskOrderDuration?: boolean;
   selectedPeriods?: IPeriod[];
   classificationLevel: IClassificationLevel;
+  classifiedInformationTypes: IClassificationLevel[];
   instanceLocation: InstanceLocation;
-  region: Region[];
+  region: Region;
   performanceTier: PerformanceTier;
   pricingModel: PricingModel;
   /**
@@ -148,22 +148,26 @@ export interface IEnvironmentInstance {
   memoryUnit: StorageUnit;
   dataEgressMonthlyAmount: number;
   dataEgressMonthlyUnit: StorageUnit;
+  usageDescription: string;
 }
 
 export enum UsageDescription {
-  EVEN_USAGE,
-  IRREGULAR_USAGE,
+  EVEN_USAGE = "EVEN_USAGE",
+  IRREGULAR_USAGE = "IRREGULAR_USAGE",
 }
 
-/** @description Extends Envrionment Instance with additional properties specific to current environment instances */
+/** @description Extends Environment Instance with additional properties specific to current environment instances */
 export interface ICurrentEnvironmentInstance extends IEnvironmentInstance {
   additionalInformation?: string;
+  // TODO: is this needed
+  anticipatedNeedUsage?: string;
   currentUsageDescription?: UsageDescription;
   isTrafficSpikeEventBased?: boolean;
   trafficSpikeEventDescription?: string;
   isTrafficSpikePeriodBased?: boolean;
   trafficSpikePeriodDescription?: string;
   deployedRegions?: Region[];
+  // TODO: turn into an object
   usersPerRegion?: number;
   operatingEnvironment?: OperatingEnvironment;
   environmentType?: EnvironmentType;
@@ -175,10 +179,10 @@ export interface IComputeEnvironmentInstance extends IEnvironmentInstance {
 }
 
 export enum DatabaseType {
-  ANALYTICAL = "Analytical",
-  TRANSACTIONAL = "Transactional",
-  GRAPH = "Graph",
-  RELATIONAL = "Relational",
+  ANALYTICAL = "ANALYTICAL",
+  TRANSACTIONAL = "TRANSACTIONAL",
+  GRAPH = "GRAPH",
+  RELATIONAL = "RELATIONAL",
   OTHER = "OTHER",
 }
 
@@ -190,16 +194,16 @@ export interface IDatabaseEnvironmentInstance {
 }
 
 export enum FacilityType {
-  GOVERNMENT_FACILITY = "Government Facility",
-  NON_GOVERNMENT_FACILITY = "Non-Government Facility",
+  GOVERNMENT_FACILITY = "GOVERNMENT_FACILITY",
+  NON_GOVERNMENT_FACILITY = "NON_GOVERNMENT_FACILITY",
 }
 
 export enum TrainingFormat {
-  ONSITE_INSTRUCTOR_CONUS = "Onsite - Instructor Led - CONUS",
-  ONSITE_INSTRUCTOR_OCONUS = "Onsite - Instructor Led - OCONUS",
-  VIRTUAL_INSTRUCTOR = "Virtual - Instructor Led",
-  VIRTUAL_SELF_LED = "Virtual - Self Paced",
-  NO_PREFERENCE = "No Preference",
+  ONSITE_INSTRUCTOR_CONUS = "ONSITE_INSTRUCTOR_CONUS",
+  ONSITE_INSTRUCTOR_OCONUS = "ONSITE_INSTRUCTOR_OCONUS",
+  VIRTUAL_INSTRUCTOR = "VIRTUAL_INSTRUCTOR",
+  VIRTUAL_SELF_LED = "VIRTUAL_SELF_LED",
+  NO_PREFERENCE = "NO_PREFERENCE",
 }
 /** @description Details related Cloud Support Packages for the Selected Service Offering */
 export interface ICloudSupportEnvironmentInstance extends IEnvironmentInstance {
@@ -213,13 +217,6 @@ export interface ICloudSupportEnvironmentInstance extends IEnvironmentInstance {
   personnelRequiringTraining?: number;
   serviceType?: ServiceOfferingGroup;
 }
-/** @description Extends Environment Instance with additional properties
- * specific to estimated environment instances used for document generation */
-export interface EstimatedEnvironmentInstance extends IEnvironmentInstance {
-  dowTaskNumber?: string;
-  /** Format: float */
-  monthlyPrice?: number;
-}
 
 export interface IPortabilityPlan {
   classificationLevel: IClassificationLevel;
@@ -227,7 +224,7 @@ export interface IPortabilityPlan {
 }
 
 export interface ISupportPackage {
-  statementOfObjectives: "string";
+  statementOfObjectives: string;
   requireForDuration: boolean;
   cspOnSite: boolean;
   classificationLevel: IClassificationLevel;
@@ -241,23 +238,34 @@ export enum EnvironmentType {
 }
 
 export enum OperatingEnvironment {
-  VIRTUAL = "Virtual",
-  CONTAINERS = "Containers",
-  SERVERLESS = "Serverless",
-  END_USER_COMPUTING_VIRTUAL_DESKTOP = "End user computing virtual desktop",
+  VIRTUAL = "VIRTUAL",
+  CONTAINERS = "CONTAINERS",
+  SERVERLESS = "SERVERLESS",
+  END_USER_COMPUTING_VIRTUAL_DESKTOP = "END_USER_COMPUTING_VIRTUAL_DESKTOP",
 }
 
 export enum Licensing {
-  NEW = "New",
-  TRANSFER_EXISTING = "Transfer Existing",
+  NEW = "NEW",
+  TRANSFER_EXISTING = "TRANSFER_EXISTING",
 }
+
+export enum ArchitecturalDesignSource {
+  DOW = "DOW",
+  CURRENT_ENVIRONMENT = "CURRENT_ENVIRONMENT",
+}
+
+export enum ContractorClearanceType {
+  TS = "TS",
+  TS_SCI = "TS_CSI",
+}
+
 /** @description A Security Requirement for a specific Service Offering Group in a package */
 export interface SecurityRequirement {
   advisoryServicesSecret?: IClassifiedInformationType[];
   advisoryServicesTopSecret?: IClassifiedInformationType[];
   serviceOfferingGroup?: ServiceOfferingGroup;
   /** @enum {string} */
-  tsContractorClearanceType?: "TS" | "TS_SCI";
+  tsContractorClearanceType?: ContractorClearanceType;
 }
 /** @description Details for an architectural design of application(s) */
 export interface ArchitecturalDesignRequirement {
@@ -265,12 +273,13 @@ export interface ArchitecturalDesignRequirement {
   statement?: string;
   externalFactors?: string;
   dataClassificationLevels?: IClassificationLevel[];
+  source: ArchitecturalDesignSource;
 }
 
 export enum Classification {
-  U = "Unclassified",
-  S = "Secret",
-  TS = "Top Secret",
+  U = "U",
+  S = "S",
+  TS = "TS",
 }
 export enum ImpactLevel {
   IL2 = "IL2",
@@ -282,7 +291,7 @@ export enum ImpactLevel {
 export interface IClassificationLevel {
   classificationLevel: Classification;
   impactLevel: ImpactLevel;
-  additionalInformation: "string";
+  additionalInformation: string;
 }
 
 /** @description Describes the classified information in a Classification Instance */
@@ -292,6 +301,7 @@ export type IClassifiedInformationType = IGeneralInformation;
 export interface ISelectedClassificationLevel {
   classificationLevel?: IClassificationLevel;
   classifiedInformationTypes?: IClassifiedInformationType[];
+  // TODO: turn into an object
   usersPerRegion?: number;
   dataEgressMonthlyAmount?: number;
   dataEgressMonthlyUnit?: StorageUnit;
@@ -343,22 +353,22 @@ export interface ClassificationInstance {
 }
 
 export enum PeriodType {
-  BASE,
-  OPTION,
+  BASE = "BASE",
+  OPTION = "OPTION",
 }
 
 export enum PeriodUnit {
-  DAY,
-  WEEK,
-  MONTH,
-  YEAR,
+  DAY = "DAY",
+  WEEK = "WEEK",
+  MONTH = "MONTH",
+  YEAR = "YEAR",
 }
 
 /** @description A period used for a package Period Of Performance */
 export interface IPeriod {
   periodType: PeriodType;
   periodUnitCount: number;
-  periodUnit: PeriodUnit | string;
+  periodUnit: PeriodUnit;
   optionOrder: number;
 }
 /** @description A single Service Offering Group (Service Offering table) */
@@ -596,6 +606,7 @@ const selectedClassificationLevels = {
 const deployedRegions = {
   type: "object",
   properties: {
+    // TODO: don't think the usersPerRegion goes here
     usersPerRegion: { type: "array" },
     regions: {
       type: "array",
@@ -851,14 +862,19 @@ const DescriptionOfWork = {
     awardHistory,
     contractInformation,
     toTitle: { type: "string" },
-    scope: { type: "string" },
-    scopeSurge: { type: "integer" },
+    surgeRequirementCapacity: { type: "integer" },
+    surgeRequirementCapabilities: { type: "boolean" },
     currentEnvironment,
+    selectedClassificationLevels,
+    architecturalDesignRequirement,
     xaasOfferings,
     crossDomainSolution,
     cloudSupportPackages: { type: "array", items: cloudSupportEnvironmentInstance },
-    periodOfPerformance,
     contractType,
-    architecturalDesignRequirement,
+    periodOfPerformance,
+    // TODO: add structure below
+    securityRequirements: { type: "object" },
+    contractConsiderations: { type: "object" },
+    sensitiveInformation: { type: "object" },
   },
 };

@@ -715,8 +715,10 @@ components:
         # DOW section 2
         scope:
           type: string
-        scopeSurge:
+        surgeRequirementCapacity:
           type: integer
+        surgeRequirementCapabilities:
+          type: boolean
         # Performance Requirements
         # DOW section 3 and 4.1
         currentEnvironment:
@@ -733,15 +735,26 @@ components:
           items:
             type: object
             properties:
-              serviceOffering:
-                $ref: "#/components/schemas/SelectedServiceOffering"
-              instanceConfigurations:
+              computeInstances:
                 type: array
                 items:
-                  anyOf:
-                    - $ref: "#/components/schemas/EnvironmentInstance" # storage
-                    - $ref: "#/components/schemas/ComputeEnvironmentInstance"
-                    - $ref: "#/components/schemas/DatabaseEnvironmentInstance"
+                  $ref: "#/components/schemas/ComputeEnvironmentInstance"
+              databaseInstances:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DatabaseEnvironmentInstance"
+              storageInstances:
+                type: array
+                items:
+                  $ref: "#/components/schemas/EnvironmentInstance" # storage
+              generalInstances:
+                type: array
+                items:
+                  $ref: "#/components/schemas/EnvironmentInstance" # general XaaS
+              selectedServiceInstances:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SelectedServiceOffering"
         # DOW section 4.2.6 - CDS
         crossDomainSolutions:
           $ref: "#/components/schemas/CrossDomainSolutions"
@@ -827,8 +840,15 @@ components:
           items:
             $ref: "#/components/schemas/Period"
         trafficPerDomainPair:
-          # JSON string
-          type: string
+          type: array
+          items:
+            type: "object"
+            properties:
+              type:
+                type: string
+              dataQuantity:
+                type: number
+                format: integer
         projectedFileStreamType:
           type: string
     CurrentEnvironment:
@@ -866,6 +886,8 @@ components:
           type: boolean
         anticipatedYearlyAdditionalCapacity:
           type: integer
+        anticipatedNeedUsage:
+          type: string
         # replicated or optimized
         currentEnvironmentReplicatedOptimized:
           type: string
@@ -958,7 +980,7 @@ components:
           $ref: "#/components/schemas/StorageUnit"
     CurrentEnvironmentInstance:
       description: >-
-        Extends Envrionment Instance with additional properties specific to current
+        Extends Environment Instance with additional properties specific to current
         environment instances
       type: object
       properties:
@@ -967,8 +989,6 @@ components:
         currentUsageDescription:
           type: string
           enum:
-          # Q: should this match up with DoW exactly?
-          # there is a high usage periods mentioned
             - EVEN_USAGE
             - IRREGULAR_USAGE
         isTrafficSpikeEventBased:
@@ -984,7 +1004,7 @@ components:
           items:
             $ref: "#/components/schemas/Region"
         usersPerRegion:
-          type: string
+          $ref: "#/components/schemas/UsersPerRegion"
         operatingEnvironment:
           $ref: "#/components/schemas/OperatingEnvironment"
         environmentType:
@@ -1155,8 +1175,7 @@ components:
           items:
             $ref: "#/components/schemas/ClassifiedInformationType"
         usersPerRegion:
-          # JSON string
-          type: string
+          $ref: "#/components/schemas/UsersPerRegion"
         dataEgressMonthlyAmount:
           type: integer
         dataEgressMonthlyUnit:
@@ -1195,6 +1214,13 @@ components:
         - GB
         - TB
         - PB
+    UsersPerRegion:
+      type: array
+      items:
+        description: >-
+          An object that has the key as the region and the number of users
+          as the value.
+        type: "object"
     Region:
       description: >-
         A region defining where instances are deployed
