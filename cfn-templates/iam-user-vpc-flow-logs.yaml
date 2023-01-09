@@ -36,10 +36,6 @@ Resources:
               - iam:GetPolicy
               - iam:GetPolicyVersion
             Resource: "*"
-      # LoginProfile:
-      #   Password: pA$$woRd
-      #   PasswordResetRequired: true
-      # UserName: !Sub ${AWS::StackName}-${AWS::AccountId}
 
   CsspApicwluserUserAccessKey:
     Type: AWS::IAM::AccessKey
@@ -49,6 +45,26 @@ Resources:
   CsspApicwluserAccessKeySecret:
     Type: AWS::SecretsManager::Secret
     Properties:
-      Name: CsspApicwluser
+      Name: Cssp-C5ISR-User-AccessKey
       Description: CsspApicwluser Secret Key
-      SecretString: !Sub '{"Cssp AccessKeyId":"${CsspApicwluserUserAccessKey}","Cssp SecretAccessKey":"${CsspApicwluserUserAccessKey.SecretAccessKey}"}'
+      SecretString: !Sub '{"AccessKeyId":"${CsspApicwluserUserAccessKey}","SecretAccessKey":"${CsspApicwluserUserAccessKey.SecretAccessKey}"}'
+
+   CsspApicwluser:
+    Type: AWS::IAM::User  
+    Properties:
+      Policies:
+      - PolicyName: sandbox-cssp-apicwl-access
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action: 
+              - s3:GetBucketAcl
+              -s3:ListBucket
+            Resource: "arn:aws-us-gov:logs:us-gov-west-1:471220942569:log-group:Sandbox-AtatNetworking-AtatVpcAllFlowLogsLogGroup3DECDA1F-150I0NQU08J03:*"
+          - Effect: Allow
+            Action: 
+              - s3:GetBucketAcl
+              - s3:ListBucket
+              -s3:GetObject
+            Resource: "arn:aws-us-gov:s3:::consolidated-logs-*-us-gov-west-1"
