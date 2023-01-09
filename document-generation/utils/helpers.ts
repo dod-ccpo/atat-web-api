@@ -29,7 +29,7 @@ export const formatDuration = (periods: IPeriod[]): string => {
     : "";
   const hasOptions = options.length > 0;
   const optionPeriods = hasOptions
-    ? options.map((period) => `OP${period.optionOrder}: ${period.periodUnitCount} ${period.periodUnit}`).join(", ")
+    ? options.map((period, index) => `OP${index + 1}: ${period.periodUnitCount} ${period.periodUnit}`).join(", ")
     : "";
 
   // display periods based on what duration is available
