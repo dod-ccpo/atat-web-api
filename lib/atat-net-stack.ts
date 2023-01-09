@@ -1,11 +1,13 @@
 import * as cdk from "aws-cdk-lib";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
+import * as s3 from "aws-cdk-lib/aws-s3";
 import * as logs from "aws-cdk-lib/aws-logs";
 import * as custom from "aws-cdk-lib/custom-resources";
 import * as route53Resolver from "aws-cdk-lib/aws-route53resolver";
 import { VpcDefaultSecurityGroupRuleRemover } from "./constructs/vpc-default-sg-rule-remove";
 
 import { Construct, DependencyGroup } from "constructs";
+import { Bucket } from "aws-cdk-lib/aws-s3";
 
 const DEFAULT_ROUTE = "0.0.0.0/0";
 
@@ -55,6 +57,10 @@ export class AtatNetStack extends cdk.Stack {
       })
     );
 
+    const vflbucket = s3.Bucket.fromBucketAttributes(this, "ImportedBucket", {
+      bucketArn: "arn:aws-us-gov:s3:::flow-logs-301912046736-us-gov-west-1",
+    });
+
     // Capture all VPC flow logs and send to CloudWatch Logs with indefinite retention.
     // Flow log format made to meet C5ISR log format requirement
     /* eslint-disable no-template-curly-in-string */
@@ -82,12 +88,10 @@ export class AtatNetStack extends cdk.Stack {
         ec2.LogFormat.custom("${log-status}"),
         /* eslint-enable no-template-curly-in-string */
       ],
-      destination: ec2.FlowLogDestination.toCloudWatchLogs(
-        new logs.LogGroup(this, "ALLFlowLogs", {
-          retention: logs.RetentionDays.INFINITE,
-        })
-      ),
+      destination: ec2.FlowLogDestination.toS3(vflbucket, "prefix/"),
     });
+
+    // destination: ec2.FlowLogDestination.(
 
     // const dnsLogsGroup = new logs.LogGroup(this, "VpcDnsQueryLogs", {
     //   retention: logs.RetentionDays.INFINITE,
