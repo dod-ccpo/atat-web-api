@@ -43,7 +43,7 @@ const optionPeriodsOnly = [
 describe("formatDuration - used when not entire duration", () => {
   it("format the duration of base and option periods", async () => {
     const duration = formatDuration(baseAndOptionPeriods);
-    expect(duration).toBe("Base: 1 Year and option(s) OP2: 12 Week(s)");
+    expect(duration).toBe("Base: 1 Year and option(s) OP1: 12 Week(s)");
   });
   it("format the duration of base periods only", async () => {
     const duration = formatDuration(basePeriodOnly);
@@ -51,7 +51,7 @@ describe("formatDuration - used when not entire duration", () => {
   });
   it("format the duration of option periods only", async () => {
     const duration = formatDuration(optionPeriodsOnly);
-    expect(duration).toBe("Option(s) - OP1: 3 Month(s), OP4: 30 Day(s)");
+    expect(duration).toBe("Option(s) - OP1: 3 Month(s), OP2: 30 Day(s)");
   });
   it("return no periods found when empty array", async () => {
     const duration = formatDuration([]);

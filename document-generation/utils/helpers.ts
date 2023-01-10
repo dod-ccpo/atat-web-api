@@ -28,6 +28,12 @@ export const formatDuration = (periods: IPeriod[]): string => {
     ? base.map((period) => `Base: ${period.periodUnitCount} ${period.periodUnit}`).join("")
     : "";
   const hasOptions = options.length > 0;
+  // The UI sets the `optionOrder` for the Base period as `1` and the Option orders follow
+  // consecutively (e.g, OP1 = 2, OP2 = 3, etc). Given the UI does not allow for an Option
+  // period to be skipped when creating a Period of Perforamnce (PoP), it is assumed there
+  // will be no gaps in the PoP option periods (e.g., B, OP1, OP3). As such, the display value
+  // is generated based on an array of the option periods index rather than the `optionOrder`
+  // previously used.
   const optionPeriods = hasOptions
     ? options.map((period, index) => `OP${index + 1}: ${period.periodUnitCount} ${period.periodUnit}`).join(", ")
     : "";
