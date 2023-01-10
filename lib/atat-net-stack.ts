@@ -20,6 +20,7 @@ export interface AtatNetStackProps extends cdk.StackProps {
    * the application. This value should almost always be provided.
    */
   vpcCidr?: string;
+  vpcFlowLogBucket?: string;
 }
 
 /**
@@ -88,7 +89,7 @@ export class AtatNetStack extends cdk.Stack {
         ec2.LogFormat.custom("${log-status}"),
         /* eslint-enable no-template-curly-in-string */
       ],
-      destination: ec2.FlowLogDestination.toS3(vflbucket, "prefix/"),
+      destination: ec2.FlowLogDestination.toS3(vflbucket, "vpc-flow-logs/"),
     });
 
     // destination: ec2.FlowLogDestination.(
