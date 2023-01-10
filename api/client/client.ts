@@ -72,7 +72,7 @@ export class AtatClient implements IAtatClient {
    * The version of the ATAT CSP API specification that is supported by this version
    * of the client. This should match the `info.version` from the OpenAPI specification.
    */
-  public static supportedApiVersion = "v0.3.0";
+  public static supportedApiVersion = "v1.0.2";
 
   private readonly client: AxiosInstance;
   private readonly logger: ILogger;
