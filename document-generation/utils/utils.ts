@@ -31,25 +31,31 @@ export const convertPeriodToMonths = (period: IPeriod): number => {
   }
 };
 
+// The UI sets the `optionOrder` for the Base period as `1` and the Option orders follow
+// consecutively (e.g, OP1 = 2, OP2 = 3, etc). Given the UI does not allow for an Option
+// period to be skipped when creating a Period of Perforamnce (PoP), it is assumed there
+// will be no gaps in the PoP option periods (e.g., B, OP1, OP3). As such, the display value
+// is generated based on an array of the option periods index rather than the `optionOrder`
+// previously used.
 export const formatPeriodOfPerformance = (basePeriod: IPeriod, optionPeriods: IPeriod[]): string => {
   let formattedPop = "";
   formattedPop += capitalize(basePeriod.periodType);
   formattedPop += " period: ";
   formattedPop += basePeriod.periodUnitCount;
   formattedPop += " ";
-  formattedPop += `${capitalize(basePeriod.periodUnit)}(s)`;
+  formattedPop += `${capitalize(basePeriod.periodUnit)}${basePeriod.periodUnitCount > 1 ? `s` : ``}`;
 
   const orderedPeriods = [...optionPeriods].sort((a, b) => a.optionOrder - b.optionOrder);
-  for (const period of orderedPeriods) {
+  for (const [index, period] of orderedPeriods.entries()) {
     // Format the option Period text as "Option period M: N <Days(s) | Month(s) | Year(s)>"
     formattedPop += ", ";
     formattedPop += capitalize(period.periodType);
     formattedPop += " period ";
-    formattedPop += period.optionOrder;
+    formattedPop += index + 1;
     formattedPop += ": ";
     formattedPop += period.periodUnitCount;
     formattedPop += " ";
-    formattedPop += `${capitalize(period.periodUnit)}(s)`;
+    formattedPop += `${capitalize(period.periodUnit)}${period.periodUnitCount > 1 ? `s` : ``}`;
   }
   return formattedPop;
 };

@@ -527,6 +527,7 @@ const descriptionOfWork = {
     awardHistory,
     contractInformation,
     toTitle: { type: "string" },
+    scope: { type: "string" },
     surgeRequirementCapacity: { type: "integer" },
     surgeRequirementCapabilities: { type: "boolean" },
     currentEnvironment,
