@@ -72,7 +72,7 @@ export class AtatNetStack extends cdk.Stack {
     // Capture all VPC flow logs and send to CloudWatch Logs with indefinite retention.
     // Flow log format made to meet C5ISR log format requirement
     /* eslint-disable no-template-curly-in-string */
-    vpc.addFlowLog("AllFlowLogs", {
+    vpc.addFlowLog("NewAllFlowLogs", {
       logFormat: [
         ec2.LogFormat.VERSION,
         ec2.LogFormat.custom("${vpc-id}"),
