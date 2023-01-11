@@ -15,6 +15,7 @@ export function createApp(props?: cdk.AppProps): cdk.App {
   const apiDomainParam = AtatContextValue.API_DOMAIN_NAME.resolve(app);
   const apiCertParam = AtatContextValue.API_CERTIFICATE_ARN.resolve(app);
   const deployRegion = AtatContextValue.DEPLOY_REGION.resolve(app);
+  const vpcFlowLogBucketParam = AtatContextValue.VPC_FLOW_LOG_BUCKET.resolve(app);
 
   if (!utils.isString(environmentParam)) {
     const err = `An EnvironmentId must be provided (use the ${AtatContextValue.ENVIRONMENT_ID} context key)`;
@@ -91,6 +92,7 @@ export function createApp(props?: cdk.AppProps): cdk.App {
       branch: AtatContextValue.VERSION_CONTROL_BRANCH.resolve(app),
       githubPatName: AtatContextValue.GITHUB_PAT_NAME.resolve(app),
       apiDomain: apiCertOptions,
+      vpcFlowLogBucket: vpcFlowLogBucketParam,
       // Set the notification email address, unless we're building the account where
       // sandbox environments live because our inboxes would never recover.
       notificationEmail: environmentName === "Sandbox" ? undefined : AtatContextValue.NOTIFICATION_EMAIL.resolve(app),
