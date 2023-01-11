@@ -84,7 +84,7 @@ export function createApp(props?: cdk.AppProps): cdk.App {
     // solution (but that is likely okay for now). A workaround to this is that if you
     // do need to perform integration testing for the pipeline (by building a test stack),
     // you can just temporarily change the `id` parameter from "Pipeline" to another
-    // static value.
+    // static value..
     const pipelineStack = new AtatPipelineStack(app, "AtatEnvironmentPipeline", {
       environmentName,
       vpcCidr: vpcCidrParam,
@@ -92,7 +92,6 @@ export function createApp(props?: cdk.AppProps): cdk.App {
       branch: AtatContextValue.VERSION_CONTROL_BRANCH.resolve(app),
       githubPatName: AtatContextValue.GITHUB_PAT_NAME.resolve(app),
       apiDomain: apiCertOptions,
-      vpcFlowLogBucket: vpcFlowLogBucketParam,
       // Set the notification email address, unless we're building the account where
       // sandbox environments live because our inboxes would never recover.
       notificationEmail: environmentName === "Sandbox" ? undefined : AtatContextValue.NOTIFICATION_EMAIL.resolve(app),
