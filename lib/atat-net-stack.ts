@@ -20,9 +20,8 @@ export interface AtatNetStackProps extends cdk.StackProps {
    * the application. This value should almost always be provided.
    */
   vpcCidr?: string;
-  vpcFlowLogBucket?: string;
+  vpcFlowLogBucket: string;
 }
-
 /**
  * Create the necessary networking infrastructure for the ATAT application.
  *
@@ -59,15 +58,8 @@ export class AtatNetStack extends cdk.Stack {
     );
 
     const vflbucket = s3.Bucket.fromBucketAttributes(this, "ImportedBucket", {
-      bucketArn: "arn:aws-us-gov:s3:::flow-logs-301912046736-us-gov-west-1",
+      bucketArn: props.vpcFlowLogBucket,
     });
-
-    // const vflbucket = "arn:aws-us-gov:s3:::flow-logs-301912046736-us-gov-west-1";
-    // const vflbucket = s3.Bucket.fromBucketArn(
-    //   this,
-    //   "flow-logs-301912046736-us-gov-west-1",
-    //   "arn:aws-us-gov:s3:::flow-logs-301912046736-us-gov-west-1"
-    // );
 
     // Capture all VPC flow logs and send to CloudWatch Logs with indefinite retention.
     // Flow log format made to meet C5ISR log format requirement

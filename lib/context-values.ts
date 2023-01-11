@@ -70,6 +70,13 @@ export class AtatContextValue {
   public static readonly API_DOMAIN_NAME = new AtatContextValue("atat:ApiDomainName", undefined);
 
   /**
+   * The s3 bucket to be used to centralize VPC Flow Logs.
+   *
+   * This must be valid variable due to the buckets differing between the Prod and Dev enviroments
+   */
+  public static readonly VPC_FLOW_LOG_BUCKET = new AtatContextValue("atat:VpcFlowLogBucket", undefined);
+
+  /**
    * The ARN of the certificate in ACM to use for the created API.
    *
    * The certificate must be stored in ACM, not IAM. Additionally, the certificate must have

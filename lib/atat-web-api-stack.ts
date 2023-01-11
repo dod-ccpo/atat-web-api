@@ -31,6 +31,7 @@ export interface AtatWebApiStackProps extends cdk.StackProps {
   network?: AtatNetStack;
   isSandbox?: boolean;
   apiDomain?: ApiCertificateOptions;
+  vpcFlowLogBucket?: AtatNetStack;
 }
 
 export class AtatWebApiStack extends cdk.Stack {
