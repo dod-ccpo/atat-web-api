@@ -17,6 +17,7 @@ describe("Validate creation of the pipeline stack", () => {
       branch: TEST_BRANCH_NAME,
       githubPatName: "DOES_NOT_EXIST",
       notificationEmail: "test@example.com",
+      vpcFlowLogBucket: "arn:aws:us-east-1:s3::123456789012:flow-logs-123456789012-us-east-1",
     });
     template = Template.fromStack(stack);
   });
