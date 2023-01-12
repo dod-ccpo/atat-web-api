@@ -5,7 +5,6 @@ import * as logs from "aws-cdk-lib/aws-logs";
 import * as custom from "aws-cdk-lib/custom-resources";
 import * as route53Resolver from "aws-cdk-lib/aws-route53resolver";
 import { VpcDefaultSecurityGroupRuleRemover } from "./constructs/vpc-default-sg-rule-remove";
-import { AtatContextValue } from "./context-values";
 
 import { Construct, DependencyGroup } from "constructs";
 import { Bucket } from "aws-cdk-lib/aws-s3";
