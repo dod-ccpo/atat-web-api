@@ -7,7 +7,6 @@ import * as route53Resolver from "aws-cdk-lib/aws-route53resolver";
 import { VpcDefaultSecurityGroupRuleRemover } from "./constructs/vpc-default-sg-rule-remove";
 
 import { Construct, DependencyGroup } from "constructs";
-import { Bucket } from "aws-cdk-lib/aws-s3";
 
 const DEFAULT_ROUTE = "0.0.0.0/0";
 
@@ -91,8 +90,6 @@ export class AtatNetStack extends cdk.Stack {
       ],
       destination: ec2.FlowLogDestination.toS3(vflbucket),
     });
-
-    // destination: ec2.FlowLogDestination.(
 
     // const dnsLogsGroup = new logs.LogGroup(this, "VpcDnsQueryLogs", {
     //   retention: logs.RetentionDays.INFINITE,
