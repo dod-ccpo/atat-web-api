@@ -343,6 +343,34 @@ export const getTaskPeriods = (payload: any) => {
     });
   });
 
+  // gets CDS PoP information for section 7
+  const { crossDomainSolutionRequired, needForEntireTaskOrderDuration, selectedPeriods } = crossDomainSolutions;
+  const crossDomainSolutionTaskNumber = [];
+  if (crossDomainSolutionRequired && needForEntireTaskOrderDuration) {
+    crossDomainSolutionTaskNumber.push({ dowTaskNumber: "4.2.6", entireDuration: true, taskPeriods: [] });
+  }
+  if (crossDomainSolutionRequired && !needForEntireTaskOrderDuration) {
+    const cdsTaskPeriods: string[] = [];
+    if (selectedPeriods && selectedPeriods.length >= 1) {
+      const basePeriod = selectedPeriods.filter((period: IPeriod) => period.periodType === PeriodType.BASE);
+      if (basePeriod.length === 1) {
+        cdsTaskPeriods.push("B");
+      }
+
+      const optionPeriods = selectedPeriods
+        .sort((a: IPeriod, b: IPeriod) => a.optionOrder - b.optionOrder)
+        .filter((period: IPeriod) => period.periodType === PeriodType.OPTION)
+        .map((period: IPeriod, index: number) => `OP${index + 1}`);
+      cdsTaskPeriods.push(...optionPeriods);
+    }
+
+    crossDomainSolutionTaskNumber.push({
+      dowTaskNumber: "4.2.6",
+      entireDuration: false,
+      taskPeriods: cdsTaskPeriods,
+    });
+  }
+
   const selectedCloudSupportPackages = cloudSupportPackages.map((instance: any) => instance.serviceType);
   const sortedCloudPkgs = sortSupportPackagesByLevels(sortSupportPackagesByGroups(cloudSupportPackages));
 
@@ -361,8 +389,10 @@ export const getTaskPeriods = (payload: any) => {
     ...storageTaskNumbers,
     ...generalTaskNumbers,
     ...selectedServiceTaskNumbers,
+    ...crossDomainSolutionTaskNumber,
     ...cloudPackagesTaskNumbers,
   ];
+
   const groupedTaskPops = groupSelectedTaskPeriods(allPackageTasks);
 
   return {
@@ -550,7 +580,7 @@ export const getInstancesCount = (instances: any) => {
         numInstances.dev += 0;
     }
 
-    return (totalCount += currentInstance.numberOfInstances);
+    return totalCount + currentInstance.numberOfInstances;
   }, 0);
 
   return {
@@ -610,19 +640,32 @@ export const getInstances = (xaasService: any, levelIdentifier: string) => {
 };
 
 export interface IXaasAccess {
-  serviceNumber: string;
+  taskNumber: string;
   access: string[];
 }
 export const getSecurityRequirements = (payload: any): any => {
   const { currentEnvironment, xaasOfferings, cloudSupportPackages } = payload;
   const currentEnvSecret: string[] = [];
   const currentEnvTopSecret: string[] = [];
-  const xaasSecret: IXaasAccess[] = [];
-  const xaasTopSecret: IXaasAccess[] = [];
+  const xaasSecret: any = {
+    compute: [],
+    database: [],
+    storage: [],
+    general: [],
+    selectedService: [],
+  };
+  const xaasTopSecret: any = {
+    compute: [],
+    database: [],
+    storage: [],
+    general: [],
+    selectedService: [],
+  };
   const cloudSupportSecret: string[] = [];
   const cloudSupportTopSecret: string[] = [];
   let isSecurityNeeded = false;
 
+  // current environment security requirements
   currentEnvironment.envInstances.forEach((instance: any) => {
     const classificationLevel = instance.classificationLevel;
     if (classificationLevel && classificationLevel.classification === Classification.S) {
@@ -635,39 +678,179 @@ export const getSecurityRequirements = (payload: any): any => {
     }
   });
 
-  // xaasOfferings.forEach((service: any) => {
-  //   const { classificationInstances } = service.serviceOffering;
-  //   if (classificationInstances.length >= 1) {
-  //     service.serviceOffering.classificationInstances.forEach((instance: any) => {
-  //       const classificationLevel = instance.classificationLevel;
-  //       if (classificationLevel && classificationLevel.classification === Classification.S) {
-  //         isSecurityNeeded = true;
-  //         const levelNumber = classificationLevelsOrder.indexOf(classificationLevel.impactLevel) + 1;
-  //         const xaasAccess: IXaasAccess = {
-  //           serviceNumber: `4.2.${levelNumber}`,
-  //           access: [],
-  //         };
-  //         instance.classifiedInformationTypes.forEach((type: any) => {
-  //           xaasAccess.access.push(type.name);
-  //         });
-  //         xaasSecret.push(xaasAccess);
-  //       }
-  //       if (classificationLevel && classificationLevel.classification === Classification.TS) {
-  //         isSecurityNeeded = true;
-  //         const levelNumber = classificationLevelsOrder.indexOf(classificationLevel.classification) + 1;
-  //         const xaasAccess: IXaasAccess = {
-  //           serviceNumber: `4.2.${levelNumber}`,
-  //           access: [],
-  //         };
-  //         instance.classifiedInformationTypes.forEach((type: any) => {
-  //           xaasAccess.access.push(type.name);
-  //         });
-  //         xaasTopSecret.push(xaasAccess);
-  //       }
-  //     });
-  //   }
-  // });
+  const { computeInstances, databaseInstances, storageInstances, generalInstances, selectedServiceInstances } =
+    xaasOfferings;
 
+  // compute security requirements
+  computeInstances.forEach((instance: any) => {
+    const { classificationLevel, classifiedInformationTypes } = instance;
+    // secret
+    if (classificationLevel.classification === Classification.S && classifiedInformationTypes.length > 0) {
+      const levelNumber = classificationLevelsOrder.indexOf(classificationLevel.impactLevel) + 1;
+      const infoTypeAccess = classifiedInformationTypes.map((infoType: any) => infoType.name);
+      xaasSecret.compute.push({ taskNumber: `4.2.${levelNumber}.1`, access: infoTypeAccess });
+    }
+    // top secret
+    if (classificationLevel.classification === Classification.TS && classifiedInformationTypes.length > 0) {
+      const levelNumber = classificationLevelsOrder.indexOf(classificationLevel.classification) + 1;
+      const infoTypeAccess = classifiedInformationTypes.map((infoType: any) => infoType.name);
+      xaasTopSecret.compute.push({ taskNumber: `4.2.${levelNumber}.1`, access: infoTypeAccess });
+    }
+  });
+  // database security requirements
+  databaseInstances.forEach((instance: any) => {
+    const { classificationLevel, classifiedInformationTypes } = instance;
+    if (classificationLevel.classification === Classification.S && classifiedInformationTypes.length > 0) {
+      const levelNumber = classificationLevelsOrder.indexOf(classificationLevel.impactLevel) + 1;
+      const infoTypeAccess = classifiedInformationTypes.map((infoType: any) => infoType.name);
+      xaasSecret.database.push({ taskNumber: `4.2.${levelNumber}.7`, access: infoTypeAccess });
+    }
+    if (classificationLevel.classification === Classification.TS && classifiedInformationTypes.length > 0) {
+      const levelNumber = classificationLevelsOrder.indexOf(classificationLevel.classification) + 1;
+      const infoTypeAccess = classifiedInformationTypes.map((infoType: any) => infoType.name);
+      xaasTopSecret.database.push({ taskNumber: `4.2.${levelNumber}.7`, access: infoTypeAccess });
+    }
+  });
+  // storage security requirements
+  storageInstances.forEach((instance: any) => {
+    const { classificationLevel, classifiedInformationTypes } = instance;
+    if (classificationLevel.classification === Classification.S && classifiedInformationTypes.length > 0) {
+      const levelNumber = classificationLevelsOrder.indexOf(classificationLevel.impactLevel) + 1;
+      const infoTypeAccess = classifiedInformationTypes.map((infoType: any) => infoType.name);
+      xaasSecret.storage.push({ taskNumber: `4.2.${levelNumber}.8`, access: infoTypeAccess });
+    }
+    if (classificationLevel.classification === Classification.TS && classifiedInformationTypes.length > 0) {
+      const levelNumber = classificationLevelsOrder.indexOf(classificationLevel.classification) + 1;
+      const infoTypeAccess = classifiedInformationTypes.map((infoType: any) => infoType.name);
+      xaasTopSecret.storage.push({ taskNumber: `4.2.${levelNumber}.8`, access: infoTypeAccess });
+    }
+  });
+  // general XaaS security requirements
+  generalInstances.forEach((instance: any) => {
+    const { classificationLevel, classifiedInformationTypes } = instance;
+    if (classificationLevel.classification === Classification.S && classifiedInformationTypes.length > 0) {
+      const levelNumber = classificationLevelsOrder.indexOf(classificationLevel.impactLevel) + 1;
+      const infoTypeAccess = classifiedInformationTypes.map((infoType: any) => infoType.name);
+      xaasSecret.general.push({ taskNumber: `4.2.${levelNumber}.11`, access: infoTypeAccess });
+    }
+    if (classificationLevel.classification === Classification.TS && classifiedInformationTypes.length > 0) {
+      const levelNumber = classificationLevelsOrder.indexOf(classificationLevel.impactLevel) + 1;
+      const infoTypeAccess = classifiedInformationTypes.map((infoType: any) => infoType.name);
+      xaasTopSecret.general.push({ taskNumber: `4.2.${levelNumber}.11`, access: infoTypeAccess });
+    }
+  });
+
+  // XaaS services using Selected Service Offerings security requirements
+  selectedServiceInstances.forEach((service: any) => {
+    const { classificationInstances } = service;
+    // look at Selected Service Offering classification instances
+    if (classificationInstances.length >= 1) {
+      service.classificationInstances.forEach((instance: any) => {
+        const classificationLevel = instance.classificationLevel;
+
+        // check for secret classification level
+        if (classificationLevel && classificationLevel.classification === Classification.S) {
+          isSecurityNeeded = true;
+          const levelNumber = classificationLevelsOrder.indexOf(classificationLevel.impactLevel) + 1;
+          let groupNumber;
+          if (xaasServiceGroupsOrder.includes(service.serviceOffering.serviceOfferingGroup)) {
+            groupNumber = xaasServiceGroupsOrder.indexOf(service.serviceOffering.serviceOfferingGroup) + 1;
+          }
+          // add service task number
+          const xaasAccess: IXaasAccess = {
+            taskNumber: `4.2.${levelNumber}.${groupNumber}`,
+            access: [],
+          };
+
+          // get classified info type for service
+          instance.classifiedInformationTypes.forEach((type: any) => {
+            xaasAccess.access.push(type.name);
+          });
+          xaasSecret.selectedService.push(xaasAccess);
+        }
+
+        // check for top secret classification level
+        if (classificationLevel && classificationLevel.classification === Classification.TS) {
+          isSecurityNeeded = true;
+          const levelNumber = classificationLevelsOrder.indexOf(classificationLevel.classification) + 1;
+          let groupNumber;
+          if (xaasServiceGroupsOrder.includes(service.serviceOffering.serviceOfferingGroup)) {
+            groupNumber = xaasServiceGroupsOrder.indexOf(service.serviceOffering.serviceOfferingGroup) + 1;
+          }
+          const xaasAccess: IXaasAccess = {
+            taskNumber: `4.2.${levelNumber}.${groupNumber}`,
+            access: [],
+          };
+          instance.classifiedInformationTypes.forEach((type: any) => {
+            xaasAccess.access.push(type.name);
+          });
+          xaasTopSecret.selectedService.push(xaasAccess);
+        }
+      });
+    }
+  });
+
+  // filter out any duplication for taskNumbers and infoTypes (secret)
+  const serviceSecretTaskNumbers = new Set();
+  xaasSecret.selectedService.forEach((serviceAccess: IXaasAccess) => {
+    if (!serviceSecretTaskNumbers.has(serviceAccess.taskNumber)) {
+      serviceSecretTaskNumbers.add(serviceAccess.taskNumber);
+    }
+  });
+  const serviceSecretNumberSet = [...serviceSecretTaskNumbers] as string[];
+  const secretServicesAccessNoDuplicates: IXaasAccess[] = [];
+  serviceSecretNumberSet.forEach((serviceNumber: string) => {
+    const allServiceAccess: IXaasAccess = {
+      taskNumber: serviceNumber,
+      access: [],
+    };
+
+    xaasSecret.selectedService
+      .filter((serviceAccess: IXaasAccess) => {
+        return serviceAccess.taskNumber === serviceNumber;
+      })
+      .forEach((serviceAccess: IXaasAccess) => {
+        const infoTypes = serviceAccess.access.map((infoType: string) => infoType);
+        if (infoTypes.length > 0) {
+          const infoSet = new Set([...allServiceAccess.access, ...infoTypes]);
+          allServiceAccess.access = [...infoSet];
+        }
+      });
+    secretServicesAccessNoDuplicates.push(allServiceAccess);
+  });
+  xaasSecret.selectedService = secretServicesAccessNoDuplicates;
+
+  // filter out any duplication for taskNumbers and infoTypes (top secret)
+  const serviceTopSecretTaskNumbers = new Set();
+  xaasTopSecret.selectedService.forEach((serviceAccess: IXaasAccess) => {
+    if (!serviceTopSecretTaskNumbers.has(serviceAccess.taskNumber)) {
+      serviceTopSecretTaskNumbers.add(serviceAccess.taskNumber);
+    }
+  });
+  const serviceNumberSet = [...serviceTopSecretTaskNumbers] as string[];
+  const topSecretServicesAccessNoDuplicates: IXaasAccess[] = [];
+  serviceNumberSet.forEach((serviceNumber: string) => {
+    const allServiceAccess: IXaasAccess = {
+      taskNumber: serviceNumber,
+      access: [],
+    };
+
+    xaasTopSecret.selectedService
+      .filter((serviceAccess: IXaasAccess) => {
+        return serviceAccess.taskNumber === serviceNumber;
+      })
+      .forEach((serviceAccess: IXaasAccess) => {
+        const infoTypes = serviceAccess.access.map((infoType: string) => infoType);
+        if (infoTypes.length > 0) {
+          const infoSet = new Set([...allServiceAccess.access, ...infoTypes]);
+          allServiceAccess.access = [...infoSet];
+        }
+      });
+    topSecretServicesAccessNoDuplicates.push(allServiceAccess);
+  });
+  xaasTopSecret.selectedService = topSecretServicesAccessNoDuplicates;
+
+  // cloud support packages security requirements
   cloudSupportPackages.forEach((instance: any) => {
     if (
       instance.serviceType === ServiceOfferingGroup.TRAINING &&

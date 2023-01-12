@@ -38,15 +38,17 @@ export const convertPeriodToMonths = (period: IPeriod): number => {
 // is generated based on an array of the option periods index rather than the `optionOrder`
 // previously used.
 export const formatPeriodOfPerformance = (basePeriod: IPeriod, optionPeriods: IPeriod[]): string => {
+  const basePluralEnding = basePeriod.periodUnitCount > 1 ? `s` : ``;
   let formattedPop = "";
   formattedPop += capitalize(basePeriod.periodType);
   formattedPop += " period: ";
   formattedPop += basePeriod.periodUnitCount;
   formattedPop += " ";
-  formattedPop += `${capitalize(basePeriod.periodUnit)}${basePeriod.periodUnitCount > 1 ? `s` : ``}`;
+  formattedPop += `${capitalize(basePeriod.periodUnit)}${basePluralEnding}`;
 
   const orderedPeriods = [...optionPeriods].sort((a, b) => a.optionOrder - b.optionOrder);
   for (const [index, period] of orderedPeriods.entries()) {
+    const optionPluralEnding = period.periodUnitCount > 1 ? `s` : ``;
     // Format the option Period text as "Option period M: N <Days(s) | Month(s) | Year(s)>"
     formattedPop += ", ";
     formattedPop += capitalize(period.periodType);
@@ -55,7 +57,7 @@ export const formatPeriodOfPerformance = (basePeriod: IPeriod, optionPeriods: IP
     formattedPop += ": ";
     formattedPop += period.periodUnitCount;
     formattedPop += " ";
-    formattedPop += `${capitalize(period.periodUnit)}${period.periodUnitCount > 1 ? `s` : ``}`;
+    formattedPop += `${capitalize(period.periodUnit)}${optionPluralEnding}`;
   }
   return formattedPop;
 };

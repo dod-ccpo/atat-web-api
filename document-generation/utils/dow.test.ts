@@ -71,6 +71,7 @@ describe("Gather Tasks for PoP", () => {
       taskNumberGroups: [
         { dowTaskNumbers: ["4.2.3.1.1"], taskPeriods: ["OP1", "OP2"] },
         { dowTaskNumbers: ["4.2.4.3.3"], taskPeriods: ["OP1", "OP2", "OP3"] },
+        { dowTaskNumbers: ["4.2.6"], taskPeriods: ["B", "OP1", "OP2"] },
       ],
     };
 

@@ -159,7 +159,6 @@ export enum UsageDescription {
 /** @description Extends Environment Instance with additional properties specific to current environment instances */
 export interface ICurrentEnvironmentInstance extends IEnvironmentInstance {
   additionalInformation?: string;
-  // TODO: is this needed
   anticipatedNeedUsage?: string;
   currentUsageDescription?: UsageDescription;
   isTrafficSpikeEventBased?: boolean;
@@ -167,7 +166,6 @@ export interface ICurrentEnvironmentInstance extends IEnvironmentInstance {
   isTrafficSpikePeriodBased?: boolean;
   trafficSpikePeriodDescription?: string;
   deployedRegions?: Region[];
-  // TODO: turn into an object
   usersPerRegion?: number;
   operatingEnvironment?: OperatingEnvironment;
   environmentType?: EnvironmentType;
@@ -301,7 +299,6 @@ export type IClassifiedInformationType = IGeneralInformation;
 export interface ISelectedClassificationLevel {
   classificationLevel?: IClassificationLevel;
   classifiedInformationTypes?: IClassifiedInformationType[];
-  // TODO: turn into an object
   usersPerRegion?: number;
   dataEgressMonthlyAmount?: number;
   dataEgressMonthlyUnit?: StorageUnit;
@@ -604,15 +601,12 @@ const selectedClassificationLevels = {
 };
 
 const deployedRegions = {
-  type: "object",
-  properties: {
-    // TODO: don't think the usersPerRegion goes here
-    usersPerRegion: { type: "array" },
-    regions: {
-      type: "array",
-      items: {
-        enum: [Region.CONUS, Region.OCONUS],
-      },
+  type: "array",
+  items: {
+    type: "object",
+    properties: {
+      ...generalInformation,
+      group: { enum: [Region.CONUS, Region.OCONUS] },
     },
   },
 };
@@ -872,7 +866,6 @@ const DescriptionOfWork = {
     cloudSupportPackages: { type: "array", items: cloudSupportEnvironmentInstance },
     contractType,
     periodOfPerformance,
-    // TODO: add structure below
     securityRequirements: { type: "object" },
     contractConsiderations: { type: "object" },
     sensitiveInformation: { type: "object" },
