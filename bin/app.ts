@@ -78,6 +78,13 @@ export function createApp(props?: cdk.AppProps): cdk.App {
       console.error(err);
       throw new Error(err);
     }
+    if (!utils.isString(vpcFlowLogBucketParam)) {
+      const err =
+        `A bucket to store VPC Flow Logs must be provided` +
+        `(use the ${AtatContextValue.VPC_FLOW_LOG_BUCKET} context key).`;
+      console.error(err);
+      throw new Error(err);
+    }
 
     // Context values can not be supplied via the CLI during self-mutation; therefore, we
     // cannot include the environment name in the stack at this time. This does limit

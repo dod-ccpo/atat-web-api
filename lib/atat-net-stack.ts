@@ -20,7 +20,7 @@ export interface AtatNetStackProps extends cdk.StackProps {
    * the application. This value should almost always be provided.
    */
   vpcCidr?: string;
-  vpcFlowLogBucket?: string;
+  vpcFlowLogBucket: string;
 }
 
 /**
