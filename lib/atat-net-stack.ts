@@ -57,7 +57,7 @@ export class AtatNetStack extends cdk.Stack {
       })
     );
 
-    const strbucket = "arn:aws-us-gov:s3:::flow-logs-301912046736-us-gov-west-1";
+    const strbucket = props.vpcFlowLogBucket;
 
     const vflbucket = s3.Bucket.fromBucketAttributes(this, "ImportedBucket", {
       bucketArn: strbucket,
