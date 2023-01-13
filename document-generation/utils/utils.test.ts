@@ -45,7 +45,7 @@ describe("formatPeriodOfPerformance", () => {
   it("should return defined PoP with no option periods in a human readable format", async () => {
     const basePeriod: IPeriod = samplePop.basePeriod as unknown as IPeriod;
     const optionPeriods: IPeriod[] = [];
-    const expectedPopFormat = "Base period: 1 Year(s)";
+    const expectedPopFormat = "Base period: 1 Year";
     const popString = formatPeriodOfPerformance(basePeriod, optionPeriods);
     expect(popString).toEqual(expectedPopFormat);
   });
@@ -54,7 +54,7 @@ describe("formatPeriodOfPerformance", () => {
     async (pop) => {
       const basePeriod: IPeriod = pop.basePeriod as unknown as IPeriod;
       const optionPeriods = pop.optionPeriods as IPeriod[];
-      const expectedPopFormat = "Base period: 1 Year(s), Option period 2: 7 Month(s), Option period 4: 36 Week(s)";
+      const expectedPopFormat = "Base period: 1 Year, Option period 1: 7 Months, Option period 2: 36 Weeks";
 
       const popString = formatPeriodOfPerformance(basePeriod, optionPeriods);
       expect(popString).toEqual(expectedPopFormat);
