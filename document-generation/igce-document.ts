@@ -95,14 +95,14 @@ export async function generateIGCEDocument(
     if (periodType === PeriodType.BASE) {
       periodSheetName = "Base Period";
     } else {
-      periodSheetName = `Option Period ${optionOrder}`;
+      periodSheetName = `Option Period ${optionOrder - 1}`;
     }
 
     // Get the specific worksheet
     const periodSheet =
       periodType === PeriodType.BASE
         ? workbook.getWorksheet("Base Period")
-        : workbook.getWorksheet(`Option Period ${optionOrder}`);
+        : workbook.getWorksheet(`Option Period ${optionOrder - 1}`);
 
     // Set Period of Performance and Funding Document Number
     // Located at the top of each Period Sheet
