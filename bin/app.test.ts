@@ -13,6 +13,7 @@ describe("Validation tests", () => {
         context: {
           "atat:Sandbox": true,
           "atat:VpcCidr": validCidr,
+          "atat:VpcFlowLogBucket": "arn:aws:us-east-1:s3::123456789012:flow-logs-123456789012-us-east-1",
         },
       });
     }).toThrow("An EnvironmentId must be provided (use the atat:EnvironmentId context key)");
@@ -25,6 +26,7 @@ describe("Validation tests", () => {
           "atat:EnvironmentId": "myEnvironment",
           "atat:Sandbox": true,
           "atat:VpcCidr": validCidr,
+          "atat:VpcFlowLogBucket": "arn:aws:us-east-1:s3::123456789012:flow-logs-123456789012-us-east-1",
         },
       });
     }).toThrow("atat:VpcCidr must NOT be provided for Sandbox environments.");
@@ -36,6 +38,7 @@ describe("Validation tests", () => {
         context: {
           "atat:EnvironmentId": "myEnvironment",
           "atat:Sandbox": false,
+          "atat:VpcFlowLogBucket": "arn:aws:us-east-1:s3::123456789012:flow-logs-123456789012-us-east-1",
         },
       });
     }).toThrow(cidrError);
@@ -47,6 +50,7 @@ describe("Validation tests", () => {
         context: {
           "atat:EnvironmentId": "myEnvironment",
           "atat:Sandbox": true,
+          "atat:VpcFlowLogBucket": "arn:aws:us-east-1:s3::123456789012:flow-logs-123456789012-us-east-1",
         },
       });
     }).not.toThrow(cidrError);
@@ -59,6 +63,7 @@ describe("Validation tests", () => {
           "atat:EnvironmentId": "myEnvironment",
           "atat:Sandbox": false,
           "atat:VpcCidr": validCidr,
+          "atat:VpcFlowLogBucket": "arn:aws:us-east-1:s3::123456789012:flow-logs-123456789012-us-east-1",
         },
       });
     }).not.toThrow(cidrError);
@@ -72,6 +77,7 @@ describe("CIDR tests", () => {
     context = {
       "atat:EnvironmentId": "myEnvironment",
       "atat:Sandbox": false,
+      "atat:VpcFlowLogBucket": "arn:aws:us-east-1:s3::123456789012:flow-logs-123456789012-us-east-1",
     };
   });
 

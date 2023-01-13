@@ -7,11 +7,13 @@ describe("ATAT network creation", () => {
     // GIVEN
     const app = new cdk.App();
     // WHEN
-    const stack = new AtatNet.AtatNetStack(app, "TestNetStack", {});
+    const stack = new AtatNet.AtatNetStack(app, "TestNetStack", {
+      vpcFlowLogBucket: "arn:aws:us-east-1:s3::123456789012:flow-logs-123456789012-us-east-1",
+    });
     const template = Template.fromStack(stack);
     // THEN
     template.hasResourceProperties("AWS::EC2::FlowLog", {
-      LogDestinationType: "cloud-watch-logs",
+      LogDestinationType: "s3",
       ResourceType: "VPC",
       TrafficType: "ALL",
       ResourceId: stack.resolve(stack.vpc.vpcId),
@@ -22,7 +24,9 @@ describe("ATAT network creation", () => {
     // GIVEN
     const app = new cdk.App();
     // WHEN
-    const stack = new AtatNet.AtatNetStack(app, "TestNetStack", {});
+    const stack = new AtatNet.AtatNetStack(app, "TestNetStack", {
+      vpcFlowLogBucket: "arn:aws:us-east-1:s3::123456789012:flow-logs-123456789012-us-east-1",
+    });
     const template = Template.fromStack(stack);
     // THEN
     template.hasResourceProperties("AWS::Route53Resolver::ResolverQueryLoggingConfig", {

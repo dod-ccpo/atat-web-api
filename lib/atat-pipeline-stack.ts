@@ -15,6 +15,7 @@ export interface AtatProps {
   vpcCidr?: string;
   notificationEmail?: string;
   apiDomain?: ApiCertificateOptions;
+  vpcFlowLogBucket: string;
 }
 
 export interface AtatPipelineStackProps extends cdk.StackProps, AtatProps {
@@ -26,7 +27,10 @@ export interface AtatPipelineStackProps extends cdk.StackProps, AtatProps {
 class AtatApplication extends cdk.Stage {
   constructor(scope: Construct, id: string, props: cdk.StageProps & AtatProps) {
     super(scope, id, props);
-    const net = new AtatNetStack(this, "AtatNetworking", { vpcCidr: props.vpcCidr });
+    const net = new AtatNetStack(this, "AtatNetworking", {
+      vpcCidr: props.vpcCidr,
+      vpcFlowLogBucket: props.vpcFlowLogBucket,
+    });
     const atat = new AtatWebApiStack(this, "AtatHothApi", {
       environmentName: props.environmentName,
       apiDomain: props.apiDomain,
@@ -65,6 +69,7 @@ export class AtatPipelineStack extends cdk.Stack {
     const synthParams = [
       AtatContextValue.ENVIRONMENT_ID.toCliArgument(props.environmentName),
       AtatContextValue.VPC_CIDR.toCliArgument(props.vpcCidr),
+      AtatContextValue.VPC_FLOW_LOG_BUCKET.toCliArgument(props.vpcFlowLogBucket),
     ];
     if (props.apiDomain) {
       synthParams.push(
@@ -90,6 +95,7 @@ export class AtatPipelineStack extends cdk.Stack {
         environmentName: props.environmentName,
         notificationEmail: props.notificationEmail,
         apiDomain: props.apiDomain,
+        vpcFlowLogBucket: props.vpcFlowLogBucket,
         env: {
           region: this.region,
           account: this.account,
