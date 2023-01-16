@@ -1338,6 +1338,7 @@ components:
           enum:
             - NO_LATER_THAN
             - NO_SOONER_THAN
+            - null
         recurringRequirement:
           type: boolean
     ContractConsiderations:

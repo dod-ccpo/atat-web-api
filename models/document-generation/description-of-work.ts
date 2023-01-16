@@ -8,7 +8,7 @@ export interface DescriptionOfWork {
   surgeRequirementCapabilities: boolean;
   currentEnvironment?: ICurrentEnvironment;
   selectedClassificationLevels: ISelectedClassificationLevel[];
-  architecturalDesignRequirements: ArchitecturalDesignRequirement;
+  architecturalDesignRequirements?: ArchitecturalDesignRequirement;
   xaasOfferings?: IXaaSOfferings;
   crossDomainSolutions?: ICrossDomainSolutions;
   cloudSupportPackages?: ICloudSupportEnvironmentInstance[];
@@ -711,7 +711,7 @@ const currentEnvironment = {
     hasPhasedApproach: { type: "boolean" },
     phasedApproachSchedule: { type: "string" },
     needsArchitecturalDesignServices: { type: "boolean" },
-    architecturalDesignRequirement: { type: "array", items: architecturalDesignRequirement },
+    architecturalDesignRequirement: architecturalDesignRequirement,
   },
 };
 
