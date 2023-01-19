@@ -7,6 +7,7 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as nodejs from "aws-cdk-lib/aws-lambda-nodejs";
 import * as s3 from "aws-cdk-lib/aws-s3";
+import * as logs from "aws-cdk-lib/aws-logs";
 import { Construct } from "constructs";
 import { UserPermissionBoundary } from "./aspects/user-only-permission-boundary";
 import { AtatNetStack } from "./atat-net-stack";
@@ -192,6 +193,11 @@ export class AtatWebApiStack extends cdk.Stack {
         ],
         true
       );
+    });
+
+    // Cloudwatch Logs for C5ISR
+    const logGroup = new logs.LogGroup(this, "Log Group", {
+      logGroupName: "hacc-cssp-cwl-logs",
     });
 
     // Ensure that no IAM users in this Stack can ever do anything
