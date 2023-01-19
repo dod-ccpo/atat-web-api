@@ -6,6 +6,7 @@ import {
   EnvironmentType,
   Classification,
   ImpactLevel,
+  IContractType,
 } from "../../models/document-generation/description-of-work";
 
 import { logger } from "../../utils/logging";

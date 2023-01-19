@@ -6,7 +6,6 @@ import { formatPeriodOfPerformance, capitalize, formatEnum } from "./utils/utils
 
 import {
   calcAvgDataEgress,
-  dataRequirementsList,
   filterDataLevels,
   formatGrowthEstimates,
   formatRegionUsers,
@@ -23,6 +22,8 @@ import {
   formatStorageType,
   formatExpirationDate,
   formatImpactLevel,
+  xaasServiceExists,
+  getCDRLs,
 } from "./utils/dow";
 
 export async function generateDowDocument(
@@ -34,16 +35,25 @@ export async function generateDowDocument(
 
   // All XaaS services
   const xaasServices = organizeXaasServices(payload.xaasOfferings);
+  const cdsRequired = payload.crossDomainSolutions.crossDomainSolutionRequired;
+  const hasXaasServices = xaasServiceExists(xaasServices, cdsRequired);
   const sortedCloudSupportPackages = sortSupportPackagesByLevels(
     sortSupportPackagesByGroups(payload.cloudSupportPackages)
   );
 
+  // Getting package task numbers
+  const popTasks = getTaskPeriods(payload);
+  const entirePeriodTasks = popTasks.entireDurationTasks.map((taskNumber: any) => taskNumber);
+  const selectedPeriodTask = popTasks.taskNumberGroups.flatMap((group: any) => group.dowTaskNumbers);
+  const allPopTasks = entirePeriodTasks.concat(selectedPeriodTask);
+
+  // CDRL
+  const cdrls = getCDRLs(allPopTasks, payload.contractType);
+
   // Helps with Section 7 to generate PoP table
   const { basePeriod, optionPeriods } = payload.periodOfPerformance;
   const popPeriods = formatPeriodOfPerformance(basePeriod, optionPeriods);
-  const popTasks = getTaskPeriods(payload);
   const simplifiedPop = popTasks.popPeriods;
-  const entirePeriodTasks = popTasks.entireDurationTasks.map((taskNumber: any) => taskNumber);
   const selectedPeriodRows = popTasks.taskNumberGroups.map((group: ITaskGrouping) => {
     return [
       group.dowTaskNumbers.join(","),
@@ -69,9 +79,11 @@ export async function generateDowDocument(
       template,
       data: {
         ...payload,
+        hasXaasServices,
         xaasServices,
         sortedSelectedClassificationLevels,
         sortedCloudSupportPackages,
+        cdrls,
         pop: popTasks,
         popTableHeaders,
         popTableBody,
