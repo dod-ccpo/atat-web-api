@@ -1,6 +1,5 @@
 import { logger } from "../utils/logging";
 import createReport from "docx-templates";
-import { DescriptionOfWork } from "../models/document-generation";
 import { ApiBase64SuccessResponse, SuccessStatusCode } from "../utils/response";
 import { formatPeriodOfPerformance, capitalize, formatEnum } from "./utils/utils";
 
@@ -25,10 +24,11 @@ import {
   xaasServiceExists,
   getCDRLs,
 } from "./utils/dow";
+import { IDescriptionOfWork } from "../models/document-generation/description-of-work";
 
 export async function generateDowDocument(
   template: Buffer,
-  payload: DescriptionOfWork
+  payload: IDescriptionOfWork
 ): Promise<ApiBase64SuccessResponse> {
   // Collection of instances at beginning of impact level for XaaS (e.g., 4.2.1)
   const sortedSelectedClassificationLevels = sortSelectedClassificationLevels(payload.selectedClassificationLevels);
@@ -106,7 +106,6 @@ export async function generateDowDocument(
         getInstancesCount,
         selectedServiceExists,
         instancesExists,
-        dataRequirementsList,
       },
       cmdDelimiter: ["{", "}"],
     })

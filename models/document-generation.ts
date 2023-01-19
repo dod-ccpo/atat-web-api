@@ -1,5 +1,6 @@
 /* eslint-disable camelcase */
 import { APIGatewayEventRequestContext } from "aws-lambda";
+import { IDescriptionOfWork } from "./document-generation/description-of-work";
 import { requirementsCheckList, RequirementsChecklist } from "./document-generation/requirements-checklist";
 
 export enum AwardType {
@@ -328,7 +329,7 @@ export interface EvaluationPlan {
 export interface GenerateDocumentRequest {
   documentType: DocumentType;
   templatePayload:
-    | DescriptionOfWork
+    | IDescriptionOfWork
     | IndependentGovernmentCostEstimate
     | IncrementalFundingPlan
     | EvaluationPlan

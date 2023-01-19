@@ -926,77 +926,85 @@ export const getSecurityRequirements = (payload: any): any => {
 export const getCDRLs = (popTasks: string[], contractType: IContractType) => {
   const { firmFixedPrice, timeAndMaterials } = contractType;
   const cdrl = [];
+  const ffp = new Set();
+  const tm = new Set();
+  const portabilityPlanClins = new Set();
+  const trainingClins = new Set();
+  const edgeClins = new Set();
+  const portabilityTaskNumbers = new Set();
+  const trainingTaskNumbers = new Set();
+  const edgeTaskNumbers = new Set();
+
   // remove instance number from end
   const allTasks = popTasks.map((taskNumber: string) => taskNumber.slice(0, 7));
-  const ffp = firmFixedPrice ? "x001, x003, x005" : "";
-  const tm = timeAndMaterials ? "x017, x019, x021" : "";
-
-  // TODO: ask if order of the table matters?
-  const progressReport = {
-    taskNumbers: ["ANY"],
-    // TODO: ask if all the numbers or only the ones based on th classifcation level
-    clins: [...ffp.split(","), ...tm.split(",")],
-    code: "A012",
-    name: "TO Monthly Progress Report",
-  };
-
-  cdrl.push(progressReport);
-
-  const portabilityPlanClins: string[] = [];
-  const trainingClins: string[] = [];
-  const edgeClins: string[] = [];
-
-  const portabilityTaskNumbers: string[] = [];
-  const trainingTaskNumbers: string[] = [];
-  const edgeTaskNumbers: string[] = [];
 
   allTasks.forEach((taskNumber: string) => {
     if (firmFixedPrice) {
+      const impactIdentifier = taskNumber.substring(4, 5);
+
+      // FFP - Monthly Report
+      switch (impactIdentifier) {
+        case "1":
+        case "2":
+        case "3":
+          ffp.add("x001");
+          break;
+        case "4":
+          ffp.add("x003");
+          break;
+        case "5":
+          ffp.add("x005");
+          break;
+        default:
+          break;
+      }
+
+      // FFP - Portability plan, TE, Training
       switch (taskNumber) {
         // Portability Plan
         case "4.3.1":
         case "4.3.2":
         case "4.3.3":
-          portabilityTaskNumbers.push(taskNumber);
-          portabilityPlanClins.push("x001");
+          portabilityTaskNumbers.add(taskNumber);
+          portabilityPlanClins.add("x001");
           break;
         case "4.3.4":
-          portabilityTaskNumbers.push(taskNumber);
-          portabilityPlanClins.push("x003");
+          portabilityTaskNumbers.add(taskNumber);
+          portabilityPlanClins.add("x003");
           break;
         case "4.3.5":
-          portabilityTaskNumbers.push(taskNumber);
-          portabilityPlanClins.push("x005");
+          portabilityTaskNumbers.add(taskNumber);
+          portabilityPlanClins.add("x005");
           break;
         // Training
         case "4.3.1.3":
         case "4.3.2.3":
         case "4.3.3.3":
-          trainingTaskNumbers.push(taskNumber);
-          trainingClins.push("x002");
+          trainingTaskNumbers.add(taskNumber);
+          trainingClins.add("x002");
           break;
         case "4.3.4.3":
-          trainingTaskNumbers.push(taskNumber);
-          trainingClins.push("x004");
+          trainingTaskNumbers.add(taskNumber);
+          trainingClins.add("x004");
           break;
         case "4.3.5.3":
-          trainingTaskNumbers.push(taskNumber);
-          trainingClins.push("x006");
+          trainingTaskNumbers.add(taskNumber);
+          trainingClins.add("x006");
           break;
         // TE
         case "4.2.1.9":
         case "4.2.2.9":
         case "4.2.3.9":
-          edgeTaskNumbers.push(taskNumber);
-          edgeClins.push("x001");
+          edgeTaskNumbers.add(taskNumber);
+          edgeClins.add("x001");
           break;
         case "4.2.4.9":
-          edgeTaskNumbers.push(taskNumber);
-          edgeClins.push("x003");
+          edgeTaskNumbers.add(taskNumber);
+          edgeClins.add("x003");
           break;
         case "4.2.5.9":
-          edgeTaskNumbers.push(taskNumber);
-          edgeClins.push("x005");
+          edgeTaskNumbers.add(taskNumber);
+          edgeClins.add("x005");
           break;
         default:
           break;
@@ -1004,51 +1012,71 @@ export const getCDRLs = (popTasks: string[], contractType: IContractType) => {
     }
 
     if (timeAndMaterials) {
+      const impactIdentifier = taskNumber.substring(4, 5);
+
+      // T&M - Monthly Report
+      switch (impactIdentifier) {
+        case "1":
+        case "2":
+        case "3":
+          tm.add("x017");
+          break;
+        case "4":
+          tm.add("x019");
+          break;
+        case "5":
+          tm.add("x021");
+          break;
+        default:
+          break;
+      }
+
+      // T&M - Portability plan, TE, Training
       switch (taskNumber) {
         // Portability Plan
         case "4.3.1":
         case "4.3.2":
         case "4.3.3":
-          portabilityTaskNumbers.push(taskNumber);
-          portabilityPlanClins.push("x017");
+          portabilityTaskNumbers.add(taskNumber);
+          portabilityPlanClins.add("x017");
           break;
         case "4.3.4":
-          portabilityTaskNumbers.push(taskNumber);
-          portabilityPlanClins.push("x019");
+          portabilityTaskNumbers.add(taskNumber);
+          portabilityPlanClins.add("x019");
           break;
         case "4.3.5":
-          portabilityTaskNumbers.push(taskNumber);
-          portabilityPlanClins.push("x021");
+          portabilityTaskNumbers.add(taskNumber);
+          portabilityPlanClins.add("x021");
           break;
         // Training
         case "4.3.1.3":
         case "4.3.2.3":
         case "4.3.3.3":
-          trainingTaskNumbers.push(taskNumber);
-          trainingClins.push("x018");
+          trainingTaskNumbers.add(taskNumber);
+          trainingClins.add("x018");
           break;
         case "4.3.4.3":
-          trainingTaskNumbers.push(taskNumber);
-          trainingClins.push("x020");
+          trainingTaskNumbers.add(taskNumber);
+          trainingClins.add("x020");
           break;
         case "4.3.5.3":
-          trainingTaskNumbers.push(taskNumber);
-          trainingClins.push("x022");
+          trainingTaskNumbers.add(taskNumber);
+          trainingClins.add("x022");
           break;
         // TE
         case "4.2.1.9":
         case "4.2.2.9":
         case "4.2.3.9":
-          edgeTaskNumbers.push(taskNumber);
-          edgeClins.push("x017");
+          edgeTaskNumbers.add(taskNumber);
+          edgeClins.add("x017");
           break;
         case "4.2.4.9":
-          edgeTaskNumbers.push(taskNumber);
-          edgeClins.push("x019");
+          edgeTaskNumbers.add(taskNumber);
+          edgeClins.add("x019");
           break;
         case "4.2.5.9":
-          edgeTaskNumbers.push(taskNumber);
-          edgeClins.push("x021");
+          edgeTaskNumbers.add(taskNumber);
+          edgeClins.add("x021");
           break;
         default:
           break;
@@ -1058,18 +1086,30 @@ export const getCDRLs = (popTasks: string[], contractType: IContractType) => {
 
   // Training
   const training = {
-    taskNumbers: trainingTaskNumbers,
-    clins: trainingClins,
+    taskNumbers: Array.from(trainingTaskNumbers),
+    clins: Array.from(trainingClins),
   };
 
   if (training.taskNumbers.length >= 1) {
     cdrl.push({ ...training, code: "*A004", name: "System Administrator Training Materials" });
     cdrl.push({ ...training, code: "*A005", name: "Role-Based User Training Material" });
   }
+
+  // Monthly Report
+  const ffpClins = Array.from(ffp);
+  const tmClins = Array.from(tm);
+  const progressReport = {
+    taskNumbers: ["ANY"],
+    clins: [...ffpClins, ...tmClins],
+    code: "A012",
+    name: "TO Monthly Progress Report",
+  };
+  cdrl.push(progressReport);
+
   // Portability Plan
   const portabilityPlan = {
-    taskNumbers: portabilityTaskNumbers,
-    clins: portabilityPlanClins,
+    taskNumbers: Array.from(portabilityTaskNumbers),
+    clins: Array.from(portabilityPlanClins),
     code: `**A006`,
     name: "Portability Plan",
   };
@@ -1079,9 +1119,9 @@ export const getCDRLs = (popTasks: string[], contractType: IContractType) => {
 
   // Technical Edge
   const edge = {
-    taskNumbers: edgeTaskNumbers,
-    clins: edgeClins,
-    code: `**A017`,
+    taskNumbers: Array.from(edgeTaskNumbers),
+    clins: Array.from(edgeClins),
+    code: `***A017`,
     name: "TE Device Specifications",
   };
   if (edge.taskNumbers.length >= 1) {
