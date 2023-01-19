@@ -204,7 +204,7 @@ export class AtatWebApiStack extends cdk.Stack {
     NagSuppressions.addResourceSuppressions(logGroup, [
       {
         id: "NIST.800.53.R4-CloudWatchLogGroupRetentionPeriod",
-        reason: "Setting retention to infinte thus no minimum retention is needed. ",
+        reason: "Setting retention to infinte so no minimum retention is needed. ",
       },
     ]);
 
