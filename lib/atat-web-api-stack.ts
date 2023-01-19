@@ -197,7 +197,7 @@ export class AtatWebApiStack extends cdk.Stack {
     });
 
     // Cloudwatch Logs for C5ISR
-    const logGroup = new logs.LogGroup(this, "Log Group", {
+    const logGroup = new logs.LogGroup(this, "LogGroup", {
       logGroupName: "hacc-cssp-cwl-logs",
       retention: RetentionDays.INFINITE,
     });
