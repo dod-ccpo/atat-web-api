@@ -201,6 +201,12 @@ export class AtatWebApiStack extends cdk.Stack {
       logGroupName: "hacc-cssp-cwl-logs",
       retention: RetentionDays.INFINITE,
     });
+    NagSuppressions.addResourceSuppressions(logGroup, [
+      {
+        id: "NIST.800.53.R4-CloudWatchLogGroupRetentionPeriod",
+        reason: "Setting retention to infinte thus no minimum retention is needed. ",
+      },
+    ]);
 
     // Ensure that no IAM users in this Stack can ever do anything
     // except for invoke the created API Gateway.
