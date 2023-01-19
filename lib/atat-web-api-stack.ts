@@ -21,6 +21,7 @@ import { VpcEndpointApplicationTargetGroup } from "./constructs/vpc-endpoint-lb-
 import { HttpMethod } from "./http";
 import { NagSuppressions } from "cdk-nag";
 import * as cr from "aws-cdk-lib/custom-resources";
+import { RetentionDays } from "aws-cdk-lib/aws-logs";
 
 export interface ApiCertificateOptions {
   domainName: string;
@@ -198,6 +199,7 @@ export class AtatWebApiStack extends cdk.Stack {
     // Cloudwatch Logs for C5ISR
     const logGroup = new logs.LogGroup(this, "Log Group", {
       logGroupName: "hacc-cssp-cwl-logs",
+      retention: RetentionDays.INFINITE,
     });
 
     // Ensure that no IAM users in this Stack can ever do anything
