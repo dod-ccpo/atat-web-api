@@ -300,7 +300,7 @@ export const getTaskPeriods = (payload: any) => {
       .sort((a: IPeriod, b: IPeriod) => a.optionOrder - b.optionOrder)
       // The base period is 1 so the optionOrder property is not used
       // the base period should have been 0 or -1 to be an exception to the rule
-      .forEach((period: IPeriod, index: number) => popPeriods.push(`OP${index + 1}`));
+      .forEach((period: IPeriod) => popPeriods.push(`OP${period.optionOrder - 1}`));
   }
 
   const { computeInstances, databaseInstances, storageInstances, generalInstances, selectedInstances } = xaasOfferings;
@@ -361,7 +361,7 @@ export const getTaskPeriods = (payload: any) => {
       const optionPeriods = selectedPeriods
         .sort((a: IPeriod, b: IPeriod) => a.optionOrder - b.optionOrder)
         .filter((period: IPeriod) => period.periodType === PeriodType.OPTION)
-        .map((period: IPeriod, index: number) => `OP${index + 1}`);
+        .map((period: IPeriod) => `OP${period.optionOrder - 1}`);
       cdsTaskPeriods.push(...optionPeriods);
     }
 
@@ -447,7 +447,7 @@ export const getInstancePop = (instance: any, instanceType: ServiceOfferingGroup
   if (selectedPeriods && selectedPeriods.length >= 1) {
     taskPeriods = selectedPeriods
       .sort((a: IPeriod, b: IPeriod) => a.optionOrder - b.optionOrder)
-      .map((period: IPeriod, index: number) => (period.periodType === PeriodType.BASE ? "B" : `OP${index + 1}`));
+      .map((period: IPeriod) => (period.periodType === PeriodType.BASE ? "B" : `OP${period.optionOrder - 1}`));
   }
 
   return {
