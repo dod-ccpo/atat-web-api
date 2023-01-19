@@ -105,7 +105,20 @@ export class AtatWebApiStack extends cdk.Stack {
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       versioned: true,
     });
-
+    NagSuppressions.addResourceSuppressions(accessLogsBucket, [
+      {
+        id: "NIST.800.53.R4-S3BucketLoggingEnabled",
+        reason: "The ideal bucket for this to log to is itself. That creates complexity with receiving other logs",
+      },
+      {
+        id: "NIST.800.53.R4-S3BucketReplicationEnabled",
+        reason: "Cross region replication is not required for this use case",
+      },
+      {
+        id: "NIST.800.53.R4-S3BucketDefaultLockEnabled",
+        reason: "Server Access Logs cannot be delivered to a bucket with Object Lock enabled",
+      },
+    ]);
     const cfnBucket = OLaccessLogsBucket.node.defaultChild as s3.CfnBucket;
     cfnBucket.objectLockConfiguration = {
       objectLockEnabled: "objectLockEnabled",
@@ -117,8 +130,7 @@ export class AtatWebApiStack extends cdk.Stack {
         },
       },
     };
-
-    NagSuppressions.addResourceSuppressions(accessLogsBucket, [
+    NagSuppressions.addResourceSuppressions(OLaccessLogsBucket, [
       {
         id: "NIST.800.53.R4-S3BucketLoggingEnabled",
         reason: "The ideal bucket for this to log to is itself. That creates complexity with receiving other logs",
