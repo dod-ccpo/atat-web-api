@@ -88,7 +88,7 @@ export class AtatWebApiStack extends cdk.Stack {
       };
     }
 
-    const accessLogsBucket = new s3.Bucket(this, "OL-ResourceAccessLogs", {
+    const accessLogsBucket = new s3.Bucket(this, "ResourceAccessLogs", {
       // Elastic Load Balancing Log Delivery requires SSE-S3 and _does not_ support
       // SSE-KMS. This still ensures that log data is encrypted at rest.
       encryption: s3.BucketEncryption.S3_MANAGED,
@@ -97,7 +97,16 @@ export class AtatWebApiStack extends cdk.Stack {
       versioned: true,
     });
 
-    const cfnBucket = accessLogsBucket.node.defaultChild as s3.CfnBucket;
+    const OLaccessLogsBucket = new s3.Bucket(this, "OLResourceAccessLogs", {
+      // Elastic Load Balancing Log Delivery requires SSE-S3 and _does not_ support
+      // SSE-KMS. This still ensures that log data is encrypted at rest.
+      encryption: s3.BucketEncryption.S3_MANAGED,
+      enforceSSL: true,
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      versioned: true,
+    });
+
+    const cfnBucket = OLaccessLogsBucket.node.defaultChild as s3.CfnBucket;
     cfnBucket.objectLockConfiguration = {
       objectLockEnabled: "objectLockEnabled",
       rule: {
@@ -132,7 +141,7 @@ export class AtatWebApiStack extends cdk.Stack {
         deletionProtection: true,
         dropInvalidHeaderFields: true,
       });
-      loadBalancer.logAccessLogs(accessLogsBucket);
+      loadBalancer.logAccessLogs(OLaccessLogsBucket);
       NagSuppressions.addResourceSuppressions(loadBalancer, [
         { id: "NIST.800.53.R4-ALBWAFEnabled", reason: "Palo Alto NGFW is in use" },
       ]);
