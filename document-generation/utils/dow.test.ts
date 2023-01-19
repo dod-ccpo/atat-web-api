@@ -1,5 +1,6 @@
 import { ServiceOfferingGroup } from "../../models/document-generation/description-of-work";
 import {
+  getCDRLs,
   getInstancePop,
   getTaskPeriods,
   organizeXaasServices,
@@ -92,4 +93,44 @@ describe("Gather Tasks for PoP", () => {
       taskPeriods: ["OP1", "OP2"],
     });
   });
+});
+
+describe("getCDRLs", () => {
+  it("All rows present", async () => {
+    const payload = sampleDowRequest.templatePayload;
+    const popTasks = getTaskPeriods(payload);
+    const entirePeriodTasks = popTasks.entireDurationTasks.map((taskNumber: any) => taskNumber);
+    const selectedPeriodTask = popTasks.taskNumberGroups.flatMap((group: any) => group.dowTaskNumbers);
+    const allPopTasks = entirePeriodTasks.concat(selectedPeriodTask);
+    const expectedCdrls = [
+      { cdrl: "A012", ffp: "x001, x003, x005", name: "TO Monthly Progress Report", taskNumbers: ["ANY"], tm: "" },
+      { cdrl: "*A004", clins: ["x004"], name: "System Administrator Training Materials", taskNumbers: ["4.3.4.3"] },
+      { cdrl: "*A005", clins: ["x004"], name: "Role-Based User Training Material", taskNumbers: ["4.3.4.3"] },
+      { cdrl: "**A006", clins: ["x001"], name: "Portability Plan", taskNumbers: ["4.3.3"] },
+      { cdrl: "**A017", clins: ["x001"], name: "TE Device Specifications", taskNumbers: ["4.2.1.9"] },
+    ];
+
+    const cdrls = getCDRLs(allPopTasks, payload.contractType);
+    expect(cdrls).toEqual(expectedCdrls);
+    expect(cdrls).toHaveLength(expectedCdrls.length);
+  });
+  it("TE and monthly report rows", async () => {
+    const payload = sampleDowRequest.templatePayload;
+    const popTasks = getTaskPeriods(payload);
+    const entirePeriodTasks = popTasks.entireDurationTasks.map((taskNumber: any) => taskNumber);
+    const selectedPeriodTask = popTasks.taskNumberGroups.flatMap((group: any) => group.dowTaskNumbers);
+    const expectedTaskNumbers = ["4.2.1.9"]
+    const allPopTasks = entirePeriodTasks
+      .concat(selectedPeriodTask)
+      .map((taskNumber: string) => taskNumber.slice(0,7))
+      .filter((taskNumber: any) => expectedTaskNumbers.includes(taskNumber) );
+    const expectedCdrls = [
+      { cdrl: "A012", ffp: "x001, x003, x005", name: "TO Monthly Progress Report", taskNumbers: ["ANY"], tm: "" }, 
+      { cdrl: "**A017", clins: ["x001"], name: "TE Device Specifications", taskNumbers: ["4.2.1.9"] },
+    ];
+
+    const cdrls = getCDRLs(allPopTasks, payload.contractType);
+    expect(cdrls).toEqual(expectedCdrls);
+    expect(cdrls).toHaveLength(expectedCdrls.length);
+  })
 });
