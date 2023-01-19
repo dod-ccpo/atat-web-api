@@ -96,41 +96,7 @@ export class AtatWebApiStack extends cdk.Stack {
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       versioned: true,
     });
-
-    const OLaccessLogsBucket = new s3.Bucket(this, "OLResourceAccessLogs", {
-      // Elastic Load Balancing Log Delivery requires SSE-S3 and _does not_ support
-      // SSE-KMS. This still ensures that log data is encrypted at rest.
-      encryption: s3.BucketEncryption.S3_MANAGED,
-      enforceSSL: true,
-      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
-      versioned: true,
-    });
     NagSuppressions.addResourceSuppressions(accessLogsBucket, [
-      {
-        id: "NIST.800.53.R4-S3BucketLoggingEnabled",
-        reason: "The ideal bucket for this to log to is itself. That creates complexity with receiving other logs",
-      },
-      {
-        id: "NIST.800.53.R4-S3BucketReplicationEnabled",
-        reason: "Cross region replication is not required for this use case",
-      },
-      {
-        id: "NIST.800.53.R4-S3BucketDefaultLockEnabled",
-        reason: "Server Access Logs cannot be delivered to a bucket with Object Lock enabled",
-      },
-    ]);
-    const cfnBucket = OLaccessLogsBucket.node.defaultChild as s3.CfnBucket;
-    cfnBucket.objectLockConfiguration = {
-      objectLockEnabled: "objectLockEnabled",
-      rule: {
-        defaultRetention: {
-          days: 8,
-          mode: "mode",
-          years: 1,
-        },
-      },
-    };
-    NagSuppressions.addResourceSuppressions(OLaccessLogsBucket, [
       {
         id: "NIST.800.53.R4-S3BucketLoggingEnabled",
         reason: "The ideal bucket for this to log to is itself. That creates complexity with receiving other logs",
@@ -153,7 +119,7 @@ export class AtatWebApiStack extends cdk.Stack {
         deletionProtection: true,
         dropInvalidHeaderFields: true,
       });
-      loadBalancer.logAccessLogs(OLaccessLogsBucket);
+      loadBalancer.logAccessLogs(accessLogsBucket);
       NagSuppressions.addResourceSuppressions(loadBalancer, [
         { id: "NIST.800.53.R4-ALBWAFEnabled", reason: "Palo Alto NGFW is in use" },
       ]);
