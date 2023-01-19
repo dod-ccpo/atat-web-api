@@ -936,23 +936,23 @@ export const getCDRLs = (popTasks: string[], contractType: IContractType) => {
   const edgeTaskNumbers = new Set();
 
   // remove instance number from end
-  const allTasks = popTasks.map((taskNumber: string) => taskNumber.slice(0, 7));
+  const allTasks = popTasks.map((taskNumber: string) => taskNumber.substring(0, 7));
 
   allTasks.forEach((taskNumber: string) => {
     if (firmFixedPrice) {
-      const impactIdentifier = taskNumber.substring(4, 5);
+      const impactIdentifier = taskNumber.substring(0, 5);
 
       // FFP - Monthly Report
       switch (impactIdentifier) {
-        case "1":
-        case "2":
-        case "3":
+        case "4.2.1":
+        case "4.2.2":
+        case "4.2.3":
           ffp.add("x001");
           break;
-        case "4":
+        case "4.2.4":
           ffp.add("x003");
           break;
-        case "5":
+        case "4.2.5":
           ffp.add("x005");
           break;
         default:
@@ -1012,19 +1012,19 @@ export const getCDRLs = (popTasks: string[], contractType: IContractType) => {
     }
 
     if (timeAndMaterials) {
-      const impactIdentifier = taskNumber.substring(4, 5);
+      const impactIdentifier = taskNumber.substring(0, 5);
 
       // T&M - Monthly Report
       switch (impactIdentifier) {
-        case "1":
-        case "2":
-        case "3":
+        case "4.2.1":
+        case "4.2.2":
+        case "4.2.3":
           tm.add("x017");
           break;
-        case "4":
+        case "4.2.4":
           tm.add("x019");
           break;
-        case "5":
+        case "4.2.5":
           tm.add("x021");
           break;
         default:
@@ -1104,7 +1104,9 @@ export const getCDRLs = (popTasks: string[], contractType: IContractType) => {
     code: "A012",
     name: "TO Monthly Progress Report",
   };
-  cdrl.push(progressReport);
+  if (progressReport.clins.length >= 1) {
+    cdrl.push(progressReport);
+  }
 
   // Portability Plan
   const portabilityPlan = {
