@@ -14,14 +14,14 @@ export interface StateMachineProps extends sfn.StateMachineProps {
 /**
  * Creates a State Machine in AWS Step Functions service
  * - uses a Standard State Machine Type (default)
- * - 180 seconds timeout (default)
+ * - 10 minutes timeout (default)
  */
 export class LoggingStandardStateMachine extends sfn.StateMachine {
   constructor(scope: Construct, id: string, props: StateMachineProps) {
     const { logGroup, ...otherProps } = props;
     super(scope, id, {
       // defaults that can be overridden
-      timeout: Duration.seconds(10),
+      timeout: Duration.minutes(10),
       stateMachineType: sfn.StateMachineType.STANDARD,
       // configuration passed in
       ...otherProps,
