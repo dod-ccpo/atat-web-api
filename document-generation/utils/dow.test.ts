@@ -1,13 +1,30 @@
 import { ServiceOfferingGroup } from "../../models/document-generation/description-of-work";
 import {
+  formatStorageType,
   getCDRLs,
   getInstancePop,
   getTaskPeriods,
+  InstancesWithStorageType,
   organizeXaasServices,
   sortInstanceClassificationLevels,
   sortSelectedServicesByGroups,
 } from "./dow";
 import { sampleDowRequest } from "./sampleTestData";
+
+describe("Formatting Utils", () => {
+  it("formatStorageType - compute env", async () => {
+    const envInstance = sampleDowRequest.templatePayload.xaasOfferings.computeInstances[0];
+    const formattedStorageType = formatStorageType(envInstance as InstancesWithStorageType);
+    const expectedFormat = "Compute Storage: 500 GB";
+    expect(formattedStorageType).toBe(expectedFormat);
+  });
+  it.each([undefined, null, ""])("formatStorageType - %s", async (instance) => {
+    // const envInstance = sampleDowRequest.templatePayload.xaasOfferings.computeInstances[0];
+    const formattedStorageType = formatStorageType(instance as unknown as InstancesWithStorageType);
+    const expectedFormat = "N/A";
+    expect(formattedStorageType).toBe(expectedFormat);
+  });
+});
 
 describe("Sorting XaaS Services", () => {
   it("sortInstanceClassificationLevels", async () => {

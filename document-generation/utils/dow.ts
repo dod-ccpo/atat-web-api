@@ -1,3 +1,4 @@
+import { IEnvironmentInstance } from "../../models/document-generation";
 import {
   IPeriod,
   PeriodType,
@@ -7,6 +8,9 @@ import {
   Classification,
   ImpactLevel,
   IContractType,
+  IComputeEnvironmentInstance,
+  ICurrentEnvironmentInstance,
+  IDatabaseEnvironmentInstance,
 } from "../../models/document-generation/description-of-work";
 
 import { logger } from "../../utils/logging";
@@ -39,7 +43,16 @@ const cloudSupportGroupsOrder = [
 ];
 const classificationLevelsOrder = ["IL2", "IL4", "IL5", "IL6", "TS"];
 
-export const formatStorageType = (env: any) => {
+export type InstancesWithStorageType =
+  | IEnvironmentInstance
+  | IComputeEnvironmentInstance
+  | ICurrentEnvironmentInstance
+  | IDatabaseEnvironmentInstance;
+export const formatStorageType = (env: InstancesWithStorageType) => {
+  if (!env) {
+    // An indicator on the document that a value was not provided
+    return `N/A`;
+  }
   return `${formatEnum(env.performanceTier)} Storage: ${env.storageAmount} ${env.storageUnit}`;
 };
 

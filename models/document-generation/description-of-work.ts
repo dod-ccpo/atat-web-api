@@ -124,33 +124,33 @@ export enum StorageType {
 export interface IEnvironmentInstance {
   anticipatedNeedOrUsage?: string;
   operatingSystemLicensing: Licensing;
-  instanceName: string;
+  instanceName: string | null;
   numberOfInstances?: number;
   needForEntireTaskOrderDuration?: boolean;
-  selectedPeriods?: IPeriod[];
+  selectedPeriods: IPeriod[] | null;
   classificationLevel: IClassificationLevel;
   classifiedInformationTypes: IClassificationLevel[];
-  instanceLocation: InstanceLocation;
-  region: Region;
+  instanceLocation: InstanceLocation | null;
+  region: Region | null;
   performanceTier: PerformanceTier;
-  pricingModel: PricingModel;
+  pricingModel: PricingModel | null;
   /**
    * Format: date
    * @example 2022-07-01
    */
-  pricingModelExpiration: string;
-  licensing: string;
+  pricingModelExpiration: string | null;
+  licensing: string | null;
   operatingSystem: string;
-  numberOfvCPUs: number;
+  numberOfVcpus: number;
   processorSpeed?: number;
   storageType: StorageType;
   storageAmount: number;
   storageUnit: StorageUnit;
   memoryAmount: number;
   memoryUnit: StorageUnit;
-  dataEgressMonthlyAmount: number;
-  dataEgressMonthlyUnit: StorageUnit;
-  usageDescription: string;
+  dataEgressMonthlyAmount: number | null;
+  dataEgressMonthlyUnit: StorageUnit | null;
+  usageDescription: string | null;
 }
 
 export enum UsageDescription {
@@ -291,7 +291,7 @@ export enum ImpactLevel {
 export interface IClassificationLevel {
   classification: Classification;
   impactLevel: ImpactLevel;
-  additionalInformation: string;
+  // additionalInformation: string;
 }
 
 /** @description Describes the classified information in a Classification Instance */
@@ -632,7 +632,7 @@ const environmentInstance = {
     pricingModelExpiration: { type: "string" },
     licensing: { type: "string" },
     operatingSystem: { type: "string" },
-    numberOfvCPUs: { type: "integer" },
+    numberOfVcpus: { type: "integer" },
     processorSpeed: { type: "float" },
     storageType: { enum: [StorageType.ARCHIVE, StorageType.BLOCK, StorageType.FILE, StorageType.OBJECT] },
     storageAmount: { type: "integer" },
@@ -659,7 +659,7 @@ const currentEnvironmentInstance = {
     isTrafficSpikePeriodBased: { type: "boolean" },
     trafficSpikePeriodDescription: { type: "string" },
     deployedRegions,
-    numberOfvCPUs: { type: "integer" },
+    numberOfVcpus: { type: "integer" },
     processorSpeed: { type: "float" },
     operatingSystem: { type: "string" },
     licensing: { type: "string" },

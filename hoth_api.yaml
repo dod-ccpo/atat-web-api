@@ -955,7 +955,7 @@ components:
           type: string
         operatingSystem:
           type: string
-        numberOfvCPUs:
+        numberOfVcpus:
           type: integer
         processorSpeed:
           type: integer
