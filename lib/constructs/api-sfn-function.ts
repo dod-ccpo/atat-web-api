@@ -62,7 +62,7 @@ export class ApiSfnFunction extends Construct {
       entry: props.handlerPath,
       runtime: lambda.Runtime.NODEJS_16_X,
       memorySize: 256,
-      timeout: Duration.seconds(5),
+      timeout: Duration.minutes(5),
       vpc: props.vpc,
       ...props.functionPropsOverride,
       tracing: lambda.Tracing.ACTIVE,

@@ -21,7 +21,7 @@ export function mapTasks(scope: Construct, tasks: Array<TaskProps>): TasksMap {
     (mappedTasks, task) => ({
       ...mappedTasks,
       [task.id]: new sfnTasks.LambdaInvoke(scope, task.id, {
-        timeout: Duration.seconds(20),
+        timeout: Duration.minutes(6),
         ...task.props,
       }),
     }),
