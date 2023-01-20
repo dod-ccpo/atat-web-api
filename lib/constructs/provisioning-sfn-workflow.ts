@@ -89,7 +89,7 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
       vpc: props.vpc,
       tracing: lambda.Tracing.ACTIVE,
     });
-    props.idp?.addClient(new IdentityProviderLambdaClient("CspWriteToPortfolioClient", cspWritePortfolioFn), [
+    props.idp?.addClient(new IdentityProviderLambdaClient("CspWritePortfolioClient", cspWritePortfolioFn), [
       "atat/write-portfolio",
     ]);
     cspConfig.grantRead(cspWritePortfolioFn);
