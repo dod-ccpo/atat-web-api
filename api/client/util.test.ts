@@ -1,4 +1,4 @@
-import { AxiosResponse } from "axios";
+import { AxiosRequestConfig, AxiosResponse } from "axios";
 import {
   camelCaseObject,
   snakeCaseObject,
@@ -85,7 +85,7 @@ describe("axios interceptors", () => {
         data: {
           hello_world: "Hello!",
         },
-      })
+      } as AxiosRequestConfig)
     ).toEqual({ data: { hello_world: "Hello!" } });
   });
   it("should convert responses from snake_case to camelCase", () => {
@@ -106,7 +106,7 @@ describe("axios interceptors", () => {
         "content-type": "application/json",
       },
       data: null,
-      config: {},
+      config: {} as AxiosRequestConfig,
     };
     expect(snakeToCamelResponseInterceptor({ ...responseObject, data: responseContentSnake })).toEqual({
       ...responseObject,
@@ -119,7 +119,7 @@ describe("axios interceptors", () => {
       statusText: "OK",
       headers: {},
       data: "Test Response",
-      config: {},
+      config: {} as AxiosRequestConfig,
     };
     expect(snakeToCamelResponseInterceptor(responseObject)).toEqual(responseObject);
   });
