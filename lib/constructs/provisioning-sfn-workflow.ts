@@ -108,7 +108,7 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
       method: HttpMethod.GET,
       handlerPath: "api/provision/consume-provisioning-job.ts",
       functionPropsOverride: {
-        timeout: cdk.Duration.seconds(20),
+        timeout: cdk.Duration.minutes(1),
         environment: {
           PROVISIONING_QUEUE_URL: this.provisioningJobsQueue.queueUrl,
         },
