@@ -32,7 +32,10 @@ const cloudSupportGroupsOrder = [
   "TRAINING",
   "DOCUMENTATION_SUPPORT",
   "GENERAL_CLOUD_SUPPORT",
-  "PORTABILITY_PLAN",
+  // NOTE: Portabilty plan is provided at the impact level under section 4.3.x
+  // and does not have a forth number in the task number. The numbering is
+  // an exception to the rule for Cloud Support Packages.
+  // "PORTABILITY_PLAN",
 ];
 const classificationLevelsOrder = ["IL2", "IL4", "IL5", "IL6", "TS"];
 
@@ -60,7 +63,7 @@ export const sortSelectedClassificationLevels = (instances: any) => {
 
   instances.forEach((instance: any) => {
     const { classification, impactLevel } = instance.classificationLevel;
-    if (classification === "TS") {
+    if (classification === Classification.TS) {
       sortedInstances.ts = instance;
     } else {
       switch (impactLevel) {
@@ -113,24 +116,24 @@ export const sortInstanceClassificationLevels = (instances: any) => {
 
   instances.forEach((instance: any) => {
     const { classification, impactLevel } = instance.classificationLevel;
-    if (classification === "TS") {
+    if (classification === Classification.TS) {
       sortedInstances.ts.push(instance);
     } else {
       switch (impactLevel) {
-        case "IL2":
+        case ImpactLevel.IL2:
           sortedInstances.il2.push(instance);
           break;
-        case "IL4":
+        case ImpactLevel.IL4:
           sortedInstances.il4.push(instance);
           break;
-        case "IL5":
+        case ImpactLevel.IL5:
           sortedInstances.il5.push(instance);
           break;
-        case "IL6":
+        case ImpactLevel.IL6:
           sortedInstances.il6.push(instance);
           break;
         default:
-          logger.debug("No classification level was provided for instance XX");
+          logger.debug("No classification level was provided for instance.");
       }
     }
   });
@@ -221,20 +224,20 @@ export const sortSupportPackagesByLevels = (supportPackages: any) => {
         services[cloudPackage].ts.push(instance);
       } else {
         switch (impactLevel) {
-          case "IL2":
+          case ImpactLevel.IL2:
             services[cloudPackage].il2.push(instance);
             break;
-          case "IL4":
+          case ImpactLevel.IL4:
             services[cloudPackage].il4.push(instance);
             break;
-          case "IL5":
+          case ImpactLevel.IL5:
             services[cloudPackage].il5.push(instance);
             break;
-          case "IL6":
+          case ImpactLevel.IL6:
             services[cloudPackage].il6.push(instance);
             break;
           default:
-            logger.debug("No classification level was provided for instance XX");
+            logger.debug("No classification level was provided for instance.");
         }
       }
     });
@@ -473,7 +476,7 @@ export const groupSelectedTaskPeriods = (taskPops: ITaskPop[]) => {
       return;
     }
 
-    const matchingPeriodPairIndex = uniquePeriodPairs.findIndex((pair, index) => {
+    const matchingPeriodPairIndex = uniquePeriodPairs.findIndex((pair) => {
       return hasSameSelectedPeriods(pair, taskPeriods);
     });
 
@@ -939,10 +942,10 @@ export const getCDRLs = (popTasks: string[], contractType: IContractType) => {
   const allTasks = popTasks.map((taskNumber: string) => taskNumber.substring(0, 7));
 
   allTasks.forEach((taskNumber: string) => {
-    if (firmFixedPrice) {
-      const impactIdentifier = taskNumber.substring(0, 5);
+    const impactIdentifier = taskNumber.substring(0, 5);
 
-      // FFP - Monthly Report
+    if (firmFixedPrice) {
+      // FFP - Monthly Report (XaaS Services)
       switch (impactIdentifier) {
         case "4.2.1":
         case "4.2.2":
@@ -1012,9 +1015,7 @@ export const getCDRLs = (popTasks: string[], contractType: IContractType) => {
     }
 
     if (timeAndMaterials) {
-      const impactIdentifier = taskNumber.substring(0, 5);
-
-      // T&M - Monthly Report
+      // T&M - Monthly Report (XaaS Services)
       switch (impactIdentifier) {
         case "4.2.1":
         case "4.2.2":

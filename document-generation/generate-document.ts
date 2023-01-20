@@ -27,7 +27,6 @@ import {
   IndependentGovernmentCostEstimate,
   IncrementalFundingPlan,
   EvaluationPlan,
-  DescriptionOfWork,
 } from "../models/document-generation";
 import handlebars from "handlebars";
 import juice from "juice";
