@@ -5,6 +5,7 @@ import middy from "@middy/core";
 import errorLogger from "@middy/error-logger";
 import inputOutputLogger from "@middy/input-output-logger";
 import validator from "@middy/validator";
+import { transpileSchema } from "@middy/validator/transpile";
 import { provisionResponseSchema, ProvisionCspResponse } from "../../models/provisioning-jobs";
 import { sqsClient } from "../../utils/aws-sdk/sqs";
 import { logger } from "../../utils/logging";
@@ -47,5 +48,5 @@ export const handler = middy(baseHandler)
   .use(captureLambdaHandler(tracer))
   .use(inputOutputLogger({ logger: (message) => logger.info("Event/Result", message) }))
   .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
-  .use(validator({ ajvOptions: { verbose: true }, eventSchema: provisionResponseSchema }))
+  .use(validator({ eventSchema: transpileSchema(provisionResponseSchema, { verbose: true }) }))
   .use(errorHandlingMiddleware());

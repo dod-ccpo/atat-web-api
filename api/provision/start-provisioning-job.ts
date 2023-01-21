@@ -5,6 +5,7 @@ import errorLogger from "@middy/error-logger";
 import httpJsonBodyParser from "@middy/http-json-body-parser";
 import inputOutputLogger from "@middy/input-output-logger";
 import validator from "@middy/validator";
+import { transpileSchema } from "@middy/validator/transpile";
 import { APIGatewayProxyResult } from "aws-lambda";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import { RequestEvent } from "../../models/document-generation";
@@ -54,6 +55,6 @@ export const handler = middy(baseHandler)
   .use(httpJsonBodyParser())
   .use(xssSanitizer())
   .use(cspPortfolioIdChecker())
-  .use(validator({ eventSchema: wrapSchema(provisionRequestSchema) }))
+  .use(validator({ eventSchema: transpileSchema(wrapSchema(provisionRequestSchema)) }))
   .use(errorHandlingMiddleware())
   .use(JSONErrorHandlerMiddleware());
