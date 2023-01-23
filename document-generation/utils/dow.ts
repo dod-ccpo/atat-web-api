@@ -56,11 +56,21 @@ export const formatStorageType = (env: InstancesWithStorageType) => {
   return `${formatEnum(env.performanceTier)} Storage: ${env.storageAmount} ${env.storageUnit}`;
 };
 
-export const formatExpirationDate = (exp: any) => {
-  return new Date(exp).toLocaleDateString(`en-US`, { year: `numeric`, month: `numeric`, day: `numeric` });
+export const formatExpirationDate = (exp: string) => {
+  const formattedDate = new Date(exp)
+    .toLocaleDateString("en-US", { timeZone: "UTC", year: "numeric", month: "numeric", day: "numeric" });
+  if (!exp || formattedDate === "Invalid Date") {
+    return `N/A`
+  }
+  return formattedDate;
 };
 
 export const formatImpactLevel = (impactLevel: any) => {
+  const impactLevels = classificationLevelsOrder;
+  if (!impactLevel || !impactLevels.includes(impactLevel)) {
+    logger.debug("No impact level provided.");
+    return `N/A`;
+  }
   const impactNumber = impactLevel.slice(-1);
   return `Impact Level IL${impactNumber} (${impactLevel})`;
 };
@@ -75,11 +85,10 @@ export const sortSelectedClassificationLevels = (instances: any) => {
   const sortedInstances: any = {};
 
   instances.forEach((instance: any) => {
-    const { classification, impactLevel } = instance.classificationLevel;
-    if (classification === Classification.TS) {
+    if (instance.classificationLevel.classification === Classification.TS) {
       sortedInstances.ts = instance;
     } else {
-      switch (impactLevel) {
+      switch (instance.classificationLevel.impactLevel) {
         case "IL2":
           sortedInstances.il2 = instance;
           break;
@@ -93,7 +102,7 @@ export const sortSelectedClassificationLevels = (instances: any) => {
           sortedInstances.il6 = instance;
           break;
         default:
-          logger.debug("No classification level was provided for instance.");
+          logger.debug("No impact level was provided for instance with a Selected Classification Levels.");
       }
     }
   });
@@ -128,11 +137,14 @@ export const sortInstanceClassificationLevels = (instances: any) => {
   const sortedInstances: any = { il2: [], il4: [], il5: [], il6: [], ts: [] };
 
   instances.forEach((instance: any) => {
-    const { classification, impactLevel } = instance.classificationLevel;
-    if (classification === Classification.TS) {
+    if (!instance.classificationLevel) {
+      logger.error(`No Classification Level found for a compute/database/storage/general service.`)
+      return;
+    }
+    if (instance.classificationLevel.classification === Classification.TS) {
       sortedInstances.ts.push(instance);
     } else {
-      switch (impactLevel) {
+      switch (instance.classificationLevel.impactLevel) {
         case ImpactLevel.IL2:
           sortedInstances.il2.push(instance);
           break;
@@ -146,7 +158,7 @@ export const sortInstanceClassificationLevels = (instances: any) => {
           sortedInstances.il6.push(instance);
           break;
         default:
-          logger.debug("No classification level was provided for instance.");
+          logger.debug("No impact Level was provided for a compute/database/storage/general instance.");
       }
     }
   });
@@ -232,11 +244,14 @@ export const sortSupportPackagesByLevels = (supportPackages: any) => {
       services[cloudPackage] = { il2: [], il4: [], il5: [], il6: [], ts: [] };
     }
     supportPackages[cloudPackage].forEach((instance: any) => {
-      const { classification, impactLevel } = instance.classificationLevel;
-      if (classification === Classification.TS) {
+      if (!instance.classificationLevel) {
+        logger.error(`No Classification Level found for service ${cloudPackage}.`)
+        return;
+      }
+      if (instance.classificationLevel.classification === Classification.TS) {
         services[cloudPackage].ts.push(instance);
       } else {
-        switch (impactLevel) {
+        switch (instance.classificationLevel.impactLevel) {
           case ImpactLevel.IL2:
             services[cloudPackage].il2.push(instance);
             break;
@@ -250,7 +265,7 @@ export const sortSupportPackagesByLevels = (supportPackages: any) => {
             services[cloudPackage].il6.push(instance);
             break;
           default:
-            logger.debug("No classification level was provided for instance.");
+            logger.debug("No impact level was provided for a Cloud Support Pkg instance.");
         }
       }
     });
@@ -424,7 +439,6 @@ export const getTaskPeriods = (payload: any) => {
 
 export const getInstancePop = (instance: any, instanceType: ServiceOfferingGroup, instanceIndex: number) => {
   const { classificationLevel, needForEntireTaskOrderDuration, selectedPeriods } = instance;
-  const { classification, impactLevel } = classificationLevel;
   let serviceSectionNumber: number;
   let levelNumber: number;
   let dowTaskNumber: string;
@@ -440,13 +454,13 @@ export const getInstancePop = (instance: any, instanceType: ServiceOfferingGroup
 
   // TS is a special case and only one that does not have an impact level
   const isPortabilityPlan = instanceType === ServiceOfferingGroup.PORTABILITY_PLAN;
-  if (classification === Classification.TS) {
-    levelNumber = classificationLevelsOrder.indexOf(classification) + 1;
+  if (classificationLevel.classification === Classification.TS) {
+    levelNumber = classificationLevelsOrder.indexOf(classificationLevel.classification) + 1;
     dowTaskNumber = isPortabilityPlan
       ? `4.${serviceSectionNumber}.${levelNumber}`
       : `4.${serviceSectionNumber}.${levelNumber}.${serviceNumber}.${instanceIndex + 1}`;
   } else {
-    levelNumber = classificationLevelsOrder.indexOf(impactLevel) + 1;
+    levelNumber = classificationLevelsOrder.indexOf(classificationLevel.impactLevel) + 1;
     dowTaskNumber = isPortabilityPlan
       ? `4.${serviceSectionNumber}.${levelNumber}`
       : `4.${serviceSectionNumber}.${levelNumber}.${serviceNumber}.${instanceIndex + 1}`;
@@ -623,12 +637,14 @@ export const getSelectedInstances = (levelIdentifier: any, service: any, selecte
   selectedInstances[service].forEach((instance: any) => {
     instance.classificationInstances.forEach((classInst: any) => {
       if (
+        classInst.classificationLevel &&
         classInst.classificationLevel.impactLevel === levelIdentifier &&
         instance.serviceOffering.serviceOfferingGroup === service
       ) {
         tools.push({ ...instance.serviceOffering, ...classInst });
       }
       if (
+        classInst.classificationLevel &&
         classInst.classificationLevel.classification === levelIdentifier &&
         instance.serviceOffering.serviceOfferingGroup === service
       ) {
