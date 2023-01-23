@@ -197,16 +197,16 @@ export class AtatWebApiStack extends cdk.Stack {
     });
 
     // Cloudwatch Logs for C5ISR
-    const logGroup = new logs.LogGroup(this, "LogGroup", {
-      logGroupName: `${environmentName.toLowerCase()}-cssp-cwl-logs`,
-      retention: RetentionDays.INFINITE,
-    });
-    NagSuppressions.addResourceSuppressions(logGroup, [
-      {
-        id: "NIST.800.53.R4-CloudWatchLogGroupRetentionPeriod",
-        reason: "Setting retention to infinte so no minimum retention is needed. ",
-      },
-    ]);
+    // const logGroup = new logs.LogGroup(this, "LogGroup", {
+    //   logGroupName: `${environmentName.toLowerCase()}-cssp-cwl-logs`,
+    //   retention: RetentionDays.INFINITE,
+    // });
+    // NagSuppressions.addResourceSuppressions(logGroup, [
+    //   {
+    //     id: "NIST.800.53.R4-CloudWatchLogGroupRetentionPeriod",
+    //     reason: "Setting retention to infinte so no minimum retention is needed. ",
+    //   },
+    // ]);
 
     // Ensure that no IAM users in this Stack can ever do anything
     // except for invoke the created API Gateway.
