@@ -130,6 +130,7 @@ export class CognitoIdentityProviderClient extends Construct {
             UserPoolId: props.userPool.userPoolId,
             ClientId: this.userPoolClient.userPoolClientId,
           },
+          physicalResourceId: cr.PhysicalResourceId.of(this.userPoolClient.userPoolClientId),
         },
         onUpdate: {
           service: "CognitoIdentityServiceProvider",
@@ -138,6 +139,7 @@ export class CognitoIdentityProviderClient extends Construct {
             UserPoolId: props.userPool.userPoolId,
             ClientId: this.userPoolClient.userPoolClientId,
           },
+          physicalResourceId: cr.PhysicalResourceId.of(this.userPoolClient.userPoolClientId),
         },
         policy: cr.AwsCustomResourcePolicy.fromSdkCalls({ resources: [props.userPool.userPoolArn] }),
       }).getResponseField("UserPoolClient.ClientSecret")
