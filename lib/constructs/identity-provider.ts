@@ -2,6 +2,7 @@ import * as cdk from "aws-cdk-lib";
 import * as cognito from "aws-cdk-lib/aws-cognito";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as secrets from "aws-cdk-lib/aws-secretsmanager";
+import * as cr from "aws-cdk-lib/custom-resources";
 import { Construct, DependencyGroup } from "constructs";
 
 /**
@@ -119,8 +120,30 @@ export class CognitoIdentityProviderClient extends Construct {
       generateSecret: true,
     });
     this.clientId = this.userPoolClient.userPoolClientId;
+    const clientSecret = cdk.SecretValue.resourceAttribute(
+      new cr.AwsCustomResource(this, "DescribeCognitoUserPoolClient", {
+        resourceType: "Custom::DescribeCognitoUserPoolClient",
+        onCreate: {
+          service: "CognitoIdentityServiceProvider",
+          action: "describeUserPoolClient",
+          parameters: {
+            UserPoolId: props.userPool.userPoolId,
+            ClientId: this.userPoolClient.userPoolClientId,
+          },
+        },
+        onUpdate: {
+          service: "CognitoIdentityServiceProvider",
+          action: "describeUserPoolClient",
+          parameters: {
+            UserPoolId: props.userPool.userPoolId,
+            ClientId: this.userPoolClient.userPoolClientId,
+          },
+        },
+        policy: cr.AwsCustomResourcePolicy.fromSdkCalls({ resources: [props.userPool.userPoolArn] }),
+      }).getResponseField("UserPoolClient.ClientSecret")
+    );
     this.secret = new secrets.Secret(this, "ClientSecret", {
-      secretStringValue: this.userPoolClient.userPoolClientSecret,
+      secretStringValue: clientSecret,
     });
   }
 }
