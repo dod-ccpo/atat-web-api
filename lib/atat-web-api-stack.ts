@@ -136,7 +136,7 @@ export class AtatWebApiStack extends cdk.Stack {
       {
         id: "NIST.800.53.R4-S3BucketDefaultLockEnabled",
         reason: "Server Access Logs cannot be delivered to a bucket with Object Lock enabled",
-  },
+      },
     ]);
     const api = new AtatRestApi(this, "HothApi", apiProps);
     if (props.apiDomain && network) {
