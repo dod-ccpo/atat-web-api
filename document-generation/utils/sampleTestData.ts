@@ -85,7 +85,7 @@ export const sampleDowRequest = {
           ],
           usersPerRegion: [
             {
-              "EUCOM": "8,755",
+              EUCOM: "8,755",
             },
           ],
           isTrafficSpikeEventBased: false,

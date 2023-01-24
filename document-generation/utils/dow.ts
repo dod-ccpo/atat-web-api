@@ -57,10 +57,14 @@ export const formatStorageType = (env: InstancesWithStorageType) => {
 };
 
 export const formatExpirationDate = (exp: string) => {
-  const formattedDate = new Date(exp)
-    .toLocaleDateString("en-US", { timeZone: "UTC", year: "numeric", month: "numeric", day: "numeric" });
+  const formattedDate = new Date(exp).toLocaleDateString("en-US", {
+    timeZone: "UTC",
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+  });
   if (!exp || formattedDate === "Invalid Date") {
-    return `N/A`
+    return `N/A`;
   }
   return formattedDate;
 };
@@ -138,7 +142,7 @@ export const sortInstanceClassificationLevels = (instances: any) => {
 
   instances.forEach((instance: any) => {
     if (!instance.classificationLevel) {
-      logger.error(`No Classification Level found for a compute/database/storage/general service.`)
+      logger.error(`No Classification Level found for a compute/database/storage/general service.`);
       return;
     }
     if (instance.classificationLevel.classification === Classification.TS) {
@@ -245,7 +249,7 @@ export const sortSupportPackagesByLevels = (supportPackages: any) => {
     }
     supportPackages[cloudPackage].forEach((instance: any) => {
       if (!instance.classificationLevel) {
-        logger.error(`No Classification Level found for service ${cloudPackage}.`)
+        logger.error(`No Classification Level found for service ${cloudPackage}.`);
         return;
       }
       if (instance.classificationLevel.classification === Classification.TS) {

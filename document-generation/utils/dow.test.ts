@@ -33,24 +33,24 @@ describe("Formatting Utils", () => {
 
   it.each(["2023-02-28", "Feb. 28, 2023", "2023-02-28 17:45:08"])("formatExpirationDate - '%s'", async (goodDate) => {
     const expirationDate = formatExpirationDate(goodDate);
-    const expectedFormat = "2/28/2023"
+    const expectedFormat = "2/28/2023";
     expect(expirationDate).toBe(expectedFormat);
   });
   it.each([undefined, null, "", "Exp Date"])("formatExpirationDate - '%s'", async (badDate) => {
     const expirationDate = formatExpirationDate(badDate as string);
-    const expectedFormat = "N/A"
+    const expectedFormat = "N/A";
     expect(expirationDate).toBe(expectedFormat);
   });
 
   it("formatImpactLevel", async () => {
     const compute = sampleDowRequest.templatePayload.xaasOfferings.computeInstances[0];
     const expirationDate = formatImpactLevel(compute.classificationLevel.impactLevel);
-    const expectedFormat = "Impact Level IL5 (IL5)"
+    const expectedFormat = "Impact Level IL5 (IL5)";
     expect(expirationDate).toBe(expectedFormat);
   });
   it.each([undefined, null, "", "Not an Impact level"])("formatImpactLevel - '%s'", async (badImpactLevel) => {
     const impactLevel = formatImpactLevel(badImpactLevel as string);
-    const expectedFormat = "N/A"
+    const expectedFormat = "N/A";
     expect(impactLevel).toBe(expectedFormat);
   });
 
@@ -59,7 +59,7 @@ describe("Formatting Utils", () => {
     const formattedUsersPerRegion = formatRegionUsers(usersPerRegion);
     const expectedFormat = ["CONUS Central: 19,238", "AFRICOM: 13,939"];
     expect(formattedUsersPerRegion).toEqual(expectedFormat);
-  })
+  });
   it.each([undefined, null, "", "String usersPerRegion"])("formatRegionUsers - '%s'", async (badUsersPerRegion) => {
     const formattedUsersPerRegion = formatRegionUsers(badUsersPerRegion as string);
     const expectedFormat: string[] = [];
@@ -69,15 +69,17 @@ describe("Formatting Utils", () => {
 
 describe("Sorting XaaS Services - happy paths", () => {
   it("getSelectedInstances", async () => {
-    const selectedServices = sortSelectedServicesByGroups(sampleDowRequest.templatePayload.xaasOfferings.selectedServiceInstances);
+    const selectedServices = sortSelectedServicesByGroups(
+      sampleDowRequest.templatePayload.xaasOfferings.selectedServiceInstances
+    );
     const selectedInstances = getSelectedInstances(
       ImpactLevel.IL5,
       ServiceOfferingGroup.APPLICATIONS,
       selectedServices
     );
     expect(selectedInstances[0].serviceOfferingGroup).toBe(ServiceOfferingGroup.APPLICATIONS);
-    expect(selectedInstances).toHaveLength(3)
-  })
+    expect(selectedInstances).toHaveLength(3);
+  });
   it("sortInstanceClassificationLevels", async () => {
     const computeInstances = sampleDowRequest.templatePayload.xaasOfferings.computeInstances;
     const sortedComputeInstances = sortInstanceClassificationLevels(computeInstances);
@@ -136,23 +138,23 @@ describe("Sorting XaaS Services - sad path", () => {
     const computeInstanceNoClassificationLevel = {
       ...sampleDowRequest.templatePayload.xaasOfferings.computeInstances[0],
       classificationLevel: null,
-    }
+    };
     const sortedComputeInstancesByLevel = sortInstanceClassificationLevels([computeInstanceNoClassificationLevel]);
 
-    expect(sortedComputeInstancesByLevel).toEqual({il2: [], il4: [], il5: [], il6: [], ts: []});
-  })
+    expect(sortedComputeInstancesByLevel).toEqual({ il2: [], il4: [], il5: [], il6: [], ts: [] });
+  });
   it("sortSupportPackagesByLevels - exclude support pkg if no classification level", async () => {
     const trainingPackageNoClassificationLevel = {
       ...sampleDowRequest.templatePayload.cloudSupportPackages[0],
       classificationLevel: null,
-    }
+    };
     const cloudSupportPackages = [trainingPackageNoClassificationLevel];
     const sortedCloudPkgs = sortSupportPackagesByGroups(cloudSupportPackages);
     const sortedCloudPkgsByLevel = sortSupportPackagesByLevels(sortedCloudPkgs);
 
-    expect(sortedCloudPkgsByLevel).toEqual({TRAINING: {il2: [], il4: [], il5: [], il6: [], ts: []}});
-  })
-})
+    expect(sortedCloudPkgsByLevel).toEqual({ TRAINING: { il2: [], il4: [], il5: [], il6: [], ts: [] } });
+  });
+});
 
 describe("Gather Tasks for PoP", () => {
   it("getTaskPeriods", async () => {
