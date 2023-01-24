@@ -528,6 +528,10 @@ export const groupSelectedTaskPeriods = (taskPops: ITaskPop[]) => {
 };
 
 export const formatRegionUsers = (usersPerRegion: any) => {
+  if (!usersPerRegion || !Array.isArray(usersPerRegion)) {
+    logger.debug("usersPerRegion is undefined or not an array.");
+    return [];
+  }
   return usersPerRegion.map((region: any) => {
     const regionName = Object.keys(region);
     const users = Object.values(region);

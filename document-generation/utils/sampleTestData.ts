@@ -85,7 +85,7 @@ export const sampleDowRequest = {
           ],
           usersPerRegion: [
             {
-              "659ee12597c31110cf3cfd9fe153af54": "8,755",
+              "EUCOM": "8,755",
             },
           ],
           isTrafficSpikeEventBased: false,
@@ -144,10 +144,10 @@ export const sampleDowRequest = {
           ],
           usersPerRegion: [
             {
-              c6bde92597c31110cf3cfd9fe153af62: "19,238",
+              "CONUS Central": "19,238",
             },
             {
-              a41ea12597c31110cf3cfd9fe153af85: "13,939",
+              AFRICOM: "13,939",
             },
           ],
           isTrafficSpikeEventBased: true,
@@ -212,13 +212,13 @@ export const sampleDowRequest = {
           ],
           usersPerRegion: [
             {
-              "2f3d2d2597c31110cf3cfd9fe153af2f": "4,305",
+              "CONUS West": "4,305",
             },
             {
-              addde16597c31110cf3cfd9fe153af3d: "2,345",
+              "CONUS East": "2,345",
             },
             {
-              "92fee16597c31110cf3cfd9fe153af48": "5,278",
+              SOUTHCOM: "5,278",
             },
           ],
           isTrafficSpikeEventBased: false,
@@ -275,13 +275,13 @@ export const sampleDowRequest = {
         dataEgressMonthlyUnit: "GB",
         usersPerRegion: [
           {
-            "2f3d2d2597c31110cf3cfd9fe153af2f": "50,000",
+            "CONUS West": "50,000",
           },
           {
-            addde16597c31110cf3cfd9fe153af3d: "75,000",
+            "CONUS East": "75,000",
           },
           {
-            "92fee16597c31110cf3cfd9fe153af48": "100,000",
+            SOUTHCOM: "100,000",
           },
         ],
         dataIncrease: true,
@@ -302,10 +302,10 @@ export const sampleDowRequest = {
         dataEgressMonthlyUnit: "PB",
         usersPerRegion: [
           {
-            c6bde92597c31110cf3cfd9fe153af62: "76,000",
+            SOUTHCOM: "76,000",
           },
           {
-            a41ea12597c31110cf3cfd9fe153af85: "123,000",
+            "CONUS West": "123,000",
           },
         ],
         dataIncrease: false,
@@ -347,7 +347,7 @@ export const sampleDowRequest = {
         dataEgressMonthlyUnit: null,
         usersPerRegion: [
           {
-            "659ee12597c31110cf3cfd9fe153af54": "200,000",
+            EUCOM: "200,000",
           },
         ],
         dataIncrease: false,

@@ -2,6 +2,7 @@ import { ImpactLevel, ServiceOfferingGroup } from "../../models/document-generat
 import {
   formatExpirationDate,
   formatImpactLevel,
+  formatRegionUsers,
   formatStorageType,
   getCDRLs,
   getInstancePop,
@@ -53,6 +54,17 @@ describe("Formatting Utils", () => {
     expect(impactLevel).toBe(expectedFormat);
   });
 
+  it("formatRegionUsers", async () => {
+    const usersPerRegion = sampleDowRequest.templatePayload.currentEnvironment.envInstances[1].usersPerRegion;
+    const formattedUsersPerRegion = formatRegionUsers(usersPerRegion);
+    const expectedFormat = ["CONUS Central: 19,238", "AFRICOM: 13,939"];
+    expect(formattedUsersPerRegion).toEqual(expectedFormat);
+  })
+  it.each([undefined, null, "", "String usersPerRegion"])("formatRegionUsers - '%s'", async (badUsersPerRegion) => {
+    const formattedUsersPerRegion = formatRegionUsers(badUsersPerRegion as string);
+    const expectedFormat: string[] = [];
+    expect(formattedUsersPerRegion).toEqual(expectedFormat);
+  });
 });
 
 describe("Sorting XaaS Services - happy paths", () => {
