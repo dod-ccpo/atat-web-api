@@ -11,6 +11,7 @@ import {
   InstancesWithStorageType,
   organizeXaasServices,
   sortInstanceClassificationLevels,
+  sortSelectedClassificationLevels,
   sortSelectedServicesByGroups,
   sortSupportPackagesByGroups,
   sortSupportPackagesByLevels,
@@ -88,6 +89,15 @@ describe("Sorting XaaS Services - happy paths", () => {
     expect(sortedComputeInstances.il5).toHaveLength(1);
     expect(sortedComputeInstances.il6).toHaveLength(1);
     expect(sortedComputeInstances.ts).toHaveLength(0);
+  });
+  it("sortSelectedClassificationLevels", async () => {
+    const selectedClassifications = sampleDowRequest.templatePayload.selectedClassificationLevels;
+    const sortedClassificationLevels = sortSelectedClassificationLevels(selectedClassifications);
+    expect(sortedClassificationLevels.il2).toBeDefined();
+    expect(sortedClassificationLevels.il4).toBeUndefined();
+    expect(sortedClassificationLevels.il5).toBeDefined();
+    expect(sortedClassificationLevels.il6).toBeDefined();
+    expect(sortedClassificationLevels.ts).toBeUndefined();
   });
   it("sortSelectedServicesByGroups", async () => {
     const selectedInstances = sampleDowRequest.templatePayload.xaasOfferings.selectedServiceInstances;
