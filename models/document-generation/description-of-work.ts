@@ -1,5 +1,5 @@
 /* eslint-disable no-use-before-define */
-export interface DescriptionOfWork {
+export interface IDescriptionOfWork {
   awardHistory?: IAward[];
   contractInformation?: IContractInformation;
   toTitle: string;
@@ -8,10 +8,11 @@ export interface DescriptionOfWork {
   surgeRequirementCapabilities: boolean;
   currentEnvironment?: ICurrentEnvironment;
   selectedClassificationLevels: ISelectedClassificationLevel[];
-  architecturalDesignRequirements: ArchitecturalDesignRequirement;
-  xaasOfferings?: IXaaSOfferings;
-  crossDomainSolutions?: ICrossDomainSolutions;
-  cloudSupportPackages?: ICloudSupportEnvironmentInstance[];
+  architecturalDesignRequirements?: ArchitecturalDesignRequirement;
+  xaasOfferings: IXaaSOfferings;
+  crossDomainSolutions: ICrossDomainSolutions;
+  cloudSupportPackages: ICloudSupportEnvironmentInstance[];
+  contractType: IContractType;
   periodOfPerformance: PeriodOfPerformance;
   securityRequirements?: SecurityRequirement[];
   contractConsiderations?: IContractConsiderations;
@@ -24,16 +25,17 @@ export interface IContractType {
 }
 
 export interface ISensitiveInformation {
-  section508Sufficient?: boolean;
-  accessibilityReqs508?: string;
+  section508Sufficient: boolean;
+  accessibilityReqs508: string;
 }
 export interface IXaaSOfferings {
-  computeInstances?: IComputeEnvironmentInstance[];
-  databaseInstances?: IDatabaseEnvironmentInstance[];
-  storageInstances?: IEnvironmentInstance[];
-  generalInstances?: IEnvironmentInstance[];
-  selectedServiceInstances?: ISelectedServiceOffering[];
+  computeInstances: IComputeEnvironmentInstance[];
+  databaseInstances: IDatabaseEnvironmentInstance[];
+  storageInstances: IEnvironmentInstance[];
+  generalInstances: IEnvironmentInstance[];
+  selectedServiceInstances: ISelectedServiceOffering[];
 }
+export type UserPerRegion = Record<string, string>;
 
 export enum ContractAwardType {
   INITIAL_AWARD = "INITIAL_AWARD",
@@ -59,8 +61,8 @@ export interface IContractInformation {
 export interface ICrossDomainSolutions {
   crossDomainSolutionRequired: boolean;
   anticipatedNeedOrUsage?: string;
-  needForEntireTaskOrderDuration?: boolean;
-  selectedPeriods?: IPeriod[];
+  needForEntireTaskOrderDuration: boolean;
+  selectedPeriods: IPeriod[];
   trafficPerDomainPair?: string;
   projectedFileStreamType?: string;
 }
@@ -122,33 +124,33 @@ export enum StorageType {
 export interface IEnvironmentInstance {
   anticipatedNeedOrUsage?: string;
   operatingSystemLicensing: Licensing;
-  instanceName: string;
+  instanceName: string | null;
   numberOfInstances?: number;
   needForEntireTaskOrderDuration?: boolean;
-  selectedPeriods?: IPeriod[];
+  selectedPeriods: IPeriod[] | null;
   classificationLevel: IClassificationLevel;
   classifiedInformationTypes: IClassificationLevel[];
-  instanceLocation: InstanceLocation;
-  region: Region;
+  instanceLocation: InstanceLocation | null;
+  region: Region | null;
   performanceTier: PerformanceTier;
-  pricingModel: PricingModel;
+  pricingModel: PricingModel | null;
   /**
    * Format: date
    * @example 2022-07-01
    */
-  pricingModelExpiration: string;
-  licensing: string;
+  pricingModelExpiration: string | null;
+  licensing: string | null;
   operatingSystem: string;
-  numberOfvCPUs: number;
+  numberOfVcpus: number;
   processorSpeed?: number;
   storageType: StorageType;
   storageAmount: number;
   storageUnit: StorageUnit;
   memoryAmount: number;
   memoryUnit: StorageUnit;
-  dataEgressMonthlyAmount: number;
-  dataEgressMonthlyUnit: StorageUnit;
-  usageDescription: string;
+  dataEgressMonthlyAmount: number | null;
+  dataEgressMonthlyUnit: StorageUnit | null;
+  usageDescription: string | null;
 }
 
 export enum UsageDescription {
@@ -166,7 +168,7 @@ export interface ICurrentEnvironmentInstance extends IEnvironmentInstance {
   isTrafficSpikePeriodBased?: boolean;
   trafficSpikePeriodDescription?: string;
   deployedRegions?: Region[];
-  usersPerRegion?: number;
+  usersPerRegion?: UserPerRegion[];
   operatingEnvironment?: OperatingEnvironment;
   environmentType?: EnvironmentType;
 }
@@ -185,7 +187,7 @@ export enum DatabaseType {
 }
 
 /** @description Extends Environment Instance with additional properties specific to database instances */
-export interface IDatabaseEnvironmentInstance {
+export interface IDatabaseEnvironmentInstance extends IEnvironmentInstance {
   databaseType?: DatabaseType;
   databaseTypeOther?: string;
   databaseLicensing?: Licensing;
@@ -287,9 +289,9 @@ export enum ImpactLevel {
 }
 /** @description Represents a Classification Level for instances of a package */
 export interface IClassificationLevel {
-  classificationLevel: Classification;
+  classification: Classification;
   impactLevel: ImpactLevel;
-  additionalInformation: string;
+  // additionalInformation: string;
 }
 
 /** @description Describes the classified information in a Classification Instance */
@@ -299,7 +301,7 @@ export type IClassifiedInformationType = IGeneralInformation;
 export interface ISelectedClassificationLevel {
   classificationLevel?: IClassificationLevel;
   classifiedInformationTypes?: IClassifiedInformationType[];
-  usersPerRegion?: number;
+  usersPerRegion?: UserPerRegion[];
   dataEgressMonthlyAmount?: number;
   dataEgressMonthlyUnit?: StorageUnit;
   usersIncrease?: boolean;
@@ -334,9 +336,9 @@ export enum Region {
 }
 /** @description A service selected by the user for a specific usage/need */
 export interface ISelectedServiceOffering {
-  serviceOffering?: ServiceOffering;
-  classificationInstances?: ClassificationInstance[];
-  otherServiceOffering?: string;
+  serviceOffering: ServiceOffering;
+  classificationInstances: ClassificationInstance[];
+  otherServiceOffering: string;
 }
 
 /** @description A general unit to define classification needs */
@@ -413,9 +415,9 @@ export enum TimeFrame {
 
 /** @description Represents a Period of Performance (PoP) for a package */
 export interface PeriodOfPerformance {
-  basePeriod?: IPeriod;
-  optionPeriods?: IPeriod[];
-  popStartRequest?: boolean;
+  basePeriod: IPeriod;
+  optionPeriods: IPeriod[];
+  popStartRequest: boolean;
   /**
    * Format: date
    * @example 2021-07-01
@@ -582,7 +584,7 @@ const selectedClassificationLevels = {
   type: "object",
   properties: {
     classificationLevel: { type: "array", items: classificationLevel },
-    usersPerRegion: { type: "integer" },
+    usersPerRegion: { type: "object" },
     dataEgressMonthlyAmount: { type: "integer" },
     dataEgressMonthlyUnit: {
       enum: [StorageUnit.GB, StorageUnit.TB, StorageUnit.PB],
@@ -630,7 +632,7 @@ const environmentInstance = {
     pricingModelExpiration: { type: "string" },
     licensing: { type: "string" },
     operatingSystem: { type: "string" },
-    numberOfvCPUs: { type: "integer" },
+    numberOfVcpus: { type: "integer" },
     processorSpeed: { type: "float" },
     storageType: { enum: [StorageType.ARCHIVE, StorageType.BLOCK, StorageType.FILE, StorageType.OBJECT] },
     storageAmount: { type: "integer" },
@@ -657,7 +659,7 @@ const currentEnvironmentInstance = {
     isTrafficSpikePeriodBased: { type: "boolean" },
     trafficSpikePeriodDescription: { type: "string" },
     deployedRegions,
-    numberOfvCPUs: { type: "integer" },
+    numberOfVcpus: { type: "integer" },
     processorSpeed: { type: "float" },
     operatingSystem: { type: "string" },
     licensing: { type: "string" },
@@ -711,7 +713,7 @@ const currentEnvironment = {
     hasPhasedApproach: { type: "boolean" },
     phasedApproachSchedule: { type: "string" },
     needsArchitecturalDesignServices: { type: "boolean" },
-    architecturalDesignRequirement: { type: "array", items: architecturalDesignRequirement },
+    architecturalDesignRequirement,
   },
 };
 

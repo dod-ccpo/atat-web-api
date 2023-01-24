@@ -27,7 +27,6 @@ import {
   IndependentGovernmentCostEstimate,
   IncrementalFundingPlan,
   EvaluationPlan,
-  DescriptionOfWork,
 } from "../models/document-generation";
 import handlebars from "handlebars";
 import juice from "juice";
@@ -35,6 +34,7 @@ import { formatDuration, formatGroupAndClassification, counter, countSections, f
 import { RequirementsChecklist } from "../models/document-generation/requirements-checklist";
 import { generateRequirementsChecklistDocument } from "./requirements-checklist-document";
 import { generateEvalPlanDocument } from "./eval-plan-document";
+import { IDescriptionOfWork } from "../models/document-generation/description-of-work";
 
 async function baseHandler(event: RequestEvent<GenerateDocumentRequest>): Promise<ApiBase64SuccessResponse> {
   const { documentType } = event.body;
@@ -91,7 +91,7 @@ async function generateDocxDocument(event: RequestEvent<GenerateDocumentRequest>
   const docxTemplate = getDocxTemplate(documentType);
   switch (documentType) {
     case DocumentType.DESCRIPTION_OF_WORK_DOCX:
-      return generateDowDocument(docxTemplate, templatePayload as DescriptionOfWork);
+      return generateDowDocument(docxTemplate, templatePayload as IDescriptionOfWork);
     case DocumentType.INCREMENTAL_FUNDING_PLAN:
       return generateIFPDocument(docxTemplate, templatePayload as IncrementalFundingPlan);
     case DocumentType.EVALUATION_PLAN:
