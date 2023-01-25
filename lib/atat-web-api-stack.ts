@@ -68,7 +68,7 @@ export class AtatWebApiStack extends cdk.Stack {
           action: "getCallerIdentity",
           physicalResourceId: cr.PhysicalResourceId.of("unused-value"),
         },
-        vpc: props.network?.vpc,
+        // vpc: props.network?.vpc,
         policy: cr.AwsCustomResourcePolicy.fromSdkCalls({ resources: cr.AwsCustomResourcePolicy.ANY_RESOURCE }),
       });
     }
