@@ -1,3 +1,4 @@
+import { IEnvironmentInstance } from "../../models/document-generation";
 import {
   IPeriod,
   PeriodType,
@@ -6,6 +7,10 @@ import {
   EnvironmentType,
   Classification,
   ImpactLevel,
+  IContractType,
+  IComputeEnvironmentInstance,
+  ICurrentEnvironmentInstance,
+  IDatabaseEnvironmentInstance,
 } from "../../models/document-generation/description-of-work";
 
 import { logger } from "../../utils/logging";
@@ -31,19 +36,45 @@ const cloudSupportGroupsOrder = [
   "TRAINING",
   "DOCUMENTATION_SUPPORT",
   "GENERAL_CLOUD_SUPPORT",
-  "PORTABILITY_PLAN",
+  // NOTE: Portabilty plan is provided at the impact level under section 4.3.x
+  // and does not have a forth number in the task number. The numbering is
+  // an exception to the rule for Cloud Support Packages.
+  // "PORTABILITY_PLAN",
 ];
 const classificationLevelsOrder = ["IL2", "IL4", "IL5", "IL6", "TS"];
 
-export const formatStorageType = (env: any) => {
+export type InstancesWithStorageType =
+  | IEnvironmentInstance
+  | IComputeEnvironmentInstance
+  | ICurrentEnvironmentInstance
+  | IDatabaseEnvironmentInstance;
+export const formatStorageType = (env: InstancesWithStorageType) => {
+  if (!env) {
+    // An indicator on the document that a value was not provided
+    return `N/A`;
+  }
   return `${formatEnum(env.performanceTier)} Storage: ${env.storageAmount} ${env.storageUnit}`;
 };
 
-export const formatExpirationDate = (exp: any) => {
-  return new Date(exp).toLocaleDateString(`en-US`, { year: `numeric`, month: `numeric`, day: `numeric` });
+export const formatExpirationDate = (exp: string) => {
+  const formattedDate = new Date(exp).toLocaleDateString("en-US", {
+    timeZone: "UTC",
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+  });
+  if (!exp || formattedDate === "Invalid Date") {
+    return `N/A`;
+  }
+  return formattedDate;
 };
 
 export const formatImpactLevel = (impactLevel: any) => {
+  const impactLevels = classificationLevelsOrder;
+  if (!impactLevel || !impactLevels.includes(impactLevel)) {
+    logger.debug("No impact level provided.");
+    return `N/A`;
+  }
   const impactNumber = impactLevel.slice(-1);
   return `Impact Level IL${impactNumber} (${impactLevel})`;
 };
@@ -58,11 +89,10 @@ export const sortSelectedClassificationLevels = (instances: any) => {
   const sortedInstances: any = {};
 
   instances.forEach((instance: any) => {
-    const { classification, impactLevel } = instance.classificationLevel;
-    if (classification === "TS") {
+    if (instance.classificationLevel.classification === Classification.TS) {
       sortedInstances.ts = instance;
     } else {
-      switch (impactLevel) {
+      switch (instance.classificationLevel.impactLevel) {
         case "IL2":
           sortedInstances.il2 = instance;
           break;
@@ -76,7 +106,7 @@ export const sortSelectedClassificationLevels = (instances: any) => {
           sortedInstances.il6 = instance;
           break;
         default:
-          logger.debug("No classification level was provided for instance.");
+          logger.debug("No impact level was provided for instance with a Selected Classification Levels.");
       }
     }
   });
@@ -111,25 +141,28 @@ export const sortInstanceClassificationLevels = (instances: any) => {
   const sortedInstances: any = { il2: [], il4: [], il5: [], il6: [], ts: [] };
 
   instances.forEach((instance: any) => {
-    const { classification, impactLevel } = instance.classificationLevel;
-    if (classification === "TS") {
+    if (!instance.classificationLevel) {
+      logger.error(`No Classification Level found for a compute/database/storage/general service.`);
+      return;
+    }
+    if (instance.classificationLevel.classification === Classification.TS) {
       sortedInstances.ts.push(instance);
     } else {
-      switch (impactLevel) {
-        case "IL2":
+      switch (instance.classificationLevel.impactLevel) {
+        case ImpactLevel.IL2:
           sortedInstances.il2.push(instance);
           break;
-        case "IL4":
+        case ImpactLevel.IL4:
           sortedInstances.il4.push(instance);
           break;
-        case "IL5":
+        case ImpactLevel.IL5:
           sortedInstances.il5.push(instance);
           break;
-        case "IL6":
+        case ImpactLevel.IL6:
           sortedInstances.il6.push(instance);
           break;
         default:
-          logger.debug("No classification level was provided for instance XX");
+          logger.debug("No impact Level was provided for a compute/database/storage/general instance.");
       }
     }
   });
@@ -215,25 +248,28 @@ export const sortSupportPackagesByLevels = (supportPackages: any) => {
       services[cloudPackage] = { il2: [], il4: [], il5: [], il6: [], ts: [] };
     }
     supportPackages[cloudPackage].forEach((instance: any) => {
-      const { classification, impactLevel } = instance.classificationLevel;
-      if (classification === "TS") {
+      if (!instance.classificationLevel) {
+        logger.error(`No Classification Level found for service ${cloudPackage}.`);
+        return;
+      }
+      if (instance.classificationLevel.classification === Classification.TS) {
         services[cloudPackage].ts.push(instance);
       } else {
-        switch (impactLevel) {
-          case "IL2":
+        switch (instance.classificationLevel.impactLevel) {
+          case ImpactLevel.IL2:
             services[cloudPackage].il2.push(instance);
             break;
-          case "IL4":
+          case ImpactLevel.IL4:
             services[cloudPackage].il4.push(instance);
             break;
-          case "IL5":
+          case ImpactLevel.IL5:
             services[cloudPackage].il5.push(instance);
             break;
-          case "IL6":
+          case ImpactLevel.IL6:
             services[cloudPackage].il6.push(instance);
             break;
           default:
-            logger.debug("No classification level was provided for instance XX");
+            logger.debug("No impact level was provided for a Cloud Support Pkg instance.");
         }
       }
     });
@@ -299,7 +335,7 @@ export const getTaskPeriods = (payload: any) => {
       .sort((a: IPeriod, b: IPeriod) => a.optionOrder - b.optionOrder)
       // The base period is 1 so the optionOrder property is not used
       // the base period should have been 0 or -1 to be an exception to the rule
-      .forEach((period: IPeriod, index: number) => popPeriods.push(`OP${index + 1}`));
+      .forEach((period: IPeriod) => popPeriods.push(`OP${period.optionOrder - 1}`));
   }
 
   const { computeInstances, databaseInstances, storageInstances, generalInstances, selectedInstances } = xaasOfferings;
@@ -360,7 +396,7 @@ export const getTaskPeriods = (payload: any) => {
       const optionPeriods = selectedPeriods
         .sort((a: IPeriod, b: IPeriod) => a.optionOrder - b.optionOrder)
         .filter((period: IPeriod) => period.periodType === PeriodType.OPTION)
-        .map((period: IPeriod, index: number) => `OP${index + 1}`);
+        .map((period: IPeriod) => `OP${period.optionOrder - 1}`);
       cdsTaskPeriods.push(...optionPeriods);
     }
 
@@ -384,12 +420,15 @@ export const getTaskPeriods = (payload: any) => {
   });
 
   const allPackageTasks = [
+    // XaaS 4.2.x.x
     ...computeTaskNumbers,
     ...databaseTaskNumbers,
     ...storageTaskNumbers,
     ...generalTaskNumbers,
     ...selectedServiceTaskNumbers,
+    // CDS 4.2.6
     ...crossDomainSolutionTaskNumber,
+    // Cloud Support 4.3.x.x
     ...cloudPackagesTaskNumbers,
   ];
 
@@ -404,23 +443,31 @@ export const getTaskPeriods = (payload: any) => {
 
 export const getInstancePop = (instance: any, instanceType: ServiceOfferingGroup, instanceIndex: number) => {
   const { classificationLevel, needForEntireTaskOrderDuration, selectedPeriods } = instance;
-  const { classification, impactLevel } = classificationLevel;
+  let serviceSectionNumber: number;
   let levelNumber: number;
   let dowTaskNumber: string;
   let groupOrder: string[];
   if (xaasServiceGroupsOrder.includes(instanceType)) {
+    serviceSectionNumber = 2; // XaaS Service
     groupOrder = xaasServiceGroupsOrder;
   } else {
+    serviceSectionNumber = 3; // Cloud Support
     groupOrder = cloudSupportGroupsOrder;
   }
   const serviceNumber = groupOrder.indexOf(instanceType) + 1;
 
-  if (classification === "TS") {
-    levelNumber = classificationLevelsOrder.indexOf(classification) + 1;
-    dowTaskNumber = `4.2.${levelNumber}.${serviceNumber}.${instanceIndex + 1}`;
+  // TS is a special case and only one that does not have an impact level
+  const isPortabilityPlan = instanceType === ServiceOfferingGroup.PORTABILITY_PLAN;
+  if (classificationLevel.classification === Classification.TS) {
+    levelNumber = classificationLevelsOrder.indexOf(classificationLevel.classification) + 1;
+    dowTaskNumber = isPortabilityPlan
+      ? `4.${serviceSectionNumber}.${levelNumber}`
+      : `4.${serviceSectionNumber}.${levelNumber}.${serviceNumber}.${instanceIndex + 1}`;
   } else {
-    levelNumber = classificationLevelsOrder.indexOf(impactLevel) + 1;
-    dowTaskNumber = `4.2.${levelNumber}.${serviceNumber}.${instanceIndex + 1}`;
+    levelNumber = classificationLevelsOrder.indexOf(classificationLevel.impactLevel) + 1;
+    dowTaskNumber = isPortabilityPlan
+      ? `4.${serviceSectionNumber}.${levelNumber}`
+      : `4.${serviceSectionNumber}.${levelNumber}.${serviceNumber}.${instanceIndex + 1}`;
   }
 
   let taskPeriods: string[] = [];
@@ -434,7 +481,7 @@ export const getInstancePop = (instance: any, instanceType: ServiceOfferingGroup
   if (selectedPeriods && selectedPeriods.length >= 1) {
     taskPeriods = selectedPeriods
       .sort((a: IPeriod, b: IPeriod) => a.optionOrder - b.optionOrder)
-      .map((period: IPeriod, index: number) => (period.periodType === PeriodType.BASE ? "B" : `OP${index + 1}`));
+      .map((period: IPeriod) => (period.periodType === PeriodType.BASE ? "B" : `OP${period.optionOrder - 1}`));
   }
 
   return {
@@ -460,7 +507,7 @@ export const groupSelectedTaskPeriods = (taskPops: ITaskPop[]) => {
       return;
     }
 
-    const matchingPeriodPairIndex = uniquePeriodPairs.findIndex((pair, index) => {
+    const matchingPeriodPairIndex = uniquePeriodPairs.findIndex((pair) => {
       return hasSameSelectedPeriods(pair, taskPeriods);
     });
 
@@ -485,6 +532,10 @@ export const groupSelectedTaskPeriods = (taskPops: ITaskPop[]) => {
 };
 
 export const formatRegionUsers = (usersPerRegion: any) => {
+  if (!usersPerRegion || !Array.isArray(usersPerRegion)) {
+    logger.debug("usersPerRegion is undefined or not an array.");
+    return [];
+  }
   return usersPerRegion.map((region: any) => {
     const regionName = Object.keys(region);
     const users = Object.values(region);
@@ -594,12 +645,14 @@ export const getSelectedInstances = (levelIdentifier: any, service: any, selecte
   selectedInstances[service].forEach((instance: any) => {
     instance.classificationInstances.forEach((classInst: any) => {
       if (
+        classInst.classificationLevel &&
         classInst.classificationLevel.impactLevel === levelIdentifier &&
         instance.serviceOffering.serviceOfferingGroup === service
       ) {
         tools.push({ ...instance.serviceOffering, ...classInst });
       }
       if (
+        classInst.classificationLevel &&
         classInst.classificationLevel.classification === levelIdentifier &&
         instance.serviceOffering.serviceOfferingGroup === service
       ) {
@@ -610,6 +663,37 @@ export const getSelectedInstances = (levelIdentifier: any, service: any, selecte
   return tools;
 };
 
+/**
+ * Determine if a package has XaaS Services to be filled into the DOW template.
+ * The goal is to find the existence of at least one XaaS Service and return true,
+ * otherwise false is returned.
+ *
+ * @param {object} sortedXaasServices - all XaaS services provided by user
+ * @return boolean - true if one found false if none found
+ */
+export const xaasServiceExists = (sortedXaasServices: any, cdsRequired: boolean) => {
+  if (cdsRequired) {
+    return true;
+  }
+
+  for (const instanceType in sortedXaasServices) {
+    for (const key in sortedXaasServices[instanceType]) {
+      if (instanceType !== "selectedInstances" && sortedXaasServices[instanceType][key].length > 0) {
+        return true;
+      }
+      if (instanceType === "selectedInstances") {
+        // look over the individual Selected Service Offering instances
+        for (const level in sortedXaasServices[instanceType][key]) {
+          if (sortedXaasServices[instanceType][key][level].length > 0) {
+            return true;
+          }
+        }
+      }
+    }
+  }
+
+  return false;
+};
 export const selectedServiceExists = (
   selectedServices: any,
   selectedInstances: any,
@@ -879,235 +963,210 @@ export const getSecurityRequirements = (payload: any): any => {
   };
 };
 
-export const dataRequirementsList = (
-  cloudSupportPackages: any,
-  check4IL2: any,
-  check4IL4: any,
-  check4IL5: any,
-  check4IL6: any,
-  il2EdgeCount: any,
-  il4EdgeCount: any,
-  il5EdgeCount: any,
-  il6EdgeCount: any,
-  contractType: any
-) => {
-  let ffp;
-  let timeMaterial;
-  const data = [];
-  if (contractType.firmFixedPrice) {
-    ffp = true;
-  }
-  if (contractType.timeAndMaterials) {
-    timeMaterial = true;
-  }
+export const getCDRLs = (popTasks: string[], contractType: IContractType) => {
+  const { firmFixedPrice, timeAndMaterials } = contractType;
+  const cdrl = [];
+  const ffp = new Set();
+  const tm = new Set();
+  const portabilityPlanClins = new Set();
+  const trainingClins = new Set();
+  const edgeClins = new Set();
+  const portabilityTaskNumbers = new Set();
+  const trainingTaskNumbers = new Set();
+  const edgeTaskNumbers = new Set();
 
-  const trainingDowTaskNumbers: any = [];
-  const trainingClinNumbers: any = [];
-  const portabilityPlanTaskNumbers: any = [];
-  const portabilityClinNumbers: any = [];
-  let monthlyClinNumbers: any = "";
-  const teDeviceTaskNumbers: any = [];
-  const teDeviceClinNumbers: any = [];
+  // remove instance number from end
+  const allTasks = popTasks.map((taskNumber: string) => taskNumber.substring(0, 7));
 
-  cloudSupportPackages.forEach((plan: any) => {
-    if (plan.serviceType === ServiceOfferingGroup.PORTABILITY_PLAN) {
-      switch (plan.classificationLevel.impactLevel.impactLevel) {
-        case ImpactLevel.IL2:
-          portabilityPlanTaskNumbers.push("4.3.1");
+  allTasks.forEach((taskNumber: string) => {
+    const impactIdentifier = taskNumber.substring(0, 5);
+
+    if (firmFixedPrice) {
+      // FFP - Monthly Report (XaaS Services)
+      switch (impactIdentifier) {
+        case "4.2.1":
+        case "4.2.2":
+        case "4.2.3":
+          ffp.add("x001");
           break;
-        case ImpactLevel.IL4:
-          portabilityPlanTaskNumbers.push("4.3.2");
+        case "4.2.4":
+          ffp.add("x003");
           break;
-        case ImpactLevel.IL5:
-          portabilityPlanTaskNumbers.push("4.3.3");
-          break;
-        case ImpactLevel.IL6:
-          portabilityPlanTaskNumbers.push("4.3.4");
+        case "4.2.5":
+          ffp.add("x005");
           break;
         default:
-        // do nothing
+          break;
+      }
+
+      // FFP - Portability plan, TE, Training
+      switch (taskNumber) {
+        // Portability Plan
+        case "4.3.1":
+        case "4.3.2":
+        case "4.3.3":
+          portabilityTaskNumbers.add(taskNumber);
+          portabilityPlanClins.add("x001");
+          break;
+        case "4.3.4":
+          portabilityTaskNumbers.add(taskNumber);
+          portabilityPlanClins.add("x003");
+          break;
+        case "4.3.5":
+          portabilityTaskNumbers.add(taskNumber);
+          portabilityPlanClins.add("x005");
+          break;
+        // Training
+        case "4.3.1.3":
+        case "4.3.2.3":
+        case "4.3.3.3":
+          trainingTaskNumbers.add(taskNumber);
+          trainingClins.add("x002");
+          break;
+        case "4.3.4.3":
+          trainingTaskNumbers.add(taskNumber);
+          trainingClins.add("x004");
+          break;
+        case "4.3.5.3":
+          trainingTaskNumbers.add(taskNumber);
+          trainingClins.add("x006");
+          break;
+        // TE
+        case "4.2.1.9":
+        case "4.2.2.9":
+        case "4.2.3.9":
+          edgeTaskNumbers.add(taskNumber);
+          edgeClins.add("x001");
+          break;
+        case "4.2.4.9":
+          edgeTaskNumbers.add(taskNumber);
+          edgeClins.add("x003");
+          break;
+        case "4.2.5.9":
+          edgeTaskNumbers.add(taskNumber);
+          edgeClins.add("x005");
+          break;
+        default:
+          break;
       }
     }
-    if (plan.serviceType === ServiceOfferingGroup.TRAINING) {
-      switch (plan.classificationLevel.impactLevel) {
-        case ImpactLevel.IL2:
-          trainingDowTaskNumbers.push("4.3.1.3");
+
+    if (timeAndMaterials) {
+      // T&M - Monthly Report (XaaS Services)
+      switch (impactIdentifier) {
+        case "4.2.1":
+        case "4.2.2":
+        case "4.2.3":
+          tm.add("x017");
           break;
-        case ImpactLevel.IL4:
-          trainingDowTaskNumbers.push("4.3.2.3");
+        case "4.2.4":
+          tm.add("x019");
           break;
-        case ImpactLevel.IL5:
-          trainingDowTaskNumbers.push("4.3.3.3");
-          break;
-        case ImpactLevel.IL6:
-          trainingDowTaskNumbers.push("4.3.4.3");
+        case "4.2.5":
+          tm.add("x021");
           break;
         default:
-        // do nothing
+          break;
+      }
+
+      // T&M - Portability plan, TE, Training
+      switch (taskNumber) {
+        // Portability Plan
+        case "4.3.1":
+        case "4.3.2":
+        case "4.3.3":
+          portabilityTaskNumbers.add(taskNumber);
+          portabilityPlanClins.add("x017");
+          break;
+        case "4.3.4":
+          portabilityTaskNumbers.add(taskNumber);
+          portabilityPlanClins.add("x019");
+          break;
+        case "4.3.5":
+          portabilityTaskNumbers.add(taskNumber);
+          portabilityPlanClins.add("x021");
+          break;
+        // Training
+        case "4.3.1.3":
+        case "4.3.2.3":
+        case "4.3.3.3":
+          trainingTaskNumbers.add(taskNumber);
+          trainingClins.add("x018");
+          break;
+        case "4.3.4.3":
+          trainingTaskNumbers.add(taskNumber);
+          trainingClins.add("x020");
+          break;
+        case "4.3.5.3":
+          trainingTaskNumbers.add(taskNumber);
+          trainingClins.add("x022");
+          break;
+        // TE
+        case "4.2.1.9":
+        case "4.2.2.9":
+        case "4.2.3.9":
+          edgeTaskNumbers.add(taskNumber);
+          edgeClins.add("x017");
+          break;
+        case "4.2.4.9":
+          edgeTaskNumbers.add(taskNumber);
+          edgeClins.add("x019");
+          break;
+        case "4.2.5.9":
+          edgeTaskNumbers.add(taskNumber);
+          edgeClins.add("x021");
+          break;
+        default:
+          break;
       }
     }
   });
-  /**
-   * Training
-   */
 
-  if (
-    ffp === true &&
-    (trainingDowTaskNumbers.includes("4.3.1.3") ||
-      trainingDowTaskNumbers.includes("4.3.2.1") ||
-      trainingDowTaskNumbers.includes("4.3.3.3"))
-  ) {
-    trainingClinNumbers.push("x002");
-  } else if (
-    timeMaterial === true &&
-    (trainingDowTaskNumbers.includes("4.3.1.3") ||
-      trainingDowTaskNumbers.includes("4.3.2.1") ||
-      trainingDowTaskNumbers.includes("4.3.3.3"))
-  ) {
-    trainingClinNumbers.push("x018");
-  }
-  if (trainingDowTaskNumbers.includes("4.3.4.3")) {
-    if (ffp) {
-      trainingClinNumbers.push("x004");
-    }
-    if (timeMaterial) {
-      trainingClinNumbers.push("x020");
-    }
+  // Training
+  const training = {
+    taskNumbers: Array.from(trainingTaskNumbers),
+    clins: Array.from(trainingClins),
+  };
+
+  if (training.taskNumbers.length >= 1) {
+    cdrl.push({ ...training, code: "*A004", name: "System Administrator Training Materials" });
+    cdrl.push({ ...training, code: "*A005", name: "Role-Based User Training Material" });
   }
 
-  /**
-   * Portability
-   */
-  if (
-    ffp === true &&
-    (portabilityPlanTaskNumbers.includes("4.3.1.3") ||
-      portabilityPlanTaskNumbers.includes("4.3.2.1") ||
-      portabilityPlanTaskNumbers.includes("4.3.3.3"))
-  ) {
-    portabilityClinNumbers.push("x002");
-  } else if (
-    timeMaterial === true &&
-    (portabilityPlanTaskNumbers.includes("4.3.1.3") ||
-      portabilityPlanTaskNumbers.includes("4.3.2.1") ||
-      portabilityPlanTaskNumbers.includes("4.3.3.3"))
-  ) {
-    portabilityClinNumbers.push("x018");
-  }
-  if (portabilityPlanTaskNumbers.includes("4.3.4.3")) {
-    if (ffp) {
-      portabilityClinNumbers.push("x004");
-    }
-    if (timeMaterial) {
-      portabilityClinNumbers.push("x020");
-    }
-  }
-  /**
-   * Monthly Progress Report
-   */
-  if (ffp === true && (check4IL2 > 0 || check4IL4 > 0 || check4IL5 > 0)) {
-    monthlyClinNumbers += "x001";
-  }
-  if (ffp === true && check4IL6 > 0) {
-    monthlyClinNumbers += "x003";
-  }
-  if (timeMaterial === true && (check4IL2 > 0 || check4IL4 > 0 || check4IL5 > 0)) {
-    monthlyClinNumbers += "x017";
-  }
-  if (timeMaterial === true && check4IL6 > 0) {
-    monthlyClinNumbers += "x019";
-  }
-  /**
-   * Tactical Edge Device Specifications
-   */
-
-  if (il2EdgeCount >= 1) {
-    teDeviceTaskNumbers.push("4.2.1.9");
-  }
-  if (il4EdgeCount >= 1) {
-    teDeviceTaskNumbers.push("4.2.2.9");
-  }
-  if (il5EdgeCount >= 1) {
-    teDeviceTaskNumbers.push("4.2.3.9");
-  }
-  if (il6EdgeCount >= 1) {
-    teDeviceTaskNumbers.push("4.2.4.9");
+  // Monthly Report
+  const ffpClins = Array.from(ffp);
+  const tmClins = Array.from(tm);
+  const progressReport = {
+    taskNumbers: ["ANY"],
+    clins: [...ffpClins, ...tmClins],
+    code: "A012",
+    name: "TO Monthly Progress Report",
+  };
+  if (progressReport.clins.length >= 1) {
+    cdrl.push(progressReport);
   }
 
-  if (
-    ffp === true &&
-    (teDeviceTaskNumbers.includes("4.2.1.9") ||
-      teDeviceTaskNumbers.includes("4.2.2.9") ||
-      teDeviceTaskNumbers.includes("4.2.3.9"))
-  ) {
-    teDeviceClinNumbers.push("x001");
-  }
-  if (
-    timeMaterial === true &&
-    (teDeviceTaskNumbers.includes("4.2.1.9") ||
-      teDeviceTaskNumbers.includes("4.2.2.9") ||
-      teDeviceTaskNumbers.includes("4.2.3.9"))
-  ) {
-    teDeviceClinNumbers.push("x017");
-  }
-  if (ffp === true && teDeviceTaskNumbers.includes("4.2.4.9")) {
-    teDeviceClinNumbers.push("x003");
-  }
-  if (timeMaterial === true && teDeviceTaskNumbers.includes("4.2.4.9")) {
-    teDeviceClinNumbers.push("x019");
+  // Portability Plan
+  const portabilityPlan = {
+    taskNumbers: Array.from(portabilityTaskNumbers),
+    clins: Array.from(portabilityPlanClins),
+    code: `**A006`,
+    name: "Portability Plan",
+  };
+  if (portabilityPlan.taskNumbers.length >= 1) {
+    cdrl.push({ ...portabilityPlan });
   }
 
-  if (trainingDowTaskNumbers.length !== 0) {
-    const obj = {
-      dowTaskNumbers: trainingDowTaskNumbers.toString(),
-      clinNumbers: trainingClinNumbers.toString(),
-      cdrl: {
-        code: "*A004",
-        name: "System Administrator Training Materials",
-      },
-    };
-    data.push(obj);
-    const obj2 = {
-      dowTaskNumbers: trainingDowTaskNumbers.toString(),
-      clinNumbers: trainingClinNumbers.toString(),
-      cdrl: {
-        code: "*A005",
-        name: "Role-Based User Training Materials",
-      },
-    };
-    data.push(obj2);
+  // Technical Edge
+  const edge = {
+    taskNumbers: Array.from(edgeTaskNumbers),
+    clins: Array.from(edgeClins),
+    code: `***A017`,
+    name: "TE Device Specifications",
+  };
+  if (edge.taskNumbers.length >= 1) {
+    cdrl.push({ ...edge });
   }
-  if (portabilityPlanTaskNumbers.length !== 0) {
-    const obj = {
-      dowTaskNumbers: portabilityPlanTaskNumbers.toString(),
-      clinNumbers: portabilityClinNumbers.toString(),
-      cdrl: {
-        code: "**A006",
-        name: "Portability Plan",
-      },
-    };
-    data.push(obj);
-  }
-  if (monthlyClinNumbers.length > 0) {
-    const obj = {
-      dowTaskNumbers: "ANY",
-      clinNumbers: monthlyClinNumbers,
-      cdrl: {
-        code: "A012",
-        name: "TO Monthly Progress Report",
-      },
-    };
-    data.push(obj);
-  }
-  if (teDeviceClinNumbers.length > 0) {
-    const obj = {
-      dowTaskNumbers: teDeviceTaskNumbers.toString(),
-      clinNumbers: teDeviceClinNumbers.toString(),
-      cdrl: {
-        code: "***A017",
-        name: "TE Device Specifications",
-      },
-    };
-    data.push(obj);
-  }
-  return data;
+
+  return cdrl;
 };

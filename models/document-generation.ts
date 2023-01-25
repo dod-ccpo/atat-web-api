@@ -1,5 +1,6 @@
 /* eslint-disable camelcase */
 import { APIGatewayEventRequestContext } from "aws-lambda";
+import { IDescriptionOfWork } from "./document-generation/description-of-work";
 import { requirementsCheckList, RequirementsChecklist } from "./document-generation/requirements-checklist";
 
 export enum AwardType {
@@ -328,7 +329,7 @@ export interface EvaluationPlan {
 export interface GenerateDocumentRequest {
   documentType: DocumentType;
   templatePayload:
-    | DescriptionOfWork
+    | IDescriptionOfWork
     | IndependentGovernmentCostEstimate
     | IncrementalFundingPlan
     | EvaluationPlan
@@ -413,7 +414,7 @@ const currentEnvironment = {
     hasPhasedApproach: { type: "boolean" },
     phasedApproachSchedule: { type: "string" },
     needsArchitecturalDesignServices: { type: "boolean" },
-    architecturalDesignRequirement: { type: "object" },
+    architecturalDesignRequirement: { type: "object", nullable: true },
     additionalInfo: { type: "string" },
   },
 };
@@ -478,7 +479,7 @@ export const periodOfPerformance = {
     optionPeriods: { type: "array", items: period },
     popStartRequest: { type: "boolean" },
     requestedPopStartDate: { type: "string" },
-    timeFrame: { enum: [TimeFrame.NO_LATER_THAN, TimeFrame.NO_SOONER_THAN] },
+    timeFrame: { enum: [TimeFrame.NO_LATER_THAN, TimeFrame.NO_SOONER_THAN, null] },
     recurringRequirement: { type: "boolean" },
   },
 };
@@ -532,7 +533,7 @@ const descriptionOfWork = {
     surgeRequirementCapabilities: { type: "boolean" },
     currentEnvironment,
     selectedClassificationLevels: { type: "array", items: { type: "object" } },
-    architecturalDesignRequirement: { type: "object" },
+    architecturalDesignRequirement: { type: "object", nullable: true },
     xaasOfferings: { type: "object" },
     crossDomainSolutions: { type: "object" },
     cloudSupportPackages: { type: "array", items: { type: "object" } },

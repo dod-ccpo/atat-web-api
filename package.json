@@ -62,7 +62,7 @@
     "@middy/validator": "^3.6.2",
     "@sparticuz/chromium": "^108.0.1",
     "aws-cdk-lib": "2.61.1",
-    "axios": "^1.2.3",
+    "axios": "^1.2.4",
     "axios-mock-adapter": "^1.21.2",
     "cdk-monitoring-constructs": "^1.30.11",
     "cdk-nag": "^2.21.68",
