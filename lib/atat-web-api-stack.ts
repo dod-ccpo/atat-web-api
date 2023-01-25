@@ -68,10 +68,23 @@ export class AtatWebApiStack extends cdk.Stack {
           action: "getCallerIdentity",
           physicalResourceId: cr.PhysicalResourceId.of("unused-value"),
         },
-        // vpc: props.network?.vpc,
+        vpc: props.network?.vpc,
         policy: cr.AwsCustomResourcePolicy.fromSdkCalls({ resources: cr.AwsCustomResourcePolicy.ANY_RESOURCE }),
       });
     }
+
+    NagSuppressions.addResourceSuppressionsByPath(
+      this,
+      `/${this.node.path}/AWS679f53fac002430cb0da5b7982bd2287/Resource`,
+      [
+        {
+          id: "NIST.800.53.R4-LambdaInsideVPC",
+          reason:
+            "The AwsCustomResource type does not support being placed in a VPC. " +
+            "This can only ever make limited-permissions calls that will appear in CloudTrail.",
+        },
+      ]
+    );
 
     const { environmentName, network } = props;
     const apiProps: AtatRestApiProps = {
