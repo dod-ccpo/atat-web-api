@@ -1,5 +1,5 @@
 import { camelCase, snakeCase, mapKeys, mapValues, cloneDeep, isPlainObject, isArray, map } from "lodash";
-import { AxiosRequestConfig, AxiosResponse } from "axios";
+import { AxiosResponse, InternalAxiosRequestConfig } from "axios";
 
 /**
  * Deeply convert keys within an object to a given case (either snake_case or camelCase are
@@ -43,7 +43,7 @@ export function snakeToCamelResponseInterceptor(response: AxiosResponse): AxiosR
   return response;
 }
 
-export function camelToSnakeRequestInterceptor(config: AxiosRequestConfig): AxiosRequestConfig {
+export function camelToSnakeRequestInterceptor(config: InternalAxiosRequestConfig): InternalAxiosRequestConfig {
   const newConfig = { ...config };
   if (config.data) {
     newConfig.data = snakeCaseObject(config.data);
