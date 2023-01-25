@@ -60,7 +60,7 @@
     "@middy/http-json-body-parser": "^3.6.2",
     "@middy/input-output-logger": "^3.6.2",
     "@middy/validator": "^3.6.2",
-    "@sparticuz/chromium": "^108.0.1",
+    "@sparticuz/chromium": "^110.0.0",
     "aws-cdk-lib": "2.61.1",
     "axios": "^1.2.4",
     "axios-mock-adapter": "^1.21.2",
