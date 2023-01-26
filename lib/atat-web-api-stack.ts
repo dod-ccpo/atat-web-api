@@ -63,7 +63,7 @@ export class AtatWebApiStack extends cdk.Stack {
     // the best possible workaround.
     if (props.network) {
       new cr.AwsCustomResource(this, "NopCustomResource", {
-        onCreate: {
+        onUpdate: {
           service: "STS",
           action: "getCallerIdentity",
           physicalResourceId: cr.PhysicalResourceId.of("unused-value"),
