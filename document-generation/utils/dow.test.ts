@@ -1,14 +1,86 @@
-import { ServiceOfferingGroup } from "../../models/document-generation/description-of-work";
+import { ImpactLevel, ServiceOfferingGroup } from "../../models/document-generation/description-of-work";
 import {
+  formatExpirationDate,
+  formatImpactLevel,
+  formatRegionUsers,
+  formatStorageType,
+  getCDRLs,
   getInstancePop,
+  getSelectedInstances,
   getTaskPeriods,
+  InstancesWithStorageType,
   organizeXaasServices,
   sortInstanceClassificationLevels,
+  sortSelectedClassificationLevels,
   sortSelectedServicesByGroups,
+  sortSupportPackagesByGroups,
+  sortSupportPackagesByLevels,
 } from "./dow";
 import { sampleDowRequest } from "./sampleTestData";
 
-describe("Sorting XaaS Services", () => {
+describe("Formatting Utils", () => {
+  it("formatStorageType - compute env", async () => {
+    const envInstance = sampleDowRequest.templatePayload.xaasOfferings.computeInstances[0];
+    const formattedStorageType = formatStorageType(envInstance as InstancesWithStorageType);
+    const expectedFormat = "Compute Storage: 500 GB";
+    expect(formattedStorageType).toBe(expectedFormat);
+  });
+  it.each([undefined, null, ""])("formatStorageType - '%s'", async (instance) => {
+    // const envInstance = sampleDowRequest.templatePayload.xaasOfferings.computeInstances[0];
+    const formattedStorageType = formatStorageType(instance as unknown as InstancesWithStorageType);
+    const expectedFormat = "N/A";
+    expect(formattedStorageType).toBe(expectedFormat);
+  });
+
+  it.each(["2023-02-28", "Feb. 28, 2023", "2023-02-28 17:45:08"])("formatExpirationDate - '%s'", async (goodDate) => {
+    const expirationDate = formatExpirationDate(goodDate);
+    const expectedFormat = "2/28/2023";
+    expect(expirationDate).toBe(expectedFormat);
+  });
+  it.each([undefined, null, "", "Exp Date"])("formatExpirationDate - '%s'", async (badDate) => {
+    const expirationDate = formatExpirationDate(badDate as string);
+    const expectedFormat = "N/A";
+    expect(expirationDate).toBe(expectedFormat);
+  });
+
+  it("formatImpactLevel", async () => {
+    const compute = sampleDowRequest.templatePayload.xaasOfferings.computeInstances[0];
+    const expirationDate = formatImpactLevel(compute.classificationLevel.impactLevel);
+    const expectedFormat = "Impact Level IL5 (IL5)";
+    expect(expirationDate).toBe(expectedFormat);
+  });
+  it.each([undefined, null, "", "Not an Impact level"])("formatImpactLevel - '%s'", async (badImpactLevel) => {
+    const impactLevel = formatImpactLevel(badImpactLevel as string);
+    const expectedFormat = "N/A";
+    expect(impactLevel).toBe(expectedFormat);
+  });
+
+  it("formatRegionUsers", async () => {
+    const usersPerRegion = sampleDowRequest.templatePayload.currentEnvironment.envInstances[1].usersPerRegion;
+    const formattedUsersPerRegion = formatRegionUsers(usersPerRegion);
+    const expectedFormat = ["CONUS Central: 19,238", "AFRICOM: 13,939"];
+    expect(formattedUsersPerRegion).toEqual(expectedFormat);
+  });
+  it.each([undefined, null, "", "String usersPerRegion"])("formatRegionUsers - '%s'", async (badUsersPerRegion) => {
+    const formattedUsersPerRegion = formatRegionUsers(badUsersPerRegion as string);
+    const expectedFormat: string[] = [];
+    expect(formattedUsersPerRegion).toEqual(expectedFormat);
+  });
+});
+
+describe("Sorting XaaS Services - happy paths", () => {
+  it("getSelectedInstances", async () => {
+    const selectedServices = sortSelectedServicesByGroups(
+      sampleDowRequest.templatePayload.xaasOfferings.selectedServiceInstances
+    );
+    const selectedInstances = getSelectedInstances(
+      ImpactLevel.IL5,
+      ServiceOfferingGroup.APPLICATIONS,
+      selectedServices
+    );
+    expect(selectedInstances[0].serviceOfferingGroup).toBe(ServiceOfferingGroup.APPLICATIONS);
+    expect(selectedInstances).toHaveLength(3);
+  });
   it("sortInstanceClassificationLevels", async () => {
     const computeInstances = sampleDowRequest.templatePayload.xaasOfferings.computeInstances;
     const sortedComputeInstances = sortInstanceClassificationLevels(computeInstances);
@@ -17,6 +89,15 @@ describe("Sorting XaaS Services", () => {
     expect(sortedComputeInstances.il5).toHaveLength(1);
     expect(sortedComputeInstances.il6).toHaveLength(1);
     expect(sortedComputeInstances.ts).toHaveLength(0);
+  });
+  it("sortSelectedClassificationLevels", async () => {
+    const selectedClassifications = sampleDowRequest.templatePayload.selectedClassificationLevels;
+    const sortedClassificationLevels = sortSelectedClassificationLevels(selectedClassifications);
+    expect(sortedClassificationLevels.il2).toBeDefined();
+    expect(sortedClassificationLevels.il4).toBeUndefined();
+    expect(sortedClassificationLevels.il5).toBeDefined();
+    expect(sortedClassificationLevels.il6).toBeDefined();
+    expect(sortedClassificationLevels.ts).toBeUndefined();
   });
   it("sortSelectedServicesByGroups", async () => {
     const selectedInstances = sampleDowRequest.templatePayload.xaasOfferings.selectedServiceInstances;
@@ -62,6 +143,29 @@ describe("Sorting XaaS Services", () => {
   });
 });
 
+describe("Sorting XaaS Services - sad path", () => {
+  it("sortInstanceClassificationLevels - exclude compute instance if no classification level", async () => {
+    const computeInstanceNoClassificationLevel = {
+      ...sampleDowRequest.templatePayload.xaasOfferings.computeInstances[0],
+      classificationLevel: null,
+    };
+    const sortedComputeInstancesByLevel = sortInstanceClassificationLevels([computeInstanceNoClassificationLevel]);
+
+    expect(sortedComputeInstancesByLevel).toEqual({ il2: [], il4: [], il5: [], il6: [], ts: [] });
+  });
+  it("sortSupportPackagesByLevels - exclude support pkg if no classification level", async () => {
+    const trainingPackageNoClassificationLevel = {
+      ...sampleDowRequest.templatePayload.cloudSupportPackages[0],
+      classificationLevel: null,
+    };
+    const cloudSupportPackages = [trainingPackageNoClassificationLevel];
+    const sortedCloudPkgs = sortSupportPackagesByGroups(cloudSupportPackages);
+    const sortedCloudPkgsByLevel = sortSupportPackagesByLevels(sortedCloudPkgs);
+
+    expect(sortedCloudPkgsByLevel).toEqual({ TRAINING: { il2: [], il4: [], il5: [], il6: [], ts: [] } });
+  });
+});
+
 describe("Gather Tasks for PoP", () => {
   it("getTaskPeriods", async () => {
     const payload = sampleDowRequest.templatePayload;
@@ -82,7 +186,7 @@ describe("Gather Tasks for PoP", () => {
     expect(popTasks.taskNumberGroups).toEqual(expectedTasks.taskNumberGroups);
   });
 
-  it("getInstancePop", async () => {
+  it("getInstancePop - happy path", async () => {
     const computeInstance = sampleDowRequest.templatePayload.xaasOfferings.computeInstances[0];
 
     const computeInstancesTaskPops = getInstancePop(computeInstance, ServiceOfferingGroup.COMPUTE, 0);
@@ -91,5 +195,45 @@ describe("Gather Tasks for PoP", () => {
       entireDuration: false,
       taskPeriods: ["OP1", "OP2"],
     });
+  });
+});
+
+describe("getCDRLs", () => {
+  it("All rows present", async () => {
+    const payload = sampleDowRequest.templatePayload;
+    const popTasks = getTaskPeriods(payload);
+    const entirePeriodTasks = popTasks.entireDurationTasks.map((taskNumber: any) => taskNumber);
+    const selectedPeriodTask = popTasks.taskNumberGroups.flatMap((group: any) => group.dowTaskNumbers);
+    const allPopTasks = entirePeriodTasks.concat(selectedPeriodTask);
+    const expectedCdrls = [
+      { code: "*A004", clins: ["x004"], name: "System Administrator Training Materials", taskNumbers: ["4.3.4.3"] },
+      { code: "*A005", clins: ["x004"], name: "Role-Based User Training Material", taskNumbers: ["4.3.4.3"] },
+      { code: "A012", clins: ["x001", "x003"], name: "TO Monthly Progress Report", taskNumbers: ["ANY"] },
+      { code: "**A006", clins: ["x001"], name: "Portability Plan", taskNumbers: ["4.3.3"] },
+      { code: "***A017", clins: ["x001"], name: "TE Device Specifications", taskNumbers: ["4.2.1.9"] },
+    ];
+
+    const cdrls = getCDRLs(allPopTasks, payload.contractType);
+    expect(cdrls).toEqual(expectedCdrls);
+    expect(cdrls).toHaveLength(expectedCdrls.length);
+  });
+  it("Only TE and monthly report rows", async () => {
+    const payload = sampleDowRequest.templatePayload;
+    const popTasks = getTaskPeriods(payload);
+    const entirePeriodTasks = popTasks.entireDurationTasks.map((taskNumber: any) => taskNumber);
+    const selectedPeriodTask = popTasks.taskNumberGroups.flatMap((group: any) => group.dowTaskNumbers);
+    const expectedTaskNumbers = ["4.2.1.9"];
+    const allPopTasks = entirePeriodTasks
+      .concat(selectedPeriodTask)
+      .map((taskNumber: string) => taskNumber.slice(0, 7))
+      .filter((taskNumber: any) => expectedTaskNumbers.includes(taskNumber));
+    const expectedCdrls = [
+      { code: "A012", clins: ["x001"], name: "TO Monthly Progress Report", taskNumbers: ["ANY"] },
+      { code: "***A017", clins: ["x001"], name: "TE Device Specifications", taskNumbers: ["4.2.1.9"] },
+    ];
+
+    const cdrls = getCDRLs(allPopTasks, payload.contractType);
+    expect(cdrls).toEqual(expectedCdrls);
+    expect(cdrls).toHaveLength(expectedCdrls.length);
   });
 });
