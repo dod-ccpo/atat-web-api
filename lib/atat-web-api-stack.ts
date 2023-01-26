@@ -73,18 +73,18 @@ export class AtatWebApiStack extends cdk.Stack {
       });
     }
 
-    // NagSuppressions.addResourceSuppressionsByPath(
-    //   this,
-    //   `/${this.node.path}/AWS679f53fac002430cb0da5b7982bd2287/Resource`,
-    //   [
-    //     {
-    //       id: "NIST.800.53.R4-LambdaInsideVPC",
-    //       reason:
-    //         "The AwsCustomResource type does not support being placed in a VPC. " +
-    //         "This can only ever make limited-permissions calls that will appear in CloudTrail.",
-    //     },
-    //   ]
-    // );
+    NagSuppressions.addResourceSuppressionsByPath(
+      this,
+      `/${this.node.path}/AWS679f53fac002430cb0da5b7982bd2287/Resource`,
+      [
+        {
+          id: "NIST.800.53.R4-LambdaInsideVPC",
+          reason:
+            "The AwsCustomResource type does not support being placed in a VPC. " +
+            "This can only ever make limited-permissions calls that will appear in CloudTrail.",
+        },
+      ]
+    );
 
     const { environmentName, network } = props;
     const apiProps: AtatRestApiProps = {
@@ -270,19 +270,6 @@ export class AtatWebApiStack extends cdk.Stack {
     const urlOutput = new cdk.CfnOutput(this, "IdpDiscoveryUrl", {
       value: atatIdp.discoveryUrl(),
     });
-
-    NagSuppressions.addResourceSuppressionsByPath(
-      this,
-      `/${this.node.path}/AWS679f53fac002430cb0da5b7982bd2287/Resource`,
-      [
-        {
-          id: "NIST.800.53.R4-LambdaInsideVPC",
-          reason:
-            "The AwsCustomResource type does not support being placed in a VPC. " +
-            "This can only ever make limited-permissions calls that will appear in CloudTrail.",
-        },
-      ]
-    );
 
     // State Machine and workflow
     const provisioningSfn = new ProvisioningWorkflow(this, "ProvisioningWorkflow", {
