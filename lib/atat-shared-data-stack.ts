@@ -1,5 +1,8 @@
 import * as cdk from "aws-cdk-lib";
 import * as kms from "aws-cdk-lib/aws-kms";
+import * as logs from "aws-cdk-lib/aws-logs";
+import { RetentionDays } from "aws-cdk-lib/aws-logs";
+import { NagSuppressions } from "cdk-nag";
 import { Construct } from "constructs";
 
 export class AtatSharedDataStack extends cdk.Stack {
@@ -15,5 +18,17 @@ export class AtatSharedDataStack extends cdk.Stack {
     });
     this.encryptionKeyAlias = key.addAlias("atat-default");
     this.encryptionKey = key;
+
+    // Cloudwatch Log group for C5ISR
+    const logGroup = new logs.LogGroup(this, "cssp-cwl-logs", {
+      //  logGroupName: `${environmentName.toLowerCase()}-cssp-cwl-logs`,
+      retention: RetentionDays.INFINITE,
+    });
+    NagSuppressions.addResourceSuppressions(logGroup, [
+      {
+        id: "NIST.800.53.R4-CloudWatchLogGroupRetentionPeriod",
+        reason: "Setting retention to infinte so no minimum retention is needed. ",
+      },
+    ]);
   }
 }

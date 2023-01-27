@@ -3,6 +3,7 @@ import * as cognito from "aws-cdk-lib/aws-cognito";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as secrets from "aws-cdk-lib/aws-secretsmanager";
 import * as cr from "aws-cdk-lib/custom-resources";
+import { NagSuppressions } from "cdk-nag";
 import { Construct, DependencyGroup } from "constructs";
 
 /**

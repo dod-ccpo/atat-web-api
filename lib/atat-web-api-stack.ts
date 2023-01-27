@@ -63,14 +63,27 @@ export class AtatWebApiStack extends cdk.Stack {
     // the best possible workaround.
     if (props.network) {
       new cr.AwsCustomResource(this, "NopCustomResource", {
-        onCreate: {
+        onUpdate: {
           service: "STS",
           action: "getCallerIdentity",
           physicalResourceId: cr.PhysicalResourceId.of("unused-value"),
         },
-        vpc: props.network?.vpc,
+        // vpc: props.network?.vpc,
         policy: cr.AwsCustomResourcePolicy.fromSdkCalls({ resources: cr.AwsCustomResourcePolicy.ANY_RESOURCE }),
       });
+
+      NagSuppressions.addResourceSuppressionsByPath(
+        this,
+        `/${this.node.path}/AWS679f53fac002430cb0da5b7982bd2287/Resource`,
+        [
+          {
+            id: "NIST.800.53.R4-LambdaInsideVPC",
+            reason:
+              "The AwsCustomResource type does not support being placed in a VPC. " +
+              "This can only ever make limited-permissions calls that will appear in CloudTrail.",
+          },
+        ]
+      );
     }
 
     const { environmentName, network } = props;
@@ -195,18 +208,6 @@ export class AtatWebApiStack extends cdk.Stack {
         true
       );
     });
-
-    // Cloudwatch Logs for C5ISR
-    const logGroup = new logs.LogGroup(this, "LogGroup", {
-      logGroupName: `${environmentName.toLowerCase()}-cssp-cwl-logs`,
-      retention: RetentionDays.INFINITE,
-    });
-    NagSuppressions.addResourceSuppressions(logGroup, [
-      {
-        id: "NIST.800.53.R4-CloudWatchLogGroupRetentionPeriod",
-        reason: "Setting retention to infinte so no minimum retention is needed. ",
-      },
-    ]);
 
     // Ensure that no IAM users in this Stack can ever do anything
     // except for invoke the created API Gateway.
