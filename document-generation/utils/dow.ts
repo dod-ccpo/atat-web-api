@@ -408,7 +408,6 @@ export const getTaskPeriods = (payload: any) => {
   }
 
   const uniqueSelectedSupportPackages = new Set();
-  // const selectedCloudSupportPackages = cloudSupportPackages.map((instance: any) => instance.serviceType);
   cloudSupportPackages.forEach((instance: any) => {
     const { serviceType } = instance;
     const serviceTypeFound = uniqueSelectedSupportPackages.has(serviceType);
@@ -417,7 +416,6 @@ export const getTaskPeriods = (payload: any) => {
     }
   });
   const selectedCloudSupportPackages = Array.from(uniqueSelectedSupportPackages) as string[];
-  console.log(selectedCloudSupportPackages)
   const sortedCloudPkgs = sortSupportPackagesByLevels(sortSupportPackagesByGroups(cloudSupportPackages));
 
   const cloudPackagesTaskNumbers = levelIdentifiers.flatMap((id: string) => {

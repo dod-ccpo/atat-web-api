@@ -932,7 +932,7 @@ components:
           type: string
           enum:
             - CLOUD
-            - ON_PREMISE
+            - ON_PREM
         region:
           $ref: "#/components/schemas/Region"
         performanceTier:
