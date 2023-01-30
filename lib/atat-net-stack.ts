@@ -57,8 +57,12 @@ export class AtatNetStack extends cdk.Stack {
       })
     );
 
-    const vflbucket = s3.Bucket.fromBucketAttributes(this, "ImportedBucket", {
-      bucketArn: props.vpcFlowLogBucket,
+    // const vflbucket = s3.Bucket.fromBucketAttributes(this, "ImportedBucket", {
+    //   bucketArn: props.vpcFlowLogBucket,
+    // });
+
+    const cwLogs = new logs.LogGroup(this, "Log", {
+      logGroupName: "vpc-cssp-cwl-logs",
     });
 
     // Capture all VPC flow logs and send to CloudWatch Logs with indefinite retention.
@@ -88,7 +92,7 @@ export class AtatNetStack extends cdk.Stack {
         ec2.LogFormat.custom("${log-status}"),
         /* eslint-enable no-template-curly-in-string */
       ],
-      destination: ec2.FlowLogDestination.toS3(vflbucket),
+      destination: ec2.FlowLogDestination.toCloudWatchLogs(cwLogs),
     });
 
     // const dnsLogsGroup = new logs.LogGroup(this, "VpcDnsQueryLogs", {
