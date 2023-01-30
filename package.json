@@ -74,7 +74,7 @@
     "juice": "^8.1.0",
     "lodash": "^4.17.21",
     "middy-middleware-json-error-handler": "^3.0.0",
-    "puppeteer-core": "^19.6.0",
+    "puppeteer-core": "^19.6.2",
     "source-map-support": "^0.5.21",
     "xss": "^1.0.14"
   }
