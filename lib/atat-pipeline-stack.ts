@@ -36,16 +36,16 @@ class AtatApplication extends cdk.Stage {
       apiDomain: props.apiDomain,
       network: net,
     });
-    const sharedData = new AtatSharedDataStack(this, "AtatSharedData");
-    const monitoredStacks: cdk.Stack[] = [net, atat];
-    if (props.notificationEmail) {
-      monitoredStacks.push(
-        new AtatNotificationStack(this, "AtatNotifications", {
-          notificationEmail: props.notificationEmail,
-          topicEncryptionKey: sharedData.encryptionKey,
-        })
-      );
-    }
+    // const sharedData = new AtatSharedDataStack(this, "AtatSharedData");
+    // const monitoredStacks: cdk.Stack[] = [net, atat];
+    // if (props.notificationEmail) {
+    //   monitoredStacks.push(
+    //     new AtatNotificationStack(this, "AtatNotifications", {
+    //       notificationEmail: props.notificationEmail,
+    //       topicEncryptionKey: sharedData.encryptionKey,
+    //     })
+    //   );
+    // }
     // const monitoring = new AtatMonitoringStack(this, "AtatMonitoring", {
     //   monitoredScopes: monitoredStacks,
     //   notifiedEmail: props.notificationEmail,
