@@ -36,7 +36,7 @@ class AtatApplication extends cdk.Stage {
       apiDomain: props.apiDomain,
       network: net,
     });
-    // const sharedData = new AtatSharedDataStack(this, "AtatSharedData");
+    const sharedData = new AtatSharedDataStack(this, "AtatSharedData");
     // const monitoredStacks: cdk.Stack[] = [net, atat];
     // if (props.notificationEmail) {
     //   monitoredStacks.push(
