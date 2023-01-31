@@ -103,7 +103,7 @@ export class AtatWebApiStack extends cdk.Stack {
       };
     }
 
-    const accessLogsBucket = new s3.Bucket(this, "ResourceAccessLogs", {
+    const accessLogsBucket = new s3.Bucket(this, "ResourceAccess-Logs", {
       // Elastic Load Balancing Log Delivery requires SSE-S3 and _does not_ support
       // SSE-KMS. This still ensures that log data is encrypted at rest.
       encryption: s3.BucketEncryption.S3_MANAGED,
