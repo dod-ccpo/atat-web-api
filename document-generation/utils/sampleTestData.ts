@@ -804,7 +804,7 @@ export const sampleDowRequest = {
     },
     cloudSupportPackages: [
       {
-        instanceName: "Some training",
+        instanceName: "Training #1",
         instanceLocation: null,
         numberOfInstances: 1,
         usageDescription: null,

@@ -100,6 +100,7 @@ const organization = {
 
 const contact = {
   type: "object",
+  nullable: true,
   properties: {
     type: {
       enum: [ContactType.MISSION_OWNER, ContactType.COR, ContactType.ACOR, ContactType.FINANCIAL_POC],

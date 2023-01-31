@@ -56,7 +56,7 @@ export enum ImpactLevel {
 export enum InstanceLocation {
   CSP = "CSP",
   HYBRID = "HYBRID",
-  ON_PREMISE = "ON_PREMISE",
+  ON_PREM = "ON_PREM",
 }
 
 export enum TargetCspName {
@@ -379,7 +379,7 @@ const environmentInstance = {
   properties: {
     instanceName: { type: "string" },
     classificationLevel,
-    instanceLocation: { enum: [InstanceLocation.CSP, InstanceLocation.HYBRID, InstanceLocation.ON_PREMISE] },
+    instanceLocation: { enum: [InstanceLocation.CSP, InstanceLocation.HYBRID, InstanceLocation.ON_PREM] },
     cspRegion: { enum: [TargetCspName.CSP_A, TargetCspName.CSP_B, TargetCspName.CSP_C, TargetCspName.CSP_D, null] },
     performanceTier: { type: "string" },
     pricingModel: { enum: [PricingModel.ON_DEMAND, PricingModel.PAY_AS_YOU_GO, PricingModel.RESERVED] },

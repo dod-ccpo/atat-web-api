@@ -168,9 +168,25 @@ describe("Sorting XaaS Services - sad path", () => {
 
 describe("Gather Tasks for PoP", () => {
   it("getTaskPeriods", async () => {
-    const payload = sampleDowRequest.templatePayload;
+    // An additional training is added to ensure no duplication occurs in cloud support packages
+    const extraTraining = {
+      ...sampleDowRequest.templatePayload.cloudSupportPackages[0],
+      instanceName: "Training #2",
+      anticipatedNeedOrUsage: "public training",
+      classificationLevel: {
+        classification: "U",
+        display: "Unclassified - IL4",
+        impactLevel: "IL4",
+      },
+      classifiedInformationTypes: [],
+    };
+    const payload = {
+      ...sampleDowRequest.templatePayload,
+      cloudSupportPackages: [...sampleDowRequest.templatePayload.cloudSupportPackages, extraTraining],
+    };
+    const expectedTaskNumbersLength = 18;
     const expectedTasks = {
-      // entireDurationTasksLength: [], // 17 found
+      // entireDurationTasks: [], // left out for brevity
       popPeriods: ["B", "OP1", "OP2", "OP3"],
       taskNumberGroups: [
         { dowTaskNumbers: ["4.2.3.1.1"], taskPeriods: ["OP1", "OP2"] },
@@ -180,7 +196,7 @@ describe("Gather Tasks for PoP", () => {
     };
 
     const popTasks = getTaskPeriods(payload);
-    expect(popTasks.entireDurationTasks).toHaveLength(17);
+    expect(popTasks.entireDurationTasks).toHaveLength(expectedTaskNumbersLength);
     expect(popTasks.popPeriods).toEqual(expectedTasks.popPeriods);
     expect(popTasks.taskNumberGroups).toHaveLength(expectedTasks.taskNumberGroups.length);
     expect(popTasks.taskNumberGroups).toEqual(expectedTasks.taskNumberGroups);
@@ -206,8 +222,18 @@ describe("getCDRLs", () => {
     const selectedPeriodTask = popTasks.taskNumberGroups.flatMap((group: any) => group.dowTaskNumbers);
     const allPopTasks = entirePeriodTasks.concat(selectedPeriodTask);
     const expectedCdrls = [
-      { code: "*A004", clins: ["x004"], name: "System Administrator Training Materials", taskNumbers: ["4.3.4.3"] },
-      { code: "*A005", clins: ["x004"], name: "Role-Based User Training Material", taskNumbers: ["4.3.4.3"] },
+      {
+        code: "*A004",
+        clins: ["x004"],
+        name: "System Administrator Training Materials",
+        taskNumbers: ["4.3.4.3"],
+      },
+      {
+        code: "*A005",
+        clins: ["x004"],
+        name: "Role-Based User Training Material",
+        taskNumbers: ["4.3.4.3"],
+      },
       { code: "A012", clins: ["x001", "x003"], name: "TO Monthly Progress Report", taskNumbers: ["ANY"] },
       { code: "**A006", clins: ["x001"], name: "Portability Plan", taskNumbers: ["4.3.3"] },
       { code: "***A017", clins: ["x001"], name: "TE Device Specifications", taskNumbers: ["4.2.1.9"] },
