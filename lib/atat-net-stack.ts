@@ -19,7 +19,7 @@ export interface AtatNetStackProps extends cdk.StackProps {
    * the application. This value should almost always be provided.
    */
   vpcCidr?: string;
-  vpcFlowLogBucket: string;
+  vpcFlowLogBucket?: string;
 }
 
 /**
@@ -57,11 +57,7 @@ export class AtatNetStack extends cdk.Stack {
       })
     );
 
-    const vflbucket = s3.Bucket.fromBucketAttributes(this, "ImportedBucket", {
-      bucketArn: props.vpcFlowLogBucket,
-    });
-
-    // Capture all VPC flow logs and send to S3 Logs with indefinite retention.
+    // Capture all VPC flow logs and send to CloudWatch Logs with indefinite retention.
     // Flow log format made to meet C5ISR log format requirement
     /* eslint-disable no-template-curly-in-string */
     vpc.addFlowLog("AllFlowLogs", {
@@ -88,7 +84,11 @@ export class AtatNetStack extends cdk.Stack {
         ec2.LogFormat.custom("${log-status}"),
         /* eslint-enable no-template-curly-in-string */
       ],
-      destination: ec2.FlowLogDestination.toS3(vflbucket),
+      destination: ec2.FlowLogDestination.toCloudWatchLogs(
+        new logs.LogGroup(this, "vpc-cssp-cwl-logs", {
+          retention: logs.RetentionDays.INFINITE,
+        })
+      ),
     });
 
     // const dnsLogsGroup = new logs.LogGroup(this, "VpcDnsQueryLogs", {
