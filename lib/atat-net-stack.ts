@@ -61,7 +61,7 @@ export class AtatNetStack extends cdk.Stack {
       bucketArn: props.vpcFlowLogBucket,
     });
 
-    // Capture all VPC flow logs and send to CloudWatch Logs with indefinite retention.
+    // Capture all VPC flow logs and send to S3 Logs with indefinite retention.
     // Flow log format made to meet C5ISR log format requirement
     /* eslint-disable no-template-curly-in-string */
     vpc.addFlowLog("AllFlowLogs", {
