@@ -13,7 +13,7 @@ describe("ATAT network creation", () => {
     const template = Template.fromStack(stack);
     // THEN
     template.hasResourceProperties("AWS::EC2::FlowLog", {
-      LogDestinationType: "s3",
+      LogDestinationType: "logs",
       ResourceType: "VPC",
       TrafficType: "ALL",
       ResourceId: stack.resolve(stack.vpc.vpcId),
