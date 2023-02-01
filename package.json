@@ -65,7 +65,7 @@
     "axios": "^1.2.4",
     "axios-mock-adapter": "^1.21.2",
     "cdk-monitoring-constructs": "^1.30.11",
-    "cdk-nag": "^2.21.68",
+    "cdk-nag": "^2.21.80",
     "constructs": "^10.1.225",
     "docx-templates": "^4.9.2",
     "exceljs": "^4.3.0",
