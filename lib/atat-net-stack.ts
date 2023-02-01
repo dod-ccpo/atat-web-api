@@ -57,6 +57,11 @@ export class AtatNetStack extends cdk.Stack {
       })
     );
 
+    const cwLogs = new logs.LogGroup(this, "LogGroup", {
+      logGroupName: "vpc-cssp-cwl-logs",
+      retention: logs.RetentionDays.INFINITE,
+    });
+
     // Capture all VPC flow logs and send to CloudWatch Logs with indefinite retention.
     // Flow log format made to meet C5ISR log format requirement
     /* eslint-disable no-template-curly-in-string */
@@ -84,11 +89,7 @@ export class AtatNetStack extends cdk.Stack {
         ec2.LogFormat.custom("${log-status}"),
         /* eslint-enable no-template-curly-in-string */
       ],
-      destination: ec2.FlowLogDestination.toCloudWatchLogs(
-        new logs.LogGroup(this, "vpc-cssp-cwl-logs", {
-          retention: logs.RetentionDays.INFINITE,
-        })
-      ),
+      destination: ec2.FlowLogDestination.toCloudWatchLogs(cwLogs),
     });
 
     // const dnsLogsGroup = new logs.LogGroup(this, "VpcDnsQueryLogs", {
