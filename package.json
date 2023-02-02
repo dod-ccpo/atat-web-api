@@ -48,7 +48,7 @@
     "@aws-lambda-powertools/logger": "^1.4.1",
     "@aws-lambda-powertools/tracer": "^1.4.1",
     "@aws-sdk/client-ec2": "^3.262.0",
-    "@aws-sdk/client-iam": "^3.262.0",
+    "@aws-sdk/client-iam": "^3.263.0",
     "@aws-sdk/client-s3": "^3.262.0",
     "@aws-sdk/client-s3-control": "^3.262.0",
     "@aws-sdk/client-secrets-manager": "^3.262.0",
