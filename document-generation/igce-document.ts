@@ -257,13 +257,9 @@ export async function generateIGCEDocument(
   const instructionSheet = workbook.getWorksheet("INSTRUCTIONS-MUST COMPLETE");
   const estimateMadeCell = instructionSheet.getCell("B11");
   estimateMadeCell.value = payload.instructions.estimateDescription;
-  const assumptionsMadeCell = instructionSheet.getCell("B12");
-  assumptionsMadeCell.value = payload.instructions.assumptionsMade;
-  const infoToolsCell = instructionSheet.getCell("B13");
+  const infoToolsCell = instructionSheet.getCell("B12");
   infoToolsCell.value = payload.instructions.toolsUsed;
-  const infoObtainedCell = instructionSheet.getCell("B14");
-  infoObtainedCell.value = payload.instructions.informationSource;
-  const previousEstimate = instructionSheet.getCell("B15");
+  const previousEstimate = instructionSheet.getCell("B13");
   previousEstimate.value = payload.instructions.previousEstimateComparison;
 
   const buffer = (await workbook.xlsx.writeBuffer()) as Buffer;
