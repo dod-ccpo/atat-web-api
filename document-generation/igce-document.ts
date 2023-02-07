@@ -50,6 +50,7 @@ export async function generateIGCEDocument(
   const contractRangeString = `'CLIN Info'!$H$2:$H$4`;
 
   // Determine unique CLINs from payload...
+  // Sort them based on optionOrder
   const uniqueAndSorted = [...new Set(payload.periodsEstimate)].sort(
     (a, b) => a.period.optionOrder - b.period.optionOrder
   );
@@ -62,6 +63,8 @@ export async function generateIGCEDocument(
       contractCLINHelper.push({ clin: lineItem.idiqClin.trim(), contract: lineItem.contractType });
     });
   });
+  // Sort CLINs on Summary Page alphabetically
+  contractCLINHelper.sort((a, b) => a.clin.localeCompare(b.clin));
 
   const uniqueCLINwithContract = [...new Map(contractCLINHelper.map((item) => [item.clin, item])).values()];
 
@@ -89,6 +92,7 @@ export async function generateIGCEDocument(
   function populatePeriodLineItems(estimate: IPeriodEstimate): void {
     const { optionOrder, periodUnit, periodUnitCount, periodType } = estimate.period;
     const periodLineItems = estimate.periodLineItems;
+    periodLineItems.sort((a, b) => a.idiqClin.localeCompare(b.idiqClin));
     // unique IDIQ Clins PER period sheet
     const uniqueIdiqClins = Array.from(new Set(periodLineItems.map((lineItem) => lineItem.idiqClin)));
     const periodSheetTopStartRow = 8;
