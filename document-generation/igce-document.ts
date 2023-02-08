@@ -30,23 +30,27 @@ export async function generateIGCEDocument(
 
   // Set fundingDocumentNumber variable
   // Located at the top of each Period sheet
-  const fundingDoc = payload.fundingDocument;
-  let fundingDocumentNumber: string;
-  switch (fundingDoc.fundingType) {
-    case FundingType.FS_FORM:
-      fundingDocumentNumber = `Order Number: ${fundingDoc.orderNumber} and GT&C Number: ${fundingDoc.gtcNumber}`;
-      break;
-    case FundingType.MIPR:
-      fundingDocumentNumber = `MIPR Number: ${fundingDoc.miprNumber}`;
-      break;
-    default:
-      fundingDocumentNumber = "";
+  let fundingDoc;
+  let fundingDocumentNumber = "";
+  if (payload.fundingDocument) {
+    fundingDoc = payload.fundingDocument;
+    switch (fundingDoc.fundingType) {
+      case FundingType.FS_FORM:
+        fundingDocumentNumber = `Order Number: ${fundingDoc.orderNumber} and GT&C Number: ${fundingDoc.gtcNumber}`;
+        break;
+      case FundingType.MIPR:
+        fundingDocumentNumber = `MIPR Number: ${fundingDoc.miprNumber}`;
+        break;
+      default:
+        fundingDocumentNumber = "";
+    }
   }
   // Set references for clin and contract drop down boxes
   const clinRangeString = `'CLIN Info'!$G$2:$G$9`;
   const contractRangeString = `'CLIN Info'!$H$2:$H$4`;
 
   // Determine unique CLINs from payload...
+  // Sort them based on optionOrder
   const uniqueAndSorted = [...new Set(payload.periodsEstimate)].sort(
     (a, b) => a.period.optionOrder - b.period.optionOrder
   );
@@ -59,6 +63,8 @@ export async function generateIGCEDocument(
       contractCLINHelper.push({ clin: lineItem.idiqClin.trim(), contract: lineItem.contractType });
     });
   });
+  // Sort CLINs on Summary Page alphabetically
+  contractCLINHelper.sort((a, b) => a.clin.localeCompare(b.clin));
 
   const uniqueCLINwithContract = [...new Map(contractCLINHelper.map((item) => [item.clin, item])).values()];
 
@@ -86,6 +92,7 @@ export async function generateIGCEDocument(
   function populatePeriodLineItems(estimate: IPeriodEstimate): void {
     const { optionOrder, periodUnit, periodUnitCount, periodType } = estimate.period;
     const periodLineItems = estimate.periodLineItems;
+    periodLineItems.sort((a, b) => a.idiqClin.localeCompare(b.idiqClin));
     // unique IDIQ Clins PER period sheet
     const uniqueIdiqClins = Array.from(new Set(periodLineItems.map((lineItem) => lineItem.idiqClin)));
     const periodSheetTopStartRow = 8;
@@ -250,13 +257,9 @@ export async function generateIGCEDocument(
   const instructionSheet = workbook.getWorksheet("INSTRUCTIONS-MUST COMPLETE");
   const estimateMadeCell = instructionSheet.getCell("B11");
   estimateMadeCell.value = payload.instructions.estimateDescription;
-  const assumptionsMadeCell = instructionSheet.getCell("B12");
-  assumptionsMadeCell.value = payload.instructions.assumptionsMade;
-  const infoToolsCell = instructionSheet.getCell("B13");
+  const infoToolsCell = instructionSheet.getCell("B12");
   infoToolsCell.value = payload.instructions.toolsUsed;
-  const infoObtainedCell = instructionSheet.getCell("B14");
-  infoObtainedCell.value = payload.instructions.informationSource;
-  const previousEstimate = instructionSheet.getCell("B15");
+  const previousEstimate = instructionSheet.getCell("B13");
   previousEstimate.value = payload.instructions.previousEstimateComparison;
 
   const buffer = (await workbook.xlsx.writeBuffer()) as Buffer;
