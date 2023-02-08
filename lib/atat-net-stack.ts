@@ -65,6 +65,7 @@ export class AtatNetStack extends cdk.Stack {
         ec2.LogFormat.VERSION,
         ec2.LogFormat.custom("${vpc-id}"),
         ec2.LogFormat.custom("${subnet-id}"),
+        ec2.LogFormat.custom("${instance-id}"),
         ec2.LogFormat.custom("${interface-id}"),
         ec2.LogFormat.custom("${account-id}"),
         ec2.LogFormat.custom("${type}"),
