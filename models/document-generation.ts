@@ -611,7 +611,7 @@ const independentGovernmentCostEstimate = {
     surgeCapabilities: { type: "integer" },
     periodsEstimate,
     instructions,
-    contractingShop: { type: "string" },
+    contractingShop: { type: "object", properties: { name: { type: "string" }, fee: { type: "number" } } },
   },
   additionalProperties: false,
 };
