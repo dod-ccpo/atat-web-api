@@ -1130,7 +1130,9 @@ export const sampleIgceRequest = {
       orderNumber: "O2206-097-097-184790",
       gtcNumber: "A2201-097-097-18092",
     },
-    contractingShop: "DITCO",
+    contractingShop: {
+      name: "DITCO",
+    },
     periodsEstimate: [
       {
         period: { periodUnit: "YEAR", periodUnitCount: "1", periodType: "BASE", optionOrder: "" },
