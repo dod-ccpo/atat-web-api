@@ -260,6 +260,10 @@ export enum IdiqClin {
   CLOUD_SUPPORT_2000 = "2000_CLOUD_SUPPORT",
   OTHER_3000 = "3000_OTHER",
 }
+export interface IContractingShop {
+  name: string;
+  fee: number;
+}
 
 export interface IFundingDocument {
   fundingType: FundingType;
@@ -294,7 +298,7 @@ export interface IndependentGovernmentCostEstimate {
   surgeCapabilities: number;
   periodsEstimate: IPeriodEstimate[];
   instructions: IGCEInstructions;
-  contractingShop: string;
+  contractingShop: IContractingShop;
 }
 
 export interface IFundingIncrement {
