@@ -249,9 +249,9 @@ export async function generateIGCEDocument(
   const contractingShopName = summarySheet.getCell("B26");
   const contractingShopFee = summarySheet.getCell("C26");
   if (payload.contractingShop.name === "OTHER") {
+    contractingShopName.value = "Contracting Office Fee";
     if (payload.contractingShop.fee > 0) {
       const fee = (payload.contractingShop.fee / 100).toFixed(2); // round to 2 decimal places
-      contractingShopName.value = "Contracting Office Fee";
       contractingShopFee.value = { formula: `=K24 *${fee}`, date1904: false };
     }
   } else if (payload.contractingShop.name === "DITCO") {
