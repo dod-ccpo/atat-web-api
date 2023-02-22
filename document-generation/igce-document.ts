@@ -14,6 +14,7 @@ export async function generateIGCEDocument(
   templatePath: string,
   payload: IndependentGovernmentCostEstimate
 ): Promise<ApiBase64SuccessResponse> {
+  // Validation of periodsEstimate
   if (!payload.periodsEstimate && !payload.fundingDocument && !payload.surgeCapabilities) {
     return INTERNAL_SERVER_ERROR;
   }
@@ -21,7 +22,6 @@ export async function generateIGCEDocument(
   const basePeriodLineItems = payload.periodsEstimate.filter((periodEstimate: IPeriodEstimate) => {
     return periodEstimate.period.periodType === PeriodType.BASE;
   });
-
   const optionPeriodsLineItems = payload.periodsEstimate
     .filter((periodEstimate: IPeriodEstimate) => {
       return periodEstimate.period.periodType === PeriodType.OPTION;
@@ -46,6 +46,7 @@ export async function generateIGCEDocument(
     }
   }
   // Set references for clin and contract drop down boxes
+  // These references are on the CLIN Info Page, consist of x001/x017 Cloud UNCLASSIFIED and other CLINs
   const clinRangeString = `'CLIN Info'!$G$2:$G$9`;
   const contractRangeString = `'CLIN Info'!$H$2:$H$4`;
 
@@ -65,7 +66,6 @@ export async function generateIGCEDocument(
   });
   // Sort CLINs on Summary Page alphabetically
   contractCLINHelper.sort((a, b) => a.clin.localeCompare(b.clin));
-
   const uniqueCLINwithContract = [...new Map(contractCLINHelper.map((item) => [item.clin, item])).values()];
 
   // Use Exceljs to generate the workbook
@@ -83,11 +83,6 @@ export async function generateIGCEDocument(
   */
   const periodSheetHelper: Array<{ period: string; cellRef: string }> = [];
 
-  const headers = {
-    "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    "Content-Disposition": `attachment; filename=IndependentGovernmentCostEstimate.xlsx`,
-  };
-
   // Populate Period sheets (Base and Option Periods)
   function populatePeriodLineItems(estimate: IPeriodEstimate): void {
     const { optionOrder, periodUnit, periodUnitCount, periodType } = estimate.period;
@@ -95,14 +90,16 @@ export async function generateIGCEDocument(
     periodLineItems.sort((a, b) => a.idiqClin.localeCompare(b.idiqClin));
     // unique IDIQ Clins PER period sheet
     const uniqueIdiqClins = Array.from(new Set(periodLineItems.map((lineItem) => lineItem.idiqClin)));
-    const periodSheetTopStartRow = 8;
-    const periodSheetBottomStartRow = 28;
-
+    const periodSheetTopStartRow = 8; // On a Period Sheet, the first row is row 8 (see template)
+    const periodSheetBottomStartRow = 28; // On a Period Sheet, the first row for the CLIN total calculations is 28
     let periodSheetName: string;
     if (periodType === PeriodType.BASE) {
       periodSheetName = "Base Period";
     } else {
       periodSheetName = `Option Period ${optionOrder - 1}`;
+      // optionOrder for Base Period is 1, optionOrder for Option Period 1 is 2, optionOrder for Option Period 2 is 3...
+      // For determining periodSheetName we need to subtract 1 from the optionOrder of the estimate.period...
+      // Old functionality had Base Period's optionOrder as null and Option Period 1 use optionOrder 1...
     }
 
     // Get the specific worksheet
@@ -118,10 +115,14 @@ export async function generateIGCEDocument(
     periodSheet.getCell("C3").value = fundingDocumentNumber;
 
     // Track number of Line Items in periodLineItems
+    // 20 is the default number of rows built into the template
+    // If there are more than 20 items in periodLineItems for a given period, we will need to use
+    // duplicateRow to extend the space alotted for these items... using duplicateRow preserves formatting
     const initialUsableRows = 20;
     let numberOfRowsToAdd = 0;
     const numberOfItems = periodLineItems.length;
     if (numberOfItems > initialUsableRows) {
+      // If there are more than 20 periodLineItems for a given period, add rows = to the difference
       numberOfRowsToAdd = numberOfItems - initialUsableRows;
       console.log("Number of rows to add: " + numberOfRowsToAdd);
       periodSheet.duplicateRow(26, numberOfRowsToAdd, true);
@@ -132,18 +133,21 @@ export async function generateIGCEDocument(
 
     // Fill each cell in the designated row with periodLineItems info
     lineItemRows?.forEach((row, index) => {
+      // Set dropdown for the PeriodSheet cells column A (CLIN/CLIN Title/Classification Level)
       row.getCell("A").value = periodLineItems[index].idiqClin; // idiqClin
       row.getCell("A").dataValidation = {
         type: "list",
         allowBlank: false,
         formulae: [clinRangeString],
       };
+      // Set dropdown for the PeriodSheet cells column B (Contract)
       row.getCell("B").value = periodLineItems[index].contractType; // Contract Type
       row.getCell("B").dataValidation = {
         type: "list",
         allowBlank: false,
         formulae: [contractRangeString],
       };
+      // Set specific values based on the the incomming periodLine items
       row.getCell("C").value = periodLineItems[index].dowTaskNumber; // "4.2.2.1.1";
       row.getCell("D").value = periodLineItems[index].serviceTitle; // "Compute";
       row.getCell("E").value = periodLineItems[index].itemDescription; // Description
@@ -151,8 +155,11 @@ export async function generateIGCEDocument(
       row.getCell("G").value = periodLineItems[index].quantity; // Quantity
       row.getCell("H").value = periodLineItems[index].unit; // Unit
 
+      // Set the total price forumla
+      // Example value =F8*G8
       const totalPrice = `=F${row.number}*G${row.number}`;
       row.getCell("I").value = { formula: totalPrice, date1904: false };
+      // date 1904 is required or exceljs will have an error generating the document
     });
 
     // Populate unique IDIQ CLIN items
@@ -164,7 +171,7 @@ export async function generateIGCEDocument(
     // For each IDIQ CLIN Line item
     periodIdiqClinLines?.forEach((row, index) => {
       row.getCell("A").value = uniqueIdiqClins[index];
-      // Set formmula for totalIdiqClinValue
+      // Set formula for totalIdiqClinValue
       const totalIdiqClinValue = `=SUMIF($A${periodSheetTopStartRow}:$A$${
         periodSheetBottomStartRow + numberOfRowsToAdd - 1
       },"="&A$${row.number},'${periodSheetName}'!$I$${periodSheetTopStartRow}:$I$${
@@ -190,6 +197,7 @@ export async function generateIGCEDocument(
       date1904: false,
     };
   }
+  // Use populatePeriodLine items on each item in the periodsEstimate array...
   // For each PeriodLineItem in the BASE Period, populatePeriodLineItems()
   basePeriodLineItems.forEach(populatePeriodLineItems);
   // For each PeriodLineItem in the OPTION Period, populatePeriodLineItems()
@@ -199,6 +207,8 @@ export async function generateIGCEDocument(
   periodSheetHelper.forEach(function (value) {
     console.log(value);
   });
+
+  // Set summary page calculation cells
   const summaryRows = summarySheet.getRows(6, uniqueCLINwithContract.length);
   summaryRows?.forEach((row, index) => {
     row.getCell("A").dataValidation = {
@@ -258,10 +268,10 @@ export async function generateIGCEDocument(
     contractingShopName.value = "DITCO Fee";
     contractingShopFee.value = { formula: `=K24 *.0225`, date1904: false };
   }
-
   // Grand Total With Fee
   const grandTotalWithFee = summarySheet.getCell("C27");
   grandTotalWithFee.value = { formula: `=C26 + K24`, date1904: false };
+  // ^End of Summary sheet static cells
 
   // Set Instruction Sheet Cells
   const instructionSheet = workbook.getWorksheet("INSTRUCTIONS-MUST COMPLETE");
@@ -272,8 +282,14 @@ export async function generateIGCEDocument(
   const previousEstimate = instructionSheet.getCell("B13");
   previousEstimate.value = payload.instructions.previousEstimateComparison;
 
+  // Create a Buffer to store finished workbook
   const buffer = (await workbook.xlsx.writeBuffer()) as Buffer;
   logger.info("IGCE document generated");
+  // Set headers of API Response
+  const headers = {
+    "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "Content-Disposition": `attachment; filename=IndependentGovernmentCostEstimate.xlsx`,
+  };
 
   return new ApiBase64SuccessResponse(buffer.toString("base64"), SuccessStatusCode.OK, headers);
 }
