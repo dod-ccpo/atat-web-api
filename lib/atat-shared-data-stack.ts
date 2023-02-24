@@ -19,6 +19,10 @@ export class AtatSharedDataStack extends cdk.Stack {
     this.encryptionKeyAlias = key.addAlias("atat-default");
     this.encryptionKey = key;
 
+    const svsprincipal = new iam.ServicePrincipal("events.amazonaws.com");
+    key.grantDecrypt(svsprincipal);
+    key.grantAdmin(svsprincipal);
+
     // Cloudwatch Log group for C5ISR
     const logGroup = new logs.LogGroup(this, "cssp-cwl-logs", {
       //  logGroupName: `${environmentName.toLowerCase()}-cssp-cwl-logs`,
