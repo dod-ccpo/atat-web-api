@@ -1,6 +1,7 @@
 import * as cdk from "aws-cdk-lib";
 import * as kms from "aws-cdk-lib/aws-kms";
 import * as logs from "aws-cdk-lib/aws-logs";
+import * as iam from "aws-cdk-lib/aws-iam";
 import { RetentionDays } from "aws-cdk-lib/aws-logs";
 import { NagSuppressions } from "cdk-nag";
 import { Construct } from "constructs";
