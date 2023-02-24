@@ -22,7 +22,7 @@ export class AtatSharedDataStack extends cdk.Stack {
 
     const svsprincipal = new iam.ServicePrincipal("events.amazonaws.com");
     key.grantDecrypt(svsprincipal);
-    key.grantAdmin(svsprincipal);
+    key.grant(svsprincipal, "kms:GenerateDataKey*");
 
     // Cloudwatch Log group for C5ISR
     const logGroup = new logs.LogGroup(this, "cssp-cwl-logs", {
