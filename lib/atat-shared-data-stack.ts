@@ -1,6 +1,7 @@
 import * as cdk from "aws-cdk-lib";
 import * as kms from "aws-cdk-lib/aws-kms";
 import * as logs from "aws-cdk-lib/aws-logs";
+import * as iam from "aws-cdk-lib/aws-iam";
 import { RetentionDays } from "aws-cdk-lib/aws-logs";
 import { NagSuppressions } from "cdk-nag";
 import { Construct } from "constructs";
@@ -18,6 +19,10 @@ export class AtatSharedDataStack extends cdk.Stack {
     });
     this.encryptionKeyAlias = key.addAlias("atat-default");
     this.encryptionKey = key;
+
+    const svsprincipal = new iam.ServicePrincipal("events.amazonaws.com");
+    key.grantDecrypt(svsprincipal);
+    key.grant(svsprincipal, "kms:GenerateDataKey*");
 
     // Cloudwatch Log group for C5ISR
     const logGroup = new logs.LogGroup(this, "cssp-cwl-logs", {
