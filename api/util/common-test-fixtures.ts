@@ -2,7 +2,16 @@ import { SQSEvent } from "aws-lambda";
 import { CostRequest } from "../../models/cost-jobs";
 import { ProvisionRequestType } from "../../models/provisioning-jobs";
 import * as crypto from "crypto";
-import { CostResponseByPortfolio } from "../client";
+import { ClassificationLevel, CostResponseByPortfolio } from "../client";
+
+// Mock data used by unit and integration tests
+export const TEST_PORTFOLIO_ID = "b02e77d1-234d-4e3d-bc85-b57ca5a93952";
+export const TEST_ENVIRONMENT_ID = "1a302680-6127-4bc1-be43-735703bdecb1";
+export const TEST_PROVISIONING_JOB_ID = "81b31a89-e3e5-46ee-acfe-75436bd14577";
+export const CSP_A_TEST_ENDPOINT = `https://CSP_A.example.com`;
+export const CSP_B_TEST_ENDPOINT = "https://CSP_B.com/atat/api";
+export const CSP_A = "CSP_A";
+export const CSP_B = "CSP_B";
 
 // provisioning fixtures
 export const fundingSources = [
@@ -13,8 +22,22 @@ export const fundingSources = [
     popEndDate: "2022-07-01",
   },
 ];
+export const taskOrders = [
+  {
+    taskOrderNumber: "1234567890123",
+    popStartDate: "2021-07-01",
+    popEndDate: "2022-07-01",
+    clins: [
+      {
+        clinNumber: "9999",
+        popStartDate: "2021-07-01",
+        popEndDate: "2022-07-01",
+      },
+    ],
+  },
+];
 
-export const operators = [
+export const administrators = [
   {
     email: "admin1@mail.mil",
     dodId: "1122334455",
@@ -26,9 +49,6 @@ export const operators = [
     needsReset: false,
   },
 ];
-export const cspA = {
-  name: "CSP_A",
-};
 
 export function constructCspTarget(csp: string) {
   return {
@@ -36,27 +56,37 @@ export function constructCspTarget(csp: string) {
   };
 }
 
-export const provisioningBodyNoPayload = {
+export const cspAProvisioningBodyNoPayload = {
   jobId: "81b31a89-e3e5-46ee-acfe-75436bd14577",
   userId: "21d18790-bf3e-4529-a361-460ee6d16e0b",
-  portfolioId: "b02e77d1-234d-4e3d-bc85-b57ca5a93952",
-  operationType: ProvisionRequestType.ADD_OPERATORS,
-  targetCsp: cspA,
+  portfolioId: TEST_PORTFOLIO_ID,
+  targetCspName: "CSP_A",
 };
 
-export const provisioningBodyWithPayload = {
-  ...provisioningBodyNoPayload,
+export const cspAAddPortfolioRequest = {
+  ...cspAProvisioningBodyNoPayload,
+  operationType: ProvisionRequestType.ADD_PORTFOLIO,
   payload: {
     name: "Sample Portfolio",
-    fundingSources,
-    operators,
+    taskOrders,
+  },
+};
+
+export const addEnvironmentRequest = {
+  ...cspAProvisioningBodyNoPayload,
+  operationType: ProvisionRequestType.ADD_ENVIRONMENT,
+  payload: {
+    name: "Sample Environment",
+    administrators,
+    classificationLevel: "UNCLASSIFIED",
+    cloudDistinguisher: undefined,
   },
 };
 
 export const requestContext = { identity: { sourceIp: "203.0.113.0" } };
 
 export const validRequest = {
-  body: JSON.stringify(provisioningBodyWithPayload),
+  body: JSON.stringify(cspAAddPortfolioRequest),
   headers: {
     "Content-Type": "application/json",
   },
@@ -66,8 +96,8 @@ export const validRequest = {
 // cost fixtures
 export const validCostRequest: CostRequest = {
   requestId: "81b31a89-e3e5-46ee-acfe-75436bd14577",
-  portfolioId: "b02e77d1-234d-4e3d-bc85-b57ca5a93952",
-  targetCsp: cspA,
+  portfolioId: TEST_PORTFOLIO_ID,
+  targetCspName: CSP_A,
   startDate: "2022-01-01",
   endDate: "2022-12-01",
 };

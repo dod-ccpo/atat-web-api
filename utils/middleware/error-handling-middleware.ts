@@ -3,19 +3,19 @@ import { APIGatewayProxyResult, SQSEvent } from "aws-lambda";
 import { serializeError } from "serialize-error";
 import { ValidationErrorResponse } from "../response";
 import { INTERNAL_SERVER_ERROR, REQUEST_BODY_INVALID } from "../errors";
-import { ProvisionRequest } from "../../models/provisioning-jobs";
+import { HothProvisionRequest } from "../../models/provisioning-jobs";
 import { CspResponse } from "../../api/util/csp-request";
 import { logger } from "../logging";
 import { CommonMiddlewareInputs } from "./common";
 import { CostResponse } from "../../models/cost-jobs";
 
-export type MiddlewareInputs = CommonMiddlewareInputs | ProvisionRequest | SQSEvent;
+export type MiddlewareInputs = CommonMiddlewareInputs | HothProvisionRequest | SQSEvent;
 export type MiddlewareOutputs =
   | APIGatewayProxyResult
   | CostResponse
   | CspResponse<any, any>
   | ValidationErrorResponse
-  | ProvisionRequest
+  | HothProvisionRequest
   | void;
 
 // A central place to catch and handle errors that occur before,

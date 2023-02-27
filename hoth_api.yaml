@@ -187,6 +187,38 @@ components:
         maxAllowed:
           type: number
           description: Represents the maximum allowed size to return
+    ProvisioningClassificationLevel:
+      description: >-
+        Represents the classification level for this environment. Attempts to change this field via PUT or PATCH
+        should result in a HTTP 400.
+      type: string
+      enum:
+        - UNCLASSIFIED
+        - SECRET
+        - TOP_SECRET
+    CloudDistinguisher:
+      description: >-
+        Optional parameter used when the vendor offers more than one distinct Cloud System at a given classification
+        level. Valid values must be provided to ATAT client by vendors. Note that it is expected that implementations
+        will ignore the display_name and description fields. They are nonetheless included to ensure that their intent
+        is not misrepresented by the ATAT UI.
+      required:
+        - name
+        - display_name
+        - description
+      properties:
+        name:
+          type: string
+          description: Unique identifier for a particular Cloud System, according to vendor
+          example: il4_dod
+        display_name:
+          type: string
+          description: Human readable display name for a Cloud System identifier
+          example: Department of Defense - IL4
+        description:
+          type: string
+          description: Description of intended use of a Cloud System
+          example: Cloud System meant for use by DoD organizations with IL4 workloads
     ProvisioningRequest:
       description: Represents a generic request for provisioning cloud resources via ATAT
       type: object
@@ -195,7 +227,7 @@ components:
         - job_id
         - user_id
         - operation_type
-        - target_csp
+        - target_csp_name
         - payload
       properties:
         job_id:
@@ -209,12 +241,15 @@ components:
           type: string
         operation_type:
           $ref: "#/components/schemas/OperationType"
-        target_csp:
-          $ref: "#/components/schemas/TargetCloudServiceProvider"
+        target_csp_name:
+          description: ->
+            Name of the target CSP for a provisioning request. Implementation will look up the CSP configuration using
+            it as the key in Secrets Manager.
+          type: string
         payload:
           oneOf:
             - $ref: "#/components/schemas/NewPortfolioPayload"
-            - $ref: "#/components/schemas/FundingSourcePayload"
+            - $ref: "#/components/schemas/NewEnvironmentPayload"
             - $ref: "#/components/schemas/OperatorPayload"
     ProvisionResponse:
       description: Response from the CSP which will be set after a request has been processed
@@ -226,33 +261,10 @@ components:
       type: string
       enum:
         - ADD_PORTFOLIO
+        - ADD_ENVIRONMENT
         - ADD_OPERATORS
-        - ADD_FUNDING_SOURCE
-    TargetCloudServiceProvider:
-      description: Distinguishes the cloud where the provisioning operation will occur
-      properties:
-        name:
-          $ref: "#/components/schemas/TargetCloudServiceProviderName"
-        uri:
-          type: string
-          description: Base URI of Target CSP's ATAT implementation
-        network:
-          $ref: "#/components/schemas/TargetNetwork"
-    TargetCloudServiceProviderName:
-      description: List of available CSPs by name
-      type: string
-      enum:
-        - CSP_A
-        - CSP_B
-        - CSP_C
-        - CSP_D
-    TargetNetwork:
-      description: Distinguishes the network where the provisioning operation will occur
-      type: string
-      enum:
-        - NETWORK_1
-        - NETWORK_2
-        - NETWORK_3
+        - ADD_ADMINISTRATOR
+        - UPDATE_TASK_ORDER
     ProvisioningPayload:
       description: Abstract base model describing the payloads for provisioning operations
     NewPortfolioPayload:
@@ -261,49 +273,56 @@ components:
         - $ref: "#/components/schemas/ProvisioningPayload"
       required:
         - name
-        - funding_sources
-        - operators
+        - task_orders
       properties:
         name:
           type: string
           description: Name of the Portfolio being created
-        funding_sources:
+        task_orders:
           type: array
           items:
-            $ref: "#/components/schemas/FundingSource"
-        operators:
-          description: Array of operator objects
-          type: array
-          items:
-            $ref: "#/components/schemas/Operator"
+            $ref: "#/components/schemas/TaskOrder"
         csp_id:
           type: string
           readOnly: true
-    FundingSourcePayload:
-      description: Payload for the addition of a Funding Source to an existing CSP Portfolio
+    NewEnvironmentPayload:
+      description: Payload for creation of a new CSP Portfolio
       allOf:
         - $ref: "#/components/schemas/ProvisioningPayload"
       required:
-        - funding_sources
+        - name
+        - administrators
+        - classification_level
       properties:
-        funding_sources:
+        name:
+          type: string
+          description: Name of the Portfolio being created
+        administrators:
+          description: Array of administrator objects
           type: array
           items:
-            $ref: "#/components/schemas/FundingSource"
-    OperatorPayload:
-      description: Payload for the addition of an Operator to an existing CSP Portfolio
+            $ref: "#/components/schemas/Administrator"
+        classification_level:
+          $ref: "#/components/schemas/ProvisioningClassificationLevel"
+        cloud_distinguisher:
+          $ref: '#/components/schemas/CloudDistinguisher'
+        csp_id:
+          type: string
+          readOnly: true
+    AdministratorPayload:
+      description: Payload for the addition of an Administrator to an existing CSP Portfolio
       allOf:
         - $ref: "#/components/schemas/ProvisioningPayload"
       required:
         - operators
       properties:
-        operators:
-          description: Array of operator objects
+        administrators:
+          description: Array of administrator objects
           type: array
           items:
-            $ref: "#/components/schemas/Operator"
-    Operator:
-      description: Operator data for provisioning resources in a CSP
+            $ref: "#/components/schemas/Administrator"
+    Administrator:
+      description: Administrator data for provisioning resources in a CSP
       type: object
       required:
         - email
@@ -317,30 +336,76 @@ components:
         needs_reset:
           type: boolean
           default: false
-    FundingSource:
+    TaskOrder:
       type: object
       description: >-
-        A Task Order and CLIN used to pay for provisioned resources and services
+        A Task Order and CLINs used to pay for provisioned resources and services
       required:
+        - id
         - task_order_number
-        - clin
+        - clins
         - pop_start_date
         - pop_end_date
       properties:
+        id:
+          description: Represents the unique ID of a Task Order. Must be defined by CSPs upon object creation.
+          type: string
+          readOnly: true
+          example: "csp-task-order-id-123"
         task_order_number:
+          description: >-
+            Represents the current Task Order Number. Subject to change over the lifetime of a Task Order. Should be
+            considered metadata rather than a primary key (use the `id` instead).
           type: string
-          example: "1234567891234"
-        clin:
-          type: string
-          example: "0001"
+          example: "HQ003421F0024"
+        clins:
+          type: array
+          items:
+            $ref: '#/components/schemas/Clin'
         pop_start_date:
+          description: Start of period of performance for this Task Order in YYYY-MM format.
           type: string
           format: date
-          example: "2021-07-01"
+          example: "2021-07"
         pop_end_date:
+          description: End of period of performance for this Task Order in YYYY-MM format.
           type: string
           format: date
-          example: "2022-07-01"
+          example: "2026-07"
+    Clin:
+      description: >-
+        Represents a CLIN in a Task Order. Note that classification_level is required if type == "CLOUD", otherwise
+        it must be null or undefined.
+      additionalProperties: false
+      required:
+        - clin_number
+        - type
+        - pop_start_date
+        - pop_end_date
+      properties:
+        clin_number:
+          description: Contract Line Item Number (CLIN), 0001 through 9999
+          type: string
+          pattern: '(?!^0{4}$)^\d{4}$'
+        type:
+          description: >-
+            Distinguishes a "CLOUD" CLIN, which directly funds cloud workloads, from "NON_CLOUD" CLINs, which do not.
+          type: string
+          enum:
+            - CLOUD
+            - NON_CLOUD
+        classification_level:
+          $ref: '#/components/schemas/ProvisioningClassificationLevel'
+        pop_start_date:
+          description: Start of period of performance for this CLIN in YYYY-MM format.
+          type: string
+          format: date
+          example: "2021-07"
+        pop_end_date:
+          description: End of period of performance for this CLIN in YYYY-MM format.
+          type: string
+          format: date
+          example: "2026-07"
     CspResponse:
       required:
         - code
@@ -371,8 +436,11 @@ components:
           format: uuid
         portfolio_id:
           type: string
-        target_csp:
-          $ref: "#/components/schemas/TargetCloudServiceProvider"
+        target_csp_name:
+          description: ->
+            Name of the target CSP for a provisioning request. Implementation will look up the CSP configuration using
+            it as the key in Secrets Manager.
+          type: string
         start_date:
           description: Start date of Cost query
           type: string
@@ -1285,7 +1353,6 @@ components:
             - DAY
             - WEEK
             - MONTH
-          type: integer
     ServiceOffering:
       description: >-
         A single Service Offering Group (Service Offering table)
@@ -1392,7 +1459,7 @@ components:
           items:
             $ref: "#/components/schemas/Period"
     GeneralInformation:
-      description >-
+      description: >-
         Basic information commonly used to describe different units inside a package
       type: object
       properties:

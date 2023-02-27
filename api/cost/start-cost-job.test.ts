@@ -4,7 +4,7 @@ import { ApiSuccessResponse, SuccessStatusCode, ValidationErrorResponse } from "
 import { handler } from "./start-cost-job";
 import { sqsClient } from "../../utils/aws-sdk/sqs";
 import { SendMessageCommand } from "@aws-sdk/client-sqs";
-import { validCostRequest, baseApiRequest, cspA } from "../util/common-test-fixtures";
+import { validCostRequest, baseApiRequest, CSP_A } from "../util/common-test-fixtures";
 
 const sqsMock = mockClient(sqsClient);
 beforeEach(() => {
@@ -50,7 +50,7 @@ describe("Cost request operations", () => {
       body: JSON.stringify({
         requestId: "81b31a89-e3e5-46ee-acfe-75436bd14577",
         portfolioId: "b02e77d1-234d-4e3d-bc85-b57ca5a93952",
-        targetCsp: cspA,
+        targetCspName: CSP_A,
         endDate: "2022-12-01",
       }),
     };

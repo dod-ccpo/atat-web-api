@@ -16,6 +16,7 @@ import { mapTasks, TasksMap } from "./sfn-lambda-invoke-task";
 import { FifoQueue } from "./sqs";
 import { LoggingStandardStateMachine } from "./state-machine";
 import { AtatContextValue } from "../context-values";
+import { ProvisionRequestType } from "../../models/provisioning-jobs";
 
 /**
  * Successful condition check
@@ -80,8 +81,10 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
       "CspConfiguration",
       AtatContextValue.CSP_CONFIGURATION_NAME.resolve(this)
     );
-    const cspWritePortfolioFn = new lambdaNodeJs.NodejsFunction(scope, "CspWritePortfolioFn", {
-      entry: "api/provision/csp-write-portfolio.ts",
+
+    // Create Portfolio Fn
+    const cspCreatePortfolioFn = new lambdaNodeJs.NodejsFunction(scope, "CspCreatePortfolioFn", {
+      entry: "api/provision/csp-create-portfolio.ts",
       runtime: lambda.Runtime.NODEJS_16_X,
       environment: { CSP_CONFIG_SECRET_NAME: cspConfig.secretArn },
       timeout: cdk.Duration.minutes(5),
@@ -89,10 +92,25 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
       vpc: props.vpc,
       tracing: lambda.Tracing.ACTIVE,
     });
-    props.idp?.addClient(new IdentityProviderLambdaClient("CspWritePortfolioClient", cspWritePortfolioFn), [
+    props.idp?.addClient(new IdentityProviderLambdaClient("CspCreatePortfolioClient", cspCreatePortfolioFn), [
       "atat/write-portfolio",
     ]);
-    cspConfig.grantRead(cspWritePortfolioFn);
+    cspConfig.grantRead(cspCreatePortfolioFn);
+
+    // Create Environment Fn
+    const cspCreateEnvironmentFn = new lambdaNodeJs.NodejsFunction(scope, "CspCreateEnvironmentFn", {
+      entry: "api/provision/csp-create-environment.ts",
+      runtime: lambda.Runtime.NODEJS_16_X,
+      environment: { CSP_CONFIG_SECRET_NAME: cspConfig.secretArn },
+      timeout: cdk.Duration.minutes(5),
+      memorySize: 256,
+      vpc: props.vpc,
+      tracing: lambda.Tracing.ACTIVE,
+    });
+    props.idp?.addClient(new IdentityProviderLambdaClient("CspCreateEnvironmentClient", cspCreateEnvironmentFn), [
+      "atat/write-portfolio",
+    ]);
+    cspConfig.grantRead(cspCreateEnvironmentFn);
 
     this.resultFn = new lambdaNodeJs.NodejsFunction(scope, "ResultFunction", {
       entry: "api/provision/result-fn.ts",
@@ -122,9 +140,22 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
     // Tasks for the Provisioning State Machine
     const tasks = [
       {
-        id: "InvokeCspApi",
+        id: "InvokeCreatePortfolio",
         props: {
-          lambdaFunction: cspWritePortfolioFn,
+          lambdaFunction: cspCreatePortfolioFn,
+          inputPath: "$.initialSnowRequest",
+          resultSelector: {
+            code: sfn.JsonPath.objectAt("$.Payload.code"),
+            content: sfn.JsonPath.objectAt("$.Payload.content"),
+          },
+          resultPath: "$.cspResponse",
+          outputPath: "$",
+        },
+      },
+      {
+        id: "InvokeCreateEnvironment",
+        props: {
+          lambdaFunction: cspCreateEnvironmentFn,
           inputPath: "$.initialSnowRequest",
           resultSelector: {
             code: sfn.JsonPath.objectAt("$.Payload.code"),
@@ -149,10 +180,20 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
       },
     ];
     this.mappedTasks = mapTasks(scope, tasks);
-    const { InvokeCspApi, EnqueueResults } = this.mappedTasks;
+    const { InvokeCreatePortfolio, InvokeCreateEnvironment, EnqueueResults } = this.mappedTasks;
     // update retry for the tasks
-    InvokeCspApi.addRetry({ maxAttempts: 2, errors: ["MockCspApiError"] });
-    InvokeCspApi.addCatch(EnqueueResults, { errors: ["States.ALL"], resultPath: "$.catchErrorResult" });
+    InvokeCreatePortfolio.addRetry({ maxAttempts: 2, errors: ["MockCspApiError"] });
+    InvokeCreatePortfolio.addCatch(EnqueueResults, { errors: ["States.ALL"], resultPath: "$.catchErrorResult" });
+    InvokeCreateEnvironment.addRetry({ maxAttempts: 2, errors: ["MockCspApiError"] });
+    InvokeCreateEnvironment.addCatch(EnqueueResults, { errors: ["States.ALL"], resultPath: "$.catchErrorResult" });
+
+    const startState = new sfn.Choice(scope, "StartState")
+      .when(sfn.Condition.stringEquals("$.operationType", ProvisionRequestType.ADD_PORTFOLIO), InvokeCreatePortfolio)
+      .when(
+        sfn.Condition.stringEquals("$.operationType", ProvisionRequestType.ADD_ENVIRONMENT),
+        InvokeCreateEnvironment
+      )
+      .afterwards();
 
     // State machine choices based on the tasks output
     const httpResponseChoices = new sfn.Choice(scope, "HttpResponse")
@@ -163,7 +204,8 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
       .afterwards(); // converge choices and allows for additional tasks to be chained on
 
     // Composing state machine
-    this.workflow = InvokeCspApi.next(httpResponseChoices);
+    InvokeCreatePortfolio.next(httpResponseChoices);
+    InvokeCreateEnvironment.next(httpResponseChoices);
     this.logGroup = new logs.LogGroup(scope, "StepFunctionsLogs", {
       retention: logs.RetentionDays.TEN_YEARS,
       logGroupName: `/aws/vendedlogs/states/StepFunctionsLogs${environmentName}`,
@@ -171,10 +213,10 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
     });
     this.stateMachine = new LoggingStandardStateMachine(this, "ProvisioningStateMachine", {
       logGroup: this.logGroup,
-      definition: this.workflow,
+      definition: startState,
     });
 
-    // Setup the Async event handling
+    // Set up the Async event handling
     const asyncProvisionWatcher = new lambdaNodeJs.NodejsFunction(this, "AsyncProvisionJob", {
       entry: "api/provision/async-provisioning-check.ts",
       runtime: lambda.Runtime.NODEJS_16_X,

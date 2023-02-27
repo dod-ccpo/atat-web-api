@@ -1,22 +1,26 @@
 import {
-  CostResponseByPortfolio,
-  Portfolio,
-  GetCostsByPortfolioRequest,
   AddTaskOrderRequest,
-  TaskOrder,
-  ImpactLevel,
+  Administrator,
+  ClassificationLevel,
+  Clin,
+  CostResponseByPortfolio,
+  Environment,
+  GetCostsByClinRequest,
+  GetCostsByPortfolioRequest,
+  PatchEnvironmentRequest,
+  Portfolio,
   ProvisioningStatus,
   ProvisioningStatusType,
-  GetCostsByClinRequest,
-  Clin,
-  Operator,
-  PatchPortfolioRequest,
+  TaskOrder,
 } from "./types";
 
 export const portfolioId = "test-portfolio-id";
+export const environmentId = "test-environment-id";
 export const provisioningJobId = "test-provisioningJob-id";
 export const location = "https://localhost/atat/api/v1/provisioning-jobs/test-job-id";
-export const administrators: Operator[] = [{ email: "admin@example.com", dodId: "3944.CTR", needsReset: false }];
+export const administrators: Administrator[] = [{ email: "admin@example.com", dodId: "3944.CTR", needsReset: false }];
+export const TEST_CSP_ENDPOINT = "https://localhost/atat/api/v1";
+
 const taskOrderNumber = "09876543214321";
 const clins: Clin[] = [
   {
@@ -40,7 +44,11 @@ export const mockTaskOrder: TaskOrder = {
 export const mockPortfolio: Portfolio = {
   name: "Test Portfolio",
   taskOrders: [],
+};
+export const mockEnvironment: Environment = {
+  name: "Test Environment",
   administrators: [],
+  classificationLevel: ClassificationLevel.UNCLASSIFIED,
 };
 
 export const mockCostsByPortfolioRequest: GetCostsByPortfolioRequest = {
@@ -49,8 +57,9 @@ export const mockCostsByPortfolioRequest: GetCostsByPortfolioRequest = {
   endDate: "2022-03-31",
 };
 
-export const mockPatchPortfolioRequest: PatchPortfolioRequest = {
+export const mockPatchEnvironmentRequest: PatchEnvironmentRequest = {
   portfolioId,
+  environmentId,
   patch: {
     administrators,
   },
@@ -59,7 +68,6 @@ export const mockPatchPortfolioRequest: PatchPortfolioRequest = {
 export const mockAddTaskOrderRequest: AddTaskOrderRequest = {
   portfolioId,
   taskOrder: mockTaskOrder,
-  targetImpactLevel: ImpactLevel.IL2,
   provisionDeadline: "",
 };
 
@@ -69,7 +77,6 @@ export const mockGetCostsByClinRequest: GetCostsByClinRequest = {
   clin: clins[0].clinNumber,
   startDate: "2022-01-01",
   endDate: "2022-12-31",
-  targetImpactLevel: ImpactLevel.IL6,
 };
 
 export const mockProvisioningStatus: ProvisioningStatus = {

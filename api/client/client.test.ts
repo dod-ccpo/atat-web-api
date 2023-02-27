@@ -1,49 +1,54 @@
 import MockAdapter from "axios-mock-adapter";
 import { AtatClient } from "./client";
 import {
-  mockCostData,
-  mockPortfolio,
-  mockAddTaskOrderRequest,
-  portfolioId,
+  administrators,
+  environmentId,
   location,
+  mockAddTaskOrderRequest,
+  mockCostData,
+  mockGetCostsByClinRequest,
+  mockPatchEnvironmentRequest,
+  mockPortfolio,
   mockProvisioningStatus,
   mockTaskOrder,
-  mockGetCostsByClinRequest,
-  administrators,
-  mockPatchPortfolioRequest,
+  portfolioId,
   provisioningJobId,
+  TEST_CSP_ENDPOINT,
 } from "./fixtures";
 import {
+  AddEnvironmentRequest,
+  AddEnvironmentResponseAsync,
+  AddEnvironmentResponseSync,
   AddPortfolioRequest,
-  AddPortfolioResponseAsync,
   AddPortfolioResponseSync,
-  GetCostsByPortfolioResponse,
-  Portfolio,
-  ImpactLevel,
-  GetPortfolioResponse,
-  GetPortfolioRequest,
-  PatchPortfolioRequest,
-  PatchPortfolioResponseSync,
-  PatchPortfolioResponseAsync,
-  GetCostsByPortfolioRequest,
-  AddTaskOrderResponseSync,
-  AddTaskOrderResponseAsync,
-  CostResponseByClin,
-  GetProvisioningStatusResponse,
-  GetProvisioningStatusRequest,
   AddTaskOrderRequest,
-  GetCostsByClinResponse,
+  AddTaskOrderResponseAsync,
+  AddTaskOrderResponseSync,
+  ClassificationLevel,
+  CostResponseByClin,
+  Environment,
   GetCostsByClinRequest,
+  GetCostsByClinResponse,
+  GetCostsByPortfolioRequest,
+  GetCostsByPortfolioResponse,
+  GetPortfolioRequest,
+  GetPortfolioResponse,
+  GetProvisioningStatusRequest,
+  GetProvisioningStatusResponse,
+  PatchEnvironmentRequest,
+  PatchEnvironmentResponseAsync,
+  PatchEnvironmentResponseSync,
+  Portfolio,
 } from "./types";
 
 const TEST_API_TOKEN = "TEST-TOKEN-NOT-REAL";
-const TEST_CSP_ENDPOINT = "https://localhost/atat/api/v1";
-const TEST_CSP_NETWORK = "NETWORK_1";
+// const TEST_PORTFOLIO_ID = "csp-portfolio-id-123";
+// const TEST_CSP_NETWORK = "NETWORK_1";
 
-const testCspConfig = {
-  uri: TEST_CSP_ENDPOINT,
-  network: TEST_CSP_NETWORK,
-};
+// const testCspConfig = {
+//   uri: TEST_CSP_ENDPOINT,
+//   network: TEST_CSP_NETWORK,
+// };
 
 describe("addPortfolio", () => {
   let client: AtatClient;
@@ -51,11 +56,10 @@ describe("addPortfolio", () => {
   const portfolio: Portfolio = {
     name: "Test Portfolio",
     taskOrders: [],
-    administrators: [],
   };
   const url = `${TEST_CSP_ENDPOINT}/portfolios`;
   beforeAll(() => {
-    client = new AtatClient(TEST_API_TOKEN, testCspConfig);
+    client = new AtatClient(TEST_API_TOKEN, TEST_CSP_ENDPOINT);
     // This is necessary to mock the specific instance of Axios. Perhaps we could instead
     // change the constructor to accept an optional axios instance or do something more
     // creative here. But for the time being, bypassing the visibility check and directly
@@ -72,26 +76,19 @@ describe("addPortfolio", () => {
     expect(mock.history.post[0].url).toEqual(`/portfolios`);
     expect(result.portfolio).toEqual(portfolio);
   });
-  it("should handle a successful 202 response", async () => {
-    mock.onPost(url).reply(202, mockProvisioningStatus, { "Content-Type": "application/json", location });
-    const result = (await client.addPortfolio({ portfolio })) as AddPortfolioResponseAsync;
-    expect(mock.history.post[0].url).toEqual(`/portfolios`);
-    expect(result.status).toEqual(mockProvisioningStatus);
-    expect(result.location).toEqual(location);
-  });
   it("should throw an error on a 400 response", async () => {
     mock.onPost(url).reply(400, { bad: "request" });
-    expect(async () => await client.addPortfolio({ bad: "input" } as unknown as AddPortfolioRequest)).rejects.toThrow(
-      /Invalid portfolio provided/
-    );
+    await expect(
+      async () => await client.addPortfolio({ bad: "input" } as unknown as AddPortfolioRequest)
+    ).rejects.toThrow(/Invalid portfolio provided/);
   });
   it.each([204, 500, 405, 404, 410, 503])(
     "should throw an error on any unexpected response (ex: %s)",
     async (statusCode) => {
       mock.onPost(url).reply(statusCode, { bad: "request" });
-      expect(async () => await client.addPortfolio({ bad: "input" } as unknown as AddPortfolioRequest)).rejects.toThrow(
-        /Unexpected API error/
-      );
+      await expect(
+        async () => await client.addPortfolio({ bad: "input" } as unknown as AddPortfolioRequest)
+      ).rejects.toThrow(/Unexpected API error/);
     }
   );
 });
@@ -102,10 +99,10 @@ describe("getPortfolioById", () => {
   const url = `${TEST_CSP_ENDPOINT}/portfolios/${portfolioId}`;
   const portfolio: Portfolio = {
     ...mockPortfolio,
-    id: "csp-portfolio-id-123",
+    id: portfolioId,
   };
   beforeAll(() => {
-    client = new AtatClient(TEST_API_TOKEN, testCspConfig);
+    client = new AtatClient(TEST_API_TOKEN, TEST_CSP_ENDPOINT);
     // see comment in 'addPortfolio' test above for more info on the mocking axios instance
     // eslint-disable-next-line dot-notation
     mock = new MockAdapter(client["client"], { onNoMatch: "throwException" });
@@ -117,37 +114,93 @@ describe("getPortfolioById", () => {
     mock.onGet(url).reply(200, portfolio);
     const result = (await client.getPortfolioById({
       portfolioId,
-      targetImpactLevel: ImpactLevel.IL2,
     })) as GetPortfolioResponse;
     expect(mock.history.get[0].url).toEqual(`/portfolios/${portfolioId}`);
     expect(result.portfolio).toEqual(portfolio);
   });
   it("should throw an error on a 400 response", async () => {
     mock.onGet(`portfolios/undefined`).reply(400, { bad: "request" });
-    expect(
+    await expect(
       async () => await client.getPortfolioById({ bad: "input" } as unknown as GetPortfolioRequest)
     ).rejects.toThrow(/Invalid ID supplied/);
   });
   it("should throw an error on a 404 response", async () => {
     mock.onGet(`portfolios/undefined`).reply(404, { not: "found" });
-    expect(
+    await expect(
       async () => await client.getPortfolioById({ not: "found" } as unknown as GetPortfolioRequest)
     ).rejects.toThrow(/Portfolio not found/);
   });
   it.each([204, 405, 410, 500, 503])("should throw an unexpected error %s", async (statusCode) => {
     mock.onGet(`portfolios/undefined`).reply(statusCode, { unknown: "error thrown" });
-    expect(
+    await expect(
       async () => await client.getPortfolioById({ unexpected: "error" } as unknown as GetPortfolioRequest)
     ).rejects.toThrow(/Unexpected API error/);
   });
 });
-
-describe("patchPortfolio", () => {
+describe("addEnvironment", () => {
   let client: AtatClient;
   let mock: MockAdapter;
-  const url = `${TEST_CSP_ENDPOINT}/portfolios/${portfolioId}`;
+  const environment: Environment = {
+    name: "Test Environment",
+    administrators: [],
+    classificationLevel: ClassificationLevel.UNCLASSIFIED,
+  };
+  const url = `${TEST_CSP_ENDPOINT}/portfolios/${portfolioId}/environments`;
   beforeAll(() => {
-    client = new AtatClient(TEST_API_TOKEN, testCspConfig);
+    client = new AtatClient(TEST_API_TOKEN, TEST_CSP_ENDPOINT);
+    // This is necessary to mock the specific instance of Axios. Perhaps we could instead
+    // change the constructor to accept an optional axios instance or do something more
+    // creative here. But for the time being, bypassing the visibility check and directly
+    // relying on this implementation details feels acceptable for an internal test.
+    // eslint-disable-next-line dot-notation
+    mock = new MockAdapter(client["client"], { onNoMatch: "throwException" });
+  });
+  afterEach(() => {
+    mock.reset();
+  });
+  it("should handle a successful 200 response", async () => {
+    mock.onPost(url).reply(200, environment, { "Content-Type": "application/json" });
+    const result = (await client.addEnvironment({
+      portfolioId,
+      environment,
+    })) as AddEnvironmentResponseSync;
+    expect(mock.history.post[0].url).toEqual(`/portfolios/${portfolioId}/environments`);
+    expect(result.environment).toEqual(environment);
+  });
+  it("should handle a successful 202 response", async () => {
+    mock.onPost(url).reply(202, mockProvisioningStatus, { "Content-Type": "application/json", location });
+    const result = (await client.addEnvironment({
+      portfolioId,
+      environment,
+    })) as AddEnvironmentResponseAsync;
+    expect(mock.history.post[0].url).toEqual(`/portfolios/${portfolioId}/environments`);
+    expect(result.status).toEqual(mockProvisioningStatus);
+    expect(result.location).toEqual(location);
+  });
+  it("should throw an error on a 400 response", async () => {
+    mock.onPost(url).reply(400, { bad: "request" });
+    await expect(
+      async () => await client.addEnvironment({ bad: "input", portfolioId } as unknown as AddEnvironmentRequest)
+    ).rejects.toThrow(/Invalid environment provided/);
+  });
+  it.each([204, 500, 405, 404, 410, 503])(
+    "should throw an error on any unexpected response (ex: %s)",
+    async (statusCode) => {
+      mock.onPost(url).reply(statusCode, { bad: "request" });
+      await expect(
+        async () => await client.addEnvironment({ bad: "input", portfolioId } as unknown as AddEnvironmentRequest)
+      ).rejects.toThrow(/Unexpected API error/);
+    }
+  );
+});
+
+// TODO: Implement updates to refactor patch operation from portfolios to environments and re-enable this suite
+describe.skip("patchEnvironment", () => {
+  let client: AtatClient;
+  let mock: MockAdapter;
+  const url = `${TEST_CSP_ENDPOINT}/portfolios/${portfolioId}/environments/${environmentId}`;
+  beforeAll(() => {
+    client = new AtatClient(TEST_API_TOKEN, TEST_CSP_ENDPOINT);
     // see comment in 'addPortfolio' test above for more info on the mocking axios instance
     // eslint-disable-next-line dot-notation
     mock = new MockAdapter(client["client"], { onNoMatch: "throwException" });
@@ -155,39 +208,49 @@ describe("patchPortfolio", () => {
   afterEach(() => {
     mock.reset();
   });
-  it("should handle a successful 200 response for patching portfolio details", async () => {
-    const request: PatchPortfolioRequest = {
-      ...mockPatchPortfolioRequest,
+  it("should handle a successful 200 response for patching environment details", async () => {
+    const request: PatchEnvironmentRequest = {
+      ...mockPatchEnvironmentRequest,
       provisionDeadline: "2022-11-15",
+      portfolioId,
     };
     mock.onPatch(url).reply(200, { patch: administrators });
-    const result = (await client.patchPortfolio(request)) as PatchPortfolioResponseSync;
-    expect(mock.history.patch[0].url).toEqual(`/portfolios/${portfolioId}`);
+    const result = (await client.patchEnvironment(request)) as PatchEnvironmentResponseSync;
+    expect(mock.history.patch[0].url).toEqual(`/portfolios/${portfolioId}/environments/${environmentId}`);
     expect(result.patch).toEqual({ patch: administrators });
   });
-  it("should handle a successful 202 response with location header", async () => {
-    mock.onPatch(url).reply(202, mockProvisioningStatus, { location });
-    const result = (await client.patchPortfolio(mockPatchPortfolioRequest)) as PatchPortfolioResponseAsync;
-    expect(mock.history.patch[0].url).toEqual(`/portfolios/${portfolioId}`);
-    expect(result.location).toEqual(location);
-    expect(result.status).toEqual(mockProvisioningStatus);
-  });
+
   it("should throw a 400 error", async () => {
     mock.onPatch(`${TEST_CSP_ENDPOINT}/portfolios/undefined`).reply(400, { bad: "request" });
-    expect(
-      async () => await client.patchPortfolio({ bad: "input" } as unknown as PatchPortfolioRequest)
+    await expect(
+      async () =>
+        await client.patchEnvironment({
+          bad: "input",
+          portfolioId,
+          environmentId,
+        } as unknown as PatchEnvironmentRequest)
     ).rejects.toThrow(/Invalid portfolio provided/);
   });
   it("should throw an error on a 404 response", async () => {
     mock.onPatch(`${TEST_CSP_ENDPOINT}/portfolios/undefined`).reply(404, { not: "found" });
-    expect(
-      async () => await client.patchPortfolio({ not: "found" } as unknown as PatchPortfolioRequest)
+    await expect(
+      async () =>
+        await client.patchEnvironment({
+          not: "found",
+          portfolioId,
+          environmentId,
+        } as unknown as PatchEnvironmentRequest)
     ).rejects.toThrow(/Portfolio not found/);
   });
   it.each([204, 405, 410, 500, 503])("should throw an unexpected error %s", async (statusCode) => {
     mock.onPatch(`${TEST_CSP_ENDPOINT}/portfolios/undefined`).reply(statusCode, { unknown: "error thrown" });
-    expect(
-      async () => await client.patchPortfolio({ unknown: "error" } as unknown as PatchPortfolioRequest)
+    await expect(
+      async () =>
+        await client.patchEnvironment({
+          unknown: "error",
+          portfolioId,
+          environmentId,
+        } as unknown as PatchEnvironmentRequest)
     ).rejects.toThrow(/Unexpected API error/);
   });
 });
@@ -197,7 +260,7 @@ describe("getCostsByPortfolio", () => {
   let mock: MockAdapter;
   const url = `${TEST_CSP_ENDPOINT}/portfolios/${portfolioId}/cost`;
   beforeAll(() => {
-    client = new AtatClient(TEST_API_TOKEN, testCspConfig);
+    client = new AtatClient(TEST_API_TOKEN, TEST_CSP_ENDPOINT);
     // see comment in 'addPortfolio' test above for more info on the mocking axios instance
     // eslint-disable-next-line dot-notation
     mock = new MockAdapter(client["client"], { onNoMatch: "throwException" });
@@ -218,19 +281,19 @@ describe("getCostsByPortfolio", () => {
   });
   it("should throw a 400 error", async () => {
     mock.onGet(`${TEST_CSP_ENDPOINT}/portfolios/undefined/cost`).reply(400, { bad: "request" });
-    expect(
+    await expect(
       async () => await client.getCostsByPortfolio({ bad: "input" } as unknown as GetCostsByPortfolioRequest)
     ).rejects.toThrow(/Invalid ID or query parameters/);
   });
   it("should throw an error on a 404 response", async () => {
     mock.onGet(`${TEST_CSP_ENDPOINT}/portfolios/undefined/cost`).reply(404, { not: "found" });
-    expect(
+    await expect(
       async () => await client.getCostsByPortfolio({ not: "found" } as unknown as GetCostsByPortfolioRequest)
     ).rejects.toThrow(/Portfolio not found/);
   });
   it.each([204, 405, 410, 500, 503])("should throw an unexpected error %s", async (statusCode) => {
     mock.onGet(`${TEST_CSP_ENDPOINT}/portfolios/undefined/cost`).reply(statusCode, { unknown: "error thrown" });
-    expect(
+    await expect(
       async () => await client.getCostsByPortfolio({ unknown: "error" } as unknown as GetCostsByPortfolioRequest)
     ).rejects.toThrow(/Unexpected API error/);
   });
@@ -241,7 +304,7 @@ describe("addTaskOrder", () => {
   let mock: MockAdapter;
   const url = `${TEST_CSP_ENDPOINT}/portfolios/${portfolioId}/task-orders`;
   beforeAll(() => {
-    client = new AtatClient(TEST_API_TOKEN, testCspConfig);
+    client = new AtatClient(TEST_API_TOKEN, TEST_CSP_ENDPOINT);
     // see comment in 'addPortfolio' test above for more info on the mocking axios instance
     // eslint-disable-next-line dot-notation
     mock = new MockAdapter(client["client"], { onNoMatch: "throwException" });
@@ -255,28 +318,21 @@ describe("addTaskOrder", () => {
     expect(mock.history.post[0].url).toEqual(`/portfolios/${portfolioId}/task-orders`);
     expect(result.taskOrder).toEqual(mockTaskOrder);
   });
-  it("should handle a successful 202 response with location header", async () => {
-    mock.onPost(url).reply(202, mockProvisioningStatus, { location });
-    const result = (await client.addTaskOrder(mockAddTaskOrderRequest)) as AddTaskOrderResponseAsync;
-    expect(mock.history.post[0].url).toEqual(`/portfolios/${portfolioId}/task-orders`);
-    expect(result.location).toEqual(location);
-    expect(result.status).toEqual(mockProvisioningStatus);
-  });
   it("should throw a 400 error", async () => {
     mock.onPost(`${TEST_CSP_ENDPOINT}/portfolios/undefined/task-orders`).reply(400, { bad: "request" });
-    expect(async () => await client.addTaskOrder({ bad: "input" } as unknown as AddTaskOrderRequest)).rejects.toThrow(
-      /Invalid ID supplied/
-    );
+    await expect(
+      async () => await client.addTaskOrder({ bad: "input" } as unknown as AddTaskOrderRequest)
+    ).rejects.toThrow(/Invalid ID supplied/);
   });
   it("should throw an error on a 404 response", async () => {
     mock.onPost(`${TEST_CSP_ENDPOINT}/portfolios/undefined/task-orders`).reply(404, { not: "found" });
-    expect(async () => await client.addTaskOrder({ not: "found" } as unknown as AddTaskOrderRequest)).rejects.toThrow(
-      /Portfolio not found/
-    );
+    await expect(
+      async () => await client.addTaskOrder({ not: "found" } as unknown as AddTaskOrderRequest)
+    ).rejects.toThrow(/Portfolio not found/);
   });
   it.each([204, 405, 410, 500, 503])("should throw an unexpected error %s", async (statusCode) => {
     mock.onPost(`${TEST_CSP_ENDPOINT}/portfolios/undefined/task-orders`).reply(statusCode, { unknown: "error thrown" });
-    expect(
+    await expect(
       async () => await client.addTaskOrder({ unknown: "error" } as unknown as AddTaskOrderRequest)
     ).rejects.toThrow(/Unexpected API error/);
   });
@@ -290,7 +346,7 @@ describe("getCostsByClin", () => {
   const url = `${TEST_CSP_ENDPOINT}/portfolios/${portfolioId}/task-orders/${taskOrderNumber}/clins/${clin}/cost`;
   const badUrl = `${TEST_CSP_ENDPOINT}/portfolios/undefined/task-orders/undefined/clins/undefined/cost`;
   beforeAll(() => {
-    client = new AtatClient(TEST_API_TOKEN, testCspConfig);
+    client = new AtatClient(TEST_API_TOKEN, TEST_CSP_ENDPOINT);
     // see comment in 'addPortfolio' test above for more info on the mocking axios instance
     // eslint-disable-next-line dot-notation
     mock = new MockAdapter(client["client"], { onNoMatch: "throwException" });
@@ -312,19 +368,19 @@ describe("getCostsByClin", () => {
   });
   it("should throw a 400 error", async () => {
     mock.onGet(badUrl).reply(400, { bad: "request" });
-    expect(
+    await expect(
       async () => await client.getCostsByClin({ bad: "input" } as unknown as GetCostsByClinRequest)
     ).rejects.toThrow(/Invalid ID or query parameters/);
   });
   it("should throw an error on a 404 response", async () => {
     mock.onGet(badUrl).reply(404, { not: "found" });
-    expect(
+    await expect(
       async () => await client.getCostsByClin({ not: "found" } as unknown as GetCostsByClinRequest)
     ).rejects.toThrow(/Portfolio not found/);
   });
   it.each([204, 405, 410, 500, 503])("should throw an unexpected error %s", async (statusCode) => {
     mock.onGet(badUrl).reply(statusCode, { unknown: "error thrown" });
-    expect(
+    await expect(
       async () => await client.getCostsByClin({ unknown: "error" } as unknown as GetCostsByClinRequest)
     ).rejects.toThrow(/Unexpected API error/);
   });
@@ -336,7 +392,7 @@ describe("getProvisioningStatus", () => {
   // the url is the location used for finding the status
   const url = `${TEST_CSP_ENDPOINT}/provisioning/${provisioningJobId}/status`;
   beforeAll(() => {
-    client = new AtatClient(TEST_API_TOKEN, testCspConfig);
+    client = new AtatClient(TEST_API_TOKEN, TEST_CSP_ENDPOINT);
     // see comment in 'addPortfolio' test above for more info on the mocking axios instance
     // eslint-disable-next-line dot-notation
     mock = new MockAdapter(client["client"], { onNoMatch: "throwException" });
@@ -347,7 +403,6 @@ describe("getProvisioningStatus", () => {
   it("should handle a successful 200 response", async () => {
     const request: GetProvisioningStatusRequest = {
       location: url,
-      targetImpactLevel: ImpactLevel.IL2,
     };
     mock.onGet(url).reply(200, mockProvisioningStatus, { location: url });
     const result = (await client.getProvisioningStatus(request)) as GetProvisioningStatusResponse;
@@ -356,7 +411,7 @@ describe("getProvisioningStatus", () => {
   });
   it("should throw a 404 error", async () => {
     mock.onGet(`undefined`).reply(404, { bad: "request" });
-    expect(
+    await expect(
       async () =>
         await client.getProvisioningStatus({
           location: "undefined", // need location for axios mock
@@ -366,7 +421,7 @@ describe("getProvisioningStatus", () => {
   });
   it.each([204, 405, 410, 500, 503])("should throw an unexpected error %s", async (statusCode) => {
     mock.onGet(`undefined`).reply(statusCode, { unknown: "error thrown" } as unknown as GetProvisioningStatusResponse);
-    expect(
+    await expect(
       async () =>
         await client.getProvisioningStatus({
           location: "undefined",

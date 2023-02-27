@@ -1,11 +1,11 @@
 import {
-  AddPortfolioResponseAsync,
+  AddEnvironmentResponseAsync,
   GetProvisioningStatusRequest,
   GetProvisioningStatusResponse,
   IAtatClient,
+  ProvisionCspResponse,
   ProvisioningStatusType,
 } from "../client";
-import { ProvisionCspResponse } from "../../models/provisioning-jobs";
 import { SQSEvent, SQSBatchResponse } from "aws-lambda";
 import { logger } from "../../utils/logging";
 import { sqsClient } from "../../utils/aws-sdk/sqs";
@@ -28,14 +28,14 @@ async function makeRequest(
   client: IAtatClient,
   request: ProvisionCspResponse
 ): Promise<ProvisionCspResponse | undefined> {
-  const origResponse: GetProvisioningStatusResponse | AddPortfolioResponseAsync = request.content.response as
+  const origResponse: GetProvisioningStatusResponse | AddEnvironmentResponseAsync = request.content.response as
     | GetProvisioningStatusResponse
-    | AddPortfolioResponseAsync;
+    | AddEnvironmentResponseAsync;
   const requestBody: GetProvisioningStatusRequest = {
     location: origResponse.location,
   };
   const mockCspNames = ["CSP_B", "CSP_C", "CSP_F"];
-  if (request.initialSnowRequest && mockCspNames.includes(request.initialSnowRequest.targetCsp.name)) {
+  if (request.initialSnowRequest && mockCspNames.includes(request.initialSnowRequest.targetCspName)) {
     const cspMockResponse = mockCspClientResponse(origResponse.$metadata.request);
     const mockResponse = {
       code: request.code,
@@ -46,8 +46,8 @@ async function makeRequest(
       initialSnowRequest: request.initialSnowRequest,
     };
     if (
-      cspMockResponse.status.status === ProvisioningStatusType.COMPLETE ||
-      cspMockResponse.status.status === ProvisioningStatusType.FAILED
+      cspMockResponse.status.status === ProvisioningStatusType.SUCCESS ||
+      cspMockResponse.status.status === ProvisioningStatusType.FAILURE
     ) {
       return mockResponse;
     }
@@ -57,8 +57,8 @@ async function makeRequest(
   logger.info("Making an actual CSP request w/ atat-client - AsyncProvisioningCheck");
   const cspResponse = await client.getProvisioningStatus(requestBody);
   if (
-    cspResponse.status.status === ProvisioningStatusType.COMPLETE ||
-    cspResponse.status.status === ProvisioningStatusType.FAILED
+    cspResponse.status.status === ProvisioningStatusType.SUCCESS ||
+    cspResponse.status.status === ProvisioningStatusType.FAILURE
   ) {
     return {
       code: cspResponse.$metadata.status,
@@ -85,7 +85,7 @@ async function baseHandler(event: SQSEvent): Promise<SQSBatchResponse> {
     if (!request.initialSnowRequest) {
       throw new Error("No initial ServiceNow Request provided for Async request");
     }
-    const client = await makeClient(request.initialSnowRequest.targetCsp.name);
+    const client = await makeClient(request.initialSnowRequest.targetCspName);
     const provisioningStatus = await makeRequest(client, request);
     if (provisioningStatus) {
       moveToReady.push(provisioningStatus);

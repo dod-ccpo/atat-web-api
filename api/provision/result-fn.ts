@@ -5,11 +5,12 @@ import middy from "@middy/core";
 import errorLogger from "@middy/error-logger";
 import inputOutputLogger from "@middy/input-output-logger";
 import validator from "@middy/validator";
-import { provisionResponseSchema, ProvisionCspResponse } from "../../models/provisioning-jobs";
 import { sqsClient } from "../../utils/aws-sdk/sqs";
 import { logger } from "../../utils/logging";
 import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
 import { tracer } from "../../utils/tracing";
+import { provisionResponseSchema } from "../../models/provisioning-schemas";
+import { ProvisionCspResponse } from "../client";
 
 const MESSAGE_GROUP_ID = "provisioning-queue-message-group";
 

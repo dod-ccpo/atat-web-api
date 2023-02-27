@@ -6,12 +6,7 @@ import inputOutputLogger from "@middy/input-output-logger";
 import validator from "@middy/validator";
 import { Context } from "aws-lambda";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
-import {
-  NewPortfolioPayload,
-  ProvisionCspResponse,
-  ProvisionRequest,
-  provisionRequestSchema,
-} from "../../models/provisioning-jobs";
+import { NewEnvironmentPayload, NewPortfolioPayload, HothProvisionRequest } from "../../models/provisioning-jobs";
 import { logger } from "../../utils/logging";
 import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
 import { ValidationErrorResponse } from "../../utils/response";
@@ -20,6 +15,8 @@ import { CspResponse, mockCspClientResponse } from "../util/csp-request";
 import { AtatApiError, IAtatClient } from "../client/client";
 import * as atatApiTypes from "../client/types";
 import { makeClient } from "../../utils/atat-client";
+import { AsyncProvisionResponse, ProvisionCspResponse } from "../client/types";
+import { provisionRequestSchema } from "../../models/provisioning-schemas";
 
 function transformSynchronousResponse(
   response: atatApiTypes.AddPortfolioResponseSync,
@@ -34,64 +31,27 @@ function transformSynchronousResponse(
   };
 }
 
-function transformAsynchronousResponse(
-  response: atatApiTypes.AddPortfolioResponseAsync,
-  request: atatApiTypes.AddPortfolioRequest
-): CspResponse<atatApiTypes.AddPortfolioRequest, atatApiTypes.AddPortfolioResponseAsync | { details: string }> {
-  if (response.location) {
-    return {
-      code: response.$metadata.status,
-      content: {
-        response,
-        request,
-      },
-    };
-  }
-  return {
-    code: 500,
-    content: {
-      response: {
-        details: "Location header was invalid or not provided",
-      },
-      request,
-    },
-  };
-}
-
-async function makeRequest(client: IAtatClient, request: ProvisionRequest): Promise<ProvisionCspResponse> {
+async function makeRequest(client: IAtatClient, request: HothProvisionRequest): Promise<ProvisionCspResponse> {
   // This function will always be operating for creating new portfolios; if we have something
   // else, this will be a non-recoverable error anyway.
   const payload = request.payload as NewPortfolioPayload;
-  const creationRequest: atatApiTypes.AddPortfolioRequest = {
+  const addPortfolioRequest: atatApiTypes.AddPortfolioRequest = {
     portfolio: {
-      name: payload.name,
-      administrators: payload.operators,
-      taskOrders: payload.fundingSources.map((funding) => ({
-        ...funding,
-        clins: [{ clinNumber: funding.clin, popStartDate: funding.popStartDate, popEndDate: funding.popEndDate }],
-        clin: undefined,
-      })),
+      ...payload,
     },
   };
   try {
     // TODO: remove once mocking is no longer needed (e.g., mocking api implemented or actual csp integration)
     // Intent is to not use the 'client' to make external call
     const mockCspNames = ["CSP_A", "CSP_B", "CSP_C", "CSP_D", "CSP_E", "CSP_F", "CSP_DNE"];
-    const response = mockCspClientResponse(request);
-    if (response.$metadata.status === 202 && mockCspNames.includes(request.targetCsp.name)) {
-      return transformAsynchronousResponse(response, creationRequest);
-    }
-    if (mockCspNames.includes(request.targetCsp.name)) {
-      return transformSynchronousResponse(response, creationRequest);
+    if (mockCspNames.includes(request.targetCspName)) {
+      const response = mockCspClientResponse(request);
+      return transformSynchronousResponse(response, addPortfolioRequest);
     }
 
     logger.info("Making an actual CSP request w/ atat-client - CspWritePortfolio");
-    const cspResponse = await client.addPortfolio(creationRequest);
-    if (cspResponse.$metadata.status === 202) {
-      const asyncResponse = cspResponse as atatApiTypes.AddPortfolioResponseAsync;
-      return transformAsynchronousResponse(asyncResponse, creationRequest);
-    }
-    return transformSynchronousResponse(cspResponse as atatApiTypes.AddPortfolioResponseSync, creationRequest);
+    const cspResponse = await client.addPortfolio(addPortfolioRequest);
+    return transformSynchronousResponse(cspResponse as atatApiTypes.AddPortfolioResponseSync, addPortfolioRequest);
   } catch (err) {
     // Re-throw any unsupported error type
     if (!err || typeof err !== "object" || !(err instanceof AtatApiError)) {
@@ -105,7 +65,7 @@ async function makeRequest(client: IAtatClient, request: ProvisionRequest): Prom
       code: err.response!.status,
       content: {
         response: err.response?.data,
-        request: creationRequest,
+        request: addPortfolioRequest,
       },
     };
   }
@@ -121,11 +81,11 @@ async function makeRequest(client: IAtatClient, request: ProvisionRequest): Prom
  * @return - CspResponse or throw error for 500 or above
  */
 export async function baseHandler(
-  stateInput: ProvisionRequest,
+  stateInput: HothProvisionRequest,
   context: Context
 ): Promise<ProvisionCspResponse | ValidationErrorResponse> {
   logger.addPersistentLogAttributes({ correlationIds: { jobId: stateInput.jobId } });
-  const client = await makeClient(stateInput.targetCsp.name);
+  const client = await makeClient(stateInput.targetCspName);
   return makeRequest(client, stateInput);
 }
 

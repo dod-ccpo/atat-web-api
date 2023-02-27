@@ -1,3 +1,5 @@
+import { CspResponse } from "../util/csp-request";
+
 export interface Metadata<T> {
   readonly status: number;
   readonly request: T;
@@ -9,18 +11,8 @@ export interface Metadata<T> {
 export enum ProvisioningStatusType {
   NOT_STARTED = "NOT_STARTED",
   IN_PROGRESS = "IN_PROGRESS",
-  COMPLETE = "COMPLETE",
-  FAILED = "FAILED",
-}
-
-/**
- * The available Impact Levels for target Cloud Environments.
- */
-export enum ImpactLevel {
-  IL2 = "IL2",
-  IL4 = "IL4",
-  IL5 = "IL5",
-  IL6 = "IL6",
+  SUCCESS = "SUCCESS",
+  FAILURE = "FAILURE",
 }
 
 /**
@@ -64,7 +56,7 @@ export interface TaskOrder {
 /**
  * An individual who should have access to a Portfolio in a target Cloud Environment.
  */
-export interface Operator {
+export interface Administrator {
   readonly email: string;
   readonly dodId: string;
   /**
@@ -73,15 +65,37 @@ export interface Operator {
   readonly needsReset: boolean;
 }
 
-export interface PortfolioPatchInput {
-  readonly administrators: Operator[];
+export interface EnvironmentPatchInput {
+  readonly administrators: Administrator[];
 }
 
-export interface Portfolio extends PortfolioPatchInput {
+export interface CloudDistinguisher {
+  readonly name: string;
+  readonly displayName: string;
+  readonly description: string;
+}
+
+/**
+ * The available Impact Levels for target Cloud Environments.
+ */
+export enum ClassificationLevel {
+  UNCLASSIFIED = "UNCLASSIFIED",
+  SECRET = "SECRET",
+  TOP_SECRET = "TOP_SECRET",
+}
+
+export interface Environment extends EnvironmentPatchInput {
+  readonly id?: string;
+  readonly name: string;
+  readonly classificationLevel: ClassificationLevel;
+  readonly dashboardLink?: string;
+  readonly cloudDistinguisher?: CloudDistinguisher;
+}
+
+export interface Portfolio {
   readonly name: string;
   readonly taskOrders: TaskOrder[];
   readonly id?: string;
-  readonly dashboardLink?: string;
 }
 
 export interface CostData {
@@ -105,10 +119,7 @@ export interface CostResponseByPortfolio {
   }[];
 }
 
-export interface AtatRequest {
-  readonly targetImpactLevel?: ImpactLevel;
-}
-export interface ProvisionRequest extends AtatRequest {
+export interface ProvisionRequest {
   readonly provisionDeadline?: string;
 }
 export interface AtatResponse {
@@ -122,31 +133,40 @@ export interface ErrorResponse extends AtatResponse {
   errorMessage?: string;
   errorCode?: string;
 }
+
 export interface AddPortfolioRequest extends ProvisionRequest {
   readonly portfolio: Portfolio;
 }
 export interface AddPortfolioResponseSync extends AtatResponse {
   readonly portfolio: Portfolio;
 }
-export type AddPortfolioResponseAsync = AsyncProvisionResponse;
+export interface AddEnvironmentRequest extends ProvisionRequest {
+  readonly portfolioId: string;
+  readonly environment: Environment;
+}
+export interface AddEnvironmentResponseSync extends AtatResponse {
+  readonly environment: Environment;
+}
+export type AddEnvironmentResponseAsync = AsyncProvisionResponse;
 
-export interface GetPortfolioRequest extends AtatRequest {
+export interface GetPortfolioRequest extends ProvisionRequest {
   readonly portfolioId: string;
 }
 export interface GetPortfolioResponse extends AtatResponse {
-  readonly portfolio: Portfolio;
+  readonly portfolio: Environment;
 }
 
-export interface PatchPortfolioRequest extends ProvisionRequest {
+export interface PatchEnvironmentRequest extends ProvisionRequest {
   readonly portfolioId: string;
-  readonly patch: PortfolioPatchInput;
+  readonly environmentId: string;
+  readonly patch: EnvironmentPatchInput;
 }
-export interface PatchPortfolioResponseSync extends AtatResponse {
-  readonly patch: PortfolioPatchInput;
+export interface PatchEnvironmentResponseSync extends AtatResponse {
+  readonly patch: EnvironmentPatchInput;
 }
-export type PatchPortfolioResponseAsync = AsyncProvisionResponse;
+export type PatchEnvironmentResponseAsync = AsyncProvisionResponse;
 
-export interface GetCostsByPortfolioRequest extends AtatRequest {
+export interface GetCostsByPortfolioRequest extends ProvisionRequest {
   readonly portfolioId: string;
   readonly startDate: string;
   readonly endDate: string;
@@ -164,7 +184,7 @@ export interface AddTaskOrderResponseSync extends AtatResponse {
 }
 export type AddTaskOrderResponseAsync = AsyncProvisionResponse;
 
-export interface GetCostsByClinRequest extends AtatRequest {
+export interface GetCostsByClinRequest extends ProvisionRequest {
   readonly portfolioId: string;
   readonly taskOrderNumber: string;
   readonly clin: string;
@@ -175,10 +195,16 @@ export interface GetCostsByClinResponse extends AtatResponse {
   readonly costs: CostResponseByClin;
 }
 
-export interface GetProvisioningStatusRequest extends AtatRequest {
+export interface GetProvisioningStatusRequest extends ProvisionRequest {
   readonly location: string;
 }
 export interface GetProvisioningStatusResponse extends AtatResponse {
   readonly status: ProvisioningStatus;
   readonly location: string;
 }
+
+export type ProvisionCspResponse =
+  | CspResponse<AddPortfolioRequest, AtatResponse>
+  | CspResponse<AddEnvironmentRequest, AtatResponse>
+  | CspResponse<AddEnvironmentRequest, AsyncProvisionResponse | { details: string }>
+  | CspResponse<GetProvisioningStatusRequest, GetProvisioningStatusResponse>;

@@ -8,7 +8,7 @@ import validator from "@middy/validator";
 import { APIGatewayProxyResult } from "aws-lambda";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import { RequestEvent } from "../../models/document-generation";
-import { ProvisionRequest, provisionRequestSchema } from "../../models/provisioning-jobs";
+import { HothProvisionRequest } from "../../models/provisioning-jobs";
 import { sfnClient } from "../../utils/aws-sdk/step-functions";
 import { REQUEST_BODY_INVALID } from "../../utils/errors";
 import { logger } from "../../utils/logging";
@@ -19,6 +19,7 @@ import { wrapSchema } from "../../utils/middleware/schema-wrapper";
 import xssSanitizer from "../../utils/middleware/xss-sanitizer";
 import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
 import { tracer } from "../../utils/tracing";
+import { provisionRequestSchema } from "../../models/provisioning-schemas";
 
 const SFN_ARN = process.env.SFN_ARN ?? "";
 
@@ -27,7 +28,7 @@ const SFN_ARN = process.env.SFN_ARN ?? "";
  *
  * @param event - POST request from API Gateway with provisioning job properties
  */
-export async function baseHandler(event: RequestEvent<ProvisionRequest>): Promise<APIGatewayProxyResult> {
+export async function baseHandler(event: RequestEvent<HothProvisionRequest>): Promise<APIGatewayProxyResult> {
   try {
     // starting the execution
     const sfnInput = {
