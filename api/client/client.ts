@@ -48,17 +48,23 @@ export class AtatApiError extends Error {
 export interface IAtatClient {
   // Operations defined directly in the specification
   addPortfolio(request: types.AddPortfolioRequest): Promise<types.AddPortfolioResponseSync>;
+
   addEnvironment(
     request: types.AddEnvironmentRequest
   ): Promise<types.AddEnvironmentResponseSync | types.AddEnvironmentResponseAsync>;
+
   getPortfolioById(request: types.GetPortfolioRequest): Promise<types.GetPortfolioResponse>;
+
   patchEnvironment(
     request: types.PatchEnvironmentRequest
   ): Promise<types.PatchEnvironmentResponseSync | types.PatchEnvironmentResponseAsync>;
+
   getCostsByPortfolio(request: types.GetCostsByPortfolioRequest): Promise<types.GetCostsByPortfolioResponse>;
+
   addTaskOrder(
     request: types.AddTaskOrderRequest
   ): Promise<types.AddTaskOrderResponseSync | types.AddTaskOrderResponseAsync>;
+
   getCostsByClin(request: types.GetCostsByClinRequest): Promise<types.GetCostsByClinResponse>;
 
   // Operations that check for the status of a previously-issued provisioning request

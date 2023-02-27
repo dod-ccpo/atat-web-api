@@ -5,7 +5,7 @@ import middy from "@middy/core";
 import errorLogger from "@middy/error-logger";
 import inputOutputLogger from "@middy/input-output-logger";
 import { SQSEvent, SQSRecord } from "aws-lambda";
-import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
+import jsonErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import { CostRequest, CostResponse } from "../../models/cost-jobs";
 import { makeClient } from "../../utils/atat-client";
 import { sqsClient } from "../../utils/aws-sdk/sqs";
@@ -103,4 +103,4 @@ export const handler = middy(baseHandler)
   .use(inputOutputLogger({ logger: (message) => logger.info("Event/Result", message) }))
   .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
   .use(errorHandlingMiddleware())
-  .use(JSONErrorHandlerMiddleware());
+  .use(jsonErrorHandlerMiddleware());

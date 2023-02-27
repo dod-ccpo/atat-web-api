@@ -17,7 +17,7 @@ import * as client from "../client";
 import * as types from "../client/types";
 import * as atatClientHelper from "../../utils/atat-client";
 import { ErrorStatusCode, ValidationErrorResponse } from "../../utils/response";
-import { constructProvisionRequestForCsp } from "./csp-write-portfolio.test";
+import { constructProvisionRequestForCsp } from "./csp-create-portfolio.test";
 import { TEST_CSP_ENDPOINT } from "../client/fixtures";
 
 // Mocks

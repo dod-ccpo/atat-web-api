@@ -5,9 +5,6 @@ import { ErrorStatusCode, SuccessStatusCode, ValidationErrorResponse } from "../
 import * as cspConfig from "./csp-configuration";
 import { handler } from "./csp-create-environment";
 import { cspAAddPortfolioRequest } from "../util/common-test-fixtures";
-import * as client from "../client";
-import * as types from "../client/types";
-import { ProvisionCspResponse } from "../client";
 
 // Reused mocks
 jest.mock("../provision/csp-configuration");

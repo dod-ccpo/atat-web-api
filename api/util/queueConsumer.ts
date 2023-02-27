@@ -3,7 +3,7 @@ import { injectLambdaContext } from "@aws-lambda-powertools/logger";
 import { captureLambdaHandler } from "@aws-lambda-powertools/tracer";
 import middy from "@middy/core";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
+import jsonErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import { sqsClient } from "../../utils/aws-sdk/sqs";
 import { logger } from "../../utils/logging";
 import { tracer } from "../../utils/tracing";
@@ -22,7 +22,7 @@ export abstract class QueueConsumer<T> {
   readonly handler: (event: APIGatewayProxyEvent) => Promise<APIGatewayProxyResult>;
 
   constructor(queueUrl: string) {
-    this.handler = async (_event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+    this.handler = async (): Promise<APIGatewayProxyResult> => {
       // poll messages from the queue
       const receiveMessageInput: ReceiveMessageCommandInput = {
         QueueUrl: queueUrl,
@@ -76,6 +76,6 @@ export abstract class QueueConsumer<T> {
       .use(inputOutputLogger({ logger: (message) => logger.info("Event/Result", message) }))
       .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
       .use(errorHandlingMiddleware())
-      .use(JSONErrorHandlerMiddleware());
+      .use(jsonErrorHandlerMiddleware());
   }
 }

@@ -6,7 +6,7 @@ import {
   ProvisionCspResponse,
   ProvisioningStatusType,
 } from "../client";
-import { SQSEvent, SQSBatchResponse } from "aws-lambda";
+import { SQSBatchResponse, SQSEvent } from "aws-lambda";
 import { logger } from "../../utils/logging";
 import { sqsClient } from "../../utils/aws-sdk/sqs";
 import { SendMessageCommand } from "@aws-sdk/client-sqs";
@@ -17,7 +17,7 @@ import { captureLambdaHandler } from "@aws-lambda-powertools/tracer";
 import inputOutputLogger from "@middy/input-output-logger";
 import errorLogger from "@middy/error-logger";
 import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
-import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
+import jsonErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import { tracer } from "../../utils/tracing";
 import { mockCspClientResponse } from "../util/csp-request";
 
@@ -115,4 +115,4 @@ export const handler = middy(baseHandler)
   .use(inputOutputLogger({ logger: (message) => logger.info("Event/Result", message) }))
   .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
   .use(errorHandlingMiddleware())
-  .use(JSONErrorHandlerMiddleware());
+  .use(jsonErrorHandlerMiddleware());

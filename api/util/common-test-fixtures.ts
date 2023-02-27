@@ -2,7 +2,7 @@ import { SQSEvent } from "aws-lambda";
 import { CostRequest } from "../../models/cost-jobs";
 import { ProvisionRequestType } from "../../models/provisioning-jobs";
 import * as crypto from "crypto";
-import { ClassificationLevel, CostResponseByPortfolio } from "../client";
+import { CostResponseByPortfolio } from "../client";
 
 // Mock data used by unit and integration tests
 export const TEST_PORTFOLIO_ID = "b02e77d1-234d-4e3d-bc85-b57ca5a93952";

@@ -5,17 +5,16 @@ import errorLogger from "@middy/error-logger";
 import inputOutputLogger from "@middy/input-output-logger";
 import validator from "@middy/validator";
 import { Context } from "aws-lambda";
-import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
-import { NewEnvironmentPayload, NewPortfolioPayload, HothProvisionRequest } from "../../models/provisioning-jobs";
+import jsonErrorHandlerMiddleware from "middy-middleware-json-error-handler";
+import { HothProvisionRequest, NewPortfolioPayload } from "../../models/provisioning-jobs";
 import { logger } from "../../utils/logging";
 import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
 import { ValidationErrorResponse } from "../../utils/response";
 import { tracer } from "../../utils/tracing";
 import { CspResponse, mockCspClientResponse } from "../util/csp-request";
-import { AtatApiError, IAtatClient } from "../client/client";
+import { AtatApiError, IAtatClient, ProvisionCspResponse } from "../client";
 import * as atatApiTypes from "../client/types";
 import { makeClient } from "../../utils/atat-client";
-import { AsyncProvisionResponse, ProvisionCspResponse } from "../client/types";
 import { provisionRequestSchema } from "../../models/provisioning-schemas";
 
 function transformSynchronousResponse(
@@ -96,4 +95,4 @@ export const handler = middy(baseHandler)
   .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
   .use(validator({ eventSchema: provisionRequestSchema }))
   .use(errorHandlingMiddleware())
-  .use(JSONErrorHandlerMiddleware());
+  .use(jsonErrorHandlerMiddleware());

@@ -5,19 +5,17 @@ import errorLogger from "@middy/error-logger";
 import inputOutputLogger from "@middy/input-output-logger";
 import validator from "@middy/validator";
 import { Context } from "aws-lambda";
-import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
-import { NewEnvironmentPayload, HothProvisionRequest } from "../../models/provisioning-jobs";
+import jsonErrorHandlerMiddleware from "middy-middleware-json-error-handler";
+import { HothProvisionRequest, NewEnvironmentPayload } from "../../models/provisioning-jobs";
 import { logger } from "../../utils/logging";
 import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
 import { ValidationErrorResponse } from "../../utils/response";
 import { tracer } from "../../utils/tracing";
-import { CspResponse, mockCspClientResponse } from "../util/csp-request";
-import { AtatApiError, IAtatClient } from "../client/client";
+import { CspResponse } from "../util/csp-request";
+import { AtatApiError, IAtatClient, AddEnvironmentRequest, ProvisionCspResponse } from "../client";
 import * as atatApiTypes from "../client/types";
 import { makeClient } from "../../utils/atat-client";
 import { provisionRequestSchema } from "../../models/provisioning-schemas";
-import { AddEnvironmentRequest, ProvisionCspResponse, ProvisionRequest } from "../client/types";
-import { addEnvironmentRequest } from "../util/common-test-fixtures";
 
 function transformSynchronousResponse(
   response: atatApiTypes.AddEnvironmentResponseSync,
@@ -80,18 +78,6 @@ async function makeRequest(client: IAtatClient, request: HothProvisionRequest): 
     },
   };
   try {
-    // TODO: remove once mocking is no longer needed (e.g., mocking api implemented or actual csp integration)
-    // Intent is to not use the 'client' to make external call
-    // const mockCspNames = ["CSP_A", "CSP_B", "CSP_C", "CSP_D", "CSP_E", "CSP_F", "CSP_DNE"];
-    // if (mockCspNames.includes(request.targetCspName)) {
-    //   const response = mockCspClientResponse(request);
-    //   if (response.$metadata.status === 202) {
-    //     return transformAsynchronousResponse(response, addEnvironmentRequest);
-    //   } else {
-    //     return transformSynchronousResponse(response, addEnvironmentRequest);
-    //   }
-    // }
-
     logger.info("Making an actual CSP request w/ atat-client - CspWritePortfolio");
     const cspResponse = await client.addEnvironment(addEnvironmentRequest);
     if (cspResponse.$metadata.status === 202) {
@@ -147,4 +133,4 @@ export const handler = middy(baseHandler)
   .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
   .use(validator({ eventSchema: provisionRequestSchema }))
   .use(errorHandlingMiddleware())
-  .use(JSONErrorHandlerMiddleware());
+  .use(jsonErrorHandlerMiddleware());

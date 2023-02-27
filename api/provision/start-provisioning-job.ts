@@ -6,7 +6,7 @@ import httpJsonBodyParser from "@middy/http-json-body-parser";
 import inputOutputLogger from "@middy/input-output-logger";
 import validator from "@middy/validator";
 import { APIGatewayProxyResult } from "aws-lambda";
-import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
+import jsonErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import { RequestEvent } from "../../models/document-generation";
 import { HothProvisionRequest } from "../../models/provisioning-jobs";
 import { sfnClient } from "../../utils/aws-sdk/step-functions";
@@ -57,4 +57,4 @@ export const handler = middy(baseHandler)
   .use(cspPortfolioIdChecker())
   .use(validator({ eventSchema: wrapSchema(provisionRequestSchema) }))
   .use(errorHandlingMiddleware())
-  .use(JSONErrorHandlerMiddleware());
+  .use(jsonErrorHandlerMiddleware());

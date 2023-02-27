@@ -22,7 +22,6 @@ import {
   AddPortfolioRequest,
   AddPortfolioResponseSync,
   AddTaskOrderRequest,
-  AddTaskOrderResponseAsync,
   AddTaskOrderResponseSync,
   ClassificationLevel,
   CostResponseByClin,
@@ -36,19 +35,11 @@ import {
   GetProvisioningStatusRequest,
   GetProvisioningStatusResponse,
   PatchEnvironmentRequest,
-  PatchEnvironmentResponseAsync,
   PatchEnvironmentResponseSync,
   Portfolio,
 } from "./types";
 
 const TEST_API_TOKEN = "TEST-TOKEN-NOT-REAL";
-// const TEST_PORTFOLIO_ID = "csp-portfolio-id-123";
-// const TEST_CSP_NETWORK = "NETWORK_1";
-
-// const testCspConfig = {
-//   uri: TEST_CSP_ENDPOINT,
-//   network: TEST_CSP_NETWORK,
-// };
 
 describe("addPortfolio", () => {
   let client: AtatClient;

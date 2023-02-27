@@ -33,7 +33,7 @@ describe("Test fetch configuraton", () => {
       .resolves({ SecretString: JSON.stringify(fakeCspConfig) });
 
     // WHEN
-    const config = cspConfig.getConfiguration("CSP_A");
+    await cspConfig.getConfiguration("CSP_A");
 
     // THEN
     expect(secretsMock.send.calledOnce).toBeTruthy();
@@ -43,7 +43,7 @@ describe("Test fetch configuraton", () => {
   it("should return the config for a single CSP", async () => {
     // GIVEN
     process.env.CSP_CONFIG_SECRET_NAME = "test/config";
-    const secretsMock = mockClient(SecretsManager)
+    await mockClient(SecretsManager)
       .on(GetSecretValueCommand)
       .resolves({ SecretString: JSON.stringify(fakeCspConfig) });
 
@@ -58,7 +58,7 @@ describe("Test fetch configuraton", () => {
   it("should return undefined when the CSP does not exist", async () => {
     // GIVEN
     process.env.CSP_CONFIG_SECRET_NAME = "test/config";
-    const secretsMock = mockClient(SecretsManager)
+    await mockClient(SecretsManager)
       .on(GetSecretValueCommand)
       .resolves({ SecretString: JSON.stringify(fakeCspConfig) });
 
