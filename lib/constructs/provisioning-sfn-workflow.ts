@@ -82,7 +82,7 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
     );
     const cspWritePortfolioFn = new lambdaNodeJs.NodejsFunction(scope, "CspWritePortfolioFn", {
       entry: "api/provision/csp-write-portfolio.ts",
-      runtime: lambda.Runtime.NODEJS_16_X,
+      runtime: lambda.Runtime.NODEJS_18_X,
       environment: { CSP_CONFIG_SECRET_NAME: cspConfig.secretArn },
       timeout: cdk.Duration.minutes(5),
       memorySize: 256,
@@ -96,7 +96,7 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
 
     this.resultFn = new lambdaNodeJs.NodejsFunction(scope, "ResultFunction", {
       entry: "api/provision/result-fn.ts",
-      runtime: lambda.Runtime.NODEJS_16_X,
+      runtime: lambda.Runtime.NODEJS_18_X,
       environment: {
         PROVISIONING_QUEUE_URL: this.provisioningJobsQueue.queueUrl,
         ASYNC_PROVISIONING_JOBS_QUEUE_URL: this.asyncProvisioningJobsQueue.queueUrl,
@@ -177,7 +177,7 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
     // Setup the Async event handling
     const asyncProvisionWatcher = new lambdaNodeJs.NodejsFunction(this, "AsyncProvisionJob", {
       entry: "api/provision/async-provisioning-check.ts",
-      runtime: lambda.Runtime.NODEJS_16_X,
+      runtime: lambda.Runtime.NODEJS_18_X,
       environment: {
         CSP_CONFIG_SECRET_NAME: cspConfig.secretArn,
         PROVISIONING_QUEUE_URL: this.provisioningJobsQueue.queueUrl,

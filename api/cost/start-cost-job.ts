@@ -6,6 +6,7 @@ import errorLogger from "@middy/error-logger";
 import httpJsonBodyParser from "@middy/http-json-body-parser";
 import inputOutputLogger from "@middy/input-output-logger";
 import validator from "@middy/validator";
+import { transpileSchema } from "@middy/validator/transpile";
 import { APIGatewayProxyResult } from "aws-lambda";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import { CostRequest, costRequestSchema } from "../../models/cost-jobs";
@@ -52,6 +53,6 @@ export const handler = middy(baseHandler)
   .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
   .use(httpJsonBodyParser())
   .use(xssSanitizer())
-  .use(validator({ eventSchema: wrapSchema(costRequestSchema) }))
+  .use(validator({ eventSchema: transpileSchema(wrapSchema(costRequestSchema)) }))
   .use(errorHandlingMiddleware())
   .use(JSONErrorHandlerMiddleware());

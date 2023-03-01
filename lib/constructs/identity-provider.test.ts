@@ -68,7 +68,7 @@ describe("Lambda OAuth client application creation", () => {
   const stack = new cdk.Stack(app, "TestStack");
   const secret = new secrets.Secret(stack, "TestSecret");
   const fn = new lambda.Function(stack, "TestFn", {
-    runtime: lambda.Runtime.NODEJS_16_X,
+    runtime: lambda.Runtime.NODEJS_18_X,
     code: lambda.Code.fromInline("foo"),
     handler: "foo",
   });

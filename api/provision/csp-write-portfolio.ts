@@ -4,6 +4,7 @@ import middy from "@middy/core";
 import errorLogger from "@middy/error-logger";
 import inputOutputLogger from "@middy/input-output-logger";
 import validator from "@middy/validator";
+import { transpileSchema } from "@middy/validator/transpile";
 import { Context } from "aws-lambda";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import {
@@ -134,6 +135,6 @@ export const handler = middy(baseHandler)
   .use(captureLambdaHandler(tracer))
   .use(inputOutputLogger({ logger: (message) => logger.info("Event/Result", message) }))
   .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
-  .use(validator({ eventSchema: provisionRequestSchema }))
+  .use(validator({ eventSchema: transpileSchema(provisionRequestSchema) }))
   .use(errorHandlingMiddleware())
   .use(JSONErrorHandlerMiddleware());

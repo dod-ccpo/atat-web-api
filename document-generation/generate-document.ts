@@ -12,6 +12,7 @@ import { LoggingContextMiddleware } from "../utils/middleware/logging-context-mi
 import { errorHandlingMiddleware } from "../utils/middleware/error-handling-middleware";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import validator from "@middy/validator";
+import { transpileSchema } from "@middy/validator/transpile";
 import xssSanitizer from "../utils/middleware/xss-sanitizer";
 import { wrapSchema } from "../utils/middleware/schema-wrapper";
 import { generateDocument } from "./chromium";
@@ -113,7 +114,7 @@ export const handler = middy(baseHandler)
   .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
   .use(httpJsonBodyParser())
   .use(xssSanitizer())
-  .use(validator({ eventSchema: wrapSchema(generateDocumentSchema) }))
+  .use(validator({ eventSchema: transpileSchema(wrapSchema(generateDocumentSchema)) }))
   .use(errorHandlingMiddleware())
   .use(JSONErrorHandlerMiddleware());
 

@@ -285,12 +285,12 @@ export class AtatWebApiStack extends cdk.Stack {
     // APIGW Document Generation Resource
     const generateDocumentResource = api.restApi.root.addResource("generate-document");
     const documentGenerationLayer = new lambda.LayerVersion(this, "GenerateDocumentSupportLayer", {
-      compatibleRuntimes: [lambda.Runtime.NODEJS_16_X],
+      compatibleRuntimes: [lambda.Runtime.NODEJS_18_X],
       code: lambda.Code.fromAsset("document-generation/templates", {}),
     });
     const generateDocumentFn = new nodejs.NodejsFunction(this, "GenerateDocumentFunction", {
       entry: "document-generation/generate-document.ts",
-      runtime: lambda.Runtime.NODEJS_16_X,
+      runtime: lambda.Runtime.NODEJS_18_X,
       memorySize: 512,
       bundling: {
         nodeModules: ["@sparticuz/chromium", "puppeteer-core"],
