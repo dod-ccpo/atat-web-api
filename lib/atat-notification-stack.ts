@@ -34,6 +34,8 @@ export class IamChangeRule extends events.Rule {
             "UpdateLoginProfile",
             // AC-2(4).7 - Account Disabling Actions
             "UpdateAccessKey",
+            "AttachUserPolicy",
+            "DetachUserPolicy",
             "DeleteLoginProfile",
             // AC-2(4).8
             "DeleteUser",

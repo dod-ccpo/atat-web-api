@@ -27,6 +27,8 @@ describe("IAM Change Notifications", () => {
             "UpdateUser",
             "UpdateLoginProfile",
             "UpdateAccessKey",
+            "AttachUserPolicy",
+            "DetachUserPolicy",
             "DeleteLoginProfile",
             "DeleteUser",
           ],
