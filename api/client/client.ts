@@ -404,14 +404,14 @@ export class AtatClient implements IAtatClient {
 
 export function transformSynchronousResponse(
   response: atatApiTypes.AtatResponse,
-  addEnvironmentRequest: ProvisionRequest,
+  provisionRequest: ProvisionRequest,
   hothProvisionRequest: HothProvisionRequest
 ): CspResponse<ProvisionRequest, atatApiTypes.AtatResponse> {
   return {
     code: response.$metadata.status,
     content: {
       response,
-      request: addEnvironmentRequest,
+      request: provisionRequest,
     },
     initialSnowRequest: hothProvisionRequest,
   };
@@ -419,7 +419,7 @@ export function transformSynchronousResponse(
 
 export function transformAsynchronousResponse(
   response: atatApiTypes.AsyncProvisionResponse,
-  addEnvironmentRequest: ProvisionRequest,
+  provisionRequest: ProvisionRequest,
   hothProvisionRequest: HothProvisionRequest
 ): CspResponse<ProvisionRequest, atatApiTypes.AsyncProvisionResponse | { details: string }> {
   if (response.location) {
@@ -427,7 +427,7 @@ export function transformAsynchronousResponse(
       code: response.$metadata.status,
       content: {
         response,
-        request: addEnvironmentRequest,
+        request: provisionRequest,
       },
       initialSnowRequest: hothProvisionRequest,
     };
@@ -438,7 +438,7 @@ export function transformAsynchronousResponse(
       response: {
         details: "Location header was invalid or not provided",
       },
-      request: addEnvironmentRequest,
+      request: provisionRequest,
     },
     initialSnowRequest: hothProvisionRequest,
   };

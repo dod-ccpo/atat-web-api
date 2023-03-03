@@ -43,7 +43,6 @@ async function makeRequest(client: IAtatClient, request: HothProvisionRequest): 
     provisionDeadline: deadline.toISOString(),
   };
   try {
-    logger.info("Making an actual CSP request w/ atat-client - CspWritePortfolio");
     const cspResponse = await client.addEnvironment(addEnvironmentRequest);
     if (cspResponse.$metadata.status === 202) {
       const asyncResponse = cspResponse as atatApiTypes.AddEnvironmentResponseAsync;

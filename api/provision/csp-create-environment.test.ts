@@ -7,11 +7,13 @@ import { handler } from "./csp-create-environment";
 import {
   addEnvironmentRequest,
   constructProvisionRequestForCsp,
+  CSP_A,
   CSP_A_TEST_ENDPOINT,
+  CSP_B,
   CSP_B_TEST_ENDPOINT,
   TEST_ENVIRONMENT_ID,
 } from "../util/common-test-fixtures";
-import { ClassificationLevel, ProvisionCspResponse, ProvisioningStatusType } from "../client";
+import { ProvisionCspResponse, ProvisioningStatusType } from "../client";
 
 // Reused mocks
 jest.mock("../provision/csp-configuration");
@@ -32,8 +34,8 @@ describe("Add Environment Tests", () => {
     const deadline = new Date(fakeNow);
     deadline.setHours(deadline.getHours() + 2);
 
-    const addEnvironmentProvisionJob = constructProvisionRequestForCsp("CSP_A", addEnvironmentRequest);
-    mockedConfig.mockImplementation(() => Promise.resolve({ name: "CSP_A", uri: CSP_A_TEST_ENDPOINT }));
+    const addEnvironmentProvisionJob = constructProvisionRequestForCsp(CSP_A, addEnvironmentRequest);
+    mockedConfig.mockImplementation(() => Promise.resolve({ name: CSP_A, uri: CSP_A_TEST_ENDPOINT }));
     mockedGetToken.mockImplementation(() =>
       Promise.resolve({ access_token: "FAKE_TOKEN", expires_in: 0, token_type: "Bearer" })
     );
@@ -83,8 +85,8 @@ describe("Add Environment Tests", () => {
     // GIVEN
     const deadline = new Date(fakeNow);
     deadline.setHours(deadline.getHours() + 2);
-    const addEnvironmentProvisionJob = constructProvisionRequestForCsp("CSP_B", addEnvironmentRequest);
-    mockedConfig.mockImplementation(() => Promise.resolve({ name: "CSP_B", uri: CSP_B_TEST_ENDPOINT }));
+    const addEnvironmentProvisionJob = constructProvisionRequestForCsp(CSP_B, addEnvironmentRequest);
+    mockedConfig.mockImplementation(() => Promise.resolve({ name: CSP_B, uri: CSP_B_TEST_ENDPOINT }));
     mockedGetToken.mockImplementation(() =>
       Promise.resolve({ access_token: "FAKE_TOKEN", expires_in: 0, token_type: "Bearer" })
     );

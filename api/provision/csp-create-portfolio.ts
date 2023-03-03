@@ -27,7 +27,6 @@ async function makeRequest(client: IAtatClient, request: HothProvisionRequest): 
     },
   };
   try {
-    logger.info("Making an actual CSP request w/ atat-client - CspWritePortfolio");
     const cspResponse = await client.addPortfolio(addPortfolioRequest);
     return transformSynchronousResponse(cspResponse, addPortfolioRequest, request);
   } catch (err) {
