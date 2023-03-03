@@ -1,5 +1,7 @@
 import axios, { AxiosInstance, AxiosResponse } from "axios";
 import * as types from "./types";
+import * as atatApiTypes from "./types";
+import { ProvisioningStatusType, ProvisionRequest } from "./types";
 import { ILogger, logger as defaultLogger } from "../../utils/logging";
 import { CspResponse } from "../util/csp-request";
 import { camelToSnakeRequestInterceptor, snakeToCamelResponseInterceptor } from "./util";
@@ -8,11 +10,12 @@ import {
   addEnvironmentRequest,
   CSP_A_TEST_ENDPOINT,
   CSP_B_TEST_ENDPOINT,
+  cspAAddPortfolioRequest,
   TEST_ENVIRONMENT_ID,
   TEST_PORTFOLIO_ID,
   TEST_PROVISIONING_JOB_ID,
 } from "../util/common-test-fixtures";
-import { ProvisioningStatusType } from "./types";
+import { HothProvisionRequest } from "../../models/provisioning-jobs";
 
 /**
  * An error that occurs during the
@@ -110,7 +113,6 @@ export class AtatClient implements IAtatClient {
         "User-Agent": "ATAT CSP Api Client",
         "Content-Type": "application/json",
         "X-Atat-Api-Version": AtatClient.supportedApiVersion,
-        // "X-Target-Impact-Level": cspConfiguration.network,
       },
       // We will perform all validation of the status code within the various API invocation
       // methods rather than relying on Axios' configuration. This will allow us to return
@@ -147,15 +149,23 @@ export class AtatClient implements IAtatClient {
     const headers: Record<string, string> = {};
 
     // set deadline
-    const now = new Date();
-    const provisionDeadline = now.setDate(now.getDate() + 12); // deadline in 12 days
-    headers["X-Provision-Deadline"] = new Date(provisionDeadline).toISOString();
+    if (request.provisionDeadline) {
+      headers["X-Provision-Deadline"] = request.provisionDeadline;
+    }
 
     return headers;
   }
 
   private setUpMocks() {
     const mock = new MockAdapter(this.client);
+
+    // TODO: move this to a different file once it gets too big
+
+    // CSP A should always return a 200 for AddPortfolio
+    mock.onPost(`${CSP_A_TEST_ENDPOINT}/portfolios`).reply(200, {
+      ...cspAAddPortfolioRequest.payload,
+      id: TEST_PORTFOLIO_ID,
+    });
 
     // CSP A should always return a 200 for AddEnvironment
     mock.onPost(`${CSP_A_TEST_ENDPOINT}/portfolios/${TEST_PORTFOLIO_ID}/environments`).reply(200, {
@@ -214,12 +224,7 @@ export class AtatClient implements IAtatClient {
   /**
    * Make a request to create a portfolio at the target Cloud Service Provider.
    *
-   * This may return either a concrete Portfolio object or a {@link ProvisioningStatus} that
-   * can be used to query the status of an asynchronous Portfolio creation request.
-   *
-   * Whether the creation is synchronous or asynchronous is an implementation decision of
-   * the ATAT server implementation (or, of the Cloud Service Provider) and may not be
-   * directly influenced by the parameters to this function.
+   * This will return a concrete Portfolio object.
    */
   async addPortfolio(request: types.AddPortfolioRequest): Promise<types.AddPortfolioResponseSync> {
     const headers = this.buildHeaders(request);
@@ -234,6 +239,17 @@ export class AtatClient implements IAtatClient {
     }
   }
 
+  /**
+   * Make a request to create an environment in a specific portfolio at the target
+   * Cloud Service Provider.
+   *
+   * This may return either a concrete Environment object or a {@link ProvisioningStatus} that
+   * can be used to query the status of an asynchronous Environment creation request.
+   *
+   * Whether the creation is synchronous or asynchronous is an implementation decision of
+   * the ATAT server implementation (or, of the Cloud Service Provider) and may not be
+   * directly influenced by the parameters to this function.
+   */
   async addEnvironment(
     request: types.AddEnvironmentRequest
   ): Promise<types.AddEnvironmentResponseSync | types.AddEnvironmentResponseAsync> {
@@ -288,8 +304,6 @@ export class AtatClient implements IAtatClient {
     switch (response.status) {
       case 200:
         return this.transformSynchronousResponse<types.PatchEnvironmentResponseSync>("patch", response, request);
-      // case 202:
-      //   return this.transformAsynchronousResponse(response, request);
       case 400:
         throw new AtatApiError("Invalid portfolio provided", "InvalidPortfolio", request, response);
       case 404:
@@ -338,8 +352,6 @@ export class AtatClient implements IAtatClient {
     switch (response.status) {
       case 200:
         return this.transformSynchronousResponse<types.AddTaskOrderResponseSync>("taskOrder", response, request);
-      // case 202:
-      //   return this.transformAsynchronousResponse(response, request);
       case 400:
         throw new AtatApiError("Invalid ID supplied", "InvalidPortfolioId", request, response);
       case 404:
@@ -388,4 +400,46 @@ export class AtatClient implements IAtatClient {
         throw new AtatApiError("Unexpected API error", "CspApiError", request, response);
     }
   }
+}
+
+export function transformSynchronousResponse(
+  response: atatApiTypes.AtatResponse,
+  addEnvironmentRequest: ProvisionRequest,
+  hothProvisionRequest: HothProvisionRequest
+): CspResponse<ProvisionRequest, atatApiTypes.AtatResponse> {
+  return {
+    code: response.$metadata.status,
+    content: {
+      response,
+      request: addEnvironmentRequest,
+    },
+    initialSnowRequest: hothProvisionRequest,
+  };
+}
+
+export function transformAsynchronousResponse(
+  response: atatApiTypes.AsyncProvisionResponse,
+  addEnvironmentRequest: ProvisionRequest,
+  hothProvisionRequest: HothProvisionRequest
+): CspResponse<ProvisionRequest, atatApiTypes.AsyncProvisionResponse | { details: string }> {
+  if (response.location) {
+    return {
+      code: response.$metadata.status,
+      content: {
+        response,
+        request: addEnvironmentRequest,
+      },
+      initialSnowRequest: hothProvisionRequest,
+    };
+  }
+  return {
+    code: 500,
+    content: {
+      response: {
+        details: "Location header was invalid or not provided",
+      },
+      request: addEnvironmentRequest,
+    },
+    initialSnowRequest: hothProvisionRequest,
+  };
 }

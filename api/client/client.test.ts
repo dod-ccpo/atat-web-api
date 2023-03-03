@@ -332,9 +332,9 @@ describe("addTaskOrder", () => {
 describe("getCostsByClin", () => {
   let client: AtatClient;
   let mock: MockAdapter;
-  const taskOrderNumber = mockTaskOrder.taskOrderNumber;
-  const clin = mockTaskOrder.clins[0].clinNumber;
-  const url = `${TEST_CSP_ENDPOINT}/portfolios/${portfolioId}/task-orders/${taskOrderNumber}/clins/${clin}/cost`;
+  const number = mockTaskOrder.number;
+  const clin = mockTaskOrder.clins[0].number;
+  const url = `${TEST_CSP_ENDPOINT}/portfolios/${portfolioId}/task-orders/${number}/clins/${clin}/cost`;
   const badUrl = `${TEST_CSP_ENDPOINT}/portfolios/undefined/task-orders/undefined/clins/undefined/cost`;
   beforeAll(() => {
     client = new AtatClient(TEST_API_TOKEN, TEST_CSP_ENDPOINT);
@@ -352,9 +352,7 @@ describe("getCostsByClin", () => {
     };
     mock.onGet(url).reply(200, mockClinCosts);
     const result = (await client.getCostsByClin(mockGetCostsByClinRequest)) as GetCostsByClinResponse;
-    expect(mock.history.get[0].url).toEqual(
-      `/portfolios/${portfolioId}/task-orders/${taskOrderNumber}/clins/${clin}/cost`
-    );
+    expect(mock.history.get[0].url).toEqual(`/portfolios/${portfolioId}/task-orders/${number}/clins/${clin}/cost`);
     expect(result.costs).toEqual(mockClinCosts);
   });
   it("should throw a 400 error", async () => {

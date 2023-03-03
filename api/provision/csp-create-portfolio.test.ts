@@ -3,13 +3,17 @@ import * as idpClient from "../../idp/client";
 import { HothProvisionRequest } from "../../models/provisioning-jobs";
 import { ErrorStatusCode, SuccessStatusCode, ValidationErrorResponse } from "../../utils/response";
 import * as cspConfig from "./csp-configuration";
-import { handler } from "./csp-create-environment";
-import { cspAAddPortfolioRequest } from "../util/common-test-fixtures";
+import { handler } from "./csp-create-portfolio";
+import {
+  constructProvisionRequestForCsp,
+  CSP_A_TEST_ENDPOINT,
+  cspAAddPortfolioRequest,
+} from "../util/common-test-fixtures";
+import { ProvisionCspResponse } from "../client";
 
 // Reused mocks
 jest.mock("../provision/csp-configuration");
 const mockedConfig = cspConfig.getConfiguration as jest.MockedFn<typeof cspConfig.getConfiguration>;
-mockedConfig.mockImplementation(() => Promise.resolve({ name: "test", uri: "https://csp.example.com/atat/api/test" }));
 jest.mock("../../idp/client");
 const mockedGetToken = idpClient.getToken as jest.MockedFn<typeof idpClient.getToken>;
 mockedGetToken.mockImplementation(() =>
@@ -20,19 +24,22 @@ beforeEach(() => {
   jest.resetAllMocks();
 });
 
-// Skipped because this covers old mock behavior
 describe("Add Portfolio Tests", () => {
   describe("Successful invocation of mock CSP function", () => {
-    // TODO: fix this
-    it.skip("should return 200 when CSP A provided in the request", async () => {
-      const response = await handler(cspAAddPortfolioRequest, {} as Context);
-      if (!(response instanceof ValidationErrorResponse)) {
-        expect(response.code).toBe(SuccessStatusCode.OK);
-      }
+    it("should return 200 when CSP A provided in the request", async () => {
+      mockedConfig.mockImplementation(() => Promise.resolve({ name: "CSP_A", uri: CSP_A_TEST_ENDPOINT }));
+      mockedGetToken.mockImplementation(() =>
+        Promise.resolve({ access_token: "FAKE_TOKEN", expires_in: 0, token_type: "Bearer" })
+      );
+      const response = (await handler(
+        constructProvisionRequestForCsp("CSP_A", cspAAddPortfolioRequest),
+        {} as Context
+      )) as ProvisionCspResponse;
+      expect(response.code).toBe(SuccessStatusCode.OK);
     });
   });
 
-  // TODO: Add tests to cover the actual logic in csp-create-environment.ts, but not beyond it
+  // TODO: Add tests to cover the actual logic in csp-create-portfolio.ts, but not beyond it
 });
 
 // This test is skipped because it covers the old mock behavior
@@ -53,13 +60,3 @@ describe("Failed invocation operations", () => {
   // Portfolio not found => HTTP 404
   // Additional properties in payload => HTTP 400
 });
-
-export function constructProvisionRequestForCsp(csp: string, request: HothProvisionRequest): HothProvisionRequest {
-  const body = {
-    ...request,
-    targetCspName: csp,
-  };
-  return {
-    ...body,
-  };
-}

@@ -314,7 +314,7 @@ components:
       allOf:
         - $ref: "#/components/schemas/ProvisioningPayload"
       required:
-        - operators
+        - administrators
       properties:
         administrators:
           description: Array of administrator objects

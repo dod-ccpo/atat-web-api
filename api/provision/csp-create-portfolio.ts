@@ -12,45 +12,24 @@ import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-m
 import { ValidationErrorResponse } from "../../utils/response";
 import { tracer } from "../../utils/tracing";
 import { CspResponse, mockCspClientResponse } from "../util/csp-request";
-import { AtatApiError, IAtatClient, ProvisionCspResponse } from "../client";
+import { AtatApiError, AtatResponse, IAtatClient, ProvisionCspResponse, ProvisionRequest } from "../client";
 import * as atatApiTypes from "../client/types";
 import { makeClient } from "../../utils/atat-client";
 import { provisionRequestSchema } from "../../models/provisioning-schemas";
-
-function transformSynchronousResponse(
-  response: atatApiTypes.AddPortfolioResponseSync,
-  request: atatApiTypes.AddPortfolioRequest
-): CspResponse<atatApiTypes.AddPortfolioRequest, atatApiTypes.AddPortfolioResponseSync> {
-  return {
-    code: response.$metadata.status,
-    content: {
-      response,
-      request,
-    },
-  };
-}
+import { transformSynchronousResponse } from "../client/client";
 
 async function makeRequest(client: IAtatClient, request: HothProvisionRequest): Promise<ProvisionCspResponse> {
   // This function will always be operating for creating new portfolios; if we have something
   // else, this will be a non-recoverable error anyway.
-  const payload = request.payload as NewPortfolioPayload;
   const addPortfolioRequest: atatApiTypes.AddPortfolioRequest = {
     portfolio: {
-      ...payload,
+      ...(request.payload as NewPortfolioPayload),
     },
   };
   try {
-    // TODO: remove once mocking is no longer needed (e.g., mocking api implemented or actual csp integration)
-    // Intent is to not use the 'client' to make external call
-    const mockCspNames = ["CSP_A", "CSP_B", "CSP_C", "CSP_D", "CSP_E", "CSP_F", "CSP_DNE"];
-    if (mockCspNames.includes(request.targetCspName)) {
-      const response = mockCspClientResponse(request);
-      return transformSynchronousResponse(response, addPortfolioRequest);
-    }
-
     logger.info("Making an actual CSP request w/ atat-client - CspWritePortfolio");
     const cspResponse = await client.addPortfolio(addPortfolioRequest);
-    return transformSynchronousResponse(cspResponse as atatApiTypes.AddPortfolioResponseSync, addPortfolioRequest);
+    return transformSynchronousResponse(cspResponse, addPortfolioRequest, request);
   } catch (err) {
     // Re-throw any unsupported error type
     if (!err || typeof err !== "object" || !(err instanceof AtatApiError)) {

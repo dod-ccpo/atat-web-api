@@ -11,53 +11,11 @@ import { logger } from "../../utils/logging";
 import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
 import { ValidationErrorResponse } from "../../utils/response";
 import { tracer } from "../../utils/tracing";
-import { CspResponse } from "../util/csp-request";
-import { AtatApiError, IAtatClient, AddEnvironmentRequest, ProvisionCspResponse } from "../client";
+import { AtatApiError, IAtatClient, ProvisionCspResponse } from "../client";
 import * as atatApiTypes from "../client/types";
 import { makeClient } from "../../utils/atat-client";
 import { provisionRequestSchema } from "../../models/provisioning-schemas";
-
-function transformSynchronousResponse(
-  response: atatApiTypes.AddEnvironmentResponseSync,
-  addEnvironmentRequest: AddEnvironmentRequest,
-  hothProvisionRequest: HothProvisionRequest
-): CspResponse<AddEnvironmentRequest, atatApiTypes.AddEnvironmentResponseSync> {
-  return {
-    code: response.$metadata.status,
-    content: {
-      response,
-      request: addEnvironmentRequest,
-    },
-    initialSnowRequest: hothProvisionRequest,
-  };
-}
-
-function transformAsynchronousResponse(
-  response: atatApiTypes.AsyncProvisionResponse,
-  addEnvironmentRequest: AddEnvironmentRequest,
-  hothProvisionRequest: HothProvisionRequest
-): CspResponse<AddEnvironmentRequest, atatApiTypes.AsyncProvisionResponse | { details: string }> {
-  if (response.location) {
-    return {
-      code: response.$metadata.status,
-      content: {
-        response,
-        request: addEnvironmentRequest,
-      },
-      initialSnowRequest: hothProvisionRequest,
-    };
-  }
-  return {
-    code: 500,
-    content: {
-      response: {
-        details: "Location header was invalid or not provided",
-      },
-      request: addEnvironmentRequest,
-    },
-    initialSnowRequest: hothProvisionRequest,
-  };
-}
+import { transformAsynchronousResponse, transformSynchronousResponse } from "../client/client";
 
 async function makeRequest(client: IAtatClient, request: HothProvisionRequest): Promise<ProvisionCspResponse> {
   // This function will always be operating for creating new portfolios; if we have something
@@ -68,6 +26,12 @@ async function makeRequest(client: IAtatClient, request: HothProvisionRequest): 
     throw new AtatApiError("Invalid ID supplied", "InvalidPortfolioId", request);
   }
 
+  // Set deadline to 2 hours for UNCLASSIFIED and 72 hours otherwise
+  const deadline = new Date();
+  deadline.setHours(
+    deadline.getHours() + (atatApiTypes.ClassificationLevel.UNCLASSIFIED === payload.classificationLevel ? 2 : 72)
+  );
+
   const addEnvironmentRequest: atatApiTypes.AddEnvironmentRequest = {
     portfolioId: request.portfolioId,
     environment: {
@@ -76,6 +40,7 @@ async function makeRequest(client: IAtatClient, request: HothProvisionRequest): 
       classificationLevel: payload.classificationLevel,
       cloudDistinguisher: payload.cloudDistinguisher,
     },
+    provisionDeadline: deadline.toISOString(),
   };
   try {
     logger.info("Making an actual CSP request w/ atat-client - CspWritePortfolio");

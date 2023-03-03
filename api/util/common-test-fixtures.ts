@@ -1,6 +1,6 @@
 import { SQSEvent } from "aws-lambda";
 import { CostRequest } from "../../models/cost-jobs";
-import { ProvisionRequestType } from "../../models/provisioning-jobs";
+import { HothProvisionRequest, ProvisionRequestType } from "../../models/provisioning-jobs";
 import * as crypto from "crypto";
 import { CostResponseByPortfolio } from "../client";
 
@@ -24,12 +24,12 @@ export const fundingSources = [
 ];
 export const taskOrders = [
   {
-    taskOrderNumber: "1234567890123",
+    number: "1234567890123",
     popStartDate: "2021-07-01",
     popEndDate: "2022-07-01",
     clins: [
       {
-        clinNumber: "9999",
+        number: "9999",
         popStartDate: "2021-07-01",
         popEndDate: "2022-07-01",
       },
@@ -60,7 +60,7 @@ export const cspAProvisioningBodyNoPayload = {
   jobId: "81b31a89-e3e5-46ee-acfe-75436bd14577",
   userId: "21d18790-bf3e-4529-a361-460ee6d16e0b",
   portfolioId: TEST_PORTFOLIO_ID,
-  targetCspName: "CSP_A",
+  targetCspName: CSP_A,
 };
 
 export const cspAAddPortfolioRequest = {
@@ -199,5 +199,15 @@ export function generateMockMessageResponses(messageBodies: any[]) {
       totalRetryDelay: 0,
     },
     Messages: messages,
+  };
+}
+
+export function constructProvisionRequestForCsp(csp: string, request: HothProvisionRequest): HothProvisionRequest {
+  const body = {
+    ...request,
+    targetCspName: csp,
+  };
+  return {
+    ...body,
   };
 }

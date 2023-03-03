@@ -5,6 +5,7 @@ import { sqsClient } from "../../utils/aws-sdk/sqs";
 import { SendMessageCommand } from "@aws-sdk/client-sqs";
 import { ProvisioningStatusType } from "../client";
 import {
+  constructProvisionRequestForCsp,
   CSP_A,
   CSP_A_TEST_ENDPOINT,
   CSP_B,
@@ -17,7 +18,6 @@ import * as client from "../client";
 import * as types from "../client/types";
 import * as atatClientHelper from "../../utils/atat-client";
 import { ErrorStatusCode, ValidationErrorResponse } from "../../utils/response";
-import { constructProvisionRequestForCsp } from "./csp-create-portfolio.test";
 import { TEST_CSP_ENDPOINT } from "../client/fixtures";
 
 // Mocks

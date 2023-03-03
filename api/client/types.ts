@@ -38,7 +38,7 @@ export interface ProvisioningStatus {
  * A CLIN in a Task Order.
  */
 export interface Clin {
-  readonly clinNumber: string;
+  readonly number: string;
   readonly popStartDate: string;
   readonly popEndDate: string;
 }
@@ -47,7 +47,7 @@ export interface Clin {
  * A Task Order and CLINs used to pay for provisioned resources and services.
  */
 export interface TaskOrder {
-  readonly taskOrderNumber: string;
+  readonly number: string;
   readonly clins: Clin[];
   readonly popStartDate: string;
   readonly popEndDate: string;
@@ -119,6 +119,8 @@ export interface CostResponseByPortfolio {
   }[];
 }
 
+// TODO: Find some other solution for sharing a single interface across all requests
+// (not possible anymore now that Target Impact Level is removed)
 export interface ProvisionRequest {
   readonly provisionDeadline?: string;
 }
@@ -204,7 +206,6 @@ export interface GetProvisioningStatusResponse extends AtatResponse {
 }
 
 export type ProvisionCspResponse =
-  | CspResponse<AddPortfolioRequest, AtatResponse>
-  | CspResponse<AddEnvironmentRequest, AtatResponse>
-  | CspResponse<AddEnvironmentRequest, AsyncProvisionResponse | { details: string }>
+  | CspResponse<ProvisionRequest, AtatResponse>
+  | CspResponse<ProvisionRequest, AsyncProvisionResponse | { details: string }>
   | CspResponse<GetProvisioningStatusRequest, GetProvisioningStatusResponse>;
