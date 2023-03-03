@@ -262,8 +262,8 @@ components:
       enum:
         - ADD_PORTFOLIO
         - ADD_ENVIRONMENT
-        - ADD_OPERATORS
         - ADD_ADMINISTRATOR
+        - ADD_TASK_ORDER
         - UPDATE_TASK_ORDER
     ProvisioningPayload:
       description: Abstract base model describing the payloads for provisioning operations

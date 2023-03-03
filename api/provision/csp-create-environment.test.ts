@@ -128,7 +128,6 @@ describe("Add Environment Tests", () => {
   });
 });
 
-// This test is skipped because it covers the old mock behavior
 describe("Failed invocation operations", () => {
   it.each([
     { desc: "empty", request: {} },
