@@ -2,7 +2,7 @@ import * as cdk from "aws-cdk-lib";
 import * as pipelines from "aws-cdk-lib/pipelines";
 import { Construct } from "constructs";
 import { GovCloudCompatibilityAspect } from "./aspects/govcloud-compatibility";
-import { AtatMonitoringStack } from "./atat-monitoring-stack";
+// import { AtatMonitoringStack } from "./atat-monitoring-stack";
 import { AtatNetStack } from "./atat-net-stack";
 import { AtatNotificationStack } from "./atat-notification-stack";
 import { ApiCertificateOptions, AtatWebApiStack } from "./atat-web-api-stack";
@@ -46,12 +46,12 @@ class AtatApplication extends cdk.Stage {
         })
       );
     }
-    const monitoring = new AtatMonitoringStack(this, "AtatMonitoring", {
-      monitoredScopes: monitoredStacks,
-      notifiedEmail: props.notificationEmail,
-      environmentName: props.environmentName,
-      topicEncryptionKey: sharedData.encryptionKey,
-    });
+    // const monitoring = new AtatMonitoringStack(this, "AtatMonitoring", {
+    //   monitoredScopes: monitoredStacks,
+    //   notifiedEmail: props.notificationEmail,
+    //   environmentName: props.environmentName,
+    //   topicEncryptionKey: sharedData.encryptionKey,
+    // });
     cdk.Aspects.of(this).add(new GovCloudCompatibilityAspect());
     cdk.Aspects.of(atat).add(new NIST80053R4Checks({ verbose: true }));
     NagSuppressions.addStackSuppressions(atat, [
