@@ -46,6 +46,7 @@ class AtatApplication extends cdk.Stage {
         })
       );
     }
+    // Removed the CDK monitoring stack
     // const monitoring = new AtatMonitoringStack(this, "AtatMonitoring", {
     //   monitoredScopes: monitoredStacks,
     //   notifiedEmail: props.notificationEmail,
