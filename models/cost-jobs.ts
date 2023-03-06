@@ -1,35 +1,24 @@
-import { provisionRequestSchema } from "./provisioning-jobs";
-import { CloudServiceProvider } from "./cloud-service-providers";
 import { CspResponse } from "../api/util/csp-request";
 import { CostResponseByPortfolio } from "../api/client";
+import { provisionRequestSchema } from "./provisioning-schemas";
 
 export interface CostRequest {
   requestId: string;
   portfolioId: string;
-  targetCsp: CloudServiceProvider;
+  targetCspName: string;
   startDate: string;
   endDate: string;
 }
 
 export type CostResponse = CspResponse<CostRequest, CostResponseByPortfolio>;
 
-export enum CspRequest {
-  PROVISION = "PROVISION",
-  COST = "COST",
-}
-
-export type CspRequestType<T> = {
-  requestType: CspRequest;
-  body: T;
-};
-
 export const costRequestSchema = {
   type: "object",
-  required: ["requestId", "portfolioId", "targetCsp", "startDate", "endDate"],
+  required: ["requestId", "portfolioId", "targetCspName", "startDate", "endDate"],
   properties: {
     requestId: { type: "string" },
     portfolioId: { type: "string" },
-    targetCsp: provisionRequestSchema.properties.targetCsp,
+    targetCspName: provisionRequestSchema.properties.targetCspName,
     startDate: { type: "string" },
     endDate: { type: "string" },
   },

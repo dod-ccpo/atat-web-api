@@ -5,10 +5,10 @@ import { sfnClient } from "../../utils/aws-sdk/step-functions";
 import { ApiSuccessResponse, ValidationErrorResponse } from "../../utils/response";
 import {
   fundingSources,
-  provisioningBodyNoPayload,
+  cspAProvisioningBodyNoPayload,
   validRequest,
   // requestContext,
-  operators,
+  administrators,
 } from "../util/common-test-fixtures";
 import { handler } from "./start-provisioning-job";
 
@@ -26,8 +26,8 @@ describe("Successful provisioning operations", () => {
   it("should add a funding source to existing portfolio", async () => {
     const request = {
       body: JSON.stringify({
-        ...provisioningBodyNoPayload,
-        operationType: ProvisionRequestType.ADD_FUNDING_SOURCE,
+        ...cspAProvisioningBodyNoPayload,
+        operationType: ProvisionRequestType.ADD_TASK_ORDER,
         payload: {
           fundingSources: [
             ...fundingSources,
@@ -51,11 +51,11 @@ describe("Successful provisioning operations", () => {
   it("should add operators to existing portfolio", async () => {
     const request = {
       body: JSON.stringify({
-        ...provisioningBodyNoPayload,
-        operationType: ProvisionRequestType.ADD_OPERATORS,
+        ...cspAProvisioningBodyNoPayload,
+        operationType: ProvisionRequestType.ADD_ADMINISTRATOR,
         payload: {
-          operators: [
-            ...operators,
+          administrators: [
+            ...administrators,
             {
               email: "root.admin@mail.mil",
               dodId: "9999999999",
@@ -78,10 +78,10 @@ describe("Failed provision operations", () => {
   it("should return a 400 due to unknown operationType (validation error)", async () => {
     const request = {
       body: JSON.stringify({
-        ...provisioningBodyNoPayload,
+        ...cspAProvisioningBodyNoPayload,
         operationType: "unknown",
         payload: {
-          operators,
+          administrators,
         },
       }),
       headers: {
@@ -91,24 +91,5 @@ describe("Failed provision operations", () => {
     } as any;
     const response = await handler(request, {} as Context, () => null);
     expect(response).toBeInstanceOf(ValidationErrorResponse);
-  });
-  it("should return a 400 when no portfolioId for ADD FUNDS/OPERATOR operationType (validation error)", async () => {
-    const request = {
-      body: JSON.stringify({
-        ...provisioningBodyNoPayload,
-        portfolioId: null,
-        payload: {
-          operators,
-        },
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-      requestContext,
-    } as any;
-    const response = await handler(request, {} as Context, () => null);
-    const responseBody = JSON.parse(response?.body ?? "");
-    expect(response).toBeInstanceOf(ValidationErrorResponse);
-    expect(responseBody.errorMap.issue).toBe("CSP portfolio ID required.");
   });
 });

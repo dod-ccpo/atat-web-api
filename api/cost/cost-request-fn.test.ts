@@ -13,11 +13,13 @@ import {
   generateTestSQSEvent,
   constructCspTarget,
   FAKE_COST_DATA,
+  CSP_A,
 } from "../util/common-test-fixtures";
 import * as atatClientHelper from "../../utils/atat-client";
 import { AxiosResponse } from "axios";
 import { CostRequest } from "../../models/cost-jobs";
 import { ErrorStatusCode, OtherErrorResponse } from "../../utils/response";
+import { TEST_CSP_ENDPOINT } from "../client/fixtures";
 
 // Mocks
 jest.mock("../provision/csp-configuration");
@@ -37,11 +39,6 @@ beforeEach(() => {
   sqsMock.reset();
 });
 
-const testCspConfig = {
-  uri: "http://fake.example.com",
-  network: "NETWORK_2",
-};
-
 describe("Cost Request Fn - Success", () => {
   it("poll messages from request queue and send to response queue", async () => {
     // GIVEN
@@ -50,7 +47,7 @@ describe("Cost Request Fn - Success", () => {
       {
         ...validCostRequest,
         requestId: "7w1er266-4a04-47ec-a3c9-6775f2a82d28",
-        targetCsp: constructCspTarget("CSP_A"),
+        targetCsp: constructCspTarget(CSP_A),
       },
     ];
     const queueEvent = generateTestSQSEvent(validMessages);
@@ -62,7 +59,7 @@ describe("Cost Request Fn - Success", () => {
         costs: FAKE_COST_DATA,
       } as GetCostsByPortfolioResponse);
     });
-    mockedMakeClient.mockResolvedValue(new client.AtatClient("SAMPLE", testCspConfig));
+    mockedMakeClient.mockResolvedValue(new client.AtatClient("SAMPLE", TEST_CSP_ENDPOINT));
 
     // WHEN
     await handler(queueEvent, {} as Context);
@@ -97,7 +94,7 @@ describe("Cost Request Fn - Errors", () => {
     const invalidCostRequest: CostRequest = {
       ...validCostRequest,
       portfolioId: "",
-      targetCsp: constructCspTarget("CSP_B"),
+      targetCspName: "CSP_B",
     };
     const errorMessages = [invalidCostRequest];
     const queueEvent = generateTestSQSEvent(errorMessages);
@@ -110,7 +107,7 @@ describe("Cost Request Fn - Errors", () => {
     jest.spyOn(client.AtatClient.prototype, "getCostsByPortfolio").mockImplementation(() => {
       throw new client.AtatApiError("Portfolio not found", "PortfolioNotFound", {}, axiosBadResponse);
     });
-    mockedMakeClient.mockResolvedValue(new AtatClient("SAMPLE", testCspConfig));
+    mockedMakeClient.mockResolvedValue(new AtatClient("SAMPLE", TEST_CSP_ENDPOINT));
 
     // WHEN
     await handler(queueEvent, {} as Context);
@@ -138,7 +135,7 @@ describe("Cost Request Fn - Errors", () => {
     jest.spyOn(client.AtatClient.prototype, "getCostsByPortfolio").mockImplementation(() => {
       throw new Error("Unknown Error");
     });
-    mockedMakeClient.mockResolvedValue(new AtatClient("SAMPLE", testCspConfig));
+    mockedMakeClient.mockResolvedValue(new AtatClient("SAMPLE", TEST_CSP_ENDPOINT));
 
     // WHEN
     const result = (await handler(queueEvent, {} as Context)) as unknown as OtherErrorResponse;

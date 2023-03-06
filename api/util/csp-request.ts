@@ -1,4 +1,4 @@
-import { ProvisionRequest } from "../../models/provisioning-jobs";
+import { HothProvisionRequest } from "../../models/provisioning-jobs";
 import { logger } from "../../utils/logging";
 import { ProvisioningStatusType } from "../client";
 export interface CspResponse<Req, Resp> {
@@ -7,7 +7,7 @@ export interface CspResponse<Req, Resp> {
     request: Req;
     response: Resp;
   };
-  initialSnowRequest?: ProvisionRequest;
+  initialSnowRequest?: HothProvisionRequest;
 }
 
 // This is merely a stop gap to provide mock responses
@@ -16,7 +16,7 @@ export interface CspResponse<Req, Resp> {
 // async Csp request client and transformed into the CspResponse interface above
 export function mockCspClientResponse(request: any) {
   let response: any;
-  switch (request.targetCsp.name) {
+  switch (request.targetCspName) {
     case "CSP_A":
       response = {
         status: {},
@@ -31,7 +31,7 @@ export function mockCspClientResponse(request: any) {
       response = {
         location: "https://cspB.example.com/v1/",
         status: {
-          status: ProvisioningStatusType.COMPLETE,
+          status: ProvisioningStatusType.SUCCESS,
           portfolioId: request.portfolioId,
           provisioningJobId: request.jobId,
         },
@@ -46,7 +46,7 @@ export function mockCspClientResponse(request: any) {
       response = {
         location: "https://cspC.example.com/v1/",
         status: {
-          status: ProvisioningStatusType.FAILED,
+          status: ProvisioningStatusType.FAILURE,
           portfolioId: request.portfolioId,
           provisioningJobId: request.jobId,
         },

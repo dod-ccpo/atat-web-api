@@ -7,7 +7,7 @@ import httpJsonBodyParser from "@middy/http-json-body-parser";
 import inputOutputLogger from "@middy/input-output-logger";
 import validator from "@middy/validator";
 import { APIGatewayProxyResult } from "aws-lambda";
-import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
+import jsonErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import { CostRequest, costRequestSchema } from "../../models/cost-jobs";
 import { RequestEvent } from "../../models/document-generation";
 import { sqsClient } from "../../utils/aws-sdk/sqs";
@@ -54,4 +54,4 @@ export const handler = middy(baseHandler)
   .use(xssSanitizer())
   .use(validator({ eventSchema: wrapSchema(costRequestSchema) }))
   .use(errorHandlingMiddleware())
-  .use(JSONErrorHandlerMiddleware());
+  .use(jsonErrorHandlerMiddleware());

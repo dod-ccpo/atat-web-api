@@ -5,7 +5,7 @@ import middy from "@middy/core";
 import errorLogger from "@middy/error-logger";
 import inputOutputLogger from "@middy/input-output-logger";
 import { SQSEvent, SQSRecord } from "aws-lambda";
-import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
+import jsonErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import { CostRequest, CostResponse } from "../../models/cost-jobs";
 import { makeClient } from "../../utils/atat-client";
 import { sqsClient } from "../../utils/aws-sdk/sqs";
@@ -24,7 +24,7 @@ async function makeRequest(client: IAtatClient, request: CostRequest): Promise<C
     // The intent is to avoid the code after the throw AtatApiError which
     // requires an external endpoint (e.g., mock csp)
     const mockCspNames = ["CSP_A"];
-    if (mockCspNames.includes(request.targetCsp.name)) {
+    if (mockCspNames.includes(request.targetCspName)) {
       return {
         code: 200,
         content: {
@@ -34,7 +34,7 @@ async function makeRequest(client: IAtatClient, request: CostRequest): Promise<C
       };
     }
     const cspNamesThrowError = ["CSP_B", "CSP_C", "CSP_D"];
-    if (cspNamesThrowError.includes(request.targetCsp.name))
+    if (cspNamesThrowError.includes(request.targetCspName))
       throw new AtatApiError("Portfolio not found", "PortfolioNotFound", request, {
         status: 404,
         data: { mockPortfolio: "not found" },
@@ -82,7 +82,7 @@ async function baseHandler(event: SQSEvent): Promise<void> {
   );
   for (const request of costRequests) {
     processedMessages.push(request);
-    const client = await makeClient(request.targetCsp.name);
+    const client = await makeClient(request.targetCspName);
     const costResponse = await makeRequest(client, request);
     const sqsResponse = await sqsClient.send(
       new SendMessageCommand({
@@ -103,4 +103,4 @@ export const handler = middy(baseHandler)
   .use(inputOutputLogger({ logger: (message) => logger.info("Event/Result", message) }))
   .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
   .use(errorHandlingMiddleware())
-  .use(JSONErrorHandlerMiddleware());
+  .use(jsonErrorHandlerMiddleware());
