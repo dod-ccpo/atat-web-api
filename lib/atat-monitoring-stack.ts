@@ -34,9 +34,9 @@ export class AtatMonitoringStack extends cdk.Stack {
           // Allowing billing can certainly only result in odd behavior in GovCloud
           enabled: false,
         },
-        lambda: {
-          enabled: false,
-        },
+        // lambda: {
+        //   enabled: false,
+        // },
         secretsManager: {
           // We need to do more work before we're ready to support automatically rotating
           // our secrets.
