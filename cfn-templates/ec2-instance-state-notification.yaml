@@ -13,12 +13,18 @@ Parameters:
         the ec2 instance, hosting the palo alto, goes down.
       Type: String
 
+  KmsKeyId:
+      Description: >-
+        Kms key used to encrypt the SNS topic.
+      Type: String
+
 Resources:
   Ec2StatusSNSTopic:
     Type: AWS::SNS::Topic
     Properties:
       TopicName: "Ec2DowntimeNotification"
       DisplayName: "Ec2DowntimeNotification"
+      KmsMasterKeyId: !Ref KmsKeyId
 
 
   Ec2StatusSnsSubscription:
