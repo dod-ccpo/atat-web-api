@@ -1,0 +1,51 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: >-
+  Creates a CloudWatch Event to monitor the ec2 instance hosting the Palo Alto
+  and if any change in the instance status occurs a sns notification will email
+  the designated distro group.
+
+Parameters:
+  EmailGroup:
+      Description: >-
+        This is the email distro group that will be notified in the event
+        the ec2 instance, hosting the palo alto, goes down.
+      Type: String
+
+Resources:
+  Ec2StatusSNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: "Ec2DowntimeNotification"
+      DisplayName: "Ec2DowntimeNotification"
+
+
+  Ec2StatusSnsSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Endpoint: !Ref EmailGroup
+      Protocol: email
+      TopicArn: !Ref Ec2StatusSNSTopic
+
+
+  CloudWatchEc2SnsStatus:
+    Type: AWS::Events::Rule
+    Properties: 
+      Name: CloudWatchEc2SnsStatus
+      Description: "CW Event to monitor the status of the Palo Alto Instance"
+      EventPattern: 
+        source:
+          - aws.ec2
+        detail-type:
+          - "EC2 Instance State-change Notification"
+        detail:
+          state:
+          - pending
+          - stopping
+          - stopped
+          - shutting-down
+          - terminated
+      Targets: 
+        - Arn: !Ref Ec2StatusSNSTopic
+          Id: "ec2-sns-downtime-topic"
