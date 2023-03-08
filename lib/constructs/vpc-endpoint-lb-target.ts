@@ -139,6 +139,8 @@ export class VpcEndpointApplicationTargetGroup
     targetGroupCfn.addPropertyOverride("TargetType", "ip");
   }
 
+  metrics: cdk.aws_elasticloadbalancingv2.IApplicationTargetGroupMetrics;
+
   registerListener(listener: elbv2.IApplicationListener, associatingConstruct?: IConstruct | undefined): void {
     return this.targetGroup.registerListener(listener, associatingConstruct);
   }
@@ -166,6 +168,8 @@ export class VpcEndpointNetworkTargetGroup
     targetGroupCfn.addPropertyOverride("Targets", this.targetJson);
     targetGroupCfn.addPropertyOverride("TargetType", "ip");
   }
+
+  metrics: cdk.aws_elasticloadbalancingv2.INetworkTargetGroupMetrics;
 
   registerListener(listener: elbv2.INetworkListener): void {
     return this.targetGroup.registerListener(listener);
