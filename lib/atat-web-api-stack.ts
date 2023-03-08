@@ -111,6 +111,7 @@ export class AtatWebApiStack extends cdk.Stack {
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       versioned: true,
       objectLockEnabled: true,
+      objectLockDefaultRetention: s3.ObjectLockRetention.compliance(cdk.Duration.days(365)),
     });
     NagSuppressions.addResourceSuppressions(accessLogsBucket, [
       {
