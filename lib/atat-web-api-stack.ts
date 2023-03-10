@@ -103,13 +103,16 @@ export class AtatWebApiStack extends cdk.Stack {
       };
     }
 
-    const accessLogsBucket = new s3.Bucket(this, "ResourceAccessLogs", {
+    const accessLogsBucket = new s3.Bucket(this, "LoadBalancerAccessLogs", {
       // Elastic Load Balancing Log Delivery requires SSE-S3 and _does not_ support
       // SSE-KMS. This still ensures that log data is encrypted at rest.
+      // Default retention for object lock is 365 days
       encryption: s3.BucketEncryption.S3_MANAGED,
       enforceSSL: true,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       versioned: true,
+      objectLockEnabled: true,
+      objectLockDefaultRetention: s3.ObjectLockRetention.compliance(cdk.Duration.days(365)),
     });
     NagSuppressions.addResourceSuppressions(accessLogsBucket, [
       {

@@ -98,6 +98,7 @@ Resources:
               - !Sub arn:${AWS::Partition}:apigateway:*::/account
               - !Sub arn:${AWS::Partition}:apigateway:*::/restapis
               - !Sub arn:${AWS::Partition}:apigateway:*::/restapis/*
+              - !Sub arn:${AWS::Partition}:apigateway:*::/clientcertificates
           - Effect: Allow
             Action:
               - xray:Get*
@@ -145,7 +146,9 @@ Resources:
             Resource: "*"
           - Effect: Allow
             Action: apigateway:POST
-            Resource: !Sub arn:${AWS::Partition}:apigateway:*::/restapis/*/deployments
+            Resource: 
+              - !Sub arn:${AWS::Partition}:apigateway:*::/restapis/*/deployments
+              - !Sub arn:${AWS::Partition}:apigateway:*::/restapis/*/resources/*
   AtatAuditorAccess:
     Type: AWS::SSO::PermissionSet
     Properties:
