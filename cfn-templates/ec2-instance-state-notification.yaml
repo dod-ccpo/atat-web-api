@@ -2,8 +2,8 @@
 AWSTemplateFormatVersion: "2010-09-09"
 
 Description: >-
-  Creates a CloudWatch Event to monitor the ec2 instance hosting the Palo Alto
-  and if any change in the instance status occurs a sns notification will email
+  Creates a CloudWatch Event to monitor the EC2 instance hosting the Palo Alto
+  and if any change in the instance status occurs a SNS notification will email
   the designated distro group.
 
 Parameters:
@@ -15,7 +15,7 @@ Parameters:
 
   KmsKeyId:
       Description: >-
-        Kms key used to encrypt the SNS topic.
+        AWS KMS key used to encrypt the SNS topic.
       Type: String
 
 Resources:

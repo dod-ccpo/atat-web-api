@@ -17,7 +17,7 @@ Parameters:
       Type: String
 
 Resources:
-  SSOStatusSNSTopic:
+  SSOStatusSnsTopic:
     Type: AWS::SNS::Topic
     Properties:
       TopicName: "SsoUserActivityNotification"
@@ -30,7 +30,7 @@ Resources:
     Properties:
       Endpoint: !Ref EmailGroup
       Protocol: email
-      TopicArn: !Ref SSOStatusSNSTopic
+      TopicArn: !Ref SSOStatusSnsTopic
 
 
   CloudWatchSsoSnsStatus:
@@ -53,5 +53,5 @@ Resources:
           - UpdateGroup
           - CreateGroup
       Targets: 
-        - Arn: !Ref SSOStatusSNSTopic
+        - Arn: !Ref SSOStatusSnsTopic
           Id: "sso-user-activity-notification"
