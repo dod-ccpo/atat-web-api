@@ -32,6 +32,7 @@ export class AtatMonitoringStack extends cdk.Stack {
       monitoring.monitorScope(scope, {
         billing: {
           // Allowing billing can certainly only result in odd behavior in GovCloud
+          //Disbaled Billing
           enabled: false,
         },
         secretsManager: {
