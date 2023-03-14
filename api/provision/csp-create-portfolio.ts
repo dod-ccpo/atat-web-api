@@ -6,13 +6,11 @@ import inputOutputLogger from "@middy/input-output-logger";
 import validator from "@middy/validator";
 import { Context } from "aws-lambda";
 import jsonErrorHandlerMiddleware from "middy-middleware-json-error-handler";
-import { HothProvisionRequest, NewPortfolioPayload } from "../../models/provisioning-jobs";
 import { logger } from "../../utils/logging";
 import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
 import { ValidationErrorResponse } from "../../utils/response";
 import { tracer } from "../../utils/tracing";
-import { CspResponse, mockCspClientResponse } from "../util/csp-request";
-import { AtatApiError, AtatResponse, IAtatClient, ProvisionCspResponse, ProvisionRequest } from "../client";
+import { AtatApiError, HothProvisionRequest, IAtatClient, NewPortfolioPayload, ProvisionCspResponse } from "../client";
 import * as atatApiTypes from "../client/types";
 import { makeClient } from "../../utils/atat-client";
 import { provisionRequestSchema } from "../../models/provisioning-schemas";
@@ -27,6 +25,7 @@ async function makeRequest(client: IAtatClient, request: HothProvisionRequest): 
     },
   };
   try {
+    logger.info(`Invoking addPortfolio against CSP ${request.targetCspName}`);
     const cspResponse = await client.addPortfolio(addPortfolioRequest);
     return transformSynchronousResponse(cspResponse, addPortfolioRequest, request);
   } catch (err) {

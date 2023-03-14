@@ -1,6 +1,5 @@
 import { Context } from "aws-lambda";
 import * as idpClient from "../../idp/client";
-import { HothProvisionRequest } from "../../models/provisioning-jobs";
 import { ErrorStatusCode, SuccessStatusCode, ValidationErrorResponse } from "../../utils/response";
 import * as cspConfig from "./csp-configuration";
 import { handler } from "./csp-create-environment";
@@ -13,7 +12,7 @@ import {
   CSP_B_TEST_ENDPOINT,
   TEST_ENVIRONMENT_ID,
 } from "../util/common-test-fixtures";
-import { ProvisionCspResponse, ProvisioningStatusType } from "../client";
+import { HothProvisionRequest, ProvisionCspResponse, ProvisioningStatusType } from "../client";
 
 // Reused mocks
 jest.mock("../provision/csp-configuration");

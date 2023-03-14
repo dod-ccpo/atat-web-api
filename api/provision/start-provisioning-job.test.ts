@@ -1,16 +1,16 @@
 import { Context } from "aws-lambda";
 import { mockClient } from "aws-sdk-client-mock";
-import { ProvisionRequestType } from "../../models/provisioning-jobs";
 import { sfnClient } from "../../utils/aws-sdk/step-functions";
 import { ApiSuccessResponse, ValidationErrorResponse } from "../../utils/response";
 import {
-  fundingSources,
   cspAProvisioningBodyNoPayload,
   validRequest,
   // requestContext,
   administrators,
+  taskOrders,
 } from "../util/common-test-fixtures";
 import { handler } from "./start-provisioning-job";
+import { ProvisionRequestType } from "../client";
 
 export const requestContext = { identity: { sourceIp: "203.0.113.0" } };
 const sfnMock = mockClient(sfnClient);
@@ -29,15 +29,7 @@ describe("Successful provisioning operations", () => {
         ...cspAProvisioningBodyNoPayload,
         operationType: ProvisionRequestType.ADD_TASK_ORDER,
         payload: {
-          fundingSources: [
-            ...fundingSources,
-            {
-              taskOrderNumber: "1234567890123",
-              clin: "0001",
-              popStartDate: "2021-10-01",
-              popEndDate: "2022-12-31",
-            },
-          ],
+          ...[taskOrders[0]],
         },
       }),
       headers: {

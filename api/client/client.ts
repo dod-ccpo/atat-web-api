@@ -1,9 +1,8 @@
 import axios, { AxiosInstance, AxiosResponse } from "axios";
 import * as types from "./types";
 import * as atatApiTypes from "./types";
-import { ProvisioningStatusType, ProvisionRequest } from "./types";
+import { CspResponse, HothProvisionRequest, ProvisioningStatusType, ProvisionRequest } from "./types";
 import { ILogger, logger as defaultLogger } from "../../utils/logging";
-import { CspResponse } from "../util/csp-request";
 import { camelToSnakeRequestInterceptor, snakeToCamelResponseInterceptor } from "./util";
 import MockAdapter from "axios-mock-adapter";
 import {
@@ -15,7 +14,6 @@ import {
   TEST_PORTFOLIO_ID,
   TEST_PROVISIONING_JOB_ID,
 } from "../util/common-test-fixtures";
-import { HothProvisionRequest } from "../../models/provisioning-jobs";
 
 /**
  * An error that occurs during the
@@ -100,7 +98,7 @@ export class AtatClient implements IAtatClient {
    * The version of the ATAT CSP API specification that is supported by this version
    * of the client. This should match the `info.version` from the OpenAPI specification.
    */
-  public static supportedApiVersion = "v1.0.2";
+  public static supportedApiVersion = "v1.1.0";
 
   private readonly client: AxiosInstance;
   private readonly logger: ILogger;
