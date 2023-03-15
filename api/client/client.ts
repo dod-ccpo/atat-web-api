@@ -15,6 +15,8 @@ import {
   TEST_PROVISIONING_JOB_ID,
 } from "../util/common-test-fixtures";
 
+const CSP_MOCK_ENABLED = process.env.CSP_MOCK_ENABLED ?? "";
+
 /**
  * An error that occurs during the
  */
@@ -140,7 +142,14 @@ export class AtatClient implements IAtatClient {
       return cspClientResponse;
     });
     this.client.interceptors.response.use(snakeToCamelResponseInterceptor);
-    this.setUpMocks();
+    // We should be able to remove this and always have mocks enabled once the fix mentioned in
+    // https://github.com/ctimmerm/axios-mock-adapter/issues/357 is merged
+    if (CSP_MOCK_ENABLED) {
+      this.logger.info("Using mock axios client");
+      this.setUpMocks();
+    } else {
+      this.logger.info("Using real axios client");
+    }
   }
 
   private buildHeaders(request: Partial<types.ProvisionRequest>): Record<string, string> {
@@ -155,7 +164,7 @@ export class AtatClient implements IAtatClient {
   }
 
   private setUpMocks() {
-    const mock = new MockAdapter(this.client);
+    const mock = new MockAdapter(this.client, { onNoMatch: "passthrough" });
 
     // TODO: move this to a different file once it gets too big
 
