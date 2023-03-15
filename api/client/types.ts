@@ -1,5 +1,3 @@
-import { CspResponse } from "../util/csp-request";
-
 export interface Metadata<T> {
   readonly status: number;
   readonly request: T;
@@ -8,11 +6,31 @@ export interface Metadata<T> {
 /**
  * The available statuses for an asynchronous provisioning job.
  */
-export enum ProvisioningStatusType {
+export const enum ProvisioningStatusType {
   NOT_STARTED = "NOT_STARTED",
   IN_PROGRESS = "IN_PROGRESS",
   SUCCESS = "SUCCESS",
   FAILURE = "FAILURE",
+}
+
+export const enum ClinType {
+  CLOUD = "CLOUD",
+  NON_CLOUD = "NON_CLOUD",
+}
+
+export interface CloudDistinguisher {
+  readonly name: string;
+  readonly displayName: string;
+  readonly description: string;
+}
+
+/**
+ * The available Impact Levels for target Cloud Environments.
+ */
+export const enum ClassificationLevel {
+  UNCLASSIFIED = "UNCLASSIFIED",
+  SECRET = "SECRET",
+  TOP_SECRET = "TOP_SECRET",
 }
 
 /**
@@ -38,16 +56,18 @@ export interface ProvisioningStatus {
  * A CLIN in a Task Order.
  */
 export interface Clin {
-  readonly number: string;
+  readonly clinNumber: string;
   readonly popStartDate: string;
   readonly popEndDate: string;
+  readonly classificationLevel?: ClassificationLevel;
+  readonly type: ClinType;
 }
 
 /**
  * A Task Order and CLINs used to pay for provisioned resources and services.
  */
 export interface TaskOrder {
-  readonly number: string;
+  readonly taskOrderNumber: string;
   readonly clins: Clin[];
   readonly popStartDate: string;
   readonly popEndDate: string;
@@ -67,21 +87,6 @@ export interface Administrator {
 
 export interface EnvironmentPatchInput {
   readonly administrators: Administrator[];
-}
-
-export interface CloudDistinguisher {
-  readonly name: string;
-  readonly displayName: string;
-  readonly description: string;
-}
-
-/**
- * The available Impact Levels for target Cloud Environments.
- */
-export enum ClassificationLevel {
-  UNCLASSIFIED = "UNCLASSIFIED",
-  SECRET = "SECRET",
-  TOP_SECRET = "TOP_SECRET",
 }
 
 export interface Environment extends EnvironmentPatchInput {
@@ -203,6 +208,56 @@ export interface GetProvisioningStatusRequest extends ProvisionRequest {
 export interface GetProvisioningStatusResponse extends AtatResponse {
   readonly status: ProvisioningStatus;
   readonly location: string;
+}
+
+export const enum ProvisionRequestType {
+  ADD_PORTFOLIO = "ADD_PORTFOLIO",
+  ADD_ENVIRONMENT = "ADD_ENVIRONMENT",
+  ADD_ADMINISTRATOR = "ADD_ADMINISTRATOR",
+  ADD_TASK_ORDER = "ADD_TASK_ORDER",
+  UPDATE_TASK_ORDER = "UPDATE_TASK_ORDER",
+}
+
+export interface NewPortfolioPayload {
+  name: string;
+  taskOrders: Array<TaskOrder>;
+}
+
+export interface NewEnvironmentPayload {
+  name: string;
+  administrators: Array<Administrator>;
+  classificationLevel: ClassificationLevel;
+  cloudDistinguisher: CloudDistinguisher;
+}
+
+export interface NewTaskOrderPayload {
+  taskOrder: TaskOrder;
+}
+
+export interface AdministratorPayload {
+  administrators: Array<Administrator>;
+}
+
+export interface HothProvisionRequest {
+  jobId: string;
+  userId: string;
+  portfolioId?: string;
+  operationType: ProvisionRequestType;
+  targetCspName: string;
+  payload: NewPortfolioPayload | NewEnvironmentPayload | NewTaskOrderPayload | AdministratorPayload;
+}
+
+export interface AsyncProvisionRequest extends HothProvisionRequest {
+  location: string;
+}
+
+export interface CspResponse<Req, Resp> {
+  code: number;
+  content: {
+    request: Req;
+    response: Resp;
+  };
+  initialSnowRequest?: HothProvisionRequest;
 }
 
 export type ProvisionCspResponse =

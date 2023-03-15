@@ -1,14 +1,5 @@
-import { HothProvisionRequest } from "../../models/provisioning-jobs";
 import { logger } from "../../utils/logging";
 import { ProvisioningStatusType } from "../client";
-export interface CspResponse<Req, Resp> {
-  code: number;
-  content: {
-    request: Req;
-    response: Resp;
-  };
-  initialSnowRequest?: HothProvisionRequest;
-}
 
 // This is merely a stop gap to provide mock responses
 // this should be removed shortly and is not meant as a true representation

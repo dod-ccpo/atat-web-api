@@ -1,8 +1,8 @@
 import middy from "@middy/core";
-import { ProvisionRequestType, HothProvisionRequest } from "../../models/provisioning-jobs";
 import createError from "http-errors";
 import { MiddlewareOutputs } from "./error-handling-middleware";
 import { RequestEvent } from "../../models/document-generation";
+import { HothProvisionRequest, ProvisionRequestType } from "../../api/client";
 
 // Ensures a CSP portfolio id is present when submitting a request
 // that updates an already existing portfolio

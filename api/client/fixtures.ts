@@ -3,6 +3,7 @@ import {
   Administrator,
   ClassificationLevel,
   Clin,
+  ClinType,
   CostResponseByPortfolio,
   Environment,
   GetCostsByClinRequest,
@@ -24,19 +25,23 @@ export const TEST_CSP_ENDPOINT = "https://localhost/atat/api/v1";
 const number = "09876543214321";
 const clins: Clin[] = [
   {
-    number: "0001",
+    clinNumber: "0001",
+    type: ClinType.CLOUD,
+    classificationLevel: ClassificationLevel.UNCLASSIFIED,
     popStartDate: "2021-09-01",
     popEndDate: "2022-09-01",
   },
   {
-    number: "1001",
+    clinNumber: "1001",
+    type: ClinType.CLOUD,
+    classificationLevel: ClassificationLevel.UNCLASSIFIED,
     popStartDate: "2023-09-01",
     popEndDate: "2023-09-01",
   },
 ];
 
 export const mockTaskOrder: TaskOrder = {
-  number,
+  taskOrderNumber: number,
   clins,
   popStartDate: "2021-09-01",
   popEndDate: "2022-09-01",
@@ -73,8 +78,8 @@ export const mockAddTaskOrderRequest: AddTaskOrderRequest = {
 
 export const mockGetCostsByClinRequest: GetCostsByClinRequest = {
   portfolioId,
-  taskOrderNumber: mockTaskOrder.number,
-  clin: clins[0].number,
+  taskOrderNumber: mockTaskOrder.taskOrderNumber,
+  clin: clins[0].clinNumber,
   startDate: "2022-01-01",
   endDate: "2022-12-31",
 };
