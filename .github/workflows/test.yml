@@ -1,0 +1,116 @@
+---
+name: Build and Test API
+on:
+  pull_request:
+  push:
+    branches:
+      - develop
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  assertPackageLockVersion:
+    name: Ensure package-lock lockfileVersion has not changed
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3
+      - name: Check package-lock.json
+        run: |
+          file="package-lock.json"
+          expectedVersion="2"
+          lockFileVersion="$(jq -r .lockfileVersion "$file")"
+          if [ "$lockFileVersion" != "$expectedVersion" ]; then
+            echo "$file: lockfileVersion ($lockFileVersion) is invalid (expected: $expectedVersion)"
+            exit 1
+          else
+            echo "$file: lockfileVersion ($lockFileVersion) is the expected value ($expectedVersion)"
+          fi
+  cloudFormationSynth:
+    name: Run CDK Synthesis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3
+      - name: Setup NodeJS
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: ".nvmrc"
+          cache: npm
+      - name: Install global dependencies
+        run: |
+          npm install -g aws-cdk
+      - name: Install project dependencies
+        run: |
+          npm ci
+      - name: Synthesize CDK template - Sandbox
+        run: |
+          cdk synth -c "atat:EnvironmentId=CiTest" -c "atat:Sandbox=true"
+      - name: Synthesize CDK template - Full Environments
+        run: >-
+          cdk synth
+          -c "atat:EnvironmentId=FullCiTest"
+          -c "atat:VpcCidr=10.250.0.0/16"
+          -c "atat:ApiDomainName=ci.atat.fake.test"
+          -c "atat:ApiCertificateArn=arn:aws:us-east-1:123456789012:certificate/aec3ac93-692e-406e-afef-642fb31afc41"
+          -c "atat:VpcFlowLogBucket=arn:aws:us-east-1:s3::123456789012:flow-logs-123456789012-us-east-1" 
+          AtatEnvironmentPipeline/Sandbox
+      - name: Gather CloudFormation artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: cloudformation-assets
+          path: |
+            cdk.out/*.template.json
+            cdk.out/asset.*/index.js
+  build:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Setup NodeJS
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: ".nvmrc"
+          cache: npm
+      - name: Install global dependencies
+        run: |
+          npm install -g aws-cdk
+      - name: Install project dependencies
+        run: |
+          npm ci
+      - name: Lint the project
+        run: npm run lint
+      - name: Build the project
+        run: npm run build
+      - name: Run test suite
+        run: npm test
+        # This step will fail for external collaborators
+      - name: Trigger SonarCloud
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  secretScan:
+    name: Scan for secrets
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+          architecture: "x64"
+      - name: Install detect-secrets
+        run: pip install detect-secrets
+      - name: Scan for new (not-yet-allowed) secrets
+        run: >-
+          git ls-files -z |
+          xargs -0 detect-secrets-hook --baseline .secrets.baseline

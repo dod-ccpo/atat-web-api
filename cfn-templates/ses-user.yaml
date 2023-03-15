@@ -1,0 +1,210 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: >-
+  Configures sending email using SES via an IAM user. This creates the SES Email Identity
+  as well as the IAM user. A Custom Resource is used to obtain the SES SMTP credentials
+  from the IAM User's Secret Access Key. The resulting credentials are stored in Secrets
+  Manager. This template requires CAPABILITY_IAM.
+
+Parameters:
+  EmailAddress:
+    Description: >-
+      The email address to verify for sending email as.
+    Type: String
+  SecretName:
+    Description: >-
+      The name in Secrets Manager to use to store the created secret
+    Type: String
+    Default: ""
+  VpcId:
+    Description: >-
+      The VPC where the Interface Endpoint for SES should be configured.
+    Type: String
+  SubnetIds:
+    Description: >-
+      The subnet(s) where the Interface Endpoint for SES should be configured.
+    Type: CommaDelimitedList
+  SourceIpCidr:
+    Description: >-
+      The CIDR of the resources that should be allowed to send email via the
+      created SES Interface Endpoint
+    Type: String
+
+Conditions:
+  HasCustomName: !Not [!Equals ["", !Ref SecretName]]
+
+Resources:
+  SesInterfaceEndpointSg:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: >-
+        Allow traffic to SES via the Interface Endpoint from given CIDRs
+      SecurityGroupIngress:
+        - CidrIp: !Ref SourceIpCidr
+          Description: Allow SMTP over Port 587
+          FromPort: 587
+          ToPort: 587
+          IpProtocol: tcp
+      VpcId: !Ref VpcId
+  InterfaceEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      PrivateDnsEnabled: true
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.email-smtp
+      VpcEndpointType: Interface
+      VpcId: !Ref VpcId
+      SubnetIds: !Ref SubnetIds
+      SecurityGroupIds:
+        - !GetAtt SesInterfaceEndpointSg.GroupId
+
+  SesEmailIdenitity:
+    Type: AWS::SES::EmailIdentity
+    Properties:
+      EmailIdentity: !Ref EmailAddress
+
+  SesSendUser:
+    Type: AWS::IAM::User
+    Properties:
+      Policies:
+        - PolicyName: SesSendRawEmail
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: ses:SendRawEmail
+                Resource: !Sub arn:${AWS::Partition}:ses:${AWS::Region}:${AWS::AccountId}:identity/${SesEmailIdenitity}
+                Condition:
+                  # This should always be true for ses:SendRawEmail
+                  StringEquals:
+                    "ses:ApiVersion": "2"
+
+  SesSendUserAccessKey:
+    Type: AWS::IAM::AccessKey
+    Properties:
+      UserName: !Ref SesSendUser
+      Status: Active
+
+  CustomResourceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Action: "sts:AssumeRole"
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+      ManagedPolicyArns:
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+  UserSesPasswordHandler:
+    Type: AWS::Lambda::Function
+    Properties:
+      Role: !GetAtt CustomResourceRole.Arn
+      Runtime: python3.9
+      Handler: index.handler
+      Code:
+        # The following code is largely derived from
+        # https://docs.aws.amazon.com/ses/latest/dg/smtp-credentials.html
+        # Support for using this as a CloudFormation custom resource was added.
+        ZipFile: |
+          #!/usr/bin/env python3
+
+          import hmac
+          import hashlib
+          import base64
+          import os
+          import cfnresponse
+
+          SMTP_REGIONS = [
+              'us-east-2',       # US East (Ohio)
+              'us-east-1',       # US East (N. Virginia)
+              'us-west-2',       # US West (Oregon)
+              'ap-south-1',      # Asia Pacific (Mumbai)
+              'ap-northeast-2',  # Asia Pacific (Seoul)
+              'ap-southeast-1',  # Asia Pacific (Singapore)
+              'ap-southeast-2',  # Asia Pacific (Sydney)
+              'ap-northeast-1',  # Asia Pacific (Tokyo)
+              'ca-central-1',    # Canada (Central)
+              'eu-central-1',    # Europe (Frankfurt)
+              'eu-west-1',       # Europe (Ireland)
+              'eu-west-2',       # Europe (London)
+              'sa-east-1',       # South America (Sao Paulo)
+              'us-gov-west-1',   # AWS GovCloud (US)
+          ]
+
+          # These values are required to calculate the signature. Do not change them.
+          DATE = "11111111"
+          SERVICE = "ses"
+          MESSAGE = "SendRawEmail"
+          TERMINAL = "aws4_request"
+          VERSION = 0x04
+
+
+          def sign(key, msg):
+              return hmac.new(key, msg.encode('utf-8'), hashlib.sha256).digest()
+
+
+          def calculate_key(secret_access_key, region):
+              if region not in SMTP_REGIONS:
+                  raise ValueError(f"The {region} Region doesn't have an SMTP endpoint.")
+
+              signature = sign(("AWS4" + secret_access_key).encode('utf-8'), DATE)
+              signature = sign(signature, region)
+              signature = sign(signature, SERVICE)
+              signature = sign(signature, TERMINAL)
+              signature = sign(signature, MESSAGE)
+              signature_and_version = bytes([VERSION]) + signature
+              smtp_password = base64.b64encode(signature_and_version)
+              return smtp_password.decode('utf-8')
+
+          def handler(event, context):
+            try:
+              # DO NOT LOG THE EVENT. THE EVENT CONTAINS THE SECRET ACCESS KEY.
+              username = event['ResourceProperties']['UserName']
+              key = event['ResourceProperties']['SecretAccessKey']
+              region = event['ResourceProperties']['Region']
+              print(f"Calculating SES credential for {username} in {region}")
+              response_data = {}
+
+              response_data['SesDerivedToken'] = calculate_key(key, region)
+              print(f"Calculation complete. Sending response to CloudFormation")
+              cfnresponse.send(event, context, cfnresponse.SUCCESS, response_data, username, noEcho=True)
+            except Exception as error:
+              cfnresponse.send(event, context, cfnresponse.FAILED, {}, reason=str(error))
+
+  SesPassword:
+    Type: Custom::SesPassword
+    Properties:
+      ServiceToken: !GetAtt UserSesPasswordHandler.Arn
+      Region: !Ref AWS::Region
+      UserName: !Ref SesSendUser
+      SecretAccessKey: !GetAtt SesSendUserAccessKey.SecretAccessKey
+
+  SesSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: >-
+        The credential to use for authenticating to SES.
+      Name: !If
+        - HasCustomName
+        - !Ref SecretName
+        - !Ref AWS::NoValue
+      SecretString: !Sub |
+        {
+          "UserName": "${SesSendUserAccessKey}",
+          "Password": "${SesPassword.SesDerivedToken}",
+          "Region": "${AWS::Region}",
+          "IamUser": "${SesSendUser}"
+        }
+
+Outputs:
+  SesIamUser:
+    Description: >-
+      The AWS IAM user created to facilitate sending emails via SES
+    Value: !Ref SesSendUser
+  SmtpSecretId:
+    Description: >-
+      The ARN of the Secret in Secrets Manager that stores the SMTP credentials
+    Value: !Ref SesSecret

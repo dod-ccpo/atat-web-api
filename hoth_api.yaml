@@ -1,0 +1,1482 @@
+openapi: 3.0.2
+info:
+  description: >-
+    This is the HOTH (Hyperscaler Orchestration and Tracking Helper) API, a private internal-facing API that is intended
+    to be purely consumed by the ServiceNow component of ATAT
+  version: "0.1"
+  title: ATAT HOTH API - ServiceNow Integration
+  contact:
+    email: replaceme@ccpo.mil
+tags:
+  - name: provisioning
+    description: >-
+      Operations related to provisioning jobs
+  - name: document
+    description: >-
+      Operations related to document generation requests
+paths:
+  /generate-document:
+    post:
+      tags:
+        - document
+      description: Generates a document
+      operationId: generateDocument
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+        "422":
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResponseTooLargeError"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateDocumentRequest"
+  /provisioning-jobs:
+    get:
+      tags:
+        - provisioning
+      description: Consumes and returns up to ten of the most recently completed Provisioning Jobs from the Provisioning Queue
+      operationId: consumesProvisioningJobs
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProvisionResponse"
+    post:
+      tags:
+        - provisioning
+      description: Starts a new Provisioning Job
+      operationId: startProvisioningJob
+      responses:
+        "201":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProvisioningRequest"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProvisioningRequest"
+    options:
+      tags:
+        - cors
+      description: CORS headers
+      responses:
+        "200":
+          $ref: "#/components/responses/CorsHeaders"
+  /cost-jobs:
+    get:
+      tags:
+        - cost
+      description: Consumes and returns up to ten of the most recently completed Cost Responses from the eponymous Queue
+      operationId: consumeCostResponses
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CostResponse"
+    post:
+      tags:
+        - cost
+      description: Starts a new Cost Request to the specified CSP
+      operationId: startCostJob
+      responses:
+        "201":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CostRequest"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CostRequest"
+    options:
+      tags:
+        - cors
+      description: CORS headers
+      responses:
+        "200":
+          $ref: "#/components/responses/CorsHeaders"
+components:
+  responses:
+    CorsHeaders:
+      description: Default response for CORS method
+      headers:
+        Access-Control-Allow-Origin:
+          schema:
+            type: string
+        Access-Control-Allow-Methods:
+          schema:
+            type: string
+        Access-Control-Allow-Headers:
+          schema:
+            type: string
+      content: {}
+  schemas:
+    Error:
+      type: object
+      additionalProperties: false
+      description: Generic error model
+      required:
+        - message
+      properties:
+        message:
+          type: string
+    ValidationError:
+      allOf:
+        - $ref: "#/components/schemas/Error"
+        - type: object
+          additionalProperties: false
+          required:
+            - error_map
+          properties:
+            error_map:
+              type: object
+              description: Maps form input IDs to validation error messages so that clients can display in-line errors
+    ResponseTooLargeError:
+      description: If the response exceeds 6MB response limit, this is returned as an error response
+      allOf:
+        - $ref: "#/components/schemas/Error"
+      type: object
+      required:
+        - responseSize
+        - maxAllowed
+      properties:
+        responseSize:
+          type: number
+          description: Represents the size of the PDF to send back to the user
+        maxAllowed:
+          type: number
+          description: Represents the maximum allowed size to return
+    ProvisioningClassificationLevel:
+      description: >-
+        Represents the classification level for this environment. Attempts to change this field via PUT or PATCH
+        should result in a HTTP 400.
+      type: string
+      enum:
+        - UNCLASSIFIED
+        - SECRET
+        - TOP_SECRET
+    CloudDistinguisher:
+      description: >-
+        Optional parameter used when the vendor offers more than one distinct Cloud System at a given classification
+        level. Valid values must be provided to ATAT client by vendors. Note that it is expected that implementations
+        will ignore the display_name and description fields. They are nonetheless included to ensure that their intent
+        is not misrepresented by the ATAT UI.
+      required:
+        - name
+        - display_name
+        - description
+      properties:
+        name:
+          type: string
+          description: Unique identifier for a particular Cloud System, according to vendor
+          example: il4_dod
+        display_name:
+          type: string
+          description: Human readable display name for a Cloud System identifier
+          example: Department of Defense - IL4
+        description:
+          type: string
+          description: Description of intended use of a Cloud System
+          example: Cloud System meant for use by DoD organizations with IL4 workloads
+    ProvisioningRequest:
+      description: Represents a generic request for provisioning cloud resources via ATAT
+      type: object
+      additionalProperties: false
+      required:
+        - job_id
+        - user_id
+        - operation_type
+        - target_csp_name
+        - payload
+      properties:
+        job_id:
+          description: ID of the Provisioning Job assigned by DISA StoreFront Service Now
+          type: string
+        user_id:
+          description: ID of the Mission Owner in DISA StoreFront Service Now
+          type: string
+        portfolio_id:
+          description: ID of the CSP Portfolio assigned by DISA StoreFront Service Now (not to be confused with the ID generated by the CSP)
+          type: string
+        operation_type:
+          $ref: "#/components/schemas/OperationType"
+        target_csp_name:
+          description: ->
+            Name of the target CSP for a provisioning request. Implementation will look up the CSP configuration using
+            it as the key in Secrets Manager.
+          type: string
+        payload:
+          oneOf:
+            - $ref: "#/components/schemas/NewPortfolioPayload"
+            - $ref: "#/components/schemas/NewEnvironmentPayload"
+            - $ref: "#/components/schemas/OperatorPayload"
+    ProvisionResponse:
+      description: Response from the CSP which will be set after a request has been processed
+      type: object
+      $ref: "#/components/schemas/CspResponse"
+      readOnly: true
+    OperationType:
+      description: Distinguishes type of operation that a user is performing
+      type: string
+      enum:
+        - ADD_PORTFOLIO
+        - ADD_ENVIRONMENT
+        - ADD_ADMINISTRATOR
+        - ADD_TASK_ORDER
+        - UPDATE_TASK_ORDER
+    ProvisioningPayload:
+      description: Abstract base model describing the payloads for provisioning operations
+    NewPortfolioPayload:
+      description: Payload for creation of a new CSP Portfolio
+      allOf:
+        - $ref: "#/components/schemas/ProvisioningPayload"
+      required:
+        - name
+        - task_orders
+      properties:
+        name:
+          type: string
+          description: Name of the Portfolio being created
+        task_orders:
+          type: array
+          items:
+            $ref: "#/components/schemas/TaskOrder"
+        csp_id:
+          type: string
+          readOnly: true
+    NewEnvironmentPayload:
+      description: Payload for creation of a new CSP Portfolio
+      allOf:
+        - $ref: "#/components/schemas/ProvisioningPayload"
+      required:
+        - name
+        - administrators
+        - classification_level
+      properties:
+        name:
+          type: string
+          description: Name of the Portfolio being created
+        administrators:
+          description: Array of administrator objects
+          type: array
+          items:
+            $ref: "#/components/schemas/Administrator"
+        classification_level:
+          $ref: "#/components/schemas/ProvisioningClassificationLevel"
+        cloud_distinguisher:
+          $ref: '#/components/schemas/CloudDistinguisher'
+        csp_id:
+          type: string
+          readOnly: true
+    AdministratorPayload:
+      description: Payload for the addition of an Administrator to an existing CSP Portfolio
+      allOf:
+        - $ref: "#/components/schemas/ProvisioningPayload"
+      required:
+        - administrators
+      properties:
+        administrators:
+          description: Array of administrator objects
+          type: array
+          items:
+            $ref: "#/components/schemas/Administrator"
+    Administrator:
+      description: Administrator data for provisioning resources in a CSP
+      type: object
+      required:
+        - email
+        - dod_id
+      properties:
+        email:
+          type: string
+          example: "user@mail.mil"
+        dod_id:
+          type: string
+        needs_reset:
+          type: boolean
+          default: false
+    TaskOrder:
+      type: object
+      description: >-
+        A Task Order and CLINs used to pay for provisioned resources and services
+      required:
+        - id
+        - task_order_number
+        - clins
+        - pop_start_date
+        - pop_end_date
+      properties:
+        id:
+          description: Represents the unique ID of a Task Order. Must be defined by CSPs upon object creation.
+          type: string
+          readOnly: true
+          example: "csp-task-order-id-123"
+        task_order_number:
+          description: >-
+            Represents the current Task Order Number. Subject to change over the lifetime of a Task Order. Should be
+            considered metadata rather than a primary key (use the `id` instead).
+          type: string
+          example: "HQ003421F0024"
+        clins:
+          type: array
+          items:
+            $ref: '#/components/schemas/Clin'
+        pop_start_date:
+          description: Start of period of performance for this Task Order in YYYY-MM format.
+          type: string
+          format: date
+          example: "2021-07"
+        pop_end_date:
+          description: End of period of performance for this Task Order in YYYY-MM format.
+          type: string
+          format: date
+          example: "2026-07"
+    Clin:
+      description: >-
+        Represents a CLIN in a Task Order. Note that classification_level is required if type == "CLOUD", otherwise
+        it must be null or undefined.
+      additionalProperties: false
+      required:
+        - clin_number
+        - type
+        - pop_start_date
+        - pop_end_date
+      properties:
+        clin_number:
+          description: Contract Line Item Number (CLIN), 0001 through 9999
+          type: string
+          pattern: '(?!^0{4}$)^\d{4}$'
+        type:
+          description: >-
+            Distinguishes a "CLOUD" CLIN, which directly funds cloud workloads, from "NON_CLOUD" CLINs, which do not.
+          type: string
+          enum:
+            - CLOUD
+            - NON_CLOUD
+        classification_level:
+          $ref: '#/components/schemas/ProvisioningClassificationLevel'
+        pop_start_date:
+          description: Start of period of performance for this CLIN in YYYY-MM format.
+          type: string
+          format: date
+          example: "2021-07"
+        pop_end_date:
+          description: End of period of performance for this CLIN in YYYY-MM format.
+          type: string
+          format: date
+          example: "2026-07"
+    CspResponse:
+      required:
+        - code
+        - content
+      properties:
+        code:
+          type: integer
+        content:
+          type: object
+          required:
+            - response
+            - request
+          properties:
+            response:
+              type: object
+            request:
+              type: object
+          additionalProperties: true
+    CostRequest:
+      description: >-
+        Represents a request for Cost data to be fulfilled by the ATAT Orchestrator by invoking the appropriate /costs
+        API for a given Cloud Service Provider
+      type: object
+      properties:
+        request_id:
+          description: ID to enable correlating Cost reqeusts with responses
+          type: string
+          format: uuid
+        portfolio_id:
+          type: string
+        target_csp_name:
+          description: ->
+            Name of the target CSP for a provisioning request. Implementation will look up the CSP configuration using
+            it as the key in Secrets Manager.
+          type: string
+        start_date:
+          description: Start date of Cost query
+          type: string
+          format: date
+          example: "2021-07-01"
+        end_date:
+          description: End date of Cost query
+          type: string
+          format: date
+          example: "2022-07-01"
+    CostResponse:
+      description: >-
+        Represents a response for Cost data which will have been fulfilled by the ATAT Orchestrator. Will contain the
+        results of the invocation of the matching Cloud Service Provider's /costs API.
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/CspResponse"
+    GenerateDocumentRequest:
+      description: "Determines which document template the API will generate"
+      type: object
+      properties:
+        documentType:
+          type: string
+          enum:
+            - EVAL_PLAN
+            - DESCRIPTION_OF_WORK_PDF
+            - DESCRIPTION_OF_WORK_DOCX
+            - INDEPENDENT_GOVERNMENT_COST_ESTIMATE
+            - INCREMENTAL_FUNDING_PLAN
+            - REQUIREMENTS_CHECKLIST
+        templatePayload:
+          type: object
+          oneOf:
+            - $ref: "#/components/schemas/EvalPlan"
+            - $ref: "#/components/schemas/DescriptionOfWork"
+            - $ref: "#/components/schemas/IndependentGovernmentCostEstimate"
+            - $ref: "#/components/schemas/IncrementalFundingPlan"
+            - $ref: "#/components/schemas/RequirementsChecklist"
+    EvalPlan:
+      description: Provides the basis of evaluation for an Acquisition Package
+      type: object
+      properties:
+        taskOrderTitle:
+          type: string
+        sourceSelection:
+          type: string
+          enum:
+            - NO_TECH_PROPOSAL
+            - TECH_PROPOSAL
+            - SET_LUMP_SUM
+            - EQUAL_SET_LUMP_SUM
+        method:
+          type: string
+          enum:
+            - LPTA
+            - BVTO
+            - BEST_USE
+            - LOWEST_RISK
+        standardSpecifications:
+          type: array
+          items:
+            type: string
+        customSpecifications:
+          type: array
+          items:
+            type: string
+        standardDifferentiators:
+          type: array
+          items:
+            type: string
+        customDifferentiators:
+          type: array
+          items:
+            type: string
+    IncrementalFundingPlan:
+      description: >-
+        For generating the Incremental Funding Plan (IFP) document
+      type: object
+      properties:
+        # DITCO will fill in during review, will be left as TBD
+        contractNumber:
+          type: string
+        # DITCO will fill in after the award, will be left as TBD
+        taskOrderNumber:
+          type: string
+        missionOwner:
+          type: string
+        financialPoc:
+          type: string
+        estimatedTaskOrderValue:
+          type: number
+          format: float
+        initialAmount:
+          type: number
+          format: float
+        remainingAmount:
+          type: number
+          format: float
+        fundingIncrements:
+          type: array
+          items:
+            $ref: "#/components/schemas/FundingIncrement"
+        scheduleText:
+          type: string
+        requirementsTitle:
+          description: >-
+            Acquisition Package Title
+          type: string
+        fundingDocument:
+          $ref: "#/components/schemas/FundingDocument"
+      required:
+        - missionOwner
+        - requirementsTitle
+        - estimatedTaskOrderValue
+        - initialAmount
+        - remainingAmount
+        - fundingIncrements
+        - fundingDocument
+    IndependentGovernmentCostEstimate:
+      description: "Data used for generating the Independent Government Cost Estimate (IGCE) document"
+      type: object
+      properties:
+        fundingDocument:
+          $ref: "#/components/schemas/FundingDocument"
+        surgeCapabilities:
+          description: Not to exceed this percentage of contractor's total proposed price (1-50)
+          type: integer
+        periodsEstimate:
+          type: array
+          items:
+            $ref: "#/components/schemas/PeriodEstimate"
+        instructions:
+          $ref: "#/components/schemas/IGCEInstructions"
+        contractingShop:
+          type: string
+          enum:
+            - "DITCO"
+            - "OTHER"
+    IGCEInstructions:
+      description: IGCE Instruction Page questions
+      type: object
+      properties:
+        estimateDescription:
+          type: string
+        assumptionsMade:
+          type: string
+        toolsUsed:
+          type: string
+        informationSource:
+          type: string
+        previousEstimateComparison:
+          type: string
+    PeriodEstimate:
+      description: "Information specific to a base or option period sheet in the IGCE document"
+      type: object
+      properties:
+        period:
+          description: "A base or option period."
+          $ref: "#/components/schemas/Period"
+        periodLineItems:
+          type: array
+          items:
+            $ref: "#/components/schemas/PeriodLineItem"
+    PeriodLineItem:
+      description: A single line item entered on a period sheet in the IGCE document
+      type: object
+      properties:
+        idiqClin:
+          type: string
+        contractType:
+          type: string
+          enum:
+            - "FFP"
+            - "T&M"
+        dowTaskNumber:
+          description: Section number from DOW document
+          type: string
+          example: "4.2.1.1"
+        serviceTitle:
+          description: DOW Subtask name or name of a CSP service offering
+          type: string
+          example: "Compute"
+        itemDescription:
+          type: string
+        unitPrice:
+          type: number
+        quantity:
+          description: >-
+            Quantity of units for specificed service for a specific period
+          type: integer
+        unit:
+          type: string
+    FundingDocument:
+      description: >-
+        Numbers from funding document(s). Either both the GT&C number and Order
+        number from US Treasury's Bureau of the Fiscal Service forms (FS_FORM)
+        or only the MIPR number from Military Interdepartmental Purchase Request (MIPR).
+      type: object
+      properties:
+        fundingType:
+          type: string
+          enum:
+            - FS_FORM
+            - MIPR
+        gtcNumber:
+          type: string
+        orderNumber:
+          type: string
+        miprNumber:
+          type: string
+      required:
+        - fundingType
+    FundingIncrement:
+      type: object
+      properties:
+        amount:
+          type: number
+          format: float
+        description:
+          type: string
+          example: "1st QTR FY23"
+        order:
+          type: integer
+    RequirementsChecklist:
+      description: >-
+        Schema used to generate Requirements Checklist document
+      type: object
+      properties:
+        projectOverview:
+          type: object
+          properties:
+            title:
+              type: string
+            scope:
+              type: string
+            emergencyDeclaration:
+              type: boolean
+        organization:
+          type: object
+          properties:
+            agency:
+              type: string
+            name:
+              description: >-
+                The DISA Organization or Organization Name column
+              type: string
+        contacts:
+          type: object
+          properties:
+            missionOwnerName:
+              type: string
+            cor:
+              $ref: "#/components/schemas/CorContact"
+            acor:
+              $ref: "#/components/schemas/CorContact"
+        currentContract:
+          type: object
+          properties:
+            exists:
+              type: boolean
+            incumbentContractorName:
+              type: string
+            contractNumber:
+              type: string
+            taskOrderNumber:
+              type: string
+            contractExpiration:
+              type: string
+        exceptionToFairOpportunity:
+          type: string
+          enum:
+            - NO_NONE
+            - YES_FAR_16_505_B_2_I_A
+            - YES_FAR_16_505_B_2_I_B
+            - YES_FAR_16_505_B_2_I_C
+        periodOfPerformance:
+          $ref: "#/components/schemas/PeriodOfPerformance"
+        contractType:
+          type: object
+          properties:
+            firmFixedPrice:
+              type: boolean
+            timeAndMaterials:
+              type: boolean
+            justification:
+              type: string
+        sensitiveInformation:
+          type: object
+          properties:
+            baaRequired:
+              type: boolean
+            potentialToBeHarmful:
+              type: boolean
+            foiaContact:
+              type: object
+              properties:
+                fullName:
+                  type: string
+                email:
+                  type: string
+                address:
+                  type: string
+            section508:
+              type: object
+              properties:
+                section508Sufficient:
+                  type: boolean
+    CorContact:
+      description: >-
+        A Contracting Officer's Representative (COR) or Alternate Contracting
+        Officer's Representative (ACOR)
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        phoneNumber:
+          type: string
+        dodaac:
+          description: >-
+            Department of Defense Activity Address Code (DoDAAC)
+          type: string
+    DescriptionOfWork:
+      description: >-
+        Schema used for generating th Description Of Work (DOW) document"
+      type: object
+      properties:
+        # DOW award history
+        awardHistory:
+          type: array
+          items:
+            $ref: "#/components/schemas/Award"
+        # DOW contract information table
+        contractInformation:
+          $ref: "#/components/schemas/ContractInformation"
+        # DOW section 1
+        toTitle:
+          type: string
+        # DOW section 2
+        scope:
+          type: string
+        surgeRequirementCapacity:
+          type: integer
+        surgeRequirementCapabilities:
+          type: boolean
+        # Performance Requirements
+        # DOW section 3 and 4.1
+        currentEnvironment:
+          $ref: "#/components/schemas/CurrentEnvironment"
+        # DOW section 4.2
+        selectedClassificationLevels:
+          type: array
+          items:
+            $ref: "#/components/schemas/SelectedClassificationLevel"
+        architecturalDesignRequirement:
+          $ref: "#/components/schemas/ArchitecturalDesignRequirement"
+        xaasOfferings:
+          type: array
+          items:
+            type: object
+            properties:
+              computeInstances:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ComputeEnvironmentInstance"
+              databaseInstances:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DatabaseEnvironmentInstance"
+              storageInstances:
+                type: array
+                items:
+                  $ref: "#/components/schemas/EnvironmentInstance" # storage
+              generalInstances:
+                type: array
+                items:
+                  $ref: "#/components/schemas/EnvironmentInstance" # general XaaS
+              selectedServiceInstances:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SelectedServiceOffering"
+        # DOW section 4.2.6 - CDS
+        crossDomainSolutions:
+          $ref: "#/components/schemas/CrossDomainSolutions"
+        # DOW section 4.3
+        cloudSupportPackages:
+          type: array
+          items:
+            $ref: "#/components/schemas/CloudSupportEnvironmentInstance"
+        # DOW section 5
+        # based on selected service offerings and training selected
+        contractType:
+          type: object
+          properties:
+            firmFixedPrice:
+              type: boolean
+            timeAndMaterials:
+              type: boolean
+            contractTypeJustification:
+              type: string
+        # DOW section 7
+        periodOfPerformance:
+          $ref: "#/components/schemas/PeriodOfPerformance"
+        # DOW section 8 - Security Requirements
+        securityRequirements:
+          type: array
+          items:
+            $ref: "#/components/schemas/SecurityRequirement"
+        # DOW section 10 (and its subtasks)
+        contractConsiderations:
+          $ref: "#/components/schemas/ContractConsiderations"
+        # DOW section 11
+        sensitiveInformation:
+          description: >-
+            Sensitive Information for a package
+          type: object
+          properties:
+            section508Sufficient:
+              type: boolean
+            accessibilityReqs508:
+              type: string
+    Award:
+      description: "Part of DOW, represents a single Award in the Award History table"
+      type: object
+      properties:
+        contractAwardType:
+          type: string
+          enum:
+            - INITIAL_AWARD
+            - MODIFICATION
+        modificationOrder:
+          type: integer
+        effectiveDate:
+          type: string
+          format: date
+    ContractInformation:
+      description: "Part of DOW, represents Current Contract Information table fields"
+      type: object
+      properties:
+        contractNumber:
+          type: string
+        currentContractExists:
+          type: boolean
+        contractExpirationDate:
+          type: string
+          format: date
+        incumbentContractorName:
+          type: string
+        previousTaskOrderNumber:
+          type: string
+    CrossDomainSolutions:
+      description: >-
+        Cross Domain Solutions (CDS) for the transfer of data between classification levels
+      type: object
+      properties:
+        crossDomainSolutionRequired:
+          type: boolean
+        anticipatedNeedOrUsage:
+          type: string
+        needForEntireTaskOrderDuration:
+          type: boolean
+        selectedPeriods:
+          type: array
+          items:
+            $ref: "#/components/schemas/Period"
+        trafficPerDomainPair:
+          type: array
+          items:
+            type: "object"
+            properties:
+              type:
+                type: string
+              dataQuantity:
+                type: number
+                format: integer
+        projectedFileStreamType:
+          type: string
+    CurrentEnvironment:
+      description: >-
+        Encapsulates data for the Background/Current Environment and part of Performance
+        Requirements sections of the DOW
+      type: object
+      properties:
+        currentEnvironmentExists:
+          type: boolean
+        hasSystemDocumentation:
+          type: boolean
+        hasMigrationDocumentation:
+          type: boolean
+        envLocation:
+          type: string
+          enum:
+            - CLOUD
+            - ON_PREM
+            - HYBRID
+        envClassificationsCloud:
+          type: array
+          items:
+            $ref: "#/components/schemas/ClassificationLevel"
+        envClassificationsOnprem:
+          type: array
+          items:
+            $ref: "#/components/schemas/ClassificationLevel"
+        envInstances:
+          type: array
+          item:
+            $ref: "#/components/schemas/CurrentEnvironmentInstance"
+        # current Env
+        additionalGrowth:
+          type: boolean
+        anticipatedYearlyAdditionalCapacity:
+          type: integer
+        anticipatedNeedUsage:
+          type: string
+        # replicated or optimized
+        currentEnvironmentReplicatedOptimized:
+          type: string
+          enum:
+            - YES_REPLICATE
+            - YES_OPTIMIZE
+            - NO
+        statementReplicatedOptimized:
+          type: string
+        hasPhasedApproach:
+          type: boolean
+        phasedApproachSchedule:
+          type: string
+        # architecture design
+        needsArchitecturalDesignServices:
+          type: boolean
+        architecturalDesignRequirement:
+          $ref: "#/components/schemas/ArchitecturalDesignRequirement"
+    EnvironmentInstance:
+      description: >-
+        Base instance used for various sections of information captured in a Package
+        mainly used for document generation (e.g., DOW)
+      type: object
+      properties:
+        anticipatedNeedOrUsage:
+          type: string
+        osLicensing:
+          $ref: "#/components/schemas/Licensing"
+        instanceName:
+          type: string
+        numberOfInstances:
+          type: integer
+        needForEntireTaskOrderDuration:
+          type: boolean
+        selectedPeriods:
+          type: array
+          items:
+            $ref: "#/components/schemas/Period"
+        classificationLevel:
+          $ref: "#/components/schemas/ClassificationLevel"
+        instanceLocation:
+          type: string
+          enum:
+            - CLOUD
+            - ON_PREM
+        region:
+          $ref: "#/components/schemas/Region"
+        performanceTier:
+          type: string
+          enum:
+            - GENERAL
+            - COMPUTE
+            - MEMORY
+            - STORAGE
+        pricingModel:
+          type: string
+          enum:
+            - PAY_AS_YOU_GO
+            - PREPAID
+        pricingModelExpiration:
+          type: string
+          format: date
+          example: "2022-07-01"
+        licensing:
+          type: string
+        operatingSystem:
+          type: string
+        numberOfVcpus:
+          type: integer
+        processorSpeed:
+          type: integer
+        storageType:
+          type: string
+          enum:
+            - BLOCK
+            - OBJECT
+            - FILE
+            - ARCHIVE
+        storageAmount:
+          type: integer
+        storageUnit:
+          $ref: "#/components/schemas/StorageUnit"
+        memoryAmount:
+          type: integer
+        memoryUnit:
+          $ref: "#/components/schemas/StorageUnit"
+        dataEgressMonthlyAmount:
+          type: integer
+        dataEgressMonthlyUnit:
+          $ref: "#/components/schemas/StorageUnit"
+    CurrentEnvironmentInstance:
+      description: >-
+        Extends Environment Instance with additional properties specific to current
+        environment instances
+      type: object
+      properties:
+        additionalInformation:
+          type: string
+        currentUsageDescription:
+          type: string
+          enum:
+            - EVEN_USAGE
+            - IRREGULAR_USAGE
+        isTrafficSpikeEventBased:
+          type: boolean
+        trafficSpikeEventDescription:
+          type: string
+        isTrafficSpikePeriodBased:
+          type: boolean
+        trafficSpikePeriodDescription:
+          type: string
+        deployedRegions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Region"
+        usersPerRegion:
+          $ref: "#/components/schemas/UsersPerRegion"
+        operatingEnvironment:
+          $ref: "#/components/schemas/OperatingEnvironment"
+        environmentType:
+          $ref: "#/components/schemas/EnvironmentType"
+      allOf:
+        - $ref: "#/components/schemas/EnvironmentInstance"
+    ComputeEnvironmentInstance:
+      description: >-
+        Extends Environment Instance with additional properties specific to compute instances
+      type: object
+      properties:
+        environmentType:
+          $ref: "#/components/schemas/EnvironmentType"
+        operatingEnvironment:
+          $ref: "#/components/schemas/OperatingEnvironment"
+      allOf:
+        - $ref: "#/components/schemas/EnvironmentInstance"
+    DatabaseEnvironmentInstance:
+      description: >-
+        Extends Environment Instance with additional properties specific to database instances
+      type: object
+      properties:
+        databaseType:
+          type: string
+          enum:
+            - ANALYTICAL
+            - TRANSACTIONAL
+            - GRAPH
+            - RELATIONAL
+            - OTHER
+        databaseTypeOther:
+          type: string
+        databaseLicensing:
+          $ref: "#/components/schemas/Licensing"
+    CloudSupportEnvironmentInstance:
+      description: >-
+        Details related Cloud Support Packages for the Selected Service Offering
+      type:
+        properties:
+          canTrainInUnclassEnv:
+            type: boolean
+          trainingLocation:
+            type: string
+          trainingRequirementTitle:
+            type: string
+          trainingTimeZone:
+            type: string
+          personnelOnsiteAccess:
+            type: boolean
+          trainingFacilityType:
+            type: string
+            enum:
+              - GOVERNMENT_FACILITY
+              - NON_GOVERNMENT_FACILITY
+          trainingFormat:
+            type: string
+            enum:
+              - ONSITE_INSTRUCTOR_CONUS
+              - ONSITE_INSTRUCTOR_OCONUS
+              - VIRTUAL_INSTRUCTOR
+              - VIRTUAL_SELF_LED
+              - NO_PREFERENCE
+          personnelRequiringTraining:
+            type: number
+            format: integer
+          serviceType:
+            $ref: "#/components/schemas/ServiceOfferingGroup"
+      allOf:
+        - $ref: "#/components/schemas/EnvironmentInstance"
+    EstimatedEnvironmentInstance:
+      description: >-
+        Extends Environment Instance with additional properties specific to estimated environment
+        instances used for document generation
+      type: object
+      properties:
+        dowTaskNumber:
+          type: string
+        monthlyPrice:
+          type: number
+          format: float
+      allOf:
+        - $ref: "#/components/schemas/EnvironmentInstance"
+    EnvironmentType:
+      type: string
+      enum:
+        - DEV_TEST
+        - PRE_PROD
+        - PROD_STAGING
+        - COOP_DIASTER_RECOVERY
+    OperatingEnvironment:
+      type: string
+      enum:
+        - VIRTUAL
+        - CONTAINERS
+        - SERVERLESS
+        - END_USER_COMPUTING_VIRTUAL_DESKTOP
+    Licensing:
+      type: string
+      enum:
+        - NEW
+        - TRANSFER_EXISTING
+    SecurityRequirement:
+      description: >-
+        A Security Requirement for a specific Service Offering Group in a package
+      type: object
+      properties:
+        advisoryServicesSecret:
+          type: array
+          items:
+            $ref: "#/components/schemas/ClassifiedInformationType"
+        advisoryServicesTopSecret:
+          type: array
+          items:
+            $ref: "#/components/schemas/ClassifiedInformationType"
+        serviceOfferingGroup:
+          $ref: "#/components/schemas/ServiceOfferingGroup"
+        tsContractorClearanceType:
+          type: string
+          enum:
+            - TS
+            - TS_SCI
+    ArchitecturalDesignRequirement:
+      description: >-
+        Details for an architectural design of application(s)
+      type: object
+      properties:
+        applicationsNeedingDesign:
+          type: string
+        statement:
+          type: string
+        externalFactors:
+          type: string
+        dataClassificationLevels:
+          type: array
+          items:
+            $ref: "#/components/schemas/ClassificationLevel"
+        source:
+          type: string
+          enum:
+            - DOW
+            - CURRENT_ENVIRONMENT
+    ClassificationLevel:
+      description: >-
+        Represents a Classification Level for instances of a package
+      type: object
+      properties:
+        classification:
+          type: string
+          enum:
+            - U
+            - S
+            - TS
+        impactLevel:
+          $ref: "#/components/schemas/ImpactLevel"
+    ClassifiedInformationType:
+      description: >-
+        Describes the classified information in a Classification Instance
+      $ref: "#/components/schemas/GeneralInformation"
+    SelectedClassificationLevel:
+      description: >-
+        Selected Classification Levels for XaaS services
+      type: object
+      properties:
+        classificationLevel:
+          $ref: "#/components/schemas/ClassificationLevel"
+        classifiedInformationTypes:
+          type: array
+          items:
+            $ref: "#/components/schemas/ClassifiedInformationType"
+        usersPerRegion:
+          $ref: "#/components/schemas/UsersPerRegion"
+        dataEgressMonthlyAmount:
+          type: integer
+        dataEgressMonthlyUnit:
+          $ref: "#/components/schemas/StorageUnit"
+        usersIncrease:
+          type: boolean
+        userGrowthEstimatedPercentage:
+          type: string
+        userGrowthEstimateType:
+          $ref: "#/components/schemas/GrowthEstimateType"
+        dataIncrease:
+          type: boolean
+        dataGrowthEstimatedPercentage:
+          type: string
+        dataGrowthEstimateType:
+          $ref: "#/components/schemas/GrowthEstimateType"
+    GrowthEstimateType:
+      description: >-
+        Growth estimate based on a growth in periods or over entire duration
+      type: string
+      enum:
+        - SINGLE
+        - MULTIPLE
+    ImpactLevel:
+      type: string
+      enum:
+        - IL2
+        - IL4
+        - IL5
+        - IL6
+    StorageUnit:
+      description: >-
+        Commonly used units for instances used for document generation
+      type: string
+      enum:
+        - GB
+        - TB
+        - PB
+    UsersPerRegion:
+      type: array
+      items:
+        description: >-
+          An object that has the key as the region and the number of users
+          as the value.
+        type: "object"
+    Region:
+      description: >-
+        A region defining where instances are deployed
+      type: object
+      properties:
+        group:
+          type: string
+          enum:
+            - CONUS
+            - OCONUS
+      allOf:
+        - $ref: "#/components/schemas/GeneralInformation"
+    SelectedServiceOffering:
+      description: >-
+        A service selected by the user for a specific usage/need
+      type: object
+      properties:
+        serviceOffering:
+          $ref: "#/components/schemas/ServiceOffering"
+        classificationInstances:
+          type: array
+          items:
+            $ref: "#/components/schemas/ClassificationInstance"
+        otherServiceOffering:
+          type: string
+      ClassificationInstance:
+        description: >-
+          A general unit to define classification needs
+        type: object
+        properties:
+          usageDescription:
+            type: string
+          classificationLevel:
+            $ref: "#/components/schemas/ClassificationLevel"
+          classifiedInformationTypes:
+            type: array
+            items:
+              $ref: "#/components/schemas/ClassifiedInformationType"
+          dowTaskNumber:
+            type: string
+          needForEntireTaskOrderDuration:
+            type: boolean
+          selectedPeriods:
+            type: array
+            items:
+              $ref: "#/components/schemas/Period"
+    Period:
+      description: >-
+        A period used for a package Period Of Performance
+      type: object
+      properties:
+        periodType:
+          type: string
+          enum:
+            - BASE
+            - OPTION
+        periodUnitCount:
+          type: integer
+        periodUnit:
+          type: string
+          enum:
+            - DAY
+            - WEEK
+            - MONTH
+    ServiceOffering:
+      description: >-
+        A single Service Offering Group (Service Offering table)
+      properties:
+        serviceOfferingGroup:
+          $ref: "#/components/schemas/ServiceOfferingGroup"
+            # Q: do we need an OTHER option record for each of the
+            # above enums
+      allOf:
+        - $ref: "#/components/schemas/GeneralInformation"
+    ServiceOfferingGroup:
+      type: string
+      enum:
+        - ADVISORY_ASSISTANCE
+        - APPLICATIONS
+        - COMPUTE
+        - DATABASE
+        - STORAGE
+        - DEVELOPER_TOOLS
+        - EDGE_COMPUTING
+        - GENERAL_XAAS
+        - IOT
+        - MACHINE_LEARNING
+        - NETWORKING
+        - SECURITY
+        - TRAINING
+        - PORTABILITY_PLAN
+        - HELP_DESK_SERVICES
+        - DOCUMENTATION_SUPPORT
+        - GENERAL_CLOUD_SUPPORT
+    PeriodOfPerformance:
+      description: >-
+        Represents a Period of Performance (PoP) for a package
+      type: object
+      properties:
+        basePeriod:
+          $ref: "#/components/schemas/Period"
+        optionPeriods:
+          type: array
+          items:
+            $ref: "#/components/schemas/Period"
+        popStartRequest:
+          type: boolean
+        requestedPopStartDate:
+          type: string
+          format: date
+          example: "2021-07-01"
+        timeFrame:
+          type: string
+          enum:
+            - NO_LATER_THAN
+            - NO_SOONER_THAN
+            - null
+        recurringRequirement:
+          type: boolean
+    ContractConsiderations:
+      description: >-
+        Information for the DOW from the Sensitive Information and
+        Contract Considerations tables
+      type: object
+      properties:
+        # section 10a
+        potentialConflictOfInterest:
+          type: boolean
+        conflictOfInterestExplanation:
+          type: string
+        # section 10b
+        packagingShippingNoneApply:
+          type: boolean
+        packagingShippingOther:
+          type: boolean
+        packagingShippingOtherExplanation:
+          type: string
+        contractorProvidedTransfer:
+          type: boolean
+        # section 10e
+        piiPresent:
+          type: boolean
+        systemOfRecordName:
+          type: string
+        # section 10f
+        travel:
+          type: array
+          items:
+            $ref: "#/components/schema/Travel"
+    Travel:
+      description: >-
+        Describes the Travel Requirements of a package
+      type: object
+      properties:
+        tripLocation:
+          type: string
+        numberOfTravelers:
+          type: number
+          format: integer
+        numberOfTrips:
+          type: number
+          format: integer
+        durationInDays:
+          type: number
+          format: integer
+        selectedPeriods:
+          type: array
+          items:
+            $ref: "#/components/schemas/Period"
+    GeneralInformation:
+      description: >-
+        Basic information commonly used to describe different units inside a package
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        sequence:
+          type: integer
+    AsyncProvisioningJobRequest:
+      required:
+        - location
+      properties:
+        request:
+          $ref: "#/components/schemas/ProvisioningRequest"
+        location:
+          type: string
+          description: >-
+            URI which ATAT clients will poll until a provisioning job is complete or times out
+          format: uri

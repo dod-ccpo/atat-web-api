@@ -1,0 +1,56 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Creating IAM Users via Cloudformation
+
+Resources:
+  CsspApicwluser:
+    Type: AWS::IAM::User  
+    Properties:
+      Policies:
+      - PolicyName: sandbox-cssp-apicwl-access
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action: 
+              - logs:CreateExportTask               
+              - logs:DescribeExportTasks              
+              - logs:DescribeLogGroups             
+              - logs:DescribeLogStreams               
+              - logs:GetLogEvents     
+              - logs:FilterLogEvents
+            Resource: "*"
+          - Effect: Allow
+            Action: 
+              - ec2:DescribeInstances
+              - ec2:DescribeImages
+              - ec2:DescribeVpcs    
+              - ec2:DescribeSecurityGroups
+              - ec2:DescribeSubnets
+              - ec2:DescribeRouteTables
+              - ec2:DescribeNetworkAcls
+              - ec2:DescribeAddresses
+              - ec2:DescribeAvailabilityZones
+              - ec2:DescribeVpcEndpoints
+              - s3:ListAllMyBuckets
+              - iam:ListPolicies
+              - iam:GetPolicy
+              - iam:GetPolicyVersion
+            Resource: "*"
+          - Effect: Allow
+            Action: 
+              - s3:GetBucketAcl
+              - s3:ListBucket
+              - s3:GetObject
+            Resource: "*"
+
+  CsspApicwluserUserAccessKey:
+    Type: AWS::IAM::AccessKey
+    Properties:
+      UserName: !Ref CsspApicwluser
+
+  CsspApicwluserAccessKeySecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: Cssp-C5ISR-User-AccessKey
+      Description: CsspApicwluser Secret Key
+      SecretString: !Sub '{"AccessKeyId":"${CsspApicwluserUserAccessKey}","SecretAccessKey":"${CsspApicwluserUserAccessKey.SecretAccessKey}"}'

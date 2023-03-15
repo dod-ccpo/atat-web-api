@@ -1,0 +1,93 @@
+html {
+  font-size: 10px;
+  font-family: 'Times New Roman', Times, serif;
+}
+
+body {
+  font-size: 1.6rem;
+}
+
+.main-wrap {
+  padding: 100px 120px;
+  margin: 0 auto;
+  max-width: 768px;
+}
+
+p {
+  margin: 0 0 1.6rem;
+  line-height: 2.1rem;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.align-center {
+  margin: 0 auto;
+}
+
+h1 {
+  font-size: 1.9rem;
+  text-transform: uppercase;
+  margin-bottom: 2.4rem !important;
+  text-align: center;
+  margin-top: 0;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+td, th {
+  border: 1px solid black;
+  padding: 8px 16px;
+  line-height: 2.2rem;
+}
+
+.award-mod-table {
+  width: 380px;
+  margin: 0 auto 2.4rem;
+}
+
+.award-mod-table td, .award-mod-table th {
+  width: 190px;
+}
+
+.contract-details-table {
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.contract-details-table th {
+  text-align: left;
+  font-weight: normal;
+  width: 300px;
+}
+
+hr {
+  margin: 0 0 12px 0;
+  border: none;
+  height: 1px;
+  background-color: #e0e1e2;
+}
+
+section {
+  padding: 12px 0;
+}
+
+.d-flex {
+  display: flex;
+}
+
+.number {
+  font-weight: bold;
+  flex: 0 38px;
+}
+
+.content {
+  flex: 1;
+}
+
+.content > p {
+  margin-top: -2px;
+}
