@@ -39,7 +39,7 @@ export class AtatContextValue {
    *
    * This value can, theoretically, be anything under `refs/heads/`
    */
-  public static readonly VERSION_CONTROL_BRANCH = new AtatContextValue("atat:VersionControlBranch", "develop");
+  public static readonly VERSION_CONTROL_BRANCH = new AtatContextValue("atat:VersionControlBranch", undefined);
 
   /**
    * The name/ID of this environment of ATAT.

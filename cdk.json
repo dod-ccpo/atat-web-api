@@ -33,7 +33,6 @@
 
     "atat:CspConfigurationName": "config/csp/integration",
     "atat:GitHubPatName": "auth/github/pat",
-    "atat:VersionControlBranch": "develop",
     "atat:VersionControlRepo": "dod-ccpo/atat-web-api",
     "atat:NotificationEmail": "atat-dev+infrastructure-notif@ccpo.mil"
   }
