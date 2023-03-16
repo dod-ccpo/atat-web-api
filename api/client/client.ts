@@ -1,9 +1,8 @@
 import axios, { AxiosInstance, AxiosResponse } from "axios";
 import * as types from "./types";
 import * as atatApiTypes from "./types";
-import { ProvisioningStatusType, ProvisionRequest } from "./types";
+import { CspResponse, HothProvisionRequest, ProvisioningStatusType, ProvisionRequest } from "./types";
 import { ILogger, logger as defaultLogger } from "../../utils/logging";
-import { CspResponse } from "../util/csp-request";
 import { camelToSnakeRequestInterceptor, snakeToCamelResponseInterceptor } from "./util";
 import MockAdapter from "axios-mock-adapter";
 import {
@@ -15,7 +14,8 @@ import {
   TEST_PORTFOLIO_ID,
   TEST_PROVISIONING_JOB_ID,
 } from "../util/common-test-fixtures";
-import { HothProvisionRequest } from "../../models/provisioning-jobs";
+
+const CSP_MOCK_ENABLED = process.env.CSP_MOCK_ENABLED ?? "";
 
 /**
  * An error that occurs during the
@@ -100,7 +100,7 @@ export class AtatClient implements IAtatClient {
    * The version of the ATAT CSP API specification that is supported by this version
    * of the client. This should match the `info.version` from the OpenAPI specification.
    */
-  public static supportedApiVersion = "v1.0.2";
+  public static supportedApiVersion = "v1.1.0";
 
   private readonly client: AxiosInstance;
   private readonly logger: ILogger;
@@ -142,7 +142,14 @@ export class AtatClient implements IAtatClient {
       return cspClientResponse;
     });
     this.client.interceptors.response.use(snakeToCamelResponseInterceptor);
-    this.setUpMocks();
+    // We should be able to remove this and always have mocks enabled once the fix mentioned in
+    // https://github.com/ctimmerm/axios-mock-adapter/issues/357 is merged
+    if (CSP_MOCK_ENABLED) {
+      this.logger.info("Using mock axios client");
+      this.setUpMocks();
+    } else {
+      this.logger.info("Using real axios client");
+    }
   }
 
   private buildHeaders(request: Partial<types.ProvisionRequest>): Record<string, string> {
@@ -157,7 +164,7 @@ export class AtatClient implements IAtatClient {
   }
 
   private setUpMocks() {
-    const mock = new MockAdapter(this.client);
+    const mock = new MockAdapter(this.client, { onNoMatch: "passthrough" });
 
     // TODO: move this to a different file once it gets too big
 

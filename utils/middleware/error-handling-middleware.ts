@@ -3,11 +3,10 @@ import { APIGatewayProxyResult, SQSEvent } from "aws-lambda";
 import { serializeError } from "serialize-error";
 import { ValidationErrorResponse } from "../response";
 import { INTERNAL_SERVER_ERROR, REQUEST_BODY_INVALID } from "../errors";
-import { HothProvisionRequest } from "../../models/provisioning-jobs";
-import { CspResponse } from "../../api/util/csp-request";
 import { logger } from "../logging";
 import { CommonMiddlewareInputs } from "./common";
 import { CostResponse } from "../../models/cost-jobs";
+import { CspResponse, HothProvisionRequest } from "../../api/client";
 
 export type MiddlewareInputs = CommonMiddlewareInputs | HothProvisionRequest | SQSEvent;
 export type MiddlewareOutputs =

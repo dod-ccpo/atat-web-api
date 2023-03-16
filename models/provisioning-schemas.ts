@@ -1,5 +1,5 @@
 // temporary schema to use for validating /provision-job request
-import { ProvisionRequestType } from "./provisioning-jobs";
+import { ProvisionRequestType } from "../api/client";
 
 // TODO: ensure we have schema validation tests for our shared test objects
 
