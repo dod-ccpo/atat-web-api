@@ -47,7 +47,7 @@ jobs:
           npm ci
       - name: Synthesize CDK template - Sandbox
         run: |
-          cdk synth -c "atat:EnvironmentId=CiTest" -c "atat:Sandbox=true"
+          cdk synth -c "atat:EnvironmentId=CiTest" -c "atat:Sandbox=true" -c "atat:VersionControlBranch=repoBranch"
       - name: Synthesize CDK template - Full Environments
         run: >-
           cdk synth
