@@ -25,9 +25,9 @@ export function createApp(props?: cdk.AppProps): cdk.App {
   }
 
   if (!utils.isString(branchParam)) {
-    const err = `A Branch name must be provided (use the ${AtatContextValue.VERSION_CONTROL_BRANCH} context key)`;
-    console.error(err);
-    throw new Error(err);
+    const repoerr = `A Branch name must be provided (use the ${AtatContextValue.VERSION_CONTROL_BRANCH} context key)`;
+    console.error(repoerr);
+    throw new Error(repoerr);
   }
 
   let apiCertOptions: ApiCertificateOptions | undefined;
