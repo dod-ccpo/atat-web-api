@@ -47,7 +47,7 @@ jobs:
           npm ci
       - name: Synthesize CDK template - Sandbox
         run: |
-          cdk synth -c "atat:EnvironmentId=CiTest" -c "atat:Sandbox=true"
+          cdk synth -c "atat:EnvironmentId=CiTest" -c "atat:Sandbox=true" -c "atat:VersionControlBranch=develop"
       - name: Synthesize CDK template - Full Environments
         run: >-
           cdk synth
@@ -56,6 +56,7 @@ jobs:
           -c "atat:ApiDomainName=ci.atat.fake.test"
           -c "atat:ApiCertificateArn=arn:aws:us-east-1:123456789012:certificate/aec3ac93-692e-406e-afef-642fb31afc41"
           -c "atat:VpcFlowLogBucket=arn:aws:us-east-1:s3::123456789012:flow-logs-123456789012-us-east-1" 
+          -c "atat:VersionControlBranch=develop"
           AtatEnvironmentPipeline/Sandbox
       - name: Gather CloudFormation artifacts
         uses: actions/upload-artifact@v3

@@ -16,6 +16,7 @@ export function createApp(props?: cdk.AppProps): cdk.App {
   const apiCertParam = AtatContextValue.API_CERTIFICATE_ARN.resolve(app);
   const deployRegion = AtatContextValue.DEPLOY_REGION.resolve(app);
   const vpcFlowLogBucketParam = AtatContextValue.VPC_FLOW_LOG_BUCKET.resolve(app);
+  const branchParam = AtatContextValue.VERSION_CONTROL_BRANCH.resolve(app);
 
   if (!utils.isString(environmentParam)) {
     const err = `An EnvironmentId must be provided (use the ${AtatContextValue.ENVIRONMENT_ID} context key)`;
@@ -86,6 +87,12 @@ export function createApp(props?: cdk.AppProps): cdk.App {
       throw new Error(err);
     }
 
+    if (!utils.isString(branchParam)) {
+      const err = `A Branch name must be provided (use the ${AtatContextValue.VERSION_CONTROL_BRANCH} context key)`;
+      console.error(err);
+      throw new Error(err);
+    }
+
     // Context values can not be supplied via the CLI during self-mutation; therefore, we
     // cannot include the environment name in the stack at this time. This does limit
     // us to having a single pipeline per account until we come up with a more thorough
@@ -97,7 +104,7 @@ export function createApp(props?: cdk.AppProps): cdk.App {
       environmentName,
       vpcCidr: vpcCidrParam,
       repository: AtatContextValue.VERSION_CONTROL_REPO.resolve(app),
-      branch: AtatContextValue.VERSION_CONTROL_BRANCH.resolve(app),
+      branch: branchParam,
       githubPatName: AtatContextValue.GITHUB_PAT_NAME.resolve(app),
       apiDomain: apiCertOptions,
       vpcFlowLogBucket: vpcFlowLogBucketParam,
