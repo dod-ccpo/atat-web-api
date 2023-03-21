@@ -332,8 +332,8 @@ describe("addTaskOrder", () => {
 describe("getCostsByClin", () => {
   let client: AtatClient;
   let mock: MockAdapter;
-  const number = mockTaskOrder.number;
-  const clin = mockTaskOrder.clins[0].number;
+  const number = mockTaskOrder.taskOrderNumber;
+  const clin = mockTaskOrder.clins[0].clinNumber;
   const url = `${TEST_CSP_ENDPOINT}/portfolios/${portfolioId}/task-orders/${number}/clins/${clin}/cost`;
   const badUrl = `${TEST_CSP_ENDPOINT}/portfolios/undefined/task-orders/undefined/clins/undefined/cost`;
   beforeAll(() => {

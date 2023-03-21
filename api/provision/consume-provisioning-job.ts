@@ -1,5 +1,5 @@
-import { HothProvisionRequest } from "../../models/provisioning-jobs";
 import { QueueConsumer } from "../util/queueConsumer";
+import { HothProvisionRequest } from "../client";
 
 const PROVISIONING_QUEUE_URL = process.env.PROVISIONING_QUEUE_URL ?? "";
 

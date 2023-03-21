@@ -16,7 +16,7 @@ import { mapTasks, TasksMap } from "./sfn-lambda-invoke-task";
 import { FifoQueue } from "./sqs";
 import { LoggingStandardStateMachine } from "./state-machine";
 import { AtatContextValue } from "../context-values";
-import { ProvisionRequestType } from "../../models/provisioning-jobs";
+import { ProvisionRequestType } from "../../api/client";
 
 /**
  * Successful condition check
@@ -188,9 +188,12 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
     InvokeCreateEnvironment.addCatch(EnqueueResults, { errors: ["States.ALL"], resultPath: "$.catchErrorResult" });
 
     const startState = new sfn.Choice(scope, "StartState")
-      .when(sfn.Condition.stringEquals("$.operationType", ProvisionRequestType.ADD_PORTFOLIO), InvokeCreatePortfolio)
       .when(
-        sfn.Condition.stringEquals("$.operationType", ProvisionRequestType.ADD_ENVIRONMENT),
+        sfn.Condition.stringEquals("$.initialSnowRequest.operationType", ProvisionRequestType.ADD_PORTFOLIO),
+        InvokeCreatePortfolio
+      )
+      .when(
+        sfn.Condition.stringEquals("$.initialSnowRequest.operationType", ProvisionRequestType.ADD_ENVIRONMENT),
         InvokeCreateEnvironment
       )
       .afterwards();

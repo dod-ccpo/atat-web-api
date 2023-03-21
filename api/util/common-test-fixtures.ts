@@ -1,8 +1,13 @@
 import { SQSEvent } from "aws-lambda";
 import { CostRequest } from "../../models/cost-jobs";
-import { HothProvisionRequest, ProvisionRequestType } from "../../models/provisioning-jobs";
 import * as crypto from "crypto";
-import { CostResponseByPortfolio } from "../client";
+import {
+  ClassificationLevel,
+  ClinType,
+  CostResponseByPortfolio,
+  HothProvisionRequest,
+  ProvisionRequestType,
+} from "../client";
 
 // Mock data used by unit and integration tests
 export const TEST_PORTFOLIO_ID = "b02e77d1-234d-4e3d-bc85-b57ca5a93952";
@@ -14,22 +19,16 @@ export const CSP_A = "CSP_A";
 export const CSP_B = "CSP_B";
 
 // provisioning fixtures
-export const fundingSources = [
-  {
-    taskOrderNumber: "1234567890123",
-    clin: "9999",
-    popStartDate: "2021-07-01",
-    popEndDate: "2022-07-01",
-  },
-];
 export const taskOrders = [
   {
-    number: "1234567890123",
+    taskOrderNumber: "1234567890123",
     popStartDate: "2021-07-01",
     popEndDate: "2022-07-01",
     clins: [
       {
-        number: "9999",
+        clinNumber: "9999",
+        type: ClinType.CLOUD,
+        classificationLevel: ClassificationLevel.UNCLASSIFIED,
         popStartDate: "2021-07-01",
         popEndDate: "2022-07-01",
       },

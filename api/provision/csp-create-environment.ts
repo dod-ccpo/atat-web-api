@@ -6,12 +6,17 @@ import inputOutputLogger from "@middy/input-output-logger";
 import validator from "@middy/validator";
 import { Context } from "aws-lambda";
 import jsonErrorHandlerMiddleware from "middy-middleware-json-error-handler";
-import { HothProvisionRequest, NewEnvironmentPayload } from "../../models/provisioning-jobs";
 import { logger } from "../../utils/logging";
 import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
 import { ValidationErrorResponse } from "../../utils/response";
 import { tracer } from "../../utils/tracing";
-import { AtatApiError, IAtatClient, ProvisionCspResponse } from "../client";
+import {
+  AtatApiError,
+  HothProvisionRequest,
+  IAtatClient,
+  NewEnvironmentPayload,
+  ProvisionCspResponse,
+} from "../client";
 import * as atatApiTypes from "../client/types";
 import { makeClient } from "../../utils/atat-client";
 import { provisionRequestSchema } from "../../models/provisioning-schemas";
@@ -43,6 +48,7 @@ async function makeRequest(client: IAtatClient, request: HothProvisionRequest): 
     provisionDeadline: deadline.toISOString(),
   };
   try {
+    logger.info(`Invoking addEnvironment against CSP ${request.targetCspName}`);
     const cspResponse = await client.addEnvironment(addEnvironmentRequest);
     if (cspResponse.$metadata.status === 202) {
       const asyncResponse = cspResponse as atatApiTypes.AddEnvironmentResponseAsync;
