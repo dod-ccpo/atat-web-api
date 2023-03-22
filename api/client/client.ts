@@ -8,6 +8,7 @@ import MockAdapter from "axios-mock-adapter";
 import {
   addEnvironmentRequest,
   CSP_A_TEST_ENDPOINT,
+  CSP_B_STATUS_ENDPOINT,
   CSP_B_TEST_ENDPOINT,
   cspAAddPortfolioRequest,
   TEST_ENVIRONMENT_ID,
@@ -100,7 +101,7 @@ export class AtatClient implements IAtatClient {
    * The version of the ATAT CSP API specification that is supported by this version
    * of the client. This should match the `info.version` from the OpenAPI specification.
    */
-  public static supportedApiVersion = "v1.1.0";
+  public static supportedApiVersion = "1.1.0";
 
   private readonly client: AxiosInstance;
   private readonly logger: ILogger;
@@ -180,16 +181,23 @@ export class AtatClient implements IAtatClient {
       id: TEST_ENVIRONMENT_ID,
     });
 
-    // CSP B should always return a 202 for AddEnvironment
+    // CSP B should always return a 202 with an IN_PROGRESS Status for AddEnvironment
     mock.onPost(`${CSP_B_TEST_ENDPOINT}/portfolios/${TEST_PORTFOLIO_ID}/environments`).reply(
       202,
       {
         portfolioId: TEST_PORTFOLIO_ID,
         provisioningJobId: TEST_PROVISIONING_JOB_ID,
-        status: ProvisioningStatusType.SUCCESS,
+        status: ProvisioningStatusType.IN_PROGRESS,
       },
-      { location: CSP_B_TEST_ENDPOINT }
+      { location: `${CSP_B_STATUS_ENDPOINT}` }
     );
+
+    // CSP B should always return a 200 with a SUCCESS Status for GetProvisioningStatus
+    mock.onPost(`${CSP_B_STATUS_ENDPOINT}`).reply(200, {
+      portfolioId: TEST_PORTFOLIO_ID,
+      provisioningJobId: TEST_PROVISIONING_JOB_ID,
+      status: ProvisioningStatusType.SUCCESS,
+    });
   }
 
   public transformSynchronousResponse<T extends types.AtatResponse>(
@@ -261,9 +269,13 @@ export class AtatClient implements IAtatClient {
     request: types.AddEnvironmentRequest
   ): Promise<types.AddEnvironmentResponseSync | types.AddEnvironmentResponseAsync> {
     const headers = this.buildHeaders(request);
-    const response = await this.client.post(`/portfolios/${request.portfolioId}/environments`, request.environment, {
-      headers,
-    });
+    const response = await this.client.post(
+      `/portfolios/${encodeURIComponent(request.portfolioId)}/environments`,
+      request.environment,
+      {
+        headers,
+      }
+    );
     switch (response.status) {
       case 200:
         return this.transformSynchronousResponse<types.AddEnvironmentResponseSync>("environment", response, request);
