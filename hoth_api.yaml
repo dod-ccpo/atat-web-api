@@ -250,7 +250,7 @@ components:
           oneOf:
             - $ref: "#/components/schemas/NewPortfolioPayload"
             - $ref: "#/components/schemas/NewEnvironmentPayload"
-            - $ref: "#/components/schemas/OperatorPayload"
+            - $ref: "#/components/schemas/AdministratorPayload"
     ProvisionResponse:
       description: Response from the CSP which will be set after a request has been processed
       type: object
