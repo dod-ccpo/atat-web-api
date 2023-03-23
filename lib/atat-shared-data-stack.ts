@@ -24,7 +24,7 @@ export class AtatSharedDataStack extends cdk.Stack {
     key.grantDecrypt(svsprincipal);
     key.grant(svsprincipal, "kms:GenerateDataKey*");
 
-    // Cloudwatch Log group for C5ISR
+    // Cloudwatch Log group for C5ISR to pull and monitor
     const logGroup = new logs.LogGroup(this, "cssp-cwl-logs", {
       //  logGroupName: `${environmentName.toLowerCase()}-cssp-cwl-logs`,
       retention: RetentionDays.INFINITE,
