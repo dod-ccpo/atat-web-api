@@ -158,6 +158,17 @@ describe("addEnvironment", () => {
     expect(mock.history.post[0].url).toEqual(`/portfolios/${portfolioId}/environments`);
     expect(result.environment).toEqual(environment);
   });
+  it("should encode URL", async () => {
+    const needsEncoding = "this:needs/to;be encoded,";
+    const encoded = encodeURIComponent(needsEncoding).toString();
+    const urlWithEncoding = `${TEST_CSP_ENDPOINT}/portfolios/${encoded}/environments`;
+    mock.onPost(urlWithEncoding).reply(200, environment, { "Content-Type": "application/json" });
+    await client.addEnvironment({
+      portfolioId: needsEncoding,
+      environment,
+    });
+    expect(mock.history.post[0].url).toEqual(`/portfolios/${encoded}/environments`);
+  });
   it("should handle a successful 202 response", async () => {
     mock.onPost(url).reply(202, mockProvisioningStatus, { "Content-Type": "application/json", location });
     const result = (await client.addEnvironment({

@@ -9,6 +9,7 @@ import {
   CSP_A,
   CSP_A_TEST_ENDPOINT,
   CSP_B,
+  CSP_B_STATUS_ENDPOINT,
   CSP_B_TEST_ENDPOINT,
   TEST_ENVIRONMENT_ID,
 } from "../util/common-test-fixtures";
@@ -102,9 +103,9 @@ describe("Add Environment Tests", () => {
           provisionDeadline: deadline.toISOString(),
         },
         response: {
-          location: CSP_B_TEST_ENDPOINT,
+          location: CSP_B_STATUS_ENDPOINT,
           status: {
-            status: ProvisioningStatusType.SUCCESS,
+            status: ProvisioningStatusType.IN_PROGRESS,
             portfolioId: addEnvironmentProvisionJob.portfolioId,
             provisioningJobId: addEnvironmentProvisionJob.jobId,
           },
