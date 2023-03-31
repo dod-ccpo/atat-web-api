@@ -28,15 +28,6 @@ import {
 import { IDescriptionOfWork, ReplicateOrOptimize } from "../models/document-generation/description-of-work";
 import { Classification } from "../models/document-generation";
 
-// export async function buildHttpResponse(report: Buffer): Promise<ApiBase64SuccessResponse> {
-//   const headers = {
-//     "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-//     "Content-Disposition": `attachment; filename=DescriptionOfWork.docx`,
-//   };
-//
-//   return new ApiBase64SuccessResponse(report.toString("base64"), SuccessStatusCode.OK, headers);
-// }
-
 export async function doGenerate(template: Buffer, payload: IDescriptionOfWork): Promise<Buffer> {
   // Collection of instances at beginning of impact level for XaaS (e.g., 4.2.1)
   const sortedSelectedClassificationLevels = sortSelectedClassificationLevels(payload.selectedClassificationLevels);
@@ -82,16 +73,6 @@ export async function doGenerate(template: Buffer, payload: IDescriptionOfWork):
   // security Requirements
   const securityRequirements = getSecurityRequirements(payload);
 
-  // const includeSecretArchDesign =
-  //   (securityRequirements.currentEnvSecret.length > 0 &&
-  //     [ReplicateOrOptimize.YES_OPTIMIZE, ReplicateOrOptimize.YES_REPLICATE].includes(
-  //       securityRequirements.currentEnvironment.currentEnvironmentReplicatedOptimized
-  //     )) ||
-  //   payload.architecturalDesignRequirement?.dataClassificationLevels
-  //     ?.map((level) => {
-  //       return level.classification;
-  //     })
-  //     .includes(Classification.S);
   const includeSecretArchDesign = getIncludeClassifiedArchDesign(securityRequirements, payload, Classification.S);
   const includeTopSecretArchDesign = getIncludeClassifiedArchDesign(securityRequirements, payload, Classification.TS);
 
