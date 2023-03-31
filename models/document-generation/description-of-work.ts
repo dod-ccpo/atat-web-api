@@ -62,9 +62,9 @@ export interface ICrossDomainSolutions {
   crossDomainSolutionRequired: boolean;
   anticipatedNeedOrUsage?: string | null;
   needForEntireTaskOrderDuration: boolean;
-  selectedPeriods: IPeriod[];
+  selectedPeriods: IPeriod[] | null;
   trafficPerDomainPair?: ITrafficPerDomainPair[] | null;
-  projectedFileStreamType?: string;
+  projectedFileStreamType?: string | null;
 }
 
 export enum EnvironmentLocation {
@@ -94,8 +94,8 @@ export interface ICurrentEnvironment {
   statementReplicatedOptimized?: string | null;
   hasPhasedApproach: boolean;
   phasedApproachSchedule?: string | null;
-  needsArchitecturalDesignServices: boolean;
-  architecturalDesignRequirement?: ArchitecturalDesignRequirement;
+  needsArchitecturalDesignServices: boolean | null;
+  architecturalDesignRequirement?: ArchitecturalDesignRequirement | null;
 }
 
 export enum InstanceLocation {
@@ -445,7 +445,7 @@ export interface ITravel {
   numberOfTravelers?: number;
   numberOfTrips?: number;
   durationInDays?: number;
-  selectedPeriods?: IPeriod[];
+  selectedPeriods?: IPeriod[] | null;
 }
 
 export interface IGeneralInformation {

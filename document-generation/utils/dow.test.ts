@@ -1,11 +1,17 @@
-import { ImpactLevel, ServiceOfferingGroup } from "../../models/document-generation/description-of-work";
+import {
+  Classification,
+  ImpactLevel,
+  ServiceOfferingGroup,
+} from "../../models/document-generation/description-of-work";
 import {
   formatExpirationDate,
   formatImpactLevel,
   formatRegionUsers,
   formatStorageType,
   getCDRLs,
+  getIncludeClassifiedArchDesign,
   getInstancePop,
+  getSecurityRequirements,
   getSelectedInstances,
   getTaskPeriods,
   InstancesWithStorageType,
@@ -56,7 +62,7 @@ describe("Formatting Utils", () => {
   });
 
   it("formatRegionUsers", async () => {
-    const usersPerRegion = sampleDowRequest.templatePayload.currentEnvironment.envInstances[1].usersPerRegion;
+    const usersPerRegion = sampleDowRequest.templatePayload.currentEnvironment.envInstances[2].usersPerRegion;
     const formattedUsersPerRegion = formatRegionUsers(usersPerRegion);
     const expectedFormat = ["CONUS Central: 19,238", "AFRICOM: 13,939"];
     expect(formattedUsersPerRegion).toEqual(expectedFormat);
@@ -97,7 +103,7 @@ describe("Sorting XaaS Services - happy paths", () => {
     expect(sortedClassificationLevels.il4).toBeUndefined();
     expect(sortedClassificationLevels.il5).toBeDefined();
     expect(sortedClassificationLevels.il6).toBeDefined();
-    expect(sortedClassificationLevels.ts).toBeUndefined();
+    expect(sortedClassificationLevels.ts).toBeDefined();
   });
   it("sortSelectedServicesByGroups", async () => {
     const selectedInstances = sampleDowRequest.templatePayload.xaasOfferings.selectedServiceInstances;
@@ -184,7 +190,7 @@ describe("Gather Tasks for PoP", () => {
       ...sampleDowRequest.templatePayload,
       cloudSupportPackages: [...sampleDowRequest.templatePayload.cloudSupportPackages, extraTraining],
     };
-    const expectedTaskNumbersLength = 18;
+    const expectedTaskNumbersLength = 21;
     const expectedTasks = {
       // entireDurationTasks: [], // left out for brevity
       popPeriods: ["B", "OP1", "OP2", "OP3"],
@@ -224,19 +230,24 @@ describe("getCDRLs", () => {
     const expectedCdrls = [
       {
         code: "*A004",
-        clins: ["x004"],
+        clins: ["x004", "x006"],
         name: "System Administrator Training Materials",
-        taskNumbers: ["4.3.4.3"],
+        taskNumbers: ["4.3.4.3", "4.3.5.3"],
       },
       {
         code: "*A005",
-        clins: ["x004"],
+        clins: ["x004", "x006"],
         name: "Role-Based User Training Material",
-        taskNumbers: ["4.3.4.3"],
+        taskNumbers: ["4.3.4.3", "4.3.5.3"],
       },
-      { code: "A012", clins: ["x001", "x003"], name: "TO Monthly Progress Report", taskNumbers: ["ANY"] },
+      { code: "A012", clins: ["x001", "x003", "x005"], name: "TO Monthly Progress Report", taskNumbers: ["ANY"] },
       { code: "**A006", clins: ["x001"], name: "Portability Plan", taskNumbers: ["4.3.3"] },
-      { code: "***A017", clins: ["x001"], name: "TE Device Specifications", taskNumbers: ["4.2.1.9"] },
+      {
+        code: "***A017",
+        clins: ["x001", "x003", "x005"],
+        name: "TE Device Specifications",
+        taskNumbers: ["4.2.1.9", "4.2.4.9", "4.2.5.9"],
+      },
     ];
 
     const cdrls = getCDRLs(allPopTasks, payload.contractType);
@@ -261,5 +272,117 @@ describe("getCDRLs", () => {
     const cdrls = getCDRLs(allPopTasks, payload.contractType);
     expect(cdrls).toEqual(expectedCdrls);
     expect(cdrls).toHaveLength(expectedCdrls.length);
+  });
+});
+
+describe("securityRequirements", () => {
+  it("should have expected summary values", async () => {
+    const payload = sampleDowRequest.templatePayload;
+    const sr = getSecurityRequirements(payload);
+    const expectedSummary = {
+      edgeComputing: {
+        hasClassified: true,
+        secret: {
+          task: "4.2.4.9",
+          types: ["EDGE Computing Classified Info Type - Secret"],
+        },
+        ts: {
+          task: "4.2.5.9",
+          types: ["EDGE Computing Classified Info Type - Top Secret"],
+        },
+        taskText: "4.2.4.9 and 4.2.5.9",
+        clearanceLevel: "TS/SCI",
+      },
+      advisoryAssistance: {
+        hasClassified: true,
+        secret: {
+          task: "4.3.4.1",
+          types: ["Restricted Data", "Formerly Restricted Data", "Controlled Unclassified Information (CUI)"],
+        },
+        ts: {
+          task: "4.3.5.1",
+          types: [],
+        },
+        taskText: "4.3.4.1",
+        clearanceLevel: "SECRET",
+      },
+      helpDesk: {
+        hasClassified: false,
+        secret: {
+          task: "4.3.4.2",
+          types: [],
+        },
+        ts: {
+          task: "4.3.5.2",
+          types: [],
+        },
+      },
+      training: {
+        hasClassified: true,
+        secret: {
+          task: "4.3.4.3",
+          types: ["Critical Nuclear Weapon Design Information (CNWDI)"],
+        },
+        ts: {
+          task: "4.3.5.3",
+          types: ["Top Secret info type - cloud support"],
+        },
+        taskText: "4.3.4.3 and 4.3.5.3",
+        clearanceLevel: "TS/SCI",
+      },
+      documentationSupport: {
+        hasClassified: false,
+        secret: {
+          task: "4.3.4.4",
+          types: [],
+        },
+        ts: {
+          task: "4.3.5.4",
+          types: [],
+        },
+      },
+      generalCloudSupport: {
+        hasClassified: false,
+        secret: {
+          task: "4.3.4.5",
+          types: [],
+        },
+        ts: {
+          task: "4.3.5.5",
+          types: [],
+        },
+      },
+    };
+    expect(sr.offeringSummary).toEqual(expectedSummary);
+  });
+
+  it("should have expected values for aggregate classification calculations", async () => {
+    const payload = sampleDowRequest.templatePayload;
+    const sr = getSecurityRequirements(payload);
+    expect(sr.containsSecretOffering).toBeTruthy();
+    expect(sr.containsTopSecretOffering).toBeTruthy();
+    expect(sr.hasSecretCloudSupport).toBeTruthy();
+    expect(sr.hasTopSecretCloudSupport).toBeTruthy();
+  });
+
+  it("should have expected classified information types", async () => {
+    const payload = sampleDowRequest.templatePayload;
+    const sr = getSecurityRequirements(payload);
+    const expectedSecretLevelOfAccess = [
+      "Restricted Data",
+      "National Intelligence Information: Non-SCI",
+      "North Atlantic Treaty Organization (NATO) Information",
+      "Foreign Government Information (FGI)",
+    ];
+    const expectedTopSecretLevelOfAccess = ["A TS level", "Another TS Level"];
+    expect(sr.secretLevelOfAccess).toEqual(expectedSecretLevelOfAccess);
+    expect(sr.topSecretLevelOfAccess).toEqual(expectedTopSecretLevelOfAccess);
+  });
+
+  it("should have expected value for includeArchDesign", async () => {
+    const payload = sampleDowRequest.templatePayload;
+    const sr = getSecurityRequirements(payload);
+    expect(getIncludeClassifiedArchDesign(sr, payload, Classification.S)).toBeTruthy();
+    expect(getIncludeClassifiedArchDesign(sr, payload, Classification.TS)).toBeTruthy();
   });
 });
