@@ -18,3 +18,6 @@ coverage/
 # We may reconsider this later if we elect to share
 # debug and local workspace settings across the team
 .vscode/
+
+# Word generated temp files
+~*.*

@@ -1,16 +1,17 @@
 import { IEnvironmentInstance } from "../../models/document-generation";
 import {
-  IPeriod,
-  PeriodType,
-  ServiceOfferingGroup,
-  StorageUnit,
-  EnvironmentType,
   Classification,
-  ImpactLevel,
-  IContractType,
+  EnvironmentType,
   IComputeEnvironmentInstance,
+  IContractType,
   ICurrentEnvironmentInstance,
   IDatabaseEnvironmentInstance,
+  ImpactLevel,
+  IPeriod,
+  PeriodType,
+  ReplicateOrOptimize,
+  ServiceOfferingGroup,
+  StorageUnit,
 } from "../../models/document-generation/description-of-work";
 
 import { logger } from "../../utils/logging";
@@ -49,7 +50,7 @@ export type InstancesWithStorageType =
   | ICurrentEnvironmentInstance
   | IDatabaseEnvironmentInstance;
 export const formatStorageType = (env: InstancesWithStorageType) => {
-  if (!env) {
+  if (!env || !env.performanceTier) {
     // An indicator on the document that a value was not provided
     return `N/A`;
   }
@@ -737,8 +738,8 @@ export interface IXaasAccess {
 }
 export const getSecurityRequirements = (payload: any): any => {
   const { currentEnvironment, xaasOfferings, cloudSupportPackages } = payload;
-  const currentEnvSecret: string[] = [];
-  const currentEnvTopSecret: string[] = [];
+  const currEnvSecretClassInfoTypes: string[] = [];
+  const currEnvTopSecretClassInfoTypes: string[] = [];
   const xaasSecret: any = {
     compute: [],
     database: [],
@@ -756,17 +757,194 @@ export const getSecurityRequirements = (payload: any): any => {
   const cloudSupportSecret: string[] = [];
   const cloudSupportTopSecret: string[] = [];
   let isSecurityNeeded = false;
+  let currentEnvIncludesSecret = false;
+  let currentEnvIncludesTopSecret = false;
+
+  const getLevelOfAccess = (classification: Classification) => {
+    return payload.selectedClassificationLevels
+      .filter((selectedLevel: any) => {
+        return selectedLevel.classificationLevel.classification === classification;
+      })
+      .flatMap((selectedLevel: any) => {
+        return selectedLevel.classifiedInformationTypes.map((classifiedInfoTypes: any) => {
+          return classifiedInfoTypes.name;
+        });
+      });
+  };
+  const secretLevelOfAccess = getLevelOfAccess(Classification.S);
+  const topSecretLevelOfAccess = getLevelOfAccess(Classification.TS);
+
+  const containsClassifiedOffering = (classification: Classification): boolean => {
+    return (
+      Object.keys(xaasOfferings).find((key) => {
+        if (key === "selectedServiceInstances") {
+          return (
+            xaasOfferings[key].find((selectedServiceInstance: any) => {
+              return (
+                selectedServiceInstance.classificationInstances.find((classificationInstance: any) => {
+                  return classification === classificationInstance.classificationLevel.classification;
+                }) !== null
+              );
+            }) !== null
+          );
+        } else {
+          return (
+            xaasOfferings[key].find((instance: any) => {
+              return classification === instance.classificationLevel.classification;
+            }) !== null
+          );
+        }
+      }) !== null
+    );
+  };
+
+  const hasClassifiedCloudSupport = (classification: Classification): boolean => {
+    return (
+      payload.cloudSupportPackages.find((supportPackage: any) => {
+        return supportPackage.classificationLevel.classification === classification;
+      }) !== undefined
+    );
+  };
+
+  const getCloudSupportClassificationTypes = (serviceType: string, classification: Classification): boolean => {
+    return payload.cloudSupportPackages
+      .filter((supportPackage: any) => {
+        return (
+          supportPackage.classificationLevel.classification === classification &&
+          supportPackage.serviceType === serviceType
+        );
+      })
+      .flatMap((supportPackage: any) => {
+        return supportPackage.classifiedInformationTypes;
+      })
+      .map((classifiedInfoType: any) => {
+        return classifiedInfoType.name;
+      });
+  };
+
+  const getServiceOfferingClassificationTypes = (serviceOffering: string, classification: Classification): boolean => {
+    const names = payload.xaasOfferings.selectedServiceInstances
+      .filter((selectedServiceInstance: any) => {
+        return selectedServiceInstance.serviceOffering.serviceOfferingGroup === serviceOffering;
+      })
+      .flatMap((selectedServiceInstance: any) => {
+        return selectedServiceInstance.classificationInstances;
+      })
+      .filter((classificationInstance: any) => {
+        return classificationInstance.classificationLevel.classification === classification;
+      })
+      .map((classificationInstance: any) => {
+        return classificationInstance.classifiedInformationTypes;
+      })
+      .flatMap((classificationInformationType: any) => {
+        return classificationInformationType.map((classifiedInfoType: any) => {
+          return classifiedInfoType.name;
+        });
+      });
+    return names || [];
+  };
+
+  const selectedServiceOfferingSummary: any = {
+    edgeComputing: {
+      hasClassified: true,
+      secret: {
+        task: "4.2.4.9",
+        types: getServiceOfferingClassificationTypes("EDGE_COMPUTING", Classification.S),
+      },
+      ts: {
+        task: "4.2.5.9",
+        types: getServiceOfferingClassificationTypes("EDGE_COMPUTING", Classification.TS),
+      },
+    },
+    advisoryAssistance: {
+      hasClassified: true,
+      secret: {
+        task: "4.3.4.1",
+        types: getCloudSupportClassificationTypes("ADVISORY_ASSISTANCE", Classification.S),
+      },
+      ts: {
+        task: "4.3.5.1",
+        types: getCloudSupportClassificationTypes("ADVISORY_ASSISTANCE", Classification.TS),
+      },
+    },
+    helpDesk: {
+      hasClassified: true,
+      secret: {
+        task: "4.3.4.2",
+        types: getCloudSupportClassificationTypes("HELP_DESK_SERVICES", Classification.S),
+      },
+      ts: {
+        task: "4.3.5.2",
+        types: getCloudSupportClassificationTypes("HELP_DESK_SERVICES", Classification.TS),
+      },
+    },
+    training: {
+      hasClassified: true,
+      secret: {
+        task: "4.3.4.3",
+        types: getCloudSupportClassificationTypes("TRAINING", Classification.S),
+      },
+      ts: {
+        task: "4.3.5.3",
+        types: getCloudSupportClassificationTypes("TRAINING", Classification.TS),
+      },
+    },
+    documentationSupport: {
+      hasClassified: true,
+      secret: {
+        task: "4.3.4.4",
+        types: getCloudSupportClassificationTypes("DOCUMENTATION_SUPPORT", Classification.S),
+      },
+      ts: {
+        task: "4.3.5.4",
+        types: getCloudSupportClassificationTypes("DOCUMENTATION_SUPPORT", Classification.TS),
+      },
+    },
+    generalCloudSupport: {
+      hasClassified: true,
+      secret: {
+        task: "4.3.4.5",
+        types: getCloudSupportClassificationTypes("GENERAL_CLOUD_SUPPORT", Classification.S),
+      },
+      ts: {
+        task: "4.3.5.5",
+        types: getCloudSupportClassificationTypes("GENERAL_CLOUD_SUPPORT", Classification.TS),
+      },
+    },
+  };
+
+  // Infer task text from classified info types
+  Object.keys(selectedServiceOfferingSummary).forEach((key: string) => {
+    if (
+      selectedServiceOfferingSummary[key].secret.types.length > 0 &&
+      selectedServiceOfferingSummary[key].ts.types.length > 0
+    ) {
+      selectedServiceOfferingSummary[key].taskText =
+        selectedServiceOfferingSummary[key].secret.task + " and " + selectedServiceOfferingSummary[key].ts.task;
+      selectedServiceOfferingSummary[key].clearanceLevel = "TS/SCI";
+    } else if (selectedServiceOfferingSummary[key].secret.types.length > 0) {
+      selectedServiceOfferingSummary[key].taskText = selectedServiceOfferingSummary[key].secret.task;
+      selectedServiceOfferingSummary[key].clearanceLevel = "SECRET";
+    } else if (selectedServiceOfferingSummary[key].ts.types.length > 0) {
+      selectedServiceOfferingSummary[key].taskText = selectedServiceOfferingSummary[key].ts.task;
+      selectedServiceOfferingSummary[key].clearanceLevel = "TS/SCI";
+    } else {
+      selectedServiceOfferingSummary[key].hasClassified = false;
+    }
+  });
 
   // current environment security requirements
   currentEnvironment.envInstances.forEach((instance: any) => {
     const classificationLevel = instance.classificationLevel;
     if (classificationLevel && classificationLevel.classification === Classification.S) {
       isSecurityNeeded = true;
-      instance.classifiedInformationTypes.forEach((type: any) => currentEnvSecret.push(type.name));
+      currentEnvIncludesSecret = true;
+      instance.classifiedInformationTypes.forEach((type: any) => currEnvSecretClassInfoTypes.push(type.name));
     }
     if (classificationLevel && classificationLevel.classification === Classification.TS) {
       isSecurityNeeded = true;
-      instance.classifiedInformationTypes.forEach((type: any) => currentEnvTopSecret.push(type.name));
+      currentEnvIncludesTopSecret = true;
+      instance.classifiedInformationTypes.forEach((type: any) => currEnvTopSecretClassInfoTypes.push(type.name));
     }
   });
 
@@ -962,8 +1140,17 @@ export const getSecurityRequirements = (payload: any): any => {
 
   return {
     isSecurityNeeded,
-    currentEnvSecret,
-    currentEnvTopSecret,
+    containsSecretOffering: containsClassifiedOffering(Classification.S),
+    containsTopSecretOffering: containsClassifiedOffering(Classification.TS),
+    hasSecretCloudSupport: hasClassifiedCloudSupport(Classification.S),
+    hasTopSecretCloudSupport: hasClassifiedCloudSupport(Classification.TS),
+    offeringSummary: selectedServiceOfferingSummary,
+    currentEnvIncludesSecret,
+    currentEnvIncludesTopSecret,
+    secretLevelOfAccess,
+    topSecretLevelOfAccess,
+    currEnvSecretClassInfoTypes,
+    currEnvTopSecretClassInfoTypes,
     xaasSecret,
     xaasTopSecret,
     cloudSupportSecret,
@@ -1177,4 +1364,27 @@ export const getCDRLs = (popTasks: string[], contractType: IContractType) => {
   }
 
   return cdrl;
+};
+
+export const getIncludeClassifiedArchDesign = (
+  securityRequirements: any,
+  payload: any,
+  classificationLevel: Classification
+): boolean | undefined => {
+  if (![Classification.S, Classification.TS].includes(classificationLevel)) {
+    return undefined;
+  }
+  const currentEnvProperty =
+    classificationLevel === Classification.S ? "currentEnvIncludesSecret" : "currentEnvIncludesTopSecret";
+  return (
+    (securityRequirements[currentEnvProperty] &&
+      [ReplicateOrOptimize.YES_OPTIMIZE, ReplicateOrOptimize.YES_REPLICATE].includes(
+        payload.currentEnvironment.currentEnvironmentReplicatedOptimized
+      )) ||
+    payload.architecturalDesignRequirement?.dataClassificationLevels
+      ?.map((level: any) => {
+        return level.classification;
+      })
+      .includes(classificationLevel)
+  );
 };
