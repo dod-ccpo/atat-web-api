@@ -775,27 +775,28 @@ export const getSecurityRequirements = (payload: any): any => {
   const topSecretLevelOfAccess = getLevelOfAccess(Classification.TS);
 
   const containsClassifiedOffering = (classification: Classification): boolean => {
-    return (
-      Object.keys(xaasOfferings).find((key) => {
-        if (key === "selectedServiceInstances") {
-          return (
-            xaasOfferings[key].find((selectedServiceInstance: any) => {
-              return (
-                selectedServiceInstance.classificationInstances.find((classificationInstance: any) => {
-                  return classification === classificationInstance.classificationLevel.classification;
-                }) !== null
-              );
-            }) !== null
-          );
-        } else {
-          return (
-            xaasOfferings[key].find((instance: any) => {
+    const foundMatchInSelectedServices: boolean =
+      xaasOfferings.selectedServiceInstances.filter((selectedServiceInstance: any) => {
+        return selectedServiceInstance.classificationInstances
+          .map((classificationInstance: any) => {
+            return classificationInstance.classificationLevel.classification;
+          })
+          .includes(classification);
+      }).length > 0;
+
+    const foundMatchInXaas: boolean =
+      Object.keys(xaasOfferings)
+        .filter((key) => {
+          return key !== "selectedServiceInstances";
+        })
+        .filter((key) => {
+          return xaasOfferings[key]
+            .map((instance: any) => {
               return classification === instance.classificationLevel.classification;
-            }) !== null
-          );
-        }
-      }) !== null
-    );
+            })
+            .includes(classification);
+        }).length > 0;
+    return foundMatchInSelectedServices || foundMatchInXaas;
   };
 
   const hasClassifiedCloudSupport = (classification: Classification): boolean => {
