@@ -385,4 +385,26 @@ describe("securityRequirements", () => {
     expect(getIncludeClassifiedArchDesign(sr, payload, Classification.S)).toBeTruthy();
     expect(getIncludeClassifiedArchDesign(sr, payload, Classification.TS)).toBeTruthy();
   });
+
+  it("containsTopSecretOffering should be true if > 1 TS instances", async () => {
+    const sr = getSecurityRequirements(sampleDowRequest.templatePayload);
+    expect(sr.containsTopSecretOffering).toBeTruthy();
+  });
+
+  it("containsTopSecretOffering should be false if no TS instances", async () => {
+    const payload: any = sampleDowRequest.templatePayload;
+    // Remove TS instances from test data
+    payload.xaasOfferings.selectedServiceInstances = payload.xaasOfferings.selectedServiceInstances.filter(
+      (selectedServiceInstance: any) => {
+        return !selectedServiceInstance.classificationInstances
+          .map((classificationInstance: any) => {
+            return classificationInstance.classificationLevel.classification;
+          })
+          .includes(Classification.TS);
+      }
+    );
+    const sr = getSecurityRequirements(payload);
+    expect(sr.containsSecretOffering).toBeTruthy();
+    expect(sr.containsTopSecretOffering).toBeFalsy();
+  });
 });
