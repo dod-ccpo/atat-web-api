@@ -208,6 +208,7 @@ Resources:
         Access for members of Test and QA teams supporting ATAT.
       ManagedPolicies:
         - !Sub "arn:${AWS::Partition}:iam::aws:policy/job-function/ViewOnlyAccess"
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/CloudWatchLogsReadOnlyAccess"
       InlinePolicy:
         Version: 2012-10-17
         Statement:
