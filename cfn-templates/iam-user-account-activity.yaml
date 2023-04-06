@@ -11,10 +11,10 @@ Parameters:
         the ec2 instance, hosting the palo alto, goes down.
       Type: String
 
-  # KmsKeyId:
-  #     Description: >-
-  #       Kms key used to encrypt the SNS topic.
-  #     Type: String
+  KmsKeyId:
+      Description: >-
+        Kms key used to encrypt the SNS topic.
+      Type: String
 
 Resources:
   IAMuserStatusSnsTopic:
@@ -22,6 +22,7 @@ Resources:
     Properties:
       TopicName: "IAM-User-Activity-Notification"
       DisplayName: "IAM-User-Activity-Notification"
+      KmsMasterKeyId: !Ref KmsKeyId
 
 
   IAMuserStatusSnsSubscription:
