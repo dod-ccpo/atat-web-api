@@ -279,81 +279,36 @@ describe("securityRequirements", () => {
   it("should have expected summary values", async () => {
     const payload = sampleDowRequest.templatePayload;
     const sr = getSecurityRequirements(payload);
-    const expectedSummary = {
+    const expectedClassificationTypes = {
       edgeComputing: {
-        hasClassified: true,
-        secret: {
-          task: "4.2.4.9",
-          types: ["EDGE Computing Classified Info Type - Secret"],
-        },
-        ts: {
-          task: "4.2.5.9",
-          types: ["EDGE Computing Classified Info Type - Top Secret"],
-        },
-        taskText: "4.2.4.9 and 4.2.5.9",
+        secret: ["EDGE Computing Classified Info Type - Secret"],
+        ts: ["EDGE Computing Classified Info Type - Top Secret"],
         clearanceLevel: "TS/SCI",
       },
       advisoryAssistance: {
-        hasClassified: true,
-        secret: {
-          task: "4.3.4.1",
-          types: ["Restricted Data", "Formerly Restricted Data", "Controlled Unclassified Information (CUI)"],
-        },
-        ts: {
-          task: "4.3.5.1",
-          types: [],
-        },
-        taskText: "4.3.4.1",
+        secret: ["Restricted Data", "Formerly Restricted Data", "Controlled Unclassified Information (CUI)"],
+        ts: [],
         clearanceLevel: "SECRET",
       },
       helpDesk: {
-        hasClassified: false,
-        secret: {
-          task: "4.3.4.2",
-          types: [],
-        },
-        ts: {
-          task: "4.3.5.2",
-          types: [],
-        },
+        secret: [],
+        ts: [],
       },
       training: {
-        hasClassified: true,
-        secret: {
-          task: "4.3.4.3",
-          types: ["Critical Nuclear Weapon Design Information (CNWDI)"],
-        },
-        ts: {
-          task: "4.3.5.3",
-          types: ["Top Secret info type - cloud support"],
-        },
-        taskText: "4.3.4.3 and 4.3.5.3",
+        secret: ["Critical Nuclear Weapon Design Information (CNWDI)"],
+        ts: ["Top Secret info type - cloud support"],
         clearanceLevel: "TS/SCI",
       },
       documentationSupport: {
-        hasClassified: false,
-        secret: {
-          task: "4.3.4.4",
-          types: [],
-        },
-        ts: {
-          task: "4.3.5.4",
-          types: [],
-        },
+        secret: [],
+        ts: [],
       },
       generalCloudSupport: {
-        hasClassified: false,
-        secret: {
-          task: "4.3.4.5",
-          types: [],
-        },
-        ts: {
-          task: "4.3.5.5",
-          types: [],
-        },
+        secret: [],
+        ts: [],
       },
     };
-    expect(sr.offeringSummary).toEqual(expectedSummary);
+    expect(sr.classificationTypes).toEqual(expectedClassificationTypes);
   });
 
   it("should have expected values for aggregate classification calculations", async () => {
