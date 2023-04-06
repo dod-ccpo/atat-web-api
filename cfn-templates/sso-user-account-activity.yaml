@@ -41,6 +41,8 @@ Resources:
       EventPattern: 
         detail-type:
           - "AWS API Call via CloudTrail"
+        source:
+        
         detail:
           eventSource:
           - sso-directory.amazonaws.com
