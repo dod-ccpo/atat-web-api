@@ -845,92 +845,41 @@ export const getSecurityRequirements = (payload: any): any => {
     return names || [];
   };
 
-  const selectedServiceOfferingSummary: any = {
+  const classificationTypes: any = {
     edgeComputing: {
-      hasClassified: true,
-      secret: {
-        task: "4.2.4.9",
-        types: getServiceOfferingClassificationTypes("EDGE_COMPUTING", Classification.S),
-      },
-      ts: {
-        task: "4.2.5.9",
-        types: getServiceOfferingClassificationTypes("EDGE_COMPUTING", Classification.TS),
-      },
+      secret: getServiceOfferingClassificationTypes("EDGE_COMPUTING", Classification.S),
+      ts: getServiceOfferingClassificationTypes("EDGE_COMPUTING", Classification.TS),
     },
     advisoryAssistance: {
-      hasClassified: true,
-      secret: {
-        task: "4.3.4.1",
-        types: getCloudSupportClassificationTypes("ADVISORY_ASSISTANCE", Classification.S),
-      },
-      ts: {
-        task: "4.3.5.1",
-        types: getCloudSupportClassificationTypes("ADVISORY_ASSISTANCE", Classification.TS),
-      },
+      secret: getCloudSupportClassificationTypes("ADVISORY_ASSISTANCE", Classification.S),
+      ts: getCloudSupportClassificationTypes("ADVISORY_ASSISTANCE", Classification.TS),
     },
     helpDesk: {
-      hasClassified: true,
-      secret: {
-        task: "4.3.4.2",
-        types: getCloudSupportClassificationTypes("HELP_DESK_SERVICES", Classification.S),
-      },
-      ts: {
-        task: "4.3.5.2",
-        types: getCloudSupportClassificationTypes("HELP_DESK_SERVICES", Classification.TS),
-      },
+      secret: getCloudSupportClassificationTypes("HELP_DESK_SERVICES", Classification.S),
+      ts: getCloudSupportClassificationTypes("HELP_DESK_SERVICES", Classification.TS),
     },
     training: {
-      hasClassified: true,
-      secret: {
-        task: "4.3.4.3",
-        types: getCloudSupportClassificationTypes("TRAINING", Classification.S),
-      },
-      ts: {
-        task: "4.3.5.3",
-        types: getCloudSupportClassificationTypes("TRAINING", Classification.TS),
-      },
+      secret: getCloudSupportClassificationTypes("TRAINING", Classification.S),
+      ts: getCloudSupportClassificationTypes("TRAINING", Classification.TS),
     },
     documentationSupport: {
-      hasClassified: true,
-      secret: {
-        task: "4.3.4.4",
-        types: getCloudSupportClassificationTypes("DOCUMENTATION_SUPPORT", Classification.S),
-      },
-      ts: {
-        task: "4.3.5.4",
-        types: getCloudSupportClassificationTypes("DOCUMENTATION_SUPPORT", Classification.TS),
-      },
+      secret: getCloudSupportClassificationTypes("DOCUMENTATION_SUPPORT", Classification.S),
+      ts: getCloudSupportClassificationTypes("DOCUMENTATION_SUPPORT", Classification.TS),
     },
     generalCloudSupport: {
-      hasClassified: true,
-      secret: {
-        task: "4.3.4.5",
-        types: getCloudSupportClassificationTypes("GENERAL_CLOUD_SUPPORT", Classification.S),
-      },
-      ts: {
-        task: "4.3.5.5",
-        types: getCloudSupportClassificationTypes("GENERAL_CLOUD_SUPPORT", Classification.TS),
-      },
+      secret: getCloudSupportClassificationTypes("GENERAL_CLOUD_SUPPORT", Classification.S),
+      ts: getCloudSupportClassificationTypes("GENERAL_CLOUD_SUPPORT", Classification.TS),
     },
   };
 
   // Infer task text from classified info types
-  Object.keys(selectedServiceOfferingSummary).forEach((key: string) => {
-    if (
-      selectedServiceOfferingSummary[key].secret.types.length > 0 &&
-      selectedServiceOfferingSummary[key].ts.types.length > 0
-    ) {
-      selectedServiceOfferingSummary[key].taskText =
-        selectedServiceOfferingSummary[key].secret.task + " and " + selectedServiceOfferingSummary[key].ts.task;
-      selectedServiceOfferingSummary[key].clearanceLevel = "TS/SCI";
-    } else if (selectedServiceOfferingSummary[key].secret.types.length > 0) {
-      selectedServiceOfferingSummary[key].taskText = selectedServiceOfferingSummary[key].secret.task;
-      selectedServiceOfferingSummary[key].clearanceLevel = "SECRET";
-    } else if (selectedServiceOfferingSummary[key].ts.types.length > 0) {
-      selectedServiceOfferingSummary[key].taskText = selectedServiceOfferingSummary[key].ts.task;
-      selectedServiceOfferingSummary[key].clearanceLevel = "TS/SCI";
-    } else {
-      selectedServiceOfferingSummary[key].hasClassified = false;
+  Object.keys(classificationTypes).forEach((key: string) => {
+    if (classificationTypes[key].secret.length > 0 && classificationTypes[key].ts.length > 0) {
+      classificationTypes[key].clearanceLevel = "TS/SCI";
+    } else if (classificationTypes[key].secret.length > 0) {
+      classificationTypes[key].clearanceLevel = "SECRET";
+    } else if (classificationTypes[key].ts.length > 0) {
+      classificationTypes[key].clearanceLevel = "TS/SCI";
     }
   });
 
@@ -1145,7 +1094,7 @@ export const getSecurityRequirements = (payload: any): any => {
     containsTopSecretOffering: containsClassifiedOffering(Classification.TS),
     hasSecretCloudSupport: hasClassifiedCloudSupport(Classification.S),
     hasTopSecretCloudSupport: hasClassifiedCloudSupport(Classification.TS),
-    offeringSummary: selectedServiceOfferingSummary,
+    classificationTypes,
     currentEnvIncludesSecret,
     currentEnvIncludesTopSecret,
     secretLevelOfAccess,
