@@ -7,8 +7,7 @@ Description: >-
 Parameters:
   EmailGroup:
       Description: >-
-        This is the email distro group that will be notified in the event
-        the ec2 instance, hosting the palo alto, goes down.
+        This is the email group that will be notified of IAM user activity.
       Type: String
 
   KmsKeyId:
