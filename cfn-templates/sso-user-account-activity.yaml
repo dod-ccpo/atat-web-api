@@ -42,7 +42,7 @@ Resources:
         detail-type:
           - "AWS API Call via CloudTrail"
         source:
-        
+          - aws.sso-directory
         detail:
           eventSource:
           - sso-directory.amazonaws.com
