@@ -23,7 +23,7 @@ Resources:
     Properties:
       Description: An example symmetric encryption KMS key
       EnableKeyRotation: false
-      PendingWindowInDays: 30
+      PendingWindowInDays: 1
       KeyPolicy:
         Version: '2012-10-17'
         Id: key-default-1
