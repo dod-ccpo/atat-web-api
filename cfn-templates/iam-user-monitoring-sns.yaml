@@ -33,7 +33,7 @@ Resources:
             Principal:
               AWS: !Ref AdminUser
             Action:
-              - '*'
+              - 'kms:*'
             Resource: '*'
           - Sid: Allow CloudWatch access to Encrypted SNS
             Effect: Allow
