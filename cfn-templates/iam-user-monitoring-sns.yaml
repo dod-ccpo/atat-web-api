@@ -14,7 +14,7 @@ Parameters:
   AdminUser:
       Description: >-
         This is the root user of each account so that the KMS policy 
-        may be changed later on if needed.
+        may be changed later on, if needed.
       Type: String
 
 Resources:
