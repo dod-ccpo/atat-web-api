@@ -483,6 +483,7 @@ export const sampleDowRequest = {
               typeOfDelivery: null,
               typeOfMobility: null,
               typeOfMobilityOther: null,
+              tsContractorClearanceType: null,
             },
             {
               classificationLevel: {
@@ -497,6 +498,7 @@ export const sampleDowRequest = {
               typeOfDelivery: null,
               typeOfMobility: null,
               typeOfMobilityOther: null,
+              tsContractorClearanceType: null,
             },
           ],
           otherServiceOffering: null,
@@ -522,6 +524,7 @@ export const sampleDowRequest = {
               typeOfDelivery: null,
               typeOfMobility: null,
               typeOfMobilityOther: null,
+              tsContractorClearanceType: null,
             },
             {
               classificationLevel: {
@@ -536,6 +539,7 @@ export const sampleDowRequest = {
               typeOfDelivery: null,
               typeOfMobility: null,
               typeOfMobilityOther: null,
+              tsContractorClearanceType: null,
             },
             {
               classificationLevel: {
@@ -550,6 +554,7 @@ export const sampleDowRequest = {
               typeOfDelivery: null,
               typeOfMobility: null,
               typeOfMobilityOther: null,
+              tsContractorClearanceType: null,
             },
           ],
           otherServiceOffering: null,
@@ -575,6 +580,7 @@ export const sampleDowRequest = {
               typeOfDelivery: null,
               typeOfMobility: null,
               typeOfMobilityOther: null,
+              tsContractorClearanceType: null,
             },
             {
               classificationLevel: {
@@ -589,6 +595,7 @@ export const sampleDowRequest = {
               typeOfDelivery: null,
               typeOfMobility: null,
               typeOfMobilityOther: null,
+              tsContractorClearanceType: null,
             },
           ],
           otherServiceOffering: null,
@@ -614,6 +621,7 @@ export const sampleDowRequest = {
               typeOfDelivery: "SHIPPED",
               typeOfMobility: "MODULAR",
               typeOfMobilityOther: null,
+              tsContractorClearanceType: null,
             },
           ],
           otherServiceOffering: null,
@@ -645,6 +653,7 @@ export const sampleDowRequest = {
               typeOfDelivery: "SHIPPED",
               typeOfMobility: "MODULAR",
               typeOfMobilityOther: null,
+              tsContractorClearanceType: null,
             },
           ],
           otherServiceOffering: null,
@@ -676,6 +685,7 @@ export const sampleDowRequest = {
               typeOfDelivery: "SHIPPED",
               typeOfMobility: "MODULAR",
               typeOfMobilityOther: null,
+              tsContractorClearanceType: "TS",
             },
           ],
           otherServiceOffering: null,
@@ -701,6 +711,7 @@ export const sampleDowRequest = {
               typeOfDelivery: null,
               typeOfMobility: null,
               typeOfMobilityOther: null,
+              tsContractorClearanceType: null,
             },
             {
               classificationLevel: {
@@ -715,6 +726,7 @@ export const sampleDowRequest = {
               typeOfDelivery: null,
               typeOfMobility: null,
               typeOfMobilityOther: null,
+              tsContractorClearanceType: null,
             },
             {
               classificationLevel: {
@@ -748,6 +760,7 @@ export const sampleDowRequest = {
               typeOfDelivery: null,
               typeOfMobility: null,
               typeOfMobilityOther: null,
+              tsContractorClearanceType: null,
             },
           ],
           otherServiceOffering: null,
@@ -995,6 +1008,7 @@ export const sampleDowRequest = {
         trainingLocation: "DC",
         trainingTimeZone: null,
         canTrainInUnclassEnv: null,
+        tsContractorClearanceType: null,
       },
       {
         instanceName: "Training #2 (TS)",
@@ -1041,6 +1055,7 @@ export const sampleDowRequest = {
         trainingLocation: "DC",
         trainingTimeZone: null,
         canTrainInUnclassEnv: null,
+        tsContractorClearanceType: "TS",
       },
       {
         instanceName: null,
@@ -1097,6 +1112,7 @@ export const sampleDowRequest = {
         trainingLocation: null,
         trainingTimeZone: null,
         canTrainInUnclassEnv: null,
+        tsContractorClearanceType: null,
       },
       {
         instanceName: null,
@@ -1137,6 +1153,7 @@ export const sampleDowRequest = {
         trainingLocation: null,
         trainingTimeZone: null,
         canTrainInUnclassEnv: null,
+        tsContractorClearanceType: null,
       },
       {
         instanceName: null,
@@ -1177,6 +1194,7 @@ export const sampleDowRequest = {
         trainingLocation: null,
         trainingTimeZone: null,
         canTrainInUnclassEnv: null,
+        tsContractorClearanceType: null,
       },
     ],
     contractType: {
