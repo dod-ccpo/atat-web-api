@@ -11,12 +11,39 @@ Parameters:
         the ec2 instance, hosting the palo alto, goes down.
       Type: String
 
-  KmsKeyId:
+  AdminUser:
       Description: >-
-        Kms key used to encrypt the SNS topic.
+        This is the root user of each account so that the KMS policy 
+        may be changed later on if needed.
       Type: String
 
 Resources:
+  SnsKmsKey:
+    Type: 'AWS::KMS::Key'
+    Properties:
+      Description: An example symmetric encryption KMS key
+      EnableKeyRotation: false
+      PendingWindowInDays: 30
+      KeyPolicy:
+        Version: '2012-10-17'
+        Id: key-default-1
+        Statement:
+          - Sid: Allow Root user all access
+            Effect: Allow
+            Principal:
+              AWS: !Ref AdminUser
+            Action:
+              - '*'
+            Resource: '*'
+          - Sid: Allow CloudWatch access to Encrypted SNS
+            Effect: Allow
+            Principal:
+              Service: events.amazonaws.com
+            Action:
+              - kms:Decrypt
+              - kms:GenerateDataKey*
+            Resource: '*'
+
   mysnspolicy:
     Type: AWS::SNS::TopicPolicy
     Properties:
@@ -38,7 +65,7 @@ Resources:
     Properties:
       TopicName: "IAM-User-Activity-Notification"
       DisplayName: "IAM-User-Activity-Notification"
-      KmsMasterKeyId: !Ref KmsKeyId
+      KmsMasterKeyId: !Ref SnsKmsKey
 
 
   IAMuserStatusSnsSubscription:
