@@ -1,0 +1,78 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: >-
+  Creates a CW event to monitor SSO user activity.
+
+Parameters:
+  EmailGroup:
+      Description: >-
+        This is the email distro group that will be notified in the event
+        the ec2 instance, hosting the palo alto, goes down.
+      Type: String
+
+  KmsKeyId:
+      Description: >-
+        Kms key used to encrypt the SNS topic.
+      Type: String
+
+Resources:
+  mysnspolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      PolicyDocument:
+        Id: CloudWatchEventAccess
+        Version: '2012-10-17'
+        Statement:
+        - Sid: CloudWatchEventAccess
+          Effect: Allow
+          Principal:
+            Service: events.amazonaws.com
+          Action: sns:Publish
+          Resource: !Ref IAMuserStatusSnsTopic
+      Topics:
+      - !Ref IAMuserStatusSnsTopic
+
+  IAMuserStatusSnsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: "IAM-User-Activity-Notification"
+      DisplayName: "IAM-User-Activity-Notification"
+      KmsMasterKeyId: !Ref KmsKeyId
+
+
+  IAMuserStatusSnsSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Endpoint: !Ref EmailGroup
+      Protocol: email
+      TopicArn: !Ref IAMuserStatusSnsTopic
+
+
+  CloudWatchSsoSnsStatus:
+    Type: AWS::Events::Rule
+    Properties: 
+      Name: CloudWatchIamUserActivity
+      Description: "CW Event to monitor IAM user activity"
+      EventPattern: 
+        detail-type:
+          - AWS API Call via CloudTrail
+        source:
+          - aws.iam
+        detail:
+          eventSource:
+          - iam.amazonaws.com
+          eventName:
+          - CreateUser
+          - CreateLoginProfile
+          - CreateAccessKey
+          - UpdateUser
+          - UpdateLoginProfile
+          - UpdateAccessKey
+          - AttachUserPolicy
+          - DetachUserPolicy
+          - DeleteLoginProfile
+          - DeleteUser
+      Targets: 
+        - Arn: !Ref IAMuserStatusSnsTopic
+          Id: "iam-user-activity-notification"
