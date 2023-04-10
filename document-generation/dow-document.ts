@@ -12,7 +12,6 @@ import {
   formatRegionUsers,
   formatStorageType,
   getCDRLs,
-  getIncludeClassifiedArchDesign,
   getInstancesCount,
   getSecurityRequirements,
   getTaskPeriods,
@@ -73,9 +72,6 @@ export async function doGenerate(template: Buffer, payload: IDescriptionOfWork):
   // security Requirements
   const securityRequirements = getSecurityRequirements(payload);
 
-  const includeSecretArchDesign = getIncludeClassifiedArchDesign(securityRequirements, payload, Classification.S);
-  const includeTopSecretArchDesign = getIncludeClassifiedArchDesign(securityRequirements, payload, Classification.TS);
-
   const report = Buffer.from(
     await createReport({
       template,
@@ -91,8 +87,6 @@ export async function doGenerate(template: Buffer, payload: IDescriptionOfWork):
         popTableBody,
         popPeriods,
         sr: securityRequirements,
-        includeSecretArchDesign,
-        includeTopSecretArchDesign,
         sumTotalInstances: (instances: any) => {
           let number = 0;
           instances.forEach((instance: any) => (number += instance.numberOfInstances));

@@ -9,7 +9,6 @@ import {
   formatRegionUsers,
   formatStorageType,
   getCDRLs,
-  getIncludeClassifiedArchDesign,
   getInstancePop,
   getSecurityRequirements,
   getSelectedInstances,
@@ -280,32 +279,75 @@ describe("securityRequirements", () => {
     const payload = sampleDowRequest.templatePayload;
     const sr = getSecurityRequirements(payload);
     const expectedClassificationTypes = {
-      edgeComputing: {
-        secret: ["EDGE Computing Classified Info Type - Secret"],
-        ts: ["EDGE Computing Classified Info Type - Top Secret"],
-        clearanceLevel: "TS/SCI",
-      },
       advisoryAssistance: {
-        secret: ["Restricted Data", "Formerly Restricted Data", "Controlled Unclassified Information (CUI)"],
+        secret: [
+          {
+            description: null,
+            name: "Restricted Data",
+            sequence: 2,
+          },
+          {
+            description: null,
+            name: "Formerly Restricted Data",
+            sequence: 4,
+          },
+          {
+            description: null,
+            name: "Controlled Unclassified Information (CUI)",
+            sequence: 11,
+          },
+        ],
         ts: [],
-        clearanceLevel: "SECRET",
-      },
-      helpDesk: {
-        secret: [],
-        ts: [],
-      },
-      training: {
-        secret: ["Critical Nuclear Weapon Design Information (CNWDI)"],
-        ts: ["Top Secret info type - cloud support"],
-        clearanceLevel: "TS/SCI",
+        tsClearanceLevel: "",
       },
       documentationSupport: {
         secret: [],
         ts: [],
+        tsClearanceLevel: "",
+      },
+      edgeComputing: {
+        secret: [
+          {
+            description: "If CNWDI access is required, then Restricted Data must also be selected.",
+            name: "EDGE Computing Classified Info Type - Secret",
+            sequence: 3,
+          },
+        ],
+        ts: [
+          {
+            description: "If CNWDI access is required, then Restricted Data must also be selected.",
+            name: "EDGE Computing Classified Info Type - Top Secret",
+            sequence: 3,
+          },
+        ],
+        tsClearanceLevel: "TS",
       },
       generalCloudSupport: {
         secret: [],
         ts: [],
+        tsClearanceLevel: "",
+      },
+      helpDesk: {
+        secret: [],
+        ts: [],
+        tsClearanceLevel: "",
+      },
+      training: {
+        secret: [
+          {
+            description: "If CNWDI access is required, then Restricted Data must also be selected.",
+            name: "Critical Nuclear Weapon Design Information (CNWDI)",
+            sequence: 3,
+          },
+        ],
+        ts: [
+          {
+            description: "If CNWDI access is required, then Restricted Data must also be selected.",
+            name: "Top Secret info type - cloud support",
+            sequence: 3,
+          },
+        ],
+        tsClearanceLevel: "TS",
       },
     };
     expect(sr.classificationTypes).toEqual(expectedClassificationTypes);
@@ -323,22 +365,28 @@ describe("securityRequirements", () => {
   it("should have expected classified information types", async () => {
     const payload = sampleDowRequest.templatePayload;
     const sr = getSecurityRequirements(payload);
-    const expectedSecretLevelOfAccess = [
+    expect(
+      sr.secretLevelOfAccess.map((classifiedInfoType: any) => {
+        return classifiedInfoType.name;
+      })
+    ).toEqual([
       "Restricted Data",
       "National Intelligence Information: Non-SCI",
       "North Atlantic Treaty Organization (NATO) Information",
       "Foreign Government Information (FGI)",
-    ];
-    const expectedTopSecretLevelOfAccess = ["A TS level", "Another TS Level"];
-    expect(sr.secretLevelOfAccess).toEqual(expectedSecretLevelOfAccess);
-    expect(sr.topSecretLevelOfAccess).toEqual(expectedTopSecretLevelOfAccess);
+    ]);
+    expect(
+      sr.topSecretLevelOfAccess.map((classifiedInfoType: any) => {
+        return classifiedInfoType.name;
+      })
+    ).toEqual(["Restricted Data", "Foreign Government Information (FGI)", "Special Access Program (SAP) Information"]);
   });
 
   it("should have expected value for includeArchDesign", async () => {
     const payload = sampleDowRequest.templatePayload;
     const sr = getSecurityRequirements(payload);
-    expect(getIncludeClassifiedArchDesign(sr, payload, Classification.S)).toBeTruthy();
-    expect(getIncludeClassifiedArchDesign(sr, payload, Classification.TS)).toBeTruthy();
+    expect(sr.includeSecretArchDesign).toBeTruthy();
+    expect(sr.includeTopSecretArchDesign).toBeTruthy();
   });
 
   it("containsTopSecretOffering should be true if > 1 TS instances", async () => {
@@ -361,5 +409,10 @@ describe("securityRequirements", () => {
     const sr = getSecurityRequirements(payload);
     expect(sr.containsSecretOffering).toBeTruthy();
     expect(sr.containsTopSecretOffering).toBeFalsy();
+  });
+
+  it("should have the correct TS Justification for Classified Access", async () => {
+    const sr = getSecurityRequirements(sampleDowRequest.templatePayload);
+    expect(sr.tsCloudSupportJustificationText).toEqual("Access to SAPs is required");
   });
 });
