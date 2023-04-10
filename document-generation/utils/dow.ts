@@ -774,9 +774,9 @@ export const getSecurityRequirements = (payload: any): any => {
   const topSecretLevelOfAccess = getLevelOfAccess(Classification.TS);
 
   const getJustificationText = (acronyms: any): string => {
-    if (acronyms.includes("SCI")) {
+    if (acronyms.includes("SCI") && !acronyms.includes("SAP")) {
       return "Access to SCI Caveats and information is required";
-    } else if (acronyms.includes("SAP")) {
+    } else if (acronyms.includes("SAP") && !acronyms.includes("SCI")) {
       return "Access to SAPs is required";
     } else if (acronyms.includes("SAP") && acronyms.includes("SCI")) {
       return "Access to SCI Caveats and information and SAPs is required";

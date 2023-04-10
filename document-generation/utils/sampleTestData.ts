@@ -418,14 +418,22 @@ export const sampleDowRequest = {
         },
         classifiedInformationTypes: [
           {
-            name: "A TS level",
+            name: "Restricted Data",
             description: null,
             sequence: 2,
+            acronym: "RD",
           },
           {
-            name: "Another TS Level",
+            name: "Foreign Government Information (FGI)",
             description: null,
             sequence: 6,
+            acronym: "FGI",
+          },
+          {
+            name: "Special Access Program (SAP) Information",
+            description: null,
+            sequence: 6,
+            acronym: "SAP",
           },
         ],
         dataEgressMonthlyAmount: null,

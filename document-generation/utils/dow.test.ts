@@ -379,7 +379,7 @@ describe("securityRequirements", () => {
       sr.topSecretLevelOfAccess.map((classifiedInfoType: any) => {
         return classifiedInfoType.name;
       })
-    ).toEqual(["A TS level", "Another TS Level"]);
+    ).toEqual(["Restricted Data", "Foreign Government Information (FGI)", "Special Access Program (SAP) Information"]);
   });
 
   it("should have expected value for includeArchDesign", async () => {
@@ -409,5 +409,10 @@ describe("securityRequirements", () => {
     const sr = getSecurityRequirements(payload);
     expect(sr.containsSecretOffering).toBeTruthy();
     expect(sr.containsTopSecretOffering).toBeFalsy();
+  });
+
+  it("should have the correct TS Justification for Classified Access", async () => {
+    const sr = getSecurityRequirements(sampleDowRequest.templatePayload);
+    expect(sr.tsCloudSupportJustificationText).toEqual("Access to SAPs is required");
   });
 });
