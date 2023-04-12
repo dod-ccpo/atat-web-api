@@ -256,7 +256,7 @@ export enum ArchitecturalDesignSource {
 
 export enum ContractorClearanceType {
   TS = "TS",
-  TS_SCI = "TS_CSI",
+  TS_SCI = "TS_SCI",
 }
 
 /** @description A Security Requirement for a specific Service Offering Group in a package */

@@ -320,7 +320,7 @@ describe("securityRequirements", () => {
             sequence: 3,
           },
         ],
-        tsClearanceLevel: "TS",
+        tsClearanceLevel: "TS/SCI",
       },
       generalCloudSupport: {
         secret: [],

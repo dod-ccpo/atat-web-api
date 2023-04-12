@@ -693,7 +693,7 @@ export const sampleDowRequest = {
               typeOfDelivery: "SHIPPED",
               typeOfMobility: "MODULAR",
               typeOfMobilityOther: null,
-              tsContractorClearanceType: "TS",
+              tsContractorClearanceType: "TS_SCI",
             },
           ],
           otherServiceOffering: null,

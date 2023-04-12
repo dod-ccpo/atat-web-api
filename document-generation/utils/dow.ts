@@ -1,6 +1,7 @@
 import { IEnvironmentInstance } from "../../models/document-generation";
 import {
   Classification,
+  ContractorClearanceType,
   EnvironmentType,
   IComputeEnvironmentInstance,
   IContractType,
@@ -775,11 +776,11 @@ export const getSecurityRequirements = (payload: any): any => {
 
   const getJustificationText = (acronyms: any): string => {
     if (acronyms.includes("SCI") && !acronyms.includes("SAP")) {
-      return "Access to SCI Caveats and information is required";
+      return "Access to SCI caveats and information is required";
     } else if (acronyms.includes("SAP") && !acronyms.includes("SCI")) {
       return "Access to SAPs is required";
     } else if (acronyms.includes("SAP") && acronyms.includes("SCI")) {
-      return "Access to SCI Caveats and information and SAPs is required";
+      return "Access to SCI caveats and information, and SAPs is required";
     } else {
       return "";
     }
@@ -859,13 +860,24 @@ export const getSecurityRequirements = (payload: any): any => {
     });
   };
 
-  const getCloudSupportTsContractorClearanceTypes = (serviceType: string): any[] => {
+  const formatTsClearanceType = (clearanceType: string) => {
+    switch (clearanceType) {
+      case ContractorClearanceType.TS_SCI:
+        return "TS/SCI";
+      case ContractorClearanceType.TS:
+        return "TS";
+      default:
+        return "";
+    }
+  };
+
+  const getCloudSupportTsContractorClearanceTypes = (serviceType: string): string => {
     const tsContractorClearanceTypes = getCloudSupportPackage(serviceType, Classification.TS).map(
       (supportPackage: any) => {
         return supportPackage.tsContractorClearanceType;
       }
     );
-    return tsContractorClearanceTypes.length > 0 ? tsContractorClearanceTypes[0] : "";
+    return formatTsClearanceType(tsContractorClearanceTypes.length > 0 ? tsContractorClearanceTypes[0] : "");
   };
 
   const getClassificationInstances = (serviceOffering: string, classification: Classification): [] => {
@@ -900,7 +912,7 @@ export const getSecurityRequirements = (payload: any): any => {
         return classificationInstance.tsContractorClearanceType;
       }
     );
-    return tsContractorClearanceTypes.length > 0 ? tsContractorClearanceTypes[0] : "";
+    return formatTsClearanceType(tsContractorClearanceTypes.length > 0 ? tsContractorClearanceTypes[0] : "");
   };
 
   const classificationTypes: any = {
