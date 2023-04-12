@@ -658,14 +658,14 @@ export const getSelectedInstances = (levelIdentifier: any, service: any, selecte
         classInst.classificationLevel.impactLevel === levelIdentifier &&
         instance.serviceOffering.serviceOfferingGroup === service
       ) {
-        tools.push({ ...instance.serviceOffering, ...classInst });
+        tools.push({ ...instance.serviceOffering, ...classInst, otherServiceOffering: instance.otherServiceOffering });
       }
       if (
         classInst.classificationLevel &&
         classInst.classificationLevel.classification === levelIdentifier &&
         instance.serviceOffering.serviceOfferingGroup === service
       ) {
-        tools.push({ ...instance.serviceOffering, ...classInst });
+        tools.push({ ...instance.serviceOffering, ...classInst, otherServiceOffering: instance.otherServiceOffering });
       }
     });
   });
