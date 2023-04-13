@@ -13,10 +13,9 @@
     "lint:fix": "npm run lint -- --fix"
   },
   "devDependencies": {
-    "@aws-cdk/aws-apigatewayv2-alpha": "^2.18.0-alpha.0",
-    "@aws-cdk/aws-appsync-alpha": "^2.18.0-alpha.0",
-    "@aws-cdk/aws-redshift-alpha": "^2.18.0-alpha.0",
-    "@aws-cdk/aws-synthetics-alpha": "^2.18.0-alpha.0",
+    "@aws-cdk/aws-apigatewayv2-alpha": "^2.65.0-alpha.0",
+    "@aws-cdk/aws-redshift-alpha": "^2.65.0-alpha.0",
+    "@aws-cdk/aws-synthetics-alpha": "^2.65.0-alpha.0",
     "@types/aws-lambda": "^8.10.110",
     "@types/http-errors": "^2.0.1",
     "@types/jest": "^29.4.0",
