@@ -55,7 +55,7 @@ class AtatApplication extends cdk.Stage {
     ]);
   }
 }
-// Test
+
 export class AtatPipelineStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: AtatPipelineStackProps) {
     super(scope, id, props);
