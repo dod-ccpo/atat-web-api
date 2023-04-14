@@ -64,6 +64,7 @@ export class AtatPipelineStack extends cdk.Stack {
       AtatContextValue.VPC_CIDR.toCliArgument(props.vpcCidr),
       AtatContextValue.VPC_FLOW_LOG_BUCKET.toCliArgument(props.vpcFlowLogBucket),
       AtatContextValue.VERSION_CONTROL_BRANCH.toCliArgument(props.branch),
+      AtatContextValue.NOTIFICATION_EMAIL.toCliArgument(props.notificationEmail),
     ];
     if (props.apiDomain) {
       synthParams.push(
