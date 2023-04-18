@@ -968,6 +968,22 @@ export const sampleDowRequest = {
           type: "S_TO_U",
           dataQuantity: 235,
         },
+        {
+          type: "U_TO_TS",
+          dataQuantity: 800,
+        },
+        {
+          type: "S_TO_TS",
+          dataQuantity: 100,
+        },
+        {
+          type: "TS_TO_U",
+          dataQuantity: 500,
+        },
+        {
+          type: "TS_TO_S",
+          dataQuantity: 750,
+        },
       ],
     },
     cloudSupportPackages: [
