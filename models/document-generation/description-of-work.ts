@@ -798,7 +798,11 @@ const portabilityPlan = {
 
 export enum CrossDomainDirection {
   U_TO_S = "U_TO_S",
+  U_TO_TS = "U_TO_TS",
   S_TO_U = "S_TO_U",
+  S_TO_TS = "S_TO_TS",
+  TS_TO_U = "TS_TO_U",
+  TS_TO_S = "TS_TO_S",
 }
 
 export interface ITrafficPerDomainPair {
