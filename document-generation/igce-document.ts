@@ -245,18 +245,13 @@ export async function generateIGCEDocument(
   const surgeCapabilities = summarySheet.getCell("A23");
   surgeCapabilities.value = payload.surgeCapabilities / 100;
 
-  // DITCO Fee / Contracting Shop Fee
+  // Contracting Office Fee
   const contractingShopName = summarySheet.getCell("B26");
   const contractingShopFee = summarySheet.getCell("C26");
-  if (payload.contractingShop.name === "OTHER") {
-    contractingShopName.value = "Contracting Office Fee";
-    if (payload.contractingShop.fee > 0) {
-      const fee = (payload.contractingShop.fee / 100).toFixed(2); // round to 2 decimal places
-      contractingShopFee.value = { formula: `=K24 *${fee}`, date1904: false };
-    }
-  } else if (payload.contractingShop.name === "DITCO") {
-    contractingShopName.value = "DITCO Fee";
-    contractingShopFee.value = { formula: `=K24 *.0225`, date1904: false };
+  const feePercentageFraction = (payload.contractingShop.fee / 100).toFixed(2); // round to 2 decimal places
+  contractingShopName.value = payload.contractingShop.name === "DITCO" ? "DITCO Fee" : "Contracting Office Fee";
+  if (payload.contractingShop.fee > 0) {
+    contractingShopFee.value = { formula: `=K24 * ${feePercentageFraction}`, date1904: false };
   }
 
   // Grand Total With Fee
