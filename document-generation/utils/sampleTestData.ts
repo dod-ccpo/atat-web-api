@@ -99,6 +99,59 @@ export const sampleDowRequest = {
         {
           instanceName: null,
           instanceLocation: "CLOUD",
+          numberOfInstances: 4,
+          usageDescription: null,
+          anticipatedNeedOrUsage: null,
+          operatingSystem: "Kali",
+          operatingSystemLicensing: null,
+          licensing: "MIT",
+          region: null,
+          needForEntireTaskOrderDuration: true,
+          selectedPeriods: null,
+          classificationLevel: {
+            classification: "TS",
+            display: "Top Secret",
+            impactLevel: null,
+          },
+          classifiedInformationTypes: [],
+          dataEgressMonthlyAmount: 985,
+          dataEgressMonthlyUnit: "TB",
+          memoryAmount: 64,
+          memoryUnit: "GB",
+          storageAmount: 2354,
+          storageUnit: "TB",
+          storageType: "ARCHIVE",
+          numberOfVcpus: 100,
+          performanceTier: "COMPUTE",
+          processorSpeed: 250,
+          pricingModel: "PAY_AS_YOU_GO",
+          pricingModelExpiration: null,
+          environmentType: null,
+          operatingEnvironment: null,
+          deployedRegions: [
+            {
+              name: "EUCOM",
+              description: "United States European Command",
+              sequence: 6,
+              group: "OCONUS",
+            },
+          ],
+          usersPerRegion: [
+            {
+              EUCOM: "8,755",
+            },
+          ],
+          isTrafficSpikeEventBased: false,
+          trafficSpikeEventDescription: null,
+          isTrafficSpikePeriodBased: false,
+          trafficSpikePeriodDescription: null,
+          additionalInformation: "Cyber security geared.",
+          currentUsageDescription: "EVEN_USAGE",
+          anticipatedNeedUsage: null,
+        },
+        {
+          instanceName: null,
+          instanceLocation: "CLOUD",
           numberOfInstances: 5,
           usageDescription: null,
           anticipatedNeedOrUsage: null,
@@ -357,6 +410,46 @@ export const sampleDowRequest = {
         dataGrowthEstimateType: null,
         usersIncrease: false,
       },
+      {
+        classificationLevel: {
+          classification: "TS",
+          display: "Top Secret",
+          impactLevel: null,
+        },
+        classifiedInformationTypes: [
+          {
+            name: "Restricted Data",
+            description: null,
+            sequence: 2,
+            acronym: "RD",
+          },
+          {
+            name: "Foreign Government Information (FGI)",
+            description: null,
+            sequence: 6,
+            acronym: "FGI",
+          },
+          {
+            name: "Special Access Program (SAP) Information",
+            description: null,
+            sequence: 6,
+            acronym: "SAP",
+          },
+        ],
+        dataEgressMonthlyAmount: null,
+        dataEgressMonthlyUnit: null,
+        usersPerRegion: [
+          {
+            EUCOM: "200,000",
+          },
+        ],
+        dataIncrease: false,
+        userGrowthEstimatePercentage: [],
+        userGrowthEstimateType: null,
+        dataGrowthEstimatePercentage: [],
+        dataGrowthEstimateType: null,
+        usersIncrease: false,
+      },
     ],
     architecturalDesignRequirement: {
       statement: "Need to optimize and expand the previous system and in higher levels",
@@ -398,6 +491,7 @@ export const sampleDowRequest = {
               typeOfDelivery: null,
               typeOfMobility: null,
               typeOfMobilityOther: null,
+              tsContractorClearanceType: null,
             },
             {
               classificationLevel: {
@@ -412,6 +506,7 @@ export const sampleDowRequest = {
               typeOfDelivery: null,
               typeOfMobility: null,
               typeOfMobilityOther: null,
+              tsContractorClearanceType: null,
             },
           ],
           otherServiceOffering: null,
@@ -437,6 +532,7 @@ export const sampleDowRequest = {
               typeOfDelivery: null,
               typeOfMobility: null,
               typeOfMobilityOther: null,
+              tsContractorClearanceType: null,
             },
             {
               classificationLevel: {
@@ -451,6 +547,7 @@ export const sampleDowRequest = {
               typeOfDelivery: null,
               typeOfMobility: null,
               typeOfMobilityOther: null,
+              tsContractorClearanceType: null,
             },
             {
               classificationLevel: {
@@ -465,6 +562,7 @@ export const sampleDowRequest = {
               typeOfDelivery: null,
               typeOfMobility: null,
               typeOfMobilityOther: null,
+              tsContractorClearanceType: null,
             },
           ],
           otherServiceOffering: null,
@@ -490,6 +588,7 @@ export const sampleDowRequest = {
               typeOfDelivery: null,
               typeOfMobility: null,
               typeOfMobilityOther: null,
+              tsContractorClearanceType: null,
             },
             {
               classificationLevel: {
@@ -504,6 +603,7 @@ export const sampleDowRequest = {
               typeOfDelivery: null,
               typeOfMobility: null,
               typeOfMobilityOther: null,
+              tsContractorClearanceType: null,
             },
           ],
           otherServiceOffering: null,
@@ -529,6 +629,71 @@ export const sampleDowRequest = {
               typeOfDelivery: "SHIPPED",
               typeOfMobility: "MODULAR",
               typeOfMobilityOther: null,
+              tsContractorClearanceType: null,
+            },
+          ],
+          otherServiceOffering: null,
+          serviceOffering: {
+            name: "Mobility",
+            description: null,
+            serviceOfferingGroup: "EDGE_COMPUTING",
+            sequence: 1,
+          },
+        },
+        {
+          classificationInstances: [
+            {
+              classificationLevel: {
+                classification: "S",
+                display: "Secret - IL6",
+                impactLevel: "IL6",
+              },
+              classifiedInformationTypes: [
+                {
+                  name: "EDGE Computing Classified Info Type - Secret",
+                  description: "If CNWDI access is required, then Restricted Data must also be selected.",
+                  sequence: 3,
+                },
+              ],
+              selectedPeriods: null,
+              needForEntireTaskOrderDuration: true,
+              usageDescription: "Need TE for at edge",
+              typeOfDelivery: "SHIPPED",
+              typeOfMobility: "MODULAR",
+              typeOfMobilityOther: null,
+              tsContractorClearanceType: null,
+            },
+          ],
+          otherServiceOffering: null,
+          serviceOffering: {
+            name: "Mobility",
+            description: null,
+            serviceOfferingGroup: "EDGE_COMPUTING",
+            sequence: 1,
+          },
+        },
+        {
+          classificationInstances: [
+            {
+              classificationLevel: {
+                classification: "TS",
+                display: "Top Secret",
+                impactLevel: null,
+              },
+              classifiedInformationTypes: [
+                {
+                  name: "EDGE Computing Classified Info Type - Top Secret",
+                  description: "If CNWDI access is required, then Restricted Data must also be selected.",
+                  sequence: 3,
+                },
+              ],
+              selectedPeriods: null,
+              needForEntireTaskOrderDuration: true,
+              usageDescription: "Need TE for at edge",
+              typeOfDelivery: "SHIPPED",
+              typeOfMobility: "MODULAR",
+              typeOfMobilityOther: null,
+              tsContractorClearanceType: "TS_SCI",
             },
           ],
           otherServiceOffering: null,
@@ -554,6 +719,7 @@ export const sampleDowRequest = {
               typeOfDelivery: null,
               typeOfMobility: null,
               typeOfMobilityOther: null,
+              tsContractorClearanceType: null,
             },
             {
               classificationLevel: {
@@ -568,6 +734,7 @@ export const sampleDowRequest = {
               typeOfDelivery: null,
               typeOfMobility: null,
               typeOfMobilityOther: null,
+              tsContractorClearanceType: null,
             },
             {
               classificationLevel: {
@@ -601,6 +768,7 @@ export const sampleDowRequest = {
               typeOfDelivery: null,
               typeOfMobility: null,
               typeOfMobilityOther: null,
+              tsContractorClearanceType: null,
             },
           ],
           otherServiceOffering: null,
@@ -848,6 +1016,54 @@ export const sampleDowRequest = {
         trainingLocation: "DC",
         trainingTimeZone: null,
         canTrainInUnclassEnv: null,
+        tsContractorClearanceType: null,
+      },
+      {
+        instanceName: "Training #2 (TS)",
+        instanceLocation: null,
+        numberOfInstances: 1,
+        usageDescription: null,
+        anticipatedNeedOrUsage: "train admins",
+        operatingSystem: null,
+        operatingSystemLicensing: null,
+        licensing: null,
+        region: null,
+        needForEntireTaskOrderDuration: true,
+        selectedPeriods: null,
+        classificationLevel: {
+          classification: "TS",
+          display: "Top Secret",
+          impactLevel: null,
+        },
+        classifiedInformationTypes: [
+          {
+            name: "Top Secret info type - cloud support",
+            description: "If CNWDI access is required, then Restricted Data must also be selected.",
+            sequence: 3,
+          },
+        ],
+        dataEgressMonthlyAmount: null,
+        dataEgressMonthlyUnit: null,
+        memoryAmount: null,
+        memoryUnit: "GB",
+        storageAmount: null,
+        storageUnit: "GB",
+        storageType: null,
+        numberOfVcpus: null,
+        performanceTier: null,
+        processorSpeed: null,
+        pricingModel: null,
+        pricingModelExpiration: null,
+        personnelOnsiteAccess: null,
+        serviceType: "TRAINING",
+        trainingRequirementTitle: null,
+        trainingFormat: "ONSITE_INSTRUCTOR_CONUS",
+        personnelRequiringTraining: 400,
+        trainingFacilityType: "GOVERNMENT_FACILITY",
+        trainingLocation: "DC",
+        trainingTimeZone: null,
+        canTrainInUnclassEnv: null,
+        tsContractorClearanceType: "TS",
       },
       {
         instanceName: null,
@@ -904,6 +1120,7 @@ export const sampleDowRequest = {
         trainingLocation: null,
         trainingTimeZone: null,
         canTrainInUnclassEnv: null,
+        tsContractorClearanceType: null,
       },
       {
         instanceName: null,
@@ -944,6 +1161,7 @@ export const sampleDowRequest = {
         trainingLocation: null,
         trainingTimeZone: null,
         canTrainInUnclassEnv: null,
+        tsContractorClearanceType: null,
       },
       {
         instanceName: null,
@@ -984,6 +1202,7 @@ export const sampleDowRequest = {
         trainingLocation: null,
         trainingTimeZone: null,
         canTrainInUnclassEnv: null,
+        tsContractorClearanceType: null,
       },
     ],
     contractType: {

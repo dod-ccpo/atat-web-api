@@ -1,13 +1,17 @@
 import { logger } from "../utils/logging";
 import createReport from "docx-templates";
 import { ApiBase64SuccessResponse, SuccessStatusCode } from "../utils/response";
-import { formatPeriodOfPerformance, capitalize, formatEnum } from "./utils/utils";
+import { capitalize, formatEnum, formatPeriodOfPerformance } from "./utils/utils";
 
 import {
   calcAvgDataEgress,
   filterDataLevels,
+  formatExpirationDate,
   formatGrowthEstimates,
+  formatImpactLevel,
   formatRegionUsers,
+  formatStorageType,
+  getCDRLs,
   getInstancesCount,
   getSecurityRequirements,
   getTaskPeriods,
@@ -18,18 +22,12 @@ import {
   sortSelectedClassificationLevels,
   sortSupportPackagesByGroups,
   sortSupportPackagesByLevels,
-  formatStorageType,
-  formatExpirationDate,
-  formatImpactLevel,
   xaasServiceExists,
-  getCDRLs,
 } from "./utils/dow";
-import { IDescriptionOfWork } from "../models/document-generation/description-of-work";
+import { IDescriptionOfWork, ReplicateOrOptimize } from "../models/document-generation/description-of-work";
+import { Classification } from "../models/document-generation";
 
-export async function generateDowDocument(
-  template: Buffer,
-  payload: IDescriptionOfWork
-): Promise<ApiBase64SuccessResponse> {
+export async function doGenerate(template: Buffer, payload: IDescriptionOfWork): Promise<Buffer> {
   // Collection of instances at beginning of impact level for XaaS (e.g., 4.2.1)
   const sortedSelectedClassificationLevels = sortSelectedClassificationLevels(payload.selectedClassificationLevels);
 
@@ -111,7 +109,14 @@ export async function generateDowDocument(
     })
   );
   logger.info("DOW Word document generated.");
+  return report;
+}
 
+export async function generateDowDocument(
+  template: Buffer,
+  payload: IDescriptionOfWork
+): Promise<ApiBase64SuccessResponse> {
+  const report = await doGenerate(template, payload);
   const headers = {
     "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     "Content-Disposition": `attachment; filename=DescriptionOfWork.docx`,

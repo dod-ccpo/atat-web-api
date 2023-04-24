@@ -1,16 +1,18 @@
 import { IEnvironmentInstance } from "../../models/document-generation";
 import {
-  IPeriod,
-  PeriodType,
-  ServiceOfferingGroup,
-  StorageUnit,
-  EnvironmentType,
   Classification,
-  ImpactLevel,
-  IContractType,
+  ContractorClearanceType,
+  EnvironmentType,
   IComputeEnvironmentInstance,
+  IContractType,
   ICurrentEnvironmentInstance,
   IDatabaseEnvironmentInstance,
+  ImpactLevel,
+  IPeriod,
+  PeriodType,
+  ReplicateOrOptimize,
+  ServiceOfferingGroup,
+  StorageUnit,
 } from "../../models/document-generation/description-of-work";
 
 import { logger } from "../../utils/logging";
@@ -49,7 +51,7 @@ export type InstancesWithStorageType =
   | ICurrentEnvironmentInstance
   | IDatabaseEnvironmentInstance;
 export const formatStorageType = (env: InstancesWithStorageType) => {
-  if (!env) {
+  if (!env || !env.performanceTier) {
     // An indicator on the document that a value was not provided
     return `N/A`;
   }
@@ -657,14 +659,14 @@ export const getSelectedInstances = (levelIdentifier: any, service: any, selecte
         classInst.classificationLevel.impactLevel === levelIdentifier &&
         instance.serviceOffering.serviceOfferingGroup === service
       ) {
-        tools.push({ ...instance.serviceOffering, ...classInst });
+        tools.push({ ...instance.serviceOffering, ...classInst, otherServiceOffering: instance.otherServiceOffering });
       }
       if (
         classInst.classificationLevel &&
         classInst.classificationLevel.classification === levelIdentifier &&
         instance.serviceOffering.serviceOfferingGroup === service
       ) {
-        tools.push({ ...instance.serviceOffering, ...classInst });
+        tools.push({ ...instance.serviceOffering, ...classInst, otherServiceOffering: instance.otherServiceOffering });
       }
     });
   });
@@ -737,8 +739,8 @@ export interface IXaasAccess {
 }
 export const getSecurityRequirements = (payload: any): any => {
   const { currentEnvironment, xaasOfferings, cloudSupportPackages } = payload;
-  const currentEnvSecret: string[] = [];
-  const currentEnvTopSecret: string[] = [];
+  const currEnvSecretClassInfoTypes: string[] = [];
+  const currEnvTopSecretClassInfoTypes: string[] = [];
   const xaasSecret: any = {
     compute: [],
     database: [],
@@ -755,18 +757,207 @@ export const getSecurityRequirements = (payload: any): any => {
   };
   const cloudSupportSecret: string[] = [];
   const cloudSupportTopSecret: string[] = [];
-  let isSecurityNeeded = false;
+  let currentEnvIncludesSecret = false;
+  let currentEnvIncludesTopSecret = false;
+
+  const getLevelOfAccess = (classification: Classification) => {
+    return payload.selectedClassificationLevels
+      .filter((selectedLevel: any) => {
+        return selectedLevel.classificationLevel.classification === classification;
+      })
+      .flatMap((selectedLevel: any) => {
+        return selectedLevel.classifiedInformationTypes.map((classifiedInfoTypes: any) => {
+          return classifiedInfoTypes;
+        });
+      });
+  };
+  const secretLevelOfAccess = getLevelOfAccess(Classification.S);
+  const topSecretLevelOfAccess = getLevelOfAccess(Classification.TS);
+
+  const getJustificationText = (acronyms: any): string => {
+    if (acronyms.includes("SCI") && !acronyms.includes("SAP")) {
+      return "Access to SCI caveats and information is required";
+    } else if (acronyms.includes("SAP") && !acronyms.includes("SCI")) {
+      return "Access to SAPs is required";
+    } else if (acronyms.includes("SAP") && acronyms.includes("SCI")) {
+      return "Access to SCI caveats and information, and SAPs is required";
+    } else {
+      return "";
+    }
+  };
+
+  const tsCloudSupportJustificationText = getJustificationText(
+    topSecretLevelOfAccess.map((infoType: any) => {
+      return infoType.acronym;
+    })
+  );
+
+  const containsClassifiedOffering = (classification: Classification): boolean => {
+    const foundMatchInSelectedServices: boolean =
+      xaasOfferings.selectedServiceInstances.filter((selectedServiceInstance: any) => {
+        return selectedServiceInstance.classificationInstances
+          .map((classificationInstance: any) => {
+            return classificationInstance.classificationLevel.classification;
+          })
+          .includes(classification);
+      }).length > 0;
+
+    const foundMatchInXaas: boolean =
+      Object.keys(xaasOfferings)
+        .filter((key) => {
+          return key !== "selectedServiceInstances";
+        })
+        .filter((key) => {
+          return xaasOfferings[key]
+            .map((instance: any) => {
+              return classification === instance.classificationLevel.classification;
+            })
+            .includes(classification);
+        }).length > 0;
+    return foundMatchInSelectedServices || foundMatchInXaas;
+  };
+
+  const getIncludeClassifiedArchDesign = (
+    classification: Classification,
+    currentEnvIncludesClassifiedAtLevel: boolean
+  ): boolean | undefined => {
+    if (![Classification.S, Classification.TS].includes(classification)) {
+      return undefined;
+    }
+    return (
+      (currentEnvIncludesClassifiedAtLevel &&
+        [ReplicateOrOptimize.YES_OPTIMIZE, ReplicateOrOptimize.YES_REPLICATE].includes(
+          payload.currentEnvironment.currentEnvironmentReplicatedOptimized
+        )) ||
+      payload.architecturalDesignRequirement?.dataClassificationLevels
+        ?.map((level: any) => {
+          return level.classification;
+        })
+        .includes(classification)
+    );
+  };
+
+  const hasClassifiedCloudSupport = (classification: Classification): boolean => {
+    return (
+      payload.cloudSupportPackages.find((supportPackage: any) => {
+        return supportPackage.classificationLevel.classification === classification;
+      }) !== undefined
+    );
+  };
+
+  const getCloudSupportPackage = (serviceType: string, classification: Classification): [] => {
+    return payload.cloudSupportPackages.filter((supportPackage: any) => {
+      return (
+        supportPackage.classificationLevel.classification === classification &&
+        supportPackage.serviceType === serviceType
+      );
+    });
+  };
+
+  const getCloudSupportClassificationTypes = (serviceType: string, classification: Classification): any[] => {
+    return getCloudSupportPackage(serviceType, classification).flatMap((supportPackage: any) => {
+      return supportPackage.classifiedInformationTypes;
+    });
+  };
+
+  const formatTsClearanceType = (clearanceType: string) => {
+    switch (clearanceType) {
+      case ContractorClearanceType.TS_SCI:
+        return "TS/SCI";
+      case ContractorClearanceType.TS:
+        return "TS";
+      default:
+        return "";
+    }
+  };
+
+  const getCloudSupportTsContractorClearanceTypes = (serviceType: string): string => {
+    const tsContractorClearanceTypes = getCloudSupportPackage(serviceType, Classification.TS).map(
+      (supportPackage: any) => {
+        return supportPackage.tsContractorClearanceType;
+      }
+    );
+    return formatTsClearanceType(tsContractorClearanceTypes.length > 0 ? tsContractorClearanceTypes[0] : "");
+  };
+
+  const getClassificationInstances = (serviceOffering: string, classification: Classification): [] => {
+    return payload.xaasOfferings.selectedServiceInstances
+      .filter((selectedServiceInstance: any) => {
+        return selectedServiceInstance.serviceOffering.serviceOfferingGroup === serviceOffering;
+      })
+      .flatMap((selectedServiceInstance: any) => {
+        return selectedServiceInstance.classificationInstances;
+      })
+      .filter((classificationInstance: any) => {
+        return classificationInstance.classificationLevel.classification === classification;
+      });
+  };
+
+  const getServiceOfferingClassificationTypes = (serviceOffering: string, classification: Classification): any => {
+    const classifiedInfoTypes = getClassificationInstances(serviceOffering, classification)
+      .map((classificationInstance: any) => {
+        return classificationInstance.classifiedInformationTypes;
+      })
+      .flatMap((classificationInformationType: any) => {
+        return classificationInformationType.map((classifiedInfoType: any) => {
+          return classifiedInfoType;
+        });
+      });
+    return classifiedInfoTypes || [];
+  };
+
+  const getServiceOfferingTsContractorClearanceType = (serviceOffering: string): string => {
+    const tsContractorClearanceTypes = getClassificationInstances(serviceOffering, Classification.TS).map(
+      (classificationInstance: any) => {
+        return classificationInstance.tsContractorClearanceType;
+      }
+    );
+    return formatTsClearanceType(tsContractorClearanceTypes.length > 0 ? tsContractorClearanceTypes[0] : "");
+  };
+
+  const classificationTypes: any = {
+    edgeComputing: {
+      secret: getServiceOfferingClassificationTypes("EDGE_COMPUTING", Classification.S),
+      ts: getServiceOfferingClassificationTypes("EDGE_COMPUTING", Classification.TS),
+      tsClearanceLevel: getServiceOfferingTsContractorClearanceType("EDGE_COMPUTING"),
+    },
+    advisoryAssistance: {
+      secret: getCloudSupportClassificationTypes("ADVISORY_ASSISTANCE", Classification.S),
+      ts: getCloudSupportClassificationTypes("ADVISORY_ASSISTANCE", Classification.TS),
+      tsClearanceLevel: getCloudSupportTsContractorClearanceTypes("ADVISORY_ASSISTANCE"),
+    },
+    helpDesk: {
+      secret: getCloudSupportClassificationTypes("HELP_DESK_SERVICES", Classification.S),
+      ts: getCloudSupportClassificationTypes("HELP_DESK_SERVICES", Classification.TS),
+      tsClearanceLevel: getCloudSupportTsContractorClearanceTypes("HELP_DESK_SERVICES"),
+    },
+    training: {
+      secret: getCloudSupportClassificationTypes("TRAINING", Classification.S),
+      ts: getCloudSupportClassificationTypes("TRAINING", Classification.TS),
+      tsClearanceLevel: getCloudSupportTsContractorClearanceTypes("TRAINING"),
+    },
+    documentationSupport: {
+      secret: getCloudSupportClassificationTypes("DOCUMENTATION_SUPPORT", Classification.S),
+      ts: getCloudSupportClassificationTypes("DOCUMENTATION_SUPPORT", Classification.TS),
+      tsClearanceLevel: getCloudSupportTsContractorClearanceTypes("DOCUMENTATION_SUPPORT"),
+    },
+    generalCloudSupport: {
+      secret: getCloudSupportClassificationTypes("GENERAL_CLOUD_SUPPORT", Classification.S),
+      ts: getCloudSupportClassificationTypes("GENERAL_CLOUD_SUPPORT", Classification.TS),
+      tsClearanceLevel: getCloudSupportTsContractorClearanceTypes("GENERAL_CLOUD_SUPPORT"),
+    },
+  };
 
   // current environment security requirements
   currentEnvironment.envInstances.forEach((instance: any) => {
     const classificationLevel = instance.classificationLevel;
     if (classificationLevel && classificationLevel.classification === Classification.S) {
-      isSecurityNeeded = true;
-      instance.classifiedInformationTypes.forEach((type: any) => currentEnvSecret.push(type.name));
+      currentEnvIncludesSecret = true;
+      instance.classifiedInformationTypes.forEach((type: any) => currEnvSecretClassInfoTypes.push(type.name));
     }
     if (classificationLevel && classificationLevel.classification === Classification.TS) {
-      isSecurityNeeded = true;
-      instance.classifiedInformationTypes.forEach((type: any) => currentEnvTopSecret.push(type.name));
+      currentEnvIncludesTopSecret = true;
+      instance.classifiedInformationTypes.forEach((type: any) => currEnvTopSecretClassInfoTypes.push(type.name));
     }
   });
 
@@ -842,7 +1033,6 @@ export const getSecurityRequirements = (payload: any): any => {
 
         // check for secret classification level
         if (classificationLevel && classificationLevel.classification === Classification.S) {
-          isSecurityNeeded = true;
           const levelNumber = classificationLevelsOrder.indexOf(classificationLevel.impactLevel) + 1;
           let groupNumber;
           if (xaasServiceGroupsOrder.includes(service.serviceOffering.serviceOfferingGroup)) {
@@ -863,7 +1053,6 @@ export const getSecurityRequirements = (payload: any): any => {
 
         // check for top secret classification level
         if (classificationLevel && classificationLevel.classification === Classification.TS) {
-          isSecurityNeeded = true;
           const levelNumber = classificationLevelsOrder.indexOf(classificationLevel.classification) + 1;
           let groupNumber;
           if (xaasServiceGroupsOrder.includes(service.serviceOffering.serviceOfferingGroup)) {
@@ -948,22 +1137,48 @@ export const getSecurityRequirements = (payload: any): any => {
       instance.serviceType === ServiceOfferingGroup.TRAINING &&
       instance.classificationLevel.classification === Classification.S
     ) {
-      isSecurityNeeded = true;
       instance.classifiedInformationTypes.forEach((type: any) => cloudSupportSecret.push(type.name));
     }
     if (
       instance.serviceType === ServiceOfferingGroup.TRAINING &&
       instance.classificationLevel.classification === Classification.TS
     ) {
-      isSecurityNeeded = true;
       instance.classifiedInformationTypes.forEach((type: any) => cloudSupportTopSecret.push(type.name));
     }
   });
 
+  const containsSecretOffering = containsClassifiedOffering(Classification.S);
+  const containsTopSecretOffering = containsClassifiedOffering(Classification.TS);
+  const hasSecretCloudSupport = hasClassifiedCloudSupport(Classification.S);
+  const hasTopSecretCloudSupport = hasClassifiedCloudSupport(Classification.TS);
+  const includeSecretArchDesign = getIncludeClassifiedArchDesign(Classification.S, currentEnvIncludesSecret);
+  const includeTopSecretArchDesign = getIncludeClassifiedArchDesign(Classification.TS, currentEnvIncludesTopSecret);
+  const isSecurityNeeded: boolean =
+    currentEnvIncludesSecret ||
+    currentEnvIncludesTopSecret ||
+    includeSecretArchDesign ||
+    includeTopSecretArchDesign ||
+    containsSecretOffering ||
+    containsTopSecretOffering ||
+    hasSecretCloudSupport ||
+    hasTopSecretCloudSupport;
+
   return {
     isSecurityNeeded,
-    currentEnvSecret,
-    currentEnvTopSecret,
+    tsCloudSupportJustificationText,
+    containsSecretOffering,
+    containsTopSecretOffering,
+    hasSecretCloudSupport,
+    hasTopSecretCloudSupport,
+    includeSecretArchDesign,
+    includeTopSecretArchDesign,
+    classificationTypes,
+    currentEnvIncludesSecret,
+    currentEnvIncludesTopSecret,
+    secretLevelOfAccess,
+    topSecretLevelOfAccess,
+    currEnvSecretClassInfoTypes,
+    currEnvTopSecretClassInfoTypes,
     xaasSecret,
     xaasTopSecret,
     cloudSupportSecret,

@@ -84,26 +84,29 @@ interface PDFTemplateFiles {
 }
 
 // documents and the related templates
-const documentTemplatePaths: TemplatePaths = {
-  [DocumentType.DESCRIPTION_OF_WORK_PDF]: {
-    html: "/opt/dow-template.html",
-    css: "/opt/dow-style.css",
-  },
-  [DocumentType.DESCRIPTION_OF_WORK_DOCX]: {
-    docx: "/opt/dow-template.docx",
-  },
-  [DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE]: {
-    excel: "/opt/igce-template.xlsx",
-  },
-  [DocumentType.INCREMENTAL_FUNDING_PLAN]: {
-    docx: "/opt/ifp-template.docx",
-  },
-  [DocumentType.EVALUATION_PLAN]: {
-    docx: "/opt/eval-plan-template.docx",
-  },
-  [DocumentType.REQUIREMENTS_CHECKLIST]: {
-    docx: "/opt/requirements-checklist-template.docx",
-  },
+export const getDocumentTemplatePath = (folder?: string): TemplatePaths => {
+  folder = folder || process.env.TEMPLATE_FOLDER || "/opt";
+  return {
+    [DocumentType.DESCRIPTION_OF_WORK_PDF]: {
+      html: `${folder}/dow-template.html`,
+      css: `${folder}/dow-style.css`,
+    },
+    [DocumentType.DESCRIPTION_OF_WORK_DOCX]: {
+      docx: `${folder}/dow-template.docx`,
+    },
+    [DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE]: {
+      excel: `${folder}/igce-template.xlsx`,
+    },
+    [DocumentType.INCREMENTAL_FUNDING_PLAN]: {
+      docx: `${folder}/ifp-template.docx`,
+    },
+    [DocumentType.EVALUATION_PLAN]: {
+      docx: `${folder}/eval-plan-template.docx`,
+    },
+    [DocumentType.REQUIREMENTS_CHECKLIST]: {
+      docx: `${folder}/requirements-checklist-template.docx`,
+    },
+  };
 };
 
 export const getPDFDocumentTemplates = (documentType: DocumentType): PDFTemplateFiles => {
@@ -111,8 +114,8 @@ export const getPDFDocumentTemplates = (documentType: DocumentType): PDFTemplate
   let css = "";
   switch (documentType) {
     case DocumentType.DESCRIPTION_OF_WORK_PDF:
-      html = fs.readFileSync(documentTemplatePaths[documentType].html, "utf-8");
-      css = fs.readFileSync(documentTemplatePaths[documentType].css, "utf-8");
+      html = fs.readFileSync(getDocumentTemplatePath()[documentType].html, "utf-8");
+      css = fs.readFileSync(getDocumentTemplatePath()[documentType].css, "utf-8");
       break;
     default:
       throw new Error(`Unsupported PDF generation type: "${documentType}"`);
@@ -125,7 +128,7 @@ export const getExcelTemplatePath = (documentType: DocumentType): string => {
   let excelPath = "";
   switch (documentType) {
     case DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE:
-      excelPath = documentTemplatePaths[documentType].excel;
+      excelPath = getDocumentTemplatePath()[documentType].excel;
       break;
     default:
       throw new Error(`Unsupported Excel generation type: "${documentType}"`);
@@ -135,19 +138,20 @@ export const getExcelTemplatePath = (documentType: DocumentType): string => {
 };
 
 export const getDocxTemplate = (documentType: DocumentType): Buffer => {
+  const TEMPLATE_FOLDER = process.env.TEMPLATE_FOLDER ?? "/opt";
   let docx;
   switch (documentType) {
     case DocumentType.DESCRIPTION_OF_WORK_DOCX:
-      docx = fs.readFileSync(documentTemplatePaths[documentType].docx);
+      docx = fs.readFileSync(getDocumentTemplatePath()[documentType].docx);
       break;
     case DocumentType.INCREMENTAL_FUNDING_PLAN:
-      docx = fs.readFileSync(documentTemplatePaths[documentType].docx);
+      docx = fs.readFileSync(getDocumentTemplatePath()[documentType].docx);
       break;
     case DocumentType.EVALUATION_PLAN:
-      docx = fs.readFileSync(documentTemplatePaths[documentType].docx);
+      docx = fs.readFileSync(getDocumentTemplatePath()[documentType].docx);
       break;
     case DocumentType.REQUIREMENTS_CHECKLIST:
-      docx = fs.readFileSync(documentTemplatePaths[documentType].docx);
+      docx = fs.readFileSync(getDocumentTemplatePath()[documentType].docx);
       break;
     default:
       throw new Error(`Unsupported Word generation type: "${documentType}"`);

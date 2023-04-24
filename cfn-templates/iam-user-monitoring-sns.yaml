@@ -1,0 +1,104 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: >-
+  Creates a CW event to monitor SSO user activity.
+
+Parameters:
+  EmailGroup:
+      Description: >-
+        This is the email distro group that will be notified in the event
+        the ec2 instance, hosting the palo alto, goes down.
+      Type: String
+
+  AdminUser:
+      Description: >-
+        This is the root user of each account so that the KMS policy 
+        may be changed later on, if needed.
+      Type: String
+
+Resources:
+  SnsKmsKey:
+    Type: 'AWS::KMS::Key'
+    Properties:
+      Description: An example symmetric encryption KMS key
+      EnableKeyRotation: false
+      KeyPolicy:
+        Version: '2012-10-17'
+        Id: key-default-1
+        Statement:
+          - Sid: Allow Root user all access
+            Effect: Allow
+            Principal:
+              AWS: !Ref AdminUser
+            Action:
+              - 'kms:*'
+            Resource: '*'
+          - Sid: Allow CloudWatch access to Encrypted SNS
+            Effect: Allow
+            Principal:
+              Service: events.amazonaws.com
+            Action:
+              - kms:Decrypt
+              - kms:GenerateDataKey*
+            Resource: '*'
+
+  mysnspolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      PolicyDocument:
+        Id: CloudWatchEventAccess
+        Version: '2012-10-17'
+        Statement:
+        - Sid: CloudWatchEventAccess
+          Effect: Allow
+          Principal:
+            Service: events.amazonaws.com
+          Action: sns:Publish
+          Resource: !Ref IAMuserStatusSnsTopic
+      Topics:
+      - !Ref IAMuserStatusSnsTopic
+
+  IAMuserStatusSnsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: "IAM-User-Activity-Notification"
+      DisplayName: "IAM-User-Activity-Notification"
+      KmsMasterKeyId: !Ref SnsKmsKey
+
+
+  IAMuserStatusSnsSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Endpoint: !Ref EmailGroup
+      Protocol: email
+      TopicArn: !Ref IAMuserStatusSnsTopic
+
+
+  CloudWatchSsoSnsStatus:
+    Type: AWS::Events::Rule
+    Properties: 
+      Name: CloudWatchIamUserActivity
+      Description: "CW Event to monitor IAM user activity"
+      EventPattern: 
+        detail-type:
+          - AWS API Call via CloudTrail
+        source:
+          - aws.iam
+        detail:
+          eventSource:
+          - iam.amazonaws.com
+          eventName:
+          - CreateUser
+          - CreateLoginProfile
+          - CreateAccessKey
+          - UpdateUser
+          - UpdateLoginProfile
+          - UpdateAccessKey
+          - AttachUserPolicy
+          - DetachUserPolicy
+          - DeleteLoginProfile
+          - DeleteUser
+      Targets: 
+        - Arn: !Ref IAMuserStatusSnsTopic
+          Id: "iam-user-activity-notification"
