@@ -1,4 +1,4 @@
-import exceljs, { Row, Worksheet } from "exceljs";
+import exceljs from "exceljs";
 import { logger } from "../utils/logging";
 
 import {
@@ -8,12 +8,12 @@ import {
   PeriodType,
 } from "../models/document-generation";
 import { INTERNAL_SERVER_ERROR } from "../utils/errors";
-import { ApiBase64SuccessResponse, SuccessStatusCode } from "../utils/response";
+import { ApiBase64SuccessResponse, ErrorResponse, SuccessStatusCode } from "../utils/response";
 
-export async function generateIGCEDocument(
+export async function doGenerateIgce(
   templatePath: string,
   payload: IndependentGovernmentCostEstimate
-): Promise<ApiBase64SuccessResponse> {
+): Promise<Buffer | ErrorResponse> {
   if (!payload.periodsEstimate && !payload.fundingDocument && !payload.surgeCapabilities) {
     return INTERNAL_SERVER_ERROR;
   }
@@ -76,17 +76,12 @@ export async function generateIGCEDocument(
 
   /* Period sheet helper is used to get the specific cell reference ranges for the summary sheet
     that are generated during populatePeriodLineItems.
-    Example output for periodSheetHelper: 
+    Example output for periodSheetHelper:
       { period: 'Base Period', cellRef: 'A41:I54' }
       { period: 'Option Period 1', cellRef: 'A28:I41' }
       { period: 'Option Period 2', cellRef: 'A28:I41' }
   */
   const periodSheetHelper: Array<{ period: string; cellRef: string }> = [];
-
-  const headers = {
-    "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    "Content-Disposition": `attachment; filename=IndependentGovernmentCostEstimate.xlsx`,
-  };
 
   // Populate Period sheets (Base and Option Periods)
   function populatePeriodLineItems(estimate: IPeriodEstimate): void {
@@ -271,9 +266,17 @@ export async function generateIGCEDocument(
   infoToolsCell.value = payload.instructions.toolsUsed;
   const previousEstimate = instructionSheet.getCell("B13");
   previousEstimate.value = payload.instructions.previousEstimateComparison;
-
-  const buffer = (await workbook.xlsx.writeBuffer()) as Buffer;
   logger.info("IGCE document generated");
+  return (await workbook.xlsx.writeBuffer()) as Buffer;
+}
 
-  return new ApiBase64SuccessResponse(buffer.toString("base64"), SuccessStatusCode.OK, headers);
+export async function generateIGCEDocument(
+  templatePath: string,
+  payload: IndependentGovernmentCostEstimate
+): Promise<ApiBase64SuccessResponse> {
+  const report = await doGenerateIgce(templatePath, payload);
+  return new ApiBase64SuccessResponse(report.toString("base64"), SuccessStatusCode.OK, {
+    "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "Content-Disposition": `attachment; filename=IndependentGovernmentCostEstimate.xlsx`,
+  });
 }
