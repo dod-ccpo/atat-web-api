@@ -22,6 +22,7 @@ import { HttpMethod } from "./http";
 import { NagSuppressions } from "cdk-nag";
 import * as cr from "aws-cdk-lib/custom-resources";
 import { RetentionDays } from "aws-cdk-lib/aws-logs";
+import { Tags } from "aws-cdk-lib";
 
 export interface ApiCertificateOptions {
   domainName: string;
@@ -114,6 +115,7 @@ export class AtatWebApiStack extends cdk.Stack {
       objectLockEnabled: true,
       objectLockDefaultRetention: s3.ObjectLockRetention.compliance(cdk.Duration.days(365)),
     });
+    Tags.of(accessLogsBucket).add("Classification", "UNCLASSIFIED");
     NagSuppressions.addResourceSuppressions(accessLogsBucket, [
       {
         id: "NIST.800.53.R4-S3BucketLoggingEnabled",
