@@ -243,23 +243,23 @@ export async function generateIGCEDocument(
 
   // Surge Capabilities
   const surgeFeePct = payload.surgeCapabilities * 0.01;
-  const surgeCapabilities = summarySheet.getCell("A23");
-  surgeCapabilities.value = surgeFeePct;
+  const surgeCapabilitiesCell = summarySheet.getCell("A23");
+  surgeCapabilitiesCell.value = surgeFeePct;
 
   // Contracting Office Fee
   const contractingShopFeePct = payload.contractingShop.fee * 0.01;
   if (contractingShopFeePct) {
-    const contractingShopFee = summarySheet.getCell("C26");
-    contractingShopFee.value = { formula: `=K24 * ${contractingShopFeePct}`, date1904: false };
+    const contractingShopFeeCell = summarySheet.getCell("C26");
+    contractingShopFeeCell.value = { formula: `=K24 * ${contractingShopFeePct}`, date1904: false };
   }
 
   // Contracting Office Name
-  const contractingShopName = summarySheet.getCell("B26");
-  contractingShopName.value = payload.contractingShop.name === "DITCO" ? "DITCO Fee" : "Contracting Office Fee";
+  const contractingShopNameCell = summarySheet.getCell("B26");
+  contractingShopNameCell.value = payload.contractingShop.name === "DITCO" ? "DITCO Fee" : "Contracting Office Fee";
 
   // Grand Total With Fee
-  const grandTotalWithFee = summarySheet.getCell("C27");
-  grandTotalWithFee.value = { formula: `=C26 + K24`, date1904: false };
+  const grandTotalWithFeeCell = summarySheet.getCell("C27");
+  grandTotalWithFeeCell.value = { formula: `=C26 + K24`, date1904: false };
 
   // Set Instruction Sheet Cells
   const instructionSheet = workbook.getWorksheet("INSTRUCTIONS-MUST COMPLETE");
@@ -267,8 +267,8 @@ export async function generateIGCEDocument(
   estimateMadeCell.value = payload.instructions.estimateDescription;
   const infoToolsCell = instructionSheet.getCell("B12");
   infoToolsCell.value = payload.instructions.toolsUsed;
-  const previousEstimate = instructionSheet.getCell("B13");
-  previousEstimate.value = payload.instructions.previousEstimateComparison;
+  const previousEstimateCell = instructionSheet.getCell("B13");
+  previousEstimateCell.value = payload.instructions.previousEstimateComparison;
 
   const buffer = (await workbook.xlsx.writeBuffer()) as Buffer;
   logger.info("IGCE document generated");
