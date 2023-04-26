@@ -242,17 +242,20 @@ export async function generateIGCEDocument(
   summaryFundingDocCell.value = fundingDocumentNumber;
 
   // Surge Capabilities
+  const surgeFeePct = payload.surgeCapabilities * 0.01;
   const surgeCapabilities = summarySheet.getCell("A23");
-  surgeCapabilities.value = payload.surgeCapabilities / 100;
+  surgeCapabilities.value = surgeFeePct;
 
   // Contracting Office Fee
-  const contractingShopName = summarySheet.getCell("B26");
-  const contractingShopFee = summarySheet.getCell("C26");
-  const feePercentageFraction = (payload.contractingShop.fee / 100).toFixed(2); // round to 2 decimal places
-  contractingShopName.value = payload.contractingShop.name === "DITCO" ? "DITCO Fee" : "Contracting Office Fee";
-  if (payload.contractingShop.fee > 0) {
-    contractingShopFee.value = { formula: `=K24 * ${feePercentageFraction}`, date1904: false };
+  const contractingShopFeePct = payload.contractingShop.fee * 0.01;
+  if (contractingShopFeePct) {
+    const contractingShopFee = summarySheet.getCell("C26");
+    contractingShopFee.value = { formula: `=K24 * ${contractingShopFeePct}`, date1904: false };
   }
+
+  // Contracting Office Name
+  const contractingShopName = summarySheet.getCell("B26");
+  contractingShopName.value = payload.contractingShop.name === "DITCO" ? "DITCO Fee" : "Contracting Office Fee";
 
   // Grand Total With Fee
   const grandTotalWithFee = summarySheet.getCell("C27");
