@@ -115,7 +115,13 @@ export class AtatWebApiStack extends cdk.Stack {
       objectLockEnabled: true,
       objectLockDefaultRetention: s3.ObjectLockRetention.compliance(cdk.Duration.days(365)),
     });
-    Tags.of(accessLogsBucket).add("Classification", "UNCLASS");
+
+    enum Classification {
+      // Used on the Cloud Trail Logs, Cloud Trail S3 bucket, and LoadBalancerAccessLogs s3 bucket
+      UNCLASSIFIED = "UNCLASS",
+    }
+    Tags.of(accessLogsBucket).add("Classification", Classification.UNCLASSIFIED);
+
     NagSuppressions.addResourceSuppressions(accessLogsBucket, [
       {
         id: "NIST.800.53.R4-S3BucketLoggingEnabled",
