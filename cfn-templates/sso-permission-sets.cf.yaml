@@ -236,6 +236,12 @@ Resources:
               - states:Get*
               - states:List*
             Resource: "*"
+          - Effect: Allow
+            Action:
+              - s3:Get*
+              - cloudtrail:Describe*
+              - cloudtrail:Get*
+            Resource: "*"
   AtatDeveloperSecretReadAccess:
     Type: AWS::SSO::PermissionSet
     Properties:
