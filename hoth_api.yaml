@@ -471,6 +471,7 @@ components:
             - INDEPENDENT_GOVERNMENT_COST_ESTIMATE
             - INCREMENTAL_FUNDING_PLAN
             - REQUIREMENTS_CHECKLIST
+            - JUSTIFICATION_AND_APPROVAL
         templatePayload:
           type: object
           oneOf:
@@ -479,6 +480,7 @@ components:
             - $ref: "#/components/schemas/IndependentGovernmentCostEstimate"
             - $ref: "#/components/schemas/IncrementalFundingPlan"
             - $ref: "#/components/schemas/RequirementsChecklist"
+            - $ref: "#/components/schemas/JustificationAndApproval"
     EvalPlan:
       description: Provides the basis of evaluation for an Acquisition Package
       type: object
@@ -559,6 +561,115 @@ components:
         - remainingAmount
         - fundingIncrements
         - fundingDocument
+    JustificationAndApproval:
+      description: >-
+        For generating the Justification and Approval (J&A) document
+      type: object
+      properties:
+        fairOpportunity:
+          $ref: "#/components/schemas/FairOpportunity"
+        purchaseRequestNumber:
+          type: string
+        jwccContractNumber:
+          type: string
+        title:
+          type: string
+        scope:
+          type: string
+        estimatedValue:
+          type: number
+        agencyLabel:
+          type: string
+        organizationFullAddress:
+          type: string
+        contractingShop:
+          type: string
+        otherContractingShopFullAddress:
+          type: string
+        taskOrderType:
+          type: string
+        proposedVendor:
+          type: string
+        periodOfPerformance:
+          $ref: "#/components/schemas/PeriodOfPerformance"
+        technicalPoc:
+          $ref: "#/components/schemas/PointOfContact"
+        requirementsPoc:
+          $ref: "#/components/schemas/PointOfContact"
+        corPoc:
+          $ref: "#/components/schemas/PointOfContact"
+      required:
+        - fairOpportunity
+        - purchaseRequestNumber
+        - jwccContractNumber
+        - title
+        - scope
+        - estimatedValue
+        - agencyLabel
+        - organizationFullAddress
+        - contractingShop
+        - REPotherContractingShopFullAddressLACEME
+        - taskOrderType
+        - proposedVendor
+        - periodOfPerformance
+        - technicalPoc
+        - requirementsPoc
+        - corPoc
+    FairOpportunity:
+      description: "Contains all fields related to the Fair Opportunity data for a given Acquisition Package. Used in J&A."
+      type: object
+      properties:
+        exceptionToFairOpportunity:
+          type: string
+        justification:
+          type: string
+        minimumGovernmentRequirements:
+          type: string
+        causeOfSoleSourceSituation:
+          type: string
+        whyCspIsOnlyCapableSource:
+          type: string
+        procurementDiscussion:
+          type: string
+        procurementHasExistingEnv:
+          type: boolean
+        procurementPreviousImpact:
+          type: string
+        requirementImpact:
+          type: string
+        marketResearchDetails:
+          type: string
+        researchSupportingData:
+          type: string
+        plansToRemoveBarriers:
+          type: string
+      required:
+        - exceptionToFairOpportunity
+        - justification
+        - minimumGovernmentRequirements
+        - causeOfSoleSourceSituation
+        - whyCspIsOnlyCapableSource
+        - procurementDiscussion
+        - procurementHasExistingEnv
+        - procurementPreviousImpact
+        - requirementImpact
+        - marketResearchDetails
+        - researchSupportingData
+        - plansToRemoveBarriers
+    PointOfContact:
+      description: "Represents basic information for Acquisition Package POCs"
+      type: object
+      properties:
+        formalName:
+          type: string
+        title:
+          type: string
+        phoneAndExtension:
+          type: string
+      required:
+        - formalName
+        - title
+        - phoneAndExtension
     IndependentGovernmentCostEstimate:
       description: "Data used for generating the Independent Government Cost Estimate (IGCE) document"
       type: object
