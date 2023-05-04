@@ -608,7 +608,6 @@ components:
         - agencyLabel
         - organizationFullAddress
         - contractingShop
-        - REPotherContractingShopFullAddressLACEME
         - taskOrderType
         - proposedVendor
         - periodOfPerformance
@@ -651,7 +650,6 @@ components:
         - whyCspIsOnlyCapableSource
         - procurementDiscussion
         - procurementHasExistingEnv
-        - procurementPreviousImpact
         - requirementImpact
         - marketResearchDetails
         - researchSupportingData
