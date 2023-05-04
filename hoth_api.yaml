@@ -590,6 +590,11 @@ components:
           type: string
         proposedVendor:
           type: string
+        appropriationFundsType:
+          type: string
+        appropriationFiscalYear:
+          type: string
+          description: Fiscal Year in FYXX format, e.g. "23" would represent Fiscal Year 2023
         periodOfPerformance:
           $ref: "#/components/schemas/PeriodOfPerformance"
         technicalPoc:
