@@ -645,7 +645,7 @@ components:
           type: string
         marketResearchDetails:
           type: string
-        researchSupportingData:
+        otherFactsToSupportLogicalFollowOn:
           type: string
         plansToRemoveBarriers:
           type: string
@@ -659,7 +659,7 @@ components:
         - procurementHasExistingEnv
         - requirementImpact
         - marketResearchDetails
-        - researchSupportingData
+        - otherFactsToSupportLogicalFollowOn
         - plansToRemoveBarriers
     PointOfContact:
       description: "Represents basic information for Acquisition Package POCs"
