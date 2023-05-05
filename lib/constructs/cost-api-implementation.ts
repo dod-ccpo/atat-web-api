@@ -96,7 +96,7 @@ export class CostApiImplementation extends Construct implements ICostApiImplemen
   ): lambdaNodeJs.NodejsFunction {
     return new lambdaNodeJs.NodejsFunction(scope, id, {
       entry,
-      runtime: lambda.Runtime.NODEJS_16_X,
+      runtime: lambda.Runtime.NODEJS_18_X,
       vpc: this.props.vpc,
       memorySize: 256,
       timeout: Duration.seconds(5),

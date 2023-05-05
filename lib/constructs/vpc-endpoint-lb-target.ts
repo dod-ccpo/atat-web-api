@@ -90,7 +90,7 @@ abstract class VpcEndpointBaseTargetGroup<T extends elbv2.ITargetGroup>
     // and ec2:DescribeNetworkInterfaces) we cannot use the nicer `AwsCustomResource` construct
     // and instead must write our own handler with the Provider framework.
     const handler = new nodejs.NodejsFunction(this, "VpcEndpointHandler", {
-      runtime: lambda.Runtime.NODEJS_16_X,
+      runtime: lambda.Runtime.NODEJS_18_X,
       entry: "lib/custom-resources/endpoint-ips.ts",
       handler: "onEvent",
       vpc: props.vpc,
