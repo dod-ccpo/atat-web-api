@@ -1,7 +1,7 @@
 /* eslint-disable no-use-before-define */
 export interface IDescriptionOfWork {
   awardHistory?: IAward[] | null;
-  contractInformation?: IContractInformation;
+  contractInformation?: IContractInformation[];
   toTitle: string;
   scope: string;
   surgeRequirementCapacity: number;
@@ -473,14 +473,17 @@ const awardHistory = {
 };
 
 const contractInformation = {
-  type: "object",
-  properties: {
-    contractNumber: { type: "string" },
-    currentContractExists: { type: "boolean" },
-    contractExpirationDate: { type: "string" },
-    incumbentContractorName: { type: "string" },
-    previousTaskOrderNumber: { type: "string" },
-  },
+  type: "array",
+  items: {
+    type: "object",
+      properties: {
+        contractNumber: { type: "string" },
+        currentContractExists: { type: "boolean" },
+        contractExpirationDate: { type: "string" },
+        incumbentContractorName: { type: "string" },
+        previousTaskOrderNumber: { type: "string" },
+    },
+  }
 };
 
 const classificationLevel = {

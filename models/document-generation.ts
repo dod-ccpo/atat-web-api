@@ -232,7 +232,7 @@ export interface ISensitiveInformation {
 
 export interface DescriptionOfWork {
   awardHistory: IAward[];
-  contractInformation: IContractInformation;
+  contractInformation: IContractInformation[];
   toTitle: string;
   scope: string;
   // scopeSurge: number;
