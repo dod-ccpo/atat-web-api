@@ -22,7 +22,7 @@ export const sampleDowRequest = {
         contractExpirationDate: "2022-02-28",
         incumbentContractorName: "Random Person",
         previousTaskOrderNumber: "",
-      }
+      },
     ],
     toTitle: "Test Package for DOW",
     scope: "Using as a way to see where different sections are saving information.",

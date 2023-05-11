@@ -476,14 +476,14 @@ const contractInformation = {
   type: "array",
   items: {
     type: "object",
-      properties: {
-        contractNumber: { type: "string" },
-        currentContractExists: { type: "boolean" },
-        contractExpirationDate: { type: "string" },
-        incumbentContractorName: { type: "string" },
-        previousTaskOrderNumber: { type: "string" },
+    properties: {
+      contractNumber: { type: "string" },
+      currentContractExists: { type: "boolean" },
+      contractExpirationDate: { type: "string" },
+      incumbentContractorName: { type: "string" },
+      previousTaskOrderNumber: { type: "string" },
     },
-  }
+  },
 };
 
 const classificationLevel = {
