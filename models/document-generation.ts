@@ -530,7 +530,7 @@ const descriptionOfWork = {
   type: "object",
   properties: {
     awardHistory,
-    contractInformation,
+    contractInformation: { type: "array", items: { type: "object" } },
     toTitle: { type: "string" },
     scope: { type: "string" },
     surgeRequirementCapacity: { type: "integer" },
