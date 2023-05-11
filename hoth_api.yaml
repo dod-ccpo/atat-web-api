@@ -892,7 +892,9 @@ components:
             $ref: "#/components/schemas/Award"
         # DOW contract information table
         contractInformation:
-          $ref: "#/components/schemas/ContractInformation"
+          type: array
+          items:
+            $ref: "#/components/schemas/ContractInformation"
         # DOW section 1
         toTitle:
           type: string
@@ -994,7 +996,7 @@ components:
           type: string
           format: date
     ContractInformation:
-      description: "Part of DOW, represents Current Contract Information table fields"
+      description: "Part of DOW, represents a single Contract in the Contract Information table"
       type: object
       properties:
         contractNumber:

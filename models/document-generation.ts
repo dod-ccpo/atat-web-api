@@ -232,7 +232,7 @@ export interface ISensitiveInformation {
 
 export interface DescriptionOfWork {
   awardHistory: IAward[];
-  contractInformation: IContractInformation;
+  contractInformation: IContractInformation[];
   toTitle: string;
   scope: string;
   // scopeSurge: number;
@@ -530,7 +530,7 @@ const descriptionOfWork = {
   type: "object",
   properties: {
     awardHistory,
-    contractInformation,
+    contractInformation: { type: "array", items: { type: "object" } },
     toTitle: { type: "string" },
     scope: { type: "string" },
     surgeRequirementCapacity: { type: "integer" },
