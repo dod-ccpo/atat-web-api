@@ -1506,20 +1506,22 @@ export const sampleRequirementsChecklistRequest = {
         dodaac: "bbb888",
       },
     },
-    currentContract: [{
-      exists: true,
-      incumbentContractorName: "Someone Making Decisions",
-      contractNumber: "928384",
-      taskOrderNumber: "29284484",
-      contractExpiration: "2022-12-09",
-    },
-    {
-      exists: true,
-      incumbentContractorName: "Someone Making Decisions",
-      contractNumber: "928375",
-      taskOrderNumber: "29284463",
-      contractExpiration: "2021-12-09",
-    }],
+    currentContract: [
+      {
+        exists: true,
+        incumbentContractorName: "Someone Making Decisions",
+        contractNumber: "928384",
+        taskOrderNumber: "29284484",
+        contractExpiration: "2022-12-09",
+      },
+      {
+        exists: true,
+        incumbentContractorName: "Someone Making Decisions",
+        contractNumber: "928375",
+        taskOrderNumber: "29284463",
+        contractExpiration: "2021-12-09",
+      },
+    ],
     exceptionToFairOpportunity: "YES_FAR_16_505_B_2_I_B",
     periodOfPerformance: {
       basePeriod: { periodType: "BASE", periodUnitCount: 1, periodUnit: "YEAR", optionOrder: null },

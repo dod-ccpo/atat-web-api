@@ -125,7 +125,7 @@ const packageContacts = {
 const currentContract = {
   type: "array",
   items: {
-  type: "object",
+    type: "object",
     properties: {
       exists: { type: "boolean" },
       incumbentContractorName: { type: "string" },

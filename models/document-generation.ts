@@ -345,8 +345,6 @@ export interface RequestEvent<T> {
   requestContext: APIGatewayEventRequestContext;
 }
 
-
-
 // Schema validation used by middy
 const awardHistory = {
   type: "array",
@@ -380,7 +378,7 @@ const contractInformation = {
       incumbentContractorName: { type: "string" },
       previousTaskOrderNumber: { type: "string" },
     },
-}
+  },
 };
 
 const environmentInstance = {
