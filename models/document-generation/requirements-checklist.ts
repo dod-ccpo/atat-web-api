@@ -74,7 +74,7 @@ export interface RequirementsChecklist {
   projectOverview: IProjectOverview;
   organization: IOrganization;
   contacts: IPackageContacts;
-  currentContract: ICurrentContract;
+  currentContract: ICurrentContract[];
   exceptionToFairOpportunity: FairOpportunity;
   periodOfPerformance: IPeriodOfPerformance;
   contractType: IContractType;
@@ -123,13 +123,16 @@ const packageContacts = {
 
 // TODO: consolidate with the 'ContractInformation' used for DOW
 const currentContract = {
+  type: "array",
+  items: {
   type: "object",
-  properties: {
-    exists: { type: "boolean" },
-    incumbentContractorName: { type: "string" },
-    contractNumber: { type: "string" },
-    taskOrderNumber: { type: "string" },
-    contractExpiration: { type: "string" },
+    properties: {
+      exists: { type: "boolean" },
+      incumbentContractorName: { type: "string" },
+      contractNumber: { type: "string" },
+      taskOrderNumber: { type: "string" },
+      contractExpiration: { type: "string" },
+    },
   },
 };
 

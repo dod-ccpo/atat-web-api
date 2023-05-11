@@ -813,18 +813,9 @@ components:
             acor:
               $ref: "#/components/schemas/CorContact"
         currentContract:
-          type: object
-          properties:
-            exists:
-              type: boolean
-            incumbentContractorName:
-              type: string
-            contractNumber:
-              type: string
-            taskOrderNumber:
-              type: string
-            contractExpiration:
-              type: string
+          type: array
+          items:
+            $ref: "#/components/schemas/ContractInformation"
         exceptionToFairOpportunity:
           type: string
           enum:
