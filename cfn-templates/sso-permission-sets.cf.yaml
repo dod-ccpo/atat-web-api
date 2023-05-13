@@ -241,6 +241,10 @@ Resources:
               - s3:Get*
               - cloudtrail:Describe*
               - cloudtrail:Get*
+              - codecommit:Get*
+              - codecommit:List*
+              - codepipeline:Get*
+              - codepipeline:List*
             Resource: "*"
   AtatDeveloperSecretReadAccess:
     Type: AWS::SSO::PermissionSet
