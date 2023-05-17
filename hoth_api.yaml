@@ -994,12 +994,12 @@ components:
           type: string
         currentContractExists:
           type: boolean
-        contractExpirationDate:
+        contractOrderExpirationDate:
           type: string
           format: date
         incumbentContractorName:
           type: string
-        previousTaskOrderNumber:
+        taskDeliveryOrderNumber:
           type: string
     CrossDomainSolutions:
       description: >-
