@@ -124,7 +124,7 @@ export interface IContractInformation {
   currentContractExists: boolean;
   contractExpirationDate: string;
   incumbentContractorName: string;
-  previousTaskOrderNumber: string;
+  taskDeliveryOrderNumber: string;
 }
 
 export interface IPeriod {
@@ -376,7 +376,7 @@ const contractInformation = {
       currentContractExists: { type: "boolean" },
       contractExpirationDate: { type: "string" },
       incumbentContractorName: { type: "string" },
-      previousTaskOrderNumber: { type: "string" },
+      taskDeliveryOrderNumber: { type: "string" },
     },
   },
 };

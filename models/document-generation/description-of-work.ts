@@ -54,7 +54,7 @@ export interface IContractInformation {
   currentContractExists: boolean;
   contractExpirationDate?: string | null;
   incumbentContractorName?: string | null;
-  previousTaskOrderNumber?: string | null;
+  taskDeliveryOrderNumber?: string | null;
 }
 
 /** @description Cross Domain Solutions (CDS) for the transfer of data between classification levels */
@@ -481,7 +481,7 @@ const contractInformation = {
       currentContractExists: { type: "boolean" },
       contractExpirationDate: { type: "string" },
       incumbentContractorName: { type: "string" },
-      previousTaskOrderNumber: { type: "string" },
+      taskDeliveryOrderNumber: { type: "string" },
     },
   },
 };
