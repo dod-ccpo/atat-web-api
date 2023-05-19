@@ -245,6 +245,7 @@ Resources:
               - codecommit:List*
               - codepipeline:Get*
               - codepipeline:List*
+              - ec2:GetEbsEncryptionByDefault
             Resource: "*"
   AtatDeveloperSecretReadAccess:
     Type: AWS::SSO::PermissionSet
