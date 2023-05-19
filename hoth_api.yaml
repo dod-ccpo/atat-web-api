@@ -472,6 +472,7 @@ components:
             - INCREMENTAL_FUNDING_PLAN
             - REQUIREMENTS_CHECKLIST
             - JUSTIFICATION_AND_APPROVAL
+            - MARKET_RESEARCH_REPORT
         templatePayload:
           type: object
           oneOf:
@@ -481,6 +482,7 @@ components:
             - $ref: "#/components/schemas/IncrementalFundingPlan"
             - $ref: "#/components/schemas/RequirementsChecklist"
             - $ref: "#/components/schemas/JustificationAndApproval"
+            - $ref: "#/components/schemas/MarketResearchReport"
     EvalPlan:
       description: Provides the basis of evaluation for an Acquisition Package
       type: object
@@ -621,6 +623,37 @@ components:
         - technicalPoc
         - requirementsPoc
         - corPoc
+    MarketResearchReport:
+      description: >-
+        For generating the Sole Source Market Research Report (MRR) document
+      type: object
+      properties:
+        researchers:
+          type: array
+          items:
+            $ref: "#/components/schemas/Researcher"
+        fairOpportunity:
+          $ref: "#/components/schemas/FairOpportunity"
+        title:
+          type: string
+        estimatedValue:
+          type: number
+        proposedVendor:
+          type: string
+        corPoc:
+          $ref: "#/components/schemas/PointOfContact"
+        priorContracts:
+          type: array
+          items:
+            $ref: "#/components/schemas/ContractInformation"
+      required:
+        - researchers
+        - fairOpportunity
+        - title
+        - estimatedValue
+        - proposedVendor
+        - corPoc
+        - priorContracts
     FairOpportunity:
       description: "Contains all fields related to the Fair Opportunity data for a given Acquisition Package. Used in J&A."
       type: object
@@ -987,13 +1020,16 @@ components:
           type: string
           format: date
     ContractInformation:
-      description: "Part of DOW, represents a single Contract in the Contract Information table"
+      description: "Represents a single prior Contract in the Current Contract Information table"
       type: object
       properties:
         contractNumber:
           type: string
         currentContractExists:
           type: boolean
+        contractOrderStartDate:
+          type: string
+          format: date
         contractOrderExpirationDate:
           type: string
           format: date
@@ -1001,6 +1037,21 @@ components:
           type: string
         taskDeliveryOrderNumber:
           type: string
+        competitiveStatus:
+          type: string
+          enum:
+            - FULL_OPEN
+            - SB_SET_ASIDE
+            - OTHER_THAN_FULL
+        businessSize:
+          type: string
+          enum:
+            - SMALL
+            - LARGE
+            - SMALL_8A
+            - HUBZONE
+            - SDVOSB
+            - WOSB
     CrossDomainSolutions:
       description: >-
         Cross Domain Solutions (CDS) for the transfer of data between classification levels
