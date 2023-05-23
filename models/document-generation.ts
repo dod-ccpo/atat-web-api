@@ -2,6 +2,7 @@
 import { APIGatewayEventRequestContext } from "aws-lambda";
 import { IDescriptionOfWork } from "./document-generation/description-of-work";
 import { requirementsCheckList, RequirementsChecklist } from "./document-generation/requirements-checklist";
+import { IJustificationAndApproval, IPointOfContact } from "./document-generation/justification-and-approval";
 
 export enum AwardType {
   INITIAL_AWARD = "INITIAL_AWARD",
@@ -15,6 +16,7 @@ export enum DocumentType {
   INCREMENTAL_FUNDING_PLAN = "INCREMENTAL_FUNDING_PLAN",
   EVALUATION_PLAN = "EVALUATION_PLAN",
   REQUIREMENTS_CHECKLIST = "REQUIREMENTS_CHECKLIST",
+  JUSTIFICATION_AND_APPROVAL = "JUSTIFICATION_AND_APPROVAL",
 }
 
 export enum PeriodType {
@@ -112,6 +114,7 @@ export interface TemplatePaths {
   [DocumentType.INCREMENTAL_FUNDING_PLAN]: { docx: string };
   [DocumentType.EVALUATION_PLAN]: { docx: string };
   [DocumentType.REQUIREMENTS_CHECKLIST]: { docx: string };
+  [DocumentType.JUSTIFICATION_AND_APPROVAL]: { docx: string };
 }
 export interface IAward {
   contractAwardType: AwardType;
@@ -337,7 +340,8 @@ export interface GenerateDocumentRequest {
     | IndependentGovernmentCostEstimate
     | IncrementalFundingPlan
     | EvaluationPlan
-    | RequirementsChecklist;
+    | RequirementsChecklist
+    | IJustificationAndApproval;
 }
 
 export interface RequestEvent<T> {
@@ -368,16 +372,16 @@ const classificationLevel = {
 };
 
 const contractInformation = {
-  type: "array",
+  type: "object",
   properties: {
-    type: "object",
-    properties: {
-      contractNumber: { type: "string" },
-      currentContractExists: { type: "boolean" },
-      contractOrderExpirationDate: { type: "string" },
-      incumbentContractorName: { type: "string" },
-      taskDeliveryOrderNumber: { type: "string" },
-    },
+    contractNumber: { type: "string" },
+    currentContractExists: { type: "boolean" },
+    contractOrderStartDate: { type: "string" },
+    contractOrderExpirationDate: { type: "string" },
+    incumbentContractorName: { type: "string" },
+    taskDeliveryOrderNumber: { type: "string" },
+    businessSize: { type: "string" },
+    competitiveStatus: { type: "string" },
   },
 };
 
@@ -690,6 +694,61 @@ export const evalPlan = {
   additionalProperties: false,
 };
 
+// J&A
+
+export const fairOpportunity = {
+  type: "object",
+  properties: {
+    procurementDiscussion: { type: "string" },
+    procurementPreviousImpact: { type: "string" },
+    marketResearchDetails: { type: "string" },
+    causeOfSoleSourceSituation: { type: "string" },
+    procurementHasExistingEnv: { type: "boolean" },
+    minimumGovernmentRequirements: { type: "string" },
+    plansToRemoveBarriers: { type: "string" },
+    requirementImpact: { type: "string" },
+    exceptionToFairOpportunity: { type: "string" },
+    otherFactsToSupportLogicalFollowOn: { type: "string" },
+    whyCspIsOnlyCapableSource: { type: "string" },
+    proposedVendor: { type: "string" },
+    justification: { type: "string" },
+  },
+  additionalProperties: false,
+};
+export const pointOfContact = {
+  type: "object",
+  properties: {
+    formalName: { type: "string" },
+    phoneAndExtension: { type: "string" },
+    title: { type: "string" },
+  },
+  additionalProperties: false,
+};
+
+export const justificationAndApproval = {
+  type: "object",
+  properties: {
+    cor: pointOfContact,
+    technicalPoc: pointOfContact,
+    requirementsPoc: pointOfContact,
+    periodOfPerformance,
+    fairOpportunity,
+    procurementHistory: { type: "array", items: contractInformation },
+    fundingRequestFiscalYear: { type: "string" },
+    otherContractingShopFullAddress: { type: "string" },
+    title: { type: "string" },
+    jwccContractNumber: { type: "string" },
+    estimatedValue: { type: "string" },
+    organizationFullAddress: { type: "string" },
+    scope: { type: "string" },
+    contractingShop: { type: "string" },
+    purchaseRequestNumber: { type: "string" },
+    agencyLabel: { type: "string" },
+    taskOrderType: { type: "string" },
+  },
+  additionalProperties: false,
+};
+
 export const generateDocumentSchema = {
   type: "object",
   properties: {
@@ -701,6 +760,7 @@ export const generateDocumentSchema = {
         DocumentType.INCREMENTAL_FUNDING_PLAN,
         DocumentType.EVALUATION_PLAN,
         DocumentType.REQUIREMENTS_CHECKLIST,
+        DocumentType.JUSTIFICATION_AND_APPROVAL,
       ],
     },
     templatePayload: {
@@ -710,6 +770,7 @@ export const generateDocumentSchema = {
         incrementalFundingPlan,
         evalPlan,
         requirementsCheckList,
+        justificationAndApproval,
       ],
     },
   },

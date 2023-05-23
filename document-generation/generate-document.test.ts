@@ -14,6 +14,7 @@ import {
   sampleIfpRequest,
   sampleIgceRequest,
   sampleRequirementsChecklistRequest,
+  sampleJustificationAndApproval,
 } from "./utils/sampleTestData";
 
 const validRequest = {
@@ -40,6 +41,10 @@ const docHeaders = {
   requirementsChecklist: {
     "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     "Content-Disposition": `attachment; filename=RequirementsChecklist.docx`,
+  },
+  janda: {
+    "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "Content-Disposition": `attachment; filename=JustificationAndApproval.docx`,
   },
 };
 
@@ -83,6 +88,14 @@ jest.mock("./requirements-checklist-document", () => {
         SuccessStatusCode.OK,
         docHeaders.requirementsChecklist
       );
+    }),
+  };
+});
+jest.mock("./justification-and-approval-document.ts", () => {
+  return {
+    generateJustificationAndApprovalDocument: jest.fn().mockImplementation(() => {
+      const buffer = Buffer.from("generateJustificationAndApprovalDocument");
+      return new ApiBase64SuccessResponse(buffer.toString("base64"), SuccessStatusCode.OK, docHeaders.janda);
     }),
   };
 });
@@ -147,6 +160,23 @@ describe("Successful generate-document handler", () => {
     // THEN / ASSERT
     expect(response).toBeInstanceOf(SuccessBase64Response);
     expect(response.headers).toEqual(docHeaders.requirementsChecklist);
+  });
+
+  it("should return successful J&A document response", async () => {
+    // GIVEN / ARRANGE
+    const request = {
+      ...validRequest,
+      body: JSON.stringify({
+        ...sampleJustificationAndApproval,
+      }),
+    };
+
+    // WHEN / ACT
+    const response = await handler(request, {} as Context);
+    console.log("RESPONSE: ", JSON.stringify(response));
+    // THEN / ASSERT
+    expect(response).toBeInstanceOf(SuccessBase64Response);
+    expect(response.headers).toEqual(docHeaders.janda);
   });
 });
 

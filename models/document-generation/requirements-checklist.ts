@@ -44,7 +44,10 @@ export interface ICurrentContract {
   incumbentContractorName: string;
   contractNumber: string;
   taskDeliveryOrderNumber: string;
+  contractOrderStartDate: string;
   contractOrderExpirationDate: string;
+  businessSize: string;
+  competitiveStatus: string;
 }
 
 export interface IContractType {

@@ -106,6 +106,9 @@ export const getDocumentTemplatePath = (folder?: string): TemplatePaths => {
     [DocumentType.REQUIREMENTS_CHECKLIST]: {
       docx: `${folder}/requirements-checklist-template.docx`,
     },
+    [DocumentType.JUSTIFICATION_AND_APPROVAL]: {
+      docx: `${folder}/j-and-a-template.docx`,
+    },
   };
 };
 
@@ -151,6 +154,9 @@ export const getDocxTemplate = (documentType: DocumentType): Buffer => {
       docx = fs.readFileSync(getDocumentTemplatePath()[documentType].docx);
       break;
     case DocumentType.REQUIREMENTS_CHECKLIST:
+      docx = fs.readFileSync(getDocumentTemplatePath()[documentType].docx);
+      break;
+    case DocumentType.JUSTIFICATION_AND_APPROVAL:
       docx = fs.readFileSync(getDocumentTemplatePath()[documentType].docx);
       break;
     default:
