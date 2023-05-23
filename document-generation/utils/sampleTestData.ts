@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 export const sampleDowRequest = {
   documentType: "DESCRIPTION_OF_WORK_DOCX",
   templatePayload: {
@@ -1635,3 +1636,4 @@ export const sampleJustificationAndApproval = {
     },
   },
 };
+/* eslint-enable max-len */
