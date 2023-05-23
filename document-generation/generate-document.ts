@@ -18,23 +18,25 @@ import { generateDocument } from "./chromium";
 import { generateIGCEDocument } from "./igce-document";
 import { generateIFPDocument } from "./ifp-document";
 import { generateDowDocument } from "./dow-document";
-import { getPDFDocumentTemplates, getExcelTemplatePath, getDocxTemplate } from "./utils/utils";
+import { getDocxTemplate, getExcelTemplatePath, getPDFDocumentTemplates } from "./utils/utils";
 import {
-  generateDocumentSchema,
-  RequestEvent,
-  GenerateDocumentRequest,
   DocumentType,
-  IndependentGovernmentCostEstimate,
-  IncrementalFundingPlan,
   EvaluationPlan,
+  GenerateDocumentRequest,
+  generateDocumentSchema,
+  IncrementalFundingPlan,
+  IndependentGovernmentCostEstimate,
+  RequestEvent,
 } from "../models/document-generation";
 import handlebars from "handlebars";
 import juice from "juice";
-import { formatDuration, formatGroupAndClassification, counter, countSections, formatAwardType } from "./utils/helpers";
+import { counter, countSections, formatAwardType, formatDuration, formatGroupAndClassification } from "./utils/helpers";
 import { RequirementsChecklist } from "../models/document-generation/requirements-checklist";
 import { generateRequirementsChecklistDocument } from "./requirements-checklist-document";
 import { generateEvalPlanDocument } from "./eval-plan-document";
 import { IDescriptionOfWork } from "../models/document-generation/description-of-work";
+import { generateJustificationAndApprovalDocument } from "./justification-and-approval-document";
+import { IJustificationAndApproval } from "../models/document-generation/justification-and-approval";
 
 async function baseHandler(event: RequestEvent<GenerateDocumentRequest>): Promise<ApiBase64SuccessResponse> {
   const { documentType } = event.body;
@@ -49,6 +51,7 @@ async function baseHandler(event: RequestEvent<GenerateDocumentRequest>): Promis
     case DocumentType.INCREMENTAL_FUNDING_PLAN:
     case DocumentType.EVALUATION_PLAN:
     case DocumentType.REQUIREMENTS_CHECKLIST:
+    case DocumentType.JUSTIFICATION_AND_APPROVAL:
       return generateDocxDocument(event);
     default:
       return new ValidationErrorResponse(`Invalid document type: "${documentType}"`, {
@@ -98,6 +101,8 @@ async function generateDocxDocument(event: RequestEvent<GenerateDocumentRequest>
       return generateEvalPlanDocument(docxTemplate, templatePayload as EvaluationPlan);
     case DocumentType.REQUIREMENTS_CHECKLIST:
       return generateRequirementsChecklistDocument(docxTemplate, templatePayload as RequirementsChecklist);
+    case DocumentType.JUSTIFICATION_AND_APPROVAL:
+      return generateJustificationAndApprovalDocument(docxTemplate, templatePayload as IJustificationAndApproval);
     default:
       return new ValidationErrorResponse(`Invalid document type: "${documentType}"`, {
         cause: `Invalid document type "${documentType}" provided. Please provide a valid document type.`,

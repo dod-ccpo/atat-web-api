@@ -1547,3 +1547,91 @@ export const sampleRequirementsChecklistRequest = {
     },
   },
 };
+
+export const sampleJustificationAndApproval = {
+  documentType: "JUSTIFICATION_AND_APPROVAL",
+  templatePayload: {
+    fundingRequestFiscalYear: "FY23",
+    periodOfPerformance: {
+      requestedPopStartDate: "2023-06-01",
+      basePeriod: {
+        periodType: "BASE",
+        periodUnitCount: 12.0,
+        optionOrder: 1.0,
+        periodUnit: "MONTH",
+      },
+      optionPeriods: [
+        {
+          periodType: "OPTION",
+          periodUnitCount: 6.0,
+          optionOrder: 2.0,
+          periodUnit: "MONTH",
+        },
+        {
+          periodType: "OPTION",
+          periodUnitCount: 6.0,
+          optionOrder: 3.0,
+          periodUnit: "MONTH",
+        },
+      ],
+      recurringRequirement: true,
+      popStartRequest: false,
+      timeFrame: "NO_LATER_THAN",
+    },
+    cor: {
+      formalName: "GEN Who Where",
+      phoneAndExtension: null,
+      title: null,
+    },
+    otherContractingShopFullAddress: null,
+    title: "Jeff J&A Test 1",
+    jwccContractNumber: "HC105023D0002",
+    estimatedValue: "$0.00",
+    organizationFullAddress: "Jeff Org J&A\n123 Fake St\nSpringfield, OH 12345\nUnited States of America",
+    technicalPoc: {
+      formalName: "Mr. Tom Arnold",
+      phoneAndExtension: "+1 (631) 524-0657",
+      title: null,
+    },
+    requirementsPoc: {
+      formalName: "SPC SAM s Ala",
+      phoneAndExtension: "+1 (789) 561-2312",
+      title: "Test engineer",
+    },
+    scope: "J & A Scope Test 1",
+    contractingShop: "DITCO",
+    purchaseRequestNumber: "OYYMM-000-000-000000, ",
+    agencyLabel: "Business Transformation Agency (BTA)",
+    taskOrderType: "Firm Fixed Price",
+    procurementHistory: [
+      {
+        contractOrderExpirationDate: "May 16, 2023",
+        incumbentContractorName: "Jeff Incumbent",
+        taskDeliveryOrderNumber: "TO32907423",
+        businessSize: "Large business",
+        contractNumber: "284632495436546",
+        contractOrderStartDate: "May 16, 2022",
+        competitiveStatus: "Full and open competition",
+        currentContractExists: true,
+      },
+    ],
+    fairOpportunity: {
+      procurementDiscussion: "google constraints",
+      procurementPreviousImpact:
+        "Since there is already an existing environment, the CSP is immediately able to shift to supporting the resultant award associated with this contract action, it would minimize any associated transition costs for the Government. In addition, another contractor would not be positioned to leverage investments made to date to most efficiently meet the objectives of the task order for the anticipated PoP.",
+      marketResearchDetails: "research details - generated",
+      causeOfSoleSourceSituation: "cause of sole source - custom",
+      procurementHasExistingEnv: true,
+      minimumGovernmentRequirements:
+        "The cloud offerings must continue at their current level in order to support...\n\nThese offerings include...\n\nAll my minimum stuff",
+      plansToRemoveBarriers: "barriers - generated",
+      requirementImpact: "requirement impact details",
+      exceptionToFairOpportunity: "16.505(b)(2)(i)(C)",
+      otherFactsToSupportLogicalFollowOn: null,
+      whyCspIsOnlyCapableSource:
+        "Google possesses the knowledge, skills, capabilities, certification, clearance, and experience required to continue the program without a break or degradation in critical mission services. Given these critical mission requirements, Google is the only contractor that is capable of performing the necessary services for the DoD within the current required timeline.",
+      proposedVendor: "Google Support Services",
+      justification: "Jeff J&A Justification 1",
+    },
+  },
+};
