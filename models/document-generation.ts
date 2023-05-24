@@ -17,6 +17,7 @@ export enum DocumentType {
   EVALUATION_PLAN = "EVALUATION_PLAN",
   REQUIREMENTS_CHECKLIST = "REQUIREMENTS_CHECKLIST",
   JUSTIFICATION_AND_APPROVAL = "JUSTIFICATION_AND_APPROVAL",
+  MARKET_RESEARCH_REPORT = "MARKET_RESEARCH_REPORT",
 }
 
 export enum PeriodType {
@@ -46,6 +47,18 @@ export enum Classification {
   U = "U", // Unclassified
   S = "S", // Secret
   TS = "TS", // Top Secret
+}
+
+export enum ResearchTechnique {
+  PERSONAL_KNOWLEDGE = "PERSONAL_KNOWLEDGE",
+  DISA_MARKET_RESEARCH_REPO = "DISA_MARKET_RESEARCH_REPO",
+  CONTACT_WITH_KNOWLEDGEABLE_PERSON = "CONTACT_WITH_KNOWLEDGEABLE_PERSON",
+  REVIEW_SIMILAR_RECENT_RESULTS = "REVIEW_SIMILAR_RECENT_RESULTS",
+  REVIEW_DATABASES = "REVIEW_DATABASES",
+  REVIEW_SOURCE_LISTS = "REVIEW_SOURCE_LISTS",
+  REVIEW_PRODUCT_LITERATURE = "REVIEW_PRODUCT_LITERATURE",
+  REVIEW_OTHER_CONTRACTS = "REVIEW_OTHER_CONTRACTS",
+  OTHER = "OTHER",
 }
 
 export enum ImpactLevel {
@@ -115,6 +128,7 @@ export interface TemplatePaths {
   [DocumentType.EVALUATION_PLAN]: { docx: string };
   [DocumentType.REQUIREMENTS_CHECKLIST]: { docx: string };
   [DocumentType.JUSTIFICATION_AND_APPROVAL]: { docx: string };
+  [DocumentType.MARKET_RESEARCH_REPORT]: { docx: string };
 }
 export interface IAward {
   contractAwardType: AwardType;
@@ -384,6 +398,31 @@ const contractInformation = {
     competitiveStatus: { type: "string" },
   },
 };
+const researcher = {
+  type: "object",
+  properties: {
+    name: { type: "string" },
+    title: { type: "string" },
+    organization: { type: "string" },
+  },
+};
+const researchTechnique = {
+  type: "object",
+  properties: {
+    type: { enum: [
+      ResearchTechnique.PERSONAL_KNOWLEDGE,
+      ResearchTechnique.DISA_MARKET_RESEARCH_REPO,
+      ResearchTechnique.CONTACT_WITH_KNOWLEDGEABLE_PERSON,
+      ResearchTechnique.REVIEW_SIMILAR_RECENT_RESULTS,
+      ResearchTechnique.REVIEW_DATABASES,
+      ResearchTechnique.REVIEW_SOURCE_LISTS,
+      ResearchTechnique.REVIEW_PRODUCT_LITERATURE,
+      ResearchTechnique.REVIEW_OTHER_CONTRACTS,
+      ResearchTechnique.OTHER,
+    ] },
+  },
+}
+
 
 const environmentInstance = {
   type: "object",
@@ -751,6 +790,22 @@ export const justificationAndApproval = {
   additionalProperties: false,
 };
 
+// MRR
+export const marketResearchReport = {
+  type: "object",
+  properties: {
+    researchers: { type: "array", items: researcher },
+    fairOpportunity,
+    techniquesUsed: { type: "array", items: researchTechnique },
+    title: { type: "string" },
+    estimatedValue: { type: "number" },
+    estimatedValueFormatted: { type: "string" },
+    // TODO finish definition
+  },
+  additionalProperties: false,
+};
+
+
 export const generateDocumentSchema = {
   type: "object",
   properties: {
@@ -763,6 +818,7 @@ export const generateDocumentSchema = {
         DocumentType.EVALUATION_PLAN,
         DocumentType.REQUIREMENTS_CHECKLIST,
         DocumentType.JUSTIFICATION_AND_APPROVAL,
+        DocumentType.MARKET_RESEARCH_REPORT,
       ],
     },
     templatePayload: {
@@ -773,6 +829,7 @@ export const generateDocumentSchema = {
         evalPlan,
         requirementsCheckList,
         justificationAndApproval,
+        marketResearchReport,
       ],
     },
   },
