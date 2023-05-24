@@ -1586,11 +1586,11 @@ export const sampleJustificationAndApproval = {
       title: null,
     },
     otherContractingShopFullAddress: null,
-    appropriationFundsType: "RDT&E",
+    appropriationFundsType: "Research, Development, Test & Evaluation",
     title: "Jeff J&A Test 1",
     jwccContractNumber: "HC105023D0002",
     estimatedValue: 50000000.0,
-    organizationFullAddress: "Jeff Org J&A\n123 Fake St\nSpringfield, OH 12345\nUnited States of America",
+    organizationFullAddress: "123 Fake St\nSpringfield, OH 12345\nUnited States of America",
     technicalPoc: {
       formalName: "Mr. Tom Arnold",
       phoneAndExtension: "+1 (631) 524-0657",
@@ -1604,8 +1604,8 @@ export const sampleJustificationAndApproval = {
     scope: "J & A Scope Test 1",
     contractingShop: "DITCO",
     purchaseRequestNumber: "OYYMM-000-000-000000",
-    agencyLabel: "Business Transformation Agency (BTA)",
-    taskOrderType: "Firm Fixed Price",
+    agencyLabel: "Business Transformation Agency (BTA)/Jeff Org J&A",
+    taskOrderType: "firm-fixed-price",
     procurementHistory: [
       {
         contractOrderExpirationDate: "May 16, 2023",
