@@ -232,7 +232,7 @@ export interface ISensitiveInformation {
 
 export interface DescriptionOfWork {
   awardHistory: IAward[];
-  contractInformation: IContractInformation;
+  contractInformation: IContractInformation[];
   toTitle: string;
   scope: string;
   // scopeSurge: number;
@@ -368,13 +368,16 @@ const classificationLevel = {
 };
 
 const contractInformation = {
-  type: "object",
+  type: "array",
   properties: {
-    contractNumber: { type: "string" },
-    currentContractExists: { type: "boolean" },
-    contractExpirationDate: { type: "string" },
-    incumbentContractorName: { type: "string" },
-    previousTaskOrderNumber: { type: "string" },
+    type: "object",
+    properties: {
+      contractNumber: { type: "string" },
+      currentContractExists: { type: "boolean" },
+      contractExpirationDate: { type: "string" },
+      incumbentContractorName: { type: "string" },
+      previousTaskOrderNumber: { type: "string" },
+    },
   },
 };
 
@@ -530,7 +533,7 @@ const descriptionOfWork = {
   type: "object",
   properties: {
     awardHistory,
-    contractInformation,
+    contractInformation: { type: "array", items: { type: "object" } },
     toTitle: { type: "string" },
     scope: { type: "string" },
     surgeRequirementCapacity: { type: "integer" },
