@@ -34,11 +34,13 @@ export interface IJustificationAndApproval {
   otherContractingShopFullAddress?: string | null;
   title: string;
   jwccContractNumber: string;
-  estimatedValue: string;
+  estimatedValue: number;
+  estimatedValueFormatted: string;
   organizationFullAddress: string;
   scope: string;
   contractingShop: string;
   purchaseRequestNumber: string;
   agencyLabel: string;
   taskOrderType: string;
+  appropriationFundsType: string;
 }

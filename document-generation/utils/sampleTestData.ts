@@ -1,3 +1,5 @@
+/* eslint-disable max-len */
+
 export const sampleDowRequest = {
   documentType: "DESCRIPTION_OF_WORK_DOCX",
   templatePayload: {
@@ -1551,6 +1553,7 @@ export const sampleRequirementsChecklistRequest = {
 export const sampleJustificationAndApproval = {
   documentType: "JUSTIFICATION_AND_APPROVAL",
   templatePayload: {
+    estimatedValueFormatted: "$50,000,000.00",
     fundingRequestFiscalYear: "FY23",
     periodOfPerformance: {
       requestedPopStartDate: "2023-06-01",
@@ -1584,9 +1587,10 @@ export const sampleJustificationAndApproval = {
       title: null,
     },
     otherContractingShopFullAddress: null,
+    appropriationFundsType: "RDT&E",
     title: "Jeff J&A Test 1",
     jwccContractNumber: "HC105023D0002",
-    estimatedValue: "$0.00",
+    estimatedValue: 50000000.0,
     organizationFullAddress: "Jeff Org J&A\n123 Fake St\nSpringfield, OH 12345\nUnited States of America",
     technicalPoc: {
       formalName: "Mr. Tom Arnold",
@@ -1600,7 +1604,7 @@ export const sampleJustificationAndApproval = {
     },
     scope: "J & A Scope Test 1",
     contractingShop: "DITCO",
-    purchaseRequestNumber: "OYYMM-000-000-000000, ",
+    purchaseRequestNumber: "OYYMM-000-000-000000",
     agencyLabel: "Business Transformation Agency (BTA)",
     taskOrderType: "Firm Fixed Price",
     procurementHistory: [
