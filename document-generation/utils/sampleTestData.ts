@@ -1648,6 +1648,7 @@ export const sampleJustificationAndApproval = {
     ],
   },
 };
+
 export const sampleMarketResearchReport = {
   documentType: "MARKET_RESEARCH_REPORT",
   templatePayload: {
@@ -1659,7 +1660,7 @@ export const sampleMarketResearchReport = {
       },
       {
         name: "John Researcher",
-        title: "Assistant reseacher",
+        title: "Assistant researcher",
         organization: "FEMA",
       },
     ],
@@ -1674,18 +1675,43 @@ export const sampleMarketResearchReport = {
         "The cloud offerings must continue at their current level in order to support...\n\nThese offerings include...\n\nAll my minimum stuff",
       plansToRemoveBarriers: "barriers - generated",
       requirementImpact: "requirement impact details",
-      exceptionToFairOpportunity: "16.505(b)(2)(i)(C)",
+      exceptionToFairOpportunity: "16.505(b)(2)(i)(B)",
       otherFactsToSupportLogicalFollowOn: null,
       whyCspIsOnlyCapableSource:
         "Google possesses the knowledge, skills, capabilities, certification, clearance, and experience required to continue the program without a break or degradation in critical mission services. Given these critical mission requirements, Google is the only contractor that is capable of performing the necessary services for the DoD within the current required timeline.",
       proposedVendor: "Google Support Services",
       justification: "Jeff J&A Justification 1",
     },
-    techniquesUsed: [{ type: "PERSONAL_KNOWLEDGE" }],
+    techniquesUsed: [{ type: "PERSONAL_KNOWLEDGE" }, { type: "CONTACT_WITH_KNOWLEDGEABLE_PERSON" },{ type: "OTHER" }],
+    techniqueOther: "Used an experimental cutting-edge technique for estimation.",
     title: "Jason MRR Test 1",
     estimatedValue: 50000000.0,
     estimatedValueFormatted: "$50,000,000.00",
-    // TODO finish sample test data
+    summaryOfMarketResearch: "My research details incredible findings from speaking to two leading experts.",
+    currentContractExists: false,
+    procurementHistory: [
+      {
+        contractOrderExpirationDate: "May 16, 2023",
+        incumbentContractorName: "Jeff Incumbent",
+        taskDeliveryOrderNumber: "TO32907423",
+        businessSize: "Large business",
+        contractNumber: "284632495436546",
+        contractOrderStartDate: "May 16, 2022",
+        competitiveStatus: "Full and open competition",
+        currentContractExists: true,
+      },
+    ],
+    primaryPoc: {
+      formalName: "Maria Missionowner",
+      phoneAndExtension: "+1 (555) 123-4567",
+      title: "Project Lead",
+    },
+    corPoc: {
+      formalName: "Cary Conofficer",
+      phoneAndExtension: "+1 (555) 987-6543",
+      title: "Contracting Officer",
+    },
+    agencyLabel: "Business Transformation Agency (BTA)/Some Org",
   },
 };
 /* eslint-enable max-len */

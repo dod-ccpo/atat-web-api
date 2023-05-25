@@ -1,5 +1,7 @@
-import { IFairOpportunity } from "./justification-and-approval";
+import { ICurrentContract } from "./requirements-checklist";
+import { IFairOpportunity, IPointOfContact } from "./justification-and-approval";
 import { ResearchTechnique } from "../document-generation";
+
 
 export interface IResearcher {
   name: string;
@@ -15,8 +17,13 @@ export interface IMarketResearchReport {
   researchers: IResearcher[];
   fairOpportunity: IFairOpportunity;
   techniquesUsed: IResearchTechnique[];
+  techniqueOther: string;
   title: string;
   estimatedValue: number;
   estimatedValueFormatted: string;
-  // TODO finish definition
+  summaryOfMarketResearch: string;
+  currentContractExists: boolean;
+  procurementHistory: ICurrentContract[];
+  primaryPoc: IPointOfContact;
+  corPoc: IPointOfContact;
 }

@@ -798,10 +798,15 @@ export const marketResearchReport = {
     researchers: { type: "array", items: researcher },
     fairOpportunity,
     techniquesUsed: { type: "array", items: researchTechnique },
+    techniqueOther: { type: "string" },
     title: { type: "string" },
     estimatedValue: { type: "number" },
     estimatedValueFormatted: { type: "string" },
-    // TODO finish definition
+    summaryOfMarketResearch:  { type: "string" },
+    currentContractExists: { type: "boolean" },
+    procurementHistory: { type: "array", items: contractInformation },
+    primaryPoc: pointOfContact,
+    corPoc: pointOfContact,
   },
   additionalProperties: false,
 };
