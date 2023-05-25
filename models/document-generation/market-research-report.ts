@@ -2,7 +2,6 @@ import { ICurrentContract } from "./requirements-checklist";
 import { IFairOpportunity, IPointOfContact } from "./justification-and-approval";
 import { ResearchTechnique } from "../document-generation";
 
-
 export interface IResearcher {
   name: string;
   title: string;

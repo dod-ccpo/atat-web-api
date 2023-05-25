@@ -1682,7 +1682,7 @@ export const sampleMarketResearchReport = {
       proposedVendor: "Google Support Services",
       justification: "Jeff J&A Justification 1",
     },
-    techniquesUsed: [{ type: "PERSONAL_KNOWLEDGE" }, { type: "CONTACT_WITH_KNOWLEDGEABLE_PERSON" },{ type: "OTHER" }],
+    techniquesUsed: [{ type: "PERSONAL_KNOWLEDGE" }, { type: "CONTACT_WITH_KNOWLEDGEABLE_PERSON" }, { type: "OTHER" }],
     techniqueOther: "Used an experimental cutting-edge technique for estimation.",
     title: "Jason MRR Test 1",
     estimatedValue: 50000000.0,

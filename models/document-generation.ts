@@ -802,7 +802,7 @@ export const marketResearchReport = {
     title: { type: "string" },
     estimatedValue: { type: "number" },
     estimatedValueFormatted: { type: "string" },
-    summaryOfMarketResearch:  { type: "string" },
+    summaryOfMarketResearch: { type: "string" },
     currentContractExists: { type: "boolean" },
     procurementHistory: { type: "array", items: contractInformation },
     primaryPoc: pointOfContact,
