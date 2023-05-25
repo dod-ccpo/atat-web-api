@@ -490,7 +490,7 @@ export const periodOfPerformance = {
     optionPeriods: { type: "array", items: period },
     popStartRequest: { type: "boolean" },
     requestedPopStartDate: { type: "string" },
-    timeFrame: { enum: [TimeFrame.NO_LATER_THAN, TimeFrame.NO_SOONER_THAN, null] },
+    timeFrame: { enum: [TimeFrame.NO_LATER_THAN, TimeFrame.NO_SOONER_THAN, null, ""] },
     recurringRequirement: { type: "boolean" },
   },
 };
