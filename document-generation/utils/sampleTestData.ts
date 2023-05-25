@@ -1681,7 +1681,7 @@ export const sampleMarketResearchReport = {
       proposedVendor: "Google Support Services",
       justification: "Jeff J&A Justification 1",
     },
-    techniquesUsed:[{type:"PERSONAL_KNOWLEDGE"}],
+    techniquesUsed: [{ type: "PERSONAL_KNOWLEDGE" }],
     title: "Jason MRR Test 1",
     estimatedValue: 50000000.0,
     estimatedValueFormatted: "$50,000,000.00",

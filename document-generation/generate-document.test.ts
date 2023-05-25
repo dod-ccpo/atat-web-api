@@ -217,7 +217,7 @@ describe("Invalid requests for generate-document handler", () => {
     sampleIfpRequest.templatePayload,
     sampleRequirementsChecklistRequest.templatePayload,
     sampleJustificationAndApproval.templatePayload,
-    sampleMarketResearchReport.templatePayload
+    sampleMarketResearchReport.templatePayload,
   ])("should return validation error when invalid document type", async (payload) => {
     // GIVEN / ARRANGE
     const invalidRequest = {
@@ -241,7 +241,7 @@ describe("Invalid requests for generate-document handler", () => {
     DocumentType.EVALUATION_PLAN,
     DocumentType.REQUIREMENTS_CHECKLIST,
     DocumentType.JUSTIFICATION_AND_APPROVAL,
-    DocumentType.MARKET_RESEARCH_REPORT
+    DocumentType.MARKET_RESEARCH_REPORT,
   ])("should return validation error when payload not an object", async (documentType) => {
     // GIVEN / ARRANGE
     const invalidRequest = {

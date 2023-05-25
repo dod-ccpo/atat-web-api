@@ -4,12 +4,11 @@ import { ApiBase64SuccessResponse, SuccessStatusCode } from "../utils/response";
 import { IMarketResearchReport } from "../models/document-generation/market-research-report";
 
 export async function doGenerate(template: Buffer, payload: IMarketResearchReport): Promise<Buffer> {
-
   return Buffer.from(
     await createReport({
       template,
       data: {
-      ...payload,
+        ...payload,
       },
       cmdDelimiter: ["{", "}"],
     })

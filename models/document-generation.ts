@@ -409,20 +409,21 @@ const researcher = {
 const researchTechnique = {
   type: "object",
   properties: {
-    type: { enum: [
-      ResearchTechnique.PERSONAL_KNOWLEDGE,
-      ResearchTechnique.DISA_MARKET_RESEARCH_REPO,
-      ResearchTechnique.CONTACT_WITH_KNOWLEDGEABLE_PERSON,
-      ResearchTechnique.REVIEW_SIMILAR_RECENT_RESULTS,
-      ResearchTechnique.REVIEW_DATABASES,
-      ResearchTechnique.REVIEW_SOURCE_LISTS,
-      ResearchTechnique.REVIEW_PRODUCT_LITERATURE,
-      ResearchTechnique.REVIEW_OTHER_CONTRACTS,
-      ResearchTechnique.OTHER,
-    ] },
+    type: {
+      enum: [
+        ResearchTechnique.PERSONAL_KNOWLEDGE,
+        ResearchTechnique.DISA_MARKET_RESEARCH_REPO,
+        ResearchTechnique.CONTACT_WITH_KNOWLEDGEABLE_PERSON,
+        ResearchTechnique.REVIEW_SIMILAR_RECENT_RESULTS,
+        ResearchTechnique.REVIEW_DATABASES,
+        ResearchTechnique.REVIEW_SOURCE_LISTS,
+        ResearchTechnique.REVIEW_PRODUCT_LITERATURE,
+        ResearchTechnique.REVIEW_OTHER_CONTRACTS,
+        ResearchTechnique.OTHER,
+      ],
+    },
   },
-}
-
+};
 
 const environmentInstance = {
   type: "object",
@@ -804,7 +805,6 @@ export const marketResearchReport = {
   },
   additionalProperties: false,
 };
-
 
 export const generateDocumentSchema = {
   type: "object",
