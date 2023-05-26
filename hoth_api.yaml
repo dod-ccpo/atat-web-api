@@ -656,6 +656,8 @@ components:
           $ref: "#/components/schemas/PointOfContact"
         corPoc:
           $ref: "#/components/schemas/PointOfContact"
+        agencyLabel:
+          type: string
       required:
         - researchers
         - fairOpportunity
@@ -668,6 +670,7 @@ components:
         - procurementHistory
         - primaryPoc
         - corPoc
+        - agencyLabel
     Researcher:
       description: "People that have done research for MRR."
       type: object

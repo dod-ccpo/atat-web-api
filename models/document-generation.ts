@@ -808,6 +808,7 @@ export const marketResearchReport = {
     procurementHistory: { type: "array", items: contractInformation },
     primaryPoc: pointOfContact,
     corPoc: pointOfContact,
+    agencyLabel: { type: "string" },
   },
   additionalProperties: false,
 };

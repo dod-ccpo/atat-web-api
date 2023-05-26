@@ -24,4 +24,5 @@ export interface IMarketResearchReport {
   procurementHistory: ICurrentContract[];
   primaryPoc: IPointOfContact;
   corPoc: IPointOfContact;
+  agencyLabel: string;
 }
