@@ -2,7 +2,8 @@
 import { APIGatewayEventRequestContext } from "aws-lambda";
 import { IDescriptionOfWork } from "./document-generation/description-of-work";
 import { requirementsCheckList, RequirementsChecklist } from "./document-generation/requirements-checklist";
-import { IJustificationAndApproval, IPointOfContact } from "./document-generation/justification-and-approval";
+import { IJustificationAndApproval } from "./document-generation/justification-and-approval";
+import { IMarketResearchReport } from "./document-generation/market-research-report";
 
 export enum AwardType {
   INITIAL_AWARD = "INITIAL_AWARD",
@@ -355,7 +356,8 @@ export interface GenerateDocumentRequest {
     | IncrementalFundingPlan
     | EvaluationPlan
     | RequirementsChecklist
-    | IJustificationAndApproval;
+    | IJustificationAndApproval
+    | IMarketResearchReport;
 }
 
 export interface RequestEvent<T> {
