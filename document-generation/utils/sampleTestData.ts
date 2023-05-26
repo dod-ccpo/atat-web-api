@@ -1688,7 +1688,6 @@ export const sampleMarketResearchReport = {
     estimatedValue: 50000000.0,
     estimatedValueFormatted: "$50,000,000.00",
     summaryOfMarketResearch: "My research details incredible findings from speaking to two leading experts.",
-    currentContractExists: true,
     procurementHistory: [
       {
         contractOrderExpirationDate: "May 16, 2023",

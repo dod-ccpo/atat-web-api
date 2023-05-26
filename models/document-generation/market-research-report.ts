@@ -21,7 +21,6 @@ export interface IMarketResearchReport {
   estimatedValue: number;
   estimatedValueFormatted: string;
   summaryOfMarketResearch: string;
-  currentContractExists: boolean;
   procurementHistory: ICurrentContract[];
   primaryPoc: IPointOfContact;
   corPoc: IPointOfContact;
