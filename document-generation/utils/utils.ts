@@ -43,7 +43,6 @@ export const formatPeriodOfPerformance = (basePeriod: IPeriod, optionPeriods: IP
   formattedPop += basePeriod.periodUnitCount;
   formattedPop += " ";
   formattedPop += basePeriod.periodUnit.toLowerCase();
-  formattedPop += basePeriod.periodUnitCount > 1 ? `s` : ``;
   formattedPop += " base period";
   formattedPop += optionPeriods.length > 0 ? ", plus " : "";
 

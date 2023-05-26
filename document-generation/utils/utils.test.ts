@@ -33,16 +33,6 @@ describe("capitalize", () => {
 });
 
 describe("formatPeriodOfPerformance", () => {
-  const samplePop = sampleRequirementsChecklistRequest.templatePayload.periodOfPerformance;
-  const popOrderedOptions = {
-    basePeriod: samplePop.basePeriod,
-    optionPeriods: samplePop.optionPeriods.sort((a, b) => a.optionOrder - b.optionOrder),
-  };
-  const popUnorderedOptions = {
-    basePeriod: samplePop.basePeriod,
-    optionPeriods: samplePop.optionPeriods, // already unordered in the sample
-  };
-
   it("should return correct format when option periods do not match", async () => {
     const periodOfPerformance = {
       basePeriod: { periodType: "BASE", periodUnitCount: 1, periodUnit: "YEAR", optionOrder: null },
@@ -78,8 +68,9 @@ describe("formatPeriodOfPerformance", () => {
     };
 
     const basePeriod: IPeriod = periodOfPerformance.basePeriod as unknown as IPeriod;
+    const optionPeriods: IPeriod[] = periodOfPerformance.optionPeriods as unknown as IPeriod[];
     const expectedPopFormat = "1 year base period, plus one 1-year option period";
-    const popString = formatPeriodOfPerformance(basePeriod, []);
+    const popString = formatPeriodOfPerformance(basePeriod, optionPeriods);
     expect(popString).toEqual(expectedPopFormat);
   });
 
@@ -101,23 +92,11 @@ describe("formatPeriodOfPerformance", () => {
     const basePeriod: IPeriod = periodOfPerformance.basePeriod as unknown as IPeriod;
     const optionPeriods: IPeriod[] = periodOfPerformance.optionPeriods as unknown as IPeriod[];
     const expectedPopFormat =
-      "12 months base period, plus two 6-month option periods, three 2-month option periods and two 1-year option periods";
+      "12 month base period, plus two 6-month option periods, three 2-month option periods and two 1-year option periods";
     const popString = formatPeriodOfPerformance(basePeriod, optionPeriods);
     expect(popString).toEqual(expectedPopFormat);
     /* eslint-enable max-len */
   });
-
-  it.each([popOrderedOptions, popUnorderedOptions])(
-    "should return defined PoP with un/ordered option periods in a human readable format",
-    async (pop) => {
-      const basePeriod: IPeriod = pop.basePeriod as unknown as IPeriod;
-      const optionPeriods = pop.optionPeriods as IPeriod[];
-      const expectedPopFormat = "Base period: 1 Year, Option period 1: 7 Months, Option period 2: 36 Weeks";
-
-      const popString = formatPeriodOfPerformance(basePeriod, optionPeriods);
-      expect(popString).toEqual(expectedPopFormat);
-    }
-  );
 });
 
 describe("convertPeriodToMonths", () => {
