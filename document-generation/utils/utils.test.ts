@@ -42,13 +42,71 @@ describe("formatPeriodOfPerformance", () => {
     basePeriod: samplePop.basePeriod,
     optionPeriods: samplePop.optionPeriods, // already unordered in the sample
   };
-  it("should return defined PoP with no option periods in a human readable format", async () => {
-    const basePeriod: IPeriod = samplePop.basePeriod as unknown as IPeriod;
-    const optionPeriods: IPeriod[] = [];
-    const expectedPopFormat = "Base period: 1 Year";
+
+  it("should return correct format when option periods do not match", async () => {
+    const periodOfPerformance = {
+      basePeriod: { periodType: "BASE", periodUnitCount: 1, periodUnit: "YEAR", optionOrder: null },
+      optionPeriods: [
+        { periodType: "OPTION", periodUnitCount: 6, periodUnit: "MONTH", optionOrder: 2 },
+        { periodType: "OPTION", periodUnitCount: 6, periodUnit: "MONTH", optionOrder: 3 },
+        { periodType: "OPTION", periodUnitCount: 1, periodUnit: "YEAR", optionOrder: 4 },
+      ],
+    };
+
+    const basePeriod: IPeriod = periodOfPerformance.basePeriod as unknown as IPeriod;
+    const optionPeriods: IPeriod[] = periodOfPerformance.optionPeriods as unknown as IPeriod[];
+    const expectedPopFormat = "1 year base period, plus two 6-month option periods and one 1-year option period";
     const popString = formatPeriodOfPerformance(basePeriod, optionPeriods);
     expect(popString).toEqual(expectedPopFormat);
   });
+
+  it("should return correct format when PoP only has a base period", async () => {
+    const periodOfPerformance = {
+      basePeriod: { periodType: "BASE", periodUnitCount: 52, periodUnit: "WEEK", optionOrder: null },
+    };
+
+    const basePeriod: IPeriod = periodOfPerformance.basePeriod as unknown as IPeriod;
+    const expectedPopFormat = "52 week base period";
+    const popString = formatPeriodOfPerformance(basePeriod, []);
+    expect(popString).toEqual(expectedPopFormat);
+  });
+
+  it("should return correct format when PoP only has a base period and one option period", async () => {
+    const periodOfPerformance = {
+      basePeriod: { periodType: "BASE", periodUnitCount: 1, periodUnit: "YEAR", optionOrder: null },
+      optionPeriods: [{ periodType: "OPTION", periodUnitCount: 1, periodUnit: "YEAR", optionOrder: 2 }],
+    };
+
+    const basePeriod: IPeriod = periodOfPerformance.basePeriod as unknown as IPeriod;
+    const expectedPopFormat = "1 year base period, plus one 1-year option period";
+    const popString = formatPeriodOfPerformance(basePeriod, []);
+    expect(popString).toEqual(expectedPopFormat);
+  });
+
+  it("should return correct format when PoP contains more than two option groups", async () => {
+    const periodOfPerformance = {
+      basePeriod: { periodType: "BASE", periodUnitCount: 12, periodUnit: "MONTH", optionOrder: null },
+      optionPeriods: [
+        { periodType: "OPTION", periodUnitCount: 6, periodUnit: "MONTH", optionOrder: 2 },
+        { periodType: "OPTION", periodUnitCount: 6, periodUnit: "MONTH", optionOrder: 3 },
+        { periodType: "OPTION", periodUnitCount: 2, periodUnit: "MONTH", optionOrder: 4 },
+        { periodType: "OPTION", periodUnitCount: 2, periodUnit: "MONTH", optionOrder: 5 },
+        { periodType: "OPTION", periodUnitCount: 2, periodUnit: "MONTH", optionOrder: 6 },
+        { periodType: "OPTION", periodUnitCount: 1, periodUnit: "YEAR", optionOrder: 7 },
+        { periodType: "OPTION", periodUnitCount: 1, periodUnit: "YEAR", optionOrder: 8 },
+      ],
+    };
+
+    /* eslint-disable max-len */
+    const basePeriod: IPeriod = periodOfPerformance.basePeriod as unknown as IPeriod;
+    const optionPeriods: IPeriod[] = periodOfPerformance.optionPeriods as unknown as IPeriod[];
+    const expectedPopFormat =
+      "12 months base period, plus two 6-month option periods, three 2-month option periods and two 1-year option periods";
+    const popString = formatPeriodOfPerformance(basePeriod, optionPeriods);
+    expect(popString).toEqual(expectedPopFormat);
+    /* eslint-enable max-len */
+  });
+
   it.each([popOrderedOptions, popUnorderedOptions])(
     "should return defined PoP with un/ordered option periods in a human readable format",
     async (pop) => {
