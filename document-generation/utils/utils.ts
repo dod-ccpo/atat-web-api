@@ -7,6 +7,7 @@ import {
   FundingType,
 } from "../../models/document-generation";
 import * as fs from "fs";
+import * as converter from "number-to-words";
 
 export const capitalize = (string: string) => {
   if (typeof string !== "string") {
@@ -38,26 +39,58 @@ export const convertPeriodToMonths = (period: IPeriod): number => {
 // is generated based on an array of the option periods index rather than the `optionOrder`
 // previously used.
 export const formatPeriodOfPerformance = (basePeriod: IPeriod, optionPeriods: IPeriod[]): string => {
-  const basePluralEnding = basePeriod.periodUnitCount > 1 ? `s` : ``;
   let formattedPop = "";
-  formattedPop += capitalize(basePeriod.periodType);
-  formattedPop += " period: ";
   formattedPop += basePeriod.periodUnitCount;
   formattedPop += " ";
-  formattedPop += `${capitalize(basePeriod.periodUnit)}${basePluralEnding}`;
+  formattedPop += basePeriod.periodUnit.toLowerCase();
+  formattedPop += " base period";
+  formattedPop += optionPeriods.length > 0 ? ", plus " : "";
 
-  const orderedPeriods = [...optionPeriods].sort((a, b) => a.optionOrder - b.optionOrder);
-  for (const [index, period] of orderedPeriods.entries()) {
-    const optionPluralEnding = period.periodUnitCount > 1 ? `s` : ``;
-    // Format the option Period text as "Option period M: N <Days(s) | Month(s) | Year(s)>"
-    formattedPop += ", ";
-    formattedPop += capitalize(period.periodType);
-    formattedPop += " period ";
-    formattedPop += index + 1;
-    formattedPop += ": ";
-    formattedPop += period.periodUnitCount;
-    formattedPop += " ";
-    formattedPop += `${capitalize(period.periodUnit)}${optionPluralEnding}`;
+  const extractFromOptionGroup = (group: IPeriod[], prefix: string): string => {
+    let section = "";
+    // section += formattedPop.includes("option") ? " and " : "";
+    section += prefix;
+    section += converter.toWords(group.length);
+    section += " ";
+    section += group[0].periodUnitCount;
+    section += "-";
+    section += group[0].periodUnit.toLowerCase();
+    section += " option period";
+    section += group.length > 1 ? "s" : "";
+    return section;
+  };
+
+  const orderedPeriods: IPeriod[] = [...optionPeriods].sort((a, b) => a.optionOrder - b.optionOrder);
+  let previousPeriod!: IPeriod;
+  let currentGroup: IPeriod[] = [];
+  const allGroups: IPeriod[][] = [];
+  for (const period of orderedPeriods) {
+    if (
+      previousPeriod &&
+      (previousPeriod.periodUnit !== period.periodUnit || previousPeriod.periodUnitCount !== period.periodUnitCount)
+    ) {
+      // If the current period is different from the last one, extract the current group and reset the array
+      allGroups.push(currentGroup);
+      currentGroup = [];
+    }
+    currentGroup.push(period);
+    previousPeriod = period;
+  }
+
+  // Extract the final remaining group when we're done
+  if (currentGroup.length > 0) {
+    allGroups.push(currentGroup);
+  }
+
+  // Now that we've assembled all the groups, extract the text from them
+  for (const [index, group] of allGroups.entries()) {
+    if (index === 0) {
+      formattedPop += extractFromOptionGroup(group, "");
+    } else if (index === allGroups.length - 1) {
+      formattedPop += extractFromOptionGroup(group, " and ");
+    } else {
+      formattedPop += extractFromOptionGroup(group, ", ");
+    }
   }
   return formattedPop;
 };
