@@ -809,6 +809,7 @@ export const marketResearchReport = {
     primaryPoc: pointOfContact,
     corPoc: pointOfContact,
     agencyLabel: { type: "string" },
+    researchPersonalKnowledgePersonOrPosition: { type: "string" },
   },
   additionalProperties: false,
 };

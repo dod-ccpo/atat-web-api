@@ -1721,6 +1721,7 @@ export const sampleMarketResearchReport = {
       title: "Contracting Officer",
     },
     agencyLabel: "Business Transformation Agency (BTA)/Some Org",
+    researchPersonalKnowledgePersonOrPosition: "Nelly Knowledgeable/Researcher Extraordinaire",
   },
 };
 /* eslint-enable max-len */

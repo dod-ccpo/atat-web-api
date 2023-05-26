@@ -658,6 +658,8 @@ components:
           $ref: "#/components/schemas/PointOfContact"
         agencyLabel:
           type: string
+        researchPersonalKnowledgePersonOrPosition:
+          type: string
       required:
         - researchers
         - fairOpportunity

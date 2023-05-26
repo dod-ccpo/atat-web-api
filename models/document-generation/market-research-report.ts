@@ -25,4 +25,5 @@ export interface IMarketResearchReport {
   primaryPoc: IPointOfContact;
   corPoc: IPointOfContact;
   agencyLabel: string;
+  researchPersonalKnowledgePersonOrPosition: string;
 }
