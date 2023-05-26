@@ -142,6 +142,9 @@ export const getDocumentTemplatePath = (folder?: string): TemplatePaths => {
     [DocumentType.JUSTIFICATION_AND_APPROVAL]: {
       docx: `${folder}/j-and-a-template.docx`,
     },
+    [DocumentType.MARKET_RESEARCH_REPORT]: {
+      docx: `${folder}/mrr-template.docx`,
+    },
   };
 };
 
@@ -190,6 +193,9 @@ export const getDocxTemplate = (documentType: DocumentType): Buffer => {
       docx = fs.readFileSync(getDocumentTemplatePath()[documentType].docx);
       break;
     case DocumentType.JUSTIFICATION_AND_APPROVAL:
+      docx = fs.readFileSync(getDocumentTemplatePath()[documentType].docx);
+      break;
+    case DocumentType.MARKET_RESEARCH_REPORT:
       docx = fs.readFileSync(getDocumentTemplatePath()[documentType].docx);
       break;
     default:

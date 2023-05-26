@@ -15,6 +15,7 @@ import {
   sampleIgceRequest,
   sampleRequirementsChecklistRequest,
   sampleJustificationAndApproval,
+  sampleMarketResearchReport,
 } from "./utils/sampleTestData";
 
 const validRequest = {
@@ -45,6 +46,10 @@ const docHeaders = {
   janda: {
     "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     "Content-Disposition": `attachment; filename=JustificationAndApproval.docx`,
+  },
+  mrr: {
+    "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "Content-Disposition": `attachment; filename=MarketResearchReport.docx`,
   },
 };
 
@@ -96,6 +101,14 @@ jest.mock("./justification-and-approval-document.ts", () => {
     generateJustificationAndApprovalDocument: jest.fn().mockImplementation(() => {
       const buffer = Buffer.from("generateJustificationAndApprovalDocument");
       return new ApiBase64SuccessResponse(buffer.toString("base64"), SuccessStatusCode.OK, docHeaders.janda);
+    }),
+  };
+});
+jest.mock("./mrr-document.ts", () => {
+  return {
+    generateMarketResearchReportDocument: jest.fn().mockImplementation(() => {
+      const buffer = Buffer.from("generateMarketResearchReportDocument");
+      return new ApiBase64SuccessResponse(buffer.toString("base64"), SuccessStatusCode.OK, docHeaders.mrr);
     }),
   };
 });
@@ -178,6 +191,23 @@ describe("Successful generate-document handler", () => {
     expect(response).toBeInstanceOf(SuccessBase64Response);
     expect(response.headers).toEqual(docHeaders.janda);
   });
+
+  it("should return successful MRR document response", async () => {
+    // GIVEN / ARRANGE
+    const request = {
+      ...validRequest,
+      body: JSON.stringify({
+        ...sampleMarketResearchReport,
+      }),
+    };
+
+    // WHEN / ACT
+    const response = await handler(request, {} as Context);
+    console.log("RESPONSE: ", JSON.stringify(response));
+    // THEN / ASSERT
+    expect(response).toBeInstanceOf(SuccessBase64Response);
+    expect(response.headers).toEqual(docHeaders.mrr);
+  });
 });
 
 describe("Invalid requests for generate-document handler", () => {
@@ -186,6 +216,8 @@ describe("Invalid requests for generate-document handler", () => {
     sampleIgceRequest.templatePayload,
     sampleIfpRequest.templatePayload,
     sampleRequirementsChecklistRequest.templatePayload,
+    sampleJustificationAndApproval.templatePayload,
+    sampleMarketResearchReport.templatePayload,
   ])("should return validation error when invalid document type", async (payload) => {
     // GIVEN / ARRANGE
     const invalidRequest = {
@@ -208,6 +240,8 @@ describe("Invalid requests for generate-document handler", () => {
     DocumentType.INCREMENTAL_FUNDING_PLAN,
     DocumentType.EVALUATION_PLAN,
     DocumentType.REQUIREMENTS_CHECKLIST,
+    DocumentType.JUSTIFICATION_AND_APPROVAL,
+    DocumentType.MARKET_RESEARCH_REPORT,
   ])("should return validation error when payload not an object", async (documentType) => {
     // GIVEN / ARRANGE
     const invalidRequest = {
@@ -240,6 +274,14 @@ describe("Invalid requests for generate-document handler", () => {
     {
       documentType: DocumentType.REQUIREMENTS_CHECKLIST,
       templatePayload: { ...sampleRequirementsChecklistRequest.templatePayload, special: "prop" },
+    },
+    {
+      documentType: DocumentType.JUSTIFICATION_AND_APPROVAL,
+      templatePayload: { ...sampleJustificationAndApproval.templatePayload, notreal: "prop" },
+    },
+    {
+      documentType: DocumentType.MARKET_RESEARCH_REPORT,
+      templatePayload: { ...sampleMarketResearchReport.templatePayload, spurious: "prop" },
     },
   ])("should return validation error when payload has additional properties", async (requestBody) => {
     // GIVEN / ARRANGE
