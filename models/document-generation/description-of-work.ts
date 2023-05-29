@@ -8,7 +8,7 @@ export interface IDescriptionOfWork {
   surgeRequirementCapabilities: boolean;
   currentEnvironment?: ICurrentEnvironment;
   selectedClassificationLevels: ISelectedClassificationLevel[];
-  architecturalDesignRequirement?: ArchitecturalDesignRequirement;
+  architecturalDesignRequirement?: ArchitecturalDesignRequirement | null;
   xaasOfferings: IXaaSOfferings;
   crossDomainSolutions: ICrossDomainSolutions;
   cloudSupportPackages: ICloudSupportEnvironmentInstance[];
