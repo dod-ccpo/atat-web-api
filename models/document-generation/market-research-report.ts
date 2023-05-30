@@ -9,7 +9,8 @@ export interface IResearcher {
 }
 
 export interface IResearchTechnique {
-  type: ResearchTechnique;
+  technique_value: ResearchTechnique;
+  sequence: number;
 }
 
 export interface IMarketResearchReport {

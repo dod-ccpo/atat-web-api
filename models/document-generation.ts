@@ -411,7 +411,7 @@ const researcher = {
 const researchTechnique = {
   type: "object",
   properties: {
-    type: {
+    technique_value: {
       enum: [
         ResearchTechnique.PERSONAL_KNOWLEDGE,
         ResearchTechnique.DISA_MARKET_RESEARCH_REPO,
@@ -424,6 +424,7 @@ const researchTechnique = {
         ResearchTechnique.OTHER,
       ],
     },
+    sequence: { type: "integer" },
   },
 };
 
