@@ -1656,12 +1656,12 @@ export const sampleMarketResearchReport = {
       {
         name: "Jane Researcher",
         title: "Head researcher",
-        organization: "FEMA",
+        org: "FEMA",
       },
       {
         name: "John Researcher",
         title: "Assistant researcher",
-        organization: "FEMA",
+        org: "FEMA",
       },
     ],
     fairOpportunity: {

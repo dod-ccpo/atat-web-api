@@ -405,7 +405,7 @@ const researcher = {
   properties: {
     name: { type: "string" },
     title: { type: "string" },
-    organization: { type: "string" },
+    org: { type: "string" },
   },
 };
 const researchTechnique = {

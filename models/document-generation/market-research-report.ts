@@ -5,7 +5,7 @@ import { ResearchTechnique } from "../document-generation";
 export interface IResearcher {
   name: string;
   title: string;
-  organization: string;
+  org: string;
 }
 
 export interface IResearchTechnique {
