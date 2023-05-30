@@ -17,7 +17,7 @@ export interface IMarketResearchReport {
   researchers: IResearcher[];
   fairOpportunity: IFairOpportunity;
   techniquesUsed: IResearchTechnique[];
-  techniqueOther: string;
+  techniqueOther: string | null;
   title: string;
   estimatedValue: number;
   estimatedValueFormatted: string;
@@ -26,5 +26,5 @@ export interface IMarketResearchReport {
   primaryPoc: IPointOfContact;
   corPoc: IPointOfContact;
   agencyLabel: string;
-  researchPersonalKnowledgePersonOrPosition: string;
+  researchPersonalKnowledgePersonOrPosition: string | null;
 }
