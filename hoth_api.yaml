@@ -687,7 +687,7 @@ components:
       description: "Types of research techniques used for MRR."
       type: object
       properties:
-        type:
+        technique_value:
           type: string
           enum:
             - PERSONAL_KNOWLEDGE,
@@ -699,6 +699,8 @@ components:
             - REVIEW_PRODUCT_LITERATURE,
             - REVIEW_OTHER_CONTRACTS,
             - OTHER,
+        sequence:
+          type: number
     FairOpportunity:
       description: "Contains all fields related to the Fair Opportunity data for a given Acquisition Package. Used in J&A."
       type: object

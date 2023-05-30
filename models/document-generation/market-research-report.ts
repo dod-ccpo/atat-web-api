@@ -5,18 +5,19 @@ import { ResearchTechnique } from "../document-generation";
 export interface IResearcher {
   name: string;
   title: string;
-  organization: string;
+  org: string;
 }
 
 export interface IResearchTechnique {
-  type: ResearchTechnique;
+  technique_value: ResearchTechnique;
+  sequence: number;
 }
 
 export interface IMarketResearchReport {
   researchers: IResearcher[];
   fairOpportunity: IFairOpportunity;
   techniquesUsed: IResearchTechnique[];
-  techniqueOther: string;
+  techniqueOther?: string | null;
   title: string;
   estimatedValue: number;
   estimatedValueFormatted: string;
@@ -25,5 +26,5 @@ export interface IMarketResearchReport {
   primaryPoc: IPointOfContact;
   corPoc: IPointOfContact;
   agencyLabel: string;
-  researchPersonalKnowledgePersonOrPosition: string;
+  researchPersonalKnowledgePersonOrPosition?: string | null;
 }
