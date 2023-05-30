@@ -681,8 +681,12 @@ components:
           type: string
         title:
           type: string
-        organization:
+        org:
           type: string
+      required:
+        - name
+        - title
+        - org
     ResearchTechnique:
       description: "Types of research techniques used for MRR."
       type: object
@@ -699,8 +703,13 @@ components:
             - REVIEW_PRODUCT_LITERATURE,
             - REVIEW_OTHER_CONTRACTS,
             - OTHER,
+        technique_label:
+          type: string
         sequence:
           type: number
+      required:
+        - technique_value
+        - technique_label
     FairOpportunity:
       description: "Contains all fields related to the Fair Opportunity data for a given Acquisition Package. Used in J&A."
       type: object
