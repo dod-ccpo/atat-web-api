@@ -1683,13 +1683,43 @@ export const sampleMarketResearchReport = {
       justification: "Jeff J&A Justification 1",
     },
     techniquesUsed: [
-      { technique_value: "PERSONAL_KNOWLEDGE", sequence: 1 },
-      { technique_value: "CONTACT_WITH_KNOWLEDGEABLE_PERSON", sequence: 3 },
+      {
+        technique_value: "PERSONAL_KNOWLEDGE",
+        technique_label: "Personal knowledge in procuring supplies/services of this type",
+        sequence: 1,
+      },
+      { technique_value: "DISA_MARKET_RESEARCH_REPO", technique_label: "DISA Market Research Repository", sequence: 2 },
+      {
+        technique_value: "CONTACT_WITH_KNOWLEDGEABLE_PERSON",
+        technique_label: "Contact with knowledgeable persons in Government and industry",
+        sequence: 3,
+      },
+      {
+        technique_value: "REVIEW_SIMILAR_RECENT_RESULTS",
+        technique_label: "Review of recent market research results for similar or identical supplies/services",
+        sequence: 4,
+      },
       {
         technique_value: "REVIEW_DATABASES",
+        technique_label: "Review of Government and/or commercial databases for relevant information",
         sequence: 5,
       },
-      { technique_value: "OTHER", sequence: 99 },
+      {
+        technique_value: "REVIEW_SOURCE_LISTS",
+        technique_label: "Review of source lists for identical or similar items obtained",
+        sequence: 6,
+      },
+      {
+        technique_value: "REVIEW_PRODUCT_LITERATURE",
+        technique_label: "Review of catalogs and/or other generally available product literature",
+        sequence: 7,
+      },
+      {
+        technique_value: "REVIEW_OTHER_CONTRACTS",
+        technique_label: "Review of existing DISA-wide and other Government-wide Acquisition Contracts",
+        sequence: 8,
+      },
+      { technique_value: "OTHER", technique_label: "Other", sequence: 99 },
     ],
     techniqueOther: "Used an experimental cutting-edge technique for estimation.",
     title: "Jason MRR Test 1",

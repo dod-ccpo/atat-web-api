@@ -10,6 +10,7 @@ export interface IResearcher {
 
 export interface IResearchTechnique {
   technique_value: ResearchTechnique;
+  technique_label: string;
   sequence: number;
 }
 
