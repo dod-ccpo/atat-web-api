@@ -2,6 +2,8 @@
 import { APIGatewayEventRequestContext } from "aws-lambda";
 import { IDescriptionOfWork } from "./document-generation/description-of-work";
 import { requirementsCheckList, RequirementsChecklist } from "./document-generation/requirements-checklist";
+import { IJustificationAndApproval } from "./document-generation/justification-and-approval";
+import { IMarketResearchReport } from "./document-generation/market-research-report";
 
 export enum AwardType {
   INITIAL_AWARD = "INITIAL_AWARD",
@@ -15,6 +17,8 @@ export enum DocumentType {
   INCREMENTAL_FUNDING_PLAN = "INCREMENTAL_FUNDING_PLAN",
   EVALUATION_PLAN = "EVALUATION_PLAN",
   REQUIREMENTS_CHECKLIST = "REQUIREMENTS_CHECKLIST",
+  JUSTIFICATION_AND_APPROVAL = "JUSTIFICATION_AND_APPROVAL",
+  MARKET_RESEARCH_REPORT = "MARKET_RESEARCH_REPORT",
 }
 
 export enum PeriodType {
@@ -44,6 +48,18 @@ export enum Classification {
   U = "U", // Unclassified
   S = "S", // Secret
   TS = "TS", // Top Secret
+}
+
+export enum ResearchTechnique {
+  PERSONAL_KNOWLEDGE = "PERSONAL_KNOWLEDGE",
+  DISA_MARKET_RESEARCH_REPO = "DISA_MARKET_RESEARCH_REPO",
+  CONTACT_WITH_KNOWLEDGEABLE_PERSON = "CONTACT_WITH_KNOWLEDGEABLE_PERSON",
+  REVIEW_SIMILAR_RECENT_RESULTS = "REVIEW_SIMILAR_RECENT_RESULTS",
+  REVIEW_DATABASES = "REVIEW_DATABASES",
+  REVIEW_SOURCE_LISTS = "REVIEW_SOURCE_LISTS",
+  REVIEW_PRODUCT_LITERATURE = "REVIEW_PRODUCT_LITERATURE",
+  REVIEW_OTHER_CONTRACTS = "REVIEW_OTHER_CONTRACTS",
+  OTHER = "OTHER",
 }
 
 export enum ImpactLevel {
@@ -112,6 +128,8 @@ export interface TemplatePaths {
   [DocumentType.INCREMENTAL_FUNDING_PLAN]: { docx: string };
   [DocumentType.EVALUATION_PLAN]: { docx: string };
   [DocumentType.REQUIREMENTS_CHECKLIST]: { docx: string };
+  [DocumentType.JUSTIFICATION_AND_APPROVAL]: { docx: string };
+  [DocumentType.MARKET_RESEARCH_REPORT]: { docx: string };
 }
 export interface IAward {
   contractAwardType: AwardType;
@@ -122,9 +140,9 @@ export interface IAward {
 export interface IContractInformation {
   contractInformation: string;
   currentContractExists: boolean;
-  contractExpirationDate: string;
+  contractOrderExpirationDate: string;
   incumbentContractorName: string;
-  previousTaskOrderNumber: string;
+  taskDeliveryOrderNumber: string;
 }
 
 export interface IPeriod {
@@ -337,7 +355,9 @@ export interface GenerateDocumentRequest {
     | IndependentGovernmentCostEstimate
     | IncrementalFundingPlan
     | EvaluationPlan
-    | RequirementsChecklist;
+    | RequirementsChecklist
+    | IJustificationAndApproval
+    | IMarketResearchReport;
 }
 
 export interface RequestEvent<T> {
@@ -368,16 +388,43 @@ const classificationLevel = {
 };
 
 const contractInformation = {
-  type: "array",
+  type: "object",
   properties: {
-    type: "object",
-    properties: {
-      contractNumber: { type: "string" },
-      currentContractExists: { type: "boolean" },
-      contractExpirationDate: { type: "string" },
-      incumbentContractorName: { type: "string" },
-      previousTaskOrderNumber: { type: "string" },
+    contractNumber: { type: "string" },
+    currentContractExists: { type: "boolean" },
+    contractOrderStartDate: { type: "string" },
+    contractOrderExpirationDate: { type: "string" },
+    incumbentContractorName: { type: "string" },
+    taskDeliveryOrderNumber: { type: "string" },
+    businessSize: { type: "string" },
+    competitiveStatus: { type: "string" },
+  },
+};
+const researcher = {
+  type: "object",
+  properties: {
+    name: { type: "string" },
+    title: { type: "string" },
+    org: { type: "string" },
+  },
+};
+const researchTechnique = {
+  type: "object",
+  properties: {
+    technique_value: {
+      enum: [
+        ResearchTechnique.PERSONAL_KNOWLEDGE,
+        ResearchTechnique.DISA_MARKET_RESEARCH_REPO,
+        ResearchTechnique.CONTACT_WITH_KNOWLEDGEABLE_PERSON,
+        ResearchTechnique.REVIEW_SIMILAR_RECENT_RESULTS,
+        ResearchTechnique.REVIEW_DATABASES,
+        ResearchTechnique.REVIEW_SOURCE_LISTS,
+        ResearchTechnique.REVIEW_PRODUCT_LITERATURE,
+        ResearchTechnique.REVIEW_OTHER_CONTRACTS,
+        ResearchTechnique.OTHER,
+      ],
     },
+    sequence: { type: "integer" },
   },
 };
 
@@ -486,7 +533,7 @@ export const periodOfPerformance = {
     optionPeriods: { type: "array", items: period },
     popStartRequest: { type: "boolean" },
     requestedPopStartDate: { type: "string" },
-    timeFrame: { enum: [TimeFrame.NO_LATER_THAN, TimeFrame.NO_SOONER_THAN, null] },
+    timeFrame: { enum: [TimeFrame.NO_LATER_THAN, TimeFrame.NO_SOONER_THAN, null, ""] },
     recurringRequirement: { type: "boolean" },
   },
 };
@@ -690,6 +737,84 @@ export const evalPlan = {
   additionalProperties: false,
 };
 
+// J&A
+
+export const fairOpportunity = {
+  type: "object",
+  properties: {
+    procurementDiscussion: { type: "string" },
+    procurementPreviousImpact: { type: "string" },
+    marketResearchDetails: { type: "string" },
+    causeOfSoleSourceSituation: { type: "string" },
+    procurementHasExistingEnv: { type: "boolean" },
+    minimumGovernmentRequirements: { type: "string" },
+    plansToRemoveBarriers: { type: "string" },
+    requirementImpact: { type: "string" },
+    exceptionToFairOpportunity: { type: "string" },
+    otherFactsToSupportLogicalFollowOn: { type: "string" },
+    whyCspIsOnlyCapableSource: { type: "string" },
+    proposedVendor: { type: "string" },
+    justification: { type: "string" },
+  },
+  additionalProperties: false,
+};
+export const pointOfContact = {
+  type: "object",
+  properties: {
+    formalName: { type: "string" },
+    phoneAndExtension: { type: "string" },
+    title: { type: "string" },
+  },
+  additionalProperties: false,
+};
+
+export const justificationAndApproval = {
+  type: "object",
+  properties: {
+    cor: pointOfContact,
+    technicalPoc: pointOfContact,
+    requirementsPoc: pointOfContact,
+    periodOfPerformance,
+    fairOpportunity,
+    procurementHistory: { type: "array", items: contractInformation },
+    fundingRequestFiscalYear: { type: "string" },
+    otherContractingShopFullAddress: { type: "string" },
+    title: { type: "string" },
+    jwccContractNumber: { type: "string" },
+    estimatedValue: { type: "number" },
+    estimatedValueFormatted: { type: "string" },
+    organizationFullAddress: { type: "string" },
+    scope: { type: "string" },
+    contractingShop: { type: "string" },
+    purchaseRequestNumber: { type: "string" },
+    agencyLabel: { type: "string" },
+    taskOrderType: { type: "string" },
+    appropriationFundsType: { type: "string" },
+  },
+  additionalProperties: false,
+};
+
+// MRR
+export const marketResearchReport = {
+  type: "object",
+  properties: {
+    researchers: { type: "array", items: researcher },
+    fairOpportunity,
+    techniquesUsed: { type: "array", items: researchTechnique },
+    techniqueOther: { type: "string" },
+    title: { type: "string" },
+    estimatedValue: { type: "number" },
+    estimatedValueFormatted: { type: "string" },
+    summaryOfMarketResearch: { type: "string" },
+    procurementHistory: { type: "array", items: contractInformation },
+    primaryPoc: pointOfContact,
+    corPoc: pointOfContact,
+    agencyLabel: { type: "string" },
+    researchPersonalKnowledgePersonOrPosition: { type: "string" },
+  },
+  additionalProperties: false,
+};
+
 export const generateDocumentSchema = {
   type: "object",
   properties: {
@@ -701,6 +826,8 @@ export const generateDocumentSchema = {
         DocumentType.INCREMENTAL_FUNDING_PLAN,
         DocumentType.EVALUATION_PLAN,
         DocumentType.REQUIREMENTS_CHECKLIST,
+        DocumentType.JUSTIFICATION_AND_APPROVAL,
+        DocumentType.MARKET_RESEARCH_REPORT,
       ],
     },
     templatePayload: {
@@ -710,6 +837,8 @@ export const generateDocumentSchema = {
         incrementalFundingPlan,
         evalPlan,
         requirementsCheckList,
+        justificationAndApproval,
+        marketResearchReport,
       ],
     },
   },

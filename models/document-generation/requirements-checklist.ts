@@ -40,11 +40,14 @@ export interface IPackageContacts {
 }
 
 export interface ICurrentContract {
-  exists: boolean;
+  currentContractExists: boolean;
   incumbentContractorName: string;
   contractNumber: string;
-  taskOrderNumber: string;
-  contractExpiration: string;
+  taskDeliveryOrderNumber: string;
+  contractOrderStartDate: string;
+  contractOrderExpirationDate: string;
+  businessSize: string;
+  competitiveStatus: string;
 }
 
 export interface IContractType {
@@ -127,11 +130,11 @@ const currentContract = {
   items: {
     type: "object",
     properties: {
-      exists: { type: "boolean" },
+      currentContractExists: { type: "boolean" },
       incumbentContractorName: { type: "string" },
       contractNumber: { type: "string" },
-      taskOrderNumber: { type: "string" },
-      contractExpiration: { type: "string" },
+      taskDeliveryOrderNumber: { type: "string" },
+      contractOrderExpirationDate: { type: "string" },
     },
   },
 };

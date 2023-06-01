@@ -8,7 +8,7 @@ export interface IDescriptionOfWork {
   surgeRequirementCapabilities: boolean;
   currentEnvironment?: ICurrentEnvironment;
   selectedClassificationLevels: ISelectedClassificationLevel[];
-  architecturalDesignRequirement?: ArchitecturalDesignRequirement;
+  architecturalDesignRequirement?: ArchitecturalDesignRequirement | null;
   xaasOfferings: IXaaSOfferings;
   crossDomainSolutions: ICrossDomainSolutions;
   cloudSupportPackages: ICloudSupportEnvironmentInstance[];
@@ -52,9 +52,9 @@ export interface IAward {
 export interface IContractInformation {
   contractNumber: string;
   currentContractExists: boolean;
-  contractExpirationDate?: string | null;
+  contractOrderExpirationDate?: string | null;
   incumbentContractorName?: string | null;
-  previousTaskOrderNumber?: string | null;
+  taskDeliveryOrderNumber?: string | null;
 }
 
 /** @description Cross Domain Solutions (CDS) for the transfer of data between classification levels */
@@ -479,9 +479,9 @@ const contractInformation = {
     properties: {
       contractNumber: { type: "string" },
       currentContractExists: { type: "boolean" },
-      contractExpirationDate: { type: "string" },
+      contractOrderExpirationDate: { type: "string" },
       incumbentContractorName: { type: "string" },
-      previousTaskOrderNumber: { type: "string" },
+      taskDeliveryOrderNumber: { type: "string" },
     },
   },
 };

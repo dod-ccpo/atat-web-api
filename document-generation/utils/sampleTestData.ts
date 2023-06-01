@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 export const sampleDowRequest = {
   documentType: "DESCRIPTION_OF_WORK_DOCX",
   templatePayload: {
@@ -12,16 +13,16 @@ export const sampleDowRequest = {
       {
         currentContractExists: true,
         contractNumber: "349759340",
-        contractExpirationDate: "2023-02-28",
+        contractExpirationDate: "2023-12-28",
         incumbentContractorName: "Random Person",
-        previousTaskOrderNumber: "",
+        taskDeliveryOrderNumber: "ABC123",
       },
       {
-        currentContractExists: true,
+        currentContractExists: false,
         contractNumber: "359875605",
         contractExpirationDate: "2022-02-28",
         incumbentContractorName: "Random Person",
-        previousTaskOrderNumber: "",
+        taskDeliveryOrderNumber: "DEF456",
       },
     ],
     toTitle: "Test Package for DOW",
@@ -1508,18 +1509,18 @@ export const sampleRequirementsChecklistRequest = {
     },
     currentContract: [
       {
-        exists: true,
+        currentContractExists: true,
         incumbentContractorName: "Someone Making Decisions",
         contractNumber: "928384",
-        taskOrderNumber: "29284484",
-        contractExpiration: "2022-12-09",
+        taskDeliveryOrderNumber: "29284484",
+        contractOrderExpirationDate: "2022-12-09",
       },
       {
-        exists: true,
+        currentContractExists: true,
         incumbentContractorName: "Someone Making Decisions",
         contractNumber: "928375",
-        taskOrderNumber: "29284463",
-        contractExpiration: "2021-12-09",
+        taskDeliveryOrderNumber: "29284463",
+        contractOrderExpirationDate: "2021-12-09",
       },
     ],
     exceptionToFairOpportunity: "YES_FAR_16_505_B_2_I_B",
@@ -1547,3 +1548,218 @@ export const sampleRequirementsChecklistRequest = {
     },
   },
 };
+
+export const sampleJustificationAndApproval = {
+  documentType: "JUSTIFICATION_AND_APPROVAL",
+  templatePayload: {
+    purchaseRequestNumber: "O2208-097-097-697046, O2208-097-097-697046",
+    jwccContractNumber: "HC105023D0002",
+    title: "Jeff J&A Test 1",
+    scope: "J & A Scope Test 1",
+    estimatedValue: 157728,
+    estimatedValueFormatted: "$157,728.00",
+    agencyLabel: "Business Transformation Agency (BTA)/Jeff Org J&A",
+    organizationFullAddress: "123 Fake St\nSpringfield, OH 12345\nUnited States of America",
+    contractingShop: "DITCO",
+    otherContractingShopFullAddress: null,
+    taskOrderType: "firm-fixed-price",
+    appropriationFundsType: "Research, Development, Test & Evaluation",
+    fundingRequestFiscalYear: "FY23",
+    fairOpportunity: {
+      proposedVendor: "Google Support Services",
+      exceptionToFairOpportunity: "16.505(b)(2)(i)(C)",
+      justification: "Jeff J&A Justification 1",
+      minimumGovernmentRequirements:
+        "The cloud offerings must continue at their current level in order to support...\n\nThese offerings include...\n\nAll my minimum stuff",
+      causeOfSoleSourceSituation: "cause of sole source - custom",
+      whyCspIsOnlyCapableSource:
+        "Google possesses the knowledge, skills, capabilities, certification, clearance, and experience required to continue the program without a break or degradation in critical mission services. Given these critical mission requirements, Google is the only contractor that is capable of performing the necessary services for the DoD within the current required timeline.",
+      procurementDiscussion: "google constraints",
+      procurementHasExistingEnv: true,
+      procurementPreviousImpact:
+        "Since there is already an existing environment, the CSP is immediately able to shift to supporting the resultant award associated with this contract action, it would minimize any associated transition costs for the Government. In addition, another contractor would not be positioned to leverage investments made to date to most efficiently meet the objectives of the task order for the anticipated PoP.",
+      requirementImpact: "requirement impact details",
+      marketResearchDetails: "research details - generated",
+      otherFactsToSupportLogicalFollowOn: null,
+      plansToRemoveBarriers: "barriers - generated",
+    },
+    technicalPoc: {
+      formalName: "SPC Bob Robert",
+      title: "Guy",
+      phoneAndExtension: null,
+    },
+    requirementsPoc: {
+      formalName: "GEN Who Where",
+      title: null,
+      phoneAndExtension: "+1 (223) 300-4293",
+    },
+    cor: {
+      formalName: "GEN Who Where",
+      title: null,
+      phoneAndExtension: "+1 (223) 300-4293",
+    },
+    periodOfPerformance: {
+      basePeriod: {
+        periodType: "BASE",
+        periodUnitCount: 12,
+        periodUnit: "MONTH",
+        optionOrder: 1,
+      },
+      optionPeriods: [
+        {
+          periodType: "OPTION",
+          periodUnitCount: 6,
+          periodUnit: "MONTH",
+          optionOrder: 2,
+        },
+        {
+          periodType: "OPTION",
+          periodUnitCount: 6,
+          periodUnit: "MONTH",
+          optionOrder: 3,
+        },
+      ],
+      popStartRequest: false,
+      requestedPopStartDate: "",
+      timeFrame: "",
+      recurringRequirement: true,
+    },
+    procurementHistory: [
+      {
+        contractNumber: "123123132",
+        currentContractExists: true,
+        contractOrderExpirationDate: "May 31, 2023",
+        incumbentContractorName: "Big Incumbent",
+        taskDeliveryOrderNumber: "634534543",
+        contractOrderStartDate: "December 07, 2022",
+        businessSize: "HUBZone",
+        competitiveStatus: "Small business (SB) set-aside",
+      },
+      {
+        contractNumber: "284632495436546",
+        currentContractExists: true,
+        contractOrderExpirationDate: "May 16, 2023",
+        incumbentContractorName: "Jeff Incumbent",
+        taskDeliveryOrderNumber: "TO32907423",
+        contractOrderStartDate: "May 16, 2022",
+        businessSize: "Large business",
+        competitiveStatus: "Full and open competition",
+      },
+    ],
+  },
+};
+
+export const sampleMarketResearchReport = {
+  documentType: "MARKET_RESEARCH_REPORT",
+  templatePayload: {
+    researchers: [
+      {
+        name: "Jane Researcher",
+        title: "Head researcher",
+        org: "FEMA",
+      },
+      {
+        name: "John Researcher",
+        title: "Assistant researcher",
+        org: "FEMA",
+      },
+    ],
+    fairOpportunity: {
+      procurementDiscussion: "google constraints",
+      procurementPreviousImpact:
+        "Since there is already an existing environment, the CSP is immediately able to shift to supporting the resultant award associated with this contract action, it would minimize any associated transition costs for the Government. In addition, another contractor would not be positioned to leverage investments made to date to most efficiently meet the objectives of the task order for the anticipated PoP.",
+      marketResearchDetails: "research details - generated",
+      causeOfSoleSourceSituation: "cause of sole source - custom",
+      procurementHasExistingEnv: true,
+      minimumGovernmentRequirements:
+        "The cloud offerings must continue at their current level in order to support...\n\nThese offerings include...\n\nAll my minimum stuff",
+      plansToRemoveBarriers: "barriers - generated",
+      requirementImpact: "requirement impact details",
+      exceptionToFairOpportunity: "16.505(b)(2)(i)(B)",
+      otherFactsToSupportLogicalFollowOn: null,
+      whyCspIsOnlyCapableSource:
+        "Google possesses the knowledge, skills, capabilities, certification, clearance, and experience required to continue the program without a break or degradation in critical mission services. Given these critical mission requirements, Google is the only contractor that is capable of performing the necessary services for the DoD within the current required timeline.",
+      proposedVendor: "Google Support Services",
+      justification: "Jeff J&A Justification 1",
+    },
+    techniquesUsed: [
+      {
+        technique_value: "PERSONAL_KNOWLEDGE",
+        technique_label: "Personal knowledge in procuring supplies/services of this type",
+        sequence: 1,
+      },
+      { technique_value: "DISA_MARKET_RESEARCH_REPO", technique_label: "DISA Market Research Repository", sequence: 2 },
+      {
+        technique_value: "CONTACT_WITH_KNOWLEDGEABLE_PERSON",
+        technique_label: "Contact with knowledgeable persons in Government and industry",
+        sequence: 3,
+      },
+      {
+        technique_value: "REVIEW_SIMILAR_RECENT_RESULTS",
+        technique_label: "Review of recent market research results for similar or identical supplies/services",
+        sequence: 4,
+      },
+      {
+        technique_value: "REVIEW_DATABASES",
+        technique_label: "Review of Government and/or commercial databases for relevant information",
+        sequence: 5,
+      },
+      {
+        technique_value: "REVIEW_SOURCE_LISTS",
+        technique_label: "Review of source lists for identical or similar items obtained",
+        sequence: 6,
+      },
+      {
+        technique_value: "REVIEW_PRODUCT_LITERATURE",
+        technique_label: "Review of catalogs and/or other generally available product literature",
+        sequence: 7,
+      },
+      {
+        technique_value: "REVIEW_OTHER_CONTRACTS",
+        technique_label: "Review of existing DISA-wide and other Government-wide Acquisition Contracts",
+        sequence: 8,
+      },
+      { technique_value: "OTHER", technique_label: "Other", sequence: 99 },
+    ],
+    techniqueOther: "Used an experimental cutting-edge technique for estimation.",
+    title: "Jason MRR Test 1",
+    estimatedValue: 50000000.0,
+    estimatedValueFormatted: "$50,000,000.00",
+    summaryOfMarketResearch: "My research details incredible findings from speaking to two leading experts.",
+    procurementHistory: [
+      {
+        contractOrderExpirationDate: "May 16, 2023",
+        incumbentContractorName: "Jeff Incumbent 2",
+        taskDeliveryOrderNumber: "TO32907423",
+        businessSize: "Large business",
+        contractNumber: "284632495436546",
+        contractOrderStartDate: "May 16, 2022",
+        competitiveStatus: "Full and open competition",
+        currentContractExists: true,
+      },
+      {
+        contractOrderExpirationDate: "May 15, 2022",
+        incumbentContractorName: "Jeff Incumbent 1",
+        taskDeliveryOrderNumber: "TO32907422",
+        businessSize: "Large business",
+        contractNumber: "284632495436545",
+        contractOrderStartDate: "May 15, 2021",
+        competitiveStatus: "Full and open competition",
+        currentContractExists: true,
+      },
+    ],
+    primaryPoc: {
+      formalName: "Maria Missionowner",
+      phoneAndExtension: "+1 (555) 123-4567",
+      title: "Project Lead",
+    },
+    corPoc: {
+      formalName: "Cary Conofficer",
+      phoneAndExtension: "+1 (555) 987-6543",
+      title: "Contracting Officer",
+    },
+    agencyLabel: "Business Transformation Agency (BTA)/Some Org",
+    researchPersonalKnowledgePersonOrPosition: "Nelly Knowledgeable/Researcher Extraordinaire",
+  },
+};
+/* eslint-enable max-len */
