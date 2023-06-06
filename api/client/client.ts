@@ -339,7 +339,7 @@ export class AtatClient implements IAtatClient {
    */
   async getCostsByPortfolio(request: types.GetCostsByPortfolioRequest): Promise<types.GetCostsByPortfolioResponse> {
     const headers = this.buildHeaders(request);
-    const response = await this.client.get(`/portfolios/${request.portfolioId}/cost`, {
+    const response = await this.client.get(`/portfolios/${request.portfolioId}/costs`, {
       params: {
         start_date: request.startDate,
         end_date: request.endDate,
@@ -387,7 +387,7 @@ export class AtatClient implements IAtatClient {
   async getCostsByClin(request: types.GetCostsByClinRequest): Promise<types.GetCostsByClinResponse> {
     const headers = this.buildHeaders(request);
     const response = await this.client.get(
-      `/portfolios/${request.portfolioId}/task-orders/${request.taskOrderNumber}/clins/${request.clin}/cost`,
+      `/portfolios/${request.portfolioId}/task-orders/${request.taskOrderNumber}/clins/${request.clin}/costs`,
       { params: { start_date: request.startDate, end_date: request.endDate }, headers }
     );
     switch (response.status) {
