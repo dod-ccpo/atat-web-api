@@ -260,7 +260,7 @@ describe.skip("patchEnvironment", () => {
 describe("getCostsByPortfolio", () => {
   let client: AtatClient;
   let mock: MockAdapter;
-  const url = `${TEST_CSP_ENDPOINT}/portfolios/${portfolioId}/cost`;
+  const url = `${TEST_CSP_ENDPOINT}/portfolios/${portfolioId}/costs`;
   beforeAll(() => {
     client = new AtatClient(TEST_API_TOKEN, TEST_CSP_ENDPOINT);
     // see comment in 'addPortfolio' test above for more info on the mocking axios instance
@@ -277,24 +277,24 @@ describe("getCostsByPortfolio", () => {
       startDate: "2021-12-01",
       endDate: "2022-03-31",
     })) as GetCostsByPortfolioResponse;
-    expect(mock.history.get[0].url).toEqual(`/portfolios/${portfolioId}/cost`);
+    expect(mock.history.get[0].url).toEqual(`/portfolios/${portfolioId}/costs`);
     expect(mock.history.get[0].params).toEqual({ start_date: "2021-12-01", end_date: "2022-03-31" });
     expect(result.costs).toEqual(mockCostData);
   });
   it("should throw a 400 error", async () => {
-    mock.onGet(`${TEST_CSP_ENDPOINT}/portfolios/undefined/cost`).reply(400, { bad: "request" });
+    mock.onGet(`${TEST_CSP_ENDPOINT}/portfolios/undefined/costs`).reply(400, { bad: "request" });
     await expect(
       async () => await client.getCostsByPortfolio({ bad: "input" } as unknown as GetCostsByPortfolioRequest)
     ).rejects.toThrow(/Invalid ID or query parameters/);
   });
   it("should throw an error on a 404 response", async () => {
-    mock.onGet(`${TEST_CSP_ENDPOINT}/portfolios/undefined/cost`).reply(404, { not: "found" });
+    mock.onGet(`${TEST_CSP_ENDPOINT}/portfolios/undefined/costs`).reply(404, { not: "found" });
     await expect(
       async () => await client.getCostsByPortfolio({ not: "found" } as unknown as GetCostsByPortfolioRequest)
     ).rejects.toThrow(/Portfolio not found/);
   });
   it.each([204, 405, 410, 500, 503])("should throw an unexpected error %s", async (statusCode) => {
-    mock.onGet(`${TEST_CSP_ENDPOINT}/portfolios/undefined/cost`).reply(statusCode, { unknown: "error thrown" });
+    mock.onGet(`${TEST_CSP_ENDPOINT}/portfolios/undefined/costs`).reply(statusCode, { unknown: "error thrown" });
     await expect(
       async () => await client.getCostsByPortfolio({ unknown: "error" } as unknown as GetCostsByPortfolioRequest)
     ).rejects.toThrow(/Unexpected API error/);
@@ -345,8 +345,8 @@ describe("getCostsByClin", () => {
   let mock: MockAdapter;
   const number = mockTaskOrder.taskOrderNumber;
   const clin = mockTaskOrder.clins[0].clinNumber;
-  const url = `${TEST_CSP_ENDPOINT}/portfolios/${portfolioId}/task-orders/${number}/clins/${clin}/cost`;
-  const badUrl = `${TEST_CSP_ENDPOINT}/portfolios/undefined/task-orders/undefined/clins/undefined/cost`;
+  const url = `${TEST_CSP_ENDPOINT}/portfolios/${portfolioId}/task-orders/${number}/clins/${clin}/costs`;
+  const badUrl = `${TEST_CSP_ENDPOINT}/portfolios/undefined/task-orders/undefined/clins/undefined/costs`;
   beforeAll(() => {
     client = new AtatClient(TEST_API_TOKEN, TEST_CSP_ENDPOINT);
     // see comment in 'addPortfolio' test above for more info on the mocking axios instance
@@ -363,7 +363,7 @@ describe("getCostsByClin", () => {
     };
     mock.onGet(url).reply(200, mockClinCosts);
     const result = (await client.getCostsByClin(mockGetCostsByClinRequest)) as GetCostsByClinResponse;
-    expect(mock.history.get[0].url).toEqual(`/portfolios/${portfolioId}/task-orders/${number}/clins/${clin}/cost`);
+    expect(mock.history.get[0].url).toEqual(`/portfolios/${portfolioId}/task-orders/${number}/clins/${clin}/costs`);
     expect(result.costs).toEqual(mockClinCosts);
   });
   it("should throw a 400 error", async () => {
