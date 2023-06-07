@@ -1,0 +1,69 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: >-
+  Creates a CloudWatch filter that monitors the cloudwatch transit logs to look for malicous IPs.
+
+Parameters:
+  EmailGroup:
+      Description: >-
+        This is the email distro group that will be notified in the event
+        the a malicous IP is flagged in the cloudwatch alarms.
+      Type: String
+
+  # KmsKeyId:
+  #     Description: >-
+  #       AWS KMS key used to encrypt the SNS topic.
+  #     Type: String
+
+  CloudWatchLogGroup:
+      Description: >-
+        Cloudwatch Log group name to place the filter on.
+      Type: String
+
+Resources:
+  rMalicousIPSNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: "MalicousIPAlert"
+      DisplayName: "MalicousIPAlert"
+      KmsMasterKeyId: !Ref KmsKeyId
+
+
+  rEc2StatusSnsSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Endpoint: !Ref EmailGroup
+      Protocol: email
+      TopicArn: !Ref MalicousIPAlert
+
+
+rMalicousIPMetricFilter: 
+  Type: AWS::Logs::MetricFilter
+  Properties: 
+    LogGroupName: !Ref CloudWatchLogGroup
+    FilterPattern: '194.147.90.79'
+    MetricTransformations: 
+      - MetricValue: "1"
+        MetricNamespace: MalicousIP
+        MetricName: "MalicousIP"
+
+   rCloudWatchAlarmMalicousIP:
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W28 # Resource found with an explicit name
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: ATAT-Malicous-IP
+      AlarmDescription: Alarm for AWS tranist logs for malicous IP
+      AlarmActions:
+        - !Ref MalicousIPSNSTopic
+      MetricName: MalicousIP
+      Namespace: LogMetrics
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      EvaluationPeriods: 1
+      Period: 300
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching

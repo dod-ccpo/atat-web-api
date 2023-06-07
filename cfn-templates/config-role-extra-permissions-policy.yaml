@@ -1,0 +1,71 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Creating IAM Users via Cloudformation
+
+Parameters:
+ConfigRole:
+    Description: >-
+      Role that we wish to use to be asscoiated with this policy.
+    Type: String
+
+Resources:
+  CsspApicwluser:
+    Type: AWS::IAM::Policy 
+    Properties:
+      PolicyName: AWSConfig-Updated-Permissions-Policy
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action: 
+              - datasync:List*
+              - datasync:ListLocations
+              - datasync:ListTasks
+              - datasync:ListTaskExecutions
+              - glue:Get*
+              - ses:List*
+              - iotevents:List*
+              - iotevents:List*
+              - s3:PutObject
+              - events:List*
+              - kinesisanalytics:List*
+              - iotsitewise:List*
+              - networkmanager:Describe*
+              - networkmanager:List*
+              - networkmanager:Get*
+              - servicediscovery:Get*
+              - servicediscovery:List*
+              - appconfig:List*
+              - appconfig:Get*
+              - imagebuilder:List*
+              - imagebuilder:Get*
+              - dms:Describe*
+              - dms:List*
+              - route53resolver:List*
+              - route53resolver:Get*
+              - cloudcontrolapi:List*
+              - cloudcontrolapi:Get*
+              - athena:List*
+              - athena:Get*
+              - transfer:List*
+              - transfer:Describe*
+              - guardduty:Get*
+              - guardduty:List*
+              - guardduty:Describe*
+              - detective:List*
+              - detective:Get*
+              - mobiletargeting:Get*
+              - mobiletargeting:List*
+              - iot:Get*
+				      - iot:List*
+				      - iot:Describe*
+              - mq:List*
+              - mq:Describe*
+              - batch:List*
+				      - batch:Describe*
+				      - redshift:Describe*
+				      - redshift:List*
+				      - redshift:Get*
+              - robomaker:List*
+              - robomaker:Get*
+      Roles:
+        - !Ref ConfigRole
