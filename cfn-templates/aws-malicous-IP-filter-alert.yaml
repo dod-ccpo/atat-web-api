@@ -27,7 +27,7 @@ Resources:
     Properties:
       TopicName: "MalicousIPAlert"
       DisplayName: "MalicousIPAlert"
-      KmsMasterKeyId: !Ref KmsKeyId
+      # KmsMasterKeyId: !Ref KmsKeyId
 
 
   rEc2StatusSnsSubscription:
@@ -35,30 +35,30 @@ Resources:
     Properties:
       Endpoint: !Ref EmailGroup
       Protocol: email
-      TopicArn: !Ref MalicousIPAlert
+      TopicArn: !Ref rMalicousIPSNSTopic
 
 
-rMalicousIPMetricFilter: 
-  Type: AWS::Logs::MetricFilter
-  Properties: 
-    LogGroupName: !Ref CloudWatchLogGroup
-    FilterPattern: '194.147.90.79'
-    MetricTransformations: 
-      - MetricValue: "1"
-        MetricNamespace: MalicousIP
-        MetricName: "MalicousIP"
+  rMalicousIPMetricFilter: 
+    Type: AWS::Logs::MetricFilter
+    Properties: 
+      LogGroupName: !Ref CloudWatchLogGroup
+      FilterPattern: '194.147.90.79'
+      MetricTransformations: 
+        - MetricValue: "1"
+          MetricNamespace: MalicousIPfilter
+          MetricName: MalicousIP
 
-   rCloudWatchAlarmMalicousIP:
+  rCloudWatchAlarmMalicousIP:
     Metadata:
       cfn_nag:
         rules_to_suppress:
           - id: W28 # Resource found with an explicit name
     Type: AWS::CloudWatch::Alarm
     Properties:
-      AlarmName: ATAT-Malicous-IP
+      AlarmName: ATAT-Malicous-IP-Alarm
       AlarmDescription: Alarm for AWS tranist logs for malicous IP
       AlarmActions:
-        - !Ref MalicousIPSNSTopic
+        - !Ref rMalicousIPSNSTopic
       MetricName: MalicousIP
       Namespace: LogMetrics
       ComparisonOperator: GreaterThanOrEqualToThreshold
