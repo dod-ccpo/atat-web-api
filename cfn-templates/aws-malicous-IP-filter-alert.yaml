@@ -56,11 +56,11 @@ Resources:
     Type: AWS::CloudWatch::Alarm
     Properties:
       AlarmName: ATAT-Malicous-IP-Alarm
-      AlarmDescription: Alarm for AWS tranist logs for malicous IP
+      AlarmDescription: Alarm for AWS tranist logs looking got malicous IP
       AlarmActions:
         - !Ref rMalicousIPSNSTopic
       MetricName: MalicousIP
-      Namespace: LogMetrics
+      Namespace: MalicousIPfilter
       ComparisonOperator: GreaterThanOrEqualToThreshold
       EvaluationPeriods: 1
       Period: 300
