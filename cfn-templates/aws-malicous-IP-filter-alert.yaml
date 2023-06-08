@@ -11,6 +11,11 @@ Parameters:
         the a malicous IP is flagged in the cloudwatch alarms.
       Type: String
 
+  KmsKeyId:
+      Description: >-
+        AWS KMS key used to encrypt the SNS topic.
+      Type: String
+
   CloudWatchLogGroup:
       Description: >-
         Cloudwatch Log group name to place the filter on.
@@ -20,8 +25,9 @@ Resources:
   rMalicousIPSNSTopic:
     Type: AWS::SNS::Topic
     Properties:
-      TopicName: "MalicousIPAlert"
-      DisplayName: "MalicousIPAlert"
+      TopicName: "VPC-Logs-Malicous-IP-Alert"
+      DisplayName: "VPC-Logs-MalicousMalicous-IP-Alert"
+      KmsMasterKeyId: !Ref KmsKeyId
 
 
   rEc2StatusSnsSubscription:
