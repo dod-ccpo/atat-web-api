@@ -41,6 +41,15 @@ import { generateMarketResearchReportDocument } from "./mrr-document";
 import { IJustificationAndApproval } from "../models/document-generation/justification-and-approval";
 import { IMarketResearchReport } from "../models/document-generation/market-research-report";
 
+import { doGenerate } from "./dow-document";
+import { sampleDowRequest } from "./utils/sampleTestData";
+import fs from "fs";
+export async function createDoc() {
+  const docxTemplate = getDocxTemplate(DocumentType.DESCRIPTION_OF_WORK_DOCX);
+  const docBuffer = await doGenerate(docxTemplate, sampleDowRequest.templatePayload as IDescriptionOfWork);
+  await fs.writeFileSync("report.docx", docBuffer);
+}
+
 async function baseHandler(event: RequestEvent<GenerateDocumentRequest>): Promise<ApiBase64SuccessResponse> {
   const { documentType } = event.body;
   logger.info("Generating document", { documentType });
