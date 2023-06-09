@@ -109,6 +109,16 @@ describe("getPortfolioById", () => {
     expect(mock.history.get[0].url).toEqual(`/portfolios/${portfolioId}`);
     expect(result.portfolio).toEqual(portfolio);
   });
+  it("should encode URL", async () => {
+    const needsEncoding = "this:needs/to;be encoded,";
+    const encoded = encodeURIComponent(needsEncoding).toString();
+    const urlWithEncoding = `${TEST_CSP_ENDPOINT}/portfolios/${encoded}`;
+    mock.onGet(urlWithEncoding).reply(200, mockCostData);
+    await client.getPortfolioById({
+      portfolioId: needsEncoding,
+    });
+    expect(mock.history.get[0].url).toEqual(`/portfolios/${encoded}`);
+  });
   it("should throw an error on a 400 response", async () => {
     mock.onGet(`portfolios/undefined`).reply(400, { bad: "request" });
     await expect(
@@ -197,7 +207,7 @@ describe("addEnvironment", () => {
 });
 
 // TODO: Implement updates to refactor patch operation from portfolios to environments and re-enable this suite
-describe.skip("patchEnvironment", () => {
+describe("patchEnvironment", () => {
   let client: AtatClient;
   let mock: MockAdapter;
   const url = `${TEST_CSP_ENDPOINT}/portfolios/${portfolioId}/environments/${environmentId}`;
@@ -221,9 +231,25 @@ describe.skip("patchEnvironment", () => {
     expect(mock.history.patch[0].url).toEqual(`/portfolios/${portfolioId}/environments/${environmentId}`);
     expect(result.patch).toEqual({ patch: administrators });
   });
-
+  it("should encode URL", async () => {
+    const portfolioId = "this:needs/to;be encoded,";
+    const environmentId = "this also:needs/to;be encoded,";
+    const encodedPortfolioId = encodeURIComponent(portfolioId).toString();
+    const encodedEnvironmentId = encodeURIComponent(environmentId).toString();
+    const encodedUrl = `${TEST_CSP_ENDPOINT}/portfolios/${encodedPortfolioId}/environments/${encodedEnvironmentId}`;
+    mock.onPatch(encodedUrl).reply(200, { patch: administrators });
+    const request: PatchEnvironmentRequest = {
+      ...mockPatchEnvironmentRequest,
+      provisionDeadline: "2022-11-15",
+      portfolioId,
+      environmentId,
+    };
+    const result = (await client.patchEnvironment(request)) as PatchEnvironmentResponseSync;
+    expect(mock.history.patch[0].url).toEqual(`/portfolios/${encodedPortfolioId}/environments/${encodedEnvironmentId}`);
+    expect(result.patch).toEqual({ patch: administrators });
+  });
   it("should throw a 400 error", async () => {
-    mock.onPatch(`${TEST_CSP_ENDPOINT}/portfolios/undefined`).reply(400, { bad: "request" });
+    mock.onPatch(url).reply(400, { bad: "request" });
     await expect(
       async () =>
         await client.patchEnvironment({
@@ -234,7 +260,7 @@ describe.skip("patchEnvironment", () => {
     ).rejects.toThrow(/Invalid portfolio provided/);
   });
   it("should throw an error on a 404 response", async () => {
-    mock.onPatch(`${TEST_CSP_ENDPOINT}/portfolios/undefined`).reply(404, { not: "found" });
+    mock.onPatch(url).reply(404);
     await expect(
       async () =>
         await client.patchEnvironment({
@@ -245,7 +271,7 @@ describe.skip("patchEnvironment", () => {
     ).rejects.toThrow(/Portfolio not found/);
   });
   it.each([204, 405, 410, 500, 503])("should throw an unexpected error %s", async (statusCode) => {
-    mock.onPatch(`${TEST_CSP_ENDPOINT}/portfolios/undefined`).reply(statusCode, { unknown: "error thrown" });
+    mock.onPatch(url).reply(statusCode, { unknown: "error thrown" });
     await expect(
       async () =>
         await client.patchEnvironment({
@@ -280,6 +306,18 @@ describe("getCostsByPortfolio", () => {
     expect(mock.history.get[0].url).toEqual(`/portfolios/${portfolioId}/costs`);
     expect(mock.history.get[0].params).toEqual({ start_date: "2021-12-01", end_date: "2022-03-31" });
     expect(result.costs).toEqual(mockCostData);
+  });
+  it("should encode URL", async () => {
+    const needsEncoding = "this:needs/to;be encoded,";
+    const encoded = encodeURIComponent(needsEncoding).toString();
+    const urlWithEncoding = `${TEST_CSP_ENDPOINT}/portfolios/${encoded}/costs`;
+    mock.onGet(urlWithEncoding).reply(200, mockCostData);
+    const result = (await client.getCostsByPortfolio({
+      portfolioId: needsEncoding,
+      startDate: "2021-12-01",
+      endDate: "2022-03-31",
+    })) as GetCostsByPortfolioResponse;
+    expect(mock.history.get[0].url).toEqual(`/portfolios/${encoded}/costs`);
   });
   it("should throw a 400 error", async () => {
     mock.onGet(`${TEST_CSP_ENDPOINT}/portfolios/undefined/costs`).reply(400, { bad: "request" });
@@ -319,6 +357,18 @@ describe("addTaskOrder", () => {
     const result = (await client.addTaskOrder(mockAddTaskOrderRequest)) as AddTaskOrderResponseSync;
     expect(mock.history.post[0].url).toEqual(`/portfolios/${portfolioId}/task-orders`);
     expect(result.taskOrder).toEqual(mockTaskOrder);
+  });
+  it("should encode URL", async () => {
+    const needsEncoding = "this:needs/to;be encoded,";
+    const encoded = encodeURIComponent(needsEncoding).toString();
+    const urlWithEncoding = `${TEST_CSP_ENDPOINT}/portfolios/${encoded}/task-orders`;
+    mock.onPost(urlWithEncoding).reply(200, mockTaskOrder);
+    await client.addTaskOrder({
+      portfolioId: needsEncoding,
+      taskOrder: mockTaskOrder,
+      provisionDeadline: "",
+    });
+    expect(mock.history.post[0].url).toEqual(`/portfolios/${encoded}/task-orders`);
   });
   it("should throw a 400 error", async () => {
     mock.onPost(`${TEST_CSP_ENDPOINT}/portfolios/undefined/task-orders`).reply(400, { bad: "request" });
@@ -365,6 +415,22 @@ describe("getCostsByClin", () => {
     const result = (await client.getCostsByClin(mockGetCostsByClinRequest)) as GetCostsByClinResponse;
     expect(mock.history.get[0].url).toEqual(`/portfolios/${portfolioId}/task-orders/${number}/clins/${clin}/costs`);
     expect(result.costs).toEqual(mockClinCosts);
+  });
+  it("should encode URL", async () => {
+    const mockClinCosts: CostResponseByClin = {
+      actual: mockCostData.taskOrders[0].clins[0].actual,
+      forecast: mockCostData.taskOrders[0].clins[0].forecast,
+    };
+    const needsEncoding = "this:needs/to;be encoded,";
+    const encoded = encodeURIComponent(needsEncoding).toString();
+    const urlWithEncoding = `${TEST_CSP_ENDPOINT}/portfolios/${encoded}/task-orders/${number}/clins/${clin}/costs`;
+    mock.onGet(urlWithEncoding).reply(200, mockClinCosts);
+    const request = {
+      ...mockGetCostsByClinRequest,
+      portfolioId: needsEncoding,
+    };
+    await client.getCostsByClin(request);
+    expect(mock.history.get[0].url).toEqual(`/portfolios/${encoded}/task-orders/${number}/clins/${clin}/costs`);
   });
   it("should throw a 400 error", async () => {
     mock.onGet(badUrl).reply(400, { bad: "request" });

@@ -293,7 +293,7 @@ export class AtatClient implements IAtatClient {
    */
   async getPortfolioById(request: types.GetPortfolioRequest): Promise<types.GetPortfolioResponse> {
     const headers = this.buildHeaders(request);
-    const response = await this.client.get(`/portfolios/${request.portfolioId}`, { headers });
+    const response = await this.client.get(`/portfolios/${encodeURIComponent(request.portfolioId)}`, { headers });
     switch (response.status) {
       case 200:
         return this.transformSynchronousResponse<types.GetPortfolioResponse>("portfolio", response, request);
@@ -316,7 +316,9 @@ export class AtatClient implements IAtatClient {
   ): Promise<types.PatchEnvironmentResponseSync | types.PatchEnvironmentResponseAsync> {
     const headers = this.buildHeaders(request);
     const response = await this.client.patch(
-      `/portfolios/${request.portfolioId}/environments/${request.environmentId}`,
+      `/portfolios/${encodeURIComponent(request.portfolioId)}/environments/${encodeURIComponent(
+        request.environmentId
+      )}`,
       request.patch,
       { headers }
     );
@@ -339,7 +341,7 @@ export class AtatClient implements IAtatClient {
    */
   async getCostsByPortfolio(request: types.GetCostsByPortfolioRequest): Promise<types.GetCostsByPortfolioResponse> {
     const headers = this.buildHeaders(request);
-    const response = await this.client.get(`/portfolios/${request.portfolioId}/costs`, {
+    const response = await this.client.get(`/portfolios/${encodeURIComponent(request.portfolioId)}/costs`, {
       params: {
         start_date: request.startDate,
         end_date: request.endDate,
@@ -365,9 +367,13 @@ export class AtatClient implements IAtatClient {
     request: types.AddTaskOrderRequest
   ): Promise<types.AddTaskOrderResponseSync | types.AddTaskOrderResponseAsync> {
     const headers = this.buildHeaders(request);
-    const response = await this.client.post(`/portfolios/${request.portfolioId}/task-orders`, request.taskOrder, {
-      headers,
-    });
+    const response = await this.client.post(
+      `/portfolios/${encodeURIComponent(request.portfolioId)}/task-orders`,
+      request.taskOrder,
+      {
+        headers,
+      }
+    );
     switch (response.status) {
       case 200:
         return this.transformSynchronousResponse<types.AddTaskOrderResponseSync>("taskOrder", response, request);
@@ -387,7 +393,9 @@ export class AtatClient implements IAtatClient {
   async getCostsByClin(request: types.GetCostsByClinRequest): Promise<types.GetCostsByClinResponse> {
     const headers = this.buildHeaders(request);
     const response = await this.client.get(
-      `/portfolios/${request.portfolioId}/task-orders/${request.taskOrderNumber}/clins/${request.clin}/costs`,
+      `/portfolios/${encodeURIComponent(request.portfolioId)}/task-orders/${request.taskOrderNumber}/clins/${
+        request.clin
+      }/costs`,
       { params: { start_date: request.startDate, end_date: request.endDate }, headers }
     );
     switch (response.status) {
