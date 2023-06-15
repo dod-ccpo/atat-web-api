@@ -623,6 +623,23 @@ components:
         - technicalPoc
         - requirementsPoc
         - corPoc
+    EvalMemo:
+      allOf:
+        - $ref: '#/components/schemas/EvalPlan'
+        - type: object
+          description: >-
+            For generating the Evaluation Memo (EM) document. Extends EvalPlan given the overlap between the two docs.
+          properties:
+            exceptionToFairOpportunity:
+              type: string
+            proposedVendor:
+              type: string
+            estimatedValueFormatted:
+              type: string
+          required:
+            - method
+            - sourceSelection
+            - estimatedValueFormatted
     MarketResearchReport:
       description: >-
         For generating the Sole Source Market Research Report (MRR) document
