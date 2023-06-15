@@ -59,7 +59,7 @@
     "@aws-sdk/client-sts": "^3.271.0",
     "@middy/core": "^3.6.2",
     "@middy/error-logger": "^4.2.7",
-    "@middy/http-json-body-parser": "^3.6.2",
+    "@middy/http-json-body-parser": "^4.5.2",
     "@middy/input-output-logger": "^4.2.7",
     "@middy/validator": "^3.6.2",
     "@sparticuz/chromium": "^110.0.0",
