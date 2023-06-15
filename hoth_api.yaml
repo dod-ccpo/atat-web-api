@@ -465,6 +465,7 @@ components:
         documentType:
           type: string
           enum:
+            - EVAL_MEMO
             - EVAL_PLAN
             - DESCRIPTION_OF_WORK_PDF
             - DESCRIPTION_OF_WORK_DOCX
@@ -477,6 +478,7 @@ components:
           type: object
           oneOf:
             - $ref: "#/components/schemas/EvalPlan"
+            - $ref: "#/components/schemas/EvalMemo"
             - $ref: "#/components/schemas/DescriptionOfWork"
             - $ref: "#/components/schemas/IndependentGovernmentCostEstimate"
             - $ref: "#/components/schemas/IncrementalFundingPlan"
