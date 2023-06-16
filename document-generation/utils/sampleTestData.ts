@@ -1762,4 +1762,21 @@ export const sampleMarketResearchReport = {
     researchPersonalKnowledgePersonOrPosition: "Nelly Knowledgeable/Researcher Extraordinaire",
   },
 };
+
+export const sampleEvalMemo = {
+  documentType: "EVALUATION_MEMO",
+  templatePayload: {
+    title: "my title",
+    estimatedValueFormatted: "$6,299,661.00",
+    exceptionToFairOpportunity: "16.505(b)(2)(i)(B)",
+    proposedVendor: "Google Support Services",
+    taskOrderTitle: "Eval Memo Test",
+    sourceSelection: "TECH_PROPOSAL",
+    method: "BVTO",
+    standardSpecifications: ["standard spec 1", "standard spec 2", "standard spec 3"],
+    customSpecifications: ["custom spec 1", "custom spec 2"],
+    standardDifferentiators: ["standard diff 1", "standard diff 2", "standard diff 3"],
+    customDifferentiators: ["custom diff 1", "custom diff 2", "custom diff 3"],
+  },
+};
 /* eslint-enable max-len */
