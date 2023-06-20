@@ -18,7 +18,7 @@ describe("Test Eval Memo document generation", () => {
     process.env.TEMPLATE_FOLDER = oldEnv;
   });
 
-  it("can generate a J&A without throwing an error", async () => {
+  it("can generate a Eval Memo without throwing an error", async () => {
     const base64 = await generateEvalMemoDocument(docxTemplate, payload);
     expect(base64).toBeInstanceOf(ApiBase64SuccessResponse);
   });
