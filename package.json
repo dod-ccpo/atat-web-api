@@ -63,7 +63,7 @@
     "@middy/input-output-logger": "^4.2.7",
     "@middy/validator": "^3.6.2",
     "@sparticuz/chromium": "^110.0.0",
-    "aws-cdk-lib": "2.67.0",
+    "aws-cdk-lib": "2.85.0",
     "axios": "^1.3.3",
     "axios-mock-adapter": "^1.21.2",
     "cdk-monitoring-constructs": "^3.0.5",
