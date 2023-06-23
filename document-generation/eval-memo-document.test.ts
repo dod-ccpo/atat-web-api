@@ -23,7 +23,7 @@ describe("Test Eval Memo document generation", () => {
     const base64 = await generateEvalMemoDocument(docxTemplate, payload);
     expect(base64).toBeInstanceOf(ApiBase64SuccessResponse);
   });
-  
+
   it.skip("unskip me to generate a local file for manual review", async () => {
     const docBuffer = await doGenerate(docxTemplate, payload);
     await fs.writeFileSync("evalmemo.docx", docBuffer);
