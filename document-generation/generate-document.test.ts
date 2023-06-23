@@ -14,9 +14,9 @@ import {
   sampleIfpRequest,
   sampleIgceRequest,
   sampleRequirementsChecklistRequest,
-  sampleJustificationAndApproval,
-  sampleMarketResearchReport,
-  sampleEvalMemo,
+  sampleJustificationAndApprovalRequest,
+  sampleMarketResearchReportRequest,
+  sampleEvalMemoRequest,
 } from "./utils/sampleTestData";
 
 const validRequest = {
@@ -192,7 +192,7 @@ describe("Successful generate-document handler", () => {
     const request = {
       ...validRequest,
       body: JSON.stringify({
-        ...sampleJustificationAndApproval,
+        ...sampleJustificationAndApprovalRequest,
       }),
     };
 
@@ -208,7 +208,7 @@ describe("Successful generate-document handler", () => {
     const request = {
       ...validRequest,
       body: JSON.stringify({
-        ...sampleMarketResearchReport,
+        ...sampleMarketResearchReportRequest,
       }),
     };
 
@@ -224,7 +224,7 @@ describe("Successful generate-document handler", () => {
     const request = {
       ...validRequest,
       body: JSON.stringify({
-        ...sampleEvalMemo,
+        ...sampleEvalMemoRequest,
       }),
     };
 
@@ -242,9 +242,9 @@ describe("Invalid requests for generate-document handler", () => {
     sampleIgceRequest.templatePayload,
     sampleIfpRequest.templatePayload,
     sampleRequirementsChecklistRequest.templatePayload,
-    sampleJustificationAndApproval.templatePayload,
-    sampleMarketResearchReport.templatePayload,
-    sampleEvalMemo.templatePayload,
+    sampleJustificationAndApprovalRequest.templatePayload,
+    sampleMarketResearchReportRequest.templatePayload,
+    sampleEvalMemoRequest.templatePayload,
   ])("should return validation error when invalid document type", async (payload) => {
     // GIVEN / ARRANGE
     const invalidRequest = {
@@ -305,15 +305,15 @@ describe("Invalid requests for generate-document handler", () => {
     },
     {
       documentType: DocumentType.JUSTIFICATION_AND_APPROVAL,
-      templatePayload: { ...sampleJustificationAndApproval.templatePayload, notreal: "prop" },
+      templatePayload: { ...sampleJustificationAndApprovalRequest.templatePayload, notreal: "prop" },
     },
     {
       documentType: DocumentType.MARKET_RESEARCH_REPORT,
-      templatePayload: { ...sampleMarketResearchReport.templatePayload, spurious: "prop" },
+      templatePayload: { ...sampleMarketResearchReportRequest.templatePayload, spurious: "prop" },
     },
     {
       documentType: DocumentType.EVALUATION_MEMO,
-      templatePayload: { ...sampleEvalMemo.templatePayload, garbage: "prop" },
+      templatePayload: { ...sampleEvalMemoRequest.templatePayload, garbage: "prop" },
     },
   ])("should return validation error when payload has additional properties", async (requestBody) => {
     // GIVEN / ARRANGE
