@@ -16,6 +16,7 @@ import {
   sampleRequirementsChecklistRequest,
   sampleJustificationAndApproval,
   sampleMarketResearchReport,
+  sampleEvalMemo,
 } from "./utils/sampleTestData";
 
 const validRequest = {
@@ -50,6 +51,10 @@ const docHeaders = {
   mrr: {
     "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     "Content-Disposition": `attachment; filename=MarketResearchReport.docx`,
+  },
+  evalMemo: {
+    "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "Content-Disposition": `attachment; filename=EvalMemo.docx`,
   },
 };
 
@@ -96,7 +101,7 @@ jest.mock("./requirements-checklist-document", () => {
     }),
   };
 });
-jest.mock("./justification-and-approval-document.ts", () => {
+jest.mock("./justification-and-approval-document", () => {
   return {
     generateJustificationAndApprovalDocument: jest.fn().mockImplementation(() => {
       const buffer = Buffer.from("generateJustificationAndApprovalDocument");
@@ -104,11 +109,19 @@ jest.mock("./justification-and-approval-document.ts", () => {
     }),
   };
 });
-jest.mock("./mrr-document.ts", () => {
+jest.mock("./mrr-document", () => {
   return {
     generateMarketResearchReportDocument: jest.fn().mockImplementation(() => {
       const buffer = Buffer.from("generateMarketResearchReportDocument");
       return new ApiBase64SuccessResponse(buffer.toString("base64"), SuccessStatusCode.OK, docHeaders.mrr);
+    }),
+  };
+});
+jest.mock("./eval-memo-document", () => {
+  return {
+    generateEvalMemoDocument: jest.fn().mockImplementation(() => {
+      const buffer = Buffer.from("generateEvalMemoDocument");
+      return new ApiBase64SuccessResponse(buffer.toString("base64"), SuccessStatusCode.OK, docHeaders.evalMemo);
     }),
   };
 });
@@ -169,7 +182,6 @@ describe("Successful generate-document handler", () => {
 
     // WHEN / ACT
     const response = await handler(request, {} as Context);
-    console.log("RESPONSE: ", JSON.stringify(response));
     // THEN / ASSERT
     expect(response).toBeInstanceOf(SuccessBase64Response);
     expect(response.headers).toEqual(docHeaders.requirementsChecklist);
@@ -186,7 +198,6 @@ describe("Successful generate-document handler", () => {
 
     // WHEN / ACT
     const response = await handler(request, {} as Context);
-    console.log("RESPONSE: ", JSON.stringify(response));
     // THEN / ASSERT
     expect(response).toBeInstanceOf(SuccessBase64Response);
     expect(response.headers).toEqual(docHeaders.janda);
@@ -203,10 +214,25 @@ describe("Successful generate-document handler", () => {
 
     // WHEN / ACT
     const response = await handler(request, {} as Context);
-    console.log("RESPONSE: ", JSON.stringify(response));
     // THEN / ASSERT
     expect(response).toBeInstanceOf(SuccessBase64Response);
     expect(response.headers).toEqual(docHeaders.mrr);
+  });
+
+  it("should return successful Eval Memo document response", async () => {
+    // GIVEN / ARRANGE
+    const request = {
+      ...validRequest,
+      body: JSON.stringify({
+        ...sampleEvalMemo,
+      }),
+    };
+
+    // WHEN / ACT
+    const response = await handler(request, {} as Context);
+    // THEN / ASSERT
+    expect(response).toBeInstanceOf(SuccessBase64Response);
+    expect(response.headers).toEqual(docHeaders.evalMemo);
   });
 });
 
@@ -218,6 +244,7 @@ describe("Invalid requests for generate-document handler", () => {
     sampleRequirementsChecklistRequest.templatePayload,
     sampleJustificationAndApproval.templatePayload,
     sampleMarketResearchReport.templatePayload,
+    sampleEvalMemo.templatePayload,
   ])("should return validation error when invalid document type", async (payload) => {
     // GIVEN / ARRANGE
     const invalidRequest = {
@@ -242,6 +269,7 @@ describe("Invalid requests for generate-document handler", () => {
     DocumentType.REQUIREMENTS_CHECKLIST,
     DocumentType.JUSTIFICATION_AND_APPROVAL,
     DocumentType.MARKET_RESEARCH_REPORT,
+    DocumentType.EVALUATION_MEMO,
   ])("should return validation error when payload not an object", async (documentType) => {
     // GIVEN / ARRANGE
     const invalidRequest = {
@@ -282,6 +310,10 @@ describe("Invalid requests for generate-document handler", () => {
     {
       documentType: DocumentType.MARKET_RESEARCH_REPORT,
       templatePayload: { ...sampleMarketResearchReport.templatePayload, spurious: "prop" },
+    },
+    {
+      documentType: DocumentType.EVALUATION_MEMO,
+      templatePayload: { ...sampleEvalMemo.templatePayload, garbage: "prop" },
     },
   ])("should return validation error when payload has additional properties", async (requestBody) => {
     // GIVEN / ARRANGE

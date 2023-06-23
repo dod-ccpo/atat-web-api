@@ -739,7 +739,54 @@ export const evalPlan = {
   additionalProperties: false,
 };
 
-// J&A
+export const evalMemo = {
+  type: "object",
+  properties: {
+    title: { type: "string" },
+    estimatedValueFormatted: { type: "string" },
+    exceptionToFairOpportunity: { type: "string" },
+    proposedVendor: { type: "string" },
+    // Eval Plan below
+    taskOrderTitle: { type: "string" },
+    sourceSelection: {
+      type: "string",
+      enum: [
+        SourceSelection.NO_TECH_PROPOSAL,
+        SourceSelection.TECH_PROPOSAL,
+        SourceSelection.SET_LUMP_SUM,
+        SourceSelection.EQUAL_SET_LUMP_SUM,
+      ],
+    },
+    method: {
+      enum: [EvalPlanMethod.BEST_USE, EvalPlanMethod.LOWEST_RISK, EvalPlanMethod.BVTO, EvalPlanMethod.LPTA, null],
+    },
+    standardSpecifications: {
+      type: "array",
+      items: {
+        type: "string",
+      },
+    },
+    customSpecifications: {
+      type: "array",
+      items: {
+        type: "string",
+      },
+    },
+    standardDifferentiators: {
+      type: "array",
+      items: {
+        type: "string",
+      },
+    },
+    customDifferentiators: {
+      type: "array",
+      items: {
+        type: "string",
+      },
+    },
+  },
+  additionalProperties: false,
+};
 
 export const fairOpportunity = {
   type: "object",
@@ -796,7 +843,6 @@ export const justificationAndApproval = {
   additionalProperties: false,
 };
 
-// MRR
 export const marketResearchReport = {
   type: "object",
   properties: {
@@ -830,6 +876,7 @@ export const generateDocumentSchema = {
         DocumentType.REQUIREMENTS_CHECKLIST,
         DocumentType.JUSTIFICATION_AND_APPROVAL,
         DocumentType.MARKET_RESEARCH_REPORT,
+        DocumentType.EVALUATION_MEMO,
       ],
     },
     templatePayload: {
@@ -838,6 +885,7 @@ export const generateDocumentSchema = {
         independentGovernmentCostEstimate,
         incrementalFundingPlan,
         evalPlan,
+        evalMemo,
         requirementsCheckList,
         justificationAndApproval,
         marketResearchReport,
