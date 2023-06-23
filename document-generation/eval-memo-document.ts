@@ -24,7 +24,7 @@ export async function generateEvalMemoDocument(
 
   const headers = {
     "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    "Content-Disposition": `attachment; filename=EvalMemo.docx`,
+    "Content-Disposition": `attachment; filename=EvaluationMemo.docx`,
   };
 
   return new ApiBase64SuccessResponse(report.toString("base64"), SuccessStatusCode.OK, headers);

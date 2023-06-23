@@ -54,7 +54,7 @@ const docHeaders = {
   },
   evalMemo: {
     "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    "Content-Disposition": `attachment; filename=EvalMemo.docx`,
+    "Content-Disposition": `attachment; filename=EvaluationMemo.docx`,
   },
 };
 
