@@ -746,44 +746,7 @@ export const evalMemo = {
     estimatedValueFormatted: { type: "string" },
     exceptionToFairOpportunity: { type: "string" },
     proposedVendor: { type: "string" },
-    // Eval Plan below
-    taskOrderTitle: { type: "string" },
-    sourceSelection: {
-      type: "string",
-      enum: [
-        SourceSelection.NO_TECH_PROPOSAL,
-        SourceSelection.TECH_PROPOSAL,
-        SourceSelection.SET_LUMP_SUM,
-        SourceSelection.EQUAL_SET_LUMP_SUM,
-      ],
-    },
-    method: {
-      enum: [EvalPlanMethod.BEST_USE, EvalPlanMethod.LOWEST_RISK, EvalPlanMethod.BVTO, EvalPlanMethod.LPTA, null],
-    },
-    standardSpecifications: {
-      type: "array",
-      items: {
-        type: "string",
-      },
-    },
-    customSpecifications: {
-      type: "array",
-      items: {
-        type: "string",
-      },
-    },
-    standardDifferentiators: {
-      type: "array",
-      items: {
-        type: "string",
-      },
-    },
-    customDifferentiators: {
-      type: "array",
-      items: {
-        type: "string",
-      },
-    },
+    ...evalPlan.properties,
   },
   additionalProperties: false,
 };
