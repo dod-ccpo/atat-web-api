@@ -41,7 +41,7 @@ export const convertPeriodToMonths = (period: IPeriod): number => {
 export const formatPeriodOfPerformance = (basePeriod: IPeriod, optionPeriods: IPeriod[]): string => {
   let formattedPop = "";
   formattedPop += basePeriod.periodUnitCount;
-  formattedPop += " ";
+  formattedPop += "-";
   formattedPop += basePeriod.periodUnit.toLowerCase();
   formattedPop += " base period";
   formattedPop += optionPeriods.length > 0 ? ", plus " : "";
