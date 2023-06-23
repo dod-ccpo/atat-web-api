@@ -58,7 +58,7 @@ const docHeaders = {
   },
 };
 
-jest.setTimeout(15000); // default of 5000 was too short
+jest.setTimeout(15000);
 // mocking the functions that generate the documents
 jest.mock("./chromium", () => {
   return {
