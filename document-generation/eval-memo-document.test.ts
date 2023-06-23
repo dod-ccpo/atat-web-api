@@ -4,10 +4,11 @@ import { sampleEvalMemo } from "./utils/sampleTestData";
 import { ApiBase64SuccessResponse } from "../utils/response";
 import fs from "fs";
 import { doGenerate, generateEvalMemoDocument } from "./eval-memo-document";
+import { IEvaluationMemo } from "../models/document-generation/evaluation-memo";
 
 describe("Test Eval Memo document generation", () => {
   const oldEnv = process.env.TEMPLATE_FOLDER;
-  const payload = sampleEvalMemo.templatePayload;
+  const payload = sampleEvalMemo.templatePayload as IEvaluationMemo;
   let docxTemplate: Buffer;
 
   beforeAll(() => {
@@ -22,7 +23,7 @@ describe("Test Eval Memo document generation", () => {
     const base64 = await generateEvalMemoDocument(docxTemplate, payload);
     expect(base64).toBeInstanceOf(ApiBase64SuccessResponse);
   });
-
+  
   it.skip("unskip me to generate a local file for manual review", async () => {
     const docBuffer = await doGenerate(docxTemplate, payload);
     await fs.writeFileSync("evalmemo.docx", docBuffer);
