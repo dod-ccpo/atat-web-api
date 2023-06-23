@@ -4,26 +4,21 @@ import { ApiBase64SuccessResponse, SuccessStatusCode } from "../utils/response";
 import { capitalize, formatPeriodOfPerformance } from "./utils/utils";
 import { RequirementsChecklist } from "../models/document-generation/requirements-checklist";
 import { REQUEST_BODY_INVALID } from "../utils/errors";
+import { IJustificationAndApproval } from "../models/document-generation/justification-and-approval";
 
-export async function generateRequirementsChecklistDocument(
-  template: Buffer,
-  payload: RequirementsChecklist
-): Promise<ApiBase64SuccessResponse> {
-  if (!payload || !payload.periodOfPerformance) {
-    return REQUEST_BODY_INVALID;
-  }
+export async function doGenerate(template: Buffer, payload: RequirementsChecklist): Promise<Buffer> {
   const { periodOfPerformance } = payload;
   const { basePeriod, optionPeriods, timeFrame, requestedPopStartDate } = periodOfPerformance;
 
-  const report = Buffer.from(
+  return Buffer.from(
     await createReport({
       template,
       data: {
         ...payload,
         periodOfPerformance: {
           ...periodOfPerformance,
-          // restructure time frame (e.g. NO_SOONER_THAN --> No Sooner Than)
-          timeFrame: timeFrame.split("_").map(capitalize).join(" "),
+          // restructure time frame (e.g. NO_SOONER_THAN --> no sooner than)
+          timeFrame: timeFrame.replaceAll("_", " ").toLowerCase(),
           requestedPopStartDate: new Date(requestedPopStartDate).toLocaleDateString("en-US", {
             year: "numeric",
             month: "long",
@@ -35,6 +30,15 @@ export async function generateRequirementsChecklistDocument(
       cmdDelimiter: ["{", "}"],
     })
   );
+}
+export async function generateRequirementsChecklistDocument(
+  template: Buffer,
+  payload: RequirementsChecklist
+): Promise<ApiBase64SuccessResponse> {
+  if (!payload || !payload.periodOfPerformance) {
+    return REQUEST_BODY_INVALID;
+  }
+  const report = await doGenerate(template, payload);
   logger.info("Requirements Checklist Word document generated.");
 
   const headers = {
