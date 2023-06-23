@@ -40,6 +40,8 @@ import { generateMarketResearchReportDocument } from "./mrr-document";
 
 import { IJustificationAndApproval } from "../models/document-generation/justification-and-approval";
 import { IMarketResearchReport } from "../models/document-generation/market-research-report";
+import { IEvaluationMemo } from "../models/document-generation/evaluation-memo";
+import { generateEvalMemoDocument } from "./eval-memo-document";
 
 async function baseHandler(event: RequestEvent<GenerateDocumentRequest>): Promise<ApiBase64SuccessResponse> {
   const { documentType } = event.body;
@@ -56,6 +58,7 @@ async function baseHandler(event: RequestEvent<GenerateDocumentRequest>): Promis
     case DocumentType.REQUIREMENTS_CHECKLIST:
     case DocumentType.JUSTIFICATION_AND_APPROVAL:
     case DocumentType.MARKET_RESEARCH_REPORT:
+    case DocumentType.EVALUATION_MEMO:
       return generateDocxDocument(event);
     default:
       return new ValidationErrorResponse(`Invalid document type: "${documentType}"`, {
@@ -101,6 +104,8 @@ async function generateDocxDocument(event: RequestEvent<GenerateDocumentRequest>
       return generateDowDocument(docxTemplate, templatePayload as IDescriptionOfWork);
     case DocumentType.INCREMENTAL_FUNDING_PLAN:
       return generateIFPDocument(docxTemplate, templatePayload as IncrementalFundingPlan);
+    case DocumentType.EVALUATION_MEMO:
+      return generateEvalMemoDocument(docxTemplate, templatePayload as IEvaluationMemo);
     case DocumentType.EVALUATION_PLAN:
       return generateEvalPlanDocument(docxTemplate, templatePayload as EvaluationPlan);
     case DocumentType.REQUIREMENTS_CHECKLIST:

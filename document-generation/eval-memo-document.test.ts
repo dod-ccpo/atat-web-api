@@ -1,13 +1,14 @@
 import { getDocxTemplate } from "./utils/utils";
 import { DocumentType } from "../models/document-generation";
-import { sampleEvalMemo } from "./utils/sampleTestData";
+import { sampleEvalMemoRequest } from "./utils/sampleTestData";
 import { ApiBase64SuccessResponse } from "../utils/response";
 import fs from "fs";
 import { doGenerate, generateEvalMemoDocument } from "./eval-memo-document";
+import { IEvaluationMemo } from "../models/document-generation/evaluation-memo";
 
 describe("Test Eval Memo document generation", () => {
   const oldEnv = process.env.TEMPLATE_FOLDER;
-  const payload = sampleEvalMemo.templatePayload;
+  const payload = sampleEvalMemoRequest.templatePayload as IEvaluationMemo;
   let docxTemplate: Buffer;
 
   beforeAll(() => {

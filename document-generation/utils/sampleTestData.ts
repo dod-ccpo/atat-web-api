@@ -1549,7 +1549,7 @@ export const sampleRequirementsChecklistRequest = {
   },
 };
 
-export const sampleJustificationAndApproval = {
+export const sampleJustificationAndApprovalRequest = {
   documentType: "JUSTIFICATION_AND_APPROVAL",
   templatePayload: {
     purchaseRequestNumber: "O2208-097-097-697046, O2208-097-097-697046",
@@ -1649,7 +1649,7 @@ export const sampleJustificationAndApproval = {
   },
 };
 
-export const sampleMarketResearchReport = {
+export const sampleMarketResearchReportRequest = {
   documentType: "MARKET_RESEARCH_REPORT",
   templatePayload: {
     researchers: [
@@ -1763,7 +1763,7 @@ export const sampleMarketResearchReport = {
   },
 };
 
-export const sampleEvalMemo = {
+export const sampleEvalMemoRequest = {
   documentType: "EVALUATION_MEMO",
   templatePayload: {
     title: "my title",

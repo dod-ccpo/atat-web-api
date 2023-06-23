@@ -739,7 +739,17 @@ export const evalPlan = {
   additionalProperties: false,
 };
 
-// J&A
+export const evalMemo = {
+  type: "object",
+  properties: {
+    title: { type: "string" },
+    estimatedValueFormatted: { type: "string" },
+    exceptionToFairOpportunity: { type: "string" },
+    proposedVendor: { type: "string" },
+    ...evalPlan.properties,
+  },
+  additionalProperties: false,
+};
 
 export const fairOpportunity = {
   type: "object",
@@ -796,7 +806,6 @@ export const justificationAndApproval = {
   additionalProperties: false,
 };
 
-// MRR
 export const marketResearchReport = {
   type: "object",
   properties: {
@@ -830,6 +839,7 @@ export const generateDocumentSchema = {
         DocumentType.REQUIREMENTS_CHECKLIST,
         DocumentType.JUSTIFICATION_AND_APPROVAL,
         DocumentType.MARKET_RESEARCH_REPORT,
+        DocumentType.EVALUATION_MEMO,
       ],
     },
     templatePayload: {
@@ -838,6 +848,7 @@ export const generateDocumentSchema = {
         independentGovernmentCostEstimate,
         incrementalFundingPlan,
         evalPlan,
+        evalMemo,
         requirementsCheckList,
         justificationAndApproval,
         marketResearchReport,
