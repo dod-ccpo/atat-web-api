@@ -56,6 +56,7 @@ async function baseHandler(event: RequestEvent<GenerateDocumentRequest>): Promis
     case DocumentType.REQUIREMENTS_CHECKLIST:
     case DocumentType.JUSTIFICATION_AND_APPROVAL:
     case DocumentType.MARKET_RESEARCH_REPORT:
+    case DocumentType.EVALUATION_MEMO:
       return generateDocxDocument(event);
     default:
       return new ValidationErrorResponse(`Invalid document type: "${documentType}"`, {
