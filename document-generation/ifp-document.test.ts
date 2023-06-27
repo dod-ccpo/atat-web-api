@@ -68,7 +68,7 @@ describe("Test IFP document generation", () => {
     expect(base64).toBeInstanceOf(ApiBase64SuccessResponse);
   });
 
-  it.only("unskip me to generate a local file for manual review", async () => {
+  it.skip("unskip me to generate a local file for manual review", async () => {
     const docBuffer = await doGenerate(docxTemplate, payload as any);
     await fs.writeFileSync("ifp.docx", docBuffer);
   });
