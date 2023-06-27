@@ -26,7 +26,7 @@ export async function generateIFPDocument(
   template: Buffer,
   payload: IncrementalFundingPlan
 ): Promise<ApiBase64SuccessResponse> {
-  if (!payload || !payload.fundingDocument) {
+  if (!payload?.fundingDocument) {
     return REQUEST_BODY_INVALID;
   }
   const report = await doGenerate(template, payload);
