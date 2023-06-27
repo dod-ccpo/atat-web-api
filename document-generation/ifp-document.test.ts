@@ -1,10 +1,11 @@
-import { IncrementalFundingPlan, IndependentGovernmentCostEstimate } from "../models/document-generation";
+import { IncrementalFundingPlan, IndependentGovernmentCostEstimate, DocumentType } from "../models/document-generation";
 import { generateIGCEDocument } from "./igce-document";
 import { fundingDocumentWithMiprNumber, sampleIfpRequest } from "./utils/sampleTestData";
 import * as fs from "fs";
 import * as path from "path";
 import { ApiBase64SuccessResponse, ErrorStatusCode, OtherErrorResponse } from "../utils/response";
-import { generateIFPDocument } from "./ifp-document";
+import { doGenerate, generateIFPDocument } from "./ifp-document";
+import { getDocxTemplate } from "./utils/utils";
 
 describe("Generate an IFP binary document - happy path", () => {
   const sampleIfpRequestWithOrderNumber = sampleIfpRequest.templatePayload as IncrementalFundingPlan;
@@ -46,5 +47,29 @@ describe("Generate an IFP binary document - sad path", () => {
     // THEN
     expect(response).toBeInstanceOf(OtherErrorResponse);
     expect(response.statusCode).toBe(ErrorStatusCode.INTERNAL_SERVER_ERROR);
+  });
+});
+
+describe("Test IFP document generation", () => {
+  const oldEnv = process.env.TEMPLATE_FOLDER;
+  const payload = sampleIfpRequest.templatePayload;
+  let docxTemplate: Buffer;
+
+  beforeAll(() => {
+    process.env.TEMPLATE_FOLDER = "./document-generation/templates";
+    docxTemplate = getDocxTemplate(DocumentType.INCREMENTAL_FUNDING_PLAN);
+  });
+  afterAll(() => {
+    process.env.TEMPLATE_FOLDER = oldEnv;
+  });
+
+  it("can generate an IFP without throwing an error", async () => {
+    const base64 = await generateIFPDocument(docxTemplate, payload as any);
+    expect(base64).toBeInstanceOf(ApiBase64SuccessResponse);
+  });
+
+  it.only("unskip me to generate a local file for manual review", async () => {
+    const docBuffer = await doGenerate(docxTemplate, payload as any);
+    await fs.writeFileSync("ifp.docx", docBuffer);
   });
 });
