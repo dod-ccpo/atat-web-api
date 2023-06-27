@@ -1445,6 +1445,7 @@ export const sampleIfpRequest = {
   templatePayload: {
     requirementsTitle: "Versatile Demo Package",
     missionOwner: "Jewel Heart",
+    primaryContact: "Michael Bubble",
     financialPoc: "Ester Crest",
     estimatedTaskOrderValue: 125000.55,
     initialAmount: 50000.55,
@@ -1487,7 +1488,7 @@ export const sampleRequirementsChecklistRequest = {
       emergencyDeclaration: true,
     },
     organization: {
-      agency: "Federal Bureau Of Investigation (FBI/ITD)",
+      agency: "Defense Information Systems Agency (DISA)",
       name: "Special Div",
     },
     contacts: {
@@ -1505,6 +1506,13 @@ export const sampleRequirementsChecklistRequest = {
         email: "yoda@atat.com",
         phoneNumber: "+1 (999) 123-4567, ext. 999",
         dodaac: "bbb888",
+      },
+      primaryContact: {
+        type: "primaryContact",
+        name: "Tortellini",
+        email: "tortellini@atat.com",
+        phoneNumber: "+1 (999) 123-4567, ext. 999",
+        dodaac: "ccc888",
       },
     },
     currentContract: [
