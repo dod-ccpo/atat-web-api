@@ -635,7 +635,7 @@ components:
             title:
               type: string
             exceptionToFairOpportunity:
-              type: string
+              type: boolean
             proposedVendor:
               type: string
             estimatedValueFormatted:
