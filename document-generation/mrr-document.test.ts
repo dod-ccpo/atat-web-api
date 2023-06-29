@@ -24,8 +24,7 @@ describe("Test MRR document generation", () => {
     expect(base64).toBeInstanceOf(ApiBase64SuccessResponse);
   });
 
-  it("unskip me to generate a local MRR file for manual review", async () => {
-    console.log(payload);
+  it.skip("unskip me to generate a local MRR file for manual review", async () => {
     const docBuffer = await doGenerate(docxTemplate, payload);
     await fs.writeFileSync("mrr.docx", docBuffer);
   });
