@@ -1,4 +1,5 @@
 /* eslint-disable max-len */
+
 export const sampleDowRequest = {
   documentType: "DESCRIPTION_OF_WORK_DOCX",
   templatePayload: {
@@ -1672,24 +1673,7 @@ export const sampleMarketResearchReportRequest = {
         org: "FEMA",
       },
     ],
-    fairOpportunity: {
-      procurementDiscussion: "google constraints",
-      procurementPreviousImpact:
-        "Since there is already an existing environment, the CSP is immediately able to shift to supporting the resultant award associated with this contract action, it would minimize any associated transition costs for the Government. In addition, another contractor would not be positioned to leverage investments made to date to most efficiently meet the objectives of the task order for the anticipated PoP.",
-      marketResearchDetails: "research details - generated",
-      causeOfSoleSourceSituation: "cause of sole source - custom",
-      procurementHasExistingEnv: true,
-      minimumGovernmentRequirements:
-        "The cloud offerings must continue at their current level in order to support...\n\nThese offerings include...\n\nAll my minimum stuff",
-      plansToRemoveBarriers: "barriers - generated",
-      requirementImpact: "requirement impact details",
-      exceptionToFairOpportunity: "16.505(b)(2)(i)(B)",
-      otherFactsToSupportLogicalFollowOn: null,
-      whyCspIsOnlyCapableSource:
-        "Google possesses the knowledge, skills, capabilities, certification, clearance, and experience required to continue the program without a break or degradation in critical mission services. Given these critical mission requirements, Google is the only contractor that is capable of performing the necessary services for the DoD within the current required timeline.",
-      proposedVendor: "Google Support Services",
-      justification: "Jeff J&A Justification 1",
-    },
+    justificationAndApproval: sampleJustificationAndApprovalRequest.templatePayload,
     techniquesUsed: [
       {
         technique_value: "PERSONAL_KNOWLEDGE",

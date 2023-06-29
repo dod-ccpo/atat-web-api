@@ -812,7 +812,7 @@ export const marketResearchReport = {
   type: "object",
   properties: {
     researchers: { type: "array", items: researcher },
-    fairOpportunity,
+    justificationAndApproval,
     techniquesUsed: { type: "array", items: researchTechnique },
     techniqueOther: { type: "string" },
     title: { type: "string" },
