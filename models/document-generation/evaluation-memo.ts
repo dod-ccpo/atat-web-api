@@ -1,8 +1,8 @@
-import { EvalPlanMethod, EvaluationPlan, SourceSelection } from "../document-generation";
+import { EvaluationPlan } from "../document-generation";
 
 export interface IEvaluationMemo extends EvaluationPlan {
   title: string;
   estimatedValueFormatted: string;
-  exceptionToFairOpportunity?: string | null; // 16.505(b)(2)(i)([A|B|C])
+  exceptionToFairOpportunity: boolean; // true for YES values, false for NO_NONE
   proposedVendor: string;
 }
