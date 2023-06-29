@@ -205,6 +205,7 @@ export interface ISelectedServiceOffering {
 
 export interface IPeriodOfPerformance {
   basePeriod: IPeriod;
+  isRequirementFollowOnProcurementSoleSourced: boolean;
   optionPeriods: IPeriod[];
   popStartRequest: boolean;
   requestedPopStartDate: string;

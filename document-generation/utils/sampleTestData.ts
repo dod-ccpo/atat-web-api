@@ -1690,6 +1690,9 @@ export const sampleMarketResearchReportRequest = {
       proposedVendor: "Google Support Services",
       justification: "Jeff J&A Justification 1",
     },
+    periodOfPerformance: {
+      isRequirementFollowOnProcurementSoleSourced: true,
+    },
     techniquesUsed: [
       {
         technique_value: "PERSONAL_KNOWLEDGE",
