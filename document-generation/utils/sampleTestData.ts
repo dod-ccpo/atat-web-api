@@ -1776,7 +1776,7 @@ export const sampleEvalMemoRequest = {
   templatePayload: {
     title: "my title",
     estimatedValueFormatted: "$6,299,661.00",
-    exceptionToFairOpportunity: null,
+    exceptionToFairOpportunity: true,
     proposedVendor: "Google Support Services",
     taskOrderTitle: "Eval Memo Test",
     sourceSelection: "NO_TECH_PROPOSAL",
