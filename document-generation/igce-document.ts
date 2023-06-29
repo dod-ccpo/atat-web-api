@@ -246,16 +246,17 @@ export async function generateIGCEDocument(
   const surgeCapabilitiesCell = summarySheet.getCell("A23");
   surgeCapabilitiesCell.value = surgeFeePct;
 
-  //External Ordering Agency Fee (1% Fixed for Non-DITCO user ONLY)
+  // External Ordering Agency Fee (1% Fixed for Non-DITCO user ONLY)
   if (payload.contractingShop.name !== "DITCO") {
-  const externalOrderingAgencyFeePct = 0.01;
-  const externalOrderingCell = summarySheet.getCell("A25");
-  externalOrderingCell.value = externalOrderingAgencyFeePct;
+    const externalOrderingAgencyFeePct = 0.01;
+    const externalOrderingCell = summarySheet.getCell("A25");
+    externalOrderingCell.value = externalOrderingAgencyFeePct;
   }
 
-  //External Ordering Agency Fee Name
+  // External Ordering Agency Fee Name
   const externalOrderingAgencyNameCell = summarySheet.getCell("B25");
-  externalOrderingAgencyNameCell.value = payload.contractingShop.name === "DITCO" ? " " : "External Ordering Agency Fee";
+  externalOrderingAgencyNameCell.value =
+    payload.contractingShop.name === "DITCO" ? " " : "External Ordering Agency Fee";
 
   // Contracting Office Fee
   const contractingShopFeePct = payload.contractingShop.fee * 0.01;
