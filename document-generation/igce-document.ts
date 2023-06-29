@@ -247,7 +247,7 @@ export async function generateIGCEDocument(
   surgeCapabilitiesCell.value = surgeFeePct;
 
   //External Ordering Agency Fee (1% Fixed for Non-DITCO user ONLY)
-  if (payload.contractingShop.name != "DITCO") {
+  if (payload.contractingShop.name !== "DITCO") {
   const externalOrderingAgencyFeePct = 0.01;
   const externalOrderingCell = summarySheet.getCell("A25");
   externalOrderingCell.value = externalOrderingAgencyFeePct;
