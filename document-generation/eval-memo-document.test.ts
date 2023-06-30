@@ -19,6 +19,18 @@ describe("Test Eval Memo document generation", () => {
     process.env.TEMPLATE_FOLDER = oldEnv;
   });
 
+  it("can generate a Eval memo with a null sourceSelection without throwing an error", async () => {
+    payload.sourceSelection = null;
+    const base64 = await generateEvalMemoDocument(docxTemplate, payload);
+    expect(base64).toBeInstanceOf(ApiBase64SuccessResponse);
+  });
+
+  it("can generate a Eval memo with a null eval plan method without throwing an error", async () => {
+    payload.method = null;
+    const base64 = await generateEvalMemoDocument(docxTemplate, payload);
+    expect(base64).toBeInstanceOf(ApiBase64SuccessResponse);
+  });
+
   it("can generate a Eval Memo without throwing an error", async () => {
     const base64 = await generateEvalMemoDocument(docxTemplate, payload);
     expect(base64).toBeInstanceOf(ApiBase64SuccessResponse);

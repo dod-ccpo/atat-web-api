@@ -343,8 +343,8 @@ export interface IncrementalFundingPlan {
 
 export interface EvaluationPlan {
   taskOrderTitle: string;
-  sourceSelection: SourceSelection;
-  method: EvalPlanMethod;
+  sourceSelection: SourceSelection | null;
+  method: EvalPlanMethod | null;
   standardSpecifications: string[];
   customSpecifications: string[];
   standardDifferentiators: string[];
