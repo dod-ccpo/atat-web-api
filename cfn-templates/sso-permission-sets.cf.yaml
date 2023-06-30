@@ -239,6 +239,7 @@ Resources:
           - Effect: Allow
             Action:
               - s3:Get*
+              - s3:Describe*
               - cloudtrail:Describe*
               - cloudtrail:Get*
               - codecommit:Get*
@@ -246,6 +247,8 @@ Resources:
               - codepipeline:Get*
               - codepipeline:List*
               - ec2:GetEbsEncryptionByDefault
+              - ec2:Describe*
+              - ec2:Get*
             Resource: "*"
   AtatDeveloperSecretReadAccess:
     Type: AWS::SSO::PermissionSet
