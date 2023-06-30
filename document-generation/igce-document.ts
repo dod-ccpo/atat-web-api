@@ -262,11 +262,10 @@ export async function generateIGCEDocument(
   const contractingShopFeePct = payload.contractingShop.fee * 0.01;
   if (contractingShopFeePct) {
     const contractingShopFeeCell = summarySheet.getCell("C27");
-    if (payload.contractingShop.name === "DITCO") {
-      contractingShopFeeCell.value = { formula: `=K24 * ${contractingShopFeePct}`, date1904: false };
-    } else {
-      contractingShopFeeCell.value = { formula: `=(K24 + K25) * ${contractingShopFeePct}`, date1904: false };
-    }
+    contractingShopFeeCell.value =
+      payload.contractingShop.name === "DITCO"
+        ? { formula: `=K24 * ${contractingShopFeePct}`, date1904: false }
+        : { formula: `=(K24 + K25) * ${contractingShopFeePct}`, date1904: false };
   }
 
   // Contracting Office Name
