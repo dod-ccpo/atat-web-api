@@ -274,7 +274,10 @@ export async function generateIGCEDocument(
 
   // Grand Total With Fee
   const grandTotalWithFeeCell = summarySheet.getCell("C28");
-  grandTotalWithFeeCell.value = { formula: `=C27 + K24 + K25`, date1904: false };
+  grandTotalWithFeeCell.value =
+    payload.contractingShop.name === "DITCO"
+      ? { formula: `=C27 + K24`, date1904: false }
+      : { formula: `=C27 + K24 + K25`, date1904: false };
 
   // Set Instruction Sheet Cells
   const instructionSheet = workbook.getWorksheet("INSTRUCTIONS-MUST COMPLETE");
