@@ -246,20 +246,32 @@ export async function generateIGCEDocument(
   const surgeCapabilitiesCell = summarySheet.getCell("A23");
   surgeCapabilitiesCell.value = surgeFeePct;
 
+  // External Ordering Agency Fee (1% Fixed for Non-DITCO user ONLY)
+  if (payload.contractingShop.name !== "DITCO") {
+    const externalOrderingAgencyFeePct = 0.01;
+    const externalOrderingCell = summarySheet.getCell("A25");
+    externalOrderingCell.value = externalOrderingAgencyFeePct;
+  }
+
+  // External Ordering Agency Fee Name
+  const externalOrderingAgencyNameCell = summarySheet.getCell("B25");
+  externalOrderingAgencyNameCell.value =
+    payload.contractingShop.name === "DITCO" ? " " : "External Ordering Agency Fee";
+
   // Contracting Office Fee
   const contractingShopFeePct = payload.contractingShop.fee * 0.01;
   if (contractingShopFeePct) {
-    const contractingShopFeeCell = summarySheet.getCell("C26");
-    contractingShopFeeCell.value = { formula: `=K24 * ${contractingShopFeePct}`, date1904: false };
+    const contractingShopFeeCell = summarySheet.getCell("C27");
+    contractingShopFeeCell.value = { formula: `=(K24 + K25) * ${contractingShopFeePct}`, date1904: false };
   }
 
   // Contracting Office Name
-  const contractingShopNameCell = summarySheet.getCell("B26");
+  const contractingShopNameCell = summarySheet.getCell("B27");
   contractingShopNameCell.value = payload.contractingShop.name === "DITCO" ? "DITCO Fee" : "Contracting Office Fee";
 
   // Grand Total With Fee
-  const grandTotalWithFeeCell = summarySheet.getCell("C27");
-  grandTotalWithFeeCell.value = { formula: `=C26 + K24`, date1904: false };
+  const grandTotalWithFeeCell = summarySheet.getCell("C28");
+  grandTotalWithFeeCell.value = { formula: `=C27 + K24 + K25`, date1904: false };
 
   // Set Instruction Sheet Cells
   const instructionSheet = workbook.getWorksheet("INSTRUCTIONS-MUST COMPLETE");
