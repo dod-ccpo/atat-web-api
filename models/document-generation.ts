@@ -710,9 +710,11 @@ export const evalPlan = {
         SourceSelection.TECH_PROPOSAL,
         SourceSelection.SET_LUMP_SUM,
         SourceSelection.EQUAL_SET_LUMP_SUM,
+        null,
       ],
     },
     method: {
+      type: "string",
       enum: [EvalPlanMethod.BEST_USE, EvalPlanMethod.LOWEST_RISK, EvalPlanMethod.BVTO, EvalPlanMethod.LPTA, null],
     },
     standardSpecifications: {
