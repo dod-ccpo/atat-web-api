@@ -853,6 +853,7 @@ const periodOfPerformance = {
   type: "object",
   properties: {
     basePeriod: { type: "object", period },
+    isRequirementFollowOnProcurementSoleSourced: { type: "boolean" },
     optionPeriods: { type: "array", items: period },
     popStartRequest: { type: "boolean" },
     requestedPopStartDate: { type: "string", nullable: true },

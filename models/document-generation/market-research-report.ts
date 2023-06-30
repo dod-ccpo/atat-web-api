@@ -1,6 +1,6 @@
 import { ICurrentContract } from "./requirements-checklist";
 import { IFairOpportunity, IPointOfContact } from "./justification-and-approval";
-import { ResearchTechnique } from "../document-generation";
+import { IPeriodOfPerformance, ResearchTechnique } from "../document-generation";
 
 export interface IResearcher {
   name: string;
@@ -17,6 +17,7 @@ export interface IResearchTechnique {
 export interface IMarketResearchReport {
   researchers: IResearcher[];
   fairOpportunity: IFairOpportunity;
+  periodOfPerformance: IPeriodOfPerformance;
   techniquesUsed: IResearchTechnique[];
   techniqueOther?: string | null;
   title: string;

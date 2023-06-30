@@ -205,6 +205,7 @@ export interface ISelectedServiceOffering {
 
 export interface IPeriodOfPerformance {
   basePeriod: IPeriod;
+  isRequirementFollowOnProcurementSoleSourced: boolean;
   optionPeriods: IPeriod[];
   popStartRequest: boolean;
   requestedPopStartDate: string;
@@ -533,6 +534,7 @@ export const periodOfPerformance = {
   type: "object",
   properties: {
     basePeriod: period,
+    isRequirementFollowOnProcurementSoleSourced: { type: "boolean" },
     optionPeriods: { type: "array", items: period },
     popStartRequest: { type: "boolean" },
     requestedPopStartDate: { type: "string" },
@@ -813,6 +815,7 @@ export const marketResearchReport = {
   properties: {
     researchers: { type: "array", items: researcher },
     fairOpportunity,
+    periodOfPerformance,
     techniquesUsed: { type: "array", items: researchTechnique },
     techniqueOther: { type: "string" },
     title: { type: "string" },

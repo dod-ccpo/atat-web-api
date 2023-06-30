@@ -1243,6 +1243,7 @@ export const sampleDowRequest = {
         periodUnit: "YEAR",
         optionOrder: 1,
       },
+      isRequirementFollowOnProcurementSoleSourced: true,
       optionPeriods: [
         {
           periodType: "OPTION",
@@ -1538,6 +1539,7 @@ export const sampleRequirementsChecklistRequest = {
         { periodType: "OPTION", periodUnitCount: 36, periodUnit: "WEEK", optionOrder: 4 },
         { periodType: "OPTION", periodUnitCount: 7, periodUnit: "MONTH", optionOrder: 2 },
       ],
+      isRequirementFollowOnProcurementSoleSourced: true,
       popStartRequest: true,
       requestedPopStartDate: "2022-11-30",
       timeFrame: "NO_SOONER_THAN",
@@ -1613,6 +1615,7 @@ export const sampleJustificationAndApprovalRequest = {
         periodUnit: "MONTH",
         optionOrder: 1,
       },
+      isRequirementFollowOnProcurementSoleSourced: true,
       optionPeriods: [
         {
           periodType: "OPTION",
@@ -1689,6 +1692,39 @@ export const sampleMarketResearchReportRequest = {
         "Google possesses the knowledge, skills, capabilities, certification, clearance, and experience required to continue the program without a break or degradation in critical mission services. Given these critical mission requirements, Google is the only contractor that is capable of performing the necessary services for the DoD within the current required timeline.",
       proposedVendor: "Google Support Services",
       justification: "Jeff J&A Justification 1",
+    },
+    periodOfPerformance: {
+      basePeriod: {
+        periodType: "BASE",
+        periodUnitCount: 1,
+        periodUnit: "YEAR",
+        optionOrder: 1,
+      },
+      isRequirementFollowOnProcurementSoleSourced: true,
+      optionPeriods: [
+        {
+          periodType: "OPTION",
+          periodUnitCount: 34,
+          periodUnit: "WEEK",
+          optionOrder: 2,
+        },
+        {
+          periodType: "OPTION",
+          periodUnitCount: 8,
+          periodUnit: "MONTH",
+          optionOrder: 3,
+        },
+        {
+          periodType: "OPTION",
+          periodUnitCount: 1,
+          periodUnit: "YEAR",
+          optionOrder: 4,
+        },
+      ],
+      popStartRequest: true,
+      requestedPopStartDate: "2023-03-01",
+      timeFrame: "NO_SOONER_THAN",
+      recurringRequirement: false,
     },
     techniquesUsed: [
       {
