@@ -29,7 +29,7 @@
     "aws-cdk": "2.67.0",
     "aws-sdk-client-mock": "^2.0.1",
     "esbuild": "^0.17.18",
-    "eslint": "^8.34.0",
+    "eslint": "^8.44.0",
     "eslint-config-prettier": "^8.6.0",
     "eslint-config-standard": "^17.0.0",
     "eslint-import-resolver-typescript": "^3.5.3",
