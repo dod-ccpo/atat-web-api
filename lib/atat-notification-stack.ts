@@ -46,6 +46,22 @@ export class IamChangeRule extends events.Rule {
   }
 }
 
+// Below is the notification for the Pipeline
+export class PipelineStatus extends events.Rule {
+  constructor(scope: Construct, id: string, props?: events.RuleProps) {
+    super(scope, id, {
+      ...props,
+      eventPattern: {
+        source: ["aws.codepipeline"],
+        detailType: ["CodePipeline Pipeline Execution State Change"],
+        detail: {
+          state: ["SUCCEEDED", "STARTED", "STOPPING"],
+        },
+      },
+    });
+  }
+}
+
 export class AtatNotificationStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: AtatNotificationStackProps) {
     super(scope, id);
@@ -55,5 +71,12 @@ export class AtatNotificationStack extends cdk.Stack {
 
     const iamChanges = new IamChangeRule(this, "IamChanges");
     iamChanges.addTarget(topicTarget);
+
+    const topicpipeline = new sns.Topic(this, "AtatPipelineNotifications", { masterKey: props.topicEncryptionKey });
+    topicpipeline.addSubscription(new subscriptions.EmailSubscription(props.notificationEmail));
+    const topicpipelineTarget = new eventTargets.SnsTopic(topicpipeline);
+
+    const PipelineStatus = new IamChangeRule(this, "PipelineStatus");
+    PipelineStatus.addTarget(topicpipelineTarget);
   }
 }
