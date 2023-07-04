@@ -47,7 +47,7 @@ export class IamChangeRule extends events.Rule {
 }
 
 // Below is the notification for the Pipeline
-export class PipelineStatus extends events.Rule {
+export class PipelineStatusRule extends events.Rule {
   constructor(scope: Construct, id: string, props?: events.RuleProps) {
     super(scope, id, {
       ...props,
@@ -76,7 +76,7 @@ export class AtatNotificationStack extends cdk.Stack {
     topicpipeline.addSubscription(new subscriptions.EmailSubscription(props.notificationEmail));
     const topicpipelineTarget = new eventTargets.SnsTopic(topicpipeline);
 
-    const PipelineStatus = new IamChangeRule(this, "PipelineStatus");
+    const PipelineStatus = new PipelineStatusRule(this, "PipelineStatus");
     PipelineStatus.addTarget(topicpipelineTarget);
   }
 }
