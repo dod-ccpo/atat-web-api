@@ -1812,7 +1812,7 @@ export const sampleEvalMemoRequestWithException = {
   templatePayload: {
     title: "Eval Memo Test",
     estimatedValueFormatted: "$6,299,661.00",
-    exceptionToFairOpportunity: true,  // EP not generated, expect no EP record
+    exceptionToFairOpportunity: true, // EP not generated, expect no EP record
     proposedVendor: "Google Support Services",
     // EP properties below
     taskOrderTitle: null,
@@ -1829,7 +1829,7 @@ export const sampleEvalMemoRequestWithoutException = {
   ...sampleEvalMemoRequestWithException,
   templatePayload: {
     ...sampleEvalMemoRequestWithException.templatePayload,
-    exceptionToFairOpportunity: false,  // EP generated, expect EP record
+    exceptionToFairOpportunity: false, // EP generated, expect EP record
     // EP properties below
     taskOrderTitle: "Amazing Task Order",
     sourceSelection: "NO_TECH_PROPOSAL",
