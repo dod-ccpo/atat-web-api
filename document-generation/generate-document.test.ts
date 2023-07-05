@@ -16,7 +16,8 @@ import {
   sampleRequirementsChecklistRequest,
   sampleJustificationAndApprovalRequest,
   sampleMarketResearchReportRequest,
-  sampleEvalMemoRequest,
+  sampleEvalMemoRequestWithException,
+  sampleEvalMemoRequestWithoutException,
 } from "./utils/sampleTestData";
 
 const validRequest = {
@@ -219,12 +220,27 @@ describe("Successful generate-document handler", () => {
     expect(response.headers).toEqual(docHeaders.mrr);
   });
 
-  it("should return successful Eval Memo document response", async () => {
+  it("should return successful Eval Memo document response - w/ Exception to Fair Opportunity", async () => {
     // GIVEN / ARRANGE
     const request = {
       ...validRequest,
       body: JSON.stringify({
-        ...sampleEvalMemoRequest,
+        ...sampleEvalMemoRequestWithException,
+      }),
+    };
+
+    // WHEN / ACT
+    const response = await handler(request, {} as Context);
+    // THEN / ASSERT
+    expect(response).toBeInstanceOf(SuccessBase64Response);
+    expect(response.headers).toEqual(docHeaders.evalMemo);
+  });
+  it("should return successful Eval Memo document response - w/o Exception to Fair Opportunity", async () => {
+    // GIVEN / ARRANGE
+    const request = {
+      ...validRequest,
+      body: JSON.stringify({
+        ...sampleEvalMemoRequestWithoutException,
       }),
     };
 
@@ -244,7 +260,8 @@ describe("Invalid requests for generate-document handler", () => {
     sampleRequirementsChecklistRequest.templatePayload,
     sampleJustificationAndApprovalRequest.templatePayload,
     sampleMarketResearchReportRequest.templatePayload,
-    sampleEvalMemoRequest.templatePayload,
+    sampleEvalMemoRequestWithException.templatePayload,
+    sampleEvalMemoRequestWithoutException.templatePayload,
   ])("should return validation error when invalid document type", async (payload) => {
     // GIVEN / ARRANGE
     const invalidRequest = {
@@ -313,7 +330,11 @@ describe("Invalid requests for generate-document handler", () => {
     },
     {
       documentType: DocumentType.EVALUATION_MEMO,
-      templatePayload: { ...sampleEvalMemoRequest.templatePayload, garbage: "prop" },
+      templatePayload: { ...sampleEvalMemoRequestWithException.templatePayload, garbage: "prop" },
+    },
+    {
+      documentType: DocumentType.EVALUATION_MEMO,
+      templatePayload: { ...sampleEvalMemoRequestWithoutException.templatePayload, basura: "prop" },
     },
   ])("should return validation error when payload has additional properties", async (requestBody) => {
     // GIVEN / ARRANGE
