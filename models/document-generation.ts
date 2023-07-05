@@ -703,9 +703,8 @@ const incrementalFundingPlan = {
 export const evalPlan = {
   type: "object",
   properties: {
-    taskOrderTitle: { type: "string" },
+    taskOrderTitle: { type: "string", nullable: true },
     sourceSelection: {
-      type: "string",
       enum: [
         SourceSelection.NO_TECH_PROPOSAL,
         SourceSelection.TECH_PROPOSAL,
@@ -715,8 +714,7 @@ export const evalPlan = {
       ],
     },
     method: {
-      type: "string",
-      enum: [EvalPlanMethod.BEST_USE, EvalPlanMethod.LOWEST_RISK, EvalPlanMethod.BVTO, EvalPlanMethod.LPTA, null],
+      enum: [EvalPlanMethod.BEST_USE, EvalPlanMethod.LOWEST_RISK, EvalPlanMethod.BVTO, EvalPlanMethod.LPTA, null,],
     },
     standardSpecifications: {
       type: "array",
@@ -751,7 +749,7 @@ export const evalMemo = {
   properties: {
     title: { type: "string" },
     estimatedValueFormatted: { type: "string" },
-    exceptionToFairOpportunity: { type: "string" },
+    exceptionToFairOpportunity: { type: "boolean" },
     proposedVendor: { type: "string" },
     ...evalPlan.properties,
   },
