@@ -343,9 +343,10 @@ export interface IncrementalFundingPlan {
 }
 
 export interface EvaluationPlan {
-  taskOrderTitle: string;
-  sourceSelection: SourceSelection;
-  method: EvalPlanMethod;
+  // EP requires non-null values, but EM doesn't always require an EP
+  taskOrderTitle: string | null;
+  sourceSelection: SourceSelection | null;
+  method: EvalPlanMethod | null;
   standardSpecifications: string[];
   customSpecifications: string[];
   standardDifferentiators: string[];
