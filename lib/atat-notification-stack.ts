@@ -12,7 +12,6 @@ export interface AtatNotificationStackProps {
    * must be sent.
    */
   notificationEmail: string;
-  topicEncryptionKey: kms.IKey;
 }
 
 export class IamChangeRule extends events.Rule {
