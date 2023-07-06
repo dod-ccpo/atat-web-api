@@ -63,25 +63,25 @@ export class PipelineStatus extends events.Rule {
 }
 
 export class AtatNotificationStack extends cdk.Stack {
-  public readonly encryptionKey: kms.IKey;
-  public readonly encryptionKeyAlias: kms.IAlias;
+  // public readonly encryptionKey: kms.IKey;
+  // public readonly encryptionKeyAlias: kms.IAlias;
   constructor(scope: Construct, id: string, props: AtatNotificationStackProps) {
     super(scope, id);
-    const snskey = new kms.Key(this, "AtatPipelineKey", {
-      enableKeyRotation: true,
-      description: "This key is used for SNS pipeline topic encryption",
-    });
-    this.encryptionKeyAlias = snskey.addAlias("atat-pipeline");
-    this.encryptionKey = snskey;
+    // const snskey = new kms.Key(this, "AtatPipelineKey", {
+    //   enableKeyRotation: true,
+    //   description: "This key is used for SNS pipeline topic encryption",
+    // });
+    // this.encryptionKeyAlias = snskey.addAlias("atat-pipeline");
+    // this.encryptionKey = snskey;
 
-    const topic = new sns.Topic(this, "AtatNotifications", { masterKey: snskey });
+    const topic = new sns.Topic(this, "AtatNotifications", {});
     topic.addSubscription(new subscriptions.EmailSubscription(props.notificationEmail));
     const topicTarget = new eventTargets.SnsTopic(topic);
 
     const iamChanges = new IamChangeRule(this, "IamChanges");
     iamChanges.addTarget(topicTarget);
 
-    const topicpipeline = new sns.Topic(this, "AtatPipelineNotifications", { masterKey: snskey });
+    const topicpipeline = new sns.Topic(this, "AtatPipelineNotifications", {});
     topicpipeline.addSubscription(new subscriptions.EmailSubscription(props.notificationEmail));
     const topicpipelineTarget = new eventTargets.SnsTopic(topicpipeline);
 
