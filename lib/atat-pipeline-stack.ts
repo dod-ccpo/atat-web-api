@@ -41,7 +41,7 @@ class AtatApplication extends cdk.Stage {
       monitoredStacks.push(
         new AtatNotificationStack(this, "AtatNotifications", {
           notificationEmail: props.notificationEmail,
-          topicEncryptionKey: sharedData.encryptionKey,
+          topicEncryptionKey: sharedData.snsEencryptionKeyAlias,
         })
       );
     }
