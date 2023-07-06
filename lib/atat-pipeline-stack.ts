@@ -37,14 +37,14 @@ class AtatApplication extends cdk.Stage {
     });
     const sharedData = new AtatSharedDataStack(this, "AtatSharedData");
     const monitoredStacks: cdk.Stack[] = [net, atat];
-    if (props.notificationEmail) {
-      monitoredStacks.push(
-        new AtatNotificationStack(this, "AtatNotifications", {
-          notificationEmail: props.notificationEmail,
-          topicEncryptionKey: sharedData.snsEencryptionKeyAlias,
-        })
-      );
-    }
+    // if (props.notificationEmail) {
+    //   monitoredStacks.push(
+    //     new AtatNotificationStack(this, "AtatNotifications", {
+    //       notificationEmail: props.notificationEmail,
+    //       topicEncryptionKey: sharedData.snsEencryptionKeyAlias,
+    //     })
+    //   );
+    // }
     cdk.Aspects.of(this).add(new GovCloudCompatibilityAspect());
     cdk.Aspects.of(atat).add(new NIST80053R4Checks({ verbose: true }));
     NagSuppressions.addStackSuppressions(atat, [
