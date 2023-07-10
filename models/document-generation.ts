@@ -849,7 +849,7 @@ export const generateDocumentSchema = {
       ],
     },
     templatePayload: {
-      oneOf: [
+      anyOf: [
         descriptionOfWork,
         independentGovernmentCostEstimate,
         incrementalFundingPlan,
