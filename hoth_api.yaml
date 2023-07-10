@@ -476,14 +476,13 @@ components:
             - MARKET_RESEARCH_REPORT
         templatePayload:
           type: object
-          oneOf:
+          anyOf:
             - $ref: "#/components/schemas/DescriptionOfWork"
             - $ref: "#/components/schemas/IndependentGovernmentCostEstimate"
             - $ref: "#/components/schemas/IncrementalFundingPlan"
             - $ref: "#/components/schemas/RequirementsChecklist"
             - $ref: "#/components/schemas/JustificationAndApproval"
-            - $ref: "#/components/schemas/MarketResearchReport"
-          anyOf: 
+            - $ref: "#/components/schemas/MarketResearchReport" 
             - $ref: "#/components/schemas/EvalPlan"
             - $ref: "#/components/schemas/EvalMemo"
     EvalPlan:
