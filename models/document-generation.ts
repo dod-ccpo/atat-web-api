@@ -343,9 +343,10 @@ export interface IncrementalFundingPlan {
 }
 
 export interface EvaluationPlan {
-  taskOrderTitle: string;
-  sourceSelection: SourceSelection;
-  method: EvalPlanMethod;
+  // EP requires non-null values, but EM doesn't always require an EP
+  taskOrderTitle: string | null;
+  sourceSelection: SourceSelection | null;
+  method: EvalPlanMethod | null;
   standardSpecifications: string[];
   customSpecifications: string[];
   standardDifferentiators: string[];
@@ -702,9 +703,8 @@ const incrementalFundingPlan = {
 export const evalPlan = {
   type: "object",
   properties: {
-    taskOrderTitle: { type: "string" },
+    taskOrderTitle: { type: "string", nullable: true },
     sourceSelection: {
-      type: "string",
       enum: [
         SourceSelection.NO_TECH_PROPOSAL,
         SourceSelection.TECH_PROPOSAL,
@@ -714,7 +714,6 @@ export const evalPlan = {
       ],
     },
     method: {
-      type: "string",
       enum: [EvalPlanMethod.BEST_USE, EvalPlanMethod.LOWEST_RISK, EvalPlanMethod.BVTO, EvalPlanMethod.LPTA, null],
     },
     standardSpecifications: {
@@ -750,7 +749,7 @@ export const evalMemo = {
   properties: {
     title: { type: "string" },
     estimatedValueFormatted: { type: "string" },
-    exceptionToFairOpportunity: { type: "string" },
+    exceptionToFairOpportunity: { type: "boolean" },
     proposedVendor: { type: "string" },
     ...evalPlan.properties,
   },

@@ -1807,14 +1807,31 @@ export const sampleMarketResearchReportRequest = {
   },
 };
 
-export const sampleEvalMemoRequest = {
+export const sampleEvalMemoRequestWithException = {
   documentType: "EVALUATION_MEMO",
   templatePayload: {
-    title: "my title",
+    title: "Eval Memo Test",
     estimatedValueFormatted: "$6,299,661.00",
-    exceptionToFairOpportunity: true,
+    exceptionToFairOpportunity: true, // EP not generated, expect no EP record
     proposedVendor: "Google Support Services",
-    taskOrderTitle: "Eval Memo Test",
+    // EP properties below
+    taskOrderTitle: null,
+    sourceSelection: null,
+    method: null,
+    standardSpecifications: [],
+    customSpecifications: [],
+    standardDifferentiators: [],
+    customDifferentiators: [],
+  },
+};
+
+export const sampleEvalMemoRequestWithoutException = {
+  ...sampleEvalMemoRequestWithException,
+  templatePayload: {
+    ...sampleEvalMemoRequestWithException.templatePayload,
+    exceptionToFairOpportunity: false, // EP generated, expect EP record
+    // EP properties below
+    taskOrderTitle: "Amazing Task Order",
     sourceSelection: "NO_TECH_PROPOSAL",
     method: "LPTA",
     standardSpecifications: ["standard spec 1", "standard spec 2", "standard spec 3"],
