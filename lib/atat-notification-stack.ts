@@ -76,7 +76,7 @@ export class AtatNotificationStack extends cdk.Stack {
     topicpipeline.addSubscription(new subscriptions.EmailSubscription(props.notificationEmail));
     const topicpipelineTarget = new eventTargets.SnsTopic(topicpipeline);
 
-    const PipelineStatus = new IamChangeRule(this, "PipelineStatus");
-    PipelineStatus.addTarget(topicpipelineTarget);
+    const pipelineChanges = new PipelineStatus(this, "PipelineStatus");
+    pipelineChanges.addTarget(topicpipelineTarget);
   }
 }
