@@ -331,6 +331,8 @@ export interface IncrementalFundingPlan {
   requirementsTitle: string;
   missionOwner: string;
   primaryContact: string;
+  agency: string;
+  organization: string;
   financialPoc: string;
   estimatedTaskOrderValue: number;
   initialAmount: number;
@@ -678,6 +680,8 @@ const incrementalFundingPlan = {
     requirementsTitle: { type: "string" },
     missionOwner: { type: "string" },
     primaryContact: { type: "string" },
+    agency: { type: "string" },
+    organization: { type: "string"},
     financialPoc: { type: "string" },
     estimatedTaskOrderValue: { type: "number" },
     initialAmount: { type: "number" },

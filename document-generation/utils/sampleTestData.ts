@@ -1447,6 +1447,8 @@ export const sampleIfpRequest = {
     requirementsTitle: "Versatile Demo Package",
     missionOwner: "Jewel Heart",
     primaryContact: "Michael Bubble",
+    agency: "Department of Agencies",
+    organization: "the organization formerly known as organiation",
     financialPoc: "Ester Crest",
     estimatedTaskOrderValue: 125000.55,
     initialAmount: 50000.55,
