@@ -1243,6 +1243,7 @@ export const sampleDowRequest = {
         periodUnit: "YEAR",
         optionOrder: 1,
       },
+      isRequirementFollowOnProcurementSoleSourced: true,
       optionPeriods: [
         {
           periodType: "OPTION",
@@ -1445,6 +1446,7 @@ export const sampleIfpRequest = {
   templatePayload: {
     requirementsTitle: "Versatile Demo Package",
     missionOwner: "Jewel Heart",
+    primaryContact: "Michael Bubble",
     financialPoc: "Ester Crest",
     estimatedTaskOrderValue: 125000.55,
     initialAmount: 50000.55,
@@ -1487,7 +1489,7 @@ export const sampleRequirementsChecklistRequest = {
       emergencyDeclaration: true,
     },
     organization: {
-      agency: "Federal Bureau Of Investigation (FBI/ITD)",
+      agency: "Defense Information Systems Agency (DISA)",
       name: "Special Div",
     },
     contacts: {
@@ -1505,6 +1507,13 @@ export const sampleRequirementsChecklistRequest = {
         email: "yoda@atat.com",
         phoneNumber: "+1 (999) 123-4567, ext. 999",
         dodaac: "bbb888",
+      },
+      primaryContact: {
+        type: "primaryContact",
+        name: "Tortellini",
+        email: "tortellini@atat.com",
+        phoneNumber: "+1 (999) 123-4567, ext. 999",
+        dodaac: "ccc888",
       },
     },
     currentContract: [
@@ -1530,6 +1539,7 @@ export const sampleRequirementsChecklistRequest = {
         { periodType: "OPTION", periodUnitCount: 36, periodUnit: "WEEK", optionOrder: 4 },
         { periodType: "OPTION", periodUnitCount: 7, periodUnit: "MONTH", optionOrder: 2 },
       ],
+      isRequirementFollowOnProcurementSoleSourced: true,
       popStartRequest: true,
       requestedPopStartDate: "2022-11-30",
       timeFrame: "NO_SOONER_THAN",
@@ -1549,7 +1559,7 @@ export const sampleRequirementsChecklistRequest = {
   },
 };
 
-export const sampleJustificationAndApproval = {
+export const sampleJustificationAndApprovalRequest = {
   documentType: "JUSTIFICATION_AND_APPROVAL",
   templatePayload: {
     purchaseRequestNumber: "O2208-097-097-697046, O2208-097-097-697046",
@@ -1605,6 +1615,7 @@ export const sampleJustificationAndApproval = {
         periodUnit: "MONTH",
         optionOrder: 1,
       },
+      isRequirementFollowOnProcurementSoleSourced: true,
       optionPeriods: [
         {
           periodType: "OPTION",
@@ -1649,7 +1660,7 @@ export const sampleJustificationAndApproval = {
   },
 };
 
-export const sampleMarketResearchReport = {
+export const sampleMarketResearchReportRequest = {
   documentType: "MARKET_RESEARCH_REPORT",
   templatePayload: {
     researchers: [
@@ -1681,6 +1692,39 @@ export const sampleMarketResearchReport = {
         "Google possesses the knowledge, skills, capabilities, certification, clearance, and experience required to continue the program without a break or degradation in critical mission services. Given these critical mission requirements, Google is the only contractor that is capable of performing the necessary services for the DoD within the current required timeline.",
       proposedVendor: "Google Support Services",
       justification: "Jeff J&A Justification 1",
+    },
+    periodOfPerformance: {
+      basePeriod: {
+        periodType: "BASE",
+        periodUnitCount: 1,
+        periodUnit: "YEAR",
+        optionOrder: 1,
+      },
+      isRequirementFollowOnProcurementSoleSourced: true,
+      optionPeriods: [
+        {
+          periodType: "OPTION",
+          periodUnitCount: 34,
+          periodUnit: "WEEK",
+          optionOrder: 2,
+        },
+        {
+          periodType: "OPTION",
+          periodUnitCount: 8,
+          periodUnit: "MONTH",
+          optionOrder: 3,
+        },
+        {
+          periodType: "OPTION",
+          periodUnitCount: 1,
+          periodUnit: "YEAR",
+          optionOrder: 4,
+        },
+      ],
+      popStartRequest: true,
+      requestedPopStartDate: "2023-03-01",
+      timeFrame: "NO_SOONER_THAN",
+      recurringRequirement: false,
     },
     techniquesUsed: [
       {
@@ -1760,6 +1804,40 @@ export const sampleMarketResearchReport = {
     },
     agencyLabel: "Business Transformation Agency (BTA)/Some Org",
     researchPersonalKnowledgePersonOrPosition: "Nelly Knowledgeable/Researcher Extraordinaire",
+  },
+};
+
+export const sampleEvalMemoRequestWithException = {
+  documentType: "EVALUATION_MEMO",
+  templatePayload: {
+    title: "Eval Memo Test",
+    estimatedValueFormatted: "$6,299,661.00",
+    exceptionToFairOpportunity: true, // EP not generated, expect no EP record
+    proposedVendor: "Google Support Services",
+    // EP properties below
+    taskOrderTitle: null,
+    sourceSelection: null,
+    method: null,
+    standardSpecifications: [],
+    customSpecifications: [],
+    standardDifferentiators: [],
+    customDifferentiators: [],
+  },
+};
+
+export const sampleEvalMemoRequestWithoutException = {
+  ...sampleEvalMemoRequestWithException,
+  templatePayload: {
+    ...sampleEvalMemoRequestWithException.templatePayload,
+    exceptionToFairOpportunity: false, // EP generated, expect EP record
+    // EP properties below
+    taskOrderTitle: "Amazing Task Order",
+    sourceSelection: "NO_TECH_PROPOSAL",
+    method: "LPTA",
+    standardSpecifications: ["standard spec 1", "standard spec 2", "standard spec 3"],
+    customSpecifications: ["custom spec 1", "custom spec 2"],
+    standardDifferentiators: ["standard diff 1", "standard diff 2", "standard diff 3"],
+    customDifferentiators: ["custom diff 1", "custom diff 2", "custom diff 3"],
   },
 };
 /* eslint-enable max-len */

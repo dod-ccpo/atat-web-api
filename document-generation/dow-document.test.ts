@@ -7,6 +7,7 @@ import { IDescriptionOfWork } from "../models/document-generation/description-of
 import { doGenerate, generateDowDocument } from "./dow-document";
 
 describe("Test DoW document generation", () => {
+  jest.setTimeout(15000);
   const oldEnv = process.env.TEMPLATE_FOLDER;
   const payload = sampleDowRequest.templatePayload as IDescriptionOfWork;
   let docxTemplate: Buffer;

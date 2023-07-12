@@ -1,14 +1,14 @@
 import { doGenerate, generateJustificationAndApprovalDocument } from "./justification-and-approval-document";
 import { getDocxTemplate } from "./utils/utils";
 import { DocumentType } from "../models/document-generation";
-import { sampleJustificationAndApproval } from "./utils/sampleTestData";
+import { sampleJustificationAndApprovalRequest } from "./utils/sampleTestData";
 import { IJustificationAndApproval } from "../models/document-generation/justification-and-approval";
 import { ApiBase64SuccessResponse } from "../utils/response";
 import fs from "fs";
 
 describe("Test J&A document generation", () => {
   const oldEnv = process.env.TEMPLATE_FOLDER;
-  const payload = sampleJustificationAndApproval.templatePayload as IJustificationAndApproval;
+  const payload = sampleJustificationAndApprovalRequest.templatePayload as IJustificationAndApproval;
   let docxTemplate: Buffer;
 
   beforeAll(() => {

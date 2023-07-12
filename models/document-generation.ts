@@ -16,6 +16,7 @@ export enum DocumentType {
   INDEPENDENT_GOVERNMENT_COST_ESTIMATE = "INDEPENDENT_GOVERNMENT_COST_ESTIMATE",
   INCREMENTAL_FUNDING_PLAN = "INCREMENTAL_FUNDING_PLAN",
   EVALUATION_PLAN = "EVALUATION_PLAN",
+  EVALUATION_MEMO = "EVALUATION_MEMO",
   REQUIREMENTS_CHECKLIST = "REQUIREMENTS_CHECKLIST",
   JUSTIFICATION_AND_APPROVAL = "JUSTIFICATION_AND_APPROVAL",
   MARKET_RESEARCH_REPORT = "MARKET_RESEARCH_REPORT",
@@ -126,6 +127,7 @@ export interface TemplatePaths {
   [DocumentType.DESCRIPTION_OF_WORK_DOCX]: { docx: string };
   [DocumentType.INDEPENDENT_GOVERNMENT_COST_ESTIMATE]: { excel: string };
   [DocumentType.INCREMENTAL_FUNDING_PLAN]: { docx: string };
+  [DocumentType.EVALUATION_MEMO]: { docx: string };
   [DocumentType.EVALUATION_PLAN]: { docx: string };
   [DocumentType.REQUIREMENTS_CHECKLIST]: { docx: string };
   [DocumentType.JUSTIFICATION_AND_APPROVAL]: { docx: string };
@@ -203,6 +205,7 @@ export interface ISelectedServiceOffering {
 
 export interface IPeriodOfPerformance {
   basePeriod: IPeriod;
+  isRequirementFollowOnProcurementSoleSourced: boolean;
   optionPeriods: IPeriod[];
   popStartRequest: boolean;
   requestedPopStartDate: string;
@@ -327,6 +330,7 @@ export interface IFundingIncrement {
 export interface IncrementalFundingPlan {
   requirementsTitle: string;
   missionOwner: string;
+  primaryContact: string;
   financialPoc: string;
   estimatedTaskOrderValue: number;
   initialAmount: number;
@@ -339,9 +343,10 @@ export interface IncrementalFundingPlan {
 }
 
 export interface EvaluationPlan {
-  taskOrderTitle: string;
-  sourceSelection: SourceSelection;
-  method: EvalPlanMethod;
+  // EP requires non-null values, but EM doesn't always require an EP
+  taskOrderTitle: string | null;
+  sourceSelection: SourceSelection | null;
+  method: EvalPlanMethod | null;
   standardSpecifications: string[];
   customSpecifications: string[];
   standardDifferentiators: string[];
@@ -530,6 +535,7 @@ export const periodOfPerformance = {
   type: "object",
   properties: {
     basePeriod: period,
+    isRequirementFollowOnProcurementSoleSourced: { type: "boolean" },
     optionPeriods: { type: "array", items: period },
     popStartRequest: { type: "boolean" },
     requestedPopStartDate: { type: "string" },
@@ -671,6 +677,7 @@ const incrementalFundingPlan = {
   properties: {
     requirementsTitle: { type: "string" },
     missionOwner: { type: "string" },
+    primaryContact: { type: "string" },
     financialPoc: { type: "string" },
     estimatedTaskOrderValue: { type: "number" },
     initialAmount: { type: "number" },
@@ -696,14 +703,14 @@ const incrementalFundingPlan = {
 export const evalPlan = {
   type: "object",
   properties: {
-    taskOrderTitle: { type: "string" },
+    taskOrderTitle: { type: "string", nullable: true },
     sourceSelection: {
-      type: "string",
       enum: [
         SourceSelection.NO_TECH_PROPOSAL,
         SourceSelection.TECH_PROPOSAL,
         SourceSelection.SET_LUMP_SUM,
         SourceSelection.EQUAL_SET_LUMP_SUM,
+        null,
       ],
     },
     method: {
@@ -737,7 +744,17 @@ export const evalPlan = {
   additionalProperties: false,
 };
 
-// J&A
+export const evalMemo = {
+  type: "object",
+  properties: {
+    title: { type: "string" },
+    estimatedValueFormatted: { type: "string" },
+    exceptionToFairOpportunity: { type: "boolean" },
+    proposedVendor: { type: "string" },
+    ...evalPlan.properties,
+  },
+  additionalProperties: false,
+};
 
 export const fairOpportunity = {
   type: "object",
@@ -794,12 +811,12 @@ export const justificationAndApproval = {
   additionalProperties: false,
 };
 
-// MRR
 export const marketResearchReport = {
   type: "object",
   properties: {
     researchers: { type: "array", items: researcher },
     fairOpportunity,
+    periodOfPerformance,
     techniquesUsed: { type: "array", items: researchTechnique },
     techniqueOther: { type: "string" },
     title: { type: "string" },
@@ -828,14 +845,16 @@ export const generateDocumentSchema = {
         DocumentType.REQUIREMENTS_CHECKLIST,
         DocumentType.JUSTIFICATION_AND_APPROVAL,
         DocumentType.MARKET_RESEARCH_REPORT,
+        DocumentType.EVALUATION_MEMO,
       ],
     },
     templatePayload: {
-      oneOf: [
+      anyOf: [
         descriptionOfWork,
         independentGovernmentCostEstimate,
         incrementalFundingPlan,
         evalPlan,
+        evalMemo,
         requirementsCheckList,
         justificationAndApproval,
         marketResearchReport,

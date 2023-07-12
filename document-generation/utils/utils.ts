@@ -41,7 +41,7 @@ export const convertPeriodToMonths = (period: IPeriod): number => {
 export const formatPeriodOfPerformance = (basePeriod: IPeriod, optionPeriods: IPeriod[]): string => {
   let formattedPop = "";
   formattedPop += basePeriod.periodUnitCount;
-  formattedPop += " ";
+  formattedPop += "-";
   formattedPop += basePeriod.periodUnit.toLowerCase();
   formattedPop += " base period";
   formattedPop += optionPeriods.length > 0 ? ", plus " : "";
@@ -133,6 +133,9 @@ export const getDocumentTemplatePath = (folder?: string): TemplatePaths => {
     [DocumentType.INCREMENTAL_FUNDING_PLAN]: {
       docx: `${folder}/ifp-template.docx`,
     },
+    [DocumentType.EVALUATION_MEMO]: {
+      docx: `${folder}/eval-memo-template.docx`,
+    },
     [DocumentType.EVALUATION_PLAN]: {
       docx: `${folder}/eval-plan-template.docx`,
     },
@@ -184,6 +187,9 @@ export const getDocxTemplate = (documentType: DocumentType): Buffer => {
       docx = fs.readFileSync(getDocumentTemplatePath()[documentType].docx);
       break;
     case DocumentType.INCREMENTAL_FUNDING_PLAN:
+      docx = fs.readFileSync(getDocumentTemplatePath()[documentType].docx);
+      break;
+    case DocumentType.EVALUATION_MEMO:
       docx = fs.readFileSync(getDocumentTemplatePath()[documentType].docx);
       break;
     case DocumentType.EVALUATION_PLAN:

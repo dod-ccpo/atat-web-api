@@ -9,7 +9,7 @@ beforeEach(() => {
 });
 
 describe("Generate an IGCE binary document - happy path", () => {
-  jest.setTimeout(10000); // these tests take longer on some clients
+  jest.setTimeout(15000);
   const sampleIgceRequestWithGTCNumber = sampleIgceRequest.templatePayload as IndependentGovernmentCostEstimate;
   const sampleIgceRequestWithMIPRNumber = {
     ...sampleIgceRequest.templatePayload,

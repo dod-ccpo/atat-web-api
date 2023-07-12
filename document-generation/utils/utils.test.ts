@@ -45,7 +45,7 @@ describe("formatPeriodOfPerformance", () => {
 
     const basePeriod: IPeriod = periodOfPerformance.basePeriod as unknown as IPeriod;
     const optionPeriods: IPeriod[] = periodOfPerformance.optionPeriods as unknown as IPeriod[];
-    const expectedPopFormat = "1 year base period, plus two 6-month option periods and one 1-year option period";
+    const expectedPopFormat = "1-year base period, plus two 6-month option periods and one 1-year option period";
     const popString = formatPeriodOfPerformance(basePeriod, optionPeriods);
     expect(popString).toEqual(expectedPopFormat);
   });
@@ -56,7 +56,7 @@ describe("formatPeriodOfPerformance", () => {
     };
 
     const basePeriod: IPeriod = periodOfPerformance.basePeriod as unknown as IPeriod;
-    const expectedPopFormat = "52 week base period";
+    const expectedPopFormat = "52-week base period";
     const popString = formatPeriodOfPerformance(basePeriod, []);
     expect(popString).toEqual(expectedPopFormat);
   });
@@ -69,7 +69,7 @@ describe("formatPeriodOfPerformance", () => {
 
     const basePeriod: IPeriod = periodOfPerformance.basePeriod as unknown as IPeriod;
     const optionPeriods: IPeriod[] = periodOfPerformance.optionPeriods as unknown as IPeriod[];
-    const expectedPopFormat = "1 year base period, plus one 1-year option period";
+    const expectedPopFormat = "1-year base period, plus one 1-year option period";
     const popString = formatPeriodOfPerformance(basePeriod, optionPeriods);
     expect(popString).toEqual(expectedPopFormat);
   });
@@ -92,7 +92,7 @@ describe("formatPeriodOfPerformance", () => {
     const basePeriod: IPeriod = periodOfPerformance.basePeriod as unknown as IPeriod;
     const optionPeriods: IPeriod[] = periodOfPerformance.optionPeriods as unknown as IPeriod[];
     const expectedPopFormat =
-      "12 month base period, plus two 6-month option periods, three 2-month option periods and two 1-year option periods";
+      "12-month base period, plus two 6-month option periods, three 2-month option periods and two 1-year option periods";
     const popString = formatPeriodOfPerformance(basePeriod, optionPeriods);
     expect(popString).toEqual(expectedPopFormat);
     /* eslint-enable max-len */
