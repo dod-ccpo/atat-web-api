@@ -681,7 +681,7 @@ const incrementalFundingPlan = {
     missionOwner: { type: "string" },
     primaryContact: { type: "string" },
     agency: { type: "string" },
-    organization: { type: "string"},
+    organization: { type: "string" },
     financialPoc: { type: "string" },
     estimatedTaskOrderValue: { type: "number" },
     initialAmount: { type: "number" },
