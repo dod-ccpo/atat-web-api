@@ -15,7 +15,6 @@ import { logger } from "../../utils/logging";
 import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
 import { LoggingContextMiddleware } from "../../utils/middleware/logging-context-middleware";
 import { wrapSchema } from "../../utils/middleware/schema-wrapper";
-import xssSanitizer from "../../utils/middleware/xss-sanitizer";
 import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
 import { tracer } from "../../utils/tracing";
 
@@ -51,7 +50,6 @@ export const handler = middy(baseHandler)
   .use(inputOutputLogger({ logger: (message) => logger.info("Event/Result", message) }))
   .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
   .use(httpJsonBodyParser())
-  .use(xssSanitizer())
   .use(validator({ eventSchema: wrapSchema(costRequestSchema) }))
   .use(errorHandlingMiddleware())
   .use(jsonErrorHandlerMiddleware());
