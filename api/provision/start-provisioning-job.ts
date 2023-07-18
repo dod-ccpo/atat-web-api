@@ -15,7 +15,6 @@ import { cspPortfolioIdChecker } from "../../utils/middleware/check-csp-portfoli
 import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
 import { LoggingContextMiddleware } from "../../utils/middleware/logging-context-middleware";
 import { wrapSchema } from "../../utils/middleware/schema-wrapper";
-import xssSanitizer from "../../utils/middleware/xss-sanitizer";
 import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
 import { tracer } from "../../utils/tracing";
 import { provisionRequestSchema } from "../../models/provisioning-schemas";
@@ -53,7 +52,6 @@ export const handler = middy(baseHandler)
   .use(inputOutputLogger({ logger: (message) => logger.info("Event/Result", message) }))
   .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
   .use(httpJsonBodyParser())
-  .use(xssSanitizer())
   .use(cspPortfolioIdChecker())
   .use(validator({ eventSchema: wrapSchema(provisionRequestSchema) }))
   .use(errorHandlingMiddleware())
