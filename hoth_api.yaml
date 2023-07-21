@@ -537,14 +537,11 @@ components:
         financialPoc:
           type: string
         estimatedTaskOrderValue:
-          type: number
-          format: float
+          type: string
         initialAmount:
-          type: number
-          format: float
+          type: string
         remainingAmount:
-          type: number
-          format: float
+          type: string
         fundingIncrements:
           type: array
           items:

@@ -334,9 +334,9 @@ export interface IncrementalFundingPlan {
   agency: string;
   organization: string;
   financialPoc: string;
-  estimatedTaskOrderValue: number;
-  initialAmount: number;
-  remainingAmount: number;
+  estimatedTaskOrderValue: string;
+  initialAmount: string;
+  remainingAmount: string;
   fundingIncrements: IFundingIncrement[];
   fundingDocument: IFundingDocument;
   scheduleText?: string;
@@ -683,9 +683,9 @@ const incrementalFundingPlan = {
     agency: { type: "string" },
     organization: { type: "string" },
     financialPoc: { type: "string" },
-    estimatedTaskOrderValue: { type: "number" },
-    initialAmount: { type: "number" },
-    remainingAmount: { type: "number" },
+    estimatedTaskOrderValue: { type: "string" },
+    initialAmount: { type: "string" },
+    remainingAmount: { type: "string" },
     fundingIncrements: {
       type: "array",
       items: {

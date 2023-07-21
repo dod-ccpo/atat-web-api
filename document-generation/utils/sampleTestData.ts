@@ -1450,9 +1450,9 @@ export const sampleIfpRequest = {
     agency: "Department of Agencies",
     organization: "the organization formerly known as organiation",
     financialPoc: "Ester Crest",
-    estimatedTaskOrderValue: 125000.55,
-    initialAmount: 50000.55,
-    remainingAmount: 75000,
+    estimatedTaskOrderValue: "125000.55",
+    initialAmount: "50000.55",
+    remainingAmount: "75000",
     fundingDocument: { fundingType: "FS_FORM", orderNumber: "O-23434-34234" },
     fundingIncrements: [
       { amount: 25000, description: "2nd QTR FY23", order: 1 },
