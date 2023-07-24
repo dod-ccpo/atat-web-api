@@ -249,6 +249,15 @@ Resources:
               - ec2:GetEbsEncryptionByDefault
               - ec2:Describe*
               - ec2:Get*
+              - cloudwatch:Describe*
+              - cloudwatch:Get*
+              - sns:Get*
+              - sns:List*
+              - events:List*
+              - events:Describe*
+              - sso:List*
+              - sso:Describe*
+              - sso:Get*
             Resource: "*"
   AtatDeveloperSecretReadAccess:
     Type: AWS::SSO::PermissionSet
