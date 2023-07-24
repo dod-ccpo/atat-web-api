@@ -88,6 +88,7 @@ describe("axios interceptors", () => {
       } as InternalAxiosRequestConfig)
     ).toEqual({ data: { hello_world: "Hello!" } });
   });
+
   it("should convert responses from snake_case to camelCase", () => {
     const responseContentSnake = {
       test_object: {
@@ -113,6 +114,31 @@ describe("axios interceptors", () => {
       data: responseContentCamel,
     });
   });
+
+  it("should convert snake_case to camelCase for application/json; charset=UTF-8 content-type", () => {
+    const response = {
+      status: 200,
+      statusText: "OK",
+      data: { snake_case_key: "value" },
+      headers: { "content-type": "application/json; charset=UTF-8" },
+      config: {} as InternalAxiosRequestConfig,
+    };
+    const result = snakeToCamelResponseInterceptor(response);
+    expect(result.data).toEqual({ snakeCaseKey: "value" });
+  });
+
+  it("should handle responses with no data", () => {
+    const response = {
+      status: 200,
+      statusText: "OK",
+      data: undefined,
+      headers: { "content-type": "application/json" },
+      config: {} as InternalAxiosRequestConfig,
+    };
+    const result = snakeToCamelResponseInterceptor(response);
+    expect(result.data).toBeUndefined();
+  });
+
   it("should not modify non-JSON response objects", () => {
     const responseObject: AxiosResponse = {
       status: 200,

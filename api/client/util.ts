@@ -36,8 +36,14 @@ export function snakeCaseObject(object: any): any {
 // Dynamically convert all values to snake_case to send across the wire, per the API
 // specification and then convert responses to camelCase for the internal API of this
 // client.
+
 export function snakeToCamelResponseInterceptor(response: AxiosResponse): AxiosResponse {
-  if (response.data && response.headers?.["content-type"] === "application/json") {
+  if (
+    response.data &&
+    response.headers &&
+    response.headers["content-type"] &&
+    response.headers["content-type"].startsWith("application/json")
+  ) {
     response.data = camelCaseObject(response.data);
   }
   return response;
