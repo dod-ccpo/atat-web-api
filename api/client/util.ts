@@ -38,7 +38,12 @@ export function snakeCaseObject(object: any): any {
 // client.
 
 export function snakeToCamelResponseInterceptor(response: AxiosResponse): AxiosResponse {
-  if (response.data && response.headers?.["content-type"].startsWith("application/json")) {
+  if (
+    response.data &&
+    response.headers &&
+    response.headers["content-type"] &&
+    response.headers["content-type"].startsWith("application/json")
+  ) {
     response.data = camelCaseObject(response.data);
   }
   return response;

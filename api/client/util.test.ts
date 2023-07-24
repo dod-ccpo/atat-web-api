@@ -115,24 +115,24 @@ describe("axios interceptors", () => {
     });
   });
 
-  it('should convert snake_case to camelCase for application/json; charset=UTF-8 content-type', () => {
+  it("should convert snake_case to camelCase for application/json; charset=UTF-8 content-type", () => {
     const response = {
       status: 200,
       statusText: "OK",
-      data: { snake_case_key: 'value' },
-      headers: { 'content-type': 'application/json; charset=UTF-8' },
+      data: { snake_case_key: "value" },
+      headers: { "content-type": "application/json; charset=UTF-8" },
       config: {} as InternalAxiosRequestConfig,
     };
     const result = snakeToCamelResponseInterceptor(response);
-    expect(result.data).toEqual({ snakeCaseKey: 'value' });
+    expect(result.data).toEqual({ snakeCaseKey: "value" });
   });
 
-  it('should handle responses with no data', () => {
+  it("should handle responses with no data", () => {
     const response = {
       status: 200,
       statusText: "OK",
       data: undefined,
-      headers: { 'content-type': 'application/json' },
+      headers: { "content-type": "application/json" },
       config: {} as InternalAxiosRequestConfig,
     };
     const result = snakeToCamelResponseInterceptor(response);
