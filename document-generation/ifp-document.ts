@@ -12,9 +12,18 @@ export async function doGenerate(template: Buffer, payload: IncrementalFundingPl
       data: {
         ...payload,
         // update amounts to have commas
-        estimatedTaskOrderValue: payload.estimatedTaskOrderValue.toLocaleString("en-US"),
-        initialAmount: payload.initialAmount.toLocaleString("en-US"),
-        remainingAmount: payload.remainingAmount.toLocaleString("en-US"),
+        estimatedTaskOrderValue: payload.estimatedTaskOrderValue.toLocaleString("en-US", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }),
+        initialAmount: payload.initialAmount.toLocaleString("en-US", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }),
+        remainingAmount: payload.remainingAmount.toLocaleString("en-US", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }),
         // construct Funding Document information to be used in template
         fundingDocInfo: getFundingDocInfo(payload.fundingDocument),
       },
