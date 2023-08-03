@@ -4,6 +4,19 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: >-
   Creates a EventBridge rule for GuardDuty to send an SNS notification with GuardDuty findings.
 
+Parameters:
+  pEmailGroup:
+    Description: >-
+      This is the email distro group that will be notified if a GuardDuty 
+      finding(s) triggers an event.
+    Type: String
+
+
+  pKmsKeyId:
+    Description: >-
+        AWS KMS key used to encrypt the SNS topic.
+    Type: String
+
 Resources:
   rEventRule:
     Type: "AWS::Events::Rule"
@@ -24,38 +37,9 @@ Resources:
     Type: "AWS::SNS::Topic"
     Properties:
       Subscription:
-        - Endpoint: "disa.meade.hacc.list.hc2-atat-dev-notifications@mail.mil" #distro email used for dev environment
+        - Endpoint: !Ref pEmailGroup #distro email used for dev environment
           Protocol: "email"
       TopicName: "GuardDuty-Event-Rule-Action"
-  rSnsTopicPolicyEventRule:
-    Type: "AWS::SNS::TopicPolicy"
-    Properties:
-      PolicyDocument:
-        Statement:
-          - Sid: "GuardDuty-Event-Rule-Action-Topic"
-            Effect: "Allow"
-            Principal:
-              AWS: "*"
-            Action:
-              - "SNS:GetTopicAttributes"
-              - "SNS:SetTopicAttributes"
-              - "SNS:Subscribe"
-              - "SNS:ListSubscriptionsByTopic"
-              - "SNS:Publish"
-              - "SNS:Receive"
-            Resource:
-              Ref: "rSnsTopicEventRule"
-            Condition:
-              StringEquals:
-                AWS:SourceOwner:
-                  Ref: "AWS::AccountId"
-          - Sid: "TrustCWEToPublishEventsToTopic"
-            Effect: "Allow"
-            Principal:
-              Service: "events.amazonaws.com"
-            Action: "sns:Publish"
-            Resource:
-              Ref: "rSnsTopicEventRule"
-      Topics:
-        - Ref: "rSnsTopicEventRule"
+      KmsMasterKeyId: !Ref pKmsKeyId
+
 
