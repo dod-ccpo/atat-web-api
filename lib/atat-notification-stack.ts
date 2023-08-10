@@ -15,7 +15,6 @@ export interface AtatNotificationStackProps {
   topicEncryptionKey: kms.IKey;
 }
 
-// Event to trigger SNS topic
 export class IamChangeRule extends events.Rule {
   constructor(scope: Construct, id: string, props?: events.RuleProps) {
     super(scope, id, {
