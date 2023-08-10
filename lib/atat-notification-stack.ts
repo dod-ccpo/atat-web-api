@@ -61,7 +61,7 @@ export class PipelineStatus extends events.Rule {
     });
   }
 }
-
+// Creates the SNS topics
 export class AtatNotificationStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: AtatNotificationStackProps) {
     super(scope, id);
