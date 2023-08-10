@@ -129,7 +129,10 @@ export class AtatContextValue {
   // This eslint-disable is required as it picks up on the constructor shorthand as a
   // "useless" constructor which is not a correct determination.
   // eslint-disable-next-line no-useless-constructor
-  private constructor(public readonly name: string, public readonly defaultValue: any | undefined) {}
+  private constructor(
+    public readonly name: string,
+    public readonly defaultValue: any | undefined
+  ) {}
 
   /**
    * Resolve the value of the context within a given scope.
