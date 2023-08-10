@@ -29,6 +29,7 @@
       }
     }
   },
+  //Added these rules to disable these lint checks
   "rules": {
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-unused-vars": "off",
