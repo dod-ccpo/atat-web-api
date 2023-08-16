@@ -27,7 +27,7 @@
     "@typescript-eslint/eslint-plugin": "^5.52.0",
     "@typescript-eslint/parser": "^5.52.0",
     "aws-cdk": "2.91.0",
-    "aws-sdk-client-mock": "^2.0.1",
+    "aws-sdk-client-mock": "^3.0.0",
     "esbuild": "^0.17.18",
     "eslint": "^8.34.0",
     "eslint-config-prettier": "^8.6.0",
