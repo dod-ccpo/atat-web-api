@@ -99,7 +99,7 @@ export class AtatNotificationStack extends cdk.Stack {
 
     // SNS Topic and subscription for GuardDuty findings
     const guardDutyTopic = new sns.Topic(this, "AtatGuardDutyNotifications", { masterKey: props.topicEncryptionKey });
-    topicpipeline.addSubscription(new subscriptions.EmailSubscription(props.notificationEmail));
+    guardDutyTopic.addSubscription(new subscriptions.EmailSubscription(props.notificationEmail));
     const guardDutyFindingTarget = new eventTargets.SnsTopic(guardDutyTopic);
 
     const guardDutyFinding = new GuardDutyFindingRule(this, "GuardDutyFindings");
