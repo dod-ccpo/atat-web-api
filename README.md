@@ -19,8 +19,9 @@ integrators in the future.
 development and deployment process therefore heavily use the `aws-cdk` CLI.
 
 There are two main deployment paths for `atat-web-api`. These are:
- - A minimal sandbox environment for developers to have a "live" environment in which to test changes
- - A full environment managed by a CI/CD pipeline
+
+- A minimal sandbox environment for developers to have a "live" environment in which to test changes
+- A full environment managed by a CI/CD pipeline
 
 In general, the steps to deploy each are approximately the same, following the typical `cdk diff`/`cdk deploy`
 workflow. Which path is chosen is determined based on the values of a CDK Context variable value.
@@ -53,11 +54,12 @@ so. Like a Sandbox environment, the `atat:EnvironmentId` context value must also
 Secret must be created within Secrets Manager to store a GitHub Personal Access Token.
 
 The required context values are:
- - `atat:EnvironmentId`, which should be the unique name used to identify the environment
- - `atat:GitHubPatName`, which should be the name of the Secret that contains the GitHub PAT
- - `atat:VersionControlRepo`, which should be name of the GitHub repository where the code is stored,
-    including the organization name (for example, `dod-ccpo/atat-web-api`)
- - `atat:VersionControlBranch`, which should be the branch within the repository to watch for changes
+
+- `atat:EnvironmentId`, which should be the unique name used to identify the environment
+- `atat:GitHubPatName`, which should be the name of the Secret that contains the GitHub PAT
+- `atat:VersionControlRepo`, which should be name of the GitHub repository where the code is stored,
+  including the organization name (for example, `dod-ccpo/atat-web-api`)
+- `atat:VersionControlBranch`, which should be the branch within the repository to watch for changes
 
 These values can, of course, be set either through the CLI or via the `cdk.json` file. The last three have
 reasonable defaults set within the `cdk.json` file. Therefore, once you have confirmed those values look
@@ -77,8 +79,9 @@ cdk deploy -c atat:EnvironmentId=<ENVIRONMENT_ID> -c atat:Sandbox=true
 
 The deployed pipeline will be self-mutating so futher manual deployments should be rarely needed.
 The primary situations needing manual deployment are:
- - When the GitHub PAT is rotated (using the `atat:ForceGitHubTokenVersion` context)
- - When changes that require additional command line arguments to `cdk synth` in the self-mutate
-   step are made
- - When it is necessary to change the branch being watched without a corresponding push to the
-   current target branch (for example, to switch from watching `main` to watching `develop`)
+
+- When the GitHub PAT is rotated (using the `atat:ForceGitHubTokenVersion` context)
+- When changes that require additional command line arguments to `cdk synth` in the self-mutate
+  step are made
+- When it is necessary to change the branch being watched without a corresponding push to the
+  current target branch (for example, to switch from watching `main` to watching `develop`)

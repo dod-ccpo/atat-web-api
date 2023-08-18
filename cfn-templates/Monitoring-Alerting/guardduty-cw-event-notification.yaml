@@ -11,10 +11,9 @@ Parameters:
       finding(s) triggers an event.
     Type: String
 
-
   pKmsKeyId:
     Description: >-
-        AWS KMS key used to encrypt the SNS topic.
+      AWS KMS key used to encrypt the SNS topic.
     Type: String
 
 Resources:
@@ -42,4 +41,3 @@ Resources:
           Protocol: "email"
       TopicName: "GuardDuty-Event-Rule-Action"
       KmsMasterKeyId: !Ref pKmsKeyId
-

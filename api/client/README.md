@@ -9,7 +9,7 @@ The client requires an API token in order to be instantiated as well as a base
 URL for requests. For example:
 
 ```ts
-import { AtatClient } from 'api/client';
+import { AtatClient } from "api/client";
 new AtatClient("TOKEN", "https://csp.example.com/atat/api/");
 ```
 

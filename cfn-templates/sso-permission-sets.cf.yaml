@@ -94,7 +94,7 @@ Resources:
                 aws:ResourceAccount: "${aws:PrincipalAccount}"
           - Effect: Allow
             Action: apigateway:GET
-            Resource: 
+            Resource:
               - !Sub arn:${AWS::Partition}:apigateway:*::/account
               - !Sub arn:${AWS::Partition}:apigateway:*::/restapis
               - !Sub arn:${AWS::Partition}:apigateway:*::/restapis/*
@@ -146,7 +146,7 @@ Resources:
             Resource: "*"
           - Effect: Allow
             Action: apigateway:POST
-            Resource: 
+            Resource:
               - !Sub arn:${AWS::Partition}:apigateway:*::/restapis/*/deployments
               - !Sub arn:${AWS::Partition}:apigateway:*::/restapis/*/resources/*
   AtatAuditorAccess:
@@ -172,7 +172,7 @@ Resources:
                 aws:ResourceAccount: "${aws:PrincipalAccount}"
           - Effect: Allow
             Action: apigateway:GET
-            Resource: 
+            Resource:
               - !Sub arn:${AWS::Partition}:apigateway:*::/account
               - !Sub arn:${AWS::Partition}:apigateway:*::/restapis
               - !Sub arn:${AWS::Partition}:apigateway:*::/restapis/*
@@ -230,7 +230,7 @@ Resources:
                 aws:ResourceAccount: "${aws:PrincipalAccount}"
           - Effect: Allow
             Action: apigateway:GET
-            Resource: 
+            Resource:
               - !Sub arn:${AWS::Partition}:apigateway:*::/account
               - !Sub arn:${AWS::Partition}:apigateway:*::/restapis
               - !Sub arn:${AWS::Partition}:apigateway:*::/restapis/*
@@ -286,7 +286,7 @@ Resources:
               StringNotEquals:
                 aws:ResourceAccount: "${aws:PrincipalAccount}"
           - Effect: Allow
-            Action: 
+            Action:
               - secretsmanager:GetSecretValue
               - secretsmanager:ListSecrets
               - secretsmanager:DescribeSecret

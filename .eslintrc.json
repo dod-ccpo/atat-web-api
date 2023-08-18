@@ -16,12 +16,7 @@
     "ecmaVersion": "latest",
     "sourceType": "module"
   },
-  "plugins": [
-    "@typescript-eslint",
-    "import",
-    "prettier",
-    "json"
-  ],
+  "plugins": ["@typescript-eslint", "import", "prettier", "json"],
   "settings": {
     "import/resolver": {
       "typescript": {
@@ -30,10 +25,7 @@
     }
   },
   "rules": {
-    "max-len": [
-      2,
-      120
-    ],
+    "max-len": [2, 120],
     "no-new": "warn"
   }
 }

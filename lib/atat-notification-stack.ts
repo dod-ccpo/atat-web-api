@@ -63,7 +63,7 @@ export class PipelineStatus extends events.Rule {
 }
 
 // Event to trigger SNS topic for GuardDuty findings
-export class guardDutyFindingRule extends events.Rule {
+export class GuardDutyFindingRule extends events.Rule {
   constructor(scope: Construct, id: string, props?: events.RuleProps) {
     super(scope, id, {
       ...props,
@@ -97,13 +97,12 @@ export class AtatNotificationStack extends cdk.Stack {
     const pipelineChanges = new PipelineStatus(this, "PipelineStatus");
     pipelineChanges.addTarget(topicpipelineTarget);
 
-     // SNS Topic and subscription for GuardDuty findings
+    // SNS Topic and subscription for GuardDuty findings
     const guardDutyTopic = new sns.Topic(this, "AtatGuardDutyNotifications", { masterKey: props.topicEncryptionKey });
     topicpipeline.addSubscription(new subscriptions.EmailSubscription(props.notificationEmail));
     const guardDutyFindingTarget = new eventTargets.SnsTopic(guardDutyTopic);
 
-    const guardDutyFinding = new guardDutyFindingRule(this, "GuardDutyFindings");
+    const guardDutyFinding = new GuardDutyFindingRule(this, "GuardDutyFindings");
     guardDutyFinding.addTarget(guardDutyFindingTarget);
-
   }
 }

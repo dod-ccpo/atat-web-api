@@ -37,6 +37,7 @@ sequenceDiagram
 
 This diagram covers the process for how the HOTH API is invoked for a Provisioning Request
 including sync and async operations for
+
 - AddPortfolio
 - AddTaskorder
 - AddOperators
@@ -66,7 +67,7 @@ sequenceDiagram
     rect rgb(53,138,89)
     Note right of EnqueueResults: Async processing of CSP provisioning requests
     EnqueueResults->>AsyncProvisioningJobsQueue: HTTP 202 - Write Async messages
-    AsyncProvisioningJobsQueue->>AsyncProvisionWatcher: Poll messages (event source) 
+    AsyncProvisioningJobsQueue->>AsyncProvisionWatcher: Poll messages (event source)
     AsyncProvisionWatcher->>CSP: Provisioning request to CSP
     CSP->>AsyncProvisionWatcher: CSP response
     AsyncProvisionWatcher->>AsyncProvisioningJobsQueue: Provisioning job still processing

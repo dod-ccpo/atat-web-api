@@ -1,6 +1,6 @@
 html {
   font-size: 10px;
-  font-family: 'Times New Roman', Times, serif;
+  font-family: "Times New Roman", Times, serif;
 }
 
 body {
@@ -38,7 +38,8 @@ table {
   border-collapse: collapse;
 }
 
-td, th {
+td,
+th {
   border: 1px solid black;
   padding: 8px 16px;
   line-height: 2.2rem;
@@ -49,7 +50,8 @@ td, th {
   margin: 0 auto 2.4rem;
 }
 
-.award-mod-table td, .award-mod-table th {
+.award-mod-table td,
+.award-mod-table th {
   width: 190px;
 }
 

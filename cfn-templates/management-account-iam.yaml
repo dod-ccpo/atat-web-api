@@ -2,12 +2,12 @@
 AWSTemplateFormatVersion: "2010-09-09"
 
 Description: >-
- Provisions IAM resources within the management account to assume the necessary
- roles within accounts in a development environment. This provisions IAM policies
- and groups that users can be placed in.
+  Provisions IAM resources within the management account to assume the necessary
+  roles within accounts in a development environment. This provisions IAM policies
+  and groups that users can be placed in.
 
- Because this does not directly create any users or roles, it does not need to be
- aware of any Permissions Boundaries.
+  Because this does not directly create any users or roles, it does not need to be
+  aware of any Permissions Boundaries.
 
 Parameters:
   ContractorGroupPrefix:

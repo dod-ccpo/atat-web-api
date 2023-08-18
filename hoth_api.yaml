@@ -305,7 +305,7 @@ components:
         classification_level:
           $ref: "#/components/schemas/ProvisioningClassificationLevel"
         cloud_distinguisher:
-          $ref: '#/components/schemas/CloudDistinguisher'
+          $ref: "#/components/schemas/CloudDistinguisher"
         csp_id:
           type: string
           readOnly: true
@@ -361,7 +361,7 @@ components:
         clins:
           type: array
           items:
-            $ref: '#/components/schemas/Clin'
+            $ref: "#/components/schemas/Clin"
         pop_start_date:
           description: Start of period of performance for this Task Order in YYYY-MM format.
           type: string
@@ -395,7 +395,7 @@ components:
             - CLOUD
             - NON_CLOUD
         classification_level:
-          $ref: '#/components/schemas/ProvisioningClassificationLevel'
+          $ref: "#/components/schemas/ProvisioningClassificationLevel"
         pop_start_date:
           description: Start of period of performance for this CLIN in YYYY-MM format.
           type: string
@@ -482,7 +482,7 @@ components:
             - $ref: "#/components/schemas/IncrementalFundingPlan"
             - $ref: "#/components/schemas/RequirementsChecklist"
             - $ref: "#/components/schemas/JustificationAndApproval"
-            - $ref: "#/components/schemas/MarketResearchReport" 
+            - $ref: "#/components/schemas/MarketResearchReport"
             - $ref: "#/components/schemas/EvalPlan"
             - $ref: "#/components/schemas/EvalMemo"
     EvalPlan:
@@ -627,7 +627,7 @@ components:
         - corPoc
     EvalMemo:
       allOf:
-        - $ref: '#/components/schemas/EvalPlan'
+        - $ref: "#/components/schemas/EvalPlan"
         - type: object
           description: >-
             For generating the Evaluation Memo (EM) document. Extends EvalPlan given the overlap between the two docs.
@@ -1596,7 +1596,8 @@ components:
         A single Service Offering Group (Service Offering table)
       properties:
         serviceOfferingGroup:
-          $ref: "#/components/schemas/ServiceOfferingGroup"
+          $ref:
+            "#/components/schemas/ServiceOfferingGroup"
             # Q: do we need an OTHER option record for each of the
             # above enums
       allOf:

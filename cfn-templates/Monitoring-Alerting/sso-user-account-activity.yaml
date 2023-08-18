@@ -6,15 +6,15 @@ Description: >-
 
 Parameters:
   EmailGroup:
-      Description: >-
-        This is the email distro group that will be notified in the event
-        the ec2 instance, hosting the palo alto, goes down.
-      Type: String
+    Description: >-
+      This is the email distro group that will be notified in the event
+      the ec2 instance, hosting the palo alto, goes down.
+    Type: String
 
   KmsKeyId:
-      Description: >-
-        Kms key used to encrypt the SNS topic.
-      Type: String
+    Description: >-
+      Kms key used to encrypt the SNS topic.
+    Type: String
 
 Resources:
   SSOStatusSnsTopic:
@@ -24,7 +24,6 @@ Resources:
       DisplayName: "SsoUserActivityNotification"
       KmsMasterKeyId: !Ref KmsKeyId
 
-
   SsoStatusSnsSubscription:
     Type: AWS::SNS::Subscription
     Properties:
@@ -32,26 +31,25 @@ Resources:
       Protocol: email
       TopicArn: !Ref SSOStatusSnsTopic
 
-
   CloudWatchSsoSnsStatus:
     Type: AWS::Events::Rule
-    Properties: 
+    Properties:
       Name: CloudWatchSsoUserActivity
       Description: "CW Event to monitor the status of the Palo Alto Instance"
-      EventPattern: 
+      EventPattern:
         detail-type:
           - "AWS API Call via CloudTrail"
         detail:
           eventSource:
-          - sso-directory.amazonaws.com
+            - sso-directory.amazonaws.com
           eventName:
-          - CreateUser
-          - EnableUser
-          - DisableUser
-          - DeleteUser
-          - UpdateUser
-          - UpdateGroup
-          - CreateGroup
-      Targets: 
+            - CreateUser
+            - EnableUser
+            - DisableUser
+            - DeleteUser
+            - UpdateUser
+            - UpdateGroup
+            - CreateGroup
+      Targets:
         - Arn: !Ref SSOStatusSnsTopic
           Id: "sso-user-activity-notification"

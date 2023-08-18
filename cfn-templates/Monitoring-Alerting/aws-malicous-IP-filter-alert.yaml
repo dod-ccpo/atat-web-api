@@ -6,20 +6,20 @@ Description: >-
 
 Parameters:
   EmailGroup:
-      Description: >-
-        This is the email distro group that will be notified in the event
-        the a malicous IP is flagged in the cloudwatch alarms.
-      Type: String
+    Description: >-
+      This is the email distro group that will be notified in the event
+      the a malicous IP is flagged in the cloudwatch alarms.
+    Type: String
 
   KmsKeyId:
-      Description: >-
-        AWS KMS key used to encrypt the SNS topic.
-      Type: String
+    Description: >-
+      AWS KMS key used to encrypt the SNS topic.
+    Type: String
 
   CloudWatchLogGroup:
-      Description: >-
-        Cloudwatch Log group name to place the filter on.
-      Type: String
+    Description: >-
+      Cloudwatch Log group name to place the filter on.
+    Type: String
 
 Resources:
   rMalicousIPSNSTopic:
@@ -29,7 +29,6 @@ Resources:
       DisplayName: "VPC-Logs-MalicousMalicous-IP-Alert"
       KmsMasterKeyId: !Ref KmsKeyId
 
-
   rEc2StatusSnsSubscription:
     Type: AWS::SNS::Subscription
     Properties:
@@ -37,13 +36,12 @@ Resources:
       Protocol: email
       TopicArn: !Ref rMalicousIPSNSTopic
 
-
-  rMalicousIPMetricFilter: 
+  rMalicousIPMetricFilter:
     Type: AWS::Logs::MetricFilter
-    Properties: 
+    Properties:
       LogGroupName: !Ref CloudWatchLogGroup
-      FilterPattern: '194.147.90.79'
-      MetricTransformations: 
+      FilterPattern: "194.147.90.79"
+      MetricTransformations:
         - MetricValue: "1"
           MetricNamespace: MalicousIPfilter
           MetricName: MalicousIP
