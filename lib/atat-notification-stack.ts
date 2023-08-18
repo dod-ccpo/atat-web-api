@@ -81,6 +81,7 @@ export class GuardDutyFindingRule extends events.Rule {
 export class AtatNotificationStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: AtatNotificationStackProps) {
     super(scope, id);
+    
     // SNS Topic and subscription for IAM user activity
     const topic = new sns.Topic(this, "AtatNotifications", { masterKey: props.topicEncryptionKey });
     topic.addSubscription(new subscriptions.EmailSubscription(props.notificationEmail));
