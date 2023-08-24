@@ -35,7 +35,6 @@
     "atat:GitHubPatName": "auth/github/pat",
     "atat:VersionControlRepo": "dod-ccpo/atat-web-api",
     "atat:EnvironmentId": "shayesSandbox",
-    "atat:Sandbox": true,
     "atat:VersionControlBranch": "feature/AT-8454"
   }
 }
