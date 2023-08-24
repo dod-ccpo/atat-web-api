@@ -42,7 +42,7 @@ export async function baseHandler(stateInput: ProvisionCspResponse): Promise<Pro
 
   return stateInput;
 }
-const Options = {}
+const Options = {};
 export const handler = middy(baseHandler)
   .use(injectLambdaContext(logger, { clearState: true }))
   .use(captureLambdaHandler(tracer))
