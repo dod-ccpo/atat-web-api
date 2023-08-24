@@ -36,7 +36,7 @@ export class VpcDefaultSecurityGroupRuleRemover extends Construct {
     super(scope, id);
 
     const handler = new nodejs.NodejsFunction(this, "VpcSgRuleRemovalHandler", {
-      runtime: lambda.Runtime.NODEJS_16_X,
+      runtime: lambda.Runtime.NODEJS_18_X,
       entry: "lib/custom-resources/delete-default-sg-rules.ts",
       handler: "onEvent",
       vpc: props.vpc,

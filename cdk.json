@@ -36,7 +36,8 @@
     "atat:VersionControlRepo": "dod-ccpo/atat-web-api",
     "atat:EnvironmentId": "shayesSandbox",
     "atat:VpcCidr ": "10.0.0.0/16",
-    "atat:Sandbox": true
+    "atat:Sandbox": true,
+    "atat:VersionControlBranch": "feature/AT-8454"
 
   }
 }
