@@ -42,11 +42,11 @@ export async function baseHandler(stateInput: ProvisionCspResponse): Promise<Pro
 
   return stateInput;
 }
-
+const Options = {}
 export const handler = middy(baseHandler)
   .use(injectLambdaContext(logger, { clearState: true }))
   .use(captureLambdaHandler(tracer))
   .use(inputOutputLogger({ logger: (message) => logger.info("Event/Result", message) }))
   .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
-  .use(validator({ ajvOptions: { verbose: true }, eventSchema: provisionResponseSchema }))
+  .use(validator({ eventSchema: provisionResponseSchema }))
   .use(errorHandlingMiddleware());
