@@ -12,7 +12,7 @@ import {
   PeriodType,
   ReplicateOrOptimize,
   ServiceOfferingGroup,
-  StorageUnit,
+  StorageUnit
 } from "../../models/document-generation/description-of-work";
 
 import { logger } from "../../utils/logging";

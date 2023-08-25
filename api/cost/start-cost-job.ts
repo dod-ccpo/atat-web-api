@@ -5,20 +5,19 @@ import middy from "@middy/core";
 import errorLogger from "@middy/error-logger";
 import httpJsonBodyParser from "@middy/http-json-body-parser";
 import inputOutputLogger from "@middy/input-output-logger";
-import validator from "@middy/validator";
 import { APIGatewayProxyResult } from "aws-lambda";
 import jsonErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import { CostRequest, costRequestSchema } from "../../models/cost-jobs";
-import { generateDocumentSchema, RequestEvent } from "../../models/document-generation";
+import { RequestEvent } from "../../models/document-generation";
 import { sqsClient } from "../../utils/aws-sdk/sqs";
 import { logger } from "../../utils/logging";
 import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
 import { LoggingContextMiddleware } from "../../utils/middleware/logging-context-middleware";
-import { wrapSchema } from "../../utils/middleware/schema-wrapper";
 import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
 import { tracer } from "../../utils/tracing";
-import validatorMiddleware from "@middy/validator";
 import { transpileSchema } from "@middy/validator/transpile";
+import en from "ajv-i18n";
+import validatorMiddleware from "@middy/validator";
 
 const MESSAGE_GROUP_ID = "cost-request-queue-message-group";
 
@@ -52,6 +51,6 @@ export const handler = middy(baseHandler)
   .use(inputOutputLogger({ logger: (message) => logger.info("Event/Result", message) }))
   .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
   .use(httpJsonBodyParser())
-  .use(validatorMiddleware({eventSchema: transpileSchema(costRequestSchema)}))
+  .use(validatorMiddleware({ eventSchema: transpileSchema(costRequestSchema), languages: { en }}))
   .use(errorHandlingMiddleware())
   .use(jsonErrorHandlerMiddleware());

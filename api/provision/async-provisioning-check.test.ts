@@ -3,6 +3,7 @@ import { Context } from "aws-lambda";
 import { mockClient } from "aws-sdk-client-mock";
 import { sqsClient } from "../../utils/aws-sdk/sqs";
 import { SendMessageCommand } from "@aws-sdk/client-sqs";
+import * as client from "../client";
 import { ProvisioningStatusType } from "../client";
 import {
   constructProvisionRequestForCsp,
@@ -12,9 +13,8 @@ import {
   CSP_B_TEST_ENDPOINT,
   cspAAddPortfolioRequest,
   generateMockMessageResponses,
-  generateTestSQSEvent,
+  generateTestSQSEvent
 } from "../util/common-test-fixtures";
-import * as client from "../client";
 import * as types from "../client/types";
 import * as atatClientHelper from "../../utils/atat-client";
 import { ErrorStatusCode, ValidationErrorResponse } from "../../utils/response";

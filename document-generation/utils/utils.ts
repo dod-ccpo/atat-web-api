@@ -1,10 +1,10 @@
 import {
-  PeriodUnit,
-  IPeriod,
   DocumentType,
-  TemplatePaths,
-  IFundingDocument,
   FundingType,
+  IFundingDocument,
+  IPeriod,
+  PeriodUnit,
+  TemplatePaths
 } from "../../models/document-generation";
 import * as fs from "fs";
 import * as converter from "number-to-words";

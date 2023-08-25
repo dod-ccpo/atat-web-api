@@ -2,13 +2,7 @@ import { Context } from "aws-lambda";
 import { mockClient } from "aws-sdk-client-mock";
 import { sfnClient } from "../../utils/aws-sdk/step-functions";
 import { ApiSuccessResponse, ValidationErrorResponse } from "../../utils/response";
-import {
-  cspAProvisioningBodyNoPayload,
-  validRequest,
-  // requestContext,
-  administrators,
-  taskOrders,
-} from "../util/common-test-fixtures";
+import { administrators, cspAProvisioningBodyNoPayload, taskOrders, validRequest } from "../util/common-test-fixtures";
 import { handler } from "./start-provisioning-job";
 import { ProvisionRequestType } from "../client";
 

@@ -6,7 +6,7 @@ import { handler } from "./csp-create-portfolio";
 import {
   constructProvisionRequestForCsp,
   CSP_A_TEST_ENDPOINT,
-  cspAAddPortfolioRequest,
+  cspAAddPortfolioRequest
 } from "../util/common-test-fixtures";
 import { HothProvisionRequest, ProvisionCspResponse } from "../client";
 

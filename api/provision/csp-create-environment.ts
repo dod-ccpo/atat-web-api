@@ -1,9 +1,7 @@
 import { injectLambdaContext } from "@aws-lambda-powertools/logger";
 import { captureLambdaHandler } from "@aws-lambda-powertools/tracer";
-import middy from "@middy/core";
 import errorLogger from "@middy/error-logger";
 import inputOutputLogger from "@middy/input-output-logger";
-import validator from "@middy/validator";
 import { Context } from "aws-lambda";
 import jsonErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import { logger } from "../../utils/logging";
@@ -15,15 +13,16 @@ import {
   HothProvisionRequest,
   IAtatClient,
   NewEnvironmentPayload,
-  ProvisionCspResponse,
+  ProvisionCspResponse
 } from "../client";
 import * as atatApiTypes from "../client/types";
 import { makeClient } from "../../utils/atat-client";
-import { provisionRequestSchema } from "../../models/provisioning-schemas";
 import { transformAsynchronousResponse, transformSynchronousResponse } from "../client/client";
+import middy from '@middy/core'
+import { transpileSchema } from '@middy/validator/transpile'
+import en from 'ajv-i18n'
 import validatorMiddleware from "@middy/validator";
-import { transpileSchema } from "@middy/validator/transpile";
-import { generateDocumentSchema } from "../../models/document-generation";
+import { provisionRequestSchema } from "../../models/provisioning-schemas";
 
 async function makeRequest(client: IAtatClient, request: HothProvisionRequest): Promise<ProvisionCspResponse> {
   // This function will always be operating for creating new portfolios; if we have something
@@ -104,6 +103,6 @@ export const handler = middy(baseHandler)
   .use(captureLambdaHandler(tracer))
   .use(inputOutputLogger({ logger: (message) => logger.info("Event/Result", message) }))
   .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
-  .use(validatorMiddleware({eventSchema: transpileSchema(generateDocumentSchema)}))
+  .use(validatorMiddleware({ eventSchema: transpileSchema(provisionRequestSchema), languages: { en }}))
   .use(errorHandlingMiddleware())
   .use(jsonErrorHandlerMiddleware());

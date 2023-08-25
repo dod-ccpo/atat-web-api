@@ -11,7 +11,7 @@ import {
   CSP_B,
   CSP_B_STATUS_ENDPOINT,
   CSP_B_TEST_ENDPOINT,
-  TEST_ENVIRONMENT_ID,
+  TEST_ENVIRONMENT_ID
 } from "../util/common-test-fixtures";
 import { HothProvisionRequest, ProvisionCspResponse, ProvisioningStatusType } from "../client";
 

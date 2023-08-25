@@ -4,7 +4,7 @@ import { captureLambdaHandler } from "@aws-lambda-powertools/tracer";
 import httpJsonBodyParser from "@middy/http-json-body-parser";
 import inputOutputLogger from "@middy/input-output-logger";
 import errorLogger from "@middy/error-logger";
-import validatorMiddleware from '@middy/validator'
+import validatorMiddleware from "@middy/validator";
 import { logger } from "../utils/logging";
 import { tracer } from "../utils/tracing";
 import { ApiBase64SuccessResponse, SuccessStatusCode, ValidationErrorResponse } from "../utils/response";
@@ -12,8 +12,6 @@ import { INTERNAL_SERVER_ERROR } from "../utils/errors";
 import { LoggingContextMiddleware } from "../utils/middleware/logging-context-middleware";
 import { errorHandlingMiddleware } from "../utils/middleware/error-handling-middleware";
 import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
-import validator from "@middy/validator";
-import { wrapSchema } from "../utils/middleware/schema-wrapper";
 import { generateDocument } from "./chromium";
 import { generateIGCEDocument } from "./igce-document";
 import { generateIFPDocument } from "./ifp-document";
@@ -26,7 +24,7 @@ import {
   generateDocumentSchema,
   IncrementalFundingPlan,
   IndependentGovernmentCostEstimate,
-  RequestEvent,
+  RequestEvent
 } from "../models/document-generation";
 import handlebars from "handlebars";
 import juice from "juice";
@@ -43,6 +41,7 @@ import { IMarketResearchReport } from "../models/document-generation/market-rese
 import { IEvaluationMemo } from "../models/document-generation/evaluation-memo";
 import { generateEvalMemoDocument } from "./eval-memo-document";
 import { transpileSchema } from "@middy/validator/transpile";
+import en from "ajv-i18n";
 
 async function baseHandler(event: RequestEvent<GenerateDocumentRequest>): Promise<ApiBase64SuccessResponse> {
   const { documentType } = event.body;
@@ -129,7 +128,7 @@ export const handler = middy(baseHandler)
   .use(inputOutputLogger({ logger: (message) => logger.info("Event/Result", message) }))
   .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
   .use(httpJsonBodyParser())
-  .use(validatorMiddleware({eventSchema: transpileSchema(generateDocumentSchema)}))
+  .use(validatorMiddleware({eventSchema: transpileSchema(generateDocumentSchema), languages: { en }}))
   .use(errorHandlingMiddleware())
   .use(JSONErrorHandlerMiddleware());
 

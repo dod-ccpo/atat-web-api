@@ -1,4 +1,5 @@
 import * as cdk from "aws-cdk-lib";
+import { Tags } from "aws-cdk-lib";
 import * as apigw from "aws-cdk-lib/aws-apigateway";
 import * as acm from "aws-cdk-lib/aws-certificatemanager";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
@@ -7,7 +8,6 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as nodejs from "aws-cdk-lib/aws-lambda-nodejs";
 import * as s3 from "aws-cdk-lib/aws-s3";
-import * as logs from "aws-cdk-lib/aws-logs";
 import { Construct } from "constructs";
 import { UserPermissionBoundary } from "./aspects/user-only-permission-boundary";
 import { AtatNetStack } from "./atat-net-stack";
@@ -21,8 +21,6 @@ import { VpcEndpointApplicationTargetGroup } from "./constructs/vpc-endpoint-lb-
 import { HttpMethod } from "./http";
 import { NagSuppressions } from "cdk-nag";
 import * as cr from "aws-cdk-lib/custom-resources";
-import { RetentionDays } from "aws-cdk-lib/aws-logs";
-import { Tags } from "aws-cdk-lib";
 
 export interface ApiCertificateOptions {
   domainName: string;

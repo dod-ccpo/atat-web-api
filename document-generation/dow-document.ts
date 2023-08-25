@@ -22,10 +22,9 @@ import {
   sortSelectedClassificationLevels,
   sortSupportPackagesByGroups,
   sortSupportPackagesByLevels,
-  xaasServiceExists,
+  xaasServiceExists
 } from "./utils/dow";
-import { IDescriptionOfWork, ReplicateOrOptimize } from "../models/document-generation/description-of-work";
-import { Classification } from "../models/document-generation";
+import { IDescriptionOfWork } from "../models/document-generation/description-of-work";
 
 export async function doGenerate(template: Buffer, payload: IDescriptionOfWork): Promise<Buffer> {
   // Collection of instances at beginning of impact level for XaaS (e.g., 4.2.1)

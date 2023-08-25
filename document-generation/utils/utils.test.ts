@@ -1,22 +1,21 @@
 import * as fs from "fs";
 import {
-  PeriodUnit,
-  PeriodType,
   DocumentType,
   FundingType,
   IFundingDocument,
   IPeriod,
+  PeriodType,
+  PeriodUnit
 } from "../../models/document-generation";
 import {
   capitalize,
   convertPeriodToMonths,
-  getPDFDocumentTemplates,
+  formatPeriodOfPerformance,
+  getDocxTemplate,
   getExcelTemplatePath,
   getFundingDocInfo,
-  getDocxTemplate,
-  formatPeriodOfPerformance,
+  getPDFDocumentTemplates
 } from "./utils";
-import { sampleRequirementsChecklistRequest } from "./sampleTestData";
 
 jest.mock("fs");
 const mockedFs = fs as jest.Mocked<typeof fs>;

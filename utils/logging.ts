@@ -1,4 +1,4 @@
-import { Logger, LogFormatter } from "@aws-lambda-powertools/logger";
+import { LogFormatter, Logger } from "@aws-lambda-powertools/logger";
 import { LogAttributes, UnformattedAttributes } from "@aws-lambda-powertools/logger/lib/types";
 
 type AtatLog = LogAttributes;

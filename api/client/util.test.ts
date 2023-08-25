@@ -1,9 +1,9 @@
 import { AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import {
   camelCaseObject,
-  snakeCaseObject,
   camelToSnakeRequestInterceptor,
-  snakeToCamelResponseInterceptor,
+  snakeCaseObject,
+  snakeToCamelResponseInterceptor
 } from "./util";
 
 // NOTE: The objects in this file are terrible examples of naming and structuring for objects.
