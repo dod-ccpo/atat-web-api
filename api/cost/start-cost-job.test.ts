@@ -4,11 +4,7 @@ import { ApiSuccessResponse, SuccessStatusCode, ValidationErrorResponse } from "
 import { handler } from "./start-cost-job";
 import { sqsClient } from "../../utils/aws-sdk/sqs";
 import { SendMessageCommand } from "@aws-sdk/client-sqs";
-import {
-  baseApiRequest,
-  CSP_A,
-  validCostRequest
-} from "../util/common-test-fixtures";
+import { baseApiRequest, CSP_A, validCostRequest } from "../util/common-test-fixtures";
 import { requestContext } from "../provision/start-provisioning-job.test";
 
 const sqsMock = mockClient(sqsClient);

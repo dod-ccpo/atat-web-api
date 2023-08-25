@@ -102,6 +102,6 @@ export const handler = middy(baseHandler)
   .use(captureLambdaHandler(tracer))
   .use(inputOutputLogger({ logger: (message) => logger.info("Event/Result", message) }))
   .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
-  .use(validator({ eventSchema: transpileSchema(provisionRequestSchema)}))
+  .use(validator({ eventSchema: transpileSchema(provisionRequestSchema) }))
   .use(errorHandlingMiddleware())
   .use(jsonErrorHandlerMiddleware());
