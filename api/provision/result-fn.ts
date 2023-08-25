@@ -11,7 +11,6 @@ import { tracer } from "../../utils/tracing";
 import { provisionResponseSchema } from "../../models/provisioning-schemas";
 import { ProvisionCspResponse } from "../client";
 import { transpileSchema } from "@middy/validator/transpile";
-import en from "ajv-i18n";
 import validatorMiddleware from "@middy/validator";
 
 const MESSAGE_GROUP_ID = "provisioning-queue-message-group";
@@ -50,5 +49,5 @@ export const handler = middy(baseHandler)
   .use(captureLambdaHandler(tracer))
   .use(inputOutputLogger({ logger: (message) => logger.info("Event/Result", message) }))
   .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
-  .use(validatorMiddleware({ eventSchema: transpileSchema(provisionResponseSchema), languages: { en } }))
+  .use(validatorMiddleware({ eventSchema: transpileSchema(provisionResponseSchema) }))
   .use(errorHandlingMiddleware());

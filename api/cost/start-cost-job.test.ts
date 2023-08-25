@@ -4,7 +4,12 @@ import { ApiSuccessResponse, SuccessStatusCode, ValidationErrorResponse } from "
 import { handler } from "./start-cost-job";
 import { sqsClient } from "../../utils/aws-sdk/sqs";
 import { SendMessageCommand } from "@aws-sdk/client-sqs";
-import { baseApiRequest, CSP_A, validCostRequest } from "../util/common-test-fixtures";
+import {
+  baseApiRequest,
+  CSP_A,
+  validCostRequest
+} from "../util/common-test-fixtures";
+import { requestContext } from "../provision/start-provisioning-job.test";
 
 const sqsMock = mockClient(sqsClient);
 beforeEach(() => {
@@ -14,9 +19,13 @@ beforeEach(() => {
 describe("Cost request operations", () => {
   it("should return successfully if no error enqueueing message", async () => {
     const request = {
-      ...baseApiRequest,
       body: JSON.stringify(validCostRequest),
-    };
+      headers: {
+        "Content-Type": "application/json",
+      },
+      requestContext,
+    } as any;
+    console.log(`Request: ${JSON.stringify(request)}`);
     const response = await handler(request, {} as Context, () => null);
     expect(response).toBeInstanceOf(ApiSuccessResponse);
     expect(response).toEqual(new ApiSuccessResponse(validCostRequest, SuccessStatusCode.CREATED));
@@ -62,7 +71,6 @@ describe("Cost request operations", () => {
     const request = {
       ...baseApiRequest,
       body: JSON.stringify({
-        requestId: "81b31a89-e3e5-46ee-acfe-75436bd14577",
         portfolioId: "b02e77d1-234d-4e3d-bc85-b57ca5a93952",
         startDate: "2022-01-01",
         endDate: "2022-12-01",

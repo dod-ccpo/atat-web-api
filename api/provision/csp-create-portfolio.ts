@@ -15,10 +15,7 @@ import { provisionRequestSchema } from "../../models/provisioning-schemas";
 import { transformSynchronousResponse } from "../client/client";
 import middy from "@middy/core";
 import validatorMiddleware from "@middy/validator";
-import en from "ajv-i18n";
 import { transpileSchema } from "@middy/validator/transpile";
-import httpJsonBodyParser from "@middy/http-json-body-parser";
-import httpHeaderNormalizer from "@middy/http-header-normalizer";
 
 async function makeRequest(client: IAtatClient, request: HothProvisionRequest): Promise<ProvisionCspResponse> {
   // This function will always be operating for creating new portfolios; if we have something
@@ -74,8 +71,6 @@ export const handler = middy(baseHandler)
   .use(captureLambdaHandler(tracer))
   .use(inputOutputLogger({ logger: (message) => logger.info("Event/Result", message) }))
   .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
-  // .use(httpHeaderNormalizer())
-  // .use(httpJsonBodyParser({ disableContentTypeError: false }))
   .use(validatorMiddleware({ eventSchema: transpileSchema(provisionRequestSchema) }))
   .use(errorHandlingMiddleware())
   .use(jsonErrorHandlerMiddleware());
