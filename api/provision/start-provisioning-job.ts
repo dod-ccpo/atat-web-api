@@ -7,7 +7,7 @@ import inputOutputLogger from "@middy/input-output-logger";
 import validator from "@middy/validator";
 import { APIGatewayProxyResult } from "aws-lambda";
 import jsonErrorHandlerMiddleware from "middy-middleware-json-error-handler";
-import { RequestEvent } from "../../models/document-generation";
+import { generateDocumentSchema, RequestEvent } from "../../models/document-generation";
 import { sfnClient } from "../../utils/aws-sdk/step-functions";
 import { REQUEST_BODY_INVALID } from "../../utils/errors";
 import { logger } from "../../utils/logging";
@@ -19,6 +19,8 @@ import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
 import { tracer } from "../../utils/tracing";
 import { provisionRequestSchema } from "../../models/provisioning-schemas";
 import { HothProvisionRequest } from "../client";
+import validatorMiddleware from "@middy/validator";
+import { transpileSchema } from "@middy/validator/transpile";
 
 const SFN_ARN = process.env.SFN_ARN ?? "";
 
@@ -53,6 +55,6 @@ export const handler = middy(baseHandler)
   .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
   .use(httpJsonBodyParser())
   .use(cspPortfolioIdChecker())
-  .use(validator({ eventSchema: wrapSchema(provisionRequestSchema) }))
+  .use(validatorMiddleware({eventSchema: transpileSchema(provisionRequestSchema)}))
   .use(errorHandlingMiddleware())
   .use(jsonErrorHandlerMiddleware());

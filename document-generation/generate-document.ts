@@ -4,6 +4,7 @@ import { captureLambdaHandler } from "@aws-lambda-powertools/tracer";
 import httpJsonBodyParser from "@middy/http-json-body-parser";
 import inputOutputLogger from "@middy/input-output-logger";
 import errorLogger from "@middy/error-logger";
+import validatorMiddleware from '@middy/validator'
 import { logger } from "../utils/logging";
 import { tracer } from "../utils/tracing";
 import { ApiBase64SuccessResponse, SuccessStatusCode, ValidationErrorResponse } from "../utils/response";
@@ -41,6 +42,7 @@ import { IJustificationAndApproval } from "../models/document-generation/justifi
 import { IMarketResearchReport } from "../models/document-generation/market-research-report";
 import { IEvaluationMemo } from "../models/document-generation/evaluation-memo";
 import { generateEvalMemoDocument } from "./eval-memo-document";
+import { transpileSchema } from "@middy/validator/transpile";
 
 async function baseHandler(event: RequestEvent<GenerateDocumentRequest>): Promise<ApiBase64SuccessResponse> {
   const { documentType } = event.body;
@@ -127,7 +129,7 @@ export const handler = middy(baseHandler)
   .use(inputOutputLogger({ logger: (message) => logger.info("Event/Result", message) }))
   .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
   .use(httpJsonBodyParser())
-  .use(validator({ eventSchema: wrapSchema(generateDocumentSchema) }))
+  .use(validatorMiddleware({eventSchema: transpileSchema(generateDocumentSchema)}))
   .use(errorHandlingMiddleware())
   .use(JSONErrorHandlerMiddleware());
 

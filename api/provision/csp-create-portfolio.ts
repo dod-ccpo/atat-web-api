@@ -15,6 +15,9 @@ import * as atatApiTypes from "../client/types";
 import { makeClient } from "../../utils/atat-client";
 import { provisionRequestSchema } from "../../models/provisioning-schemas";
 import { transformSynchronousResponse } from "../client/client";
+import validatorMiddleware from "@middy/validator";
+import { transpileSchema } from "@middy/validator/transpile";
+import { generateDocumentSchema } from "../../models/document-generation";
 
 async function makeRequest(client: IAtatClient, request: HothProvisionRequest): Promise<ProvisionCspResponse> {
   // This function will always be operating for creating new portfolios; if we have something
@@ -70,6 +73,6 @@ export const handler = middy(baseHandler)
   .use(captureLambdaHandler(tracer))
   .use(inputOutputLogger({ logger: (message) => logger.info("Event/Result", message) }))
   .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
-  .use(validator({ eventSchema: provisionRequestSchema }))
+  .use(validatorMiddleware({eventSchema: transpileSchema(provisionRequestSchema)}))
   .use(errorHandlingMiddleware())
   .use(jsonErrorHandlerMiddleware());
