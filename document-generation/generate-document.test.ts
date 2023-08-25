@@ -344,7 +344,7 @@ describe("Invalid requests for generate-document handler", () => {
     };
     // WHEN / ACT
     const response = await handler(invalidRequest, {} as Context);
-    console.log(response)
+    console.log(response);
     const responseBody = JSON.parse(response?.body ?? "");
     // THEN / ASSERT
     expect(response).toBeInstanceOf(ValidationErrorResponse);

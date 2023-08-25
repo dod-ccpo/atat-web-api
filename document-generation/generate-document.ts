@@ -1,7 +1,7 @@
 import middy from "@middy/core";
 import { injectLambdaContext } from "@aws-lambda-powertools/logger";
 import { captureLambdaHandler } from "@aws-lambda-powertools/tracer";
-import httpJsonBodyParser from '@middy/http-json-body-parser'
+import httpJsonBodyParser from "@middy/http-json-body-parser";
 import inputOutputLogger from "@middy/input-output-logger";
 import errorLogger from "@middy/error-logger";
 import { logger } from "../utils/logging";
@@ -33,7 +33,7 @@ import { generateEvalPlanDocument } from "./eval-plan-document";
 import { IDescriptionOfWork } from "../models/document-generation/description-of-work";
 import { generateJustificationAndApprovalDocument } from "./justification-and-approval-document";
 import { generateMarketResearchReportDocument } from "./mrr-document";
-import httpHeaderNormalizer from '@middy/http-header-normalizer';
+import httpHeaderNormalizer from "@middy/http-header-normalizer";
 import { IJustificationAndApproval } from "../models/document-generation/justification-and-approval";
 import { IMarketResearchReport } from "../models/document-generation/market-research-report";
 import { IEvaluationMemo } from "../models/document-generation/evaluation-memo";
@@ -126,9 +126,9 @@ export const handler = middy(baseHandler)
   .use(inputOutputLogger({ logger: (message) => logger.info("Event/Result", message) }))
   .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
   .use(httpHeaderNormalizer())
-  .use(httpJsonBodyParser({disableContentTypeError: false}))
-  .use(validator({ eventSchema: transpileSchema(generateDocumentSchema)}))
-  .use(errorHandlingMiddleware())
+  .use(httpJsonBodyParser({ disableContentTypeError: false }))
+  .use(validator({ eventSchema: transpileSchema(generateDocumentSchema) }))
+  .use(errorHandlingMiddleware());
 
 // register handlebars helpers for use in template
 handlebars.registerHelper("formatDuration", formatDuration);
