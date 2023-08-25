@@ -3,7 +3,7 @@ import {
   camelCaseObject,
   camelToSnakeRequestInterceptor,
   snakeCaseObject,
-  snakeToCamelResponseInterceptor
+  snakeToCamelResponseInterceptor,
 } from "./util";
 
 // NOTE: The objects in this file are terrible examples of naming and structuring for objects.

@@ -4,7 +4,7 @@ import {
   GetProvisioningStatusResponse,
   IAtatClient,
   ProvisionCspResponse,
-  ProvisioningStatusType
+  ProvisioningStatusType,
 } from "../client";
 import { SQSBatchResponse, SQSEvent } from "aws-lambda";
 import { logger } from "../../utils/logging";

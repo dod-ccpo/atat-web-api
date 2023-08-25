@@ -5,7 +5,7 @@ import {
   FundingType,
   IndependentGovernmentCostEstimate,
   IPeriodEstimate,
-  PeriodType
+  PeriodType,
 } from "../models/document-generation";
 import { INTERNAL_SERVER_ERROR } from "../utils/errors";
 import { ApiBase64SuccessResponse, SuccessStatusCode } from "../utils/response";

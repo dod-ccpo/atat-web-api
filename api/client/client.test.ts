@@ -13,7 +13,7 @@ import {
   mockTaskOrder,
   portfolioId,
   provisioningJobId,
-  TEST_CSP_ENDPOINT
+  TEST_CSP_ENDPOINT,
 } from "./fixtures";
 import {
   AddEnvironmentRequest,
@@ -36,7 +36,7 @@ import {
   GetProvisioningStatusResponse,
   PatchEnvironmentRequest,
   PatchEnvironmentResponseSync,
-  Portfolio
+  Portfolio,
 } from "./types";
 
 const TEST_API_TOKEN = "TEST-TOKEN-NOT-REAL";

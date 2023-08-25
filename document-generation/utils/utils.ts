@@ -4,7 +4,7 @@ import {
   IFundingDocument,
   IPeriod,
   PeriodUnit,
-  TemplatePaths
+  TemplatePaths,
 } from "../../models/document-generation";
 import * as fs from "fs";
 import * as converter from "number-to-words";

@@ -1,7 +1,7 @@
 import {
   Classification,
   ImpactLevel,
-  ServiceOfferingGroup
+  ServiceOfferingGroup,
 } from "../../models/document-generation/description-of-work";
 import {
   formatExpirationDate,
@@ -19,7 +19,7 @@ import {
   sortSelectedClassificationLevels,
   sortSelectedServicesByGroups,
   sortSupportPackagesByGroups,
-  sortSupportPackagesByLevels
+  sortSupportPackagesByLevels,
 } from "./dow";
 import { sampleDowRequest } from "./sampleTestData";
 

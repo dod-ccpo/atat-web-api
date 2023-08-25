@@ -5,7 +5,7 @@ import {
   IFundingDocument,
   IPeriod,
   PeriodType,
-  PeriodUnit
+  PeriodUnit,
 } from "../../models/document-generation";
 import {
   capitalize,
@@ -14,7 +14,7 @@ import {
   getDocxTemplate,
   getExcelTemplatePath,
   getFundingDocInfo,
-  getPDFDocumentTemplates
+  getPDFDocumentTemplates,
 } from "./utils";
 
 jest.mock("fs");

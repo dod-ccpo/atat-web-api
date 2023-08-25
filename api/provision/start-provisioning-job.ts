@@ -16,8 +16,8 @@ import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
 import { tracer } from "../../utils/tracing";
 import { provisionRequestSchema } from "../../models/provisioning-schemas";
 import { HothProvisionRequest } from "../client";
-import validatorMiddleware from '@middy/validator'
-import en from 'ajv-i18n'
+import validatorMiddleware from "@middy/validator";
+import en from "ajv-i18n";
 import middy from "@middy/core";
 import { transpileSchema } from "@middy/validator/transpile";
 
@@ -54,6 +54,6 @@ export const handler = middy(baseHandler)
   .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
   .use(httpJsonBodyParser())
   .use(cspPortfolioIdChecker())
-  .use(validatorMiddleware({eventSchema: transpileSchema(provisionRequestSchema), languages: { en }}))
+  .use(validatorMiddleware({ eventSchema: transpileSchema(provisionRequestSchema), languages: { en } }))
   .use(errorHandlingMiddleware())
   .use(jsonErrorHandlerMiddleware());

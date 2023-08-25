@@ -5,7 +5,7 @@ import {
   ApiBase64SuccessResponse,
   SuccessBase64Response,
   SuccessStatusCode,
-  ValidationErrorResponse
+  ValidationErrorResponse,
 } from "../utils/response";
 import { handler } from "./generate-document";
 import { requestContext } from "../api/util/common-test-fixtures";
@@ -17,7 +17,7 @@ import {
   sampleIgceRequest,
   sampleJustificationAndApprovalRequest,
   sampleMarketResearchReportRequest,
-  sampleRequirementsChecklistRequest
+  sampleRequirementsChecklistRequest,
 } from "./utils/sampleTestData";
 
 const validRequest = {

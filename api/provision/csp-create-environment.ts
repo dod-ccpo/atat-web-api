@@ -13,14 +13,14 @@ import {
   HothProvisionRequest,
   IAtatClient,
   NewEnvironmentPayload,
-  ProvisionCspResponse
+  ProvisionCspResponse,
 } from "../client";
 import * as atatApiTypes from "../client/types";
 import { makeClient } from "../../utils/atat-client";
 import { transformAsynchronousResponse, transformSynchronousResponse } from "../client/client";
-import middy from '@middy/core'
-import { transpileSchema } from '@middy/validator/transpile'
-import en from 'ajv-i18n'
+import middy from "@middy/core";
+import { transpileSchema } from "@middy/validator/transpile";
+import en from "ajv-i18n";
 import validatorMiddleware from "@middy/validator";
 import { provisionRequestSchema } from "../../models/provisioning-schemas";
 
@@ -103,6 +103,6 @@ export const handler = middy(baseHandler)
   .use(captureLambdaHandler(tracer))
   .use(inputOutputLogger({ logger: (message) => logger.info("Event/Result", message) }))
   .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
-  .use(validatorMiddleware({ eventSchema: transpileSchema(provisionRequestSchema), languages: { en }}))
+  .use(validatorMiddleware({ eventSchema: transpileSchema(provisionRequestSchema), languages: { en } }))
   .use(errorHandlingMiddleware())
   .use(jsonErrorHandlerMiddleware());

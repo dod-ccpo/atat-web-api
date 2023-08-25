@@ -51,6 +51,6 @@ export const handler = middy(baseHandler)
   .use(inputOutputLogger({ logger: (message) => logger.info("Event/Result", message) }))
   .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
   .use(httpJsonBodyParser())
-  .use(validatorMiddleware({ eventSchema: transpileSchema(costRequestSchema), languages: { en }}))
+  .use(validatorMiddleware({ eventSchema: transpileSchema(costRequestSchema), languages: { en } }))
   .use(errorHandlingMiddleware())
   .use(jsonErrorHandlerMiddleware());

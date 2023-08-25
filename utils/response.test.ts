@@ -6,7 +6,7 @@ import {
   ErrorStatusCode,
   NoContentResponse,
   OtherErrorResponse,
-  SuccessStatusCode
+  SuccessStatusCode,
 } from "./response";
 
 describe("Validation for No Content responses", () => {

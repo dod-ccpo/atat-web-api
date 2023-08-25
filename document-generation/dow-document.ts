@@ -22,7 +22,7 @@ import {
   sortSelectedClassificationLevels,
   sortSupportPackagesByGroups,
   sortSupportPackagesByLevels,
-  xaasServiceExists
+  xaasServiceExists,
 } from "./utils/dow";
 import { IDescriptionOfWork } from "../models/document-generation/description-of-work";
 

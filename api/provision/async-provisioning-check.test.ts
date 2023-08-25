@@ -13,7 +13,7 @@ import {
   CSP_B_TEST_ENDPOINT,
   cspAAddPortfolioRequest,
   generateMockMessageResponses,
-  generateTestSQSEvent
+  generateTestSQSEvent,
 } from "../util/common-test-fixtures";
 import * as types from "../client/types";
 import * as atatClientHelper from "../../utils/atat-client";

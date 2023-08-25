@@ -6,7 +6,7 @@ import {
   ClinType,
   CostResponseByPortfolio,
   HothProvisionRequest,
-  ProvisionRequestType
+  ProvisionRequestType,
 } from "../client";
 
 // Mock data used by unit and integration tests

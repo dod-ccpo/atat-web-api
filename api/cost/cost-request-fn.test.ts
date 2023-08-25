@@ -13,7 +13,7 @@ import {
   FAKE_COST_DATA,
   generateMockMessageResponses,
   generateTestSQSEvent,
-  validCostRequest
+  validCostRequest,
 } from "../util/common-test-fixtures";
 import * as atatClientHelper from "../../utils/atat-client";
 import { AxiosResponse } from "axios";

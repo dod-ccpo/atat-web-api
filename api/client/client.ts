@@ -13,7 +13,7 @@ import {
   cspAAddPortfolioRequest,
   TEST_ENVIRONMENT_ID,
   TEST_PORTFOLIO_ID,
-  TEST_PROVISIONING_JOB_ID
+  TEST_PROVISIONING_JOB_ID,
 } from "../util/common-test-fixtures";
 
 const CSP_MOCK_ENABLED = process.env.CSP_MOCK_ENABLED ?? "";

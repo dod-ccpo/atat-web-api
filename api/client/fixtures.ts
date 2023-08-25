@@ -12,7 +12,7 @@ import {
   Portfolio,
   ProvisioningStatus,
   ProvisioningStatusType,
-  TaskOrder
+  TaskOrder,
 } from "./types";
 
 export const portfolioId = "test-portfolio-id";
