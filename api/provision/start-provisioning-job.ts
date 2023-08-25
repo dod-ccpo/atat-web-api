@@ -14,7 +14,7 @@ import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-m
 import { LoggingContextMiddleware } from "../../utils/middleware/logging-context-middleware";
 import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
 import { tracer } from "../../utils/tracing";
-import { provisionRequestSchema } from "../../models/provisioning-schemas";
+import { provisionRequestEventSchema, provisionRequestSchema } from "../../models/provisioning-schemas";
 import { HothProvisionRequest } from "../client";
 import validatorMiddleware from "@middy/validator";
 import middy from "@middy/core";
@@ -55,6 +55,6 @@ export const handler = middy(baseHandler)
   .use(httpHeaderNormalizer())
   .use(httpJsonBodyParser({ disableContentTypeError: false }))
   .use(cspPortfolioIdChecker())
-  .use(validatorMiddleware({ eventSchema: transpileSchema(provisionRequestSchema) }))
+  .use(validatorMiddleware({ eventSchema: transpileSchema(provisionRequestEventSchema) }))
   .use(errorHandlingMiddleware())
   .use(jsonErrorHandlerMiddleware());

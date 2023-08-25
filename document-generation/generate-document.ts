@@ -18,6 +18,7 @@ import { getDocxTemplate, getExcelTemplatePath, getPDFDocumentTemplates } from "
 import {
   DocumentType,
   EvaluationPlan,
+  generateDocumentEventSchema,
   GenerateDocumentRequest,
   generateDocumentSchema,
   IncrementalFundingPlan,
@@ -127,7 +128,7 @@ export const handler = middy(baseHandler)
   .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
   .use(httpHeaderNormalizer())
   .use(httpJsonBodyParser({ disableContentTypeError: false }))
-  .use(validator({ eventSchema: transpileSchema(generateDocumentSchema) }))
+  .use(validator({ eventSchema: transpileSchema(generateDocumentEventSchema) }))
   .use(errorHandlingMiddleware());
 
 // register handlebars helpers for use in template
