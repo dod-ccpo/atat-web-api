@@ -17,9 +17,9 @@ import { tracer } from "../../utils/tracing";
 import { provisionRequestSchema } from "../../models/provisioning-schemas";
 import { HothProvisionRequest } from "../client";
 import validatorMiddleware from "@middy/validator";
-import en from "ajv-i18n";
 import middy from "@middy/core";
 import { transpileSchema } from "@middy/validator/transpile";
+import httpHeaderNormalizer from "@middy/http-header-normalizer";
 
 const SFN_ARN = process.env.SFN_ARN ?? "";
 
@@ -52,8 +52,9 @@ export const handler = middy(baseHandler)
   .use(LoggingContextMiddleware())
   .use(inputOutputLogger({ logger: (message) => logger.info("Event/Result", message) }))
   .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
-  .use(httpJsonBodyParser())
+  .use(httpHeaderNormalizer())
+  .use(httpJsonBodyParser({disableContentTypeError: false}))
   .use(cspPortfolioIdChecker())
-  .use(validatorMiddleware({ eventSchema: transpileSchema(provisionRequestSchema), languages: { en } }))
+  .use(validatorMiddleware({ eventSchema: transpileSchema(provisionRequestSchema) }))
   .use(errorHandlingMiddleware())
   .use(jsonErrorHandlerMiddleware());

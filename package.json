@@ -60,6 +60,7 @@
     "@aws-sdk/client-sts": "^3.391.0",
     "@middy/core": "^4.6.0",
     "@middy/error-logger": "^4.6.0",
+    "@middy/http-header-normalizer": "^4.6.0",
     "@middy/http-json-body-parser": "^4.6.0",
     "@middy/input-output-logger": "^4.6.0",
     "@middy/validator": "^4.6.0",

@@ -867,4 +867,5 @@ export const generateDocumentSchema = {
       ],
     },
   },
+  additionalProperties: false,
 };
