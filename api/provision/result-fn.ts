@@ -48,5 +48,5 @@ export const handler = middy(baseHandler)
   .use(captureLambdaHandler(tracer))
   .use(inputOutputLogger({ logger: (message) => logger.info("Event/Result", message) }))
   .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
-  .use(validator({ eventSchema: provisionResponseSchema }))
+  .use(validator({ ajvOptions: { verbose: true }, eventSchema: provisionResponseSchema }))
   .use(errorHandlingMiddleware());
