@@ -4,13 +4,14 @@ import { SendMessageCommand } from "@aws-sdk/client-sqs";
 import middy from "@middy/core";
 import errorLogger from "@middy/error-logger";
 import inputOutputLogger from "@middy/input-output-logger";
-import validator from "@middy/validator";
 import { sqsClient } from "../../utils/aws-sdk/sqs";
 import { logger } from "../../utils/logging";
 import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
 import { tracer } from "../../utils/tracing";
 import { provisionResponseSchema } from "../../models/provisioning-schemas";
 import { ProvisionCspResponse } from "../client";
+import { transpileSchema } from "@middy/validator/transpile";
+import validatorMiddleware from "@middy/validator";
 
 const MESSAGE_GROUP_ID = "provisioning-queue-message-group";
 
@@ -48,5 +49,5 @@ export const handler = middy(baseHandler)
   .use(captureLambdaHandler(tracer))
   .use(inputOutputLogger({ logger: (message) => logger.info("Event/Result", message) }))
   .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
-  .use(validator({ ajvOptions: { verbose: true }, eventSchema: provisionResponseSchema }))
+  .use(validatorMiddleware({ eventSchema: transpileSchema(provisionResponseSchema) }))
   .use(errorHandlingMiddleware());

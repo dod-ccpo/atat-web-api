@@ -1,5 +1,5 @@
 import chromium from "@sparticuz/chromium";
-import { PDFOptions, launch } from "puppeteer-core";
+import { launch, PDFOptions } from "puppeteer-core";
 import { logger } from "../utils/logging";
 
 export async function generateDocument(document: string): Promise<Buffer | undefined> {

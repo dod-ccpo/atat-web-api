@@ -1,12 +1,12 @@
 import {
+  ApiBase64SuccessResponse,
+  ApiSuccessResponse,
   Error,
   ErrorCode,
-  OtherErrorResponse,
   ErrorStatusCode,
   NoContentResponse,
-  ApiSuccessResponse,
+  OtherErrorResponse,
   SuccessStatusCode,
-  ApiBase64SuccessResponse,
 } from "./response";
 
 describe("Validation for No Content responses", () => {

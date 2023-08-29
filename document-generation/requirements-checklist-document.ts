@@ -1,10 +1,9 @@
 import { logger } from "../utils/logging";
 import createReport from "docx-templates";
 import { ApiBase64SuccessResponse, SuccessStatusCode } from "../utils/response";
-import { capitalize, formatPeriodOfPerformance } from "./utils/utils";
+import { formatPeriodOfPerformance } from "./utils/utils";
 import { RequirementsChecklist } from "../models/document-generation/requirements-checklist";
 import { REQUEST_BODY_INVALID } from "../utils/errors";
-import { IJustificationAndApproval } from "../models/document-generation/justification-and-approval";
 
 export async function doGenerate(template: Buffer, payload: RequirementsChecklist): Promise<Buffer> {
   const { periodOfPerformance } = payload;

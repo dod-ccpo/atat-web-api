@@ -867,4 +867,25 @@ export const generateDocumentSchema = {
       ],
     },
   },
+  additionalProperties: false,
+};
+
+export const generateDocumentEventSchema = {
+  type: "object",
+  properties: {
+    body: generateDocumentSchema,
+    requestContext: {
+      type: "object",
+      additionalProperties: true,
+    },
+    headers: {
+      type: "object",
+      additionalProperties: true,
+    },
+    rawHeaders: {
+      type: "object",
+      additionalProperties: true,
+    },
+  },
+  additionalProperties: false,
 };

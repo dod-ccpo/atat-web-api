@@ -1,7 +1,7 @@
 import * as apigw from "aws-cdk-lib/aws-apigateway";
+import { Method } from "aws-cdk-lib/aws-apigateway";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import { HttpMethod } from "../http";
-import { Method } from "aws-cdk-lib/aws-apigateway";
 import * as idp from "../constructs/identity-provider";
 
 export interface ApiRouteProps {

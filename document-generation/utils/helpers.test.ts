@@ -1,6 +1,6 @@
 import { HelperOptions } from "handlebars";
 import { AwardType, Classification, ImpactLevel, PeriodType, PeriodUnit } from "../../models/document-generation";
-import { formatDuration, formatGroupAndClassification, formatAwardType, countSections, counter } from "./helpers";
+import { counter, countSections, formatAwardType, formatDuration, formatGroupAndClassification } from "./helpers";
 
 const baseAndOptionPeriods = [
   {

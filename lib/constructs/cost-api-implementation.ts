@@ -1,5 +1,6 @@
 import { Construct } from "constructs";
 import * as lambdaNodeJs from "aws-cdk-lib/aws-lambda-nodejs";
+import { NodejsFunctionProps } from "aws-cdk-lib/aws-lambda-nodejs";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import { Duration } from "aws-cdk-lib";
 import { FifoQueue } from "./sqs";
@@ -10,7 +11,6 @@ import { ApiRouteProps, IApiRoute } from "./api-route";
 import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 import * as idp from "../constructs/identity-provider";
 import * as secrets from "aws-cdk-lib/aws-secretsmanager";
-import { NodejsFunctionProps } from "aws-cdk-lib/aws-lambda-nodejs";
 import { AtatContextValue } from "../context-values";
 
 export interface ICostApiImplementation extends IApiRoute {
@@ -96,7 +96,6 @@ export class CostApiImplementation extends Construct implements ICostApiImplemen
   ): lambdaNodeJs.NodejsFunction {
     return new lambdaNodeJs.NodejsFunction(scope, id, {
       entry,
-      runtime: lambda.Runtime.NODEJS_16_X,
       vpc: this.props.vpc,
       memorySize: 256,
       timeout: Duration.seconds(5),

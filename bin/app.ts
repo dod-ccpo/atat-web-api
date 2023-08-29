@@ -1,6 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import * as utils from "../lib/util";
-import { AtatWebApiStack, ApiCertificateOptions } from "../lib/atat-web-api-stack";
+import { ApiCertificateOptions, AtatWebApiStack } from "../lib/atat-web-api-stack";
 import { RemovalPolicySetter } from "../lib/aspects/removal-policy";
 import { GovCloudCompatibilityAspect } from "../lib/aspects/govcloud-compatibility";
 import { AtatPipelineStack } from "../lib/atat-pipeline-stack";

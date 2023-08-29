@@ -1,8 +1,8 @@
 import { AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import {
   camelCaseObject,
-  snakeCaseObject,
   camelToSnakeRequestInterceptor,
+  snakeCaseObject,
   snakeToCamelResponseInterceptor,
 } from "./util";
 

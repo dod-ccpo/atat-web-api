@@ -1,9 +1,7 @@
 import * as cdk from "aws-cdk-lib";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
-import * as s3 from "aws-cdk-lib/aws-s3";
 import * as logs from "aws-cdk-lib/aws-logs";
 import * as custom from "aws-cdk-lib/custom-resources";
-import * as route53Resolver from "aws-cdk-lib/aws-route53resolver";
 import { VpcDefaultSecurityGroupRuleRemover } from "./constructs/vpc-default-sg-rule-remove";
 
 import { Construct, DependencyGroup } from "constructs";
