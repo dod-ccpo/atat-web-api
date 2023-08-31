@@ -96,20 +96,8 @@ export const provisionRequestEventSchema = {
   type: "object",
   properties: {
     body: provisionRequestSchema,
-    headers: {
-      type: "object",
-      additionalProperties: true,
-    },
-    rawHeaders: {
-      type: "object",
-      additionalProperties: true,
-    },
-    requestContext: {
-      type: "object",
-      additionalProperties: true,
-    },
   },
-  additionalProperties: false,
+  additionalProperties: true,
 };
 
 export const provisionResponseSchema = {
