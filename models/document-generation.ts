@@ -867,4 +867,13 @@ export const generateDocumentSchema = {
       ],
     },
   },
+  additionalProperties: false,
+};
+
+export const generateDocumentEventSchema = {
+  type: "object",
+  properties: {
+    body: generateDocumentSchema,
+  },
+  additionalProperties: true,
 };

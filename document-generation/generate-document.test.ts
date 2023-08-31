@@ -11,13 +11,13 @@ import { handler } from "./generate-document";
 import { requestContext } from "../api/util/common-test-fixtures";
 import {
   sampleDowRequest,
-  sampleIfpRequest,
-  sampleIgceRequest,
-  sampleRequirementsChecklistRequest,
-  sampleJustificationAndApprovalRequest,
-  sampleMarketResearchReportRequest,
   sampleEvalMemoRequestWithException,
   sampleEvalMemoRequestWithoutException,
+  sampleIfpRequest,
+  sampleIgceRequest,
+  sampleJustificationAndApprovalRequest,
+  sampleMarketResearchReportRequest,
+  sampleRequirementsChecklistRequest,
 } from "./utils/sampleTestData";
 
 const validRequest = {

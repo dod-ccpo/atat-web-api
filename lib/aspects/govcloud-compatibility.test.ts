@@ -1,7 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import * as acm from "aws-cdk-lib/aws-certificatemanager";
 import * as cognito from "aws-cdk-lib/aws-cognito";
-import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as logs from "aws-cdk-lib/aws-logs";
 import { Annotations, Match, Template } from "aws-cdk-lib/assertions";
 import { GovCloudCompatibilityAspect } from "./govcloud-compatibility";

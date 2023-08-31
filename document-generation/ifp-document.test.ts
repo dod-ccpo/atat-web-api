@@ -1,4 +1,4 @@
-import { IncrementalFundingPlan, IndependentGovernmentCostEstimate, DocumentType } from "../models/document-generation";
+import { DocumentType, IncrementalFundingPlan, IndependentGovernmentCostEstimate } from "../models/document-generation";
 import { generateIGCEDocument } from "./igce-document";
 import { fundingDocumentWithMiprNumber, sampleIfpRequest } from "./utils/sampleTestData";
 import * as fs from "fs";

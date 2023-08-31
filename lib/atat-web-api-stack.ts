@@ -1,4 +1,5 @@
 import * as cdk from "aws-cdk-lib";
+import { Tags } from "aws-cdk-lib";
 import * as apigw from "aws-cdk-lib/aws-apigateway";
 import * as acm from "aws-cdk-lib/aws-certificatemanager";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
@@ -7,7 +8,6 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as nodejs from "aws-cdk-lib/aws-lambda-nodejs";
 import * as s3 from "aws-cdk-lib/aws-s3";
-import * as logs from "aws-cdk-lib/aws-logs";
 import { Construct } from "constructs";
 import { UserPermissionBoundary } from "./aspects/user-only-permission-boundary";
 import { AtatNetStack } from "./atat-net-stack";
@@ -21,8 +21,6 @@ import { VpcEndpointApplicationTargetGroup } from "./constructs/vpc-endpoint-lb-
 import { HttpMethod } from "./http";
 import { NagSuppressions } from "cdk-nag";
 import * as cr from "aws-cdk-lib/custom-resources";
-import { RetentionDays } from "aws-cdk-lib/aws-logs";
-import { Tags } from "aws-cdk-lib";
 
 export interface ApiCertificateOptions {
   domainName: string;
@@ -296,12 +294,12 @@ export class AtatWebApiStack extends cdk.Stack {
     // APIGW Document Generation Resource
     const generateDocumentResource = api.restApi.root.addResource("generate-document");
     const documentGenerationLayer = new lambda.LayerVersion(this, "GenerateDocumentSupportLayer", {
-      compatibleRuntimes: [lambda.Runtime.NODEJS_16_X],
+      compatibleRuntimes: [lambda.Runtime.NODEJS_18_X],
       code: lambda.Code.fromAsset("document-generation/templates", {}),
     });
     const generateDocumentFn = new nodejs.NodejsFunction(this, "GenerateDocumentFunction", {
       entry: "document-generation/generate-document.ts",
-      runtime: lambda.Runtime.NODEJS_16_X,
+      runtime: lambda.Runtime.NODEJS_18_X,
       memorySize: 512,
       bundling: {
         nodeModules: ["@sparticuz/chromium", "puppeteer-core"],

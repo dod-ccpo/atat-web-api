@@ -10,9 +10,6 @@ import { ApiBase64SuccessResponse, SuccessStatusCode, ValidationErrorResponse } 
 import { INTERNAL_SERVER_ERROR } from "../utils/errors";
 import { LoggingContextMiddleware } from "../utils/middleware/logging-context-middleware";
 import { errorHandlingMiddleware } from "../utils/middleware/error-handling-middleware";
-import JSONErrorHandlerMiddleware from "middy-middleware-json-error-handler";
-import validator from "@middy/validator";
-import { wrapSchema } from "../utils/middleware/schema-wrapper";
 import { generateDocument } from "./chromium";
 import { generateIGCEDocument } from "./igce-document";
 import { generateIFPDocument } from "./ifp-document";
@@ -21,6 +18,7 @@ import { getDocxTemplate, getExcelTemplatePath, getPDFDocumentTemplates } from "
 import {
   DocumentType,
   EvaluationPlan,
+  generateDocumentEventSchema,
   GenerateDocumentRequest,
   generateDocumentSchema,
   IncrementalFundingPlan,
@@ -36,11 +34,13 @@ import { generateEvalPlanDocument } from "./eval-plan-document";
 import { IDescriptionOfWork } from "../models/document-generation/description-of-work";
 import { generateJustificationAndApprovalDocument } from "./justification-and-approval-document";
 import { generateMarketResearchReportDocument } from "./mrr-document";
-
+import httpHeaderNormalizer from "@middy/http-header-normalizer";
 import { IJustificationAndApproval } from "../models/document-generation/justification-and-approval";
 import { IMarketResearchReport } from "../models/document-generation/market-research-report";
 import { IEvaluationMemo } from "../models/document-generation/evaluation-memo";
 import { generateEvalMemoDocument } from "./eval-memo-document";
+import { transpileSchema } from "@middy/validator/transpile";
+import validator from "@middy/validator";
 
 async function baseHandler(event: RequestEvent<GenerateDocumentRequest>): Promise<ApiBase64SuccessResponse> {
   const { documentType } = event.body;
@@ -126,10 +126,10 @@ export const handler = middy(baseHandler)
   .use(LoggingContextMiddleware())
   .use(inputOutputLogger({ logger: (message) => logger.info("Event/Result", message) }))
   .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
-  .use(httpJsonBodyParser())
-  .use(validator({ eventSchema: wrapSchema(generateDocumentSchema) }))
-  .use(errorHandlingMiddleware())
-  .use(JSONErrorHandlerMiddleware());
+  .use(httpHeaderNormalizer())
+  .use(httpJsonBodyParser({ disableContentTypeError: false }))
+  .use(validator({ eventSchema: transpileSchema(generateDocumentEventSchema) }))
+  .use(errorHandlingMiddleware());
 
 // register handlebars helpers for use in template
 handlebars.registerHelper("formatDuration", formatDuration);

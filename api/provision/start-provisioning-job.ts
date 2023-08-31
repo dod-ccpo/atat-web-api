@@ -1,10 +1,8 @@
 import { injectLambdaContext } from "@aws-lambda-powertools/logger";
 import { captureLambdaHandler } from "@aws-lambda-powertools/tracer";
-import middy from "@middy/core";
 import errorLogger from "@middy/error-logger";
 import httpJsonBodyParser from "@middy/http-json-body-parser";
 import inputOutputLogger from "@middy/input-output-logger";
-import validator from "@middy/validator";
 import { APIGatewayProxyResult } from "aws-lambda";
 import jsonErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import { RequestEvent } from "../../models/document-generation";
@@ -14,11 +12,14 @@ import { logger } from "../../utils/logging";
 import { cspPortfolioIdChecker } from "../../utils/middleware/check-csp-portfolio-id";
 import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
 import { LoggingContextMiddleware } from "../../utils/middleware/logging-context-middleware";
-import { wrapSchema } from "../../utils/middleware/schema-wrapper";
 import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
 import { tracer } from "../../utils/tracing";
-import { provisionRequestSchema } from "../../models/provisioning-schemas";
+import { provisionRequestEventSchema, provisionRequestSchema } from "../../models/provisioning-schemas";
 import { HothProvisionRequest } from "../client";
+import validatorMiddleware from "@middy/validator";
+import middy from "@middy/core";
+import { transpileSchema } from "@middy/validator/transpile";
+import httpHeaderNormalizer from "@middy/http-header-normalizer";
 
 const SFN_ARN = process.env.SFN_ARN ?? "";
 
@@ -51,8 +52,9 @@ export const handler = middy(baseHandler)
   .use(LoggingContextMiddleware())
   .use(inputOutputLogger({ logger: (message) => logger.info("Event/Result", message) }))
   .use(errorLogger({ logger: (err) => logger.error("An error occurred during the request", err as Error) }))
-  .use(httpJsonBodyParser())
+  .use(httpHeaderNormalizer())
+  .use(httpJsonBodyParser({ disableContentTypeError: false }))
   .use(cspPortfolioIdChecker())
-  .use(validator({ eventSchema: wrapSchema(provisionRequestSchema) }))
+  .use(validatorMiddleware({ eventSchema: transpileSchema(provisionRequestEventSchema) }))
   .use(errorHandlingMiddleware())
   .use(jsonErrorHandlerMiddleware());

@@ -22,3 +22,11 @@ export const costRequestSchema = {
     endDate: { type: "string" },
   },
 };
+
+export const CostRequestEventSchema = {
+  type: "object",
+  properties: {
+    body: costRequestSchema,
+  },
+  additionalProperties: true,
+};

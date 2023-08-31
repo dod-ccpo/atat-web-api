@@ -1,9 +1,9 @@
 import {
-  EC2Client,
   DescribeNetworkInterfacesCommand,
+  DescribeNetworkInterfacesCommandOutput,
   DescribeVpcEndpointsCommand,
   DescribeVpcEndpointsCommandOutput,
-  DescribeNetworkInterfacesCommandOutput,
+  EC2Client,
 } from "@aws-sdk/client-ec2";
 import type { OnEventRequest } from "aws-cdk-lib/custom-resources/lib/provider-framework/types";
 import { mockClient } from "aws-sdk-client-mock";
