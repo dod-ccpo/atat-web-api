@@ -1,3 +1,7 @@
+// These are required because CDK uses "new <object>" as a way to create side-effects
+// No known alternative to satisfy not using the result of the constructor.
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable no-new */
 import * as cdk from "aws-cdk-lib";
 import { Tags } from "aws-cdk-lib";
 import * as apigw from "aws-cdk-lib/aws-apigateway";
@@ -37,6 +41,7 @@ export interface AtatWebApiStackProps extends cdk.StackProps {
 
 export class AtatWebApiStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: AtatWebApiStackProps) {
+    let result = null;
     super(scope, id, props);
     NagSuppressions.addStackSuppressions(this, [
       // This is a temporary supression (hopefully) and we will adopt this as soon as the feature
@@ -61,7 +66,7 @@ export class AtatWebApiStack extends cdk.Stack {
     // not viable for us to reimplement all of them ourselves to avoid CDK-created ones, this is
     // the best possible workaround.
     if (props.network) {
-      new cr.AwsCustomResource(this, "NopCustomResource", {
+      result = new cr.AwsCustomResource(this, "NopCustomResource", {
         onUpdate: {
           service: "STS",
           action: "getCallerIdentity",
@@ -182,7 +187,7 @@ export class AtatWebApiStack extends cdk.Stack {
       // We manually set the targets so we need to allow this
       // TODO: Fix that in the TargetGroup config?
       loadBalancer.connections.allowToAnyIpv4(ec2.Port.tcp(443));
-      new cdk.CfnOutput(this, "LoadBalancerDns", { value: loadBalancer.loadBalancerDnsName });
+      result = new cdk.CfnOutput(this, "LoadBalancerDns", { value: loadBalancer.loadBalancerDnsName });
       NagSuppressions.addResourceSuppressions(loadBalancer, [
         {
           id: "NIST.800.53.R4-ALBWAFEnabled",
@@ -196,8 +201,8 @@ export class AtatWebApiStack extends cdk.Stack {
     api.grantOnRoute(readUser.user, HttpMethod.GET);
     api.grantOnRoute(writeUser.user, "*");
 
-    new cdk.CfnOutput(this, "ReadUserAccessKey", { value: readUser.accessKey.secretName });
-    new cdk.CfnOutput(this, "WriteUserAccessKey", { value: writeUser.accessKey.secretName });
+    result = new cdk.CfnOutput(this, "ReadUserAccessKey", { value: readUser.accessKey.secretName });
+    result = new cdk.CfnOutput(this, "WriteUserAccessKey", { value: writeUser.accessKey.secretName });
 
     [readUser, writeUser].forEach((user) => {
       NagSuppressions.addResourceSuppressions(
@@ -264,7 +269,8 @@ export class AtatWebApiStack extends cdk.Stack {
         },
       ],
     });
-    const urlOutput = new cdk.CfnOutput(this, "IdpDiscoveryUrl", {
+
+    result = new cdk.CfnOutput(this, "IdpDiscoveryUrl", {
       value: atatIdp.discoveryUrl(),
     });
 
@@ -291,6 +297,7 @@ export class AtatWebApiStack extends cdk.Stack {
       new apigw.LambdaIntegration(provisioningSfn.provisioningQueueConsumer.fn)
     );
 
+    // TODO: No longer need this functionality as we are not producing .html or .pdf documents
     // APIGW Document Generation Resource
     const generateDocumentResource = api.restApi.root.addResource("generate-document");
     const documentGenerationLayer = new lambda.LayerVersion(this, "GenerateDocumentSupportLayer", {
@@ -312,7 +319,7 @@ export class AtatWebApiStack extends cdk.Stack {
     generateDocumentResource.addMethod(HttpMethod.POST, new apigw.LambdaIntegration(generateDocumentFn));
 
     // Build all Cost Resources
-    const costApi = new CostApiImplementation(this, {
+    result = new CostApiImplementation(this, {
       environmentName,
       apiParent: api.restApi.root,
       vpc: props?.network?.vpc,
