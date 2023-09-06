@@ -67,6 +67,7 @@ export interface Clin {
  * A Task Order and CLINs used to pay for provisioned resources and services.
  */
 export interface TaskOrder {
+  readonly id?: string;
   readonly taskOrderNumber: string;
   readonly clins: Clin[];
   readonly popStartDate: string;
