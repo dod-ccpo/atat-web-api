@@ -193,7 +193,7 @@ export class AtatClient implements IAtatClient {
       id: TEST_ENVIRONMENT_ID,
     });
 
-    // CSP A should always return a 200 for UpdatePortfolio
+    // CSP A should always return a 200 for UpdateTaskOrder
     mock.onPut(`${CSP_A_TEST_ENDPOINT}/portfolios/${TEST_PORTFOLIO_ID}/task-orders/${TEST_TASKORDER_ID}`).reply(200, {
       ...cspAUpdateTaskOrderRequest.payload,
       id: TEST_ENVIRONMENT_ID,

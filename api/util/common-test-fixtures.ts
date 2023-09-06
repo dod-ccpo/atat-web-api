@@ -101,7 +101,7 @@ export const validRequest = {
     "Content-Type": "application/json",
   },
   requestContext,
-} as any;
+};
 
 // cost fixtures
 export const validCostRequest: CostRequest = {
@@ -117,7 +117,7 @@ export const baseApiRequest = {
     "Content-Type": "application/json",
   },
   requestContext,
-} as any;
+};
 
 export const FAKE_COST_DATA: CostResponseByPortfolio = {
   taskOrders: [
@@ -158,7 +158,7 @@ export const FAKE_COST_DATA: CostResponseByPortfolio = {
   ],
 };
 
-export function generateTestSQSEvent(recordBodies: any[]): SQSEvent {
+export function generateTestSQSEvent(recordBodies: object[]): SQSEvent {
   const records = recordBodies.map((body) => {
     const recordBody = JSON.stringify(body);
     return {
@@ -185,7 +185,7 @@ export function generateTestSQSEvent(recordBodies: any[]): SQSEvent {
     Records: records,
   };
 }
-export function generateMockMessageResponses(messageBodies: any[]) {
+export function generateMockMessageResponses(messageBodies: object[]) {
   const messages = messageBodies.map((body) => {
     const messageBody = JSON.stringify(body);
     return {
