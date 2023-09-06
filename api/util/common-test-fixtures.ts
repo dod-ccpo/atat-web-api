@@ -13,6 +13,7 @@ import {
 export const TEST_PORTFOLIO_ID = "b02e77d1-234d-4e3d-bc85-b57ca5a93952";
 export const TEST_ENVIRONMENT_ID = "1a302680-6127-4bc1-be43-735703bdecb1";
 export const TEST_PROVISIONING_JOB_ID = "81b31a89-e3e5-46ee-acfe-75436bd14577";
+export const TEST_TASKORDER_ID = "csp-a-task-order-id-123";
 export const CSP_A_TEST_ENDPOINT = `https://CSP_A.example.com`;
 export const CSP_B_TEST_ENDPOINT = "https://CSP_B.example.com";
 export const CSP_B_STATUS_ENDPOINT = `${CSP_B_TEST_ENDPOINT}/provisioning/${TEST_PROVISIONING_JOB_ID}/status`;
@@ -80,6 +81,15 @@ export const addEnvironmentRequest = {
     administrators,
     classificationLevel: "UNCLASSIFIED",
     cloudDistinguisher: undefined,
+  },
+};
+
+export const cspAUpdateTaskOrderRequest = {
+  ...cspAProvisioningBodyNoPayload,
+  operationType: ProvisionRequestType.UPDATE_TASK_ORDER,
+  payload: {
+    taskOrderId: TEST_TASKORDER_ID,
+    taskOrder: taskOrders[0],
   },
 };
 

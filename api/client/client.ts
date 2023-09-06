@@ -5,13 +5,15 @@ import { ILogger, logger as defaultLogger } from "../../utils/logging";
 import { camelToSnakeRequestInterceptor, snakeToCamelResponseInterceptor } from "./util";
 import MockAdapter from "axios-mock-adapter";
 import {
-  addEnvironmentRequest,
+  addEnvironmentRequest as cspAAddEnvironmentRequest,
   CSP_A_TEST_ENDPOINT,
   CSP_B_STATUS_ENDPOINT,
   CSP_B_TEST_ENDPOINT,
   cspAAddPortfolioRequest,
+  cspAUpdateTaskOrderRequest,
   TEST_ENVIRONMENT_ID,
   TEST_PORTFOLIO_ID,
+  TEST_TASKORDER_ID,
   TEST_PROVISIONING_JOB_ID,
 } from "../util/common-test-fixtures";
 
@@ -187,7 +189,13 @@ export class AtatClient implements IAtatClient {
 
     // CSP A should always return a 200 for AddEnvironment
     mock.onPost(`${CSP_A_TEST_ENDPOINT}/portfolios/${TEST_PORTFOLIO_ID}/environments`).reply(200, {
-      ...addEnvironmentRequest.payload,
+      ...cspAAddEnvironmentRequest.payload,
+      id: TEST_ENVIRONMENT_ID,
+    });
+
+    // CSP A should always return a 200 for UpdatePortfolio
+    mock.onPut(`${CSP_A_TEST_ENDPOINT}/portfolios/${TEST_PORTFOLIO_ID}/task-orders/${TEST_TASKORDER_ID}`).reply(200, {
+      ...cspAUpdateTaskOrderRequest.payload,
       id: TEST_ENVIRONMENT_ID,
     });
 
@@ -418,7 +426,11 @@ export class AtatClient implements IAtatClient {
     );
     switch (response.status) {
       case 200:
-        return this.transformSynchronousResponse<atatApiTypes.AddTaskOrderResponseSync>("taskOrder", response, request);
+        return this.transformSynchronousResponse<atatApiTypes.UpdateTaskOrderResponseSync>(
+          "taskOrder",
+          response,
+          request
+        );
       case 400:
         throw new AtatApiError("Invalid ID supplied", "InvalidPortfolioId", request, response);
       case 404:

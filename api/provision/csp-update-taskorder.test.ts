@@ -2,134 +2,47 @@ import { Context } from "aws-lambda";
 import * as idpClient from "../../idp/client";
 import { ErrorStatusCode, SuccessStatusCode, ValidationErrorResponse } from "../../utils/response";
 import * as cspConfig from "./csp-configuration";
-import { handler } from "./csp-create-environment";
+import { handler } from "./csp-update-taskorder";
 import {
-  addEnvironmentRequest,
   constructProvisionRequestForCsp,
-  CSP_A,
   CSP_A_TEST_ENDPOINT,
-  CSP_B,
-  CSP_B_STATUS_ENDPOINT,
-  CSP_B_TEST_ENDPOINT,
-  TEST_ENVIRONMENT_ID,
+  cspAUpdateTaskOrderRequest,
 } from "../util/common-test-fixtures";
-import { HothProvisionRequest, ProvisionCspResponse, ProvisioningStatusType } from "../client";
+import { HothProvisionRequest, ProvisionCspResponse } from "../client";
 
 // Reused mocks
 jest.mock("../provision/csp-configuration");
 const mockedConfig = cspConfig.getConfiguration as jest.MockedFn<typeof cspConfig.getConfiguration>;
-
 jest.mock("../../idp/client");
 const mockedGetToken = idpClient.getToken as jest.MockedFn<typeof idpClient.getToken>;
+mockedGetToken.mockImplementation(() =>
+  Promise.resolve({ access_token: "FAKE_TOKEN", expires_in: 0, token_type: "Bearer" })
+);
 
-const fakeNow = new Date("2030-01-02");
 beforeEach(() => {
   jest.resetAllMocks();
-  jest.useFakeTimers().setSystemTime(fakeNow);
 });
 
-describe("Add Environment Tests", () => {
-  it("should return a 200 for CSP_A requests", async () => {
-    // GIVEN
-    const deadline = new Date(fakeNow);
-    deadline.setHours(deadline.getHours() + 2);
-
-    const addEnvironmentProvisionJob = constructProvisionRequestForCsp(CSP_A, addEnvironmentRequest);
-    mockedConfig.mockImplementation(() => Promise.resolve({ name: CSP_A, uri: CSP_A_TEST_ENDPOINT }));
-    mockedGetToken.mockImplementation(() =>
-      Promise.resolve({ access_token: "FAKE_TOKEN", expires_in: 0, token_type: "Bearer" })
-    );
-    const transformedRequest = {
-      environment: addEnvironmentRequest.payload,
-      portfolioId: addEnvironmentProvisionJob.portfolioId,
-    };
-    const transformedResponse = {
-      environment: {
-        ...addEnvironmentRequest.payload,
-        id: TEST_ENVIRONMENT_ID,
-      },
-    };
-
-    const expectedResponse = {
-      code: 200,
-      content: {
-        request: {
-          environment: addEnvironmentRequest.payload,
-          portfolioId: addEnvironmentProvisionJob.portfolioId,
-          provisionDeadline: deadline.toISOString(),
-        },
-        response: {
-          ...transformedResponse,
-          $metadata: {
-            request: {
-              ...transformedRequest,
-              provisionDeadline: deadline.toISOString(),
-            },
-            status: 200,
-          },
-        },
-      },
-      initialSnowRequest: addEnvironmentProvisionJob,
-    };
-
-    // WHEN
-    const response = (await handler(addEnvironmentProvisionJob, {} as Context)) as ProvisionCspResponse;
-
-    // THEN
-    expect(response).toEqual(expectedResponse);
-    expect(response.code).toBe(SuccessStatusCode.OK);
-    console.log(response.content.request.provisionDeadline);
+describe("Update TaskOrder Tests", () => {
+  describe("Successful invocation of mock CSP function", () => {
+    it("should return 200 when CSP A provided in the request", async () => {
+      mockedConfig.mockImplementation(() => Promise.resolve({ name: "CSP_A", uri: CSP_A_TEST_ENDPOINT }));
+      mockedGetToken.mockImplementation(() =>
+        Promise.resolve({ access_token: "FAKE_TOKEN", expires_in: 0, token_type: "Bearer" })
+      );
+      const response = (await handler(
+        constructProvisionRequestForCsp("CSP_A", cspAUpdateTaskOrderRequest),
+        {} as Context
+      )) as ProvisionCspResponse;
+      expect(response.code).toBe(SuccessStatusCode.OK);
+    });
   });
 
-  it("should return 202 with a reformatted CSP_B response", async () => {
-    // GIVEN
-    const deadline = new Date(fakeNow);
-    deadline.setHours(deadline.getHours() + 2);
-    const addEnvironmentProvisionJob = constructProvisionRequestForCsp(CSP_B, addEnvironmentRequest);
-    mockedConfig.mockImplementation(() => Promise.resolve({ name: CSP_B, uri: CSP_B_TEST_ENDPOINT }));
-    mockedGetToken.mockImplementation(() =>
-      Promise.resolve({ access_token: "FAKE_TOKEN", expires_in: 0, token_type: "Bearer" })
-    );
-    const transformedRequest = {
-      environment: addEnvironmentRequest.payload,
-      portfolioId: addEnvironmentProvisionJob.portfolioId,
-    };
-
-    const expectedResponse = {
-      code: 202,
-      content: {
-        request: {
-          ...transformedRequest,
-          provisionDeadline: deadline.toISOString(),
-        },
-        response: {
-          location: CSP_B_STATUS_ENDPOINT,
-          status: {
-            status: ProvisioningStatusType.IN_PROGRESS,
-            portfolioId: addEnvironmentProvisionJob.portfolioId,
-            provisioningJobId: addEnvironmentProvisionJob.jobId,
-          },
-          $metadata: {
-            request: {
-              ...transformedRequest,
-              provisionDeadline: deadline.toISOString(),
-            },
-            status: 202,
-          },
-        },
-      },
-      initialSnowRequest: addEnvironmentProvisionJob,
-    };
-
-    // WHEN
-    const response = (await handler(addEnvironmentProvisionJob, {} as Context)) as ProvisionCspResponse;
-
-    // THEN
-    expect(response).toEqual(expectedResponse);
-    expect(response.code).toBe(SuccessStatusCode.ACCEPTED);
-  });
+  // TODO: Add negative expect clause for provision deadline
+  // TODO: Add tests to cover the actual logic in csp-create-portfolio.ts, but not beyond it
 });
 
+// This test is skipped because it covers the old mock behavior
 describe("Failed invocation operations", () => {
   it.each([
     { desc: "empty", request: {} },
