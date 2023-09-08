@@ -28,11 +28,20 @@ async function makeRequest(client: IAtatClient, request: HothProvisionRequest): 
   // else, this will be a non-recoverable error anyway.
   const payload = request.payload as UpdateTaskOrderPayload;
 
+  if (!request.portfolioId) {
+    throw new AtatApiError("Invalid ID supplied", "InvalidPortfolioId", request);
+  }
+
+  if (!payload.taskOrderId) {
+    throw new AtatApiError("Invalid ID supplied", "InvalidTaskOrderId", request);
+  }
+
   const updateTaskOrderRequest: atatApiTypes.UpdateTaskOrderRequest = {
     portfolioId: request.portfolioId ?? "",
     taskOrderId: payload.taskOrderId,
     taskOrder: payload.taskOrder,
   };
+
   try {
     logger.info(`Invoking updateTaskOrder against CSP ${request.targetCspName}`);
     const cspResponse = await client.updateTaskOrder(updateTaskOrderRequest);

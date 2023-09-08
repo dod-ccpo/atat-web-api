@@ -64,6 +64,13 @@ export const cspAProvisioningBodyNoPayload = {
   targetCspName: CSP_A,
 };
 
+export const cspAProvisioningBodyNoPayloadNoPortfolioId = {
+  jobId: "81b31a89-e3e5-46ee-acfe-75436bd14577",
+  userId: "21d18790-bf3e-4529-a361-460ee6d16e0b",
+  portfolioId: "",
+  targetCspName: CSP_A,
+};
+
 export const cspAAddPortfolioRequest = {
   ...cspAProvisioningBodyNoPayload,
   operationType: ProvisionRequestType.ADD_PORTFOLIO,
@@ -89,6 +96,24 @@ export const cspAUpdateTaskOrderRequest = {
   operationType: ProvisionRequestType.UPDATE_TASK_ORDER,
   payload: {
     taskOrderId: TEST_TASKORDER_ID,
+    taskOrder: taskOrders[0],
+  },
+};
+
+export const cspAUpdateTaskOrderRequestNoPortfolioId = {
+  ...cspAProvisioningBodyNoPayloadNoPortfolioId,
+  operationType: ProvisionRequestType.UPDATE_TASK_ORDER,
+  payload: {
+    taskOrderId: TEST_TASKORDER_ID,
+    taskOrder: taskOrders[0],
+  },
+};
+
+export const cspAUpdateTaskOrderRequestNoTaskOrderId = {
+  ...cspAProvisioningBodyNoPayload,
+  operationType: ProvisionRequestType.UPDATE_TASK_ORDER,
+  payload: {
+    taskOrderId: "",
     taskOrder: taskOrders[0],
   },
 };
