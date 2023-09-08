@@ -7,6 +7,8 @@ import {
   constructProvisionRequestForCsp,
   CSP_A_TEST_ENDPOINT,
   cspAUpdateTaskOrderRequest,
+  cspAUpdateTaskOrderRequestNoPortfolioId,
+  cspAUpdateTaskOrderRequestNoTaskOrderId,
 } from "../util/common-test-fixtures";
 import { HothProvisionRequest, ProvisionCspResponse } from "../client";
 
@@ -50,6 +52,14 @@ describe("Failed invocation operations", () => {
   ])("should return a 400 when the request body is $desc", async ({ request }) => {
     const response = (await handler(request as HothProvisionRequest, {} as Context)) as ValidationErrorResponse;
     expect(response.statusCode).toBe(ErrorStatusCode.BAD_REQUEST);
+  });
+
+  it.each([
+    { desc: "missing portfolioId", request: cspAUpdateTaskOrderRequestNoPortfolioId },
+    { desc: "missing taskOrderId", request: cspAUpdateTaskOrderRequestNoTaskOrderId },
+  ])("should return a 500 when the request body is $desc", async ({ request }) => {
+    const response = (await handler(request as HothProvisionRequest, {} as Context)) as ValidationErrorResponse;
+    expect(response.statusCode).toBe(ErrorStatusCode.INTERNAL_SERVER_ERROR);
   });
 
   // TODO: Add the following test cases:
