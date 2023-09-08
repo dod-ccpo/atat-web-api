@@ -67,6 +67,7 @@ export interface Clin {
  * A Task Order and CLINs used to pay for provisioned resources and services.
  */
 export interface TaskOrder {
+  readonly id?: string;
   readonly taskOrderNumber: string;
   readonly clins: Clin[];
   readonly popStartDate: string;
@@ -129,7 +130,10 @@ export interface CostResponseByPortfolio {
 export interface ProvisionRequest {
   readonly provisionDeadline?: string;
 }
+
+// As AtatResponse is purposefully generic, no good way to use anything but 'any' as a Metadata type.
 export interface AtatResponse {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   $metadata: Metadata<any>;
 }
 export interface AsyncProvisionResponse extends AtatResponse {
@@ -191,6 +195,16 @@ export interface AddTaskOrderResponseSync extends AtatResponse {
 }
 export type AddTaskOrderResponseAsync = AsyncProvisionResponse;
 
+export interface UpdateTaskOrderRequest extends ProvisionRequest {
+  readonly portfolioId: string;
+  readonly taskOrderId: string;
+  readonly taskOrder: TaskOrder;
+}
+export interface UpdateTaskOrderResponseSync extends AtatResponse {
+  readonly taskOrder: TaskOrder;
+}
+export type UpdateTaskOrderResponseAsync = AsyncProvisionResponse;
+
 export interface GetCostsByClinRequest extends ProvisionRequest {
   readonly portfolioId: string;
   readonly taskOrderNumber: string;
@@ -234,6 +248,11 @@ export interface NewTaskOrderPayload {
   taskOrder: TaskOrder;
 }
 
+export interface UpdateTaskOrderPayload {
+  taskOrderId: string;
+  taskOrder: TaskOrder;
+}
+
 export interface AdministratorPayload {
   administrators: Array<Administrator>;
 }
@@ -244,7 +263,12 @@ export interface HothProvisionRequest {
   portfolioId?: string;
   operationType: ProvisionRequestType;
   targetCspName: string;
-  payload: NewPortfolioPayload | NewEnvironmentPayload | NewTaskOrderPayload | AdministratorPayload;
+  payload:
+    | NewPortfolioPayload
+    | NewEnvironmentPayload
+    | NewTaskOrderPayload
+    | UpdateTaskOrderPayload
+    | AdministratorPayload;
 }
 
 export interface AsyncProvisionRequest extends HothProvisionRequest {

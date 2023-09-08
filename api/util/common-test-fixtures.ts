@@ -13,6 +13,7 @@ import {
 export const TEST_PORTFOLIO_ID = "b02e77d1-234d-4e3d-bc85-b57ca5a93952";
 export const TEST_ENVIRONMENT_ID = "1a302680-6127-4bc1-be43-735703bdecb1";
 export const TEST_PROVISIONING_JOB_ID = "81b31a89-e3e5-46ee-acfe-75436bd14577";
+export const TEST_TASKORDER_ID = "csp-a-task-order-id-123";
 export const CSP_A_TEST_ENDPOINT = `https://CSP_A.example.com`;
 export const CSP_B_TEST_ENDPOINT = "https://CSP_B.example.com";
 export const CSP_B_STATUS_ENDPOINT = `${CSP_B_TEST_ENDPOINT}/provisioning/${TEST_PROVISIONING_JOB_ID}/status`;
@@ -83,6 +84,15 @@ export const addEnvironmentRequest = {
   },
 };
 
+export const cspAUpdateTaskOrderRequest = {
+  ...cspAProvisioningBodyNoPayload,
+  operationType: ProvisionRequestType.UPDATE_TASK_ORDER,
+  payload: {
+    taskOrderId: TEST_TASKORDER_ID,
+    taskOrder: taskOrders[0],
+  },
+};
+
 export const requestContext = { identity: { sourceIp: "203.0.113.0" } };
 
 export const validRequest = {
@@ -91,7 +101,7 @@ export const validRequest = {
     "Content-Type": "application/json",
   },
   requestContext,
-} as any;
+};
 
 // cost fixtures
 export const validCostRequest: CostRequest = {
@@ -107,7 +117,7 @@ export const baseApiRequest = {
     "Content-Type": "application/json",
   },
   requestContext,
-} as any;
+};
 
 export const FAKE_COST_DATA: CostResponseByPortfolio = {
   taskOrders: [
@@ -148,7 +158,7 @@ export const FAKE_COST_DATA: CostResponseByPortfolio = {
   ],
 };
 
-export function generateTestSQSEvent(recordBodies: any[]): SQSEvent {
+export function generateTestSQSEvent(recordBodies: object[]): SQSEvent {
   const records = recordBodies.map((body) => {
     const recordBody = JSON.stringify(body);
     return {
@@ -175,7 +185,7 @@ export function generateTestSQSEvent(recordBodies: any[]): SQSEvent {
     Records: records,
   };
 }
-export function generateMockMessageResponses(messageBodies: any[]) {
+export function generateMockMessageResponses(messageBodies: object[]) {
   const messages = messageBodies.map((body) => {
     const messageBody = JSON.stringify(body);
     return {

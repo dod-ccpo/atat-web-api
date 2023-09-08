@@ -5,6 +5,7 @@ import {
   environmentId,
   location,
   mockAddTaskOrderRequest,
+  mockUpdateTaskOrderRequest,
   mockCostData,
   mockGetCostsByClinRequest,
   mockPatchEnvironmentRequest,
@@ -13,6 +14,7 @@ import {
   mockTaskOrder,
   portfolioId,
   provisioningJobId,
+  taskOrderId,
   TEST_CSP_ENDPOINT,
 } from "./fixtures";
 import {
@@ -20,16 +22,16 @@ import {
   AddEnvironmentResponseAsync,
   AddEnvironmentResponseSync,
   AddPortfolioRequest,
-  AddPortfolioResponseSync,
   AddTaskOrderRequest,
   AddTaskOrderResponseSync,
+  UpdateTaskOrderRequest,
+  UpdateTaskOrderResponseSync,
   ClassificationLevel,
   CostResponseByClin,
   Environment,
   GetCostsByClinRequest,
   GetCostsByClinResponse,
   GetCostsByPortfolioRequest,
-  GetCostsByPortfolioResponse,
   GetPortfolioRequest,
   GetPortfolioResponse,
   GetProvisioningStatusRequest,
@@ -63,7 +65,7 @@ describe("addPortfolio", () => {
   });
   it("should handle a successful 200 response", async () => {
     mock.onPost(url).reply(200, portfolio, { "Content-Type": "application/json" });
-    const result = (await client.addPortfolio({ portfolio })) as AddPortfolioResponseSync;
+    const result = await client.addPortfolio({ portfolio });
     expect(mock.history.post[0].url).toEqual(`/portfolios`);
     expect(result.portfolio).toEqual(portfolio);
   });
@@ -298,11 +300,11 @@ describe("getCostsByPortfolio", () => {
   });
   it("should handle a successful 200 response", async () => {
     mock.onGet(url).reply(200, mockCostData);
-    const result = (await client.getCostsByPortfolio({
+    const result = await client.getCostsByPortfolio({
       portfolioId,
       startDate: "2021-12-01",
       endDate: "2022-03-31",
-    })) as GetCostsByPortfolioResponse;
+    });
     expect(mock.history.get[0].url).toEqual(`/portfolios/${portfolioId}/costs`);
     expect(mock.history.get[0].params).toEqual({ start_date: "2021-12-01", end_date: "2022-03-31" });
     expect(result.costs).toEqual(mockCostData);
@@ -312,11 +314,11 @@ describe("getCostsByPortfolio", () => {
     const encoded = encodeURIComponent(needsEncoding).toString();
     const urlWithEncoding = `${TEST_CSP_ENDPOINT}/portfolios/${encoded}/costs`;
     mock.onGet(urlWithEncoding).reply(200, mockCostData);
-    const result = (await client.getCostsByPortfolio({
+    await client.getCostsByPortfolio({
       portfolioId: needsEncoding,
       startDate: "2021-12-01",
       endDate: "2022-03-31",
-    })) as GetCostsByPortfolioResponse;
+    });
     expect(mock.history.get[0].url).toEqual(`/portfolios/${encoded}/costs`);
   });
   it("should throw a 400 error", async () => {
@@ -386,6 +388,62 @@ describe("addTaskOrder", () => {
     mock.onPost(`${TEST_CSP_ENDPOINT}/portfolios/undefined/task-orders`).reply(statusCode, { unknown: "error thrown" });
     await expect(
       async () => await client.addTaskOrder({ unknown: "error" } as unknown as AddTaskOrderRequest)
+    ).rejects.toThrow(/Unexpected API error/);
+  });
+});
+
+describe("updateTaskOrder", () => {
+  let client: AtatClient;
+  let mock: MockAdapter;
+  const url = `${TEST_CSP_ENDPOINT}/portfolios/${portfolioId}/task-orders/${taskOrderId}`;
+  beforeAll(() => {
+    client = new AtatClient(TEST_API_TOKEN, TEST_CSP_ENDPOINT);
+    // see comment in 'addPortfolio' test above for more info on the mocking axios instance
+    // eslint-disable-next-line dot-notation
+    mock = new MockAdapter(client["client"], { onNoMatch: "throwException" });
+  });
+  afterEach(() => {
+    mock.reset();
+  });
+  it("should handle a successful 200 response", async () => {
+    mock.onPut(url).reply(200, mockTaskOrder);
+    const result = (await client.updateTaskOrder(mockUpdateTaskOrderRequest)) as UpdateTaskOrderResponseSync;
+    expect(mock.history.put[0].url).toEqual(`/portfolios/${portfolioId}/task-orders/${taskOrderId}`);
+    expect(result.taskOrder).toEqual(mockTaskOrder);
+  });
+  it("should encode URL", async () => {
+    const needsEncoding = "this:needs/to;be encoded,";
+    const needsEncoding2 = "this:needs/to;be encoded--as well,";
+    const encoded1 = encodeURIComponent(needsEncoding).toString();
+    const encoded2 = encodeURIComponent(needsEncoding2).toString();
+    const urlWithEncoding = `${TEST_CSP_ENDPOINT}/portfolios/${encoded1}/task-orders/${encoded2}`;
+    mock.onPut(urlWithEncoding).reply(200, mockTaskOrder);
+    await client.updateTaskOrder({
+      portfolioId: needsEncoding,
+      taskOrderId: needsEncoding2,
+      taskOrder: mockTaskOrder,
+      provisionDeadline: "",
+    });
+    expect(mock.history.put[0].url).toEqual(`/portfolios/${encoded1}/task-orders/${encoded2}`);
+  });
+  it("should throw a 400 error", async () => {
+    mock.onPut(`${TEST_CSP_ENDPOINT}/portfolios/undefined/task-orders/undefined`).reply(400, { bad: "request" });
+    await expect(
+      async () => await client.updateTaskOrder({ bad: "input" } as unknown as UpdateTaskOrderRequest)
+    ).rejects.toThrow(/Invalid ID supplied/);
+  });
+  it("should throw an error on a 404 response", async () => {
+    mock.onPut(`${TEST_CSP_ENDPOINT}/portfolios/undefined/task-orders/undefined`).reply(404, { not: "found" });
+    await expect(
+      async () => await client.updateTaskOrder({ not: "found" } as unknown as UpdateTaskOrderRequest)
+    ).rejects.toThrow(/Portfolio not found/);
+  });
+  it.each([204, 405, 410, 500, 503])("should throw an unexpected error %s", async (statusCode) => {
+    mock
+      .onPut(`${TEST_CSP_ENDPOINT}/portfolios/undefined/task-orders/undefined`)
+      .reply(statusCode, { unknown: "error thrown" });
+    await expect(
+      async () => await client.updateTaskOrder({ unknown: "error" } as unknown as UpdateTaskOrderRequest)
     ).rejects.toThrow(/Unexpected API error/);
   });
 });

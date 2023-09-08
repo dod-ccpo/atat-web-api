@@ -1,5 +1,6 @@
 import {
   AddTaskOrderRequest,
+  UpdateTaskOrderRequest,
   Administrator,
   ClassificationLevel,
   Clin,
@@ -16,6 +17,7 @@ import {
 } from "./types";
 
 export const portfolioId = "test-portfolio-id";
+export const taskOrderId = "csp-task-order-id-123";
 export const environmentId = "test-environment-id";
 export const provisioningJobId = "test-provisioningJob-id";
 export const location = "https://localhost/atat/api/v1/provisioning-jobs/test-job-id";
@@ -72,6 +74,13 @@ export const mockPatchEnvironmentRequest: PatchEnvironmentRequest = {
 
 export const mockAddTaskOrderRequest: AddTaskOrderRequest = {
   portfolioId,
+  taskOrder: mockTaskOrder,
+  provisionDeadline: "",
+};
+
+export const mockUpdateTaskOrderRequest: UpdateTaskOrderRequest = {
+  portfolioId,
+  taskOrderId,
   taskOrder: mockTaskOrder,
   provisionDeadline: "",
 };

@@ -1,31 +1,38 @@
 import axios, { AxiosInstance, AxiosResponse } from "axios";
-import * as types from "./types";
 import * as atatApiTypes from "./types";
 import { CspResponse, HothProvisionRequest, ProvisioningStatusType, ProvisionRequest } from "./types";
 import { ILogger, logger as defaultLogger } from "../../utils/logging";
 import { camelToSnakeRequestInterceptor, snakeToCamelResponseInterceptor } from "./util";
 import MockAdapter from "axios-mock-adapter";
 import {
-  addEnvironmentRequest,
+  addEnvironmentRequest as cspAAddEnvironmentRequest,
   CSP_A_TEST_ENDPOINT,
   CSP_B_STATUS_ENDPOINT,
   CSP_B_TEST_ENDPOINT,
   cspAAddPortfolioRequest,
+  cspAUpdateTaskOrderRequest,
   TEST_ENVIRONMENT_ID,
   TEST_PORTFOLIO_ID,
+  TEST_TASKORDER_ID,
   TEST_PROVISIONING_JOB_ID,
 } from "../util/common-test-fixtures";
 
 const CSP_MOCK_ENABLED = process.env.CSP_MOCK_ENABLED ?? "";
+
+// Unfortunately in this case because we're handling errors, we can't do much better than
+// an `any` here -- unless we considered making AtatApiError itself generic which provides
+// less clear benefits.
 
 /**
  * An error that occurs during the
  */
 export class AtatApiError extends Error {
   public readonly name: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public readonly request: any;
   public readonly response?: AxiosResponse;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor(message: string, name: string, request: any, response?: AxiosResponse) {
     super(message);
     this.name = name;
@@ -33,9 +40,6 @@ export class AtatApiError extends Error {
     this.response = response;
   }
 
-  // Unfortunately in this case because we're handling errors, we can't do much better than
-  // an `any` here -- unless we considered making AtatApiError itself generic which provides
-  // less clear benefits.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   asCspResponse(): CspResponse<any, any> & { name: string } {
     return {
@@ -51,41 +55,49 @@ export class AtatApiError extends Error {
 
 export interface IAtatClient {
   // Operations defined directly in the specification
-  addPortfolio(request: types.AddPortfolioRequest): Promise<types.AddPortfolioResponseSync>;
+  addPortfolio(request: atatApiTypes.AddPortfolioRequest): Promise<atatApiTypes.AddPortfolioResponseSync>;
 
   addEnvironment(
-    request: types.AddEnvironmentRequest
-  ): Promise<types.AddEnvironmentResponseSync | types.AddEnvironmentResponseAsync>;
+    request: atatApiTypes.AddEnvironmentRequest
+  ): Promise<atatApiTypes.AddEnvironmentResponseSync | atatApiTypes.AddEnvironmentResponseAsync>;
 
-  getPortfolioById(request: types.GetPortfolioRequest): Promise<types.GetPortfolioResponse>;
+  getPortfolioById(request: atatApiTypes.GetPortfolioRequest): Promise<atatApiTypes.GetPortfolioResponse>;
 
   patchEnvironment(
-    request: types.PatchEnvironmentRequest
-  ): Promise<types.PatchEnvironmentResponseSync | types.PatchEnvironmentResponseAsync>;
+    request: atatApiTypes.PatchEnvironmentRequest
+  ): Promise<atatApiTypes.PatchEnvironmentResponseSync | atatApiTypes.PatchEnvironmentResponseAsync>;
 
-  getCostsByPortfolio(request: types.GetCostsByPortfolioRequest): Promise<types.GetCostsByPortfolioResponse>;
+  getCostsByPortfolio(
+    request: atatApiTypes.GetCostsByPortfolioRequest
+  ): Promise<atatApiTypes.GetCostsByPortfolioResponse>;
 
   addTaskOrder(
-    request: types.AddTaskOrderRequest
-  ): Promise<types.AddTaskOrderResponseSync | types.AddTaskOrderResponseAsync>;
+    request: atatApiTypes.AddTaskOrderRequest
+  ): Promise<atatApiTypes.AddTaskOrderResponseSync | atatApiTypes.AddTaskOrderResponseAsync>;
 
-  getCostsByClin(request: types.GetCostsByClinRequest): Promise<types.GetCostsByClinResponse>;
+  updateTaskOrder(
+    request: atatApiTypes.UpdateTaskOrderRequest
+  ): Promise<atatApiTypes.UpdateTaskOrderResponseSync | atatApiTypes.UpdateTaskOrderResponseAsync>;
+
+  getCostsByClin(request: atatApiTypes.GetCostsByClinRequest): Promise<atatApiTypes.GetCostsByClinResponse>;
 
   // Operations that check for the status of a previously-issued provisioning request
-  getProvisioningStatus(request: types.GetProvisioningStatusRequest): Promise<types.GetProvisioningStatusResponse>;
+  getProvisioningStatus(
+    request: atatApiTypes.GetProvisioningStatusRequest
+  ): Promise<atatApiTypes.GetProvisioningStatusResponse>;
 
-  transformSynchronousResponse<T extends types.AtatResponse>(
+  transformSynchronousResponse<T extends atatApiTypes.AtatResponse>(
     field: keyof T,
     response: AxiosResponse,
     request:
-      | types.GetPortfolioRequest
-      | types.GetCostsByPortfolioRequest
-      | types.GetCostsByClinRequest
-      | types.GetProvisioningStatusRequest
-      | types.AddPortfolioRequest
-      | types.AddEnvironmentRequest
-      | types.PatchEnvironmentRequest
-      | types.AddTaskOrderRequest
+      | atatApiTypes.GetPortfolioRequest
+      | atatApiTypes.GetCostsByPortfolioRequest
+      | atatApiTypes.GetCostsByClinRequest
+      | atatApiTypes.GetProvisioningStatusRequest
+      | atatApiTypes.AddPortfolioRequest
+      | atatApiTypes.AddEnvironmentRequest
+      | atatApiTypes.PatchEnvironmentRequest
+      | atatApiTypes.AddTaskOrderRequest
   ): T;
 }
 
@@ -153,7 +165,7 @@ export class AtatClient implements IAtatClient {
     }
   }
 
-  private buildHeaders(request: Partial<types.ProvisionRequest>): Record<string, string> {
+  private buildHeaders(request: Partial<atatApiTypes.ProvisionRequest>): Record<string, string> {
     const headers: Record<string, string> = {};
 
     // set deadline
@@ -177,7 +189,13 @@ export class AtatClient implements IAtatClient {
 
     // CSP A should always return a 200 for AddEnvironment
     mock.onPost(`${CSP_A_TEST_ENDPOINT}/portfolios/${TEST_PORTFOLIO_ID}/environments`).reply(200, {
-      ...addEnvironmentRequest.payload,
+      ...cspAAddEnvironmentRequest.payload,
+      id: TEST_ENVIRONMENT_ID,
+    });
+
+    // CSP A should always return a 200 for UpdateTaskOrder
+    mock.onPut(`${CSP_A_TEST_ENDPOINT}/portfolios/${TEST_PORTFOLIO_ID}/task-orders/${TEST_TASKORDER_ID}`).reply(200, {
+      ...cspAUpdateTaskOrderRequest.payload,
       id: TEST_ENVIRONMENT_ID,
     });
 
@@ -200,18 +218,18 @@ export class AtatClient implements IAtatClient {
     });
   }
 
-  public transformSynchronousResponse<T extends types.AtatResponse>(
+  public transformSynchronousResponse<T extends atatApiTypes.AtatResponse>(
     field: keyof T,
     response: AxiosResponse,
     request:
-      | types.GetPortfolioRequest
-      | types.GetCostsByPortfolioRequest
-      | types.GetCostsByClinRequest
-      | types.GetProvisioningStatusRequest
-      | types.AddPortfolioRequest
-      | types.AddEnvironmentRequest
-      | types.PatchEnvironmentRequest
-      | types.AddTaskOrderRequest
+      | atatApiTypes.GetPortfolioRequest
+      | atatApiTypes.GetCostsByPortfolioRequest
+      | atatApiTypes.GetCostsByClinRequest
+      | atatApiTypes.GetProvisioningStatusRequest
+      | atatApiTypes.AddPortfolioRequest
+      | atatApiTypes.AddEnvironmentRequest
+      | atatApiTypes.PatchEnvironmentRequest
+      | atatApiTypes.AddTaskOrderRequest
   ): T {
     return {
       [field]: response.data,
@@ -224,8 +242,8 @@ export class AtatClient implements IAtatClient {
 
   private transformAsynchronousResponse(
     response: AxiosResponse,
-    request: types.AddEnvironmentRequest
-  ): types.AsyncProvisionResponse {
+    request: atatApiTypes.AddEnvironmentRequest
+  ): atatApiTypes.AsyncProvisionResponse {
     return {
       status: response.data,
       location: response.headers.location ?? "",
@@ -241,12 +259,12 @@ export class AtatClient implements IAtatClient {
    *
    * This will return a concrete Portfolio object.
    */
-  async addPortfolio(request: types.AddPortfolioRequest): Promise<types.AddPortfolioResponseSync> {
+  async addPortfolio(request: atatApiTypes.AddPortfolioRequest): Promise<atatApiTypes.AddPortfolioResponseSync> {
     const headers = this.buildHeaders(request);
     const response = await this.client.post("/portfolios", request.portfolio, { headers });
     switch (response.status) {
       case 200:
-        return this.transformSynchronousResponse<types.AddPortfolioResponseSync>("portfolio", response, request);
+        return this.transformSynchronousResponse<atatApiTypes.AddPortfolioResponseSync>("portfolio", response, request);
       case 400:
         throw new AtatApiError("Invalid portfolio provided", "InvalidPortfolio", request, response);
       default:
@@ -266,8 +284,8 @@ export class AtatClient implements IAtatClient {
    * directly influenced by the parameters to this function.
    */
   async addEnvironment(
-    request: types.AddEnvironmentRequest
-  ): Promise<types.AddEnvironmentResponseSync | types.AddEnvironmentResponseAsync> {
+    request: atatApiTypes.AddEnvironmentRequest
+  ): Promise<atatApiTypes.AddEnvironmentResponseSync | atatApiTypes.AddEnvironmentResponseAsync> {
     const headers = this.buildHeaders(request);
     const response = await this.client.post(
       `/portfolios/${encodeURIComponent(request.portfolioId)}/environments`,
@@ -278,7 +296,11 @@ export class AtatClient implements IAtatClient {
     );
     switch (response.status) {
       case 200:
-        return this.transformSynchronousResponse<types.AddEnvironmentResponseSync>("environment", response, request);
+        return this.transformSynchronousResponse<atatApiTypes.AddEnvironmentResponseSync>(
+          "environment",
+          response,
+          request
+        );
       case 202:
         return this.transformAsynchronousResponse(response, request);
       case 400:
@@ -291,12 +313,12 @@ export class AtatClient implements IAtatClient {
   /**
    * Get the details of a Portfolio object.
    */
-  async getPortfolioById(request: types.GetPortfolioRequest): Promise<types.GetPortfolioResponse> {
+  async getPortfolioById(request: atatApiTypes.GetPortfolioRequest): Promise<atatApiTypes.GetPortfolioResponse> {
     const headers = this.buildHeaders(request);
     const response = await this.client.get(`/portfolios/${encodeURIComponent(request.portfolioId)}`, { headers });
     switch (response.status) {
       case 200:
-        return this.transformSynchronousResponse<types.GetPortfolioResponse>("portfolio", response, request);
+        return this.transformSynchronousResponse<atatApiTypes.GetPortfolioResponse>("portfolio", response, request);
       case 400:
         throw new AtatApiError("Invalid ID supplied", "InvalidPortfolioId", request, response);
       case 404:
@@ -312,8 +334,8 @@ export class AtatClient implements IAtatClient {
    * Primarily, this is used to add or reset the access of particular portfolio administrators.
    */
   async patchEnvironment(
-    request: types.PatchEnvironmentRequest
-  ): Promise<types.PatchEnvironmentResponseSync | types.PatchEnvironmentResponseAsync> {
+    request: atatApiTypes.PatchEnvironmentRequest
+  ): Promise<atatApiTypes.PatchEnvironmentResponseSync | atatApiTypes.PatchEnvironmentResponseAsync> {
     const headers = this.buildHeaders(request);
     const response = await this.client.patch(
       `/portfolios/${encodeURIComponent(request.portfolioId)}/environments/${encodeURIComponent(
@@ -324,7 +346,7 @@ export class AtatClient implements IAtatClient {
     );
     switch (response.status) {
       case 200:
-        return this.transformSynchronousResponse<types.PatchEnvironmentResponseSync>("patch", response, request);
+        return this.transformSynchronousResponse<atatApiTypes.PatchEnvironmentResponseSync>("patch", response, request);
       case 400:
         throw new AtatApiError("Invalid portfolio provided", "InvalidPortfolio", request, response);
       case 404:
@@ -339,7 +361,9 @@ export class AtatClient implements IAtatClient {
    *
    * This returns actuals and forecasts for the entire portfolio.
    */
-  async getCostsByPortfolio(request: types.GetCostsByPortfolioRequest): Promise<types.GetCostsByPortfolioResponse> {
+  async getCostsByPortfolio(
+    request: atatApiTypes.GetCostsByPortfolioRequest
+  ): Promise<atatApiTypes.GetCostsByPortfolioResponse> {
     const headers = this.buildHeaders(request);
     const response = await this.client.get(`/portfolios/${encodeURIComponent(request.portfolioId)}/costs`, {
       params: {
@@ -350,7 +374,7 @@ export class AtatClient implements IAtatClient {
     });
     switch (response.status) {
       case 200:
-        return this.transformSynchronousResponse<types.GetCostsByPortfolioResponse>("costs", response, request);
+        return this.transformSynchronousResponse<atatApiTypes.GetCostsByPortfolioResponse>("costs", response, request);
       case 400:
         throw new AtatApiError("Invalid ID or query parameters", "InvalidCostQuery", request, response);
       case 404:
@@ -364,8 +388,8 @@ export class AtatClient implements IAtatClient {
    * Add details of a task order that is used to fund resources and services for the Portfolio.
    */
   async addTaskOrder(
-    request: types.AddTaskOrderRequest
-  ): Promise<types.AddTaskOrderResponseSync | types.AddTaskOrderResponseAsync> {
+    request: atatApiTypes.AddTaskOrderRequest
+  ): Promise<atatApiTypes.AddTaskOrderResponseSync | atatApiTypes.AddTaskOrderResponseAsync> {
     const headers = this.buildHeaders(request);
     const response = await this.client.post(
       `/portfolios/${encodeURIComponent(request.portfolioId)}/task-orders`,
@@ -376,7 +400,37 @@ export class AtatClient implements IAtatClient {
     );
     switch (response.status) {
       case 200:
-        return this.transformSynchronousResponse<types.AddTaskOrderResponseSync>("taskOrder", response, request);
+        return this.transformSynchronousResponse<atatApiTypes.AddTaskOrderResponseSync>("taskOrder", response, request);
+      case 400:
+        throw new AtatApiError("Invalid ID supplied", "InvalidPortfolioId", request, response);
+      case 404:
+        throw new AtatApiError("Portfolio not found", "PortfolioNotFound", request, response);
+      default:
+        throw new AtatApiError("Unexpected API error", "CspApiError", request, response);
+    }
+  }
+
+  /**
+   * Update details of a task order that is used to fund resources and services for the Portfolio.
+   */
+  async updateTaskOrder(
+    request: atatApiTypes.UpdateTaskOrderRequest
+  ): Promise<atatApiTypes.UpdateTaskOrderResponseSync | atatApiTypes.UpdateTaskOrderResponseAsync> {
+    const headers = this.buildHeaders(request);
+    const response = await this.client.put(
+      `/portfolios/${encodeURIComponent(request.portfolioId)}/task-orders/${encodeURIComponent(request.taskOrderId)}`,
+      request.taskOrder,
+      {
+        headers,
+      }
+    );
+    switch (response.status) {
+      case 200:
+        return this.transformSynchronousResponse<atatApiTypes.UpdateTaskOrderResponseSync>(
+          "taskOrder",
+          response,
+          request
+        );
       case 400:
         throw new AtatApiError("Invalid ID supplied", "InvalidPortfolioId", request, response);
       case 404:
@@ -390,7 +444,7 @@ export class AtatClient implements IAtatClient {
    * Provides actual and forecasted cost information for a CLIN on a particular Task Order that is
    * used to fund a specific Portfolio.
    */
-  async getCostsByClin(request: types.GetCostsByClinRequest): Promise<types.GetCostsByClinResponse> {
+  async getCostsByClin(request: atatApiTypes.GetCostsByClinRequest): Promise<atatApiTypes.GetCostsByClinResponse> {
     const headers = this.buildHeaders(request);
     const response = await this.client.get(
       `/portfolios/${encodeURIComponent(request.portfolioId)}/task-orders/${request.taskOrderNumber}/clins/${
@@ -400,7 +454,7 @@ export class AtatClient implements IAtatClient {
     );
     switch (response.status) {
       case 200:
-        return this.transformSynchronousResponse<types.GetCostsByClinResponse>("costs", response, request);
+        return this.transformSynchronousResponse<atatApiTypes.GetCostsByClinResponse>("costs", response, request);
       case 400:
         throw new AtatApiError("Invalid ID or query parameters", "InvalidCostQuery", request, response);
       case 404:
@@ -411,14 +465,14 @@ export class AtatClient implements IAtatClient {
   }
 
   async getProvisioningStatus(
-    request: types.GetProvisioningStatusRequest
-  ): Promise<types.GetProvisioningStatusResponse> {
+    request: atatApiTypes.GetProvisioningStatusRequest
+  ): Promise<atatApiTypes.GetProvisioningStatusResponse> {
     const headers = this.buildHeaders(request);
     const response = await this.client.get(request.location, { headers });
     switch (response.status) {
       case 200:
         return {
-          ...this.transformSynchronousResponse<types.GetProvisioningStatusResponse>("status", response, request),
+          ...this.transformSynchronousResponse<atatApiTypes.GetProvisioningStatusResponse>("status", response, request),
           location: request.location,
         };
       case 404:
