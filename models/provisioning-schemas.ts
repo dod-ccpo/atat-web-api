@@ -92,6 +92,22 @@ export const provisionRequestSchema = {
   additionalProperties: false,
 };
 
+export const provisionRequestNoPayloadSchema = {
+  type: "object",
+  properties: {
+    jobId: { type: "string" },
+    userId: { type: "string" },
+    portfolioId: { type: "string" },
+    operationType: {
+      enum: [ProvisionRequestType.GET_PORTFOLIO],
+    },
+    targetCspName: { type: "string" },
+    payload: {},
+  },
+  required: ["userId", "operationType", "targetCspName", "payload"],
+  additionalProperties: false,
+};
+
 export const provisionRequestEventSchema = {
   type: "object",
   properties: {

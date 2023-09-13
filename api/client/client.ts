@@ -5,23 +5,20 @@ import { ILogger, logger as defaultLogger } from "../../utils/logging";
 import { camelToSnakeRequestInterceptor, snakeToCamelResponseInterceptor } from "./util";
 import MockAdapter from "axios-mock-adapter";
 import {
-  addEnvironmentRequest as cspAAddEnvironmentRequest,
   CSP_A_TEST_ENDPOINT,
   CSP_B_STATUS_ENDPOINT,
   CSP_B_TEST_ENDPOINT,
   cspAAddPortfolioRequest,
+  cspAAddEnvironmentRequest,
   cspAUpdateTaskOrderRequest,
   TEST_ENVIRONMENT_ID,
   TEST_PORTFOLIO_ID,
+  TEST_BAD_PORTFOLIO_ID,
   TEST_TASKORDER_ID,
   TEST_PROVISIONING_JOB_ID,
 } from "../util/common-test-fixtures";
 
 const CSP_MOCK_ENABLED = process.env.CSP_MOCK_ENABLED ?? "";
-
-// Unfortunately in this case because we're handling errors, we can't do much better than
-// an `any` here -- unless we considered making AtatApiError itself generic which provides
-// less clear benefits.
 
 /**
  * An error that occurs during the
@@ -215,6 +212,14 @@ export class AtatClient implements IAtatClient {
       portfolioId: TEST_PORTFOLIO_ID,
       provisioningJobId: TEST_PROVISIONING_JOB_ID,
       status: ProvisioningStatusType.SUCCESS,
+    });
+
+    // CSP A should always return a 404 for GetPortfolio if a bad portfolioId is provided
+    mock.onGet(`${CSP_A_TEST_ENDPOINT}/portfolios/${TEST_BAD_PORTFOLIO_ID}`).reply(404);
+
+    // CSP A should always return a 200 for GetPortfolio
+    mock.onGet(`${CSP_A_TEST_ENDPOINT}/portfolios/${TEST_PORTFOLIO_ID}`).reply(200, {
+      id: TEST_PORTFOLIO_ID,
     });
   }
 
