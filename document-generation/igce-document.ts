@@ -1,4 +1,3 @@
-import exceljs from "exceljs";
 import { logger } from "../utils/logging";
 
 import {
@@ -9,6 +8,7 @@ import {
 } from "../models/document-generation";
 import { INTERNAL_SERVER_ERROR } from "../utils/errors";
 import { ApiBase64SuccessResponse, SuccessStatusCode } from "../utils/response";
+import Workbook from "exceljs/index";
 
 export async function generateIGCEDocument(
   templatePath: string,
@@ -69,7 +69,7 @@ export async function generateIGCEDocument(
   const uniqueCLINwithContract = [...new Map(contractCLINHelper.map((item) => [item.clin, item])).values()];
 
   // Use Exceljs to generate the workbook
-  const workbook = new exceljs.Workbook();
+  const workbook = new Workbook();
   await workbook.xlsx.readFile(templatePath);
 
   const summarySheet = workbook.getWorksheet("Summary");
@@ -113,8 +113,7 @@ export async function generateIGCEDocument(
 
     // Set Period of Performance and Funding Document Number
     // Located at the top of each Period Sheet
-    const pop = `${periodUnitCount} ${periodUnit[0] + periodUnit.slice(1).toLowerCase()}(s)`;
-    periodSheet.getCell("C2").value = pop;
+    periodSheet.getCell("C2").value = `${periodUnitCount} ${periodUnit[0] + periodUnit.slice(1).toLowerCase()}(s)`;
     periodSheet.getCell("C3").value = fundingDocumentNumber;
 
     // Track number of Line Items in periodLineItems

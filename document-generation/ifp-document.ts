@@ -1,5 +1,5 @@
 import { logger } from "../utils/logging";
-import createReport from "docx-templates";
+import { createReport } from "docx-templates";
 import { IncrementalFundingPlan } from "../models/document-generation";
 import { ApiBase64SuccessResponse, SuccessStatusCode } from "../utils/response";
 import { getFundingDocInfo } from "./utils/utils";

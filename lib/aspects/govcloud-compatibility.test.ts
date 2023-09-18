@@ -11,8 +11,8 @@ describe("Ensure the GovCloudCompatibilityAspect makes necessary changes for Gov
     const app = new cdk.App();
     const stack = new cdk.Stack(app, "TestStack");
 
-    // tslint:disable-next-line
-    const logGroup = new logs.LogGroup(stack, "TestLogs");
+    /* eslint-disable no-new */
+    new logs.LogGroup(stack, "TestLogs");
     cdk.Tags.of(stack).add("Test", "Test");
     // WHEN
     cdk.Aspects.of(stack).add(new GovCloudCompatibilityAspect());
