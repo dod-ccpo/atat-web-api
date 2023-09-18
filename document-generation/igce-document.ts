@@ -1,3 +1,4 @@
+import exceljs from "exceljs";
 import { logger } from "../utils/logging";
 
 import {
@@ -8,7 +9,6 @@ import {
 } from "../models/document-generation";
 import { INTERNAL_SERVER_ERROR } from "../utils/errors";
 import { ApiBase64SuccessResponse, SuccessStatusCode } from "../utils/response";
-import Workbook from "exceljs/index";
 
 export async function generateIGCEDocument(
   templatePath: string,
@@ -69,7 +69,7 @@ export async function generateIGCEDocument(
   const uniqueCLINwithContract = [...new Map(contractCLINHelper.map((item) => [item.clin, item])).values()];
 
   // Use Exceljs to generate the workbook
-  const workbook = new Workbook();
+  const workbook = new exceljs.Workbook();
   await workbook.xlsx.readFile(templatePath);
 
   const summarySheet = workbook.getWorksheet("Summary");
