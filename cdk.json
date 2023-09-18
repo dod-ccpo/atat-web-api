@@ -33,6 +33,10 @@
 
     "atat:CspConfigurationName": "config/csp/integration",
     "atat:GitHubPatName": "auth/github/pat",
-    "atat:VersionControlRepo": "dod-ccpo/atat-web-api"
+    "atat:VersionControlRepo": "dod-ccpo/atat-web-api",
+    "atat:EnvironmentId": "shayesSandbox",
+    "atat:VpcCidr ": "10.0.0.0/16",
+    "atat:Sandbox": true,
+    "atat:VersionControlBranch": "dep_update"
   }
 }
