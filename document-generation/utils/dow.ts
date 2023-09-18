@@ -12,7 +12,7 @@ import {
   PeriodType,
   ReplicateOrOptimize,
   ServiceOfferingGroup,
-  StorageUnit
+  StorageUnit,
 } from "../../models/document-generation/description-of-work";
 
 import { logger } from "../../utils/logging";
@@ -381,7 +381,7 @@ export const getTaskPeriods = (payload: any) => {
 
   // gets CDS PoP information for section 7
   const { crossDomainSolutionRequired, needForEntireTaskOrderDuration, selectedPeriods } = crossDomainSolutions;
-  const crossDomainSolutionTaskNumber:any = [];
+  const crossDomainSolutionTaskNumber: any = [];
   if (crossDomainSolutionRequired && needForEntireTaskOrderDuration) {
     crossDomainSolutionTaskNumber.push({ dowTaskNumber: "4.2.6", entireDuration: true, taskPeriods: [] });
   }
@@ -1183,7 +1183,7 @@ export const getSecurityRequirements = (payload: any): any => {
 
 export const getCDRLs = (popTasks: string[], contractType: IContractType) => {
   const { firmFixedPrice, timeAndMaterials } = contractType;
-  const cdrl:any = [];
+  const cdrl: any = [];
   const ffp = new Set();
   const tm = new Set();
   const portabilityPlanClins = new Set();
