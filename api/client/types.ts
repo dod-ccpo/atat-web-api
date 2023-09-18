@@ -230,6 +230,7 @@ export const enum ProvisionRequestType {
   ADD_ADMINISTRATOR = "ADD_ADMINISTRATOR",
   ADD_TASK_ORDER = "ADD_TASK_ORDER",
   UPDATE_TASK_ORDER = "UPDATE_TASK_ORDER",
+  GET_PORTFOLIO = "GET_PORTFOLIO",
 }
 
 export interface NewPortfolioPayload {
