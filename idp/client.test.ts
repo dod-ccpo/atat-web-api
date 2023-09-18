@@ -61,6 +61,9 @@ describe("Environment Configuration Provider", () => {
       .on(GetSecretValueCommand)
       .resolves({ SecretString: TEST_CLIENT_FAKE_SECET });
 
+    // WHEN
+    const config = idpClient.getConfigurationFromEnvironment();
+
     // THEN
     // Ensure that gratuitous calls are not made and that the correct secret is
     // retrieved. Retrieving the secret from the correct environment variable is
