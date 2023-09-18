@@ -35,7 +35,7 @@ describe("Test Eval Memo document generation", () => {
     await fs.writeFileSync("evalmemo-withException.docx", docBuffer);
   });
 
-  it.skip("unskip me to generate a local file for manual review - w/o exception to fair opportunity", async () => {
+  it("unskip me to generate a local file for manual review - w/o exception to fair opportunity", async () => {
     const docBuffer = await doGenerate(docxTemplate, payloadWithoutException);
     await fs.writeFileSync("evalmemo-withoutException.docx", docBuffer);
   });

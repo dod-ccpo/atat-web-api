@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { getDocxTemplate } from "./utils/utils";
 import { DocumentType } from "../models/document-generation";
 import { sampleDowRequest } from "./utils/sampleTestData";
@@ -31,7 +32,7 @@ describe("Test DoW document generation", () => {
     expect(base64).toBeInstanceOf(ApiBase64SuccessResponse);
   });
 
-  it.skip("unskip me to generate a local file for manual review", async () => {
+  it("unskip me to generate a local file for manual review", async () => {
     payload.architecturalDesignRequirement = null;
     const docBuffer = await doGenerate(docxTemplate, payload);
     await fs.writeFileSync("dow.docx", docBuffer);
