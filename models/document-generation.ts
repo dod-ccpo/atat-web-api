@@ -482,30 +482,6 @@ const currentEnvironment = {
   },
 };
 
-const serviceOffering = {
-  type: "object",
-  properties: {
-    name: { type: "string" },
-    serviceOfferingGroup: {
-      enum: [
-        ServiceOfferingGroup.ADVISORY,
-        ServiceOfferingGroup.APPLICATIONS,
-        ServiceOfferingGroup.COMPUTE,
-        ServiceOfferingGroup.DATABASE,
-        ServiceOfferingGroup.DEVELOPER_TOOLS,
-        ServiceOfferingGroup.EDGE_COMPUTING,
-        ServiceOfferingGroup.GENERAL_XAAS,
-        ServiceOfferingGroup.IOT,
-        ServiceOfferingGroup.MACHINE_LEARNING,
-        ServiceOfferingGroup.NETWORKING,
-        ServiceOfferingGroup.SECURITY,
-        ServiceOfferingGroup.TRAINING,
-        null,
-      ],
-    },
-  },
-};
-
 const period = {
   type: "object",
   properties: {
@@ -526,15 +502,6 @@ const classificationInstance = {
   },
 };
 
-const selectedServiceOfferings = {
-  type: "object",
-  properties: {
-    serviceOffering,
-    classificationInstances: { type: "array", items: classificationInstance },
-    otherServiceOffering: { type: "string" },
-  },
-};
-
 export const periodOfPerformance = {
   type: "object",
   properties: {
@@ -548,21 +515,11 @@ export const periodOfPerformance = {
   },
 };
 
-const gfeOverview = {
-  type: "object",
-  properties: {
-    dpasUnitId: { type: "string" },
-    propertyCustodianName: { type: "string" },
-    dpasCustodianNumber: { type: "string" },
-    propertyAccountable: { type: "boolean" },
-    gfeOrGfpFurnished: { type: "boolean" },
-  },
-};
-
 const travel = {
   type: "array",
   items: { type: "object" },
 };
+
 const contractConsiderations = {
   type: "object",
   properties: {

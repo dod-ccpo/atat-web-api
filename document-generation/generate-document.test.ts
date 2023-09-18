@@ -1,4 +1,3 @@
-import fs from "fs";
 import { Context } from "aws-lambda";
 import { DocumentType } from "../models/document-generation";
 import {
@@ -128,7 +127,6 @@ jest.mock("./eval-memo-document", () => {
 });
 
 jest.mock("fs");
-const mockedFs = fs as jest.Mocked<typeof fs>;
 
 describe("Successful generate-document handler", () => {
   it("should return successful DoW document response", async () => {

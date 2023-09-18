@@ -10,6 +10,7 @@ describe("IAM Change Notifications", () => {
     const stack = new cdk.Stack(app, "TestStack");
 
     // WHEN
+    // tslint:disable-next-line
     const eventRule = new IamChangeRule(stack, "IamRule");
     const template = Template.fromStack(stack);
 

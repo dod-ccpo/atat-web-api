@@ -20,7 +20,6 @@ import {
   EvaluationPlan,
   generateDocumentEventSchema,
   GenerateDocumentRequest,
-  generateDocumentSchema,
   IncrementalFundingPlan,
   IndependentGovernmentCostEstimate,
   RequestEvent,

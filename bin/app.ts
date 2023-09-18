@@ -59,6 +59,8 @@ export function createApp(props?: cdk.AppProps): cdk.App {
       console.error(err);
       throw new Error(err);
     }
+
+    // tslint:disable-next-line
     const apiStack = new AtatWebApiStack(app, `${environmentName}WebApi`, {
       environmentName,
       vpcFlowLogBucket: vpcFlowLogBucketParam,
@@ -100,6 +102,7 @@ export function createApp(props?: cdk.AppProps): cdk.App {
     // do need to perform integration testing for the pipeline (by building a test stack),
     // you can just temporarily change the `id` parameter from "Pipeline" to another
     // static value.
+    // tslint:disable-next-line
     const pipelineStack = new AtatPipelineStack(app, "AtatEnvironmentPipeline", {
       environmentName,
       vpcCidr: vpcCidrParam,

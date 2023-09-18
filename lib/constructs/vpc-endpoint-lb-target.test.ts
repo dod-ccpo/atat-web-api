@@ -15,11 +15,6 @@ describe("VPC Endpoint Application Load Balancer Target Group", () => {
     const endpoint = vpc.addInterfaceEndpoint("TestEndpoint", {
       service: ec2.InterfaceVpcEndpointAwsService.APIGATEWAY,
     });
-    // WHEN
-    const targetGroup = new vpceLb.VpcEndpointApplicationTargetGroup(stack, "TestGroup", {
-      endpoint,
-      vpc,
-    });
     const template = Template.fromStack(stack);
     // THEN
     template.hasResourceProperties("AWS::ElasticLoadBalancingV2::TargetGroup", {
@@ -162,12 +157,6 @@ describe("VPC Endpoint Network Load Balancer Target Group", () => {
     const vpc = new ec2.Vpc(stack, "TestVpc");
     const endpoint = vpc.addInterfaceEndpoint("TestEndpoint", {
       service: ec2.InterfaceVpcEndpointAwsService.APIGATEWAY,
-    });
-    // WHEN
-    const targetGroup = new vpceLb.VpcEndpointNetworkTargetGroup(stack, "TestGroup", {
-      endpoint,
-      vpc,
-      port: 443,
     });
     const template = Template.fromStack(stack);
     // THEN

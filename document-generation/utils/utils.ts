@@ -180,7 +180,6 @@ export const getExcelTemplatePath = (documentType: DocumentType): string => {
 };
 
 export const getDocxTemplate = (documentType: DocumentType): Buffer => {
-  const TEMPLATE_FOLDER = process.env.TEMPLATE_FOLDER ?? "/opt";
   let docx;
   switch (documentType) {
     case DocumentType.DESCRIPTION_OF_WORK_DOCX:

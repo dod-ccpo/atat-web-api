@@ -2,7 +2,6 @@ import { injectLambdaContext } from "@aws-lambda-powertools/logger";
 import { captureLambdaHandler } from "@aws-lambda-powertools/tracer";
 import errorLogger from "@middy/error-logger";
 import inputOutputLogger from "@middy/input-output-logger";
-import { Context } from "aws-lambda";
 import jsonErrorHandlerMiddleware from "middy-middleware-json-error-handler";
 import { logger } from "../../utils/logging";
 import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-middleware";
@@ -58,8 +57,7 @@ async function makeRequest(client: IAtatClient, request: HothProvisionRequest): 
  * @return - CspResponse or throw error for 500 or above
  */
 export async function baseHandler(
-  stateInput: HothProvisionRequest,
-  context: Context
+  stateInput: HothProvisionRequest
 ): Promise<ProvisionCspResponse | ValidationErrorResponse> {
   logger.addPersistentLogAttributes({ correlationIds: { jobId: stateInput.jobId } });
   const client = await makeClient(stateInput.targetCspName);
