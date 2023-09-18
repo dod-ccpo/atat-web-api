@@ -41,7 +41,6 @@ export interface AtatWebApiStackProps extends cdk.StackProps {
 
 export class AtatWebApiStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: AtatWebApiStackProps) {
-    let result = null;
     super(scope, id, props);
     NagSuppressions.addStackSuppressions(this, [
       // This is a temporary supression (hopefully) and we will adopt this as soon as the feature
@@ -66,7 +65,7 @@ export class AtatWebApiStack extends cdk.Stack {
     // not viable for us to reimplement all of them ourselves to avoid CDK-created ones, this is
     // the best possible workaround.
     if (props.network) {
-      result = new cr.AwsCustomResource(this, "NopCustomResource", {
+      new cr.AwsCustomResource(this, "NopCustomResource", {
         onUpdate: {
           service: "STS",
           action: "getCallerIdentity",
@@ -187,7 +186,7 @@ export class AtatWebApiStack extends cdk.Stack {
       // We manually set the targets so we need to allow this
       // TODO: Fix that in the TargetGroup config?
       loadBalancer.connections.allowToAnyIpv4(ec2.Port.tcp(443));
-      result = new cdk.CfnOutput(this, "LoadBalancerDns", { value: loadBalancer.loadBalancerDnsName });
+      new cdk.CfnOutput(this, "LoadBalancerDns", { value: loadBalancer.loadBalancerDnsName });
       NagSuppressions.addResourceSuppressions(loadBalancer, [
         {
           id: "NIST.800.53.R4-ALBWAFEnabled",
@@ -201,8 +200,8 @@ export class AtatWebApiStack extends cdk.Stack {
     api.grantOnRoute(readUser.user, HttpMethod.GET);
     api.grantOnRoute(writeUser.user, "*");
 
-    result = new cdk.CfnOutput(this, "ReadUserAccessKey", { value: readUser.accessKey.secretName });
-    result = new cdk.CfnOutput(this, "WriteUserAccessKey", { value: writeUser.accessKey.secretName });
+    new cdk.CfnOutput(this, "ReadUserAccessKey", { value: readUser.accessKey.secretName });
+    new cdk.CfnOutput(this, "WriteUserAccessKey", { value: writeUser.accessKey.secretName });
 
     [readUser, writeUser].forEach((user) => {
       NagSuppressions.addResourceSuppressions(
@@ -270,7 +269,7 @@ export class AtatWebApiStack extends cdk.Stack {
       ],
     });
 
-    result = new cdk.CfnOutput(this, "IdpDiscoveryUrl", {
+    new cdk.CfnOutput(this, "IdpDiscoveryUrl", {
       value: atatIdp.discoveryUrl(),
     });
 
@@ -319,7 +318,7 @@ export class AtatWebApiStack extends cdk.Stack {
     generateDocumentResource.addMethod(HttpMethod.POST, new apigw.LambdaIntegration(generateDocumentFn));
 
     // Build all Cost Resources
-    result = new CostApiImplementation(this, {
+    new CostApiImplementation(this, {
       environmentName,
       apiParent: api.restApi.root,
       vpc: props?.network?.vpc,
