@@ -2,7 +2,7 @@ import { Construct } from "constructs";
 import { Duration } from "aws-cdk-lib";
 import * as sfnTasks from "aws-cdk-lib/aws-stepfunctions-tasks";
 
-type TaskProps = {
+export type TaskProps = {
   id: string;
   props: sfnTasks.LambdaInvokeProps;
 };

@@ -17,6 +17,7 @@ import { FifoQueue } from "./sqs";
 import { LoggingStandardStateMachine } from "./state-machine";
 import { AtatContextValue } from "../context-values";
 import { ProvisionRequestType } from "../../api/client";
+import { LambdaHelper } from "../lambda_helpers";
 
 /**
  * Successful condition check
@@ -82,77 +83,54 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
       AtatContextValue.CSP_CONFIGURATION_NAME.resolve(this)
     );
 
+    const lambdaHelper = new LambdaHelper(
+      scope,
+      cspConfig,
+      {
+        runtime: lambda.Runtime.NODEJS_18_X,
+        tracing: lambda.Tracing.ACTIVE,
+        timeout: cdk.Duration.minutes(5),
+        memorySize: 256,
+        vpc: props.vpc,
+      },
+      props.idp
+    );
     // Create Portfolio Fn
-    const cspCreatePortfolioFn = new lambdaNodeJs.NodejsFunction(scope, "CspCreatePortfolioFn", {
-      entry: "api/provision/csp-create-portfolio.ts",
-      runtime: lambda.Runtime.NODEJS_18_X,
-      environment: { CSP_CONFIG_SECRET_NAME: cspConfig.secretArn },
-      timeout: cdk.Duration.minutes(5),
-      memorySize: 256,
-      vpc: props.vpc,
-      tracing: lambda.Tracing.ACTIVE,
-    });
-    props.idp?.addClient(new IdentityProviderLambdaClient("CspCreatePortfolioClient", cspCreatePortfolioFn), [
-      "atat/write-portfolio",
-    ]);
-    cspConfig.grantRead(cspCreatePortfolioFn);
-
-    // Create Environment Fn
-    const cspCreateEnvironmentFn = new lambdaNodeJs.NodejsFunction(scope, "CspCreateEnvironmentFn", {
-      entry: "api/provision/csp-create-environment.ts",
-      runtime: lambda.Runtime.NODEJS_18_X,
-      environment: { CSP_CONFIG_SECRET_NAME: cspConfig.secretArn },
-      timeout: cdk.Duration.minutes(5),
-      memorySize: 256,
-      vpc: props.vpc,
-      tracing: lambda.Tracing.ACTIVE,
-    });
-    props.idp?.addClient(new IdentityProviderLambdaClient("CspCreateEnvironmentClient", cspCreateEnvironmentFn), [
-      "atat/write-portfolio",
-    ]);
-    cspConfig.grantRead(cspCreateEnvironmentFn);
-
-    // Update Task Order Fn
-    const cspInvokeUpdateTaskOrderFn = new lambdaNodeJs.NodejsFunction(scope, "CspInvokeUpdateTaskOrderFn", {
-      entry: "api/provision/csp-update-taskorder.ts",
-      runtime: lambda.Runtime.NODEJS_18_X,
-      environment: { CSP_CONFIG_SECRET_NAME: cspConfig.secretArn },
-      timeout: cdk.Duration.minutes(5),
-      memorySize: 256,
-      vpc: props.vpc,
-      tracing: lambda.Tracing.ACTIVE,
-    });
-    props.idp?.addClient(
-      new IdentityProviderLambdaClient("cspInvokeUpdateTaskOrderClient", cspInvokeUpdateTaskOrderFn),
+    const cspCreatePortfolioFn = lambdaHelper.createFunctionEx(
+      "CreatePortfolio",
+      "api/provision/csp-create-portfolio.ts",
       ["atat/write-portfolio"]
     );
-    cspConfig.grantRead(cspInvokeUpdateTaskOrderFn);
 
-    // Get Portfolio Fn
-    const cspGetPortfolioFn = new lambdaNodeJs.NodejsFunction(scope, "CspGetPortfolioFn", {
-      entry: "api/provision/csp-get-portfolio.ts",
-      runtime: lambda.Runtime.NODEJS_18_X,
-      environment: { CSP_CONFIG_SECRET_NAME: cspConfig.secretArn },
-      timeout: cdk.Duration.minutes(5),
-      memorySize: 256,
-      vpc: props.vpc,
-      tracing: lambda.Tracing.ACTIVE,
-    });
-    props.idp?.addClient(new IdentityProviderLambdaClient("CspGetPortfolioClient", cspGetPortfolioFn), [
-      "atat/read-portfolio",
-    ]);
-    cspConfig.grantRead(cspGetPortfolioFn);
+    // Create Environment Fn
+    const cspCreateEnvironmentFn = lambdaHelper.createFunctionEx(
+      "CreateEnvironment",
+      "api/provision/csp-create-environment.ts",
+      ["atat/write-portfolio"]
+    );
 
-    this.resultFn = new lambdaNodeJs.NodejsFunction(scope, "ResultFunction", {
-      entry: "api/provision/result-fn.ts",
+    // Update Task Order Fn
+    const cspUpdateTaskOrderFn = lambdaHelper.createFunctionEx(
+      "UpdateTaskOrder",
+      "api/provision/csp-update-taskorder.ts",
+      ["atat/write-portfolio"]
+    );
+
+    const functions = [cspCreatePortfolioFn, cspCreateEnvironmentFn, cspUpdateTaskOrderFn];
+
+    // redefine lambdaHelper to establish new options.
+    lambdaHelper.baseFunctionProps = {
       runtime: lambda.Runtime.NODEJS_18_X,
-      environment: {
-        PROVISIONING_QUEUE_URL: this.provisioningJobsQueue.queueUrl,
-        ASYNC_PROVISIONING_JOBS_QUEUE_URL: this.asyncProvisioningJobsQueue.queueUrl,
-      },
-      vpc: props.vpc,
       tracing: lambda.Tracing.ACTIVE,
+      vpc: props.vpc,
+    };
+
+    // Result Fn
+    this.resultFn = lambdaHelper.createFunction("ResultFunction", "api/provision/result-fn.ts", {
+      PROVISIONING_QUEUE_URL: this.provisioningJobsQueue.queueUrl,
+      ASYNC_PROVISIONING_JOBS_QUEUE_URL: this.asyncProvisioningJobsQueue.queueUrl,
     });
+
     this.provisioningQueueConsumer = new ApiSfnFunction(this, "ConsumeProvisioningJobRequest", {
       method: HttpMethod.GET,
       handlerPath: "api/provision/consume-provisioning-job.ts",
@@ -169,81 +147,25 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
     this.asyncProvisioningJobsQueue.grantSendMessages(this.resultFn);
 
     // Tasks for the Provisioning State Machine
-    const tasks = [
-      {
-        id: "InvokeCreatePortfolio",
-        props: {
-          lambdaFunction: cspCreatePortfolioFn,
-          inputPath: "$.initialSnowRequest",
-          resultSelector: {
-            code: sfn.JsonPath.objectAt("$.Payload.code"),
-            content: sfn.JsonPath.objectAt("$.Payload.content"),
-          },
-          resultPath: "$.cspResponse",
-          outputPath: "$",
-        },
+    const tasks = lambdaHelper.createTasks(functions);
+    // Add the resultsFn task manually since it doesn't follow the same pattern.
+    tasks.push({
+      id: "EnqueueResults",
+      props: {
+        lambdaFunction: this.resultFn,
+        payload: sfn.TaskInput.fromObject({
+          code: sfn.JsonPath.objectAt("$.cspResponse.code"),
+          content: sfn.JsonPath.objectAt("$.cspResponse.content"),
+          initialSnowRequest: sfn.JsonPath.objectAt("$.initialSnowRequest"),
+        }),
+        resultPath: "$.enqueueResultResponse",
+        outputPath: "$",
       },
-      {
-        id: "InvokeCreateEnvironment",
-        props: {
-          lambdaFunction: cspCreateEnvironmentFn,
-          inputPath: "$.initialSnowRequest",
-          resultSelector: {
-            code: sfn.JsonPath.objectAt("$.Payload.code"),
-            content: sfn.JsonPath.objectAt("$.Payload.content"),
-          },
-          resultPath: "$.cspResponse",
-          outputPath: "$",
-        },
-      },
-      {
-        id: "InvokeGetPortfolio",
-        props: {
-          lambdaFunction: cspGetPortfolioFn,
-          inputPath: "$.initialSnowRequest",
-          resultSelector: {
-            code: sfn.JsonPath.objectAt("$.Payload.code"),
-            content: sfn.JsonPath.objectAt("$.Payload.content"),
-          },
-          resultPath: "$.cspResponse",
-          outputPath: "$",
-        },
-      },
-      {
-        id: "InvokeUpdateTaskOrder",
-        props: {
-          lambdaFunction: cspInvokeUpdateTaskOrderFn,
-          inputPath: "$.initialSnowRequest",
-          resultSelector: {
-            code: sfn.JsonPath.objectAt("$.Payload.code"),
-            content: sfn.JsonPath.objectAt("$.Payload.content"),
-          },
-          resultPath: "$.cspResponse",
-          outputPath: "$",
-        },
-      },
-      {
-        id: "EnqueueResults",
-        props: {
-          lambdaFunction: this.resultFn,
-          payload: sfn.TaskInput.fromObject({
-            code: sfn.JsonPath.objectAt("$.cspResponse.code"),
-            content: sfn.JsonPath.objectAt("$.cspResponse.content"),
-            initialSnowRequest: sfn.JsonPath.objectAt("$.initialSnowRequest"),
-          }),
-          resultPath: "$.enqueueResultResponse",
-          outputPath: "$",
-        },
-      },
-    ];
+    });
+
+    // Add method to lambdaHelper to configure the tasks.
     this.mappedTasks = mapTasks(scope, tasks);
-    const {
-      InvokeCreatePortfolio,
-      InvokeCreateEnvironment,
-      InvokeUpdateTaskOrder,
-      InvokeGetPortfolio,
-      EnqueueResults,
-    } = this.mappedTasks;
+    const { InvokeCreatePortfolio, InvokeCreateEnvironment, InvokeUpdateTaskOrder, EnqueueResults } = this.mappedTasks;
     // update retry for the tasks
     InvokeCreatePortfolio.addRetry({ maxAttempts: 2, errors: ["MockCspApiError"] });
     InvokeCreatePortfolio.addCatch(EnqueueResults, { errors: ["States.ALL"], resultPath: "$.catchErrorResult" });
@@ -251,8 +173,6 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
     InvokeCreateEnvironment.addCatch(EnqueueResults, { errors: ["States.ALL"], resultPath: "$.catchErrorResult" });
     InvokeUpdateTaskOrder.addRetry({ maxAttempts: 2, errors: ["MockCspApiError"] });
     InvokeUpdateTaskOrder.addCatch(EnqueueResults, { errors: ["States.ALL"], resultPath: "$.catchErrorResult" });
-    InvokeGetPortfolio.addRetry({ maxAttempts: 2, errors: ["MockCspApiError"] });
-    InvokeGetPortfolio.addCatch(EnqueueResults, { errors: ["States.ALL"], resultPath: "$.catchErrorResult" });
 
     const startState = new sfn.Choice(scope, "StartState")
       .when(
@@ -266,10 +186,6 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
       .when(
         sfn.Condition.stringEquals("$.initialSnowRequest.operationType", ProvisionRequestType.UPDATE_TASK_ORDER),
         InvokeUpdateTaskOrder
-      )
-      .when(
-        sfn.Condition.stringEquals("$.initialSnowRequest.operationType", ProvisionRequestType.GET_PORTFOLIO),
-        InvokeGetPortfolio
       )
       .afterwards();
 
@@ -285,7 +201,6 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
     InvokeCreatePortfolio.next(httpResponseChoices);
     InvokeCreateEnvironment.next(httpResponseChoices);
     InvokeUpdateTaskOrder.next(httpResponseChoices);
-    InvokeGetPortfolio.next(httpResponseChoices);
     this.logGroup = new logs.LogGroup(scope, "StepFunctionsLogs", {
       retention: logs.RetentionDays.TEN_YEARS,
       logGroupName: `/aws/vendedlogs/states/StepFunctionsLogs${environmentName}`,
