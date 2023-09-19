@@ -24,7 +24,7 @@
     "@types/number-to-words": "^1.2.1",
     "@types/puppeteer": "^7.0.4",
     "@types/sax": "^1.2.4",
-    "@typescript-eslint/eslint-plugin": "^5.52.0",
+    "@typescript-eslint/eslint-plugin": "^6.7.2",
     "@typescript-eslint/parser": "^5.52.0",
     "ajv-i18n": "^4.2.0",
     "aws-cdk": "2.93.0",
