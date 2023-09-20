@@ -1,5 +1,5 @@
 import { logger } from "../utils/logging";
-import createReport from "docx-templates";
+import { createReport } from "docx-templates";
 import { ApiBase64SuccessResponse, SuccessStatusCode } from "../utils/response";
 import { IEvaluationMemo } from "../models/document-generation/evaluation-memo";
 

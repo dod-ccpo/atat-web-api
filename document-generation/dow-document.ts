@@ -1,5 +1,4 @@
 import { logger } from "../utils/logging";
-import createReport from "docx-templates";
 import { ApiBase64SuccessResponse, SuccessStatusCode } from "../utils/response";
 import { capitalize, formatEnum, formatPeriodOfPerformance } from "./utils/utils";
 
@@ -25,6 +24,7 @@ import {
   xaasServiceExists,
 } from "./utils/dow";
 import { IDescriptionOfWork } from "../models/document-generation/description-of-work";
+import { createReport } from "docx-templates";
 
 export async function doGenerate(template: Buffer, payload: IDescriptionOfWork): Promise<Buffer> {
   // Collection of instances at beginning of impact level for XaaS (e.g., 4.2.1)

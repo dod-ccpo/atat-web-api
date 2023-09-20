@@ -14,7 +14,7 @@ import { errorHandlingMiddleware } from "../../utils/middleware/error-handling-m
 import { LoggingContextMiddleware } from "../../utils/middleware/logging-context-middleware";
 import { ApiSuccessResponse, SuccessStatusCode } from "../../utils/response";
 import { tracer } from "../../utils/tracing";
-import { provisionRequestEventSchema, provisionRequestSchema } from "../../models/provisioning-schemas";
+import { provisionRequestEventSchema } from "../../models/provisioning-schemas";
 import { HothProvisionRequest } from "../client";
 import validatorMiddleware from "@middy/validator";
 import middy from "@middy/core";

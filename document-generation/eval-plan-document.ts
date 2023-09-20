@@ -1,5 +1,5 @@
 import { logger } from "../utils/logging";
-import createReport from "docx-templates";
+import { createReport } from "docx-templates";
 import { EvaluationPlan } from "../models/document-generation";
 import { ApiBase64SuccessResponse, SuccessStatusCode } from "../utils/response";
 import { INTERNAL_SERVER_ERROR } from "../utils/errors";

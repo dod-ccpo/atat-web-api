@@ -72,8 +72,7 @@ export const formatExpirationDate = (exp: string) => {
 };
 
 export const formatImpactLevel = (impactLevel: any) => {
-  const impactLevels = classificationLevelsOrder;
-  if (!impactLevel || !impactLevels.includes(impactLevel)) {
+  if (!impactLevel || !classificationLevelsOrder.includes(impactLevel)) {
     logger.debug("No impact level provided.");
     return `N/A`;
   }
@@ -311,8 +310,7 @@ const hasSameSelectedPeriods = (unique: ITaskGrouping, check: string[]) => {
   if (unique.taskPeriods.length !== check.length) {
     return false;
   }
-  const hasAllPeriods = check.every((period: any) => unique.taskPeriods.includes(period));
-  return hasAllPeriods;
+  return check.every((period: any) => unique.taskPeriods.includes(period));
 };
 
 /**
@@ -383,7 +381,7 @@ export const getTaskPeriods = (payload: any) => {
 
   // gets CDS PoP information for section 7
   const { crossDomainSolutionRequired, needForEntireTaskOrderDuration, selectedPeriods } = crossDomainSolutions;
-  const crossDomainSolutionTaskNumber = [];
+  const crossDomainSolutionTaskNumber: any = [];
   if (crossDomainSolutionRequired && needForEntireTaskOrderDuration) {
     crossDomainSolutionTaskNumber.push({ dowTaskNumber: "4.2.6", entireDuration: true, taskPeriods: [] });
   }
@@ -722,10 +720,7 @@ export const selectedServiceExists = (
 };
 
 export const instancesExists = (instances: any) => {
-  if (instances.length < 1) {
-    return false;
-  }
-  return true;
+  return instances.length >= 1;
 };
 
 // only for compute / database / general / storage
@@ -1188,7 +1183,7 @@ export const getSecurityRequirements = (payload: any): any => {
 
 export const getCDRLs = (popTasks: string[], contractType: IContractType) => {
   const { firmFixedPrice, timeAndMaterials } = contractType;
-  const cdrl = [];
+  const cdrl: any = [];
   const ffp = new Set();
   const tm = new Set();
   const portabilityPlanClins = new Set();

@@ -10,7 +10,8 @@ describe("IAM Change Notifications", () => {
     const stack = new cdk.Stack(app, "TestStack");
 
     // WHEN
-    const eventRule = new IamChangeRule(stack, "IamRule");
+    /* eslint-disable no-new */
+    new IamChangeRule(stack, "IamRule");
     const template = Template.fromStack(stack);
 
     // THEN

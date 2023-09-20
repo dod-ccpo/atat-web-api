@@ -20,13 +20,11 @@ import {
   EvaluationPlan,
   generateDocumentEventSchema,
   GenerateDocumentRequest,
-  generateDocumentSchema,
   IncrementalFundingPlan,
   IndependentGovernmentCostEstimate,
   RequestEvent,
 } from "../models/document-generation";
 import handlebars from "handlebars";
-import juice from "juice";
 import { counter, countSections, formatAwardType, formatDuration, formatGroupAndClassification } from "./utils/helpers";
 import { RequirementsChecklist } from "../models/document-generation/requirements-checklist";
 import { generateRequirementsChecklistDocument } from "./requirements-checklist-document";
@@ -41,6 +39,7 @@ import { IEvaluationMemo } from "../models/document-generation/evaluation-memo";
 import { generateEvalMemoDocument } from "./eval-memo-document";
 import { transpileSchema } from "@middy/validator/transpile";
 import validator from "@middy/validator";
+import { inlineContent } from "juice";
 
 async function baseHandler(event: RequestEvent<GenerateDocumentRequest>): Promise<ApiBase64SuccessResponse> {
   const { documentType } = event.body;
@@ -69,7 +68,7 @@ async function baseHandler(event: RequestEvent<GenerateDocumentRequest>): Promis
 async function generatePdf(event: RequestEvent<GenerateDocumentRequest>): Promise<ApiBase64SuccessResponse> {
   const { documentType, templatePayload } = event.body;
   const { html, css } = getPDFDocumentTemplates(documentType);
-  const htmlWithCss = juice.inlineContent(html, css);
+  const htmlWithCss = inlineContent(html, css);
 
   // use handlebars to populate data into template
   const template = handlebars.compile(htmlWithCss);

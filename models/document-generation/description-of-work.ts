@@ -791,14 +791,6 @@ const xaasOfferings = {
   items: service,
 };
 
-const portabilityPlan = {
-  type: "object",
-  properties: {
-    classificationLevel,
-    planRequired: { type: "boolean" },
-  },
-};
-
 export enum CrossDomainDirection {
   U_TO_S = "U_TO_S",
   U_TO_TS = "U_TO_TS",
@@ -867,27 +859,5 @@ const contractType = {
     firmFixedPrice: { type: "boolean" },
     timeAndMaterials: { type: "boolean" },
     contractTypeJustification: { type: "string" },
-  },
-};
-
-const DescriptionOfWork = {
-  type: "object",
-  properties: {
-    awardHistory,
-    contractInformation,
-    toTitle: { type: "string" },
-    surgeRequirementCapacity: { type: "integer" },
-    surgeRequirementCapabilities: { type: "boolean" },
-    currentEnvironment,
-    selectedClassificationLevels,
-    architecturalDesignRequirement,
-    xaasOfferings,
-    crossDomainSolution,
-    cloudSupportPackages: { type: "array", items: cloudSupportEnvironmentInstance },
-    contractType,
-    periodOfPerformance,
-    securityRequirements: { type: "object" },
-    contractConsiderations: { type: "object" },
-    sensitiveInformation: { type: "object" },
   },
 };

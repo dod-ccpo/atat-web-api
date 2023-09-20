@@ -7,7 +7,7 @@ import httpJsonBodyParser from "@middy/http-json-body-parser";
 import inputOutputLogger from "@middy/input-output-logger";
 import { APIGatewayProxyResult } from "aws-lambda";
 import jsonErrorHandlerMiddleware from "middy-middleware-json-error-handler";
-import { CostRequest, CostRequestEventSchema, costRequestSchema } from "../../models/cost-jobs";
+import { CostRequest, CostRequestEventSchema } from "../../models/cost-jobs";
 import { RequestEvent } from "../../models/document-generation";
 import { sqsClient } from "../../utils/aws-sdk/sqs";
 import { logger } from "../../utils/logging";

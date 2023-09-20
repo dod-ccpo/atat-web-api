@@ -113,8 +113,7 @@ export async function generateIGCEDocument(
 
     // Set Period of Performance and Funding Document Number
     // Located at the top of each Period Sheet
-    const pop = `${periodUnitCount} ${periodUnit[0] + periodUnit.slice(1).toLowerCase()}(s)`;
-    periodSheet.getCell("C2").value = pop;
+    periodSheet.getCell("C2").value = `${periodUnitCount} ${periodUnit[0] + periodUnit.slice(1).toLowerCase()}(s)`;
     periodSheet.getCell("C3").value = fundingDocumentNumber;
 
     // Track number of Line Items in periodLineItems
