@@ -24,7 +24,7 @@ describe("Test J&A document generation", () => {
     expect(base64).toBeInstanceOf(ApiBase64SuccessResponse);
   });
 
-  it("unskip me to generate a local file for manual review", async () => {
+  it.skip("unskip me to generate a local file for manual review", async () => {
     const docBuffer = await doGenerate(docxTemplate, payload);
     await fs.writeFileSync("janda.docx", docBuffer);
   });

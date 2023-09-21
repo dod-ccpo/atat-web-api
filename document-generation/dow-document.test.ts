@@ -32,7 +32,7 @@ describe("Test DoW document generation", () => {
     expect(base64).toBeInstanceOf(ApiBase64SuccessResponse);
   });
 
-  it("unskip me to generate a local file for manual review", async () => {
+  it.skip("unskip me to generate a local file for manual review", async () => {
     payload.architecturalDesignRequirement = null;
     const docBuffer = await doGenerate(docxTemplate, payload);
     await fs.writeFileSync("dow.docx", docBuffer);
