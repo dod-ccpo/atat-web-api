@@ -1473,8 +1473,8 @@ export const sampleEvalPlanRequest = {
   documentType: "EVALUATION_PLAN",
   templatePayload: {
     taskOrderTitle: "Maria Mission Owner's Eval Plan",
-    sourceSelection: "NO_TECH_PROPOSAL",
-    method: "LPTA",
+    sourceSelection: "SET_LUMP_SUM",
+    method: "BEST_USE",
     standardSpecifications: ["string"],
     customSpecifications: ["string"],
     standardDifferentiators: ["string"],

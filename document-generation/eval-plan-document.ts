@@ -1,8 +1,22 @@
+/* eslint-disable prettier/prettier */
 import { logger } from "../utils/logging";
 import createReport from "docx-templates";
 import { EvaluationPlan } from "../models/document-generation";
 import { ApiBase64SuccessResponse, SuccessStatusCode } from "../utils/response";
 import { INTERNAL_SERVER_ERROR } from "../utils/errors";
+
+
+export async function doGenerate(template: Buffer, payload: EvaluationPlan): Promise<Buffer> {
+  return Buffer.from(
+    await createReport({
+      template,
+      data: {
+        ...payload,
+      },
+      cmdDelimiter: ["{", "}"],
+    })
+  );
+}
 
 export async function generateEvalPlanDocument(
   template: Buffer,
@@ -12,15 +26,7 @@ export async function generateEvalPlanDocument(
     return INTERNAL_SERVER_ERROR;
   }
 
-  const report = Buffer.from(
-    await createReport({
-      template,
-      data: {
-        ...payload,
-      },
-      cmdDelimiter: ["{", "}"],
-    })
-  );
+  const report = await doGenerate(template, payload);
   logger.info("Evaluation Plan document generated.");
 
   const headers = {
