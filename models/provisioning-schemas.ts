@@ -1,6 +1,5 @@
 // temporary schema to use for validating /provision-job request
 import { ProvisionRequestType } from "../api/client";
-import { requestContext } from "../api/provision/start-provisioning-job.test";
 
 // TODO: ensure we have schema validation tests for our shared test objects
 
@@ -104,14 +103,16 @@ export const provisionRequestNoPayloadSchema = {
     targetCspName: { type: "string" },
     payload: {},
   },
-  required: ["userId", "operationType", "targetCspName", "payload"],
+  required: ["operationType", "targetCspName", "payload"],
   additionalProperties: false,
 };
 
 export const provisionRequestEventSchema = {
   type: "object",
   properties: {
-    body: provisionRequestSchema,
+    body: {
+      anyOf: [provisionRequestSchema, provisionRequestNoPayloadSchema],
+    },
   },
   additionalProperties: true,
 };
