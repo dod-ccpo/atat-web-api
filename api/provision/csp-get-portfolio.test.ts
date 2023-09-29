@@ -36,7 +36,6 @@ describe("Get Portfolio Tests", () => {
         constructProvisionRequestForCsp("CSP_A", cspAGetPortfolioRequest as HothProvisionRequest),
         {} as Context
       )) as ProvisionCspResponse;
-      console.log(response);
       expect(response.code).toBe(SuccessStatusCode.OK);
     });
   });
