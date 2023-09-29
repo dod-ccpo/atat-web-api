@@ -31,6 +31,7 @@ describe("Get Portfolio Tests", () => {
       mockedGetToken.mockImplementation(() =>
         Promise.resolve({ access_token: "FAKE_TOKEN", expires_in: 0, token_type: "Bearer" })
       );
+
       const response = (await handler(
         constructProvisionRequestForCsp("CSP_A", cspAGetPortfolioRequest as HothProvisionRequest),
         {} as Context
