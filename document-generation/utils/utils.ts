@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import {
   DocumentType,
   FundingType,
@@ -102,9 +103,9 @@ export const getFundingDocInfo = (fundingDoc: IFundingDocument): string => {
   }
 
   if (fundingDoc.fundingType === FundingType.MIPR) {
-    return `MIPR #: ${fundingDoc.miprNumber}`;
+    return `Military Interdepartmental Purchase Request (MIPR): ${fundingDoc.miprNumber}`;
   }
-  return `Order #: ${fundingDoc.orderNumber}`;
+  return `7600(B) Order Number: ${fundingDoc.orderNumber}`;
 };
 
 export const formatEnum = (text: string) => {
