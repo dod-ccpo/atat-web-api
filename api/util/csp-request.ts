@@ -5,7 +5,9 @@ import { ProvisioningStatusType } from "../client";
 // this should be removed shortly and is not meant as a true representation
 // of the different provisioning actions that can be performed with the
 // async Csp request client and transformed into the CspResponse interface above
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function mockCspClientResponse(request: any) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let response: any;
   switch (request.targetCspName) {
     case "CSP_A":

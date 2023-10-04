@@ -4,7 +4,7 @@ import { ErrorStatusCode, SuccessStatusCode, ValidationErrorResponse } from "../
 import * as cspConfig from "./csp-configuration";
 import { handler } from "./csp-create-environment";
 import {
-  addEnvironmentRequest,
+  cspAAddEnvironmentRequest,
   constructProvisionRequestForCsp,
   CSP_A,
   CSP_A_TEST_ENDPOINT,
@@ -34,18 +34,18 @@ describe("Add Environment Tests", () => {
     const deadline = new Date(fakeNow);
     deadline.setHours(deadline.getHours() + 2);
 
-    const addEnvironmentProvisionJob = constructProvisionRequestForCsp(CSP_A, addEnvironmentRequest);
+    const addEnvironmentProvisionJob = constructProvisionRequestForCsp(CSP_A, cspAAddEnvironmentRequest);
     mockedConfig.mockImplementation(() => Promise.resolve({ name: CSP_A, uri: CSP_A_TEST_ENDPOINT }));
     mockedGetToken.mockImplementation(() =>
       Promise.resolve({ access_token: "FAKE_TOKEN", expires_in: 0, token_type: "Bearer" })
     );
     const transformedRequest = {
-      environment: addEnvironmentRequest.payload,
+      environment: cspAAddEnvironmentRequest.payload,
       portfolioId: addEnvironmentProvisionJob.portfolioId,
     };
     const transformedResponse = {
       environment: {
-        ...addEnvironmentRequest.payload,
+        ...cspAAddEnvironmentRequest.payload,
         id: TEST_ENVIRONMENT_ID,
       },
     };
@@ -54,7 +54,7 @@ describe("Add Environment Tests", () => {
       code: 200,
       content: {
         request: {
-          environment: addEnvironmentRequest.payload,
+          environment: cspAAddEnvironmentRequest.payload,
           portfolioId: addEnvironmentProvisionJob.portfolioId,
           provisionDeadline: deadline.toISOString(),
         },
@@ -85,13 +85,13 @@ describe("Add Environment Tests", () => {
     // GIVEN
     const deadline = new Date(fakeNow);
     deadline.setHours(deadline.getHours() + 2);
-    const addEnvironmentProvisionJob = constructProvisionRequestForCsp(CSP_B, addEnvironmentRequest);
+    const addEnvironmentProvisionJob = constructProvisionRequestForCsp(CSP_B, cspAAddEnvironmentRequest);
     mockedConfig.mockImplementation(() => Promise.resolve({ name: CSP_B, uri: CSP_B_TEST_ENDPOINT }));
     mockedGetToken.mockImplementation(() =>
       Promise.resolve({ access_token: "FAKE_TOKEN", expires_in: 0, token_type: "Bearer" })
     );
     const transformedRequest = {
-      environment: addEnvironmentRequest.payload,
+      environment: cspAAddEnvironmentRequest.payload,
       portfolioId: addEnvironmentProvisionJob.portfolioId,
     };
 

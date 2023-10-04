@@ -7,4 +7,8 @@ module.exports = {
     '^.+\\.tsx?$': 'ts-jest'
   },
   collectCoverage: true,
+  coveragePathIgnorePatterns: [
+    "/node_modules/",
+    "api/util/csp-request.ts"
+  ]
 };

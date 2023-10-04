@@ -112,6 +112,37 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
     ]);
     cspConfig.grantRead(cspCreateEnvironmentFn);
 
+    // Update Task Order Fn
+    const cspInvokeUpdateTaskOrderFn = new lambdaNodeJs.NodejsFunction(scope, "CspInvokeUpdateTaskOrderFn", {
+      entry: "api/provision/csp-update-taskorder.ts",
+      runtime: lambda.Runtime.NODEJS_18_X,
+      environment: { CSP_CONFIG_SECRET_NAME: cspConfig.secretArn },
+      timeout: cdk.Duration.minutes(5),
+      memorySize: 256,
+      vpc: props.vpc,
+      tracing: lambda.Tracing.ACTIVE,
+    });
+    props.idp?.addClient(
+      new IdentityProviderLambdaClient("cspInvokeUpdateTaskOrderClient", cspInvokeUpdateTaskOrderFn),
+      ["atat/write-portfolio"]
+    );
+    cspConfig.grantRead(cspInvokeUpdateTaskOrderFn);
+
+    // Get Portfolio Fn
+    const cspGetPortfolioFn = new lambdaNodeJs.NodejsFunction(scope, "CspGetPortfolioFn", {
+      entry: "api/provision/csp-get-portfolio.ts",
+      runtime: lambda.Runtime.NODEJS_18_X,
+      environment: { CSP_CONFIG_SECRET_NAME: cspConfig.secretArn },
+      timeout: cdk.Duration.minutes(5),
+      memorySize: 256,
+      vpc: props.vpc,
+      tracing: lambda.Tracing.ACTIVE,
+    });
+    props.idp?.addClient(new IdentityProviderLambdaClient("CspGetPortfolioClient", cspGetPortfolioFn), [
+      "atat/read-portfolio",
+    ]);
+    cspConfig.grantRead(cspGetPortfolioFn);
+
     this.resultFn = new lambdaNodeJs.NodejsFunction(scope, "ResultFunction", {
       entry: "api/provision/result-fn.ts",
       runtime: lambda.Runtime.NODEJS_18_X,
@@ -166,6 +197,32 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
         },
       },
       {
+        id: "InvokeGetPortfolio",
+        props: {
+          lambdaFunction: cspGetPortfolioFn,
+          inputPath: "$.initialSnowRequest",
+          resultSelector: {
+            code: sfn.JsonPath.objectAt("$.Payload.code"),
+            content: sfn.JsonPath.objectAt("$.Payload.content"),
+          },
+          resultPath: "$.cspResponse",
+          outputPath: "$",
+        },
+      },
+      {
+        id: "InvokeUpdateTaskOrder",
+        props: {
+          lambdaFunction: cspInvokeUpdateTaskOrderFn,
+          inputPath: "$.initialSnowRequest",
+          resultSelector: {
+            code: sfn.JsonPath.objectAt("$.Payload.code"),
+            content: sfn.JsonPath.objectAt("$.Payload.content"),
+          },
+          resultPath: "$.cspResponse",
+          outputPath: "$",
+        },
+      },
+      {
         id: "EnqueueResults",
         props: {
           lambdaFunction: this.resultFn,
@@ -180,12 +237,22 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
       },
     ];
     this.mappedTasks = mapTasks(scope, tasks);
-    const { InvokeCreatePortfolio, InvokeCreateEnvironment, EnqueueResults } = this.mappedTasks;
+    const {
+      InvokeCreatePortfolio,
+      InvokeCreateEnvironment,
+      InvokeUpdateTaskOrder,
+      InvokeGetPortfolio,
+      EnqueueResults,
+    } = this.mappedTasks;
     // update retry for the tasks
     InvokeCreatePortfolio.addRetry({ maxAttempts: 2, errors: ["MockCspApiError"] });
     InvokeCreatePortfolio.addCatch(EnqueueResults, { errors: ["States.ALL"], resultPath: "$.catchErrorResult" });
     InvokeCreateEnvironment.addRetry({ maxAttempts: 2, errors: ["MockCspApiError"] });
     InvokeCreateEnvironment.addCatch(EnqueueResults, { errors: ["States.ALL"], resultPath: "$.catchErrorResult" });
+    InvokeUpdateTaskOrder.addRetry({ maxAttempts: 2, errors: ["MockCspApiError"] });
+    InvokeUpdateTaskOrder.addCatch(EnqueueResults, { errors: ["States.ALL"], resultPath: "$.catchErrorResult" });
+    InvokeGetPortfolio.addRetry({ maxAttempts: 2, errors: ["MockCspApiError"] });
+    InvokeGetPortfolio.addCatch(EnqueueResults, { errors: ["States.ALL"], resultPath: "$.catchErrorResult" });
 
     const startState = new sfn.Choice(scope, "StartState")
       .when(
@@ -195,6 +262,14 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
       .when(
         sfn.Condition.stringEquals("$.initialSnowRequest.operationType", ProvisionRequestType.ADD_ENVIRONMENT),
         InvokeCreateEnvironment
+      )
+      .when(
+        sfn.Condition.stringEquals("$.initialSnowRequest.operationType", ProvisionRequestType.UPDATE_TASK_ORDER),
+        InvokeUpdateTaskOrder
+      )
+      .when(
+        sfn.Condition.stringEquals("$.initialSnowRequest.operationType", ProvisionRequestType.GET_PORTFOLIO),
+        InvokeGetPortfolio
       )
       .afterwards();
 
@@ -209,6 +284,8 @@ export class ProvisioningWorkflow extends Construct implements IProvisioningWork
     // Composing state machine
     InvokeCreatePortfolio.next(httpResponseChoices);
     InvokeCreateEnvironment.next(httpResponseChoices);
+    InvokeUpdateTaskOrder.next(httpResponseChoices);
+    InvokeGetPortfolio.next(httpResponseChoices);
     this.logGroup = new logs.LogGroup(scope, "StepFunctionsLogs", {
       retention: logs.RetentionDays.TEN_YEARS,
       logGroupName: `/aws/vendedlogs/states/StepFunctionsLogs${environmentName}`,

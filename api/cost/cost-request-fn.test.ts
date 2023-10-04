@@ -64,7 +64,9 @@ describe("Cost Request Fn - Success", () => {
     // WHEN
     await handler(queueEvent, {} as Context);
     const commandCalls = sqsMock.commandCalls(SendMessageCommand);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const firstSentMessage: any = commandCalls[0].firstArg.input;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const secondSentMessage: any = commandCalls[1].firstArg.input;
 
     // THEN
@@ -112,6 +114,7 @@ describe("Cost Request Fn - Errors", () => {
     // WHEN
     await handler(queueEvent, {} as Context);
     const commandCalls = sqsMock.commandCalls(SendMessageCommand);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const firstSentMessage: any = commandCalls[0].firstArg.input;
 
     // THEN

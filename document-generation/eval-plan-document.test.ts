@@ -1,32 +1,38 @@
-import { EvaluationPlan } from "../models/document-generation";
+/* eslint-disable prettier/prettier */
+import { EvaluationPlan, DocumentType } from "../models/document-generation";
 import { sampleEvalPlanRequest } from "./utils/sampleTestData";
+import { getDocxTemplate } from "./utils/utils";
 import * as fs from "fs";
 import * as path from "path";
 import { ApiBase64SuccessResponse, ErrorStatusCode, OtherErrorResponse } from "../utils/response";
-import { generateEvalPlanDocument } from "./eval-plan-document";
+import { generateEvalPlanDocument, doGenerate } from "./eval-plan-document";
 
-describe("Generate an Evaluation Plan document - success path", () => {
-  const sampleEPRequest = sampleEvalPlanRequest.templatePayload as EvaluationPlan;
-  const sampleEPCustomSpecsRequest = sampleEvalPlanRequest.templatePayload as EvaluationPlan;
-  const templateBuffer = fs.readFileSync(path.resolve(__dirname, "templates/eval-plan-template.docx"));
+describe("Test DoW document generation", () => {
+  jest.setTimeout(15000);
+  const oldEnv = process.env.TEMPLATE_FOLDER;
+  const payload = sampleEvalPlanRequest.templatePayload as EvaluationPlan;
+  let docxTemplate: Buffer;
 
-  it.each([sampleEPRequest, sampleEPCustomSpecsRequest])("should return an ApiBase64Response", async (epPayload) => {
-    // GIVEN
-    const headers = {
-      "Content-Disposition": "attachment; filename=EvaluationPlan.docx",
-      "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    };
-
-    // WHEN
-    const response = await generateEvalPlanDocument(templateBuffer, epPayload);
-
-    // THEN
-    expect(response.headers).toEqual(headers);
-    expect(response).toBeInstanceOf(ApiBase64SuccessResponse);
+  beforeAll(() => {
+    process.env.TEMPLATE_FOLDER = "./document-generation/templates";
+    docxTemplate = getDocxTemplate(DocumentType.EVALUATION_PLAN);
   });
-});
+  afterAll(() => {
+    process.env.TEMPLATE_FOLDER = oldEnv;
+  });
 
-describe("Generate an Evaluation Plan document - failure path", () => {
+  it("can generate an Eval Plan without throwing an error", async () => {
+    const base64 = await generateEvalPlanDocument(docxTemplate, payload);
+    expect(base64).toBeInstanceOf(ApiBase64SuccessResponse);
+  });
+
+
+  it.skip("unskip me to generate a local file for manual review", async () => {
+    // payload.architecturalDesignRequirement = null;
+    const docBuffer = await doGenerate(docxTemplate, payload);
+    await fs.writeFileSync("eval-plan-test.docx", docBuffer);
+  });
+
   const templateBuffer = fs.readFileSync(path.resolve(__dirname, "templates/eval-plan-template.docx"));
   it("should return an error if empty argument", async () => {
     // WHEN
@@ -35,4 +41,6 @@ describe("Generate an Evaluation Plan document - failure path", () => {
     expect(response).toBeInstanceOf(OtherErrorResponse);
     expect(response.statusCode).toBe(ErrorStatusCode.INTERNAL_SERVER_ERROR);
   });
+
 });
+

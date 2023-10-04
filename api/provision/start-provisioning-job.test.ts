@@ -2,9 +2,16 @@ import { Context } from "aws-lambda";
 import { mockClient } from "aws-sdk-client-mock";
 import { sfnClient } from "../../utils/aws-sdk/step-functions";
 import { ApiSuccessResponse, ValidationErrorResponse } from "../../utils/response";
-import { administrators, cspAProvisioningBodyNoPayload, taskOrders, validRequest } from "../util/common-test-fixtures";
+import {
+  administrators,
+  cspAProvisioningBodyNoPayload,
+  taskOrders,
+  validRequest,
+  baseApiRequest,
+  cspAGetPortfolioRequest,
+} from "../util/common-test-fixtures";
 import { handler } from "./start-provisioning-job";
-import { ProvisionRequestType } from "../client";
+import { HothProvisionRequest, ProvisionRequestType } from "../client";
 
 export const requestContext = { identity: { sourceIp: "203.0.113.0" } };
 const sfnMock = mockClient(sfnClient);
@@ -13,6 +20,14 @@ beforeEach(() => {
 });
 
 describe("Successful provisioning operations", () => {
+  it("should get an existing portfolio", async () => {
+    const getRequest = {
+      body: JSON.stringify(cspAGetPortfolioRequest),
+      ...baseApiRequest,
+    };
+    const response = await handler(getRequest, {} as Context, () => null);
+    expect(response).toBeInstanceOf(ApiSuccessResponse);
+  });
   it("should add a new portfolio", async () => {
     const response = await handler(validRequest, {} as Context, () => null);
     expect(response).toBeInstanceOf(ApiSuccessResponse);

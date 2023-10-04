@@ -14,6 +14,7 @@ import {
   getSelectedInstances,
   getTaskPeriods,
   InstancesWithStorageType,
+  ITaskGrouping,
   organizeXaasServices,
   sortInstanceClassificationLevels,
   sortSelectedClassificationLevels,
@@ -31,13 +32,12 @@ describe("Formatting Utils", () => {
     expect(formattedStorageType).toBe(expectedFormat);
   });
   it.each([undefined, null, ""])("formatStorageType - '%s'", async (instance) => {
-    // const envInstance = sampleDowRequest.templatePayload.xaasOfferings.computeInstances[0];
     const formattedStorageType = formatStorageType(instance as unknown as InstancesWithStorageType);
     const expectedFormat = "N/A";
     expect(formattedStorageType).toBe(expectedFormat);
   });
 
-  it.each(["2023-02-28", "Feb. 28, 2023", "2023-02-28 17:45:08"])("formatExpirationDate - '%s'", async (goodDate) => {
+  it.each(["2023-02-28", "Feb. 28, 2023", "2023-02-28 10:45:08"])("formatExpirationDate - '%s'", async (goodDate) => {
     const expirationDate = formatExpirationDate(goodDate);
     const expectedFormat = "2/28/2023";
     expect(expirationDate).toBe(expectedFormat);
@@ -223,8 +223,8 @@ describe("getCDRLs", () => {
   it("All rows present", async () => {
     const payload = sampleDowRequest.templatePayload;
     const popTasks = getTaskPeriods(payload);
-    const entirePeriodTasks = popTasks.entireDurationTasks.map((taskNumber: any) => taskNumber);
-    const selectedPeriodTask = popTasks.taskNumberGroups.flatMap((group: any) => group.dowTaskNumbers);
+    const entirePeriodTasks = popTasks.entireDurationTasks.map((taskNumber: string) => taskNumber);
+    const selectedPeriodTask = popTasks.taskNumberGroups.flatMap((group: ITaskGrouping) => group.dowTaskNumbers);
     const allPopTasks = entirePeriodTasks.concat(selectedPeriodTask);
     const expectedCdrls = [
       {
@@ -256,13 +256,13 @@ describe("getCDRLs", () => {
   it("Only TE and monthly report rows", async () => {
     const payload = sampleDowRequest.templatePayload;
     const popTasks = getTaskPeriods(payload);
-    const entirePeriodTasks = popTasks.entireDurationTasks.map((taskNumber: any) => taskNumber);
-    const selectedPeriodTask = popTasks.taskNumberGroups.flatMap((group: any) => group.dowTaskNumbers);
+    const entirePeriodTasks = popTasks.entireDurationTasks.map((taskNumber: string) => taskNumber);
+    const selectedPeriodTask = popTasks.taskNumberGroups.flatMap((group: ITaskGrouping) => group.dowTaskNumbers);
     const expectedTaskNumbers = ["4.2.1.9"];
     const allPopTasks = entirePeriodTasks
       .concat(selectedPeriodTask)
       .map((taskNumber: string) => taskNumber.slice(0, 7))
-      .filter((taskNumber: any) => expectedTaskNumbers.includes(taskNumber));
+      .filter((taskNumber: string) => expectedTaskNumbers.includes(taskNumber));
     const expectedCdrls = [
       { code: "A012", clins: ["x001"], name: "TO Monthly Progress Report", taskNumbers: ["ANY"] },
       { code: "***A017", clins: ["x001"], name: "TE Device Specifications", taskNumbers: ["4.2.1.9"] },

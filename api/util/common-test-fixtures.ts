@@ -11,9 +11,11 @@ import {
 
 // Mock data used by unit and integration tests
 export const TEST_PORTFOLIO_ID = "b02e77d1-234d-4e3d-bc85-b57ca5a93952";
+export const TEST_BAD_PORTFOLIO_ID = "00000000-0000-0000-0000-000000000000";
 export const TEST_ENVIRONMENT_ID = "1a302680-6127-4bc1-be43-735703bdecb1";
 export const TEST_PROVISIONING_JOB_ID = "81b31a89-e3e5-46ee-acfe-75436bd14577";
-export const CSP_A_TEST_ENDPOINT = `https://CSP_A.example.com`;
+export const TEST_TASKORDER_ID = "csp-a-task-order-id-123";
+export const CSP_A_TEST_ENDPOINT = "https://CSP_A.example.com";
 export const CSP_B_TEST_ENDPOINT = "https://CSP_B.example.com";
 export const CSP_B_STATUS_ENDPOINT = `${CSP_B_TEST_ENDPOINT}/provisioning/${TEST_PROVISIONING_JOB_ID}/status`;
 export const CSP_A = "CSP_A";
@@ -50,16 +52,17 @@ export const administrators = [
   },
 ];
 
-export function constructCspTarget(csp: string) {
-  return {
-    name: csp,
-  };
-}
-
 export const cspAProvisioningBodyNoPayload = {
   jobId: "81b31a89-e3e5-46ee-acfe-75436bd14577",
   userId: "21d18790-bf3e-4529-a361-460ee6d16e0b",
   portfolioId: TEST_PORTFOLIO_ID,
+  targetCspName: CSP_A,
+};
+
+export const cspAProvisioningBodyNoPayloadNoPortfolioId = {
+  jobId: "81b31a89-e3e5-46ee-acfe-75436bd14577",
+  userId: "21d18790-bf3e-4529-a361-460ee6d16e0b",
+  portfolioId: "",
   targetCspName: CSP_A,
 };
 
@@ -72,7 +75,22 @@ export const cspAAddPortfolioRequest = {
   },
 };
 
-export const addEnvironmentRequest = {
+export const cspAGetPortfolioRequest = {
+  ...cspAProvisioningBodyNoPayload,
+  operationType: ProvisionRequestType.GET_PORTFOLIO,
+  payload: {},
+};
+
+export const cspAGetPortfolioRequestBadId = {
+  jobId: "81b31a89-e3e5-46ee-acfe-75436bd14577",
+  userId: "21d18790-bf3e-4529-a361-460ee6d16e0b",
+  portfolioId: `${TEST_BAD_PORTFOLIO_ID}`,
+  targetCspName: CSP_A,
+  operationType: ProvisionRequestType.GET_PORTFOLIO,
+  payload: {},
+};
+
+export const cspAAddEnvironmentRequest = {
   ...cspAProvisioningBodyNoPayload,
   operationType: ProvisionRequestType.ADD_ENVIRONMENT,
   payload: {
@@ -80,6 +98,33 @@ export const addEnvironmentRequest = {
     administrators,
     classificationLevel: "UNCLASSIFIED",
     cloudDistinguisher: undefined,
+  },
+};
+
+export const cspAUpdateTaskOrderRequest = {
+  ...cspAProvisioningBodyNoPayload,
+  operationType: ProvisionRequestType.UPDATE_TASK_ORDER,
+  payload: {
+    taskOrderId: TEST_TASKORDER_ID,
+    taskOrder: taskOrders[0],
+  },
+};
+
+export const cspAUpdateTaskOrderRequestNoPortfolioId = {
+  ...cspAProvisioningBodyNoPayloadNoPortfolioId,
+  operationType: ProvisionRequestType.UPDATE_TASK_ORDER,
+  payload: {
+    taskOrderId: TEST_TASKORDER_ID,
+    taskOrder: taskOrders[0],
+  },
+};
+
+export const cspAUpdateTaskOrderRequestNoTaskOrderId = {
+  ...cspAProvisioningBodyNoPayload,
+  operationType: ProvisionRequestType.UPDATE_TASK_ORDER,
+  payload: {
+    taskOrderId: "",
+    taskOrder: taskOrders[0],
   },
 };
 
@@ -91,7 +136,7 @@ export const validRequest = {
     "Content-Type": "application/json",
   },
   requestContext,
-} as any;
+};
 
 // cost fixtures
 export const validCostRequest: CostRequest = {
@@ -107,7 +152,7 @@ export const baseApiRequest = {
     "Content-Type": "application/json",
   },
   requestContext,
-} as any;
+};
 
 export const FAKE_COST_DATA: CostResponseByPortfolio = {
   taskOrders: [
@@ -148,7 +193,13 @@ export const FAKE_COST_DATA: CostResponseByPortfolio = {
   ],
 };
 
-export function generateTestSQSEvent(recordBodies: any[]): SQSEvent {
+export function constructCspTarget(csp: string) {
+  return {
+    name: csp,
+  };
+}
+
+export function generateTestSQSEvent(recordBodies: object[]): SQSEvent {
   const records = recordBodies.map((body) => {
     const recordBody = JSON.stringify(body);
     return {
@@ -175,7 +226,7 @@ export function generateTestSQSEvent(recordBodies: any[]): SQSEvent {
     Records: records,
   };
 }
-export function generateMockMessageResponses(messageBodies: any[]) {
+export function generateMockMessageResponses(messageBodies: object[]) {
   const messages = messageBodies.map((body) => {
     const messageBody = JSON.stringify(body);
     return {

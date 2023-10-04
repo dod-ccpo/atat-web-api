@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { getDocxTemplate } from "./utils/utils";
 import { DocumentType } from "../models/document-generation";
 import { sampleDowRequest } from "./utils/sampleTestData";
