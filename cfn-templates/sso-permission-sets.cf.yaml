@@ -267,6 +267,9 @@ Resources:
               - sso:List*
               - sso:Describe*
               - sso:Get*
+              - codepipeline:List*
+              - codepipeline:ListPipelineExecutions
+              - codepipeline:Get*
             Resource: "*"
   AtatDeveloperSecretReadAccess:
     Type: AWS::SSO::PermissionSet
