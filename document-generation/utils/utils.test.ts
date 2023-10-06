@@ -154,7 +154,7 @@ describe("getFundingDocInfo", () => {
       miprNumber: "29348403",
     } as IFundingDocument;
     const fundingDocInfo = getFundingDocInfo(fundingDocument);
-    expect(fundingDocInfo).toEqual(`MIPR #: ${fundingDocument.miprNumber}`);
+    expect(fundingDocInfo).toEqual(`Military Interdepartmental Purchase Request (MIPR): ${fundingDocument.miprNumber}`);
   });
   it("should return GT&C and Order number when FS_FORM document type", async () => {
     const orderNumber = "O-03049-2034-48403";
@@ -163,7 +163,7 @@ describe("getFundingDocInfo", () => {
       orderNumber,
     } as IFundingDocument;
     const fundingDocInfo = getFundingDocInfo(fundingDocument);
-    expect(fundingDocInfo).toEqual(`Order #: ${orderNumber}`);
+    expect(fundingDocInfo).toEqual(`7600(B) Order Number: ${orderNumber}`);
   });
   it.each(["", null, undefined, {}])("should return an empty string when invalid inputs", async (type) => {
     const fundingDocument = {
