@@ -276,6 +276,7 @@ export interface DescriptionOfWork {
 export enum FundingType {
   FS_FORM = "FS_FORM",
   MIPR = "MIPR",
+  TBD = "TBD",
 }
 export enum IdiqClin {
   CLOUD_1000 = "1000_CLOUD",
@@ -624,6 +625,12 @@ const fundingDocument = {
       properties: {
         fundingType: { enum: [FundingType.MIPR] },
         miprNumber: { type: "string" },
+      },
+    },
+    {
+      properties: {
+        fundingType: { enum: [FundingType.TBD] },
+        orderNumber: { type: "string" },
       },
     },
   ],

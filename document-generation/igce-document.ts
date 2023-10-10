@@ -36,13 +36,13 @@ export async function generateIGCEDocument(
     fundingDoc = payload.fundingDocument;
     switch (fundingDoc.fundingType) {
       case FundingType.FS_FORM:
-        fundingDocumentNumber = `Order Number: ${fundingDoc.orderNumber} and GT&C Number: ${fundingDoc.gtcNumber}`;
+        fundingDocumentNumber = `Order Number: ${fundingDoc.orderNumber}`;
         break;
       case FundingType.MIPR:
         fundingDocumentNumber = `MIPR Number: ${fundingDoc.miprNumber}`;
         break;
       default:
-        fundingDocumentNumber = "";
+        fundingDocumentNumber = "Funding Document Number: TBD";
     }
   }
   // Set references for clin and contract drop down boxes

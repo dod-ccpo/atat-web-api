@@ -74,6 +74,7 @@ export interface ISensitiveInformation {
 }
 
 export interface RequirementsChecklist {
+  gtcNumber: string;
   projectOverview: IProjectOverview;
   organization: IOrganization;
   contacts: IPackageContacts;
@@ -172,9 +173,14 @@ const sensitiveInformation = {
   },
 };
 
+const gtcNumber = {
+  type: "string",
+};
+
 export const requirementsCheckList = {
   type: "object",
   properties: {
+    gtcNumber,
     projectOverview,
     organization,
     contacts: packageContacts,
