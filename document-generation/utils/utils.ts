@@ -98,13 +98,13 @@ export const formatPeriodOfPerformance = (basePeriod: IPeriod, optionPeriods: IP
 export const getFundingDocInfo = (fundingDoc: IFundingDocument): string => {
   const documentTypes = [FundingType.MIPR, FundingType.FS_FORM];
   if (!fundingDoc || !documentTypes.includes(fundingDoc.fundingType)) {
-    return "";
+    return "Military Interdepartmental Purchase Request (MIPR) or 7600B(s): TBD";
   }
 
   if (fundingDoc.fundingType === FundingType.MIPR) {
-    return `MIPR #: ${fundingDoc.miprNumber}`;
+    return `Military Interdepartmental Purchase Request (MIPR): ${fundingDoc.miprNumber}`;
   }
-  return `Order #: ${fundingDoc.orderNumber}`;
+  return `7600(B) Order Number: ${fundingDoc.orderNumber}`;
 };
 
 export const formatEnum = (text: string) => {

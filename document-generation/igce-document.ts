@@ -31,18 +31,16 @@ export async function generateIGCEDocument(
   // Set fundingDocumentNumber variable
   // Located at the top of each Period sheet
   let fundingDoc;
-  let fundingDocumentNumber = "";
+  let fundingDocumentNumber = "Funding Document Number: TBD";
   if (payload.fundingDocument) {
     fundingDoc = payload.fundingDocument;
     switch (fundingDoc.fundingType) {
       case FundingType.FS_FORM:
-        fundingDocumentNumber = `Order Number: ${fundingDoc.orderNumber} and GT&C Number: ${fundingDoc.gtcNumber}`;
+        fundingDocumentNumber = `Order Number: ${fundingDoc.orderNumber}`;
         break;
       case FundingType.MIPR:
         fundingDocumentNumber = `MIPR Number: ${fundingDoc.miprNumber}`;
         break;
-      default:
-        fundingDocumentNumber = "";
     }
   }
   // Set references for clin and contract drop down boxes

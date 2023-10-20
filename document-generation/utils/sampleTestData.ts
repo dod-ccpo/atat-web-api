@@ -1485,6 +1485,7 @@ export const sampleEvalPlanRequest = {
 export const sampleRequirementsChecklistRequest = {
   documentType: "REQUIREMENTS_CHECKLIST",
   templatePayload: {
+    gtcNumber: "123456",
     projectOverview: {
       title: "Versatile Demo Package",
       scope: "Trying to build up another package that can be used for testing different parts of the system.",
@@ -1564,7 +1565,7 @@ export const sampleRequirementsChecklistRequest = {
 export const sampleJustificationAndApprovalRequest = {
   documentType: "JUSTIFICATION_AND_APPROVAL",
   templatePayload: {
-    purchaseRequestNumber: "O2208-097-097-697046, O2208-097-097-697046",
+    purchaseRequestNumber: "O2208-097-097-697046",
     jwccContractNumber: "HC105023D0002",
     title: "Jeff J&A Test 1",
     scope: "J & A Scope Test 1",
