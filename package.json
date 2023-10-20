@@ -79,7 +79,7 @@
     "lodash": "^4.17.21",
     "middy-middleware-json-error-handler": "^4.0.0",
     "number-to-words": "^1.2.4",
-    "puppeteer-core": "^19.6.3",
+    "puppeteer-core": "^21.4.0",
     "source-map-support": "^0.5.21",
     "xss": "^1.0.14"
   }
