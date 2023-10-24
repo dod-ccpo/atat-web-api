@@ -322,7 +322,7 @@ export class AtatWebApiStack extends cdk.Stack {
 
     // Create a custom event
     const customEvent = {
-      apiGatewayIpAddresses: apiProps.vpcConfig?.interfaceEndpoint,
+      apiGatewayIpAddresses: network?.endpoints.apiGatewayIpAddresses,
       // other relevant data...
     };
 
@@ -355,6 +355,13 @@ export class AtatWebApiStack extends cdk.Stack {
       eventPattern: APIeventPattern,
       targets: [new targets.LambdaFunction(customEventLambda)],
     });
+
+    NagSuppressions.addResourceSuppressions(customEventLambda, [
+      {
+        id: "NIST.800.53.R4-LambdaInsideVPC",
+        reason: "Lambda used for testing api gateway Ips",
+      },
+    ]);
 
     // Build all Cost Resources
     result = new CostApiImplementation(this, {
