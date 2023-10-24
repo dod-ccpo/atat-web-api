@@ -346,7 +346,7 @@ export class AtatWebApiStack extends cdk.Stack {
 
     const APIeventPattern = {
       source: ["custom.source"],
-      detail: customEvent,
+      detail: ["CustomResource"],
     };
 
     // Define the target for your event
