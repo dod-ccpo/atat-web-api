@@ -326,6 +326,13 @@ export class AtatWebApiStack extends cdk.Stack {
       // other relevant data...
     };
 
+    const apieventPattern = {
+      source: ["custom.source"],
+      detail: {
+        eventName: [customEvent],
+      },
+    };
+
     const lambdaCode = `
       exports.handler = async (event) => {
         // Lambda function code here
@@ -344,15 +351,15 @@ export class AtatWebApiStack extends cdk.Stack {
     // Send the custom event to the EventBridge event bus
     // const eventBus = eventBridge.EventBus.fromEventBusName(this, );
 
-    const APIeventPattern = {
-      source: ["custom.source"],
-      detail: ["CustomResource"],
-    };
+    // const APIeventPattern = {
+    //   source: ["custom.source"],
+    //   detail: ["CustomResource"],
+    // };
 
     // Define the target for your event
     const customEventRule = new events.Rule(this, "CustomEventRule", {
       // eventBus,
-      eventPattern: APIeventPattern,
+      eventPattern: apieventPattern,
       targets: [new targets.LambdaFunction(customEventLambda)],
     });
 
