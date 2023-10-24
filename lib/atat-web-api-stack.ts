@@ -10,7 +10,9 @@ import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as elbv2 from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
+import * as targets from "aws-cdk-lib/aws-events-targets";
 import * as nodejs from "aws-cdk-lib/aws-lambda-nodejs";
+import * as eventBridge from "aws-cdk-lib/aws-events";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import { Construct } from "constructs";
 import { UserPermissionBoundary } from "./aspects/user-only-permission-boundary";
@@ -317,6 +319,42 @@ export class AtatWebApiStack extends cdk.Stack {
       tracing: lambda.Tracing.ACTIVE,
     });
     generateDocumentResource.addMethod(HttpMethod.POST, new apigw.LambdaIntegration(generateDocumentFn));
+
+    // Create a custom event
+    const customEvent = {
+      apiGatewayIpAddresses: apiProps.vpcConfig?.interfaceEndpoint,
+      // other relevant data...
+    };
+
+    const lambdaCode = `
+      exports.handler = async (event) => {
+        // Lambda function code here
+        // Access event details, process the IP addresses, and perform your automation logic
+        const apiGatewayIpAddresses = event.detail.apiGatewayIpAddresses;
+        console.log(apiGatewayIpAddresses)
+        };
+    `;
+
+    const customEventLambda = new lambda.Function(this, "CustomEventLambda", {
+      runtime: lambda.Runtime.NODEJS_14_X,
+      handler: "index.handler",
+      code: lambda.Code.fromInline(lambdaCode), // Use awsLambda.Code.fromInline to specify inline code
+    });
+
+    // Send the custom event to the EventBridge event bus
+    const eventBus = eventBridge.EventBus.fromEventBusName(this, "YourEventBusName", "your-event-bus-name");
+
+    const APIeventPattern = {
+      source: ["custom.source"],
+      detail: customEvent,
+    };
+
+    // Define the target for your event
+    const customEventRule = new eventBridge.Rule(this, "CustomEventRule", {
+      eventBus,
+      eventPattern: APIeventPattern,
+      targets: [new targets.LambdaFunction(customEventLambda)],
+    });
 
     // Build all Cost Resources
     result = new CostApiImplementation(this, {
