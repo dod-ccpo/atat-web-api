@@ -327,9 +327,9 @@ export class AtatWebApiStack extends cdk.Stack {
     };
 
     const apieventPattern = {
-      source: ["custom.source"],
+      source: ["aws.ec2"],
       detail: {
-        eventName: [customEvent],
+        eventName: ["CreateTransitGatewayVpcAttachment"],
       },
     };
 
