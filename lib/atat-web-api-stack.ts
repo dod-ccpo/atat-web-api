@@ -12,7 +12,7 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as targets from "aws-cdk-lib/aws-events-targets";
 import * as nodejs from "aws-cdk-lib/aws-lambda-nodejs";
-import * as eventBridge from "aws-cdk-lib/aws-events";
+import * as events from "aws-cdk-lib/aws-events";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import { Construct } from "constructs";
 import { UserPermissionBoundary } from "./aspects/user-only-permission-boundary";
@@ -342,7 +342,7 @@ export class AtatWebApiStack extends cdk.Stack {
     });
 
     // Send the custom event to the EventBridge event bus
-    const eventBus = eventBridge.EventBus.fromEventBusName(this, "YourEventBusName", "your-event-bus-name");
+    // const eventBus = eventBridge.EventBus.fromEventBusName(this, );
 
     const APIeventPattern = {
       source: ["custom.source"],
@@ -350,8 +350,8 @@ export class AtatWebApiStack extends cdk.Stack {
     };
 
     // Define the target for your event
-    const customEventRule = new eventBridge.Rule(this, "CustomEventRule", {
-      eventBus,
+    const customEventRule = new events.Rule(this, "CustomEventRule", {
+      // eventBus,
       eventPattern: APIeventPattern,
       targets: [new targets.LambdaFunction(customEventLambda)],
     });
