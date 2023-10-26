@@ -492,11 +492,12 @@ export class AtatWebApiStack extends cdk.Stack {
     if (network) {
     for (let index = 0; index < network.vpc.availabilityZones.length; index++) {
       const getEndpointIp = new cr.AwsCustomResource(this, `GetEndpointIp${index}`, {
-          onUpdate: {
+          onCreate: {
               service: 'EC2',
               action: 'DescribeNetworkInterfaces',
               // outputPath: `NetworkInterfaces.${index}.PrivateIpAddress`,
               parameters: { NetworkInterfaceIds: apiProps.vpcConfig?.interfaceEndpoint },
+              // role: crLambdaRole,
           },
       });
 
@@ -514,6 +515,7 @@ export class AtatWebApiStack extends cdk.Stack {
                 Detail: JSON.stringify({ endpointResponse }),
               },
             ],
+          role: crLambdaRole,
           },
         },
       })
