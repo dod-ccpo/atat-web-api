@@ -391,35 +391,35 @@ export class AtatWebApiStack extends cdk.Stack {
     ));
 
     // Initialize the AWS SDK
-  //   if (network) {
-  //   for (let index = 0; index < network.vpc.availabilityZones.length; index++) {
-  //     const handler2 = new nodejs.NodejsFunction(this, "VpcEndpointHandler2", {
-  //       runtime: lambda.Runtime.NODEJS_18_X,
-  //       entry: "lib/custom-resources/endpoint-ips.ts",
-  //       handler: "onEvent",
-  //       // vpc: network.vpc,
-  //       initialPolicy: [
-  //         new iam.PolicyStatement({
-  //           effect: iam.Effect.ALLOW,
-  //           actions: ["ec2:DescribeVpcEndpoints", "ec2:DescribeNetworkInterfaces"],
-  //           resources: ["*"],
-  //         }),
-  //       ],
-  //     })
+    if (network) {
+    for (let index = 0; index < network.vpc.availabilityZones.length; index++) {
+      const handler2 = new nodejs.NodejsFunction(this, "VpcEndpointHandler2", {
+        runtime: lambda.Runtime.NODEJS_18_X,
+        entry: "lib/custom-resources/endpoint-ips.ts",
+        handler: "onEvent",
+        // vpc: network.vpc,
+        initialPolicy: [
+          new iam.PolicyStatement({
+            effect: iam.Effect.ALLOW,
+            actions: ["ec2:DescribeVpcEndpoints", "ec2:DescribeNetworkInterfaces"],
+            resources: ["*"],
+          }),
+        ],
+      })
 
-  //   const vpcEndpointIpProvider2 = new cr.Provider(this, "VpcEndpointIps2", {
-  //     onEventHandler: handler2,
-  //     vpc: network.vpc,
-  //   });
+    const vpcEndpointIpProvider2 = new cr.Provider(this, "VpcEndpointIps2", {
+      onEventHandler: handler2,
+      vpc: network.vpc,
+    });
 
-  //   const customResource = new cdk.CustomResource(this, "ApiGatewayEndpointIps", {
-  //     serviceToken: vpcEndpointIpProvider2.serviceToken,
-  //     properties: {
-  //       VpcEndpointId: apiProps.vpcConfig?.interfaceEndpoint
-  //     }
-  //   })
-  //   }
-  // }
+    const customResource = new cdk.CustomResource(this, "ApiGatewayEndpointIps", {
+      serviceToken: vpcEndpointIpProvider2.serviceToken,
+      properties: {
+        VpcEndpointId: apiProps.vpcConfig?.interfaceEndpoint
+      }
+    })
+    }
+  }
 
 
 
@@ -440,56 +440,42 @@ export class AtatWebApiStack extends cdk.Stack {
       //   },
       // })
 
+    // const crLambdaRole = new iam.Role(this, 'CustomResourcetLambdaRole', {
+    //   assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
+    //   managedPolicies: [
+    //     iam.ManagedPolicy.fromAwsManagedPolicyName(
+    //       'service-role/AWSLambdaBasicExecutionRole'
+    //     ),
+    //   ],
 
+    // });
 
-    //   // Create an AWS Custom Resource to get the PrivateIpAddress
-    //   new AwsCustomResource(this, `GetEndpointIp${index}`, vpcEndpointIpProvider2, {
-    //     onUpdate: {
-    //       service: 'EC2',
-    //       action: 'describeNetworkInterfaces',
-    //       parameters: { NetworkInterfaceIds: this.vpce.vpcEndpointNetworkInterfaceIds },
-    //       outputPath: `NetworkInterfaces.${index}.PrivateIpAddress`,
-    //     },
-    //   }).send();
+    // // Create an inline policy for the IAM role
+    // const inlinePolicy = new iam.Policy(this, 'attachmentLambdaInlinePolicy', {
+    //   statements: [
+    //     new iam.PolicyStatement({
+    //       actions: [
+    //               'ec2:DescribeNetworkInterfaces',
+    //               'events:PutEvents',
+    //             ],
+    //       effect: iam.Effect.ALLOW,
+    //       resources: ['*'],
+    //     }),
+    //   ],
+    // });
 
-    // }
+    // // Attach the inline policy to the IAM role
+    // crLambdaRole.attachInlinePolicy(inlinePolicy);
 
-    const crLambdaRole = new iam.Role(this, 'CustomResourcetLambdaRole', {
-      assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
-      managedPolicies: [
-        iam.ManagedPolicy.fromAwsManagedPolicyName(
-          'service-role/AWSLambdaBasicExecutionRole'
-        ),
-      ],
+    // NagSuppressions.addResourceSuppressions(
+    //   inlinePolicy, [
+    //   {
+    //     id: "NIST.800.53.R4-IAMNoInlinePolicy",
+    //     reason: "Inline policy holds no security threat",
+    //   },
+    // ]);
 
-    });
-
-    // Create an inline policy for the IAM role
-    const inlinePolicy = new iam.Policy(this, 'attachmentLambdaInlinePolicy', {
-      statements: [
-        new iam.PolicyStatement({
-          actions: [
-                  'ec2:DescribeNetworkInterfaces',
-                  'events:PutEvents',
-                ],
-          effect: iam.Effect.ALLOW,
-          resources: ['*'],
-        }),
-      ],
-    });
-
-    // Attach the inline policy to the IAM role
-    crLambdaRole.attachInlinePolicy(inlinePolicy);
-
-    NagSuppressions.addResourceSuppressions(
-      inlinePolicy, [
-      {
-        id: "NIST.800.53.R4-IAMNoInlinePolicy",
-        reason: "Inline policy holds no security threat",
-      },
-    ]);
-
-    if (network) {
+    // if (network) {
     // for (let index = 0; index < network.vpc.availabilityZones.length; index++) {
     //   const getEndpointIp = new cr.AwsCustomResource(this, `GetEndpointIp${index}`, {
     //       onCreate: {
@@ -503,26 +489,26 @@ export class AtatWebApiStack extends cdk.Stack {
 
     //   const endpointResponse = getEndpointIp.getResponseField(`NetworkInterfaces.${index}.PrivateIpAddress`);
 
-      new cr.AwsCustomResource(this,  "sendEvent", {
-        onCreate: {
-          service: 'Events',
-          action: 'PutEvents',
-          parameters: {
-            Entries: [
-              {
-                Source: 'CustomSource',
-                DetailType: 'PrivateIpAddress',
-                // Detail: JSON.stringify({ endpointResponse }),
-              },
-            ],
-          role: crLambdaRole,
-          policy: cr.AwsCustomResourcePolicy.fromSdkCalls({
-            resources: cr.AwsCustomResourcePolicy.ANY_RESOURCE,
-          }),
-        },
-      }
-      })
-    }
+    //   new cr.AwsCustomResource(this,  "sendEvent", {
+    //     onCreate: {
+    //       service: 'Events',
+    //       action: 'PutEvents',
+    //       parameters: {
+    //         Entries: [
+    //           {
+    //             Source: 'CustomSource',
+    //             DetailType: 'PrivateIpAddress',
+    //             // Detail: JSON.stringify({ endpointResponse }),
+    //           },
+    //         ],
+    //       role: crLambdaRole,
+    //       policy: cr.AwsCustomResourcePolicy.fromSdkCalls({
+    //         resources: cr.AwsCustomResourcePolicy.ANY_RESOURCE,
+    //       }),
+    //     },
+    //   }
+    //   })
+    // }
 
     // TESTING FOR NET FIREWALL MIGRATION
 
