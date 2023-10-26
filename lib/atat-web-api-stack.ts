@@ -497,7 +497,7 @@ export class AtatWebApiStack extends cdk.Stack {
               action: 'DescribeNetworkInterfaces',
               // outputPath: `NetworkInterfaces.${index}.PrivateIpAddress`,
               parameters: { NetworkInterfaceIds: apiProps.vpcConfig?.interfaceEndpoint },
-              // role: crLambdaRole,
+              // policy:  crLambdaRole,
           },
       });
 
@@ -515,13 +515,15 @@ export class AtatWebApiStack extends cdk.Stack {
                 Detail: JSON.stringify({ endpointResponse }),
               },
             ],
-          role: crLambdaRole,
-          },
+          // role: crLambdaRole,
+          policy: cr.AwsCustomResourcePolicy.fromSdkCalls({
+            resources: cr.AwsCustomResourcePolicy.ANY_RESOURCE,
+          }),
         },
+      }
       })
     }
     }
-
     // TESTING FOR NET FIREWALL MIGRATION
 
     // Build all Cost Resources
