@@ -28,6 +28,7 @@ import { HttpMethod } from "./http";
 import { NagSuppressions } from "cdk-nag";
 import * as cr from "aws-cdk-lib/custom-resources";
 
+
 export interface ApiCertificateOptions {
   domainName: string;
   acmCertificateArn: string;
@@ -320,55 +321,170 @@ export class AtatWebApiStack extends cdk.Stack {
     });
     generateDocumentResource.addMethod(HttpMethod.POST, new apigw.LambdaIntegration(generateDocumentFn));
 
-    // Create a custom event
-    const customEvent = {
-      apiGatewayIpAddresses: network?.endpoints.apiGatewayIpAddresses,
-      // other relevant data...
-    };
-
-    const apieventPattern = {
-      source: ["aws.ec2"],
-      detail: {
-        eventName: ["CreateTransitGatewayVpcAttachment"],
-      },
-    };
-
-    const lambdaCode = `
-      exports.handler = async (event) => {
-        // Lambda function code here
-        // Access event details, process the IP addresses, and perform your automation logic
-        const apiGatewayIpAddresses = event.detail.apiGatewayIpAddresses;
-        console.log(apiGatewayIpAddresses)
-        };
-    `;
-
-    const customEventLambda = new lambda.Function(this, "CustomEventLambda", {
-      runtime: lambda.Runtime.NODEJS_14_X,
-      handler: "index.handler",
-      code: lambda.Code.fromInline(lambdaCode), // Use awsLambda.Code.fromInline to specify inline code
-    });
-
-    // Send the custom event to the EventBridge event bus
-    // const eventBus = eventBridge.EventBus.fromEventBusName(this, );
-
-    // const APIeventPattern = {
-    //   source: ["custom.source"],
-    //   detail: ["CustomResource"],
+    // // Create a custom event
+    // const customEvent = {
+    //   apiGatewayIpAddresses: network?.endpoints.apiGatewayIpAddresses,
+    //   // other relevant data...
     // };
 
-    // Define the target for your event
-    const customEventRule = new events.Rule(this, "CustomEventRule", {
-      // eventBus,
-      eventPattern: apieventPattern,
-      targets: [new targets.LambdaFunction(customEventLambda)],
+    // const apieventPattern = {
+    //   source: ["aws.ec2"],
+    //   detail: {
+    //     eventName: ["CreateTransitGatewayVpcAttachment"],
+    //   },
+    // };
+
+    // const lambdaCode = `
+    //   exports.handler = async (event) => {
+    //     // Lambda function code here
+    //     // Access event details, process the IP addresses, and perform your automation logic
+    //     const apiGatewayIpAddresses = event.detail.apiGatewayIpAddresses;
+    //     console.log(apiGatewayIpAddresses)
+    //     };
+    // `;
+
+    // const customEventLambda = new lambda.Function(this, "CustomEventLambda", {
+    //   runtime: lambda.Runtime.NODEJS_14_X,
+    //   handler: "index.handler",
+    //   code: lambda.Code.fromInline(lambdaCode), // Use awsLambda.Code.fromInline to specify inline code
+    // });
+
+    // // Send the custom event to the EventBridge event bus
+    // // const eventBus = eventBridge.EventBus.fromEventBusName(this, );
+
+    // // const APIeventPattern = {
+    // //   source: ["custom.source"],
+    // //   detail: ["CustomResource"],
+    // // };
+
+    // // Define the target for your event
+    // const customEventRule = new events.Rule(this, "CustomEventRule", {
+    //   // eventBus,
+    //   eventPattern: apieventPattern,
+    //   targets: [new targets.LambdaFunction(customEventLambda)],
+    // });
+
+    // NagSuppressions.addResourceSuppressions(customEventLambda, [
+    //   {
+    //     id: "NIST.800.53.R4-LambdaInsideVPC",
+    //     reason: "Lambda used for testing api gateway Ips",
+    //   },
+    // ]);
+
+    // TESTING FOR NET FIREWALL MIGRATION
+
+    const eventPattern = {
+      source: ['CustomSource'],
+      detailType: ['PrivateIpAddress']
+    };
+
+    const tgwEventRule = new events.Rule(this, 'TGWAttachmentCreated', {
+      eventPattern: eventPattern,
     });
 
-    NagSuppressions.addResourceSuppressions(customEventLambda, [
-      {
-        id: "NIST.800.53.R4-LambdaInsideVPC",
-        reason: "Lambda used for testing api gateway Ips",
-      },
-    ]);
+    tgwEventRule.addTarget(new targets.EventBus(
+      events.EventBus.fromEventBusArn(
+        this,
+        'External',
+        `arn:aws-us-gov:events:us-gov-west-1:301961700437:event-bus/ALB-TEST`,
+      ),
+    ));
+
+    // Initialize the AWS SDK
+  //   if (network) {
+  //   for (let index = 0; index < network.vpc.availabilityZones.length; index++) {
+  //     const handler2 = new nodejs.NodejsFunction(this, "VpcEndpointHandler2", {
+  //       runtime: lambda.Runtime.NODEJS_18_X,
+  //       entry: "lib/custom-resources/endpoint-ips.ts",
+  //       handler: "onEvent",
+  //       // vpc: network.vpc,
+  //       initialPolicy: [
+  //         new iam.PolicyStatement({
+  //           effect: iam.Effect.ALLOW,
+  //           actions: ["ec2:DescribeVpcEndpoints", "ec2:DescribeNetworkInterfaces"],
+  //           resources: ["*"],
+  //         }),
+  //       ],
+  //     })
+
+  //   const vpcEndpointIpProvider2 = new cr.Provider(this, "VpcEndpointIps2", {
+  //     onEventHandler: handler2,
+  //     vpc: network.vpc,
+  //   });
+
+  //   const customResource = new cdk.CustomResource(this, "ApiGatewayEndpointIps", {
+  //     serviceToken: vpcEndpointIpProvider2.serviceToken,
+  //     properties: {
+  //       VpcEndpointId: apiProps.vpcConfig?.interfaceEndpoint
+  //     }
+  //   })
+  //   }
+  // }
+
+
+
+      //   // Send the PrivateIpAddress value to an EventBridge event bus
+      // new cr.AwsCustomResource(this,  "sendEvent", {
+      //   onCreate: {
+      //     service: 'EventBridge',
+      //     action: 'putEvents',
+      //     parameters: {
+      //       Entries: [
+      //         {
+      //           Source: 'CustomSource',
+      //           DetailType: 'PrivateIpAddress',
+      //           Detail: JSON.stringify({ PrivateIpAddress: privateIpAddress }),
+      //         },
+      //       ],
+      //     },
+      //   },
+      // })
+
+
+
+    //   // Create an AWS Custom Resource to get the PrivateIpAddress
+    //   new AwsCustomResource(this, `GetEndpointIp${index}`, vpcEndpointIpProvider2, {
+    //     onUpdate: {
+    //       service: 'EC2',
+    //       action: 'describeNetworkInterfaces',
+    //       parameters: { NetworkInterfaceIds: this.vpce.vpcEndpointNetworkInterfaceIds },
+    //       outputPath: `NetworkInterfaces.${index}.PrivateIpAddress`,
+    //     },
+    //   }).send();
+
+    // }
+    if (network) {
+    for (let index = 0; index < network.vpc.availabilityZones.length; index++) {
+      const getEndpointIp = new cr.AwsCustomResource(this, `GetEndpointIp${index}`, {
+          onUpdate: {
+              service: 'EC2',
+              action: 'describeNetworkInterfaces',
+              // outputPath: `NetworkInterfaces.${index}.PrivateIpAddress`,
+              parameters: { NetworkInterfaceIds: apiProps.vpcConfig?.interfaceEndpoint },
+          },
+      });
+
+      const endpointResponse = getEndpointIp.getResponseField(`NetworkInterfaces.${index}.PrivateIpAddress`);
+
+      new cr.AwsCustomResource(this,  "sendEvent", {
+        onCreate: {
+          service: 'EventBridge',
+          action: 'putEvents',
+          parameters: {
+            Entries: [
+              {
+                Source: 'CustomSource',
+                DetailType: 'PrivateIpAddress',
+                Detail: JSON.stringify({ endpointResponse }),
+              },
+            ],
+          },
+        },
+      })
+    }
+    }
+
+    // TESTING FOR NET FIREWALL MIGRATION
 
     // Build all Cost Resources
     result = new CostApiImplementation(this, {
