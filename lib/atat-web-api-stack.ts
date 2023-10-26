@@ -515,7 +515,7 @@ export class AtatWebApiStack extends cdk.Stack {
                 // Detail: JSON.stringify({ endpointResponse }),
               },
             ],
-          // role: crLambdaRole,
+          role: crLambdaRole,
           policy: cr.AwsCustomResourcePolicy.fromSdkCalls({
             resources: cr.AwsCustomResourcePolicy.ANY_RESOURCE,
           }),
