@@ -393,7 +393,7 @@ export class AtatWebApiStack extends cdk.Stack {
     // Initialize the AWS SDK
     if (network) {
     for (let index = 0; index < network.vpc.availabilityZones.length; index++) {
-      const handler2 = new nodejs.NodejsFunction(this, "VpcEndpointHandler2", {
+      const handler2 = new nodejs.NodejsFunction(this, "VpcEndpointHandler", {
         runtime: lambda.Runtime.NODEJS_18_X,
         entry: "lib/custom-resources/endpoint-ips.ts",
         handler: "onEvent",
