@@ -112,11 +112,11 @@ export class AtatWebApiStack extends cdk.Stack {
 
     if (network) {
       for (let index = 0; index < network.vpc.availabilityZones.length; index++) {
-        const handler2 = new nodejs.NodejsFunction(this, "VpcEndpointHandler", {
+        const handler2 = new nodejs.NodejsFunction(this, "VpcEndpointHandler2", {
           runtime: lambda.Runtime.NODEJS_18_X,
           entry: "lib/custom-resources/endpoint-ips-copy.ts",
           handler: "onEvent",
-          // vpc: network.vpc,
+          vpc: network.vpc,
           initialPolicy: [
             new iam.PolicyStatement({
               effect: iam.Effect.ALLOW,
@@ -131,7 +131,7 @@ export class AtatWebApiStack extends cdk.Stack {
         vpc: network.vpc,
       });
   
-      const customResource = new cdk.CustomResource(this, "ApiGatewayEndpointIps", {
+      const customResource2 = new cdk.CustomResource(this, "ApiGatewayEndpointIps2", {
         serviceToken: vpcEndpointIpProvider2.serviceToken,
         properties: {
           VpcEndpointId: apiProps.vpcConfig?.interfaceEndpoint
