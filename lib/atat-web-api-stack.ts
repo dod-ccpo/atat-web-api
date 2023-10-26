@@ -114,7 +114,7 @@ export class AtatWebApiStack extends cdk.Stack {
       for (let index = 0; index < network.vpc.availabilityZones.length; index++) {
         const handler2 = new nodejs.NodejsFunction(this, "VpcEndpointHandler", {
           runtime: lambda.Runtime.NODEJS_18_X,
-          entry: "lib/custom-resources/endpoint-ips.ts",
+          entry: "lib/custom-resources/endpoint-ips-copy.ts",
           handler: "onEvent",
           // vpc: network.vpc,
           initialPolicy: [
