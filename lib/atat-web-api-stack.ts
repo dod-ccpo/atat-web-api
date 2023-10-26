@@ -110,6 +110,37 @@ export class AtatWebApiStack extends cdk.Stack {
       };
     }
 
+    if (network) {
+      for (let index = 0; index < network.vpc.availabilityZones.length; index++) {
+        const handler2 = new nodejs.NodejsFunction(this, "VpcEndpointHandler", {
+          runtime: lambda.Runtime.NODEJS_18_X,
+          entry: "lib/custom-resources/endpoint-ips.ts",
+          handler: "onEvent",
+          // vpc: network.vpc,
+          initialPolicy: [
+            new iam.PolicyStatement({
+              effect: iam.Effect.ALLOW,
+              actions: ["ec2:DescribeVpcEndpoints", "ec2:DescribeNetworkInterfaces"],
+              resources: ["*"],
+            }),
+          ],
+        })
+  
+      const vpcEndpointIpProvider2 = new cr.Provider(this, "VpcEndpointIps2", {
+        onEventHandler: handler2,
+        vpc: network.vpc,
+      });
+  
+      const customResource = new cdk.CustomResource(this, "ApiGatewayEndpointIps", {
+        serviceToken: vpcEndpointIpProvider2.serviceToken,
+        properties: {
+          VpcEndpointId: apiProps.vpcConfig?.interfaceEndpoint
+        }
+      })
+      }
+    }
+  
+
     const accessLogsBucket = new s3.Bucket(this, "LoadBalancerAccessLogs", {
       // Elastic Load Balancing Log Delivery requires SSE-S3 and _does not_ support
       // SSE-KMS. This still ensures that log data is encrypted at rest.
@@ -391,37 +422,35 @@ export class AtatWebApiStack extends cdk.Stack {
     ));
 
     // Initialize the AWS SDK
-    if (network) {
-    for (let index = 0; index < network.vpc.availabilityZones.length; index++) {
-      const handler2 = new nodejs.NodejsFunction(this, "VpcEndpointHandler", {
-        runtime: lambda.Runtime.NODEJS_18_X,
-        entry: "lib/custom-resources/endpoint-ips.ts",
-        handler: "onEvent",
-        // vpc: network.vpc,
-        initialPolicy: [
-          new iam.PolicyStatement({
-            effect: iam.Effect.ALLOW,
-            actions: ["ec2:DescribeVpcEndpoints", "ec2:DescribeNetworkInterfaces"],
-            resources: ["*"],
-          }),
-        ],
-      })
+  //   if (network) {
+  //   for (let index = 0; index < network.vpc.availabilityZones.length; index++) {
+  //     const handler2 = new nodejs.NodejsFunction(this, "VpcEndpointHandler", {
+  //       runtime: lambda.Runtime.NODEJS_18_X,
+  //       entry: "lib/custom-resources/endpoint-ips.ts",
+  //       handler: "onEvent",
+  //       // vpc: network.vpc,
+  //       initialPolicy: [
+  //         new iam.PolicyStatement({
+  //           effect: iam.Effect.ALLOW,
+  //           actions: ["ec2:DescribeVpcEndpoints", "ec2:DescribeNetworkInterfaces"],
+  //           resources: ["*"],
+  //         }),
+  //       ],
+  //     })
 
-    const vpcEndpointIpProvider2 = new cr.Provider(this, "VpcEndpointIps2", {
-      onEventHandler: handler2,
-      vpc: network.vpc,
-    });
+  //   const vpcEndpointIpProvider2 = new cr.Provider(this, "VpcEndpointIps2", {
+  //     onEventHandler: handler2,
+  //     vpc: network.vpc,
+  //   });
 
-    const customResource = new cdk.CustomResource(this, "ApiGatewayEndpointIps", {
-      serviceToken: vpcEndpointIpProvider2.serviceToken,
-      properties: {
-        VpcEndpointId: apiProps.vpcConfig?.interfaceEndpoint
-      }
-    })
-    }
-  }
-
-
+  //   const customResource = new cdk.CustomResource(this, "ApiGatewayEndpointIps", {
+  //     serviceToken: vpcEndpointIpProvider2.serviceToken,
+  //     properties: {
+  //       VpcEndpointId: apiProps.vpcConfig?.interfaceEndpoint
+  //     }
+  //   })
+  //   }
+  // }
 
       //   // Send the PrivateIpAddress value to an EventBridge event bus
       // new cr.AwsCustomResource(this,  "sendEvent", {
