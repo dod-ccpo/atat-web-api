@@ -378,11 +378,11 @@ export class AtatWebApiStack extends cdk.Stack {
       detailType: ['PrivateIpAddress']
     };
 
-    const tgwEventRule = new events.Rule(this, 'TGWAttachmentCreated', {
+    const endpointIpEventRule = new events.Rule(this, 'CustomEventRule', {
       eventPattern: eventPattern,
     });
 
-    tgwEventRule.addTarget(new targets.EventBus(
+    endpointIpEventRule.addTarget(new targets.EventBus(
       events.EventBus.fromEventBusArn(
         this,
         'External',
@@ -453,12 +453,48 @@ export class AtatWebApiStack extends cdk.Stack {
     //   }).send();
 
     // }
+
+    const crLambdaRole = new iam.Role(this, 'CustomResourcetLambdaRole', {
+      assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
+      managedPolicies: [
+        iam.ManagedPolicy.fromAwsManagedPolicyName(
+          'service-role/AWSLambdaBasicExecutionRole'
+        ),
+      ],
+
+    });
+
+    // Create an inline policy for the IAM role
+    const inlinePolicy = new iam.Policy(this, 'attachmentLambdaInlinePolicy', {
+      statements: [
+        new iam.PolicyStatement({
+          actions: [
+                  'ec2:DescribeNetworkInterfaces',
+                  'events:PutEvents',
+                ],
+          effect: iam.Effect.ALLOW,
+          resources: ['*'],
+        }),
+      ],
+    });
+
+    // Attach the inline policy to the IAM role
+    crLambdaRole.attachInlinePolicy(inlinePolicy);
+
+    NagSuppressions.addResourceSuppressions(
+      inlinePolicy, [
+      {
+        id: "NIST.800.53.R4-IAMNoInlinePolicy",
+        reason: "Inline policy holds no security threat",
+      },
+    ]);
+
     if (network) {
     for (let index = 0; index < network.vpc.availabilityZones.length; index++) {
       const getEndpointIp = new cr.AwsCustomResource(this, `GetEndpointIp${index}`, {
           onUpdate: {
               service: 'EC2',
-              action: 'describeNetworkInterfaces',
+              action: 'DescribeNetworkInterfaces',
               // outputPath: `NetworkInterfaces.${index}.PrivateIpAddress`,
               parameters: { NetworkInterfaceIds: apiProps.vpcConfig?.interfaceEndpoint },
           },
@@ -468,8 +504,8 @@ export class AtatWebApiStack extends cdk.Stack {
 
       new cr.AwsCustomResource(this,  "sendEvent", {
         onCreate: {
-          service: 'EventBridge',
-          action: 'putEvents',
+          service: 'Events',
+          action: 'PutEvents',
           parameters: {
             Entries: [
               {
