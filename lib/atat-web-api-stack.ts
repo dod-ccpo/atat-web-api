@@ -490,18 +490,18 @@ export class AtatWebApiStack extends cdk.Stack {
     ]);
 
     if (network) {
-    for (let index = 0; index < network.vpc.availabilityZones.length; index++) {
-      const getEndpointIp = new cr.AwsCustomResource(this, `GetEndpointIp${index}`, {
-          onCreate: {
-              service: 'EC2',
-              action: 'DescribeNetworkInterfaces',
-              // outputPath: `NetworkInterfaces.${index}.PrivateIpAddress`,
-              parameters: { NetworkInterfaceIds: apiProps.vpcConfig?.interfaceEndpoint },
-              // policy:  crLambdaRole,
-          },
-      });
+    // for (let index = 0; index < network.vpc.availabilityZones.length; index++) {
+    //   const getEndpointIp = new cr.AwsCustomResource(this, `GetEndpointIp${index}`, {
+    //       onCreate: {
+    //           service: 'EC2',
+    //           action: 'DescribeNetworkInterfaces',
+    //           // outputPath: `NetworkInterfaces.${index}.PrivateIpAddress`,
+    //           parameters: { NetworkInterfaceIds: apiProps.vpcConfig?.interfaceEndpoint },
+    //           // policy:  inlinePolicy,
+    //       },
+    //   });
 
-      const endpointResponse = getEndpointIp.getResponseField(`NetworkInterfaces.${index}.PrivateIpAddress`);
+    //   const endpointResponse = getEndpointIp.getResponseField(`NetworkInterfaces.${index}.PrivateIpAddress`);
 
       new cr.AwsCustomResource(this,  "sendEvent", {
         onCreate: {
@@ -512,7 +512,7 @@ export class AtatWebApiStack extends cdk.Stack {
               {
                 Source: 'CustomSource',
                 DetailType: 'PrivateIpAddress',
-                Detail: JSON.stringify({ endpointResponse }),
+                // Detail: JSON.stringify({ endpointResponse }),
               },
             ],
           // role: crLambdaRole,
@@ -523,7 +523,7 @@ export class AtatWebApiStack extends cdk.Stack {
       }
       })
     }
-    }
+
     // TESTING FOR NET FIREWALL MIGRATION
 
     // Build all Cost Resources
