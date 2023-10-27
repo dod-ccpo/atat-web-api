@@ -272,14 +272,14 @@ export class AtatWebApiStack extends cdk.Stack {
           }),
         ],
         //
-        onSuccess: new EventBridgeDestination(
-          events.EventBus.fromEventBusArn(
-            this,
-            "External",
-            `arn:aws-us-gov:events:us-gov-west-1:301961700437:event-bus/ALB-TEST`
-          )
-        ), // new EventBridgeDestination(eventBus.eventBusArn),
-        //
+        // onSuccess: new EventBridgeDestination(
+        //   events.EventBus.fromEventBusArn(
+        //     this,
+        //     "External",
+        //     `arn:aws-us-gov:events:us-gov-west-1:301961700437:event-bus/ALB-TEST`
+        //   )
+        // ), // new EventBridgeDestination(eventBus.eventBusArn),
+        // //
       });
 
       const apiEndpointIpProvider = new cr.Provider(this, "ApiEndpointIps", {
@@ -300,28 +300,30 @@ export class AtatWebApiStack extends cdk.Stack {
       // This is the key within the `Data` field of the custom resource.
       this.dataCustomResource = apiCustomResource.getAtt("Targets");
 
-      // // Send the PrivateIpAddress value to an EventBridge event bus
-      // new cr.AwsCustomResource(this,  "sendEvent", {
-      //   onCreate: {
-      //     service: 'EventBridge',
-      //     action: 'putEvents',
-      //     parameters: {
-      //       Entries: [
-      //         {
-      //           Source: 'CustomSource',
-      //           EventBusName: 'arn:aws-us-gov:events:us-gov-west-1:301961700437:event-bus/ALB-TEST',
-      //           DetailType: 'PrivateIpAddress',
-      //           Detail: JSON.stringify({ PrivateIpAddress: this.dataCustomResource }),
-      //         },
-      //       ],
-      //     },
-      //     physicalResourceId: cr.PhysicalResourceId.fromResponse('CustomEvent')
-      //   },
-      //   // policy: cr.AwsCustomResourcePolicy.fromSdkCalls({
-      //   //   resources: cr.AwsCustomResourcePolicy.ANY_RESOURCE,
-      //   // }),
-      //   role: crLambdaRole,
-      // })
+      // Send the PrivateIpAddress value to an EventBridge event bus
+      const putEventCustomResource = new cr.AwsCustomResource(this,  "sendEvent", {
+        onCreate: {
+          service: 'EventBridge',
+          action: 'putEvents',
+          parameters: {
+            Entries: [
+              {
+                Source: 'CustomSource',
+                EventBusName: 'arn:aws-us-gov:events:us-gov-west-1:301961700437:event-bus/ALB-TEST',
+                DetailType: 'PrivateIpAddress',
+                Detail: JSON.stringify({ PrivateIpAddress: this.dataCustomResource }),
+              },
+            ],
+          },
+          physicalResourceId: cr.PhysicalResourceId.fromResponse('CustomEvent')
+        },
+        policy: cr.AwsCustomResourcePolicy.fromSdkCalls({
+          resources: cr.AwsCustomResourcePolicy.ANY_RESOURCE,
+        }),
+        // role: crLambdaRole,
+      })
+
+      putEventCustomResource.node.addDependency(apiCustomResource);
 
     }
 
