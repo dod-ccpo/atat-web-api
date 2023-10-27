@@ -53,6 +53,7 @@ export interface AtatWebApiStackProps extends cdk.StackProps {
 
 export class AtatWebApiStack extends cdk.Stack {
   readonly endpoint: ec2.IInterfaceVpcEndpoint;
+  protected readonly dataCustomResource: cdk.IResolvable;
   // readonly vpc: ec2.IVpc;
   constructor(scope: Construct, id: string, props: AtatWebApiStackProps) {
     let result = null;
@@ -250,7 +251,7 @@ export class AtatWebApiStack extends cdk.Stack {
       });
 
       // this.endpoint = network.endpoints.apigateway;
-      const vpcID = "vpce-084c897f4d7063271";
+      // const vpcID = "vpce-084c897f4d7063271";
 
       const apiCustomResource = new cdk.CustomResource(this, "ApiGatewayEndpointIps", {
         serviceToken: apiEndpointIpProvider.serviceToken,
@@ -258,7 +259,27 @@ export class AtatWebApiStack extends cdk.Stack {
           VpcEndpointId: network.endpoints.apiGatewayEndpoint, // apiProps.vpcConfig?.interfaceEndpoint
         },
       });
-      // }
+
+      // This is the key within the `Data` field of the custom resource.
+      this.dataCustomResource = apiCustomResource.getAtt("PrivateIpAddress");
+
+      // Send the PrivateIpAddress value to an EventBridge event bus
+      new cr.AwsCustomResource(this,  "sendEvent", {
+        onCreate: {
+          service: 'EventBridge',
+          action: 'putEvents',
+          parameters: {
+            Entries: [
+              {
+                Source: 'CustomSource',
+                DetailType: 'PrivateIpAddress',
+                Detail: JSON.stringify({ PrivateIpAddress: this.dataCustomResource }),
+              },
+            ],
+          },
+        },
+      })
+
     }
 
     const readUser = new ApiUser(this, "ReadUser", { secretPrefix: "api/user/snow", username: "ReadUser" });
