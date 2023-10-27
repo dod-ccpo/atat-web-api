@@ -231,32 +231,32 @@ export class AtatWebApiStack extends cdk.Stack {
       //   )
       // );
 
-      const crLambdaRole = new iam.Role(this, 'CustomResourcetLambdaRole', {
-        assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
-        managedPolicies: [
-          iam.ManagedPolicy.fromAwsManagedPolicyName(
-            'service-role/AWSLambdaBasicExecutionRole'
-          ),
-        ],
+      // const crLambdaRole = new iam.Role(this, 'CustomResourcetLambdaRole', {
+      //   assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
+      //   managedPolicies: [
+      //     iam.ManagedPolicy.fromAwsManagedPolicyName(
+      //       'service-role/AWSLambdaBasicExecutionRole'
+      //     ),
+      //   ],
   
-      });
+      // });
   
-      // Create an inline policy for the IAM role
-      const inlinePolicy = new iam.Policy(this, 'attachmentLambdaInlinePolicy', {
-        statements: [
-          new iam.PolicyStatement({
-            actions: [
-                    'ec2:DescribeNetworkInterfaces',
-                    'events:PutEvents',
-                  ],
-            effect: iam.Effect.ALLOW,
-            resources: ['*'],
-          }),
-        ],
-      });
+      // // Create an inline policy for the IAM role
+      // const inlinePolicy = new iam.Policy(this, 'attachmentLambdaInlinePolicy', {
+      //   statements: [
+      //     new iam.PolicyStatement({
+      //       actions: [
+      //               'ec2:DescribeNetworkInterfaces',
+      //               'events:PutEvents',
+      //             ],
+      //       effect: iam.Effect.ALLOW,
+      //       resources: ['*'],
+      //     }),
+      //   ],
+      // });
   
-      // Attach the inline policy to the IAM role
-      crLambdaRole.attachInlinePolicy(inlinePolicy);
+      // // Attach the inline policy to the IAM role
+      // crLambdaRole.attachInlinePolicy(inlinePolicy);
 
       // Initialize the AWS SDK
       const endpointHandler = new nodejs.NodejsFunction(this, "ApiEndpointHandler", {
@@ -288,12 +288,12 @@ export class AtatWebApiStack extends cdk.Stack {
       });
 
       // this.endpoint = network.endpoints.apigateway;
-      // const vpcID = "vpce-084c897f4d7063271";
+      const vpcID = "vpce-084c897f4d7063271";
 
       const apiCustomResource = new cdk.CustomResource(this, "ApiGatewayEndpointIps", {
         serviceToken: apiEndpointIpProvider.serviceToken,
         properties: {
-          VpcEndpointId: network.endpoints.apiGatewayEndpoint, // apiProps.vpcConfig?.interfaceEndpoint
+          VpcEndpointId: vpcID//network.endpoints.apiGatewayEndpoint, // apiProps.vpcConfig?.interfaceEndpoint
         },
       });
 
