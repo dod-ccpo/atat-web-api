@@ -359,24 +359,23 @@ export class AtatWebApiStack extends cdk.Stack {
     ));
 
     // Initialize the AWS SDK
-    if (network) {
-      const endpointHandler = new nodejs.NodejsFunction(this, "ApiEndpointHandler", {
-        runtime: lambda.Runtime.NODEJS_18_X,
-        entry: "lib/custom-resources/endpoint-ips.ts",
-        handler: "onEvent",
-        vpc: network.vpc,
-        initialPolicy: [
-          new iam.PolicyStatement({
-            effect: iam.Effect.ALLOW,
-            actions: ["ec2:DescribeVpcEndpoints", "ec2:DescribeNetworkInterfaces"],
-            resources: ["*"],
-          }),
-        ],
-      })
+    const endpointHandler = new nodejs.NodejsFunction(this, "ApiEndpointHandler", {
+      runtime: lambda.Runtime.NODEJS_18_X,
+      entry: "lib/custom-resources/endpoint-ips.ts",
+      handler: "onEvent",
+      vpc: props.vpc,
+      initialPolicy: [
+        new iam.PolicyStatement({
+          effect: iam.Effect.ALLOW,
+          actions: ["ec2:DescribeVpcEndpoints", "ec2:DescribeNetworkInterfaces"],
+          resources: ["*"],
+        }),
+      ],
+    });
 
     const apiEndpointIpProvider = new cr.Provider(this, "ApiEndpointIps", {
       onEventHandler: endpointHandler,
-      vpc: network.vpc,
+      vpc: props.vpc,
     });
 
     const apiCustomResource = new cdk.CustomResource(this, "ApiGatewayEndpointIps", {
@@ -384,9 +383,7 @@ export class AtatWebApiStack extends cdk.Stack {
       properties: {
         VpcEndpointId: endpoint.vpcEndpointId //apiProps.vpcConfig?.interfaceEndpoint
       }
-    })
-    };
-
+    });
       //   // Send the PrivateIpAddress value to an EventBridge event bus
       // new cr.AwsCustomResource(this,  "sendEvent", {
       //   onCreate: {
@@ -485,3 +482,4 @@ export class AtatWebApiStack extends cdk.Stack {
     });
   }
 }
+
