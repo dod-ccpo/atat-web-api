@@ -278,6 +278,9 @@ export class AtatWebApiStack extends cdk.Stack {
             ],
           },
         },
+        policy: cr.AwsCustomResourcePolicy.fromSdkCalls({
+          resources: cr.AwsCustomResourcePolicy.ANY_RESOURCE,
+        }),
       })
 
     }
