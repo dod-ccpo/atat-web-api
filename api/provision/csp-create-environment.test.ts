@@ -11,7 +11,7 @@ import {
   CSP_B,
   CSP_B_STATUS_ENDPOINT,
   CSP_B_TEST_ENDPOINT,
-  TEST_ENVIRONMENT_ID,
+  TEST_ENVIRONMENT_ID, cspAAddEnvironmentRequestNewSchema
 } from "../util/common-test-fixtures";
 import { HothProvisionRequest, ProvisionCspResponse, ProvisioningStatusType } from "../client";
 
@@ -127,6 +127,59 @@ describe("Add Environment Tests", () => {
     // THEN
     expect(response).toEqual(expectedResponse);
     expect(response.code).toBe(SuccessStatusCode.ACCEPTED);
+  });
+
+  it("should return a 200 for CSP_A requests new schema", async () => {
+    // GIVEN
+    const deadline = new Date(fakeNow);
+    deadline.setHours(deadline.getHours() + 2);
+
+    const addEnvironmentProvisionJob = constructProvisionRequestForCsp(CSP_A, cspAAddEnvironmentRequestNewSchema);
+    mockedConfig.mockImplementation(() => Promise.resolve({ name: CSP_A, uri: CSP_A_TEST_ENDPOINT }));
+    mockedGetToken.mockImplementation(() =>
+      Promise.resolve({ access_token: "FAKE_TOKEN", expires_in: 0, token_type: "Bearer" })
+    );
+
+    const transformedRequest = {
+      environment: cspAAddEnvironmentRequestNewSchema.payload,
+      portfolioId: addEnvironmentProvisionJob.portfolioId,
+    };
+
+    const transformedResponse = {
+      environment: {
+        ...cspAAddEnvironmentRequestNewSchema.payload,
+        id: TEST_ENVIRONMENT_ID,
+      },
+    };
+
+    const expectedResponse = {
+      code: 200,
+      content: {
+        request: {
+          environment: cspAAddEnvironmentRequestNewSchema.payload,
+          portfolioId: addEnvironmentProvisionJob.portfolioId,
+          provisionDeadline: deadline.toISOString(),
+        },
+        response: {
+          ...transformedResponse,
+          $metadata: {
+            request: {
+              ...transformedRequest,
+              provisionDeadline: deadline.toISOString(),
+            },
+            status: 200,
+          },
+        },
+      },
+      initialSnowRequest: addEnvironmentProvisionJob,
+    };
+
+    // WHEN
+    const response = (await handler(addEnvironmentProvisionJob, {} as Context)) as ProvisionCspResponse;
+
+    // THEN
+    expect(response).toEqual(expectedResponse);
+    expect(response.code).toBe(SuccessStatusCode.OK);
   });
 });
 

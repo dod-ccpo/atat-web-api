@@ -59,8 +59,11 @@ async function makeRequest(client: IAtatClient, request: HothProvisionRequest): 
       ...(emailDistributionList && { emailDistributionList }),
       ...(isMigration !== undefined && { isMigration }),
     },
-    ...(!isMigration && { provisionDeadline: deadline.toISOString()})
   };
+
+  if (!isMigration) {
+    addEnvironmentRequest.provisionDeadline = deadline.toISOString();
+  }
 
   try {
     logger.info(`Invoking addEnvironment against CSP ${request.targetCspName}`);
