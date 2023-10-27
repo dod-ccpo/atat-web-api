@@ -187,11 +187,13 @@ describe("Add Environment Tests", () => {
   });
 
   it("should return a 200 for CSP_A requests new schema and omit deadline", async () => {
-
-    const addEnvironmentProvisionJob = constructProvisionRequestForCsp(CSP_A,
-      cspAAddEnvironmentRequestNewSchemaIsMigration);
-    mockedConfig.mockImplementation(() => Promise.resolve({ name: CSP_A,
-      uri: CSP_A_TEST_ENDPOINT_NEW_SCHEMA_MIGRATION }));
+    const addEnvironmentProvisionJob = constructProvisionRequestForCsp(
+      CSP_A,
+      cspAAddEnvironmentRequestNewSchemaIsMigration
+    );
+    mockedConfig.mockImplementation(() =>
+      Promise.resolve({ name: CSP_A, uri: CSP_A_TEST_ENDPOINT_NEW_SCHEMA_MIGRATION })
+    );
     mockedGetToken.mockImplementation(() =>
       Promise.resolve({ access_token: "FAKE_TOKEN", expires_in: 0, token_type: "Bearer" })
     );
