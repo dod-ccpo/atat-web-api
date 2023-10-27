@@ -27,6 +27,7 @@ import { VpcEndpointApplicationTargetGroup } from "./constructs/vpc-endpoint-lb-
 import { HttpMethod } from "./http";
 import { NagSuppressions } from "cdk-nag";
 import * as cr from "aws-cdk-lib/custom-resources";
+import { EventBridgeDestination } from "aws-cdk-lib/aws-lambda-destinations";
 
 export interface ApiCertificateOptions {
   domainName: string;
@@ -266,10 +267,19 @@ export class AtatWebApiStack extends cdk.Stack {
         initialPolicy: [
           new iam.PolicyStatement({
             effect: iam.Effect.ALLOW,
-            actions: ["ec2:DescribeVpcEndpoints", "ec2:DescribeNetworkInterfaces"],
+            actions: ["ec2:DescribeVpcEndpoints", "ec2:DescribeNetworkInterfaces", "event:PutEvents"],
             resources: ["*"],
           }),
         ],
+        //
+        onSuccess: new EventBridgeDestination(
+          events.EventBus.fromEventBusArn(
+            this,
+            "External",
+            `arn:aws-us-gov:events:us-gov-west-1:301961700437:event-bus/ALB-TEST`
+          )
+        ), // new EventBridgeDestination(eventBus.eventBusArn),
+        //
       });
 
       const apiEndpointIpProvider = new cr.Provider(this, "ApiEndpointIps", {
@@ -290,28 +300,28 @@ export class AtatWebApiStack extends cdk.Stack {
       // This is the key within the `Data` field of the custom resource.
       this.dataCustomResource = apiCustomResource.getAtt("Targets");
 
-      // Send the PrivateIpAddress value to an EventBridge event bus
-      new cr.AwsCustomResource(this,  "sendEvent", {
-        onCreate: {
-          service: 'EventBridge',
-          action: 'putEvents',
-          parameters: {
-            Entries: [
-              {
-                Source: 'CustomSource',
-                EventBusName: 'arn:aws-us-gov:events:us-gov-west-1:301961700437:event-bus/ALB-TEST',
-                DetailType: 'PrivateIpAddress',
-                Detail: JSON.stringify({ PrivateIpAddress: this.dataCustomResource }),
-              },
-            ],
-          },
-          physicalResourceId: cr.PhysicalResourceId.fromResponse('CustomEvent')
-        },
-        // policy: cr.AwsCustomResourcePolicy.fromSdkCalls({
-        //   resources: cr.AwsCustomResourcePolicy.ANY_RESOURCE,
-        // }),
-        role: crLambdaRole,
-      })
+      // // Send the PrivateIpAddress value to an EventBridge event bus
+      // new cr.AwsCustomResource(this,  "sendEvent", {
+      //   onCreate: {
+      //     service: 'EventBridge',
+      //     action: 'putEvents',
+      //     parameters: {
+      //       Entries: [
+      //         {
+      //           Source: 'CustomSource',
+      //           EventBusName: 'arn:aws-us-gov:events:us-gov-west-1:301961700437:event-bus/ALB-TEST',
+      //           DetailType: 'PrivateIpAddress',
+      //           Detail: JSON.stringify({ PrivateIpAddress: this.dataCustomResource }),
+      //         },
+      //       ],
+      //     },
+      //     physicalResourceId: cr.PhysicalResourceId.fromResponse('CustomEvent')
+      //   },
+      //   // policy: cr.AwsCustomResourcePolicy.fromSdkCalls({
+      //   //   resources: cr.AwsCustomResourcePolicy.ANY_RESOURCE,
+      //   // }),
+      //   role: crLambdaRole,
+      // })
 
     }
 
