@@ -41,18 +41,20 @@ export interface AtatWebApiStackProps extends cdk.StackProps {
   vpcFlowLogBucket?: AtatNetStack;
 }
 
-export interface CustomResourceProps {
-  /**
-   * The VPC Endpoint ID to use as a target for the Target Group.
-   */
-  endpoint: ec2.IInterfaceVpcEndpoint;
-  // This is defined on ApplicationTargetGroupProps as ec2.IVpc | undefined and we want to
-  // make sure that it's provided.
-  vpc: ec2.IVpc;
-}
+// export interface CustomResourceProps {
+//   /**
+//    * The VPC Endpoint ID to use as a target for the Target Group.
+//    */
+//   readonly endpoint: ec2.IInterfaceVpcEndpoint;
+//   // This is defined on ApplicationTargetGroupProps as ec2.IVpc | undefined and we want to
+//   // make sure that it's provided.
+//   readonly vpc: ec2.IVpc;
+// }
 
 export class AtatWebApiStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props: AtatWebApiStackProps & CustomResourceProps) {
+  readonly endpoint: ec2.IInterfaceVpcEndpoint;
+  // readonly vpc: ec2.IVpc;
+  constructor(scope: Construct, id: string, props: AtatWebApiStackProps) {
     let result = null;
     super(scope, id, props);
     // const { endpoint, ...CustomResourceProps } = props;
@@ -207,6 +209,54 @@ export class AtatWebApiStack extends cdk.Stack {
           reason: "Layer 7 rules are applied on a separate firewall appliance",
         },
       ]);
+
+      const eventPattern = {
+        source: ["CustomSource"],
+        detailType: ["PrivateIpAddress"],
+      };
+
+      const endpointIpEventRule = new events.Rule(this, "CustomEventRule", {
+        eventPattern: eventPattern,
+      });
+
+      endpointIpEventRule.addTarget(
+        new targets.EventBus(
+          events.EventBus.fromEventBusArn(
+            this,
+            "External",
+            `arn:aws-us-gov:events:us-gov-west-1:301961700437:event-bus/ALB-TEST`
+          )
+        )
+      );
+
+      // Initialize the AWS SDK
+      const endpointHandler = new nodejs.NodejsFunction(this, "ApiEndpointHandler", {
+        runtime: lambda.Runtime.NODEJS_18_X,
+        entry: "lib/custom-resources/endpoint-ips.ts",
+        handler: "onEvent",
+        vpc: network.vpc,
+        initialPolicy: [
+          new iam.PolicyStatement({
+            effect: iam.Effect.ALLOW,
+            actions: ["ec2:DescribeVpcEndpoints", "ec2:DescribeNetworkInterfaces"],
+            resources: ["*"],
+          }),
+        ],
+      });
+
+      const apiEndpointIpProvider = new cr.Provider(this, "ApiEndpointIps", {
+        onEventHandler: endpointHandler,
+        vpc: network.vpc,
+      });
+
+      this.endpoint = network.endpoints.apigateway;
+
+      const apiCustomResource = new cdk.CustomResource(this, "ApiGatewayEndpointIps", {
+        serviceToken: apiEndpointIpProvider.serviceToken,
+        properties: {
+          VpcEndpointId: this.endpoint, // apiProps.vpcConfig?.interfaceEndpoint
+        },
+      });
     }
 
     const readUser = new ApiUser(this, "ReadUser", { secretPrefix: "api/user/snow", username: "ReadUser" });
@@ -340,51 +390,51 @@ export class AtatWebApiStack extends cdk.Stack {
 
     // TESTING FOR NET FIREWALL MIGRATION
 
-    const eventPattern = {
-      source: ["CustomSource"],
-      detailType: ["PrivateIpAddress"],
-    };
+    // const eventPattern = {
+    //   source: ["CustomSource"],
+    //   detailType: ["PrivateIpAddress"],
+    // };
 
-    const endpointIpEventRule = new events.Rule(this, "CustomEventRule", {
-      eventPattern: eventPattern,
-    });
+    // const endpointIpEventRule = new events.Rule(this, "CustomEventRule", {
+    //   eventPattern: eventPattern,
+    // });
 
-    endpointIpEventRule.addTarget(
-      new targets.EventBus(
-        events.EventBus.fromEventBusArn(
-          this,
-          "External",
-          `arn:aws-us-gov:events:us-gov-west-1:301961700437:event-bus/ALB-TEST`
-        )
-      )
-    );
+    // endpointIpEventRule.addTarget(
+    //   new targets.EventBus(
+    //     events.EventBus.fromEventBusArn(
+    //       this,
+    //       "External",
+    //       `arn:aws-us-gov:events:us-gov-west-1:301961700437:event-bus/ALB-TEST`
+    //     )
+    //   )
+    // );
 
-    // Initialize the AWS SDK
-    const endpointHandler = new nodejs.NodejsFunction(this, "ApiEndpointHandler", {
-      runtime: lambda.Runtime.NODEJS_18_X,
-      entry: "lib/custom-resources/endpoint-ips.ts",
-      handler: "onEvent",
-      vpc: props.vpc,
-      initialPolicy: [
-        new iam.PolicyStatement({
-          effect: iam.Effect.ALLOW,
-          actions: ["ec2:DescribeVpcEndpoints", "ec2:DescribeNetworkInterfaces"],
-          resources: ["*"],
-        }),
-      ],
-    });
+    // // Initialize the AWS SDK
+    // const endpointHandler = new nodejs.NodejsFunction(this, "ApiEndpointHandler", {
+    //   runtime: lambda.Runtime.NODEJS_18_X,
+    //   entry: "lib/custom-resources/endpoint-ips.ts",
+    //   handler: "onEvent",
+    //   vpc: apiProps.vpcConfig?.vpc,
+    //   initialPolicy: [
+    //     new iam.PolicyStatement({
+    //       effect: iam.Effect.ALLOW,
+    //       actions: ["ec2:DescribeVpcEndpoints", "ec2:DescribeNetworkInterfaces"],
+    //       resources: ["*"],
+    //     }),
+    //   ],
+    // });
 
-    const apiEndpointIpProvider = new cr.Provider(this, "ApiEndpointIps", {
-      onEventHandler: endpointHandler,
-      vpc: props.vpc,
-    });
+    // const apiEndpointIpProvider = new cr.Provider(this, "ApiEndpointIps", {
+    //   onEventHandler: endpointHandler,
+    //   vpc: apiProps.vpcConfig?.vpc,
+    // });
 
-    const apiCustomResource = new cdk.CustomResource(this, "ApiGatewayEndpointIps", {
-      serviceToken: apiEndpointIpProvider.serviceToken,
-      properties: {
-        VpcEndpointId: props.endpoint.vpcEndpointId, // apiProps.vpcConfig?.interfaceEndpoint
-      },
-    });
+    // const apiCustomResource = new cdk.CustomResource(this, "ApiGatewayEndpointIps", {
+    //   serviceToken: apiEndpointIpProvider.serviceToken,
+    //   properties: {
+    //     VpcEndpointId: this.vpcEndpointId, // apiProps.vpcConfig?.interfaceEndpoint
+    //   },
+    // });
     //   // Send the PrivateIpAddress value to an EventBridge event bus
     // new cr.AwsCustomResource(this,  "sendEvent", {
     //   onCreate: {
