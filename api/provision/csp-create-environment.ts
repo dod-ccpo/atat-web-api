@@ -45,7 +45,7 @@ async function makeRequest(client: IAtatClient, request: HothProvisionRequest): 
     cloudDistinguisher,
     accountName,
     emailDistributionList,
-    isMigration
+    isMigration,
   } = payload;
 
   const addEnvironmentRequest: atatApiTypes.AddEnvironmentRequest = {

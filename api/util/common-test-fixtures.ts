@@ -99,7 +99,7 @@ export const cspAAddEnvironmentRequest = {
     name: "Sample Environment",
     administrators,
     classificationLevel: "UNCLASSIFIED",
-    cloudDistinguisher: undefined
+    cloudDistinguisher: undefined,
   },
 };
 

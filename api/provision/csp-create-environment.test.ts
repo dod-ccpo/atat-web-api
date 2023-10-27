@@ -15,7 +15,7 @@ import {
   CSP_B_TEST_ENDPOINT,
   TEST_ENVIRONMENT_ID,
   cspAAddEnvironmentRequestNewSchema,
-  cspAAddEnvironmentRequestNewSchemaIsMigration
+  cspAAddEnvironmentRequestNewSchemaIsMigration,
 } from "../util/common-test-fixtures";
 import { HothProvisionRequest, ProvisionCspResponse, ProvisioningStatusType } from "../client";
 
