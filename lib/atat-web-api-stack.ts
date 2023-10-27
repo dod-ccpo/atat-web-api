@@ -277,6 +277,7 @@ export class AtatWebApiStack extends cdk.Stack {
               },
             ],
           },
+          physicalResourceId: cr.PhysicalResourceId.fromResponse('CustomEvent')
         },
         policy: cr.AwsCustomResourcePolicy.fromSdkCalls({
           resources: cr.AwsCustomResourcePolicy.ANY_RESOURCE,
