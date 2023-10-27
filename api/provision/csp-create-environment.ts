@@ -55,9 +55,9 @@ async function makeRequest(client: IAtatClient, request: HothProvisionRequest): 
       administrators,
       classificationLevel,
       cloudDistinguisher,
-      ...(accountName && { accountName }),
-      ...(emailDistributionList && { emailDistributionList }),
-      ...(isMigration !== undefined && { isMigration }),
+      accountName,
+      emailDistributionList,
+      isMigration,
     },
   };
 

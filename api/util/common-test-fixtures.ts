@@ -115,6 +115,20 @@ export const cspAAddEnvironmentRequestNewSchema = {
   },
 };
 
+export const cspAAddEnvironmentRequestNewSchemaIsMigration = {
+  ...cspAProvisioningBodyNoPayload,
+  operationType: ProvisionRequestType.ADD_ENVIRONMENT,
+  payload: {
+    name: "Sample Environment",
+    administrators,
+    classificationLevel: "UNCLASSIFIED",
+    cloudDistinguisher: undefined,
+    accountName: "Test",
+    emailDistributionList: "Test",
+    isMigration: true,
+  },
+};
+
 export const cspAUpdateTaskOrderRequest = {
   ...cspAProvisioningBodyNoPayload,
   operationType: ProvisionRequestType.UPDATE_TASK_ORDER,
