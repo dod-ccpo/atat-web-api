@@ -8,13 +8,14 @@ import {
   constructProvisionRequestForCsp,
   CSP_A,
   CSP_A_TEST_ENDPOINT,
+  CSP_A_TEST_ENDPOINT_NEW_SCHEMA,
+  CSP_A_TEST_ENDPOINT_NEW_SCHEMA_MIGRATION,
   CSP_B,
   CSP_B_STATUS_ENDPOINT,
   CSP_B_TEST_ENDPOINT,
   TEST_ENVIRONMENT_ID,
   cspAAddEnvironmentRequestNewSchema,
-  cspAAddEnvironmentRequestNewSchemaIsMigration,
-  CSP_A_TEST_ENDPOINT_NEW_SCHEMA_MIGRATION, CSP_A_TEST_ENDPOINT_NEW_SCHEMA
+  cspAAddEnvironmentRequestNewSchemaIsMigration
 } from "../util/common-test-fixtures";
 import { HothProvisionRequest, ProvisionCspResponse, ProvisioningStatusType } from "../client";
 
@@ -187,8 +188,10 @@ describe("Add Environment Tests", () => {
 
   it("should return a 200 for CSP_A requests new schema and omit deadline", async () => {
 
-    const addEnvironmentProvisionJob = constructProvisionRequestForCsp(CSP_A, cspAAddEnvironmentRequestNewSchemaIsMigration);
-    mockedConfig.mockImplementation(() => Promise.resolve({ name: CSP_A, uri: CSP_A_TEST_ENDPOINT_NEW_SCHEMA_MIGRATION }));
+    const addEnvironmentProvisionJob = constructProvisionRequestForCsp(CSP_A,
+      cspAAddEnvironmentRequestNewSchemaIsMigration);
+    mockedConfig.mockImplementation(() => Promise.resolve({ name: CSP_A,
+      uri: CSP_A_TEST_ENDPOINT_NEW_SCHEMA_MIGRATION }));
     mockedGetToken.mockImplementation(() =>
       Promise.resolve({ access_token: "FAKE_TOKEN", expires_in: 0, token_type: "Bearer" })
     );
