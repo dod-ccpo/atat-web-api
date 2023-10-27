@@ -16,6 +16,8 @@ export const TEST_ENVIRONMENT_ID = "1a302680-6127-4bc1-be43-735703bdecb1";
 export const TEST_PROVISIONING_JOB_ID = "81b31a89-e3e5-46ee-acfe-75436bd14577";
 export const TEST_TASKORDER_ID = "csp-a-task-order-id-123";
 export const CSP_A_TEST_ENDPOINT = "https://CSP_A.example.com";
+export const CSP_A_TEST_ENDPOINT_NEW_SCHEMA = "https://CSP_A.example.com/newSchema";
+export const CSP_A_TEST_ENDPOINT_NEW_SCHEMA_MIGRATION = "https://CSP_A.example.com/newSchema/migration";
 export const CSP_B_TEST_ENDPOINT = "https://CSP_B.example.com";
 export const CSP_B_STATUS_ENDPOINT = `${CSP_B_TEST_ENDPOINT}/provisioning/${TEST_PROVISIONING_JOB_ID}/status`;
 export const CSP_A = "CSP_A";
@@ -97,7 +99,7 @@ export const cspAAddEnvironmentRequest = {
     name: "Sample Environment",
     administrators,
     classificationLevel: "UNCLASSIFIED",
-    cloudDistinguisher: undefined,
+    cloudDistinguisher: undefined
   },
 };
 
