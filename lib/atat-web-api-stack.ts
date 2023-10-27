@@ -212,24 +212,24 @@ export class AtatWebApiStack extends cdk.Stack {
         },
       ]);
 
-      const eventPattern = {
-        source: ["CustomSource"],
-        detailType: ["PrivateIpAddress"],
-      };
+      // const eventPattern = {
+      //   source: ["CustomSource"],
+      //   detailType: ["PrivateIpAddress"],
+      // };
 
-      const endpointIpEventRule = new events.Rule(this, "CustomEventRule", {
-        eventPattern: eventPattern,
-      });
+      // const endpointIpEventRule = new events.Rule(this, "CustomEventRule", {
+      //   eventPattern: eventPattern,
+      // });
 
-      endpointIpEventRule.addTarget(
-        new targets.EventBus(
-          events.EventBus.fromEventBusArn(
-            this,
-            "External",
-            `arn:aws-us-gov:events:us-gov-west-1:301961700437:event-bus/ALB-TEST`
-          )
-        )
-      );
+      // endpointIpEventRule.addTarget(
+      //   new targets.EventBus(
+      //     events.EventBus.fromEventBusArn(
+      //       this,
+      //       "External",
+      //       `arn:aws-us-gov:events:us-gov-west-1:301961700437:event-bus/ALB-TEST`
+      //     )
+      //   )
+      // );
 
       const crLambdaRole = new iam.Role(this, 'CustomResourcetLambdaRole', {
         assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
