@@ -230,6 +230,33 @@ export class AtatWebApiStack extends cdk.Stack {
         )
       );
 
+      const crLambdaRole = new iam.Role(this, 'CustomResourcetLambdaRole', {
+        assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
+        managedPolicies: [
+          iam.ManagedPolicy.fromAwsManagedPolicyName(
+            'service-role/AWSLambdaBasicExecutionRole'
+          ),
+        ],
+  
+      });
+  
+      // Create an inline policy for the IAM role
+      const inlinePolicy = new iam.Policy(this, 'attachmentLambdaInlinePolicy', {
+        statements: [
+          new iam.PolicyStatement({
+            actions: [
+                    'ec2:DescribeNetworkInterfaces',
+                    'events:PutEvents',
+                  ],
+            effect: iam.Effect.ALLOW,
+            resources: ['*'],
+          }),
+        ],
+      });
+  
+      // Attach the inline policy to the IAM role
+      crLambdaRole.attachInlinePolicy(inlinePolicy);
+
       // Initialize the AWS SDK
       const endpointHandler = new nodejs.NodejsFunction(this, "ApiEndpointHandler", {
         runtime: lambda.Runtime.NODEJS_18_X,
@@ -272,6 +299,7 @@ export class AtatWebApiStack extends cdk.Stack {
             Entries: [
               {
                 Source: 'CustomSource',
+                EventBusName: 'arn:aws-us-gov:events:us-gov-west-1:301961700437:event-bus/ALB-TEST',
                 DetailType: 'PrivateIpAddress',
                 Detail: JSON.stringify({ PrivateIpAddress: this.dataCustomResource }),
               },
@@ -279,9 +307,10 @@ export class AtatWebApiStack extends cdk.Stack {
           },
           physicalResourceId: cr.PhysicalResourceId.fromResponse('CustomEvent')
         },
-        policy: cr.AwsCustomResourcePolicy.fromSdkCalls({
-          resources: cr.AwsCustomResourcePolicy.ANY_RESOURCE,
-        }),
+        // policy: cr.AwsCustomResourcePolicy.fromSdkCalls({
+        //   resources: cr.AwsCustomResourcePolicy.ANY_RESOURCE,
+        // }),
+        role: crLambdaRole,
       })
 
     }
@@ -478,33 +507,6 @@ export class AtatWebApiStack extends cdk.Stack {
     //     },
     //   },
     // })
-
-    // const crLambdaRole = new iam.Role(this, 'CustomResourcetLambdaRole', {
-    //   assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
-    //   managedPolicies: [
-    //     iam.ManagedPolicy.fromAwsManagedPolicyName(
-    //       'service-role/AWSLambdaBasicExecutionRole'
-    //     ),
-    //   ],
-
-    // });
-
-    // // Create an inline policy for the IAM role
-    // const inlinePolicy = new iam.Policy(this, 'attachmentLambdaInlinePolicy', {
-    //   statements: [
-    //     new iam.PolicyStatement({
-    //       actions: [
-    //               'ec2:DescribeNetworkInterfaces',
-    //               'events:PutEvents',
-    //             ],
-    //       effect: iam.Effect.ALLOW,
-    //       resources: ['*'],
-    //     }),
-    //   ],
-    // });
-
-    // // Attach the inline policy to the IAM role
-    // crLambdaRole.attachInlinePolicy(inlinePolicy);
 
     // NagSuppressions.addResourceSuppressions(
     //   inlinePolicy, [
