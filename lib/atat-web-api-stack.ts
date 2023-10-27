@@ -28,7 +28,6 @@ import { HttpMethod } from "./http";
 import { NagSuppressions } from "cdk-nag";
 import * as cr from "aws-cdk-lib/custom-resources";
 
-
 export interface ApiCertificateOptions {
   domainName: string;
   acmCertificateArn: string;
@@ -42,14 +41,14 @@ export interface AtatWebApiStackProps extends cdk.StackProps {
   vpcFlowLogBucket?: AtatNetStack;
 }
 
-interface CustomResourceProps {
+export interface CustomResourceProps {
   /**
    * The VPC Endpoint ID to use as a target for the Target Group.
    */
-  readonly endpoint: ec2.IInterfaceVpcEndpoint;
+  endpoint: ec2.IInterfaceVpcEndpoint;
   // This is defined on ApplicationTargetGroupProps as ec2.IVpc | undefined and we want to
   // make sure that it's provided.
-  readonly vpc: ec2.IVpc;
+  vpc: ec2.IVpc;
 }
 
 export class AtatWebApiStack extends cdk.Stack {
@@ -120,7 +119,7 @@ export class AtatWebApiStack extends cdk.Stack {
         interfaceEndpoint: network.endpoints.apigateway,
       };
     }
-  
+
     const accessLogsBucket = new s3.Bucket(this, "LoadBalancerAccessLogs", {
       // Elastic Load Balancing Log Delivery requires SSE-S3 and _does not_ support
       // SSE-KMS. This still ensures that log data is encrypted at rest.
@@ -342,21 +341,23 @@ export class AtatWebApiStack extends cdk.Stack {
     // TESTING FOR NET FIREWALL MIGRATION
 
     const eventPattern = {
-      source: ['CustomSource'],
-      detailType: ['PrivateIpAddress']
+      source: ["CustomSource"],
+      detailType: ["PrivateIpAddress"],
     };
 
-    const endpointIpEventRule = new events.Rule(this, 'CustomEventRule', {
+    const endpointIpEventRule = new events.Rule(this, "CustomEventRule", {
       eventPattern: eventPattern,
     });
 
-    endpointIpEventRule.addTarget(new targets.EventBus(
-      events.EventBus.fromEventBusArn(
-        this,
-        'External',
-        `arn:aws-us-gov:events:us-gov-west-1:301961700437:event-bus/ALB-TEST`,
-      ),
-    ));
+    endpointIpEventRule.addTarget(
+      new targets.EventBus(
+        events.EventBus.fromEventBusArn(
+          this,
+          "External",
+          `arn:aws-us-gov:events:us-gov-west-1:301961700437:event-bus/ALB-TEST`
+        )
+      )
+    );
 
     // Initialize the AWS SDK
     const endpointHandler = new nodejs.NodejsFunction(this, "ApiEndpointHandler", {
@@ -381,25 +382,25 @@ export class AtatWebApiStack extends cdk.Stack {
     const apiCustomResource = new cdk.CustomResource(this, "ApiGatewayEndpointIps", {
       serviceToken: apiEndpointIpProvider.serviceToken,
       properties: {
-        VpcEndpointId: endpoint.vpcEndpointId //apiProps.vpcConfig?.interfaceEndpoint
-      }
+        VpcEndpointId: endpoint.vpcEndpointId, // apiProps.vpcConfig?.interfaceEndpoint
+      },
     });
-      //   // Send the PrivateIpAddress value to an EventBridge event bus
-      // new cr.AwsCustomResource(this,  "sendEvent", {
-      //   onCreate: {
-      //     service: 'EventBridge',
-      //     action: 'putEvents',
-      //     parameters: {
-      //       Entries: [
-      //         {
-      //           Source: 'CustomSource',
-      //           DetailType: 'PrivateIpAddress',
-      //           Detail: JSON.stringify({ PrivateIpAddress: privateIpAddress }),
-      //         },
-      //       ],
-      //     },
-      //   },
-      // })
+    //   // Send the PrivateIpAddress value to an EventBridge event bus
+    // new cr.AwsCustomResource(this,  "sendEvent", {
+    //   onCreate: {
+    //     service: 'EventBridge',
+    //     action: 'putEvents',
+    //     parameters: {
+    //       Entries: [
+    //         {
+    //           Source: 'CustomSource',
+    //           DetailType: 'PrivateIpAddress',
+    //           Detail: JSON.stringify({ PrivateIpAddress: privateIpAddress }),
+    //         },
+    //       ],
+    //     },
+    //   },
+    // })
 
     // const crLambdaRole = new iam.Role(this, 'CustomResourcetLambdaRole', {
     //   assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
@@ -482,4 +483,3 @@ export class AtatWebApiStack extends cdk.Stack {
     });
   }
 }
-
