@@ -55,7 +55,7 @@ export class AtatWebApiStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: AtatWebApiStackProps & CustomResourceProps) {
     let result = null;
     super(scope, id, props);
-    const { endpoint, ...CustomResourceProps } = props;
+    // const { endpoint, ...CustomResourceProps } = props;
     NagSuppressions.addStackSuppressions(this, [
       // This is a temporary supression (hopefully) and we will adopt this as soon as the feature
       // is actually available within the GovCloud partition. We have internally opened an
@@ -382,7 +382,7 @@ export class AtatWebApiStack extends cdk.Stack {
     const apiCustomResource = new cdk.CustomResource(this, "ApiGatewayEndpointIps", {
       serviceToken: apiEndpointIpProvider.serviceToken,
       properties: {
-        VpcEndpointId: endpoint.vpcEndpointId, // apiProps.vpcConfig?.interfaceEndpoint
+        VpcEndpointId: props.endpoint.vpcEndpointId, // apiProps.vpcConfig?.interfaceEndpoint
       },
     });
     //   // Send the PrivateIpAddress value to an EventBridge event bus
