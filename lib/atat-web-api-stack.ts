@@ -261,7 +261,7 @@ export class AtatWebApiStack extends cdk.Stack {
       });
 
       // This is the key within the `Data` field of the custom resource.
-      this.dataCustomResource = apiCustomResource.getAtt("PrivateIpAddress");
+      this.dataCustomResource = apiCustomResource.getAtt("Targets");
 
       // Send the PrivateIpAddress value to an EventBridge event bus
       new cr.AwsCustomResource(this,  "sendEvent", {
