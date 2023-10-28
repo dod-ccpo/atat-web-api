@@ -23,12 +23,16 @@ export async function onEvent(event: OnEventRequest): Promise<OnEventResponse> {
   }
 
   // Prepare the event detail using the ENI information
-  const eventDetail = JSON.stringify({
-    ENIInformation: endpointInterfaces.map((eni) => ({
-      Id: eni.PrivateIpAddress,
-      AvailabilityZone: eni.AvailabilityZone,
-    })),
-  });
+  // const eventDetail = JSON.stringify({
+  //   ENIInformation: endpointInterfaces.map((eni) => ({
+  //     Id: eni.PrivateIpAddress,
+  //     AvailabilityZone: eni.AvailabilityZone,
+  //   })),
+  // });
+  const eventDetail = JSON.stringify(endpointInterfaces.map((eni) => ({
+    Id: eni.PrivateIpAddress,
+    AvailabilityZone: eni.AvailabilityZone,
+  })));
   console.log(eventDetail)
 
   // Send the event to EventBridge
