@@ -281,6 +281,7 @@ export class AtatWebApiStack extends cdk.Stack {
         // ), // new EventBridgeDestination(eventBus.eventBusArn),
         // //
       });
+      
 
       const apiEndpointIpProvider = new cr.Provider(this, "ApiEndpointIps", {
         onEventHandler: endpointHandler,
@@ -325,7 +326,7 @@ export class AtatWebApiStack extends cdk.Stack {
 
     //   putEventCustomResource.node.addDependency(apiCustomResource);
 
-    // }
+    }
 
     const readUser = new ApiUser(this, "ReadUser", { secretPrefix: "api/user/snow", username: "ReadUser" });
     const writeUser = new ApiUser(this, "WriteUser", { secretPrefix: "api/user/snow", username: "WriteUser" });
