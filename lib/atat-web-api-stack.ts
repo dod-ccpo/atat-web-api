@@ -261,7 +261,7 @@ export class AtatWebApiStack extends cdk.Stack {
       // Initialize the AWS SDK
       const endpointHandler = new nodejs.NodejsFunction(this, "ApiEndpointHandler", {
         runtime: lambda.Runtime.NODEJS_18_X,
-        entry: "lib/custom-resources/endpoint-ips.ts",
+        entry: "lib/custom-resources/endpoint-ips-copy.ts",
         handler: "onEvent",
         vpc: network.vpc,
         initialPolicy: [
