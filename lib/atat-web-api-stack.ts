@@ -291,7 +291,7 @@ export class AtatWebApiStack extends cdk.Stack {
       // this.endpoint = network.endpoints.apigateway;
       const vpcID = "vpce-084c897f4d7063271";
 
-      const apiCustomResource = new cdk.CustomResource(this, "CrApiGatewayEndpointIps", {
+      const apiCustomResource = new cdk.CustomResource(this, "ApiGatewayEndpointIps", {
         serviceToken: apiEndpointIpProvider.serviceToken,
         properties: {
           VpcEndpointId: vpcID//network.endpoints.apiGatewayEndpoint, // apiProps.vpcConfig?.interfaceEndpoint

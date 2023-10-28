@@ -21,12 +21,10 @@ export async function onEvent(event: OnEventRequest): Promise<OnEventResponse> {
   }
 
   // Prepare the event detail using the ENI information
-  const eventDetail = JSON.stringify({
-    ENIInformation: endpointInterfaces.map((eni) => ({
+  const eventDetail = JSON.stringify(endpointInterfaces.map((eni) => ({
       Id: eni.PrivateIpAddress,
       AvailabilityZone: eni.AvailabilityZone,
-    })),
-  });
+    })));
 
   // Send the event to EventBridge
   await sendEventToEventBridge(eventDetail);
