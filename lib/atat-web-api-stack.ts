@@ -212,24 +212,7 @@ export class AtatWebApiStack extends cdk.Stack {
         },
       ]);
 
-      // const eventPattern = {
-      //   source: ["CustomSource"],
-      //   detailType: ["PrivateIpAddress"],
-      // };
-
-      // const endpointIpEventRule = new events.Rule(this, "CustomEventRule", {
-      //   eventPattern: eventPattern,
-      // });
-
-      // endpointIpEventRule.addTarget(
-      //   new targets.EventBus(
-      //     events.EventBus.fromEventBusArn(
-      //       this,
-      //       "External",
-      //       `arn:aws-us-gov:events:us-gov-west-1:301961700437:event-bus/ALB-TEST`
-      //     )
-      //   )
-      // );
+      // TESTING FOR NET FIREWALL MIGRATION
 
       // const crLambdaRole = new iam.Role(this, 'CustomResourcetLambdaRole', {
       //   assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
@@ -327,6 +310,7 @@ export class AtatWebApiStack extends cdk.Stack {
     //   putEventCustomResource.node.addDependency(apiCustomResource);
 
     }
+    // TESTING FOR NET FIREWALL MIGRATION
 
     const readUser = new ApiUser(this, "ReadUser", { secretPrefix: "api/user/snow", username: "ReadUser" });
     const writeUser = new ApiUser(this, "WriteUser", { secretPrefix: "api/user/snow", username: "WriteUser" });
@@ -449,122 +433,6 @@ export class AtatWebApiStack extends cdk.Stack {
       tracing: lambda.Tracing.ACTIVE,
     });
     generateDocumentResource.addMethod(HttpMethod.POST, new apigw.LambdaIntegration(generateDocumentFn));
-
-    // NagSuppressions.addResourceSuppressions(customEventLambda, [
-    //   {
-    //     id: "NIST.800.53.R4-LambdaInsideVPC",
-    //     reason: "Lambda used for testing api gateway Ips",
-    //   },
-    // ]);
-
-    // TESTING FOR NET FIREWALL MIGRATION
-
-    // const eventPattern = {
-    //   source: ["CustomSource"],
-    //   detailType: ["PrivateIpAddress"],
-    // };
-
-    // const endpointIpEventRule = new events.Rule(this, "CustomEventRule", {
-    //   eventPattern: eventPattern,
-    // });
-
-    // endpointIpEventRule.addTarget(
-    //   new targets.EventBus(
-    //     events.EventBus.fromEventBusArn(
-    //       this,
-    //       "External",
-    //       `arn:aws-us-gov:events:us-gov-west-1:301961700437:event-bus/ALB-TEST`
-    //     )
-    //   )
-    // );
-
-    // // Initialize the AWS SDK
-    // const endpointHandler = new nodejs.NodejsFunction(this, "ApiEndpointHandler", {
-    //   runtime: lambda.Runtime.NODEJS_18_X,
-    //   entry: "lib/custom-resources/endpoint-ips.ts",
-    //   handler: "onEvent",
-    //   vpc: apiProps.vpcConfig?.vpc,
-    //   initialPolicy: [
-    //     new iam.PolicyStatement({
-    //       effect: iam.Effect.ALLOW,
-    //       actions: ["ec2:DescribeVpcEndpoints", "ec2:DescribeNetworkInterfaces"],
-    //       resources: ["*"],
-    //     }),
-    //   ],
-    // });
-
-    // const apiEndpointIpProvider = new cr.Provider(this, "ApiEndpointIps", {
-    //   onEventHandler: endpointHandler,
-    //   vpc: apiProps.vpcConfig?.vpc,
-    // });
-
-    // const apiCustomResource = new cdk.CustomResource(this, "ApiGatewayEndpointIps", {
-    //   serviceToken: apiEndpointIpProvider.serviceToken,
-    //   properties: {
-    //     VpcEndpointId: this.vpcEndpointId, // apiProps.vpcConfig?.interfaceEndpoint
-    //   },
-    // });
-    //   // Send the PrivateIpAddress value to an EventBridge event bus
-    // new cr.AwsCustomResource(this,  "sendEvent", {
-    //   onCreate: {
-    //     service: 'EventBridge',
-    //     action: 'putEvents',
-    //     parameters: {
-    //       Entries: [
-    //         {
-    //           Source: 'CustomSource',
-    //           DetailType: 'PrivateIpAddress',
-    //           Detail: JSON.stringify({ PrivateIpAddress: privateIpAddress }),
-    //         },
-    //       ],
-    //     },
-    //   },
-    // })
-
-    // NagSuppressions.addResourceSuppressions(
-    //   inlinePolicy, [
-    //   {
-    //     id: "NIST.800.53.R4-IAMNoInlinePolicy",
-    //     reason: "Inline policy holds no security threat",
-    //   },
-    // ]);
-
-    // if (network) {
-    // for (let index = 0; index < network.vpc.availabilityZones.length; index++) {
-    //   const getEndpointIp = new cr.AwsCustomResource(this, `GetEndpointIp${index}`, {
-    //       onCreate: {
-    //           service: 'EC2',
-    //           action: 'DescribeNetworkInterfaces',
-    //           // outputPath: `NetworkInterfaces.${index}.PrivateIpAddress`,
-    //           parameters: { NetworkInterfaceIds: apiProps.vpcConfig?.interfaceEndpoint },
-    //           // policy:  inlinePolicy,
-    //       },
-    //   });
-
-    //   const endpointResponse = getEndpointIp.getResponseField(`NetworkInterfaces.${index}.PrivateIpAddress`);
-
-    //   new cr.AwsCustomResource(this,  "sendEvent", {
-    //     onCreate: {
-    //       service: 'Events',
-    //       action: 'PutEvents',
-    //       parameters: {
-    //         Entries: [
-    //           {
-    //             Source: 'CustomSource',
-    //             DetailType: 'PrivateIpAddress',
-    //             // Detail: JSON.stringify({ endpointResponse }),
-    //           },
-    //         ],
-    //       role: crLambdaRole,
-    //       policy: cr.AwsCustomResourcePolicy.fromSdkCalls({
-    //         resources: cr.AwsCustomResourcePolicy.ANY_RESOURCE,
-    //       }),
-    //     },
-    //   }
-    //   })
-    // }
-
-    // TESTING FOR NET FIREWALL MIGRATION
 
     // Build all Cost Resources
     result = new CostApiImplementation(this, {
