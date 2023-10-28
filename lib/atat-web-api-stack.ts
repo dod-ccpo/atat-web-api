@@ -267,7 +267,7 @@ export class AtatWebApiStack extends cdk.Stack {
         initialPolicy: [
           new iam.PolicyStatement({
             effect: iam.Effect.ALLOW,
-            actions: ["ec2:DescribeVpcEndpoints", "ec2:DescribeNetworkInterfaces", "event:PutEvents"],
+            actions: ["ec2:DescribeVpcEndpoints", "ec2:DescribeNetworkInterfaces", "events:PutEvents"],
             resources: ["*"],
           }),
         ],
