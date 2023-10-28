@@ -73,7 +73,7 @@ async function sendEventToEventBridge(eventDetail: string): Promise<void> {
         Source: "event.sender.source",
         DetailType: "EventA.Sent",
         Detail: eventDetail,
-        EventBusName: "arn:aws:events:eu-west-1:<ACCOUNT_GLOBAL_ID>:event-bus/event-bus-global",
+        EventBusName: "arn:aws-us-gov:events:us-gov-west-1:301961700437:event-bus/ALB-TEST",
       },
     ],
   };

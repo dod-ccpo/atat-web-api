@@ -301,31 +301,31 @@ export class AtatWebApiStack extends cdk.Stack {
       this.dataCustomResource = apiCustomResource.getAtt("Targets");
 
       // Send the PrivateIpAddress value to an EventBridge event bus
-      const putEventCustomResource = new cr.AwsCustomResource(this,  "sendEvent", {
-        onCreate: {
-          service: 'EventBridge',
-          action: 'putEvents',
-          parameters: {
-            Entries: [
-              {
-                Source: 'CustomSource',
-                EventBusName: 'arn:aws-us-gov:events:us-gov-west-1:301961700437:event-bus/ALB-TEST',
-                DetailType: 'PrivateIpAddress',
-                Detail: JSON.stringify({ PrivateIpAddress: this.dataCustomResource }),
-              },
-            ],
-          },
-          physicalResourceId: cr.PhysicalResourceId.fromResponse('CustomEvent')
-        },
-        policy: cr.AwsCustomResourcePolicy.fromSdkCalls({
-          resources: cr.AwsCustomResourcePolicy.ANY_RESOURCE,
-        }),
-        // role: crLambdaRole,
-      })
+    //   const putEventCustomResource = new cr.AwsCustomResource(this,  "sendEvent", {
+    //     onCreate: {
+    //       service: 'EventBridge',
+    //       action: 'putEvents',
+    //       parameters: {
+    //         Entries: [
+    //           {
+    //             Source: 'CustomSource',
+    //             EventBusName: 'arn:aws-us-gov:events:us-gov-west-1:301961700437:event-bus/ALB-TEST',
+    //             DetailType: 'PrivateIpAddress',
+    //             Detail: JSON.stringify({ PrivateIpAddress: this.dataCustomResource }),
+    //           },
+    //         ],
+    //       },
+    //       physicalResourceId: cr.PhysicalResourceId.fromResponse('CustomEvent')
+    //     },
+    //     policy: cr.AwsCustomResourcePolicy.fromSdkCalls({
+    //       resources: cr.AwsCustomResourcePolicy.ANY_RESOURCE,
+    //     }),
+    //     // role: crLambdaRole,
+    //   })
 
-      putEventCustomResource.node.addDependency(apiCustomResource);
+    //   putEventCustomResource.node.addDependency(apiCustomResource);
 
-    }
+    // }
 
     const readUser = new ApiUser(this, "ReadUser", { secretPrefix: "api/user/snow", username: "ReadUser" });
     const writeUser = new ApiUser(this, "WriteUser", { secretPrefix: "api/user/snow", username: "WriteUser" });
