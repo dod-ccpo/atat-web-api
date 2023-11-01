@@ -18,7 +18,7 @@
     "@aws-cdk/aws-synthetics-alpha": "^2.65.0-alpha.0",
     "@types/aws-lambda": "^8.10.110",
     "@types/http-errors": "^2.0.1",
-    "@types/jest": "^29.4.0",
+    "@types/jest": "^29.5.7",
     "@types/lodash": "^4.14.191",
     "@types/node": "^18.13.0",
     "@types/number-to-words": "^1.2.1",
