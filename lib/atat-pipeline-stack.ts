@@ -1,5 +1,7 @@
 import * as cdk from "aws-cdk-lib";
 import * as pipelines from "aws-cdk-lib/pipelines";
+import * as codecommit from "aws-cdk-lib/aws-codecommit";
+import * as iam from "aws-cdk-lib/aws-iam";
 import { Construct } from "constructs";
 import { GovCloudCompatibilityAspect } from "./aspects/govcloud-compatibility";
 import { AtatNetStack } from "./atat-net-stack";
@@ -73,13 +75,30 @@ export class AtatPipelineStack extends cdk.Stack {
       );
     }
 
+    const repo = new codecommit.Repository(this, "ATAT-Repository", {
+      repositoryName: "ATAT-CC-Repo",
+    });
+
+    const user = new iam.User(this, "ATAT-Gitlab-User", {
+      userName: "ATAT-Gitlab-User",
+    });
+
+    const policy = new iam.Policy(this, "ATAT-Gitlab-UserPolicy", {
+      policyName: "ATAT-Gitlab-UserPolicy",
+      statements: [
+        new iam.PolicyStatement({
+          effect: iam.Effect.ALLOW,
+          actions: ["codecommit:GitPull", "codecommit:GitPush"],
+          resources: [repo.repositoryArn],
+        }),
+      ],
+    });
+
+    policy.attachToUser(user);
+
     const pipeline = new pipelines.CodePipeline(this, "Pipeline", {
       synth: new pipelines.ShellStep("Synth", {
-        input: pipelines.CodePipelineSource.gitHub(props.repository, props.branch, {
-          authentication: cdk.SecretValue.secretsManager(props.githubPatName, {
-            versionId: AtatContextValue.FORCE_GITHUB_TOKEN_VERSION.resolve(this),
-          }),
-        }),
+        input: pipelines.CodePipelineSource.codeCommit(repo, "develop"),
         commands: ["npm ci", "npm run build", "npm run -- cdk synth " + synthParams.join(" ")],
       }),
     });
