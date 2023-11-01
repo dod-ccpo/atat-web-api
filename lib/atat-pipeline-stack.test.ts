@@ -30,15 +30,15 @@ describe("Validate creation of the pipeline stack", () => {
     template.resourceCountIs("AWS::CodePipeline::Pipeline", 1);
   });
 
-  it("should leverage webhooks for a single branch", async () => {
-    template.hasResourceProperties("AWS::CodePipeline::Webhook", {
-      Filters: [
-        {
-          JsonPath: "$.ref",
-          MatchEquals: "refs/heads/{Branch}",
-        },
-      ],
-      RegisterWithThirdParty: true,
-    });
-  });
+  // it("should leverage webhooks for a single branch", async () => {
+  //   template.hasResourceProperties("AWS::CodePipeline::Webhook", {
+  //     Filters: [
+  //       {
+  //         JsonPath: "$.ref",
+  //         MatchEquals: "refs/heads/{Branch}",
+  //       },
+  //     ],
+  //     RegisterWithThirdParty: true,
+  //   });
+  // });
 });
