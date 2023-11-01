@@ -70,7 +70,7 @@ export class AtatContextValue {
   public static readonly API_DOMAIN_NAME = new AtatContextValue("atat:ApiDomainName", undefined);
 
   /**
-   * The event bud ARN used to monitor for the TGW attachment.
+   * The event bus ARN used to monitor for the TGW attachment.
    */
   public static readonly EVENT_BUS_ARN = new AtatContextValue("atat:TGWEventBus", undefined);
 
