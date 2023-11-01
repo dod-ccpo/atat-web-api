@@ -17,6 +17,7 @@ export function createApp(props?: cdk.AppProps): cdk.App {
   const deployRegion = AtatContextValue.DEPLOY_REGION.resolve(app);
   const vpcFlowLogBucketParam = AtatContextValue.VPC_FLOW_LOG_BUCKET.resolve(app);
   const branchParam = AtatContextValue.VERSION_CONTROL_BRANCH.resolve(app);
+  const eventbusARN = AtatContextValue.EVENT_BUS_ARN.resolve(app);
 
   if (!utils.isString(environmentParam)) {
     const err = `An EnvironmentId must be provided (use the ${AtatContextValue.ENVIRONMENT_ID} context key)`;
@@ -61,6 +62,7 @@ export function createApp(props?: cdk.AppProps): cdk.App {
     }
     const apiStack = new AtatWebApiStack(app, `${environmentName}WebApi`, {
       environmentName,
+      eventbusARN,
       vpcFlowLogBucket: vpcFlowLogBucketParam,
       isSandbox,
       apiDomain: apiCertOptions,
