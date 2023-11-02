@@ -71,7 +71,7 @@
     "cdk-nag": "^2.22.7",
     "constructs": "^10.1.251",
     "docx-templates": "^4.9.2",
-    "exceljs": "^4.3.0",
+    "exceljs": "^4.4.0",
     "handlebars": "^4.7.7",
     "http-errors": "^2.0.0",
     "juice": "^8.1.0",
