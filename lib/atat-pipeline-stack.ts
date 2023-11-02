@@ -85,15 +85,6 @@ export class AtatPipelineStack extends cdk.Stack {
       userName: "ATAT-Gitlab-User",
     });
 
-    // const accessKey = new iam.AccessKey(this, "AccessKey", { user });
-    // const AccessKey = new secretsmanager.Secret(this, "IAM-Access-Key", {
-    //   secretStringValue: SecretValue.unsafePlainText(accessKey.accessKeyId),
-    // });
-
-    // const SecretKey = new secretsmanager.Secret(this, "IAM-Secret-Key", {
-    //   secretStringValue: accessKey.secretAccessKey,
-    // });
-
     const policy = new iam.Policy(this, "ATAT-Gitlab-UserPolicy", {
       policyName: "ATAT-Gitlab-UserPolicy",
       statements: [
@@ -109,7 +100,7 @@ export class AtatPipelineStack extends cdk.Stack {
 
     const pipeline = new pipelines.CodePipeline(this, "Pipeline", {
       synth: new pipelines.ShellStep("Synth", {
-        input: pipelines.CodePipelineSource.codeCommit(repo, "develop"),
+        input: pipelines.CodePipelineSource.codeCommit(repo, props.branch),
         commands: ["npm ci", "npm run build", "npm run -- cdk synth " + synthParams.join(" ")],
       }),
     });
