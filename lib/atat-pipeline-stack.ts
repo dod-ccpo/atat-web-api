@@ -23,8 +23,8 @@ export interface AtatProps {
 
 export interface AtatPipelineStackProps extends cdk.StackProps, AtatProps {
   branch: string;
-  repository: string;
-  githubPatName: string;
+  // repository: string;
+  // githubPatName: string;
 }
 
 class AtatApplication extends cdk.Stage {
