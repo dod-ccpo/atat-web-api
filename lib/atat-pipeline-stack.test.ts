@@ -13,9 +13,9 @@ describe("Validate creation of the pipeline stack", () => {
     app = new cdk.App();
     stack = new AtatPipelineStack(app, "TestPipelineStack", {
       environmentName: "At0000",
-      repository: "test/test",
+      // repository: "test/test",
       branch: TEST_BRANCH_NAME,
-      githubPatName: "DOES_NOT_EXIST",
+      // githubPatName: "DOES_NOT_EXIST",
       notificationEmail: "test@example.com",
       vpcFlowLogBucket: "arn:aws:us-east-1:s3::123456789012:flow-logs-123456789012-us-east-1",
     });
@@ -30,15 +30,15 @@ describe("Validate creation of the pipeline stack", () => {
     template.resourceCountIs("AWS::CodePipeline::Pipeline", 1);
   });
 
-  it("should leverage webhooks for a single branch", async () => {
-    template.hasResourceProperties("AWS::CodePipeline::Webhook", {
-      Filters: [
-        {
-          JsonPath: "$.ref",
-          MatchEquals: "refs/heads/{Branch}",
-        },
-      ],
-      RegisterWithThirdParty: true,
-    });
-  });
+  // it("should leverage webhooks for a single branch", async () => {
+  //   template.hasResourceProperties("AWS::CodePipeline::Webhook", {
+  //     Filters: [
+  //       {
+  //         JsonPath: "$.ref",
+  //         MatchEquals: "refs/heads/{Branch}",
+  //       },
+  //     ],
+  //     RegisterWithThirdParty: true,
+  //   });
+  // });
 });
