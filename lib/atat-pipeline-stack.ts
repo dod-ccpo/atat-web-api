@@ -79,7 +79,7 @@ export class AtatPipelineStack extends cdk.Stack {
       );
     }
 
-    const repo = new codecommit.Repository(this, "ATAT-Repository", {
+    const repo = new codecommit.Repository(this, "ATAT-" + props.environmentName + "HOTH-Repository", {
       repositoryName: "ATAT-CC-Repo",
     });
 
