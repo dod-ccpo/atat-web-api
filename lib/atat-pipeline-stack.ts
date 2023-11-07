@@ -15,6 +15,7 @@ export interface AtatProps {
   notificationEmail?: string;
   apiDomain?: ApiCertificateOptions;
   vpcFlowLogBucket: string;
+  eventbusARN?: string;
 }
 
 export interface AtatPipelineStackProps extends cdk.StackProps, AtatProps {
@@ -65,6 +66,7 @@ export class AtatPipelineStack extends cdk.Stack {
       AtatContextValue.VPC_FLOW_LOG_BUCKET.toCliArgument(props.vpcFlowLogBucket),
       AtatContextValue.VERSION_CONTROL_BRANCH.toCliArgument(props.branch),
       AtatContextValue.NOTIFICATION_EMAIL.toCliArgument(props.notificationEmail),
+      AtatContextValue.EVENT_BUS_ARN.toCliArgument(props.eventbusARN),
     ];
     if (props.apiDomain) {
       synthParams.push(
