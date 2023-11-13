@@ -17,7 +17,7 @@ export class AtatSharedDataStack extends cdk.Stack {
       enableKeyRotation: true,
       description: "This key is used for SNS topic encryption",
     });
-    this.encryptionKeyAlias = key.addAlias("atat-default");
+    this.encryptionKeyAlias = key.addAlias("atat-default-key");
     this.encryptionKey = key;
 
     const svsprincipal = new iam.ServicePrincipal("events.amazonaws.com");
