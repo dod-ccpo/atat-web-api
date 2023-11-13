@@ -9,7 +9,6 @@ import { AtatContextValue } from "../lib/context-values";
 export function createApp(props?: cdk.AppProps): cdk.App {
   const app = new cdk.App(props);
 
-  // Objects passed in via cli
   const environmentParam = AtatContextValue.ENVIRONMENT_ID.resolve(app);
   const sandboxParam = AtatContextValue.SANDBOX_ENVIRONMENT.resolve(app);
   const vpcCidrParam = AtatContextValue.VPC_CIDR.resolve(app);
