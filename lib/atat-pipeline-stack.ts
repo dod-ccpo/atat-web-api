@@ -78,11 +78,11 @@ export class AtatPipelineStack extends cdk.Stack {
     }
 
     const repo = new codecommit.Repository(this, "ATAT-Repository", {
-      repositoryName: "ATAT-CC-Repo",
+      repositoryName: "ATAT-CC-" + props.environmentName + "-Repo",
     });
 
     const user = new iam.User(this, "ATAT-Gitlab-User", {
-      userName: "ATAT-Gitlab-User",
+      userName: "ATAT-Gitlab-" + props.environmentName + "-User",
     });
 
     const policy = new iam.Policy(this, "ATAT-Gitlab-UserPolicy", {
