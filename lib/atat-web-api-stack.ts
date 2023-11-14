@@ -213,7 +213,7 @@ export class AtatWebApiStack extends cdk.Stack {
       ],
     });
 
-    policy.attachToUser(user);
+    // policy.attachToUser(user);
 
     const readUser = new ApiUser(this, "ReadUser", { secretPrefix: "api/user/snow", username: "ReadUser" });
     const writeUser = new ApiUser(this, "WriteUser", { secretPrefix: "api/user/snow", username: "WriteUser" });
