@@ -128,7 +128,6 @@ export class AtatPipelineStack extends cdk.Stack {
       }),
     });
 
-
     pipeline.addStage(
       new AtatApplication(this, props.environmentName, {
         vpcCidr: props.vpcCidr,
