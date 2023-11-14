@@ -12,6 +12,14 @@ import { NagSuppressions, NIST80053R4Checks } from "cdk-nag";
 import { AtatContextValue } from "./context-values";
 import { AtatSharedDataStack } from "./atat-shared-data-stack";
 import { SecretValue } from "aws-cdk-lib";
+import {
+  AwsCustomResource,
+  AwsCustomResourcePolicy,
+  PhysicalResourceId,
+  PhysicalResourceIdReference,
+} from "aws-cdk-lib/custom-resources";
+import * as cr from "aws-cdk-lib/custom-resources";
+import * as secrets from "aws-cdk-lib/aws-secretsmanager";
 
 export interface AtatProps {
   environmentName: string;
@@ -98,6 +106,18 @@ export class AtatPipelineStack extends cdk.Stack {
 
     policy.attachToUser(user);
 
+    const gitCredResource = new CodeCommitGitCredentials(this, "ATAT-GitCredentialsCustomResource", {
+      iamUser: user,
+      userName: "ATAT-Git-" + props.environmentName + "-Username",
+    });
+    const secret = new secrets.Secret(this, `ApiUser${props.username}KeySecret`, {
+      secretName: `ATAT-CodeCommitUserCredentials-${props.environmentName}`,
+      secretObjectValue: {
+        username: cdk.SecretValue.unsafePlainText(gitCredResource.serviceUserName),
+        password: cdk.SecretValue.unsafePlainText(gitCredResource.serviceUserName),
+      },
+    });
+
     const pipeline = new pipelines.CodePipeline(this, "Pipeline", {
       synth: new pipelines.ShellStep("Synth", {
         input: pipelines.CodePipelineSource.codeCommit(repo, props.branch),
@@ -118,5 +138,53 @@ export class AtatPipelineStack extends cdk.Stack {
         },
       })
     );
+  }
+}
+export class CodeCommitGitCredentialsProps {
+  userName: string;
+  iamUser: iam.User;
+}
+
+export class CodeCommitGitCredentials extends Construct {
+  readonly serviceSpecificCredentialId: string;
+  readonly serviceName: string;
+  readonly serviceUserName: string;
+  readonly servicePassword: string;
+  readonly status: string;
+
+  constructor(scope: Construct, id: string, props: CodeCommitGitCredentialsProps) {
+    super(scope, id);
+
+    // Create the Git Credentials required
+    const gitCredResp = new AwsCustomResource(this, "gitCredentials", {
+      // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/IAM.html#createServiceSpecificCredential-property
+      onCreate: {
+        service: "IAM",
+        action: "createServiceSpecificCredential",
+        parameters: {
+          ServiceName: "codecommit.amazonaws.com",
+          UserName: props.userName,
+        },
+        physicalResourceId: PhysicalResourceId.fromResponse("ServiceSpecificCredential.ServiceSpecificCredentialId"),
+      },
+      // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/IAM.html#deleteServiceSpecificCredential-property
+      onDelete: {
+        service: "IAM",
+        action: "deleteServiceSpecificCredential",
+        parameters: {
+          ServiceSpecificCredentialId: new PhysicalResourceIdReference(),
+          UserName: props.userName,
+        },
+      },
+      policy: cr.AwsCustomResourcePolicy.fromSdkCalls({ resources: [props.iamUser.userArn] }),
+    });
+
+    this.serviceSpecificCredentialId = gitCredResp.getResponseField(
+      "ServiceSpecificCredential.ServiceSpecificCredentialId"
+    );
+    this.serviceName = gitCredResp.getResponseField("ServiceSpecificCredential.ServiceName");
+    this.serviceUserName = gitCredResp.getResponseField("ServiceSpecificCredential.ServiceUserName");
+    this.servicePassword = gitCredResp.getResponseField("ServiceSpecificCredential.ServicePassword");
+    this.status = gitCredResp.getResponseField("ServiceSpecificCredential.Status");
   }
 }
