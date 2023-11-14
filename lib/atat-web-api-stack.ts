@@ -275,15 +275,15 @@ export class AtatWebApiStack extends cdk.Stack {
       // this.endpoint = network.endpoints.apigateway;
       // const vpcID = "vpce-084c897f4d7063271";
 
-      const apiGwCustomResource = new cdk.CustomResource(this, "ApiGatewayEndpointIps", {
-        serviceToken: apiEndpointIpProvider.serviceToken,
-        properties: {
-          VpcEndpointId: network.endpoints.apigateway   //.endpoints.apiGatewayEndpoint, // apiProps.vpcConfig?.interfaceEndpoint
-        },
-      });
+      // const apiGwCustomResource = new cdk.CustomResource(this, "ApiGatewayEndpointIps", {
+      //   serviceToken: apiEndpointIpProvider.serviceToken,
+      //   properties: {
+      //     VpcEndpointId: network.endpoints.apigateway   //.endpoints.apiGatewayEndpoint, // apiProps.vpcConfig?.interfaceEndpoint
+      //   },
+      // });
 
-      // This is the key within the `Data` field of the custom resource.
-      this.dataCustomResource = apiGwCustomResource.getAtt("Targets");
+      // // This is the key within the `Data` field of the custom resource.
+      // this.dataCustomResource = apiGwCustomResource.getAtt("Targets");
 
       // Send the PrivateIpAddress value to an EventBridge event bus
     //   const putEventCustomResource = new cr.AwsCustomResource(this,  "sendEvent", {
