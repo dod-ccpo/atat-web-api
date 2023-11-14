@@ -96,7 +96,7 @@ export class AtatPipelineStack extends cdk.Stack {
         new iam.PolicyStatement({
           effect: iam.Effect.ALLOW,
           actions: ["codecommit:GitPull", "codecommit:GitPush"],
-          resources: ["*"],
+          resources: [repo.repositoryArn],
         }),
       ],
     });
