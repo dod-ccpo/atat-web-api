@@ -24,8 +24,6 @@ export interface AtatProps {
 
 export interface AtatPipelineStackProps extends cdk.StackProps, AtatProps {
   branch: string;
-  repository: string;
-  githubPatName: string;
 }
 
 // export interface AtatWebApiStack extends cdk.StackProps, AtatProps {
@@ -84,49 +82,49 @@ export class AtatPipelineStack extends cdk.Stack {
       );
     }
 
-    // const repo = new codecommit.Repository(this, "ATAT-Repository", {
-    //   repositoryName: "ATAT-CC-" + props.environmentName + "-Repo",
-    // });
+    const repo = new codecommit.Repository(this, "ATAT-Repository", {
+      repositoryName: "ATAT-CC-" + props.environmentName + "-Repository",
+    });
 
-    // const user = new iam.User(this, "ATAT-Gitlab-User", {
-    //   // userName: "ATAT-Gitlab-" + props.environmentName + "-User",
-    // });
+    const user = new iam.User(this, "ATAT-Gitlab-User", {
+      // userName: "ATAT-Gitlab-" + props.environmentName + "-User",
+    });
 
-    // const policy = new iam.Policy(this, "ATAT-Gitlab-UserPolicy", {
-    //   policyName: "ATAT-Gitlab-UserPolicy",
-    //   statements: [
-    //     new iam.PolicyStatement({
-    //       effect: iam.Effect.ALLOW,
-    //       actions: ["codecommit:GitPull", "codecommit:GitPush"],
-    //       resources: [repo.repositoryArn],
-    //     }),
-    //   ],
-    // });
+    const policy = new iam.Policy(this, "ATAT-Gitlab-UserPolicy", {
+      policyName: "ATAT-Gitlab-UserPolicy",
+      statements: [
+        new iam.PolicyStatement({
+          effect: iam.Effect.ALLOW,
+          actions: ["codecommit:GitPull", "codecommit:GitPush"],
+          resources: [repo.repositoryArn],
+        }),
+      ],
+    });
 
-    // NagSuppressions.addResourceSuppressions(user, [
-    //   {
-    //     id: "NIST.800.53.R4-IAMUserGroupMembership",
-    //     reason: "The IAM user does not belong to any group(s)",
-    //   },
-    // ]);
+    NagSuppressions.addResourceSuppressions(user, [
+      {
+        id: "NIST.800.53.R4-IAMUserGroupMembership",
+        reason: "The IAM user does not belong to any group(s)",
+      },
+    ]);
 
-    // policy.attachToUser(user);
-
-    // const pipeline = new pipelines.CodePipeline(this, "Pipeline", {
-    //   synth: new pipelines.ShellStep("Synth", {
-    //     input: pipelines.CodePipelineSource.codeCommit(repo, props.branch),
-    //     commands: ["npm ci", "npm run build", "npm run -- cdk synth " + synthParams.join(" ")],
-    //   }),
-    // });
+    policy.attachToUser(user);
 
     const pipeline = new pipelines.CodePipeline(this, "Pipeline", {
       synth: new pipelines.ShellStep("Synth", {
-        input: pipelines.CodePipelineSource.gitHub(props.repository, props.branch, {
-          authentication: cdk.SecretValue.secretsManager(props.githubPatName),
-        }),
+        input: pipelines.CodePipelineSource.codeCommit(repo, props.branch),
         commands: ["npm ci", "npm run build", "npm run -- cdk synth " + synthParams.join(" ")],
       }),
     });
+
+    // const pipeline = new pipelines.CodePipeline(this, "Pipeline", {
+    //   synth: new pipelines.ShellStep("Synth", {
+    //     input: pipelines.CodePipelineSource.gitHub(props.repository, props.branch, {
+    //       authentication: cdk.SecretValue.secretsManager(props.githubPatName),
+    //     }),
+    //     commands: ["npm ci", "npm run build", "npm run -- cdk synth " + synthParams.join(" ")],
+    //   }),
+    // });
 
     pipeline.addStage(
       new AtatApplication(this, props.environmentName, {
