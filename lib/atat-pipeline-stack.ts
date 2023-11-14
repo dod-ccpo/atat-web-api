@@ -24,6 +24,8 @@ export interface AtatProps {
 
 export interface AtatPipelineStackProps extends cdk.StackProps, AtatProps {
   branch: string;
+  repository: string;
+  githubPatName: string;
 }
 
 // export interface AtatWebApiStack extends cdk.StackProps, AtatProps {
@@ -110,12 +112,22 @@ export class AtatPipelineStack extends cdk.Stack {
 
     policy.attachToUser(user);
 
+    // const pipeline = new pipelines.CodePipeline(this, "Pipeline", {
+    //   synth: new pipelines.ShellStep("Synth", {
+    //     input: pipelines.CodePipelineSource.codeCommit(repo, props.branch),
+    //     commands: ["npm ci", "npm run build", "npm run -- cdk synth " + synthParams.join(" ")],
+    //   }),
+    // });
+
     const pipeline = new pipelines.CodePipeline(this, "Pipeline", {
       synth: new pipelines.ShellStep("Synth", {
-        input: pipelines.CodePipelineSource.codeCommit(repo, props.branch),
+        input: pipelines.CodePipelineSource.gitHub(props.repository, props.branch, {
+          authentication: cdk.SecretValue.secretsManager(props.githubPatName),
+        }),
         commands: ["npm ci", "npm run build", "npm run -- cdk synth " + synthParams.join(" ")],
       }),
     });
+
 
     pipeline.addStage(
       new AtatApplication(this, props.environmentName, {
