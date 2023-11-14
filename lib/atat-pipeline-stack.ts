@@ -1,5 +1,8 @@
 import * as cdk from "aws-cdk-lib";
 import * as pipelines from "aws-cdk-lib/pipelines";
+import * as codecommit from "aws-cdk-lib/aws-codecommit";
+import * as iam from "aws-cdk-lib/aws-iam";
+import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
 import { Construct } from "constructs";
 import { GovCloudCompatibilityAspect } from "./aspects/govcloud-compatibility";
 import { AtatNetStack } from "./atat-net-stack";
@@ -8,6 +11,7 @@ import { ApiCertificateOptions, AtatWebApiStack } from "./atat-web-api-stack";
 import { NagSuppressions, NIST80053R4Checks } from "cdk-nag";
 import { AtatContextValue } from "./context-values";
 import { AtatSharedDataStack } from "./atat-shared-data-stack";
+import { SecretValue } from "aws-cdk-lib";
 
 export interface AtatProps {
   environmentName: string;
@@ -19,8 +23,6 @@ export interface AtatProps {
 
 export interface AtatPipelineStackProps extends cdk.StackProps, AtatProps {
   branch: string;
-  repository: string;
-  githubPatName: string;
 }
 
 class AtatApplication extends cdk.Stage {
@@ -73,13 +75,30 @@ export class AtatPipelineStack extends cdk.Stack {
       );
     }
 
+    const repo = new codecommit.Repository(this, "ATAT-Repository", {
+      repositoryName: "ATAT-CC-" + props.environmentName + "-Repo",
+    });
+
+    const user = new iam.User(this, "ATAT-Gitlab-User", {
+      userName: "ATAT-Gitlab-" + props.environmentName + "-User",
+    });
+
+    const policy = new iam.Policy(this, "ATAT-Gitlab-UserPolicy", {
+      policyName: "ATAT-Gitlab-UserPolicy",
+      statements: [
+        new iam.PolicyStatement({
+          effect: iam.Effect.ALLOW,
+          actions: ["codecommit:GitPull", "codecommit:GitPush"],
+          resources: [repo.repositoryArn],
+        }),
+      ],
+    });
+
+    policy.attachToUser(user);
+
     const pipeline = new pipelines.CodePipeline(this, "Pipeline", {
       synth: new pipelines.ShellStep("Synth", {
-        input: pipelines.CodePipelineSource.gitHub(props.repository, props.branch, {
-          authentication: cdk.SecretValue.secretsManager(props.githubPatName, {
-            versionId: AtatContextValue.FORCE_GITHUB_TOKEN_VERSION.resolve(this),
-          }),
-        }),
+        input: pipelines.CodePipelineSource.codeCommit(repo, props.branch),
         commands: ["npm ci", "npm run build", "npm run -- cdk synth " + synthParams.join(" ")],
       }),
     });
