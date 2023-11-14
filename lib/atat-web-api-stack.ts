@@ -198,27 +198,27 @@ export class AtatWebApiStack extends cdk.Stack {
       ]);
     }
 
-    const user = new iam.User(this, "ATAT-Gitlab-User", {
-      userName: "ATAT-Gitlab-" + props.environmentName + "-User",
-    });
+    // const user = new iam.User(this, "ATAT-Gitlab-User", {
+    //   userName: "ATAT-Gitlab-" + props.environmentName + "-User",
+    // });
 
-    const policy = new iam.Policy(this, "ATAT-Gitlab-UserPolicy", {
-      policyName: "ATAT-Gitlab-UserPolicy",
-      statements: [
-        new iam.PolicyStatement({
-          effect: iam.Effect.ALLOW,
-          actions: ["codecommit:GitPull", "codecommit:GitPush"],
-          resources: ["*"],
-        }),
-      ],
-    });
+    // const policy = new iam.Policy(this, "ATAT-Gitlab-UserPolicy", {
+    //   policyName: "ATAT-Gitlab-UserPolicy",
+    //   statements: [
+    //     new iam.PolicyStatement({
+    //       effect: iam.Effect.ALLOW,
+    //       actions: ["codecommit:GitPull", "codecommit:GitPush"],
+    //       resources: ["*"],
+    //     }),
+    //   ],
+    // });
 
-    NagSuppressions.addResourceSuppressions(user, [
-      {
-        id: "NIST.800.53.R4-IAMUserGroupMembership",
-        reason: "The IAM user does not belong to any group(s)",
-      },
-    ]);
+    // NagSuppressions.addResourceSuppressions(user, [
+    //   {
+    //     id: "NIST.800.53.R4-IAMUserGroupMembership",
+    //     reason: "The IAM user does not belong to any group(s)",
+    //   },
+    // ]);
 
     // policy.attachToUser(user);
 
