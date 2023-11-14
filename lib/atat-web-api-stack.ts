@@ -213,6 +213,13 @@ export class AtatWebApiStack extends cdk.Stack {
       ],
     });
 
+    NagSuppressions.addResourceSuppressions(user, [
+      {
+        id: "NIST.800.53.R4-IAMUserGroupMembership",
+        reason: "The IAM user does not belong to any group(s)",
+      },
+    ]);
+
     // policy.attachToUser(user);
 
     const readUser = new ApiUser(this, "ReadUser", { secretPrefix: "api/user/snow", username: "ReadUser" });
