@@ -6,12 +6,16 @@ Parameters:
     Description: >-
       The VPC where the Interface Endpoint for SES should be configured.
     Type: String
+  CodeCommit:
+    Description: >-
+      The ARN of the code commit repo.
+    Type: String
 
 Resources:
   Gitlabuser:
     Type: AWS::IAM::User  
     Properties:
-      Username: Atat-Gitlab-${Env}-user
+      UserName: !Sub "Atat-${Env}-Gitlab-user"
       Policies:
       - PolicyName: gitlab-mirroring-access
         PolicyDocument:
@@ -21,4 +25,4 @@ Resources:
             Action: 
               - codecommit:GitPull,
               - codecommit:GitPush
-            Resource: "*"
+            Resource: !Sub "${CodeCommit}"
