@@ -26,6 +26,10 @@ export interface AtatPipelineStackProps extends cdk.StackProps, AtatProps {
   branch: string;
 }
 
+// export interface AtatWebApiStack extends cdk.StackProps, AtatProps {
+//   repo: string;
+// }
+
 class AtatApplication extends cdk.Stage {
   constructor(scope: Construct, id: string, props: cdk.StageProps & AtatProps) {
     super(scope, id, props);
@@ -48,6 +52,7 @@ class AtatApplication extends cdk.Stage {
         })
       );
     }
+
     cdk.Aspects.of(this).add(new GovCloudCompatibilityAspect());
     cdk.Aspects.of(atat).add(new NIST80053R4Checks({ verbose: true }));
     NagSuppressions.addStackSuppressions(atat, [
@@ -80,23 +85,6 @@ export class AtatPipelineStack extends cdk.Stack {
     const repo = new codecommit.Repository(this, "ATAT-Repository", {
       repositoryName: "ATAT-CC-" + props.environmentName + "-Repo",
     });
-
-    const user = new iam.User(this, "ATAT-Gitlab-User", {
-      userName: "ATAT-Gitlab-" + props.environmentName + "-User",
-    });
-
-    const policy = new iam.Policy(this, "ATAT-Gitlab-UserPolicy", {
-      policyName: "ATAT-Gitlab-UserPolicy",
-      statements: [
-        new iam.PolicyStatement({
-          effect: iam.Effect.ALLOW,
-          actions: ["codecommit:GitPull", "codecommit:GitPush"],
-          resources: [repo.repositoryArn],
-        }),
-      ],
-    });
-
-    policy.attachToUser(user);
 
     const pipeline = new pipelines.CodePipeline(this, "Pipeline", {
       synth: new pipelines.ShellStep("Synth", {
