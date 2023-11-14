@@ -12,7 +12,7 @@ test("Rest API is created", () => {
   const template = Template.fromStack(stack);
   template.hasResourceProperties("AWS::ApiGateway::RestApi", {});
 });
-
+// TEST
 test("The stack creates successfully with a VPC defined", () => {
   // GIVEN
   const app = new cdk.App();

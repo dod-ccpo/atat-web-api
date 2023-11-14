@@ -6,10 +6,14 @@ import { camelToSnakeRequestInterceptor, snakeToCamelResponseInterceptor } from 
 import MockAdapter from "axios-mock-adapter";
 import {
   CSP_A_TEST_ENDPOINT,
+  CSP_A_TEST_ENDPOINT_NEW_SCHEMA,
+  CSP_A_TEST_ENDPOINT_NEW_SCHEMA_MIGRATION,
   CSP_B_STATUS_ENDPOINT,
   CSP_B_TEST_ENDPOINT,
   cspAAddPortfolioRequest,
   cspAAddEnvironmentRequest,
+  cspAAddEnvironmentRequestNewSchema,
+  cspAAddEnvironmentRequestNewSchemaIsMigration,
   cspAUpdateTaskOrderRequest,
   TEST_ENVIRONMENT_ID,
   TEST_PORTFOLIO_ID,
@@ -187,6 +191,18 @@ export class AtatClient implements IAtatClient {
     // CSP A should always return a 200 for AddEnvironment
     mock.onPost(`${CSP_A_TEST_ENDPOINT}/portfolios/${TEST_PORTFOLIO_ID}/environments`).reply(200, {
       ...cspAAddEnvironmentRequest.payload,
+      id: TEST_ENVIRONMENT_ID,
+    });
+
+    // CSP A should always return a 200 for AddEnvironment with new schema
+    mock.onPost(`${CSP_A_TEST_ENDPOINT_NEW_SCHEMA}/portfolios/${TEST_PORTFOLIO_ID}/environments`).reply(200, {
+      ...cspAAddEnvironmentRequestNewSchema.payload,
+      id: TEST_ENVIRONMENT_ID,
+    });
+
+    // CSP A should always return a 200 for AddEnvironment with new schema & migration
+    mock.onPost(`${CSP_A_TEST_ENDPOINT_NEW_SCHEMA_MIGRATION}/portfolios/${TEST_PORTFOLIO_ID}/environments`).reply(200, {
+      ...cspAAddEnvironmentRequestNewSchemaIsMigration.payload,
       id: TEST_ENVIRONMENT_ID,
     });
 
