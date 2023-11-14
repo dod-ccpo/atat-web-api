@@ -187,7 +187,7 @@ export class AtatWebApiStack extends cdk.Stack {
       // We're behind NAT so we need to allow this
       loadBalancer.connections.allowFromAnyIpv4(ec2.Port.tcp(443));
       // We manually set the targets so we need to allow this
-      // TODO: Fix that in the TargetGroup config?
+      // TODO: Fix that in the TargetGroup config??
       loadBalancer.connections.allowToAnyIpv4(ec2.Port.tcp(443));
       result = new cdk.CfnOutput(this, "LoadBalancerDns", { value: loadBalancer.loadBalancerDnsName });
       NagSuppressions.addResourceSuppressions(loadBalancer, [
