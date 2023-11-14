@@ -5,22 +5,15 @@ import { AtatPipelineStack } from "./atat-pipeline-stack";
 const TEST_BRANCH_NAME = "test";
 
 describe("Validate creation of the pipeline stack", () => {
-  let app: cdk.App;
-  let stack: AtatPipelineStack;
-  let template: Template;
-
-  beforeEach(() => {
-    app = new cdk.App();
-    stack = new AtatPipelineStack(app, "TestPipelineStack", {
-      environmentName: "At0000",
-      repository: "test/test",
-      branch: TEST_BRANCH_NAME,
-      githubPatName: "DOES_NOT_EXIST",
-      notificationEmail: "test@example.com",
-      vpcFlowLogBucket: "arn:aws:us-east-1:s3::123456789012:flow-logs-123456789012-us-east-1",
-    });
-    template = Template.fromStack(stack);
+  const envName = "At0000";
+  const app = new cdk.App();
+  const stack = new AtatPipelineStack(app, "TestPipelineStack", {
+    environmentName: envName,
+    branch: TEST_BRANCH_NAME,
+    notificationEmail: "test@example.com",
+    vpcFlowLogBucket: "arn:aws:us-east-1:s3::123456789012:flow-logs-123456789012-us-east-1",
   });
+  const template = Template.fromStack(stack);
 
   it("should contain at least one CodeBuild project", async () => {
     template.hasResourceProperties("AWS::CodeBuild::Project", {});
@@ -30,15 +23,15 @@ describe("Validate creation of the pipeline stack", () => {
     template.resourceCountIs("AWS::CodePipeline::Pipeline", 1);
   });
 
-  it("should leverage webhooks for a single branch", async () => {
-    template.hasResourceProperties("AWS::CodePipeline::Webhook", {
-      Filters: [
-        {
-          JsonPath: "$.ref",
-          MatchEquals: "refs/heads/{Branch}",
-        },
-      ],
-      RegisterWithThirdParty: true,
+  it("should have CodeCommit repo with configured env name", async () => {
+    template.hasResourceProperties("AWS::CodeCommit::Repository", {
+      RepositoryName: `ATAT-CC-${envName}-Repo`,
+    });
+  });
+
+  it("should have IAM User with configured env name", async () => {
+    template.hasResourceProperties("AWS::IAM::User", {
+      UserName: `ATAT-Gitlab-${envName}-User`,
     });
   });
 });

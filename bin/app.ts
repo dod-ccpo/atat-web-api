@@ -103,9 +103,7 @@ export function createApp(props?: cdk.AppProps): cdk.App {
     const pipelineStack = new AtatPipelineStack(app, "AtatEnvironmentPipeline", {
       environmentName,
       vpcCidr: vpcCidrParam,
-      repository: AtatContextValue.VERSION_CONTROL_REPO.resolve(app),
       branch: branchParam,
-      githubPatName: AtatContextValue.GITHUB_PAT_NAME.resolve(app),
       apiDomain: apiCertOptions,
       vpcFlowLogBucket: vpcFlowLogBucketParam,
       // Set the notification email address, unless we're building the account where
