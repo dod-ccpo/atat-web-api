@@ -272,12 +272,12 @@ export class AtatWebApiStack extends cdk.Stack {
       });
 
       // this.endpoint = network.endpoints.apigateway;
-      const vpcID = "vpce-084c897f4d7063271";
+      // const vpcID = "vpce-084c897f4d7063271";
 
       const apiGwCustomResource = new cdk.CustomResource(this, "ApiGatewayEndpointIps", {
         serviceToken: apiEndpointIpProvider.serviceToken,
         properties: {
-          VpcEndpointId: vpcID//network.endpoints.apiGatewayEndpoint, // apiProps.vpcConfig?.interfaceEndpoint
+          VpcEndpointId: network.endpoints.apigateway   //.endpoints.apiGatewayEndpoint, // apiProps.vpcConfig?.interfaceEndpoint
         },
       });
 
