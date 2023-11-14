@@ -151,8 +151,8 @@ function constructNonSandbox(
   const pipelineStack = new AtatPipelineStack(app, "AtatEnvironmentPipeline", {
     environmentName,
     vpcCidr: vpcCidrParam,
-    githubPatName: app.node.tryGetContext("atat:GitHubPatName"),
-    repository: app.node.tryGetContext("atat:VersionControlRepo"),
+    // githubPatName: app.node.tryGetContext("atat:GitHubPatName"),
+    // repository: app.node.tryGetContext("atat:VersionControlRepo"),
     branch: branchParam,
     apiDomain: apiCertOptions,
     vpcFlowLogBucket: vpcFlowLogBucketParam,
