@@ -60,10 +60,10 @@ export function createApp(props?: cdk.AppProps): cdk.App {
       vpcCidrParam,
       environmentName,
       vpcFlowLogBucketParam,
-      true,
+      // true,
       apiCertParam,
       apiCertOptions,
-      eventbusARN,
+      // eventbusARN,
       deployRegion
     );
   } else {
@@ -88,9 +88,7 @@ function constructSandbox(
   environmentName: string,
   vpcFlowLogBucketParam: any,
   isSandbox: boolean,
-  apiCertParam: string,
   apiCertOptions: any,
-  eventbusARN: any,
   deployRegion: string
 ) {
   if (utils.isString(vpcCidrParam) || validateCidr(vpcCidrParam)) {
