@@ -48,6 +48,7 @@ class AtatApplication extends cdk.Stage {
         })
       );
     }
+
     cdk.Aspects.of(this).add(new GovCloudCompatibilityAspect());
     cdk.Aspects.of(atat).add(new NIST80053R4Checks({ verbose: true }));
     NagSuppressions.addStackSuppressions(atat, [
@@ -81,9 +82,7 @@ export class AtatPipelineStack extends cdk.Stack {
       repositoryName: "ATAT-CC-" + props.environmentName + "-Repo",
     });
 
-    const user = new iam.User(this, "ATAT-Gitlab-User", {
-      userName: "ATAT-Gitlab-" + props.environmentName + "-User",
-    });
+    const user = new iam.User(this, "ATAT-CodeCommit-User", {});
 
     const policy = new iam.Policy(this, "ATAT-Gitlab-UserPolicy", {
       policyName: "ATAT-Gitlab-UserPolicy",
@@ -95,6 +94,13 @@ export class AtatPipelineStack extends cdk.Stack {
         }),
       ],
     });
+
+    NagSuppressions.addResourceSuppressions(user, [
+      {
+        id: "NIST.800.53.R4-IAMUserGroupMembership",
+        reason: "The IAM user does not belong to any group(s)",
+      },
+    ]);
 
     policy.attachToUser(user);
 
