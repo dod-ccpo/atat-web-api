@@ -59,11 +59,11 @@ export function createApp(props?: cdk.AppProps): cdk.App {
       app,
       vpcCidrParam,
       environmentName,
-      eventbusARN,
       vpcFlowLogBucketParam,
       true,
       apiCertParam,
       apiCertOptions,
+      eventbusARN,
       deployRegion
     );
   } else {
@@ -75,6 +75,7 @@ export function createApp(props?: cdk.AppProps): cdk.App {
       branchParam,
       vpcFlowLogBucketParam,
       apiCertOptions,
+      eventbusARN,
       deployRegion
     );
   }
@@ -85,11 +86,11 @@ function constructSandbox(
   app: cdk.App,
   vpcCidrParam: string,
   environmentName: string,
-  eventbusARN: string,
   vpcFlowLogBucketParam: any,
   isSandbox: boolean,
   apiCertParam: string,
   apiCertOptions: any,
+  eventbusARN: any,
   deployRegion: string
 ) {
   if (utils.isString(vpcCidrParam) || validateCidr(vpcCidrParam)) {
@@ -99,7 +100,6 @@ function constructSandbox(
   }
   const apiStack = new AtatWebApiStack(app, `${environmentName}WebApi`, {
     environmentName,
-    eventbusARN,
     vpcFlowLogBucket: vpcFlowLogBucketParam,
     isSandbox,
     apiDomain: apiCertOptions,
@@ -118,6 +118,7 @@ function constructNonSandbox(
   branchParam: string,
   vpcFlowLogBucketParam: any,
   apiCertOptions: any,
+  eventbusARN: any,
   deployRegion: string
 ) {
   if (!utils.isString(vpcCidrParam) || !validateCidr(vpcCidrParam)) {
@@ -157,6 +158,7 @@ function constructNonSandbox(
     // Set the notification email address, unless we're building the account where
     // sandbox environments live because our inboxes would never recover.
     notificationEmail: environmentName === "Sandbox" ? undefined : AtatContextValue.NOTIFICATION_EMAIL.resolve(app),
+    eventbusARN: eventbusARN,
     env: {
       region: deployRegion,
     },

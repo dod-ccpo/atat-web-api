@@ -19,7 +19,7 @@ export interface AtatProps {
   notificationEmail?: string;
   apiDomain?: ApiCertificateOptions;
   vpcFlowLogBucket: string;
-  eventbusARN?: string;
+  eventbusARN: string;
 }
 
 export interface AtatPipelineStackProps extends cdk.StackProps, AtatProps {
@@ -119,6 +119,7 @@ export class AtatPipelineStack extends cdk.Stack {
         notificationEmail: props.notificationEmail,
         apiDomain: props.apiDomain,
         vpcFlowLogBucket: props.vpcFlowLogBucket,
+        eventbusARN: props.eventbusARN,
         env: {
           region: this.region,
           account: this.account,
