@@ -26,10 +26,6 @@ export interface AtatPipelineStackProps extends cdk.StackProps, AtatProps {
   branch: string;
 }
 
-// export interface AtatWebApiStack extends cdk.StackProps, AtatProps {
-//   repo: string;
-// }
-
 class AtatApplication extends cdk.Stage {
   constructor(scope: Construct, id: string, props: cdk.StageProps & AtatProps) {
     super(scope, id, props);
@@ -86,9 +82,7 @@ export class AtatPipelineStack extends cdk.Stack {
       repositoryName: "ATAT-CC-" + props.environmentName + "-Repo",
     });
 
-    const user = new iam.User(this, "ATAT-CodeCommit-User", {
-      // userName: "ATAT-Gitlab-" + props.environmentName + "-User",
-    });
+    const user = new iam.User(this, "ATAT-CodeCommit-User", {});
 
     const policy = new iam.Policy(this, "ATAT-Gitlab-UserPolicy", {
       policyName: "ATAT-Gitlab-UserPolicy",
@@ -116,15 +110,6 @@ export class AtatPipelineStack extends cdk.Stack {
         commands: ["npm ci", "npm run build", "npm run -- cdk synth " + synthParams.join(" ")],
       }),
     });
-
-    // const pipeline = new pipelines.CodePipeline(this, "Pipeline", {
-    //   synth: new pipelines.ShellStep("Synth", {
-    //     input: pipelines.CodePipelineSource.gitHub(props.repository, props.branch, {
-    //       authentication: cdk.SecretValue.secretsManager(props.githubPatName),
-    //     }),
-    //     commands: ["npm ci", "npm run build", "npm run -- cdk synth " + synthParams.join(" ")],
-    //   }),
-    // });
 
     pipeline.addStage(
       new AtatApplication(this, props.environmentName, {
