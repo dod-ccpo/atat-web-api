@@ -2,7 +2,6 @@ import * as cdk from "aws-cdk-lib";
 import * as pipelines from "aws-cdk-lib/pipelines";
 import * as codecommit from "aws-cdk-lib/aws-codecommit";
 import * as iam from "aws-cdk-lib/aws-iam";
-import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
 import { Construct } from "constructs";
 import { GovCloudCompatibilityAspect } from "./aspects/govcloud-compatibility";
 import { AtatNetStack } from "./atat-net-stack";
@@ -11,7 +10,6 @@ import { ApiCertificateOptions, AtatWebApiStack } from "./atat-web-api-stack";
 import { NagSuppressions, NIST80053R4Checks } from "cdk-nag";
 import { AtatContextValue } from "./context-values";
 import { AtatSharedDataStack } from "./atat-shared-data-stack";
-import { SecretValue } from "aws-cdk-lib";
 
 export interface AtatProps {
   environmentName: string;
@@ -19,7 +17,7 @@ export interface AtatProps {
   notificationEmail?: string;
   apiDomain?: ApiCertificateOptions;
   vpcFlowLogBucket: string;
-  eventbusARN: string;
+  tgweventbusARN: string;
 }
 
 export interface AtatPipelineStackProps extends cdk.StackProps, AtatProps {
@@ -32,7 +30,7 @@ class AtatApplication extends cdk.Stage {
     const net = new AtatNetStack(this, "AtatNetworking", {
       vpcCidr: props.vpcCidr,
       vpcFlowLogBucket: props.vpcFlowLogBucket,
-      eventbus: props.eventbusARN,
+      eventbus: props.tgweventbusARN,
     });
     const atat = new AtatWebApiStack(this, "AtatHothApi", {
       environmentName: props.environmentName,
@@ -70,7 +68,7 @@ export class AtatPipelineStack extends cdk.Stack {
       AtatContextValue.VPC_FLOW_LOG_BUCKET.toCliArgument(props.vpcFlowLogBucket),
       AtatContextValue.VERSION_CONTROL_BRANCH.toCliArgument(props.branch),
       AtatContextValue.NOTIFICATION_EMAIL.toCliArgument(props.notificationEmail),
-      AtatContextValue.EVENT_BUS_ARN.toCliArgument(props.eventbusARN),
+      AtatContextValue.EVENT_BUS_ARN.toCliArgument(props.tgweventbusARN),
     ];
     if (props.apiDomain) {
       synthParams.push(
@@ -119,7 +117,7 @@ export class AtatPipelineStack extends cdk.Stack {
         notificationEmail: props.notificationEmail,
         apiDomain: props.apiDomain,
         vpcFlowLogBucket: props.vpcFlowLogBucket,
-        eventbusARN: props.eventbusARN,
+        tgweventbusARN: props.tgweventbusARN,
         env: {
           region: this.region,
           account: this.account,
