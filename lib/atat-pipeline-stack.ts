@@ -11,6 +11,7 @@ import { ApiCertificateOptions, AtatWebApiStack } from "./atat-web-api-stack";
 import { NagSuppressions, NIST80053R4Checks } from "cdk-nag";
 import { AtatContextValue } from "./context-values";
 import { AtatSharedDataStack } from "./atat-shared-data-stack";
+import { EventStack } from "./atat-event-stack";
 import { SecretValue } from "aws-cdk-lib";
 
 export interface AtatProps {
@@ -37,6 +38,9 @@ class AtatApplication extends cdk.Stage {
       environmentName: props.environmentName,
       apiDomain: props.apiDomain,
       network: net,
+    });
+    const eventStack = new EventStack(this, "AtatEventStack", {
+      eventbus: props.eventbusARN,
     });
     const sharedData = new AtatSharedDataStack(this, "AtatSharedData");
     const monitoredStacks: cdk.Stack[] = [net, atat];
