@@ -60,7 +60,7 @@ export function createApp(props?: cdk.AppProps): cdk.App {
       vpcCidrParam,
       environmentName,
       vpcFlowLogBucketParam,
-      // true,
+      true,
       apiCertParam,
       apiCertOptions,
       tgweventbusARN,
@@ -88,6 +88,7 @@ function constructSandbox(
   environmentName: string,
   vpcFlowLogBucketParam: any,
   isSandbox: boolean,
+  apiCertParam: any,
   apiCertOptions: any,
   tgweventbusARN: any,
   deployRegion: string
