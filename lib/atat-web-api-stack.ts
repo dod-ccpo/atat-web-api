@@ -222,7 +222,7 @@ export class AtatWebApiStack extends cdk.Stack {
       const apiGwCustomResource = new cdk.CustomResource(this, "ApiGatewayEndpointIps", {
         serviceToken: apiEndpointIpProvider.serviceToken,
         properties: {
-          VpcEndpointId: network.endpoints.apiGatewayEndpoint.vpcEndpointId   //.endpoints.apiGatewayEndpoint, // apiProps.vpcConfig?.interfaceEndpoint
+          VpcEndpointId: network.endpoints.apigateway.vpcEndpointId  //.endpoints.apiGatewayEndpoint, // apiProps.vpcConfig?.interfaceEndpoint
         },
       });
 
