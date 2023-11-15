@@ -17,7 +17,7 @@ export function createApp(props?: cdk.AppProps): cdk.App {
   const deployRegion = AtatContextValue.DEPLOY_REGION.resolve(app);
   const vpcFlowLogBucketParam = AtatContextValue.VPC_FLOW_LOG_BUCKET.resolve(app);
   const branchParam = AtatContextValue.VERSION_CONTROL_BRANCH.resolve(app);
-  const eventbusARN = AtatContextValue.EVENT_BUS_ARN.resolve(app);
+  const tgweventbusARN = AtatContextValue.EVENT_BUS_ARN.resolve(app);
 
   if (!utils.isString(environmentParam)) {
     const err = `An EnvironmentId must be provided (use the ${AtatContextValue.ENVIRONMENT_ID} context key)`;
@@ -63,7 +63,7 @@ export function createApp(props?: cdk.AppProps): cdk.App {
       // true,
       apiCertParam,
       apiCertOptions,
-      // eventbusARN,
+      tgweventbusARN,
       deployRegion
     );
   } else {
@@ -75,7 +75,7 @@ export function createApp(props?: cdk.AppProps): cdk.App {
       branchParam,
       vpcFlowLogBucketParam,
       apiCertOptions,
-      eventbusARN,
+      tgweventbusARN,
       deployRegion
     );
   }
@@ -89,6 +89,7 @@ function constructSandbox(
   vpcFlowLogBucketParam: any,
   isSandbox: boolean,
   apiCertOptions: any,
+  tgweventbusARN: any,
   deployRegion: string
 ) {
   if (utils.isString(vpcCidrParam) || validateCidr(vpcCidrParam)) {
@@ -116,7 +117,7 @@ function constructNonSandbox(
   branchParam: string,
   vpcFlowLogBucketParam: any,
   apiCertOptions: any,
-  eventbusARN: any,
+  tgweventbusARN: any,
   deployRegion: string
 ) {
   if (!utils.isString(vpcCidrParam) || !validateCidr(vpcCidrParam)) {
@@ -156,7 +157,7 @@ function constructNonSandbox(
     // Set the notification email address, unless we're building the account where
     // sandbox environments live because our inboxes would never recover.
     notificationEmail: environmentName === "Sandbox" ? undefined : AtatContextValue.NOTIFICATION_EMAIL.resolve(app),
-    eventbusARN: eventbusARN,
+    eventbusARN: tgweventbusARN,
     env: {
       region: deployRegion,
     },
