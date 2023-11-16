@@ -30,6 +30,6 @@ describe("Validate creation of the pipeline stack", () => {
   });
 
   it("should have a user for code commit", async () => {
-    template.hasResource("AWS::IAM:User", {});
+    template.hasResource("AWS::IAM::User", {});
   });
 });
