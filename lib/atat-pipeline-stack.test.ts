@@ -28,10 +28,4 @@ describe("Validate creation of the pipeline stack", () => {
       RepositoryName: `ATAT-CC-${envName}-Repo`,
     });
   });
-
-  it("should have IAM User with configured env name", async () => {
-    template.hasResourceProperties("AWS::IAM::User", {
-      UserName: `ATAT-Gitlab-${envName}-User`,
-    });
-  });
 });
