@@ -27,9 +27,9 @@ describe("Validate creation of the pipeline stack", () => {
     template.hasResourceProperties("AWS::CodeCommit::Repository", {
       RepositoryName: `ATAT-CC-${envName}-Repo`,
     });
+  });
 
-    it("should have a user for code commit", async () => {
-      template.resourceCountIs("AWS::IAM:User", 1);
-    });
+  it("should have a user for code commit", async () => {
+    template.resourceCountIs("AWS::IAM:User", 1);
   });
 });
