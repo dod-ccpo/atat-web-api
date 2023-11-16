@@ -2,7 +2,6 @@ import * as cdk from "aws-cdk-lib";
 import * as pipelines from "aws-cdk-lib/pipelines";
 import * as codecommit from "aws-cdk-lib/aws-codecommit";
 import * as iam from "aws-cdk-lib/aws-iam";
-import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
 import { Construct } from "constructs";
 import { GovCloudCompatibilityAspect } from "./aspects/govcloud-compatibility";
 import { AtatNetStack } from "./atat-net-stack";
@@ -11,7 +10,6 @@ import { ApiCertificateOptions, AtatWebApiStack } from "./atat-web-api-stack";
 import { NagSuppressions, NIST80053R4Checks } from "cdk-nag";
 import { AtatContextValue } from "./context-values";
 import { AtatSharedDataStack } from "./atat-shared-data-stack";
-import { SecretValue } from "aws-cdk-lib";
 
 export interface AtatProps {
   environmentName: string;
