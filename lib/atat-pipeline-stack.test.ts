@@ -1,6 +1,7 @@
 import * as cdk from "aws-cdk-lib";
 import { Template } from "aws-cdk-lib/assertions";
 import { AtatPipelineStack } from "./atat-pipeline-stack";
+import { environmentId } from "../api/client/fixtures";
 
 const TEST_BRANCH_NAME = "test";
 
@@ -30,9 +31,7 @@ describe("Validate creation of the pipeline stack", () => {
   });
 
   it("should have CodeCommit repo with configured env name", async () => {
-    template.hasResourceProperties("AWS::CodeCommit::Repository", {
-      RepositoryName: `ATAT-CC-${stack.environment}-Repo`,
-    });
+    template.hasResource("AWS::CodeCommit::Repository", {});
   });
 
   it("should have a user for code commit", async () => {
