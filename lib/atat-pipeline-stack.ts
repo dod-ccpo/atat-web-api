@@ -17,7 +17,7 @@ export interface AtatProps {
   notificationEmail?: string;
   apiDomain?: ApiCertificateOptions;
   vpcFlowLogBucket: string;
-  tgweventbusARN: string;
+  tgweventbusARN?: string;
 }
 
 export interface AtatPipelineStackProps extends cdk.StackProps, AtatProps {
