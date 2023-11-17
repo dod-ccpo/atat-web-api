@@ -103,7 +103,6 @@ export class AtatNetStack extends cdk.Stack {
           },
         },
       });
-      // targets: [targets.EventBus.bind(props.eventbus)],
       eventrule.addTarget(new targets.EventBus(events.EventBus.fromEventBusArn(this, "External", props.eventbus)));
     }
 
