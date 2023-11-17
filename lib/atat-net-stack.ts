@@ -19,7 +19,7 @@ export interface AtatNetStackProps extends cdk.StackProps {
    */
   vpcCidr?: string;
   vpcFlowLogBucket?: string;
-  eventbus: string;
+  eventbus?: string;
 }
 
 /**
@@ -92,16 +92,20 @@ export class AtatNetStack extends cdk.Stack {
       ),
     });
 
-    const eventrule = new events.Rule(this, "TGW-Association-rule", {
-      eventPattern: {
-        source: ["aws.ec2"],
-        detail: {
-          eventName: ["CreateTransitGatewayVpcAttachment"],
+    const eventbusarn = props.eventbus;
+
+    if (props.eventbus) {
+      const eventrule = new events.Rule(this, "TGW-Association-rule", {
+        eventPattern: {
+          source: ["aws.ec2"],
+          detail: {
+            eventName: ["CreateTransitGatewayVpcAttachment"],
+          },
         },
-      },
-    });
-    // targets: [targets.EventBus.bind(props.eventbus)],
-    eventrule.addTarget(new targets.EventBus(events.EventBus.fromEventBusArn(this, "External", props.eventbus)));
+      });
+      // targets: [targets.EventBus.bind(props.eventbus)],
+      eventrule.addTarget(new targets.EventBus(events.EventBus.fromEventBusArn(this, "External", props.eventbus)));
+    }
 
     // const dnsLogsGroup = new logs.LogGroup(this, "VpcDnsQueryLogs", {
     //   retention: logs.RetentionDays.INFINITE,
