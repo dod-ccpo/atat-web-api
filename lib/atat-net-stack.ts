@@ -92,8 +92,6 @@ export class AtatNetStack extends cdk.Stack {
       ),
     });
 
-    const eventbusarn = props.eventbus;
-
     if (props.eventbus) {
       const eventrule = new events.Rule(this, "TGW-Association-rule", {
         eventPattern: {
