@@ -20,7 +20,7 @@ const SINGLE_VPC_ENDPOINT: DescribeVpcEndpointsCommandOutput = {
       VpcEndpointType: "Interface",
       VpcId: "vpc-01231432432",
       ServiceName: "com.amazonaws.us-gov-west-1.execute-api",
-      State: "available",
+      State: "Available",
       PolicyDocument: "",
       RouteTableIds: [],
       SubnetIds: ["subnet-0ffasdfa", "subnet-0asdfas1"],

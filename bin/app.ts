@@ -5,6 +5,21 @@ import { RemovalPolicySetter } from "../lib/aspects/removal-policy";
 import { GovCloudCompatibilityAspect } from "../lib/aspects/govcloud-compatibility";
 import { AtatPipelineStack } from "../lib/atat-pipeline-stack";
 import { AtatContextValue } from "../lib/context-values";
+import { IReusableStackSynthesizer } from "aws-cdk-lib/core/lib/stack-synthesizers";
+import { IPolicyValidationPluginBeta1 } from "aws-cdk-lib/core/lib/validation/validation";
+
+interface AtatAppProps {
+  app: cdk.App;
+  vpcCidrParam: string;
+  environmentName: string;
+  tgweventbusARN: string;
+  vpcFlowLogBucketParam: any;
+  isSandbox?: boolean;
+  apiCertParam?: string;
+  apiCertOptions: any;
+  deployRegion: string;
+  branchParam?: any;
+}
 
 export function createApp(props?: cdk.AppProps): cdk.App {
   const app = new cdk.App(props);
@@ -17,6 +32,7 @@ export function createApp(props?: cdk.AppProps): cdk.App {
   const deployRegion = AtatContextValue.DEPLOY_REGION.resolve(app);
   const vpcFlowLogBucketParam = AtatContextValue.VPC_FLOW_LOG_BUCKET.resolve(app);
   const branchParam = AtatContextValue.VERSION_CONTROL_BRANCH.resolve(app);
+  const tgweventbusARN = AtatContextValue.EVENT_BUS_ARN.resolve(app);
 
   if (!utils.isString(environmentParam)) {
     const err = `An EnvironmentId must be provided (use the ${AtatContextValue.ENVIRONMENT_ID} context key)`;
@@ -54,70 +70,100 @@ export function createApp(props?: cdk.AppProps): cdk.App {
   // either through a manual deployment or the automatic self-mutation step).
   if (isSandbox) {
     // Sandbox environments (which do NOT have a VPC) must NOT have a VpcCidr parameter
-    if (utils.isString(vpcCidrParam) || validateCidr(vpcCidrParam)) {
-      const err = `${AtatContextValue.VPC_CIDR} must NOT be provided for Sandbox environments.`;
-      console.error(err);
-      throw new Error(err);
-    }
-    const apiStack = new AtatWebApiStack(app, `${environmentName}WebApi`, {
+    constructSandbox({
+      app,
+      vpcCidrParam,
       environmentName,
-      vpcFlowLogBucket: vpcFlowLogBucketParam,
-      isSandbox,
-      apiDomain: apiCertOptions,
-      env: {
-        region: deployRegion,
-      },
+      tgweventbusARN,
+      vpcFlowLogBucketParam,
+      isSandbox: true,
+      apiCertParam,
+      apiCertOptions,
+      deployRegion,
     });
-    cdk.Aspects.of(app).add(new RemovalPolicySetter({ globalRemovalPolicy: cdk.RemovalPolicy.DESTROY }));
-    cdk.Aspects.of(app).add(new GovCloudCompatibilityAspect());
   } else {
     // Non Sandbox environments (which have a VPC) must have a VpcCidr parameter
-    if (!utils.isString(vpcCidrParam) || !validateCidr(vpcCidrParam)) {
-      const err =
-        `A VpcCidr must be provided for non-Sandbox environments (use the ${AtatContextValue.VPC_CIDR} context key) ` +
-        "and it must be a valid CIDR block.";
-      console.error(err);
-      throw new Error(err);
-    }
-    if (!utils.isString(vpcFlowLogBucketParam)) {
-      const err =
-        `A bucket to store VPC Flow Logs must be provided` +
-        `(use the ${AtatContextValue.VPC_FLOW_LOG_BUCKET} context key).`;
-      console.error(err);
-      throw new Error(err);
-    }
-
-    if (!utils.isString(branchParam)) {
-      const err = `A Branch name must be provided (use the ${AtatContextValue.VERSION_CONTROL_BRANCH} context key)`;
-      console.error(err);
-      throw new Error(err);
-    }
-
-    // Context values can not be supplied via the CLI during self-mutation; therefore, we
-    // cannot include the environment name in the stack at this time. This does limit
-    // us to having a single pipeline per account until we come up with a more thorough
-    // solution (but that is likely okay for now). A workaround to this is that if you
-    // do need to perform integration testing for the pipeline (by building a test stack),
-    // you can just temporarily change the `id` parameter from "Pipeline" to another
-    // static value.
-    const pipelineStack = new AtatPipelineStack(app, "AtatEnvironmentPipeline", {
+    constructNonSandbox({
+      app,
+      vpcCidrParam,
       environmentName,
-      vpcCidr: vpcCidrParam,
-      branch: branchParam,
-      apiDomain: apiCertOptions,
-      vpcFlowLogBucket: vpcFlowLogBucketParam,
-      // Set the notification email address, unless we're building the account where
-      // sandbox environments live because our inboxes would never recover.
-      notificationEmail: environmentName === "Sandbox" ? undefined : AtatContextValue.NOTIFICATION_EMAIL.resolve(app),
-      env: {
-        region: deployRegion,
-      },
+      tgweventbusARN,
+      branchParam,
+      vpcFlowLogBucketParam,
+      apiCertOptions,
+      deployRegion,
     });
   }
   return app;
 }
 
-// Ensure that we have a CIDR block that will be allowed by AWS VPC
+function constructSandbox(props: AtatAppProps) {
+  if (utils.isString(props.vpcCidrParam) || validateCidr(props.vpcCidrParam)) {
+    const err = `${AtatContextValue.VPC_CIDR} must NOT be provided for Sandbox environments.`;
+    console.error(err);
+    throw new Error(err);
+  }
+  const apiStack = new AtatWebApiStack(props.app, `${props.environmentName}WebApi`, {
+    environmentName: props.environmentName,
+    vpcFlowLogBucket: props.vpcFlowLogBucketParam,
+    isSandbox: props.isSandbox,
+    apiDomain: props.apiCertOptions,
+    env: {
+      region: props.deployRegion,
+    },
+  });
+  cdk.Aspects.of(props.app).add(new RemovalPolicySetter({ globalRemovalPolicy: cdk.RemovalPolicy.DESTROY }));
+  cdk.Aspects.of(props.app).add(new GovCloudCompatibilityAspect());
+}
+
+function constructNonSandbox(props: AtatAppProps) {
+  if (!utils.isString(props.vpcCidrParam) || !validateCidr(props.vpcCidrParam)) {
+    const err =
+      `A VpcCidr must be provided for non-Sandbox environments (use the ${AtatContextValue.VPC_CIDR} context key) ` +
+      "and it must be a valid CIDR block.";
+    console.error(err);
+    throw new Error(err);
+  }
+  if (!utils.isString(props.vpcFlowLogBucketParam)) {
+    const err =
+      `A bucket to store VPC Flow Logs must be provided` +
+      `(use the ${AtatContextValue.VPC_FLOW_LOG_BUCKET} context key).`;
+    console.error(err);
+    throw new Error(err);
+  }
+
+  if (!utils.isString(props.branchParam)) {
+    const err = `A Branch name must be provided (use the ${AtatContextValue.VERSION_CONTROL_BRANCH} context key)`;
+    console.error(err);
+    throw new Error(err);
+  }
+
+  // Context values can not be supplied via the CLI during self-mutation; therefore, we
+  // cannot include the environment name in the stack at this time. This does limit
+  // us to having a single pipeline per account until we come up with a more thorough
+  // solution (but that is likely okay for now). A workaround to this is that if you
+  // do need to perform integration testing for the pipeline (by building a test stack),
+  // you can just temporarily change the `id` parameter from "Pipeline" to another
+  // static value.
+  // eslint-disable-next-line no-new
+  new AtatPipelineStack(props.app, "AtatEnvironmentPipeline", {
+    environmentName: props.environmentName,
+    vpcCidr: props.vpcCidrParam,
+    tgweventbusARN: props.tgweventbusARN,
+    branch: props.branchParam,
+    apiDomain: props.apiCertOptions,
+    vpcFlowLogBucket: props.vpcFlowLogBucketParam,
+    // Set the notification email address, unless we're building the account where
+    // sandbox environments live because our inboxes would never recover.
+    notificationEmail:
+      props.environmentName === "Sandbox" ? undefined : AtatContextValue.NOTIFICATION_EMAIL.resolve(props.app),
+    env: {
+      region: props.deployRegion,
+    },
+  });
+}
+
+// Ensure that we have a CIDR block that will be allowed by AWS VPC...
 function validateCidr(cidr: string): boolean {
   const AWS_MIN_NETMASK = 16;
   const AWS_MAX_NETMASK = 28;

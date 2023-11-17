@@ -96,6 +96,9 @@ export interface Environment extends EnvironmentPatchInput {
   readonly classificationLevel: ClassificationLevel;
   readonly dashboardLink?: string;
   readonly cloudDistinguisher?: CloudDistinguisher;
+  readonly accountName?: string;
+  readonly emailDistributionList?: string;
+  readonly isMigration?: boolean;
 }
 
 export interface Portfolio {
@@ -128,7 +131,7 @@ export interface CostResponseByPortfolio {
 // TODO: Find some other solution for sharing a single interface across all requests
 // (not possible anymore now that Target Impact Level is removed)
 export interface ProvisionRequest {
-  readonly provisionDeadline?: string;
+  provisionDeadline?: string;
 }
 
 // As AtatResponse is purposefully generic, no good way to use anything but 'any' as a Metadata type.
@@ -243,6 +246,9 @@ export interface NewEnvironmentPayload {
   administrators: Array<Administrator>;
   classificationLevel: ClassificationLevel;
   cloudDistinguisher: CloudDistinguisher;
+  accountName?: string;
+  emailDistributionList?: string;
+  isMigration?: boolean;
 }
 
 export interface NewTaskOrderPayload {
@@ -270,10 +276,6 @@ export interface HothProvisionRequest {
     | NewTaskOrderPayload
     | UpdateTaskOrderPayload
     | AdministratorPayload;
-}
-
-export interface AsyncProvisionRequest extends HothProvisionRequest {
-  location: string;
 }
 
 export interface CspResponse<Req, Resp> {

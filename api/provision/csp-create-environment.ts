@@ -38,16 +38,33 @@ async function makeRequest(client: IAtatClient, request: HothProvisionRequest): 
     deadline.getHours() + (atatApiTypes.ClassificationLevel.UNCLASSIFIED === payload.classificationLevel ? 2 : 72)
   );
 
+  const {
+    name,
+    administrators,
+    classificationLevel,
+    cloudDistinguisher,
+    accountName,
+    emailDistributionList,
+    isMigration,
+  } = payload;
+
   const addEnvironmentRequest: atatApiTypes.AddEnvironmentRequest = {
     portfolioId: request.portfolioId,
     environment: {
-      name: payload.name,
-      administrators: payload.administrators,
-      classificationLevel: payload.classificationLevel,
-      cloudDistinguisher: payload.cloudDistinguisher,
+      name,
+      administrators,
+      classificationLevel,
+      cloudDistinguisher,
+      accountName,
+      emailDistributionList,
+      isMigration,
     },
-    provisionDeadline: deadline.toISOString(),
   };
+
+  if (!isMigration) {
+    addEnvironmentRequest.provisionDeadline = deadline.toISOString();
+  }
+
   try {
     logger.info(`Invoking addEnvironment against CSP ${request.targetCspName}`);
     const cspResponse = await client.addEnvironment(addEnvironmentRequest);

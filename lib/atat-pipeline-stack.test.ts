@@ -5,13 +5,22 @@ import { AtatPipelineStack } from "./atat-pipeline-stack";
 const TEST_BRANCH_NAME = "test";
 
 describe("Validate creation of the pipeline stack", () => {
-  const envName = "At0000";
-  const app = new cdk.App();
-  const stack = new AtatPipelineStack(app, "TestPipelineStack", {
-    environmentName: envName,
-    branch: TEST_BRANCH_NAME,
-    notificationEmail: "test@example.com",
-    vpcFlowLogBucket: "arn:aws:us-east-1:s3::123456789012:flow-logs-123456789012-us-east-1",
+
+  let app: cdk.App;
+  let stack: AtatPipelineStack;
+  let template: Template;
+
+  beforeEach(() => {
+    app = new cdk.App();
+    stack = new AtatPipelineStack(app, "TestPipelineStack", {
+      environmentName: "At0000",
+      branch: TEST_BRANCH_NAME,
+      tgweventbusARN: "arn:aws:us-east-1:event:12345678910:test",
+      notificationEmail: "test@example.com",
+      vpcFlowLogBucket: "arn:aws:us-east-1:s3::12345678910:test-flow-logs-123456789012-us-east-1",
+    });
+    template = Template.fromStack(stack);
+
   });
   const template = Template.fromStack(stack);
 

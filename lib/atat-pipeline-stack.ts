@@ -17,6 +17,7 @@ export interface AtatProps {
   notificationEmail?: string;
   apiDomain?: ApiCertificateOptions;
   vpcFlowLogBucket: string;
+  tgweventbusARN?: string;
 }
 
 export interface AtatPipelineStackProps extends cdk.StackProps, AtatProps {
@@ -29,6 +30,7 @@ class AtatApplication extends cdk.Stage {
     const net = new AtatNetStack(this, "AtatNetworking", {
       vpcCidr: props.vpcCidr,
       vpcFlowLogBucket: props.vpcFlowLogBucket,
+      eventbus: props.tgweventbusARN,
     });
     const atat = new AtatWebApiStack(this, "AtatHothApi", {
       environmentName: props.environmentName,
@@ -45,6 +47,7 @@ class AtatApplication extends cdk.Stage {
         })
       );
     }
+
     cdk.Aspects.of(this).add(new GovCloudCompatibilityAspect());
     cdk.Aspects.of(atat).add(new NIST80053R4Checks({ verbose: true }));
     NagSuppressions.addStackSuppressions(atat, [
@@ -65,6 +68,7 @@ export class AtatPipelineStack extends cdk.Stack {
       AtatContextValue.VPC_FLOW_LOG_BUCKET.toCliArgument(props.vpcFlowLogBucket),
       AtatContextValue.VERSION_CONTROL_BRANCH.toCliArgument(props.branch),
       AtatContextValue.NOTIFICATION_EMAIL.toCliArgument(props.notificationEmail),
+      AtatContextValue.EVENT_BUS_ARN.toCliArgument(props.tgweventbusARN),
     ];
     if (props.apiDomain) {
       synthParams.push(
@@ -90,6 +94,13 @@ export class AtatPipelineStack extends cdk.Stack {
       ],
     });
 
+    NagSuppressions.addResourceSuppressions(user, [
+      {
+        id: "NIST.800.53.R4-IAMUserGroupMembership",
+        reason: "The IAM user does not belong to any group(s)",
+      },
+    ]);
+
     policy.attachToUser(user);
 
     const pipeline = new pipelines.CodePipeline(this, "Pipeline", {
@@ -106,6 +117,7 @@ export class AtatPipelineStack extends cdk.Stack {
         notificationEmail: props.notificationEmail,
         apiDomain: props.apiDomain,
         vpcFlowLogBucket: props.vpcFlowLogBucket,
+        tgweventbusARN: props.tgweventbusARN,
         env: {
           region: this.region,
           account: this.account,
