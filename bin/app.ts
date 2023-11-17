@@ -12,7 +12,7 @@ interface AtatAppProps {
   app: cdk.App;
   vpcCidrParam: string;
   environmentName: string;
-  eventbusARN?: string;
+  tgweventbusARN: string;
   vpcFlowLogBucketParam: any;
   isSandbox?: boolean;
   apiCertParam?: string;
@@ -32,7 +32,7 @@ export function createApp(props?: cdk.AppProps): cdk.App {
   const deployRegion = AtatContextValue.DEPLOY_REGION.resolve(app);
   const vpcFlowLogBucketParam = AtatContextValue.VPC_FLOW_LOG_BUCKET.resolve(app);
   const branchParam = AtatContextValue.VERSION_CONTROL_BRANCH.resolve(app);
-  const eventbusARN = AtatContextValue.EVENT_BUS_ARN.resolve(app);
+  const tgweventbusARN = AtatContextValue.EVENT_BUS_ARN.resolve(app);
 
   if (!utils.isString(environmentParam)) {
     const err = `An EnvironmentId must be provided (use the ${AtatContextValue.ENVIRONMENT_ID} context key)`;
@@ -74,7 +74,7 @@ export function createApp(props?: cdk.AppProps): cdk.App {
       app,
       vpcCidrParam,
       environmentName,
-      eventbusARN,
+      tgweventbusARN,
       vpcFlowLogBucketParam,
       isSandbox: true,
       apiCertParam,
@@ -87,6 +87,7 @@ export function createApp(props?: cdk.AppProps): cdk.App {
       app,
       vpcCidrParam,
       environmentName,
+      tgweventbusARN,
       branchParam,
       vpcFlowLogBucketParam,
       apiCertOptions,
@@ -104,7 +105,6 @@ function constructSandbox(props: AtatAppProps) {
   }
   const apiStack = new AtatWebApiStack(props.app, `${props.environmentName}WebApi`, {
     environmentName: props.environmentName,
-    eventbusARN: props.eventbusARN,
     vpcFlowLogBucket: props.vpcFlowLogBucketParam,
     isSandbox: props.isSandbox,
     apiDomain: props.apiCertOptions,
@@ -145,9 +145,11 @@ function constructNonSandbox(props: AtatAppProps) {
   // do need to perform integration testing for the pipeline (by building a test stack),
   // you can just temporarily change the `id` parameter from "Pipeline" to another
   // static value.
+  // eslint-disable-next-line no-new
   new AtatPipelineStack(props.app, "AtatEnvironmentPipeline", {
     environmentName: props.environmentName,
     vpcCidr: props.vpcCidrParam,
+    tgweventbusARN: props.tgweventbusARN,
     branch: props.branchParam,
     apiDomain: props.apiCertOptions,
     vpcFlowLogBucket: props.vpcFlowLogBucketParam,
@@ -161,7 +163,7 @@ function constructNonSandbox(props: AtatAppProps) {
   });
 }
 
-// Ensure that we have a CIDR block that will be allowed by AWS VPC
+// Ensure that we have a CIDR block that will be allowed by AWS VPC...
 function validateCidr(cidr: string): boolean {
   const AWS_MIN_NETMASK = 16;
   const AWS_MAX_NETMASK = 28;

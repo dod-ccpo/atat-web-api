@@ -7,7 +7,9 @@ describe("ATAT network creation", () => {
     // GIVEN
     const app = new cdk.App();
     // WHEN
-    const stack = new AtatNet.AtatNetStack(app, "TestNetStack", {});
+    const stack = new AtatNet.AtatNetStack(app, "TestNetStack", {
+      eventbus: "arn:aws:us-east-1:event:12345678910:test",
+    });
     const template = Template.fromStack(stack);
     // THEN
     template.hasResourceProperties("AWS::EC2::FlowLog", {
@@ -24,6 +26,7 @@ describe("ATAT network creation", () => {
     // WHEN
     const stack = new AtatNet.AtatNetStack(app, "TestNetStack", {
       vpcFlowLogBucket: "arn:aws:us-east-1:s3::123456789012:flow-logs-123456789012-us-east-1",
+      eventbus: "arn:aws:us-east-1:event:12345678910:test",
     });
     const template = Template.fromStack(stack);
     // THEN

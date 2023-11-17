@@ -1,9 +1,10 @@
 import * as cdk from "aws-cdk-lib";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
+import * as targets from "aws-cdk-lib/aws-events-targets";
+import * as events from "aws-cdk-lib/aws-events";
 import * as logs from "aws-cdk-lib/aws-logs";
 import * as custom from "aws-cdk-lib/custom-resources";
 import { VpcDefaultSecurityGroupRuleRemover } from "./constructs/vpc-default-sg-rule-remove";
-
 import { Construct, DependencyGroup } from "constructs";
 
 const DEFAULT_ROUTE = "0.0.0.0/0";
@@ -18,6 +19,7 @@ export interface AtatNetStackProps extends cdk.StackProps {
    */
   vpcCidr?: string;
   vpcFlowLogBucket?: string;
+  eventbus: string;
 }
 
 /**
@@ -89,6 +91,17 @@ export class AtatNetStack extends cdk.Stack {
         })
       ),
     });
+
+    const eventrule = new events.Rule(this, "TGW-Association-rule", {
+      eventPattern: {
+        source: ["aws.ec2"],
+        detail: {
+          eventName: ["CreateTransitGatewayVpcAttachment"],
+        },
+      },
+    });
+    // targets: [targets.EventBus.bind(props.eventbus)],
+    eventrule.addTarget(new targets.EventBus(events.EventBus.fromEventBusArn(this, "External", props.eventbus)));
 
     // const dnsLogsGroup = new logs.LogGroup(this, "VpcDnsQueryLogs", {
     //   retention: logs.RetentionDays.INFINITE,
