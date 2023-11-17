@@ -163,7 +163,7 @@ function constructNonSandbox(props: AtatAppProps) {
   });
 }
 
-// Ensure that we have a CIDR block that will be allowed by AWS VPC
+// Ensure that we have a CIDR block that will be allowed by AWS VPC...
 function validateCidr(cidr: string): boolean {
   const AWS_MIN_NETMASK = 16;
   const AWS_MAX_NETMASK = 28;
