@@ -5,7 +5,6 @@ import { AtatPipelineStack } from "./atat-pipeline-stack";
 const TEST_BRANCH_NAME = "test";
 
 describe("Validate creation of the pipeline stack", () => {
-
   let app: cdk.App;
   let stack: AtatPipelineStack;
   let template: Template;
@@ -20,9 +19,7 @@ describe("Validate creation of the pipeline stack", () => {
       vpcFlowLogBucket: "arn:aws:us-east-1:s3::12345678910:test-flow-logs-123456789012-us-east-1",
     });
     template = Template.fromStack(stack);
-
   });
-  const template = Template.fromStack(stack);
 
   it("should contain at least one CodeBuild project", async () => {
     template.hasResourceProperties("AWS::CodeBuild::Project", {});
@@ -34,7 +31,7 @@ describe("Validate creation of the pipeline stack", () => {
 
   it("should have CodeCommit repo with configured env name", async () => {
     template.hasResourceProperties("AWS::CodeCommit::Repository", {
-      RepositoryName: `ATAT-CC-${envName}-Repo`,
+      RepositoryName: `ATAT-CC-${stack.environment}-Repo`,
     });
   });
 
