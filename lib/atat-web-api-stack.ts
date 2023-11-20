@@ -200,7 +200,7 @@ export class AtatWebApiStack extends cdk.Stack {
 
       // Initialize the AWS SDK
       if (props.albevent) {
-      const endpointHandler = new nodejs.NodejsFunction(this, "ApiEndpointHandler", {
+      const endpointHandler = new nodejs.NodejsFunction(this, "ApiGwEndpointHandler", {
         runtime: lambda.Runtime.NODEJS_18_X,
         entry: "lib/custom-resources/endpoint-ips-apigw.ts",
         handler: "onEvent",
