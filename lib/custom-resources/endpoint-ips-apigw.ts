@@ -1,5 +1,6 @@
 import { EC2, NetworkInterface } from "@aws-sdk/client-ec2";
 import { EventBridgeClient, PutEventsCommand } from "@aws-sdk/client-eventbridge";
+import { PropagatedTagSource } from "aws-cdk-lib/aws-ecs";
 import type { OnEventRequest, OnEventResponse } from "aws-cdk-lib/custom-resources/lib/provider-framework/types";
 
 const ec2 = new EC2({ useFipsEndpoint: true });
@@ -12,7 +13,6 @@ export async function onEvent(event: OnEventRequest): Promise<OnEventResponse> {
 
   const endpointId = event.ResourceProperties.VpcEndpointId;
   console.log(endpointId)
-  const eventbusArn = event.ResourceProperties.EventBridgeArn;
   
   if (!endpointId) {
     throw new Error("VpcEndpointId property is required");
@@ -37,7 +37,7 @@ export async function onEvent(event: OnEventRequest): Promise<OnEventResponse> {
   console.log(eventDetail)
 
   // Send the event to EventBridge
-  await sendEventToEventBridge(eventDetail);
+  await sendEventToEventBridge(event, eventDetail);
 
   return {
     PhysicalResourceId: endpointId,
@@ -74,14 +74,17 @@ async function getEnisForVpcEndpoint(vpcEndpointId: string): Promise<NetworkInte
     ?.filter((eni): eni is NetworkInterface => !!eni);
   }
 
-async function sendEventToEventBridge(eventDetail: string): Promise<void> {
+
+
+async function sendEventToEventBridge(event: OnEventRequest, eventDetail: string): Promise<void> {
+  const albEventBusArn = event.ResourceProperties.AlbEventBus;
   const eventParams = {
     Entries: [
       {
         Source: "event.sender.source",
         DetailType: "EventA.Sent",
         Detail: eventDetail,
-        EventBusName: eventbusArn,
+        EventBusName:  albEventBusArn,
       },
     ],
   };
