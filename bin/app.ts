@@ -13,6 +13,7 @@ interface AtatAppProps {
   vpcCidrParam: string;
   environmentName: string;
   tgweventbusARN: string;
+  albeventbusARN: string;
   vpcFlowLogBucketParam: any;
   isSandbox?: boolean;
   apiCertParam?: string;
@@ -32,7 +33,8 @@ export function createApp(props?: cdk.AppProps): cdk.App {
   const deployRegion = AtatContextValue.DEPLOY_REGION.resolve(app);
   const vpcFlowLogBucketParam = AtatContextValue.VPC_FLOW_LOG_BUCKET.resolve(app);
   const branchParam = AtatContextValue.VERSION_CONTROL_BRANCH.resolve(app);
-  const tgweventbusARN = AtatContextValue.EVENT_BUS_ARN.resolve(app);
+  const tgweventbusARN = AtatContextValue.TGW_EVENT_BUS_ARN.resolve(app);
+  const albeventbusARN = AtatContextValue.ALB_EVENT_BUS_ARN.resolve(app);
 
   if (!utils.isString(environmentParam)) {
     const err = `An EnvironmentId must be provided (use the ${AtatContextValue.ENVIRONMENT_ID} context key)`;
@@ -75,6 +77,7 @@ export function createApp(props?: cdk.AppProps): cdk.App {
       vpcCidrParam,
       environmentName,
       tgweventbusARN,
+      albeventbusARN,
       vpcFlowLogBucketParam,
       isSandbox: true,
       apiCertParam,
@@ -88,6 +91,7 @@ export function createApp(props?: cdk.AppProps): cdk.App {
       vpcCidrParam,
       environmentName,
       tgweventbusARN,
+      albeventbusARN,
       branchParam,
       vpcFlowLogBucketParam,
       apiCertOptions,
@@ -150,6 +154,7 @@ function constructNonSandbox(props: AtatAppProps) {
     environmentName: props.environmentName,
     vpcCidr: props.vpcCidrParam,
     tgweventbusARN: props.tgweventbusARN,
+    albeventbusARN: props.albeventbusARN,
     branch: props.branchParam,
     apiDomain: props.apiCertOptions,
     vpcFlowLogBucket: props.vpcFlowLogBucketParam,

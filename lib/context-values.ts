@@ -72,7 +72,12 @@ export class AtatContextValue {
   /**
    * The event bus ARN used to monitor for the TGW attachment.
    */
-  public static readonly EVENT_BUS_ARN = new AtatContextValue("atat:TGWEventBus", undefined);
+  public static readonly TGW_EVENT_BUS_ARN = new AtatContextValue("atat:TGWEventBus", undefined);
+
+  /**
+   * The event bus ARN used to monitor for the ALB target group IPs.
+   */
+  public static readonly ALB_EVENT_BUS_ARN = new AtatContextValue("atat:ALBEventBus", undefined);
 
   /**
    * The s3 bucket to be used to centralize VPC Flow Logs.
