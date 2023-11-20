@@ -199,6 +199,7 @@ export class AtatWebApiStack extends cdk.Stack {
       // TESTING FOR NET FIREWALL MIGRATION
 
       // Initialize the AWS SDK
+      if (props.albevent) {
       const endpointHandler = new nodejs.NodejsFunction(this, "ApiEndpointHandler", {
         runtime: lambda.Runtime.NODEJS_18_X,
         entry: "lib/custom-resources/endpoint-ips-apigw.ts",
@@ -211,6 +212,9 @@ export class AtatWebApiStack extends cdk.Stack {
             resources: ["*"],
           }),
         ],
+        environment: {
+          albEventBusArn: props.albevent,
+        }
       });
 
       const apiEndpointIpProvider = new cr.Provider(this, "ApiEndpointIps", {
@@ -222,9 +226,9 @@ export class AtatWebApiStack extends cdk.Stack {
         serviceToken: apiEndpointIpProvider.serviceToken,
         properties: {
           VpcEndpointId: network.endpoints.apigateway.vpcEndpointId,
-          AlbEventBus: props.albevent
         },
       });
+      }
     }
 
     const readUser = new ApiUser(this, "ReadUser", { secretPrefix: "api/user/snow", username: "ReadUser" });

@@ -37,7 +37,7 @@ export async function onEvent(event: OnEventRequest): Promise<OnEventResponse> {
   console.log(eventDetail)
 
   // Send the event to EventBridge
-  await sendEventToEventBridge(event, eventDetail);
+  await sendEventToEventBridge(eventDetail);
 
   return {
     PhysicalResourceId: endpointId,
@@ -76,15 +76,14 @@ async function getEnisForVpcEndpoint(vpcEndpointId: string): Promise<NetworkInte
 
 
 
-async function sendEventToEventBridge(event: OnEventRequest, eventDetail: string): Promise<void> {
-  const albEventBusArn = event.ResourceProperties.AlbEventBus;
+async function sendEventToEventBridge(eventDetail: string): Promise<void> {
   const eventParams = {
     Entries: [
       {
         Source: "event.sender.source",
         DetailType: "EventA.Sent",
         Detail: eventDetail,
-        EventBusName:  albEventBusArn,
+        EventBusName:  process.env.albEventBusArn,
       },
     ],
   };
