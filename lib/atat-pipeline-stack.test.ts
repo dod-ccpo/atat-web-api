@@ -15,7 +15,8 @@ describe("Validate creation of the pipeline stack", () => {
     stack = new AtatPipelineStack(app, "TestPipelineStack", {
       environmentName: "At0000",
       branch: TEST_BRANCH_NAME,
-      tgweventbusARN: "arn:aws:us-east-1:event:12345678910:test",
+      tgweventbusARN: "arn:aws:us-east-1:event:12345678910:tgwtest",
+      albeventbusARN: "arn:aws:us-east-1:event:12345678910:albtest",
       notificationEmail: "test@example.com",
       vpcFlowLogBucket: "arn:aws:us-east-1:s3::12345678910:test-flow-logs-123456789012-us-east-1",
     });

@@ -33,7 +33,7 @@ export interface ApiCertificateOptions {
 
 export interface AtatWebApiStackProps extends cdk.StackProps {
   environmentName: string;
-  // eventbusARN?: string;
+  albevent?: string;
   network?: AtatNetStack;
   isSandbox?: boolean;
   apiDomain?: ApiCertificateOptions;
