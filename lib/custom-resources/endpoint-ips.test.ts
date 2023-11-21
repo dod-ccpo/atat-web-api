@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-expressions */
 import { DescribeNetworkInterfacesCommand, DescribeVpcEndpointsCommand, EC2Client } from "@aws-sdk/client-ec2";
 import { mockClient } from "aws-sdk-client-mock";
 import { onEvent } from "./endpoint-ips";
@@ -45,13 +46,14 @@ describe("VPC Endpoint Client IP address", () => {
 
   it("gives a valid response when state is valid", async () => {
     const endpointId = "vpce-01234567890123";
-    serviceTokenData
+    // eslint-disable-next-line no-unused-expressions
+    serviceTokenData;
   });
 
   it("uses a port if provided", async () => {
     const endpointId = "vpce-01234567890123";
     const port = 1024;
     setupFullResponses(endpointId);
-    serviceTokenData
+    serviceTokenData;
   });
 });
