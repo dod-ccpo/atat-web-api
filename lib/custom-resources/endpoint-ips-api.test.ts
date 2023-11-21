@@ -7,7 +7,7 @@ import {
 } from "@aws-sdk/client-ec2";
 import type { OnEventRequest } from "aws-cdk-lib/custom-resources/lib/provider-framework/types";
 import { mockClient } from "aws-sdk-client-mock";
-import { onEvent } from "./endpoint-ips";
+import { onEvent } from "./endpoint-ips-apigw";
 
 const ec2Mock = mockClient(EC2Client);
 
