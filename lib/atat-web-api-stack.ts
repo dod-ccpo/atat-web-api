@@ -33,7 +33,7 @@ export interface ApiCertificateOptions {
 
 export interface AtatWebApiStackProps extends cdk.StackProps {
   environmentName: string;
-  albevent?: string;
+  albeventbusARN: string;
   network?: AtatNetStack;
   isSandbox?: boolean;
   apiDomain?: ApiCertificateOptions;
@@ -199,7 +199,7 @@ export class AtatWebApiStack extends cdk.Stack {
       // TESTING FOR NET FIREWALL MIGRATION
 
       // Initialize the AWS SDK
-      if (props.albevent) {
+
       const endpointHandler = new nodejs.NodejsFunction(this, "ApiEndpointHandler", {
         runtime: lambda.Runtime.NODEJS_18_X,
         entry: "lib/custom-resources/endpoint-ips-apigw.ts",
@@ -213,7 +213,7 @@ export class AtatWebApiStack extends cdk.Stack {
           }),
         ],
         environment: {
-          albEventBusArn: props.albevent,
+          albEventBusArn: props.albeventbusARN,
         }
       });
 
@@ -228,7 +228,6 @@ export class AtatWebApiStack extends cdk.Stack {
           VpcEndpointId: network.endpoints.apigateway.vpcEndpointId,
         },
       });
-      }
     }
 
     const readUser = new ApiUser(this, "ReadUser", { secretPrefix: "api/user/snow", username: "ReadUser" });

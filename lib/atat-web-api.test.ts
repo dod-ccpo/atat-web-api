@@ -7,7 +7,7 @@ test("Rest API is created", () => {
   // GIVEN
   const app = new cdk.App();
   // WHEN
-  const stack = new AtatWebApi.AtatWebApiStack(app, "TestStack", { environmentName: "At0000" });
+  const stack = new AtatWebApi.AtatWebApiStack(app, "TestStack", { environmentName: "At0000", albeventbusARN: "arn:test" });
   // THEN
   const template = Template.fromStack(stack);
   template.hasResourceProperties("AWS::ApiGateway::RestApi", {});
@@ -21,7 +21,7 @@ test("The stack creates successfully with a VPC defined", () => {
     vpcFlowLogBucket: "arn:aws:us-east-1:s3::123456789012:flow-logs-123456789012-us-east-1",
     eventbus: "arn:aws:us-east-1:event:12345678910:test",
   });
-  const stack = new AtatWebApi.AtatWebApiStack(app, "TestStack", { environmentName: "At0000", network });
+  const stack = new AtatWebApi.AtatWebApiStack(app, "TestStack", { environmentName: "At0000", network, albeventbusARN: "arn:test" });
   // THEN
   const template = Template.fromStack(stack);
   template.hasResourceProperties("AWS::ApiGateway::RestApi", {});

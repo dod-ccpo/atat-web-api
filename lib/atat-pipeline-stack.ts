@@ -18,7 +18,7 @@ export interface AtatProps {
   apiDomain?: ApiCertificateOptions;
   vpcFlowLogBucket: string;
   tgweventbusARN?: string;
-  albeventbusARN?: string;
+  albeventbusARN: string;
 }
 
 export interface AtatPipelineStackProps extends cdk.StackProps, AtatProps {
@@ -37,7 +37,7 @@ class AtatApplication extends cdk.Stage {
       environmentName: props.environmentName,
       apiDomain: props.apiDomain,
       network: net,
-      albevent: props.albeventbusARN,
+      albeventbusARN: props.albeventbusARN,
     });
     const sharedData = new AtatSharedDataStack(this, "AtatSharedData");
     const monitoredStacks: cdk.Stack[] = [net, atat];
@@ -121,6 +121,7 @@ export class AtatPipelineStack extends cdk.Stack {
         apiDomain: props.apiDomain,
         vpcFlowLogBucket: props.vpcFlowLogBucket,
         tgweventbusARN: props.tgweventbusARN,
+        albeventbusARN: props.albeventbusARN,
         env: {
           region: this.region,
           account: this.account,
