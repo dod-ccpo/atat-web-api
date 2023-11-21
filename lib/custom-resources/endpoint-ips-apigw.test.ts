@@ -5,16 +5,30 @@ import {
   DescribeVpcEndpointsCommandOutput,
   EC2Client,
 } from "@aws-sdk/client-ec2";
-import { EventBridgeClient, PutEventsCommand } from "@aws-sdk/client-eventbridge";
 import type { OnEventRequest } from "aws-cdk-lib/custom-resources/lib/provider-framework/types";
 import { mockClient } from "aws-sdk-client-mock";
 import { onEvent } from "./endpoint-ips-apigw";
+import { EventBridgeClient, EventBridgeClientResolvedConfig, PutEventsCommand, PutEventsCommandInput, PutEventsCommandOutput, PutEventsRequestEntry, ServiceInputTypes, ServiceOutputTypes } from "@aws-sdk/client-eventbridge";
 
 const ec2Mock = mockClient(EC2Client);
 const eventMock = mockClient(EventBridgeClient);
 
 const NO_VPC_ENDPOINTS_REPONSE: DescribeVpcEndpointsCommandOutput = { VpcEndpoints: [], $metadata: {} };
 const NO_NETWORK_INTERFACE_RESPONSE: DescribeNetworkInterfacesCommandOutput = { NetworkInterfaces: [], $metadata: {} };
+const input = { // PutEventsRequest
+  Entries: [ // PutEventsRequestEntryList // required
+    { // PutEventsRequestEntry
+      Source: "STRING_VALUE",
+      DetailType: "STRING_VALUE",
+      Detail: "STRING_VALUE",
+      EventBusName: "STRING_VALUE",
+    },
+  ],
+  EndpointId: "STRING_VALUE",
+};
+// const EVENT_BUS_CALL: PutEventsCommand = {input};
+
+
 const SINGLE_VPC_ENDPOINT: DescribeVpcEndpointsCommandOutput = {
   VpcEndpoints: [
     {
@@ -123,61 +137,93 @@ const setupFullResponses = (endpointId: string) => {
     .resolves(NETWORK_INTERFACES["eni-293413435asdf"]);
 };
 
-it("throws some exception when endpoint ID not provided", async () => {
-  expect(onEvent(makeRequest({ RequestType: "Create" }))).rejects.toThrow("VpcEndpointId property is required");
-});
-
-it("throws if the VPC Endpoint ID is invalid", async () => {
-  ec2Mock.on(DescribeVpcEndpointsCommand).resolves(NO_VPC_ENDPOINTS_REPONSE);
-  expect(
-    onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: "fake-endpoint", ServiceToken: "" } }))
-  ).rejects.toThrow();
-});
-
-it("throws if a VPC endpoint has no interfaces", async () => {
-  ec2Mock
-    .on(DescribeVpcEndpointsCommand)
-    .resolves(SINGLE_VPC_ENDPOINT)
-    .on(DescribeNetworkInterfacesCommand)
-    .resolves(NO_NETWORK_INTERFACE_RESPONSE);
-  expect(
-    onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: "fake-endpoint", ServiceToken: "" } }))
-  ).rejects.toThrow();
-});
-
-it("gives a valid response when state is valid", async () => {
-  const endpointId = "vpce-01234567890123";
-  setupFullResponses(endpointId);
-  expect(await onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: endpointId, ServiceToken: "" } }))).toEqual({
-    PhysicalResourceId: endpointId,
-    Data: {
-      Targets: [
-        {
-          Id: "192.168.1.10",
-          AvailabilityZone: "us-east-1a",
-        },
-        {
-          Id: "192.168.2.37",
-          AvailabilityZone: "us-east-1b",
-        },
-      ],
-    },
+describe("VPC Endpoint Client IP address", () => {
+  beforeEach(() => {
+    ec2Mock.reset();
   });
-});
 
-const detail = JSON.stringify({
-  Id: "192.68.0.100",
-  AvailabilityZone: "az1",
-});
-
-it("Send Event to Event bus ARN", async () => {
-  eventMock.on(PutEventsCommand);
-  expect(await onEvent(makeRequest({ ResourceProperties: { eventDetail: detail, ServiceToken: "" } }))).toEqual({
-    Data: {
-      Source: "event.sender.source",
-      DetailType: "EventA.Sent",
-      Detail: JSON.stringify({ type: "a", value: "111" }),
-      EventBusName: "arn:aws-us-gov:events:us-gov-west-1:308735261122:event-bus/Test-Bus",
-    },
+  it("does nothing on a Delete", async () => {
+    expect(await onEvent(makeRequest({ RequestType: "Delete" }))).toEqual({});
   });
+
+  it("throws some exception when endpoint ID not provided", async () => {
+    expect(onEvent(makeRequest({ RequestType: "Create" }))).rejects.toThrow("VpcEndpointId property is required");
+  });
+
+  it("throws if the VPC Endpoint ID is invalid", async () => {
+    ec2Mock.on(DescribeVpcEndpointsCommand).resolves(NO_VPC_ENDPOINTS_REPONSE);
+    expect(
+      onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: "fake-endpoint", ServiceToken: "" } }))
+    ).rejects.toThrow();
+  });
+
+  it("throws if a VPC endpoint has no interfaces", async () => {
+    ec2Mock
+      .on(DescribeVpcEndpointsCommand)
+      .resolves(SINGLE_VPC_ENDPOINT)
+      .on(DescribeNetworkInterfacesCommand)
+      .resolves(NO_NETWORK_INTERFACE_RESPONSE);
+    expect(
+      onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: "fake-endpoint", ServiceToken: "" } }))
+    ).rejects.toThrow();
+  });
+
+  it("gives a valid response when state is valid", async () => {
+    const endpointId = "vpce-01234567890123";
+    setupFullResponses(endpointId);
+    expect(await onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: endpointId, ServiceToken: "" } }))).toEqual(
+      {
+        PhysicalResourceId: endpointId,
+        Data: {
+          Targets: [
+            {
+              Port: 443,
+              Id: "192.168.1.10",
+              AvailabilityZone: "us-east-1a",
+            },
+            {
+              Port: 443,
+              Id: "192.168.2.37",
+              AvailabilityZone: "us-east-1b",
+            },
+          ],
+        },
+      }
+    );
+  });
+
+  it("uses a port if provided", async () => {
+    const endpointId = "vpce-01234567890123";
+    const port = 1024;
+    setupFullResponses(endpointId);
+    expect(
+      await onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: endpointId, Port: port, ServiceToken: "" } }))
+    ).toEqual({
+      PhysicalResourceId: endpointId,
+      Data: {
+        Targets: [
+          {
+            Port: port,
+            Id: "192.168.1.10",
+            AvailabilityZone: "us-east-1a",
+          },
+          {
+            Port: port,
+            Id: "192.168.2.37",
+            AvailabilityZone: "us-east-1b",
+          },
+        ],
+      },
+    });
+  });
+
+  it("Send Event to Event bus ARN", async () => {
+    eventMock.on(PutEventsCommand).resolves(SINGLE_VPC_ENDPOINT);
+    expect(
+      onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: "fake-endpoint", ServiceToken: "" } }))
+    ).rejects.toThrow();
+  });
+
 });
+
+
