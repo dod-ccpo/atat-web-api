@@ -10,6 +10,6 @@ module.exports = {
   coveragePathIgnorePatterns: [
     "/node_modules/",
     "api/util/csp-request.ts",
-    "lib/custom-resources/endpoint-ips-test-fixtures.ts"
+    // "lib/custom-resources/endpoint-ips-test-fixtures.ts"
   ]
 };
