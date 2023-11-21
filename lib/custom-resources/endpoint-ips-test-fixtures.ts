@@ -7,6 +7,7 @@ import {
 } from "@aws-sdk/client-ec2";
 import type { OnEventRequest } from "aws-cdk-lib/custom-resources/lib/provider-framework/types";
 import { mockClient } from "aws-sdk-client-mock";
+import { onEvent } from "./delete-default-sg-rules";
 
 const ec2Mock = mockClient(EC2Client);
 
@@ -121,4 +122,27 @@ export const setupFullResponses = (endpointId: string) => {
       Filters: [{ Name: "network-interface-id", Values: ["eni-293413435asdf"] }],
     })
     .resolves(NETWORK_INTERFACES["eni-293413435asdf"]);
+};
+
+export const serviceTokenData = async (endpointId: string) => {
+  setupFullResponses(endpointId);
+  expect(await onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: endpointId, ServiceToken: "" } }))).toEqual(
+    {
+      PhysicalResourceId: endpointId,
+      Data: {
+        Targets: [
+          {
+            Port: 443,
+            Id: "192.168.1.10",
+            AvailabilityZone: "us-east-1a",
+          },
+          {
+            Port: 443,
+            Id: "192.168.2.37",
+            AvailabilityZone: "us-east-1b",
+          },
+        ],
+      },
+    }
+  );
 };

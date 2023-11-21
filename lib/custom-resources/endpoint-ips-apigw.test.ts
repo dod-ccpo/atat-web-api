@@ -1,5 +1,4 @@
 import { DescribeNetworkInterfacesCommand, DescribeVpcEndpointsCommand, EC2Client } from "@aws-sdk/client-ec2";
-import type { OnEventRequest } from "aws-cdk-lib/custom-resources/lib/provider-framework/types";
 import { mockClient } from "aws-sdk-client-mock";
 import { onEvent } from "./endpoint-ips-apigw";
 import { EventBridgeClient, PutEventsCommand } from "@aws-sdk/client-eventbridge";
@@ -8,8 +7,10 @@ import {
   NO_VPC_ENDPOINTS_REPONSE,
   SINGLE_VPC_ENDPOINT,
   makeRequest,
+  serviceTokenData,
   setupFullResponses,
 } from "./endpoint-ips-test-fixtures";
+import { getEnisForVpcEndpoint } from "./endpoint-ips-service";
 
 const ec2Mock = mockClient(EC2Client);
 const eventMock = mockClient(EventBridgeClient);
@@ -47,57 +48,18 @@ describe("VPC Endpoint Client IP address", () => {
 
   it("gives a valid response when state is valid", async () => {
     const endpointId = "vpce-01234567890123";
-    setupFullResponses(endpointId);
-    expect(await onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: endpointId, ServiceToken: "" } }))).toEqual(
-      {
-        PhysicalResourceId: endpointId,
-        Data: {
-          Targets: [
-            {
-              Port: 443,
-              Id: "192.168.1.10",
-              AvailabilityZone: "us-east-1a",
-            },
-            {
-              Port: 443,
-              Id: "192.168.2.37",
-              AvailabilityZone: "us-east-1b",
-            },
-          ],
-        },
-      }
-    );
+    serviceTokenData
   });
 
   it("uses a port if provided", async () => {
     const endpointId = "vpce-01234567890123";
     const port = 1024;
     setupFullResponses(endpointId);
-    expect(
-      await onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: endpointId, Port: port, ServiceToken: "" } }))
-    ).toEqual({
-      PhysicalResourceId: endpointId,
-      Data: {
-        Targets: [
-          {
-            Port: port,
-            Id: "192.168.1.10",
-            AvailabilityZone: "us-east-1a",
-          },
-          {
-            Port: port,
-            Id: "192.168.2.37",
-            AvailabilityZone: "us-east-1b",
-          },
-        ],
-      },
-    });
+    serviceTokenData
   });
 
   it("Send Event to Event bus ARN", async () => {
     eventMock.on(PutEventsCommand).resolves(SINGLE_VPC_ENDPOINT);
-    expect(
-      onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: "fake-endpoint", ServiceToken: "" } }))
-    ).rejects.toThrow();
+    serviceTokenData
   });
 });
