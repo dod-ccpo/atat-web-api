@@ -48,13 +48,11 @@ describe("VPC Endpoint Client IP address", () => {
   });
 
   it("gives a valid response when state is valid", async () => {
-    const endpointId = "vpce-01234567890123";
     serviceTokenData;
   });
 
   it("uses a port if provided", async () => {
     const endpointId = "vpce-01234567890123";
-    const port = 1024;
     setupFullResponses(endpointId);
     serviceTokenData;
   });

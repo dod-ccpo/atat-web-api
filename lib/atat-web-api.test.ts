@@ -33,7 +33,5 @@ test("The stack creates successfully with a VPC defined", () => {
   const template = Template.fromStack(stack);
   template.hasResourceProperties("AWS::ApiGateway::RestApi", {});
 
-  it("should contain at least one Load Balancer", async () => {
-    template.hasResource("AWS::ElasticLoadBalancingV2::LoadBalancer", {});
-  });
+  template.hasResource("AWS::ElasticLoadBalancingV2::LoadBalancer", {});
 });
