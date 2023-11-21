@@ -12,8 +12,8 @@ export async function onEvent(event: OnEventRequest): Promise<OnEventResponse> {
   }
 
   const endpointId = event.ResourceProperties.VpcEndpointId;
-  console.log(endpointId)
-  
+  console.log(endpointId);
+
   if (!endpointId) {
     throw new Error("VpcEndpointId property is required");
   }
@@ -34,7 +34,7 @@ export async function onEvent(event: OnEventRequest): Promise<OnEventResponse> {
   //   Id: eni.PrivateIpAddress,
   //   AvailabilityZone: eni.AvailabilityZone,
   // })));
-  console.log(eventDetail)
+  console.log(eventDetail);
 
   // Send the event to EventBridge
   await sendEventToEventBridge(eventDetail);
@@ -46,8 +46,8 @@ export async function onEvent(event: OnEventRequest): Promise<OnEventResponse> {
         Port: event.ResourceProperties.Port ?? 443,
         Id: eni.PrivateIpAddress,
         AvailabilityZone: eni.AvailabilityZone,
-      }),
-    )},
+      })),
+    },
   };
 }
 
@@ -72,9 +72,7 @@ async function getEnisForVpcEndpoint(vpcEndpointId: string): Promise<NetworkInte
   )
     ?.flatMap((result) => result.NetworkInterfaces)
     ?.filter((eni): eni is NetworkInterface => !!eni);
-  }
-
-
+}
 
 async function sendEventToEventBridge(eventDetail: string): Promise<void> {
   const eventParams = {
@@ -83,7 +81,7 @@ async function sendEventToEventBridge(eventDetail: string): Promise<void> {
         Source: "event.sender.source",
         DetailType: "EventA.Sent",
         Detail: eventDetail,
-        EventBusName:  process.env.albEventBusArn,
+        EventBusName: process.env.albEventBusArn,
       },
     ],
   };
