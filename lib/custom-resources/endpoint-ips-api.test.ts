@@ -123,6 +123,48 @@ const setupFullResponses = (endpointId: string) => {
     .resolves(NETWORK_INTERFACES["eni-293413435asdf"]);
 };
 
+it("throws some exception when endpoint ID not provided", async () => {
+  expect(onEvent(makeRequest({ RequestType: "Create" }))).rejects.toThrow("VpcEndpointId property is required");
+});
+
+it("throws if the VPC Endpoint ID is invalid", async () => {
+  ec2Mock.on(DescribeVpcEndpointsCommand).resolves(NO_VPC_ENDPOINTS_REPONSE);
+  expect(
+    onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: "fake-endpoint", ServiceToken: "" } }))
+  ).rejects.toThrow();
+});
+
+it("throws if a VPC endpoint has no interfaces", async () => {
+  ec2Mock
+    .on(DescribeVpcEndpointsCommand)
+    .resolves(SINGLE_VPC_ENDPOINT)
+    .on(DescribeNetworkInterfacesCommand)
+    .resolves(NO_NETWORK_INTERFACE_RESPONSE);
+  expect(
+    onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: "fake-endpoint", ServiceToken: "" } }))
+  ).rejects.toThrow();
+});
+
+it("gives a valid response when state is valid", async () => {
+  const endpointId = "vpce-01234567890123";
+  setupFullResponses(endpointId);
+  expect(await onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: endpointId, ServiceToken: "" } }))).toEqual({
+    PhysicalResourceId: endpointId,
+    Data: {
+      Targets: [
+        {
+          Id: "192.168.1.10",
+          AvailabilityZone: "us-east-1a",
+        },
+        {
+          Id: "192.168.2.37",
+          AvailabilityZone: "us-east-1b",
+        },
+      ],
+    },
+  });
+});
+
 const detail = JSON.stringify({
   Id: "192.68.0.100",
   AvailabilityZone: "az1",
