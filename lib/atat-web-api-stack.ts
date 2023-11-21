@@ -215,7 +215,7 @@ export class AtatWebApiStack extends cdk.Stack {
         ],
         environment: {
           albEventBusArn: props.albeventbusARN,
-        }
+        },
       });
 
       const apiEndpointIpProvider = new cr.Provider(this, "ApiEndpointIps", {
