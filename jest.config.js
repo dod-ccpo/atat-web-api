@@ -9,6 +9,7 @@ module.exports = {
   collectCoverage: true,
   coveragePathIgnorePatterns: [
     "/node_modules/",
-    "api/util/csp-request.ts"
+    "api/util/csp-request.ts",
+    "*/*/endpoint-ips-test-fixtures.ts"
   ]
 };
