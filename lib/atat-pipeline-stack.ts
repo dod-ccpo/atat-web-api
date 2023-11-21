@@ -31,7 +31,7 @@ class AtatApplication extends cdk.Stage {
     const net = new AtatNetStack(this, "AtatNetworking", {
       vpcCidr: props.vpcCidr,
       vpcFlowLogBucket: props.vpcFlowLogBucket,
-      eventbus: props.tgweventbusARN,
+      tgwEventBus: props.tgweventbusARN,
     });
     const atat = new AtatWebApiStack(this, "AtatHothApi", {
       environmentName: props.environmentName,

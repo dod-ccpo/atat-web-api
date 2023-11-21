@@ -195,12 +195,12 @@ export class AtatWebApiStack extends cdk.Stack {
           reason: "Layer 7 rules are applied on a separate firewall appliance",
         },
       ]);
-
+    }
       // Custom Resource to describe the ApiGw endpoint IPs and send to custom event
       // in the transit acct for NET FIREWALL MIGRATION
 
       // Initialize the AWS SDK
-
+    if (props.apiDomain && network && props.albeventbusARN && props.environmentName != 'Sandbox') {
       const endpointHandler = new nodejs.NodejsFunction(this, "ApiEndpointHandler", {
         runtime: lambda.Runtime.NODEJS_18_X,
         entry: "lib/custom-resources/endpoint-ips-apigw.ts",
