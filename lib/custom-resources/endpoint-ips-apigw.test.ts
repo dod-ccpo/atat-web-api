@@ -7,8 +7,8 @@ import {
   NO_NETWORK_INTERFACE_RESPONSE,
   NO_VPC_ENDPOINTS_REPONSE,
   SINGLE_VPC_ENDPOINT,
+  describeEndpointIps,
   makeRequest,
-  serviceTokenData,
   setupFullResponses,
 } from "./endpoint-ips-test-fixtures";
 import { getEnisForVpcEndpoint } from "./endpoint-ips-service";
@@ -48,22 +48,23 @@ describe("VPC Endpoint Client IP address", () => {
   });
 
   it("gives a valid response when state is valid", async () => {
-    serviceTokenData;
+    const endpointId = "vpce-01234567890123";
+    expect(await onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: endpointId, ServiceToken: "" } }))).toEqual(
+      { describeEndpointIps }
+    );
+  });;
   });
 
   it("uses a port if provided", async () => {
     const endpointId = "vpce-01234567890123";
     setupFullResponses(endpointId);
-    serviceTokenData;
-  });
-
-  const detail = JSON.stringify({
-    Id: "192.68.0.100",
-    AvailabilityZone: "az1",
+    expect(await onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: endpointId, ServiceToken: "" } }))).toEqual(
+      { describeEndpointIps }
+    );
   });
 
   it("Send Event to Event bus ARN", async () => {
     eventMock.on(PutEventsCommand).resolves(SINGLE_VPC_ENDPOINT);
-    serviceTokenData;
+    describeEndpointIps;
   });
 });

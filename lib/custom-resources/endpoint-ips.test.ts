@@ -6,8 +6,8 @@ import {
   NO_NETWORK_INTERFACE_RESPONSE,
   NO_VPC_ENDPOINTS_REPONSE,
   SINGLE_VPC_ENDPOINT,
+  describeEndpointIps,
   makeRequest,
-  serviceTokenData,
   setupFullResponses,
 } from "./endpoint-ips-test-fixtures";
 
@@ -46,14 +46,19 @@ describe("VPC Endpoint Client IP address", () => {
 
   it("gives a valid response when state is valid", async () => {
     const endpointId = "vpce-01234567890123";
-    // eslint-disable-next-line no-unused-expressions
-    serviceTokenData;
+    expect(await onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: endpointId, ServiceToken: "" } }))).toEqual(
+      { describeEndpointIps }
+    );
   });
 
   it("uses a port if provided", async () => {
     const endpointId = "vpce-01234567890123";
     const port = 1024;
     setupFullResponses(endpointId);
-    serviceTokenData;
+    expect(await onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: endpointId, ServiceToken: "" } }))).toEqual(
+      {
+        describeEndpointIps,
+      }
+    );
   });
 });
