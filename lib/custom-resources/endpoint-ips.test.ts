@@ -8,16 +8,19 @@ import {
 import type { OnEventRequest } from "aws-cdk-lib/custom-resources/lib/provider-framework/types";
 import { mockClient } from "aws-sdk-client-mock";
 import { onEvent } from "./endpoint-ips";
-import { EventBridgeClient, EventBridgeClientResolvedConfig, PutEventsCommand, PutEventsCommandInput, PutEventsCommandOutput, PutEventsRequestEntry, ServiceInputTypes, ServiceOutputTypes } from "@aws-sdk/client-eventbridge";
+import { EventBridgeClient, PutEventsCommand } from "@aws-sdk/client-eventbridge";
 
 const ec2Mock = mockClient(EC2Client);
 const eventMock = mockClient(EventBridgeClient);
 
 const NO_VPC_ENDPOINTS_REPONSE: DescribeVpcEndpointsCommandOutput = { VpcEndpoints: [], $metadata: {} };
 const NO_NETWORK_INTERFACE_RESPONSE: DescribeNetworkInterfacesCommandOutput = { NetworkInterfaces: [], $metadata: {} };
-const input = { // PutEventsRequest
-  Entries: [ // PutEventsRequestEntryList // required
-    { // PutEventsRequestEntry
+const input = {
+  // PutEventsRequest
+  Entries: [
+    // PutEventsRequestEntryList // required
+    {
+      // PutEventsRequestEntry
       Source: "STRING_VALUE",
       DetailType: "STRING_VALUE",
       Detail: "STRING_VALUE",
@@ -27,7 +30,6 @@ const input = { // PutEventsRequest
   EndpointId: "STRING_VALUE",
 };
 // const EVENT_BUS_CALL: PutEventsCommand = {input};
-
 
 const SINGLE_VPC_ENDPOINT: DescribeVpcEndpointsCommandOutput = {
   VpcEndpoints: [
@@ -217,35 +219,10 @@ describe("VPC Endpoint Client IP address", () => {
     });
   });
 
-  // const detail = JSON.stringify({
-  //   Id: "192.68.0.100",
-  //   AvailabilityZone: "az1",
-  // });
-
-  // const EVENT_BUS = {
-  //   DetailType: "STRING_VALUE",
-  //   Detail: "STRING_VALUE",
-  //   EventBusName: "STRING_VALUE",
-  //   Source: "STRING_VALUE",
-  // };
-
-
-  // it("Send Event to Event bus ARN", async () => {
-  //   return eventMock
-  //     .on(PutEventsCommand)
-  //     .callsFake(input);
-
-
-    
-  // });
-
-  it("Send Event to Event bus ARN", async () => {
-    eventMock.on(PutEventsCommand).resolves(SINGLE_VPC_ENDPOINT);
-    expect(
-      onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: "fake-endpoint", ServiceToken: "" } }))
-    ).rejects.toThrow();
-  });
-
-});
-
-
+//   it("Send Event to Event bus ARN", async () => {
+//     eventMock.on(PutEventsCommand).resolves(SINGLE_VPC_ENDPOINT);
+//     expect(
+//       onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: "fake-endpoint", ServiceToken: "" } }))
+//     ).rejects.toThrow();
+//   });
+// });
