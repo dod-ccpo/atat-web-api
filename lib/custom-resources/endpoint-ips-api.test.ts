@@ -199,4 +199,16 @@ describe("VPC Endpoint Client IP address", () => {
       },
     });
   });
+
+  it("Send Event to Event bus ARN", async () => {
+    // const endpointId = "vpce-01234567890123";
+    expect(await onEvent(makeRequest({ ResourceProperties: { ServiceToken: "" } }))).toEqual({
+      Data: {
+        Source: "event.sender.source",
+        DetailType: "EventA.Sent",
+        Detail: JSON.stringify({ type: "a", value: "111" }),
+        EventBusName: "arn:aws-us-gov:events:us-gov-west-1:308735261122:event-bus/Test-Bus",
+      },
+    });
+  });
 });
