@@ -12,7 +12,6 @@ export async function onEvent(event: OnEventRequest): Promise<OnEventResponse> {
   }
 
   const endpointId = event.ResourceProperties.VpcEndpointId;
-  console.log(endpointId);
 
   if (!endpointId) {
     throw new Error("VpcEndpointId property is required");
@@ -30,11 +29,6 @@ export async function onEvent(event: OnEventRequest): Promise<OnEventResponse> {
       AvailabilityZone: eni.AvailabilityZone,
     })),
   });
-  // const eventDetail = JSON.stringify(endpointInterfaces.map((eni) => ({
-  //   Id: eni.PrivateIpAddress,
-  //   AvailabilityZone: eni.AvailabilityZone,
-  // })));
-  console.log(eventDetail);
 
   // Send the event to EventBridge
   await sendEventToEventBridge(eventDetail);
