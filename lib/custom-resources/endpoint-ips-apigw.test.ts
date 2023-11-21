@@ -57,6 +57,11 @@ describe("VPC Endpoint Client IP address", () => {
     serviceTokenData;
   });
 
+  const detail = JSON.stringify({
+    Id: "192.68.0.100",
+    AvailabilityZone: "az1",
+  });
+
   it("Send Event to Event bus ARN", async () => {
     eventMock.on(PutEventsCommand).resolves(SINGLE_VPC_ENDPOINT);
     serviceTokenData;
