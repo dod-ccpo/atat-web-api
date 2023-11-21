@@ -159,66 +159,65 @@ describe("VPC Endpoint Client IP address", () => {
     ).rejects.toThrow();
   });
 
-  // it("throws if a VPC endpoint has no interfaces", async () => {
-  //   ec2Mock
-  //     .on(DescribeVpcEndpointsCommand)
-  //     .resolves(SINGLE_VPC_ENDPOINT)
-  //     .on(DescribeNetworkInterfacesCommand)
-  //     .resolves(NO_NETWORK_INTERFACE_RESPONSE);
-  //   expect(
-  //     onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: "fake-endpoint", ServiceToken: "" } }))
-  //   ).rejects.toThrow();
-  // });
+  it("throws if a VPC endpoint has no interfaces", async () => {
+    ec2Mock
+      .on(DescribeVpcEndpointsCommand)
+      .resolves(SINGLE_VPC_ENDPOINT)
+      .on(DescribeNetworkInterfacesCommand)
+      .resolves(NO_NETWORK_INTERFACE_RESPONSE);
+    expect(
+      onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: "fake-endpoint", ServiceToken: "" } }))
+    ).rejects.toThrow();
+  });
 
-  // it("gives a valid response when state is valid", async () => {
-  //   const endpointId = "vpce-01234567890123";
-  //   setupFullResponses(endpointId);
-  // eslint-disable-next-line max-len
-  //   expect(await onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: endpointId, ServiceToken: "" } }))).toEqual(
-  //     {
-  //       PhysicalResourceId: endpointId,
-  //       Data: {
-  //         Targets: [
-  //           {
-  //             Port: 443,
-  //             Id: "192.168.1.10",
-  //             AvailabilityZone: "us-east-1a",
-  //           },
-  //           {
-  //             Port: 443,
-  //             Id: "192.168.2.37",
-  //             AvailabilityZone: "us-east-1b",
-  //           },
-  //         ],
-  //       },
-  //     }
-  //   );
-  // });
+  it("gives a valid response when state is valid", async () => {
+    const endpointId = "vpce-01234567890123";
+    setupFullResponses(endpointId);
+    expect(await onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: endpointId, ServiceToken: "" } }))).toEqual(
+      {
+        PhysicalResourceId: endpointId,
+        Data: {
+          Targets: [
+            {
+              Port: 443,
+              Id: "192.168.1.10",
+              AvailabilityZone: "us-east-1a",
+            },
+            {
+              Port: 443,
+              Id: "192.168.2.37",
+              AvailabilityZone: "us-east-1b",
+            },
+          ],
+        },
+      }
+    );
+  });
 
-  // it("uses a port if provided", async () => {
-  //   const endpointId = "vpce-01234567890123";
-  //   const port = 1024;
-  //   setupFullResponses(endpointId);
-  //   expect(
-  //     await onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: endpointId, Port: port, ServiceToken: "" } }))
-  //   ).toEqual({
-  //     PhysicalResourceId: endpointId,
-  //     Data: {
-  //       Targets: [
-  //         {
-  //           Port: port,
-  //           Id: "192.168.1.10",
-  //           AvailabilityZone: "us-east-1a",
-  //         },
-  //         {
-  //           Port: port,
-  //           Id: "192.168.2.37",
-  //           AvailabilityZone: "us-east-1b",
-  //         },
-  //       ],
-  //     },
-  //   });
-  // });
+  it("uses a port if provided", async () => {
+    const endpointId = "vpce-01234567890123";
+    const port = 1024;
+    setupFullResponses(endpointId);
+    expect(
+      await onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: endpointId, Port: port, ServiceToken: "" } }))
+    ).toEqual({
+      PhysicalResourceId: endpointId,
+      Data: {
+        Targets: [
+          {
+            Port: port,
+            Id: "192.168.1.10",
+            AvailabilityZone: "us-east-1a",
+          },
+          {
+            Port: port,
+            Id: "192.168.2.37",
+            AvailabilityZone: "us-east-1b",
+          },
+        ],
+      },
+    });
+  });
 
   it("Send Event to Event bus ARN", async () => {
     eventMock.on(PutEventsCommand).resolves(SINGLE_VPC_ENDPOINT);
