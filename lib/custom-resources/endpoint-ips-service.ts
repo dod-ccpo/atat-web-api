@@ -1,7 +1,4 @@
 import { EC2, NetworkInterface } from "@aws-sdk/client-ec2";
-import { EventBridgeClient, PutEventsCommand } from "@aws-sdk/client-eventbridge";
-import { PropagatedTagSource } from "aws-cdk-lib/aws-ecs";
-import type { OnEventRequest, OnEventResponse } from "aws-cdk-lib/custom-resources/lib/provider-framework/types";
 
 const ec2 = new EC2({ useFipsEndpoint: true });
 

@@ -1,9 +1,7 @@
-import { EC2, NetworkInterface } from "@aws-sdk/client-ec2";
 import { EventBridgeClient, PutEventsCommand } from "@aws-sdk/client-eventbridge";
 import type { OnEventRequest, OnEventResponse } from "aws-cdk-lib/custom-resources/lib/provider-framework/types";
 import { getEnisForVpcEndpoint } from "./endpoint-ips-service";
 
-const ec2 = new EC2({ useFipsEndpoint: true });
 const eventBridgeClient = new EventBridgeClient({ region: "us-gov-west-1" }); // Replace with your target region
 
 export async function onEvent(event: OnEventRequest): Promise<OnEventResponse> {
