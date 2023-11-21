@@ -219,10 +219,10 @@ describe("VPC Endpoint Client IP address", () => {
     });
   });
 
-//   it("Send Event to Event bus ARN", async () => {
-//     eventMock.on(PutEventsCommand).resolves(SINGLE_VPC_ENDPOINT);
-//     expect(
-//       onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: "fake-endpoint", ServiceToken: "" } }))
-//     ).rejects.toThrow();
-//   });
-// });
+  // it("Send Event to Event bus ARN", async () => {
+  //   eventMock.on(PutEventsCommand).resolves(SINGLE_VPC_ENDPOINT);
+  //   expect(
+  //     onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: "fake-endpoint", ServiceToken: "" } }))
+  //   ).rejects.toThrow();
+  // });
+});
