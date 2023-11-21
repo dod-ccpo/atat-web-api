@@ -201,34 +201,34 @@ export class AtatWebApiStack extends cdk.Stack {
 
       // Initialize the AWS SDK
 
-      // const endpointHandler = new nodejs.NodejsFunction(this, "ApiEndpointHandler", {
-      //   runtime: lambda.Runtime.NODEJS_18_X,
-      //   entry: "lib/custom-resources/endpoint-ips-apigw.ts",
-      //   handler: "onEvent",
-      //   vpc: network.vpc,
-      //   initialPolicy: [
-      //     new iam.PolicyStatement({
-      //       effect: iam.Effect.ALLOW,
-      //       actions: ["ec2:DescribeVpcEndpoints", "ec2:DescribeNetworkInterfaces", "events:PutEvents"],
-      //       resources: ["*"],
-      //     }),
-      //   ],
-      //   environment: {
-      //     albEventBusArn: props.albeventbusARN,
-      //   }
-      // });
+      const endpointHandler = new nodejs.NodejsFunction(this, "ApiEndpointHandler", {
+        runtime: lambda.Runtime.NODEJS_18_X,
+        entry: "lib/custom-resources/endpoint-ips-apigw.ts",
+        handler: "onEvent",
+        vpc: network.vpc,
+        initialPolicy: [
+          new iam.PolicyStatement({
+            effect: iam.Effect.ALLOW,
+            actions: ["ec2:DescribeVpcEndpoints", "ec2:DescribeNetworkInterfaces", "events:PutEvents"],
+            resources: ["*"],
+          }),
+        ],
+        environment: {
+          albEventBusArn: props.albeventbusARN,
+        }
+      });
 
-      // const apiEndpointIpProvider = new cr.Provider(this, "ApiEndpointIps", {
-      //   onEventHandler: endpointHandler,
-      //   vpc: network.vpc,
-      // });
+      const apiEndpointIpProvider = new cr.Provider(this, "ApiEndpointIps", {
+        onEventHandler: endpointHandler,
+        vpc: network.vpc,
+      });
 
-      // const apiGwCustomResource = new cdk.CustomResource(this, "ApiGatewayEndpointIps", {
-      //   serviceToken: apiEndpointIpProvider.serviceToken,
-      //   properties: {
-      //     VpcEndpointId: network.endpoints.apigateway.vpcEndpointId,
-      //   },
-      // });
+      const apiGwCustomResource = new cdk.CustomResource(this, "ApiGatewayEndpointIps", {
+        serviceToken: apiEndpointIpProvider.serviceToken,
+        properties: {
+          VpcEndpointId: network.endpoints.apigateway.vpcEndpointId,
+        },
+      });
     }
 
     const readUser = new ApiUser(this, "ReadUser", { secretPrefix: "api/user/snow", username: "ReadUser" });
