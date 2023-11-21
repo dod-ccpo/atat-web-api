@@ -126,23 +126,21 @@ export const setupFullResponses = (endpointId: string) => {
 
 export const serviceTokenData = async (endpointId: string) => {
   setupFullResponses(endpointId);
-  expect(await onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: endpointId, ServiceToken: "" } }))).toEqual(
-    {
-      PhysicalResourceId: endpointId,
-      Data: {
-        Targets: [
-          {
-            Port: 443,
-            Id: "192.168.1.10",
-            AvailabilityZone: "us-east-1a",
-          },
-          {
-            Port: 443,
-            Id: "192.168.2.37",
-            AvailabilityZone: "us-east-1b",
-          },
-        ],
-      },
-    }
-  );
+  expect(await onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: endpointId, ServiceToken: "" } }))).toEqual({
+    PhysicalResourceId: endpointId,
+    Data: {
+      Targets: [
+        {
+          Port: 443,
+          Id: "192.168.1.10",
+          AvailabilityZone: "us-east-1a",
+        },
+        {
+          Port: 443,
+          Id: "192.168.2.37",
+          AvailabilityZone: "us-east-1b",
+        },
+      ],
+    },
+  });
 };
