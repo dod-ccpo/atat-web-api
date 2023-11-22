@@ -1,5 +1,10 @@
 /* eslint-disable no-unused-expressions */
-import { DescribeNetworkInterfacesCommand, DescribeVpcEndpointsCommand, EC2Client } from "@aws-sdk/client-ec2";
+import {
+  DescribeNetworkInterfacesCommand,
+  DescribeNetworkInterfacesCommandOutput,
+  DescribeVpcEndpointsCommand,
+  EC2Client,
+} from "@aws-sdk/client-ec2";
 import { mockClient } from "aws-sdk-client-mock";
 import { onEvent } from "./endpoint-ips-apigw";
 import { EventBridgeClient, PutEventsCommand } from "@aws-sdk/client-eventbridge";
@@ -71,26 +76,17 @@ describe("VPC Endpoint Client IP address", () => {
 
   it("gives a valid response when state is valid", async () => {
     const endpointId = "vpce-01234567890123";
-    // const expectedData = endpointData(endpointId);
+    expect(await onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: endpointId, ServiceToken: "" } }))).toEqual(
+      { describeEndpointIps }
+    );
+  });;
+  });
+
+  it("uses a port if provided", async () => {
+    const endpointId = "vpce-01234567890123";
     setupFullResponses(endpointId);
     expect(await onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: endpointId, ServiceToken: "" } }))).toEqual(
-      {
-        PhysicalResourceId: endpointId,
-        Data: {
-          Targets: [
-            {
-              Port: 443,
-              Id: "192.168.1.10",
-              AvailabilityZone: "us-east-1a",
-            },
-            {
-              Port: 443,
-              Id: "192.168.2.37",
-              AvailabilityZone: "us-east-1b",
-            },
-          ],
-        },
-      }
+      { describeEndpointIps }
     );
   });
 });
