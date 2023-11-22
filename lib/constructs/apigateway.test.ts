@@ -15,7 +15,7 @@ describe("ATAT apigateway construct creation", () => {
     // THEN
     const template = Template.fromStack(stack);
     template.hasResourceProperties("AWS::ApiGateway::RestApi", {});
-    //template.hasResourceProperties("AWS::CertificateManager::Certificate", {});
+    // template.hasResourceProperties("AWS::CertificateManager::Certificate", {});
   });
 
   test("Ensure grantOnRoute method properly generates IAM policy with execute-api:Invoke action", async () => {
