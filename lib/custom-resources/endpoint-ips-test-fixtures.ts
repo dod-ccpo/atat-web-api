@@ -8,9 +8,6 @@ import {
   EC2Client,
 } from "@aws-sdk/client-ec2";
 import type { OnEventRequest } from "aws-cdk-lib/custom-resources/lib/provider-framework/types";
-import { mockClient } from "aws-sdk-client-mock";
-
-const ec2Mock = mockClient(EC2Client);
 
 export const NO_VPC_ENDPOINTS_REPONSE: DescribeVpcEndpointsCommandOutput = { VpcEndpoints: [], $metadata: {} };
 export const NO_NETWORK_INTERFACE_RESPONSE: DescribeNetworkInterfacesCommandOutput = {
@@ -104,7 +101,7 @@ export const makeRequest = (data: Partial<OnEventRequest>): OnEventRequest => ({
   },
 });
 
-export const setupFullResponses = (endpointId: string) => {
+export const setupFullResponses = (ec2Mock: any, endpointId: string) => {
   ec2Mock
     .on(DescribeVpcEndpointsCommand, {
       Filters: [
@@ -125,66 +122,20 @@ export const setupFullResponses = (endpointId: string) => {
     .resolves(NETWORK_INTERFACES["eni-293413435asdf"]);
 };
 
-// export const serviceTokenData = async (endpointId: string) => {
-//   setupFullResponses(endpointId);
-// eslint-disable-next-line max-len
-//   expect(await onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: endpointId, ServiceToken: "" } }))).toEqual({
-//     PhysicalResourceId: endpointId,
-//     Data: {
-//       Targets: [
-//         {
-//           Port: 443,
-//           Id: "192.168.1.10",
-//           AvailabilityZone: "us-east-1a",
-//         },
-//         {
-//           Port: 443,
-//           Id: "192.168.2.37",
-//           AvailabilityZone: "us-east-1b",
-//         },
-//       ],
-//     },
-//   });
-// };
-
-export const describeEndpointIps = {
-  PhysicalResourceId: "vpce-01234567890123",
+export const endpointData = (endpointId: any, port = 443) => ({
+  PhysicalResourceId: endpointId,
   Data: {
     Targets: [
       {
-        Port: 443,
+        Port: port,
         Id: "192.168.1.10",
         AvailabilityZone: "us-east-1a",
       },
       {
-        Port: 443,
+        Port: port,
         Id: "192.168.2.37",
         AvailabilityZone: "us-east-1b",
       },
     ],
   },
 });
-
-// Assuming your JSON data is stored in a variable called jsonData
-// const endpointData = {
-//   Targets: [
-//     {
-//       Port: 443,
-//       Id: "192.168.1.10",
-//       AvailabilityZone: "us-east-1a",
-//     },
-//     {
-//       Port: 443,
-//       Id: "192.168.2.37",
-//       AvailabilityZone: "us-east-1b",
-//     },
-//   ],
-// };
-
-// // Function to process each target
-// function processTargets(targets: any[]) {
-//   targets.forEach((target) => {});
-// }
-
-// Call the function with the Targets array from the jsonData
-// processTargets(endpointData.Targets);
