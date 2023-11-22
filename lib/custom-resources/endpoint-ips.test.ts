@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-expressions */
 import { DescribeNetworkInterfacesCommand, DescribeVpcEndpointsCommand, EC2Client } from "@aws-sdk/client-ec2";
 import { mockClient } from "aws-sdk-client-mock";
-import { onEvent } from "./endpoint-ips-apigw";
+import { onEvent } from "./endpoint-ips";
 import {
   NO_NETWORK_INTERFACE_RESPONSE,
   NO_VPC_ENDPOINTS_REPONSE,
