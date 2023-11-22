@@ -11,7 +11,6 @@ import {
   makeRequest,
   setupFullResponses,
 } from "./endpoint-ips-test-fixtures";
-import { getEnisForVpcEndpoint } from "./endpoint-ips-service";
 
 const ec2Mock = mockClient(EC2Client);
 const eventMock = mockClient(EventBridgeClient);
@@ -49,16 +48,18 @@ describe("VPC Endpoint Client IP address", () => {
 
   it("gives a valid response when state is valid", async () => {
     const endpointId = "vpce-01234567890123";
-    expect(await onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: endpointId, ServiceToken: "" } }))).toEqual(
-      { describeEndpointIps }
-    );
+    expect(
+      await onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: "fake-endpoint", ServiceToken: "" } }))
+    ).toEqual({ describeEndpointIps });
   });
 });
 
 it("uses a port if provided", async () => {
   const endpointId = "vpce-01234567890123";
   setupFullResponses(endpointId);
-  expect(await onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: endpointId, ServiceToken: "" } }))).toEqual({
+  expect(
+    await onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: "fake-endpoint", ServiceToken: "" } }))
+  ).toEqual({
     describeEndpointIps,
   });
 
