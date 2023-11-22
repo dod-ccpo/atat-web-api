@@ -196,8 +196,8 @@ export class AtatWebApiStack extends cdk.Stack {
         },
       ]);
     }
-    // Custom Resource to describe the ApiGw endpoint IPs and send to custom event
-    // in the transit acct for NET FIREWALL MIGRATION
+    // Custom Resource to describe the ApiGw endpoint IPs and send to custom EventBus
+    // in the transit account for Net Firewall Migration
 
     // Initialize the AWS SDK
     if (props.apiDomain && network && props.albeventbusARN && props.environmentName !== "Sandbox") {
