@@ -4,16 +4,37 @@ import { mockClient } from "aws-sdk-client-mock";
 import { onEvent } from "./endpoint-ips-apigw";
 import { EventBridgeClient, PutEventsCommand } from "@aws-sdk/client-eventbridge";
 import {
+  NETWORK_INTERFACES,
   NO_NETWORK_INTERFACE_RESPONSE,
   NO_VPC_ENDPOINTS_REPONSE,
   SINGLE_VPC_ENDPOINT,
   describeEndpointIps,
   makeRequest,
-  setupFullResponses,
 } from "./endpoint-ips-test-fixtures";
 
 const ec2Mock = mockClient(EC2Client);
 const eventMock = mockClient(EventBridgeClient);
+
+export const setupFullResponses = (endpointId: string) => {
+  ec2Mock
+    .on(DescribeVpcEndpointsCommand, {
+      Filters: [
+        {
+          Name: "vpc-endpoint-id",
+          Values: [endpointId],
+        },
+      ],
+    })
+    .resolves(SINGLE_VPC_ENDPOINT)
+    .on(DescribeNetworkInterfacesCommand, {
+      Filters: [{ Name: "network-interface-id", Values: ["eni-0124515241231"] }],
+    })
+    .resolves(NETWORK_INTERFACES["eni-0124515241231"])
+    .on(DescribeNetworkInterfacesCommand, {
+      Filters: [{ Name: "network-interface-id", Values: ["eni-293413435asdf"] }],
+    })
+    .resolves(NETWORK_INTERFACES["eni-293413435asdf"]);
+};
 
 describe("VPC Endpoint Client IP address", () => {
   beforeEach(() => {
@@ -48,18 +69,16 @@ describe("VPC Endpoint Client IP address", () => {
 
   it("gives a valid response when state is valid", async () => {
     const endpointId = "vpce-01234567890123";
-    expect(
-      await onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: "fake-endpoint", ServiceToken: "" } }))
-    ).toEqual({ describeEndpointIps });
+    expect(await onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: endpointId, ServiceToken: "" } }))).toEqual(
+      { describeEndpointIps }
+    );
   });
 });
 
 it("uses a port if provided", async () => {
   const endpointId = "vpce-01234567890123";
   setupFullResponses(endpointId);
-  expect(
-    await onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: "fake-endpoint", ServiceToken: "" } }))
-  ).toEqual({
+  expect(await onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: endpointId, ServiceToken: "" } }))).toEqual({
     describeEndpointIps,
   });
 
