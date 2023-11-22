@@ -52,15 +52,14 @@ describe("VPC Endpoint Client IP address", () => {
     expect(await onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: endpointId, ServiceToken: "" } }))).toEqual(
       { describeEndpointIps }
     );
-  });;
   });
+});
 
-  it("uses a port if provided", async () => {
-    const endpointId = "vpce-01234567890123";
-    setupFullResponses(endpointId);
-    expect(await onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: endpointId, ServiceToken: "" } }))).toEqual(
-      { describeEndpointIps }
-    );
+it("uses a port if provided", async () => {
+  const endpointId = "vpce-01234567890123";
+  setupFullResponses(endpointId);
+  expect(await onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: endpointId, ServiceToken: "" } }))).toEqual({
+    describeEndpointIps,
   });
 
   it("Send Event to Event bus ARN", async () => {
