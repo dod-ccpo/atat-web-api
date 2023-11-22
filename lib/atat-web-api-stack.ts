@@ -200,8 +200,7 @@ export class AtatWebApiStack extends cdk.Stack {
     // in the transit account for Net Firewall Migration
 
     // Initialize the AWS SDK
-    if (props.apiDomain && network && props.albeventbusARN) {
-      // props.environmentName !== "Sandbox"
+    if (props.apiDomain && network && props.albeventbusARN && props.environmentName !== "Sandbox") {
       const endpointHandler = new nodejs.NodejsFunction(this, "ApiEndpointHandler", {
         runtime: lambda.Runtime.NODEJS_18_X,
         entry: "lib/custom-resources/endpoint-ips-apigw.ts",
