@@ -14,6 +14,8 @@ test("Rest API is created", () => {
   // THEN
   const template = Template.fromStack(stack);
   template.hasResourceProperties("AWS::ApiGateway::RestApi", {});
+
+  template.hasResource("AWS::ElasticLoadBalancingV2::LoadBalancer", {});
 });
 // TEST
 test("The stack creates successfully with a VPC defined", () => {

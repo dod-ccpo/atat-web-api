@@ -52,7 +52,6 @@ describe("VPC Endpoint Client IP address", () => {
     expect(await onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: endpointId, ServiceToken: "" } }))).toEqual(
       { describeEndpointIps }
     );
-  });;
   });
 
   it("uses a port if provided", async () => {
