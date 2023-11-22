@@ -7,8 +7,6 @@ import {
   NO_NETWORK_INTERFACE_RESPONSE,
   NO_VPC_ENDPOINTS_REPONSE,
   SINGLE_VPC_ENDPOINT,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  NETWORK_INTERFACES,
   endpointData,
   makeRequest,
   setupFullResponses,
