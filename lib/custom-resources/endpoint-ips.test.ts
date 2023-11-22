@@ -6,7 +6,6 @@ import {
   NO_NETWORK_INTERFACE_RESPONSE,
   NO_VPC_ENDPOINTS_REPONSE,
   SINGLE_VPC_ENDPOINT,
-  describeEndpointIps,
   makeRequest,
   setupFullResponses,
 } from "./endpoint-ips-test-fixtures";
@@ -46,19 +45,48 @@ describe("VPC Endpoint Client IP address", () => {
 
   it("gives a valid response when state is valid", async () => {
     const endpointId = "vpce-01234567890123";
-    expect(await onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: endpointId, ServiceToken: "" } }))).toEqual(
-      { describeEndpointIps }
-    );
-  });
-
-  it("uses a port if provided", async () => {
-    const endpointId = "vpce-01234567890123";
-    const port = 1024;
     setupFullResponses(endpointId);
     expect(await onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: endpointId, ServiceToken: "" } }))).toEqual(
       {
-        describeEndpointIps,
+        PhysicalResourceId: endpointId,
+        Data: {
+          Targets: [
+            {
+              Port: 443,
+              Id: "192.168.1.10",
+              AvailabilityZone: "us-east-1a",
+            },
+            {
+              Port: 443,
+              Id: "192.168.2.37",
+              AvailabilityZone: "us-east-1b",
+            },
+          ],
+        },
       }
     );
+  });
+});
+
+it("uses a port if provided", async () => {
+  const endpointId = "vpce-01234567890123";
+  const port = 1024;
+  setupFullResponses(endpointId);
+  expect(await onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: endpointId, ServiceToken: "" } }))).toEqual({
+    PhysicalResourceId: endpointId,
+    Data: {
+      Targets: [
+        {
+          Port: 443,
+          Id: "192.168.1.10",
+          AvailabilityZone: "us-east-1a",
+        },
+        {
+          Port: 443,
+          Id: "192.168.2.37",
+          AvailabilityZone: "us-east-1b",
+        },
+      ],
+    },
   });
 });
