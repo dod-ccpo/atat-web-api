@@ -17,27 +17,6 @@ import {
 const ec2Mock = mockClient(EC2Client);
 const eventMock = mockClient(EventBridgeClient);
 
-// const setupFullResponses = (endpointId: string) => {
-//   ec2Mock
-//     .on(DescribeVpcEndpointsCommand, {
-//       Filters: [
-//         {
-//           Name: "vpc-endpoint-id",
-//           Values: [endpointId],
-//         },
-//       ],
-//     })
-//     .resolves(SINGLE_VPC_ENDPOINT)
-//     .on(DescribeNetworkInterfacesCommand, {
-//       Filters: [{ Name: "network-interface-id", Values: ["eni-0124515241231"] }],
-//     })
-//     .resolves(NETWORK_INTERFACES["eni-0124515241231"])
-//     .on(DescribeNetworkInterfacesCommand, {
-//       Filters: [{ Name: "network-interface-id", Values: ["eni-293413435asdf"] }],
-//     })
-//     .resolves(NETWORK_INTERFACES["eni-293413435asdf"]);
-// };
-
 describe("VPC Endpoint Client IP address", () => {
   beforeEach(() => {
     ec2Mock.reset();
@@ -71,59 +50,28 @@ describe("VPC Endpoint Client IP address", () => {
 
   it("gives a valid response when state is valid", async () => {
     const endpointId = "vpce-01234567890123";
-    // const expectedData = endpointData(endpointId);
-    setupFullResponses(endpointId);
-    expect(await onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: endpointId, ServiceToken: "" } }))).toEqual(
-      {
-        PhysicalResourceId: endpointId,
-        Data: {
-          Targets: [
-            {
-              Port: 443,
-              Id: "192.168.1.10",
-              AvailabilityZone: "us-east-1a",
-            },
-            {
-              Port: 443,
-              Id: "192.168.2.37",
-              AvailabilityZone: "us-east-1b",
-            },
-          ],
-        },
-      }
+    const expectedData = endpointData(endpointId);
+    setupFullResponses(ec2Mock, endpointId);
+    const response = await onEvent(
+      makeRequest({ ResourceProperties: { VpcEndpointId: endpointId, ServiceToken: "" } })
     );
+
+    expect(response).toEqual(expectedData);
   });
+
+  it("uses a port if provided", async () => {
+    const endpointId = "vpce-01234567890123";
+    setupFullResponses(ec2Mock, endpointId);
+    const port = 8080;
+    const expectedData = endpointData(endpointId, port);
+    expect(
+      await onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: endpointId, Port: port, ServiceToken: "" } }))
+    ).toEqual(expectedData);
+  });
+
+  // it("Send Event to Event bus ARN", async () => {
+  //   const expectedData = endpointData(endpointId, port);
+  //   eventMock.on(PutEventsCommand).resolves(SINGLE_VPC_ENDPOINT);
+  //   expectedData;
+  // });
 });
-
-//   it("uses a port if provided", async () => {
-//     const endpointId = "vpce-01234567890123";
-//     setupFullResponses(endpointId);
-//     const port = 443;
-//     // const expectedData = endpointData(endpointId, port);
-//     expect(
-//       await onEvent(makeRequest({ ResourceProperties: { VpcEndpointId: endpointId, Port: port, ServiceToken: "" } }))
-//     ).toEqual({
-//       PhysicalResourceId: endpointId,
-//       Data: {
-//         Targets: [
-//           {
-//             Port: port,
-//             Id: "192.168.1.10",
-//             AvailabilityZone: "us-east-1a",
-//           },
-//           {
-//             Port: port,
-//             Id: "192.168.2.37",
-//             AvailabilityZone: "us-east-1b",
-//           },
-//         ],
-//       },
-//     });
-//   });
-// });
-
-// it("Send Event to Event bus ARN", async () => {
-//   const expectedData = endpointData(endpointId, port);
-//   eventMock.on(PutEventsCommand).resolves(SINGLE_VPC_ENDPOINT);
-//   expectedData;
-// });
