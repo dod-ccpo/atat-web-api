@@ -1,19 +1,19 @@
 /* eslint-disable no-unused-expressions */
 import { DescribeNetworkInterfacesCommand, DescribeVpcEndpointsCommand, EC2Client } from "@aws-sdk/client-ec2";
 import { mockClient } from "aws-sdk-client-mock";
-import { onEvent } from "./endpoint-ips";
+import { onEvent } from "./endpoint-ips-apigw";
+import { EventBridgeClient, PutEventsCommand } from "@aws-sdk/client-eventbridge";
 import {
   NO_NETWORK_INTERFACE_RESPONSE,
   NO_VPC_ENDPOINTS_REPONSE,
   SINGLE_VPC_ENDPOINT,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  NETWORK_INTERFACES,
   endpointData,
   makeRequest,
   setupFullResponses,
 } from "./endpoint-ips-test-fixtures";
 
 const ec2Mock = mockClient(EC2Client);
+const eventMock = mockClient(EventBridgeClient);
 
 describe("VPC Endpoint Client IP address", () => {
   beforeEach(() => {

@@ -112,6 +112,7 @@ function constructSandbox(props: AtatAppProps) {
     vpcFlowLogBucket: props.vpcFlowLogBucketParam,
     isSandbox: props.isSandbox,
     apiDomain: props.apiCertOptions,
+    albeventbusARN: props.albeventbusARN,
     env: {
       region: props.deployRegion,
     },

@@ -8,7 +8,7 @@ describe("ATAT network creation", () => {
     const app = new cdk.App();
     // WHEN
     const stack = new AtatNet.AtatNetStack(app, "TestNetStack", {
-      eventbus: "arn:aws:us-east-1:event:12345678910:test",
+      tgwEventBus: "arn:aws:us-east-1:event:12345678910:test",
     });
     const template = Template.fromStack(stack);
     // THEN
@@ -26,7 +26,7 @@ describe("ATAT network creation", () => {
     // WHEN
     const stack = new AtatNet.AtatNetStack(app, "TestNetStack", {
       vpcFlowLogBucket: "arn:aws:us-east-1:s3::123456789012:flow-logs-123456789012-us-east-1",
-      eventbus: "arn:aws:us-east-1:event:12345678910:test",
+      tgwEventBus: "arn:aws:us-east-1:event:12345678910:test",
     });
     const template = Template.fromStack(stack);
     // THEN
