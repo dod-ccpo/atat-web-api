@@ -19,7 +19,7 @@
     "@types/aws-lambda": "^8.10.110",
     "@types/http-errors": "^2.0.1",
     "@types/jest": "^29.5.7",
-    "@types/lodash": "^4.14.200",
+    "@types/lodash": "^4.14.202",
     "@types/node": "^18.13.0",
     "@types/number-to-words": "^1.2.1",
     "@types/puppeteer": "^7.0.4",
