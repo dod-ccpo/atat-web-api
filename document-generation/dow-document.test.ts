@@ -33,7 +33,6 @@ describe("Test DoW document generation", () => {
   });
 
   it.skip("unskip me to generate a local file for manual review", async () => {
-    payload.architecturalDesignRequirement = null;
     const docBuffer = await doGenerate(docxTemplate, payload);
     await fs.writeFileSync("dow.docx", docBuffer);
   });

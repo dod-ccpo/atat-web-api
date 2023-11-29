@@ -268,12 +268,19 @@ export interface SecurityRequirement {
   tsContractorClearanceType?: ContractorClearanceType | null;
 }
 /** @description Details for an architectural design of application(s) */
-export interface ArchitecturalDesignRequirement {
+export interface ArchitecturalDesignRequirementSingle {
   applicationsNeedingDesign?: string | null;
   statement?: string | null;
   externalFactors?: string | null;
-  dataClassificationLevels?: IClassificationLevel[] | null;
+  classificationLevel?: IClassificationLevel[] | null;
   source: ArchitecturalDesignSource;
+}
+export interface ArchitecturalDesignRequirement {
+  designIL2: ArchitecturalDesignRequirementSingle | null;
+  designIL4: ArchitecturalDesignRequirementSingle | null;
+  designIL5: ArchitecturalDesignRequirementSingle | null;
+  designIL6: ArchitecturalDesignRequirementSingle | null;
+  designTS: ArchitecturalDesignRequirementSingle | null;
 }
 
 export enum Classification {
@@ -290,7 +297,7 @@ export enum ImpactLevel {
 /** @description Represents a Classification Level for instances of a package */
 export interface IClassificationLevel {
   classification: Classification;
-  impactLevel: ImpactLevel;
+  impactLevel: ImpactLevel | null;
   // additionalInformation: string;
 }
 
@@ -502,12 +509,26 @@ const classificationLevel = {
 const architecturalDesignRequirement = {
   type: "object",
   properties: {
-    applicationsNeedingDesign: { type: "string" },
-    statement: { type: "string" },
-    externalFactors: { type: "string" },
-    dataClassificationLevels: { type: "array", items: classificationLevel },
+    designIL2: createDesignObject(),
+    designIL4: createDesignObject(),
+    designIL5: createDesignObject(),
+    designIL6: createDesignObject(),
+    designTS: createDesignObject(),
   },
 };
+
+function createDesignObject() {
+  return {
+    type: "object",
+    properties: {
+      applicationsNeedingDesign: { type: "string" },
+      statement: { type: "string" },
+      externalFactors: { type: "string" },
+      dataClassificationLevels: { type: "array", items: classificationLevel },
+    },
+  };
+}
+
 const generalInformation = {
   type: "object",
   properties: {
