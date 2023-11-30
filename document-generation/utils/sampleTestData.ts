@@ -302,28 +302,59 @@ export const sampleDowRequest = {
       phasedApproachSchedule: "B - 10, OP1- 23, OP2 -30, OP3 -35",
       needsArchitecturalDesignServices: true,
       architecturalDesignRequirement: {
-        statement: "Optimize and save costs.",
-        applicationsNeedingDesign: "web server, app server, db server",
-        externalFactors:
-          "Economic factors are important at the moment chip making is are moving out of China it seems.",
-        source: "CURRENT_ENVIRONMENT",
-        dataClassificationLevels: [
-          {
-            classification: "U",
-            display: "Unclassified - IL2",
-            impactLevel: "IL2",
-          },
-          {
-            classification: "U",
-            display: "Unclassified - IL5",
-            impactLevel: "IL5",
-          },
-          {
-            classification: "S",
-            display: "Secret - IL6",
-            impactLevel: "IL6",
-          },
-        ],
+        designIL2: {
+          statement: "some statement",
+          applicationsNeedingDesign: "application1",
+          source: "DOW",
+          externalFactors: "some external Factors",
+          classificationLevel: [
+            {
+              classification: "U",
+              display: "Unclassified - IL2",
+              impactLevel: "IL2",
+            },
+          ],
+        },
+        designIL4: {
+          statement: "some statementIL4",
+          applicationsNeedingDesign: "application2",
+          source: "DOW",
+          externalFactors: "some external Factors",
+          classificationLevel: [
+            {
+              classification: "U",
+              display: "Unclassified - IL4",
+              impactLevel: "IL4",
+            },
+          ],
+        },
+        designIL5: null,
+        designIL6: {
+          statement: "some statementIL6",
+          applicationsNeedingDesign: "application2",
+          source: "DOW",
+          externalFactors: "some external Factors",
+          classificationLevel: [
+            {
+              classification: "S",
+              display: "Unclassified - IL6",
+              impactLevel: "IL6",
+            },
+          ],
+        },
+        designTS: {
+          statement: "some statement7",
+          applicationsNeedingDesign: "application2",
+          source: "DOW",
+          externalFactors: "some external Factors",
+          classificationLevel: [
+            {
+              classification: "TS",
+              display: "Top Secret",
+              impactLevel: null,
+            },
+          ],
+        },
       },
     },
     selectedClassificationLevels: [
@@ -462,27 +493,59 @@ export const sampleDowRequest = {
       },
     ],
     architecturalDesignRequirement: {
-      statement: "Need to optimize and expand the previous system and in higher levels",
-      applicationsNeedingDesign: "web server, app server, db server",
-      externalFactors: "Pending laws that will change how the system will need to be build.",
-      source: "DOW",
-      dataClassificationLevels: [
-        {
-          classification: "U",
-          display: "Unclassified - IL4",
-          impactLevel: "IL4",
-        },
-        {
-          classification: "U",
-          display: "Unclassified - IL5",
-          impactLevel: "IL5",
-        },
-        {
-          classification: "S",
-          display: "Secret - IL6",
-          impactLevel: "IL6",
-        },
-      ],
+      designIL2: {
+        statement: "some statement",
+        applicationsNeedingDesign: "application1",
+        source: "DOW",
+        externalFactors: "some external Factors",
+        classificationLevel: [
+          {
+            classification: "U",
+            display: "Unclassified - IL2",
+            impactLevel: "IL2",
+          },
+        ],
+      },
+      designIL4: {
+        statement: "some statementIL4",
+        applicationsNeedingDesign: "application2",
+        source: "DOW",
+        externalFactors: "some external Factors",
+        classificationLevel: [
+          {
+            classification: "U",
+            display: "Unclassified - IL4",
+            impactLevel: "IL4",
+          },
+        ],
+      },
+      designIL5: null,
+      designIL6: {
+        statement: "some statementIL6",
+        applicationsNeedingDesign: "application2",
+        source: "DOW",
+        externalFactors: "some external Factors",
+        classificationLevel: [
+          {
+            classification: "S",
+            display: "Unclassified - IL6",
+            impactLevel: "IL6",
+          },
+        ],
+      },
+      designTS: {
+        statement: "some statement7",
+        applicationsNeedingDesign: "application2",
+        source: "DOW",
+        externalFactors: "some external Factors",
+        classificationLevel: [
+          {
+            classification: "TS",
+            display: "Top Secret",
+            impactLevel: null,
+          },
+        ],
+      },
     },
     xaasOfferings: {
       selectedServiceInstances: [
