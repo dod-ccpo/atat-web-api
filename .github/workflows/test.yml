@@ -60,7 +60,7 @@ jobs:
           -c "atat:TGWEventBus=arn:aws:us-east-1:event:12345678910:test"
           AtatEnvironmentPipeline/Sandbox
       - name: Gather CloudFormation artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: cloudformation-assets
           path: |
